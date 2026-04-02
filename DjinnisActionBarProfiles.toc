@@ -1,0 +1,20 @@
+## Interface: 120001
+## Title: Djinni's Action Bar Profiles
+## Author: Djinni
+## Version: 0.1.0-alpha
+## Notes: Save and restore action bar layouts as named profiles, shared across characters of the same class. MySlot interoperability.
+## Category: Action Bars
+## SavedVariables: DjinnisActionBarProfilesDB
+## OptionalDeps: Myslot
+
+# Libraries
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+
+# Core
+Core.lua
+Settings.lua
+
+# Module
+ActionBarProfiles.lua
