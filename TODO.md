@@ -126,7 +126,7 @@ Cross-character profile sharing means abilities may differ between characters of
 - [x] **Spell availability check before restore** — pre-scan profile slots via `CanPlaceAction()` used by partial restore and optimized clear phase
 - [x] **Racial ability substitution hints** — detect racial ability slots and suggest the character's own racial as a replacement
 - [x] **Profession skill detection** — identify profession-specific abilities in skip reports via spellbook skill line scanning
-- [ ] **Per-slot override system** — allow users to set per-character overrides for specific slots (e.g., "slot 45 is always my racial ability on this character")
+- [x] **Per-slot override system** — per-character slot overrides applied during restore, with Settings UI to add/remove/clear overrides
 - [x] **"Partial restore" mode** — option to only restore slots the character can actually fill, leaving other slots untouched rather than clearing them
 
 ---
@@ -134,9 +134,9 @@ Cross-character profile sharing means abilities may differ between characters of
 ## Future Features (Post-MVP)
 
 - [x] **Talent profile sync** — save and restore talent loadouts as named profiles using Blizzard export strings, with action bar linking
-- [ ] **Keybinding profiles** — save/restore keybinding layouts
-- [ ] **Profile sharing** — in-game profile sharing between players (addon comms)
+- [x] **Keybinding profiles** — save/restore keybinding layouts (full CRUD, export/import, confirmation dialogs)
+- [x] **Profile sharing** — JSON export/import via copy+paste for all profile types (action bars, talents, keybindings)
 - [x] **Minimap button** — standalone minimap icon via LibDBIcon with settings toggle
 - [ ] **Drag-and-drop profile ordering** — custom sort order in tooltip
 - [ ] **Profile categories/tags** — organize profiles by purpose (PvP, PvE, etc.)
-- [ ] **Per-bar profiles** — save/restore individual bars instead of all 180 slots
+- [x] **Per-bar profiles** — save/restore individual bars instead of all 180 slots (bar filter checkboxes in Options, engine filters in read/clear/place)

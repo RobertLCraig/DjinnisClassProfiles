@@ -20,3 +20,4 @@ Settings.lua
 # Modules
 ActionBarProfiles.lua
 TalentProfiles.lua
+KeybindingProfiles.lua

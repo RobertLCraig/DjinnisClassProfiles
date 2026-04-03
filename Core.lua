@@ -137,6 +137,227 @@ function DCP:BuildHintText(clickActions, actionLabels)
 end
 
 ---------------------------------------------------------------------------
+-- Minimal JSON encoder/decoder
+-- Handles: string, number, boolean, nil, table (array or object).
+-- No metatables, cycles, or functions. Produces minified output.
+---------------------------------------------------------------------------
+
+local json = {}
+ns.json = json
+
+local function jsonEncodeString(s)
+    s = s:gsub('\\', '\\\\')
+    s = s:gsub('"', '\\"')
+    s = s:gsub('\n', '\\n')
+    s = s:gsub('\r', '\\r')
+    s = s:gsub('\t', '\\t')
+    return '"' .. s .. '"'
+end
+
+local function isArray(t)
+    local n = 0
+    for _ in pairs(t) do n = n + 1 end
+    return n == #t
+end
+
+local function jsonEncode(val, depth)
+    depth = depth or 0
+    if depth > 40 then return "null" end
+    local vtype = type(val)
+    if val == nil then
+        return "null"
+    elseif vtype == "boolean" then
+        return val and "true" or "false"
+    elseif vtype == "number" then
+        if val ~= val then return "null" end  -- NaN
+        if val == math.huge or val == -math.huge then return "null" end
+        if val == math.floor(val) and math.abs(val) < 2^53 then
+            return tostring(math.floor(val))
+        end
+        return string.format("%.14g", val)
+    elseif vtype == "string" then
+        return jsonEncodeString(val)
+    elseif vtype == "table" then
+        if isArray(val) then
+            local parts = {}
+            for i = 1, #val do
+                parts[i] = jsonEncode(val[i], depth + 1)
+            end
+            return "[" .. table.concat(parts, ",") .. "]"
+        else
+            local parts = {}
+            -- Sort keys for deterministic output
+            local keys = {}
+            for k in pairs(val) do
+                keys[#keys + 1] = k
+            end
+            table.sort(keys, function(a, b)
+                local ta, tb = type(a), type(b)
+                if ta ~= tb then return ta < tb end
+                return a < b
+            end)
+            for _, k in ipairs(keys) do
+                local ks = type(k) == "number" and tostring(k) or tostring(k)
+                parts[#parts + 1] = jsonEncodeString(ks) .. ":" .. jsonEncode(val[k], depth + 1)
+            end
+            return "{" .. table.concat(parts, ",") .. "}"
+        end
+    end
+    return "null"
+end
+
+json.encode = jsonEncode
+
+-- Decoder: hand-written recursive descent parser for JSON subset.
+local function jsonDecode(str)
+    local pos = 1
+    local len = #str
+
+    local function skipWhitespace()
+        while pos <= len do
+            local c = str:byte(pos)
+            if c == 32 or c == 9 or c == 10 or c == 13 then
+                pos = pos + 1
+            else
+                break
+            end
+        end
+    end
+
+    local function peek()
+        skipWhitespace()
+        return pos <= len and str:sub(pos, pos) or nil
+    end
+
+    local function consume(expected)
+        skipWhitespace()
+        if str:sub(pos, pos) == expected then
+            pos = pos + 1
+            return true
+        end
+        return false
+    end
+
+    local parseValue  -- forward declaration
+
+    local function parseString()
+        if str:sub(pos, pos) ~= '"' then return nil end
+        pos = pos + 1
+        local parts = {}
+        while pos <= len do
+            local c = str:sub(pos, pos)
+            if c == '"' then
+                pos = pos + 1
+                return table.concat(parts)
+            elseif c == '\\' then
+                pos = pos + 1
+                local esc = str:sub(pos, pos)
+                if esc == 'n' then parts[#parts + 1] = '\n'
+                elseif esc == 'r' then parts[#parts + 1] = '\r'
+                elseif esc == 't' then parts[#parts + 1] = '\t'
+                elseif esc == '"' then parts[#parts + 1] = '"'
+                elseif esc == '\\' then parts[#parts + 1] = '\\'
+                elseif esc == '/' then parts[#parts + 1] = '/'
+                elseif esc == 'u' then
+                    -- Simple unicode escape (BMP only, skip surrogates)
+                    local hex = str:sub(pos + 1, pos + 4)
+                    local code = tonumber(hex, 16)
+                    if code and code < 128 then
+                        parts[#parts + 1] = string.char(code)
+                    else
+                        parts[#parts + 1] = '?'
+                    end
+                    pos = pos + 4
+                else
+                    parts[#parts + 1] = esc
+                end
+                pos = pos + 1
+            else
+                parts[#parts + 1] = c
+                pos = pos + 1
+            end
+        end
+        return nil  -- unterminated string
+    end
+
+    local function parseNumber()
+        local start = pos
+        if str:sub(pos, pos) == '-' then pos = pos + 1 end
+        while pos <= len and str:byte(pos) >= 48 and str:byte(pos) <= 57 do pos = pos + 1 end
+        if pos <= len and str:sub(pos, pos) == '.' then
+            pos = pos + 1
+            while pos <= len and str:byte(pos) >= 48 and str:byte(pos) <= 57 do pos = pos + 1 end
+        end
+        if pos <= len and (str:sub(pos, pos) == 'e' or str:sub(pos, pos) == 'E') then
+            pos = pos + 1
+            if pos <= len and (str:sub(pos, pos) == '+' or str:sub(pos, pos) == '-') then pos = pos + 1 end
+            while pos <= len and str:byte(pos) >= 48 and str:byte(pos) <= 57 do pos = pos + 1 end
+        end
+        return tonumber(str:sub(start, pos - 1))
+    end
+
+    local function parseArray()
+        pos = pos + 1  -- skip '['
+        local arr = {}
+        skipWhitespace()
+        if str:sub(pos, pos) == ']' then pos = pos + 1; return arr end
+        while true do
+            local val = parseValue()
+            arr[#arr + 1] = val
+            skipWhitespace()
+            if not consume(',') then break end
+        end
+        consume(']')
+        return arr
+    end
+
+    local function parseObject()
+        pos = pos + 1  -- skip '{'
+        local obj = {}
+        skipWhitespace()
+        if str:sub(pos, pos) == '}' then pos = pos + 1; return obj end
+        while true do
+            skipWhitespace()
+            local key = parseString()
+            if not key then break end
+            skipWhitespace()
+            consume(':')
+            local val = parseValue()
+            -- Convert numeric string keys back to numbers for slot IDs
+            local numKey = tonumber(key)
+            if numKey then
+                obj[numKey] = val
+            else
+                obj[key] = val
+            end
+            skipWhitespace()
+            if not consume(',') then break end
+        end
+        consume('}')
+        return obj
+    end
+
+    parseValue = function()
+        skipWhitespace()
+        if pos > len then return nil end
+        local c = str:sub(pos, pos)
+        if c == '"' then return parseString()
+        elseif c == '{' then return parseObject()
+        elseif c == '[' then return parseArray()
+        elseif c == 't' then pos = pos + 4; return true
+        elseif c == 'f' then pos = pos + 5; return false
+        elseif c == 'n' then pos = pos + 4; return nil
+        else return parseNumber()
+        end
+    end
+
+    local result = parseValue()
+    return result
+end
+
+json.decode = jsonDecode
+
+---------------------------------------------------------------------------
 -- Copy-to-clipboard popup
 ---------------------------------------------------------------------------
 

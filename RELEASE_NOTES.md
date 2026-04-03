@@ -1,38 +1,28 @@
 # Release Notes
 
-## Version: 0.2.0
+## Version: 0.3.0
 
-### Action Bar Profiles + Talent Profiles
+### Keybinding Profiles, Per-Bar Filtering, Slot Overrides, JSON Export
 
-#### Core Features
-- Save and restore action bar layouts as named profiles, shared across characters of the same class
-- Save and restore talent loadouts using Blizzard export strings
-- MySlot import/export compatibility
-- LDB data source with configurable click actions
-- Minimap button via LibDBIcon
+#### New: Keybinding Profiles
+- Save and restore keybinding layouts as named profiles
+- Full CRUD: save, load, rename, delete, duplicate
+- JSON export/import via copy+paste
+- Confirmation dialog before restoring (replaces all bindings)
 
-#### Action Bar Restore Engine
-- Optimized clear phase: only clears/replaces slots that differ from target profile
-- Partial restore mode: leave unfillable slots untouched instead of clearing
-- Vehicle/override bar detection blocks restore during special bars
-- Flyout spellbook cache per session for faster restores
-- Macro name normalization for reliable cross-character matching
+#### New: Per-Bar Profiles
+- Choose which action bars to include in save/restore operations
+- Bar filter checkboxes in Options (Main, Stance, Right 1/2, Bottom Right/Left, Extra 1/2/3)
 
-#### Skip Reporting
-- Detailed per-slot skip reasons (spell not known, macro not found, item not owned)
-- Racial ability detection with substitution hints (lists your own racials)
-- Profession spell identification in skip reports
+#### New: Per-Character Slot Overrides
+- Override specific action bar slots on a per-character basis
+- Overridden slots use the current bar action instead of the profile's saved action during restore
+- Useful for racial abilities, profession skills, or character-specific abilities
+- Settings UI to add, view, and remove overrides
 
-#### Profile Management
-- Full CRUD: save, load, rename, delete, duplicate profiles
-- Auto-load profiles on spec change
-- Previous Layout undo (single-level)
-- Action bar change detection with "Modified" indicator
-- Profile metadata (saved by, spec, date) with proper alignment
-
-#### Settings Panel
-- Label template with tag expansion (<profile>, <count>, <class>, <spec>)
-- Tooltip customization (scale, width, max height, grow direction)
-- Click action configuration (9 modifier+button combos)
-- Import/export with multi-line editbox
-- Collapsible sections
+#### New: JSON Export/Import
+- All profile types now export as minified JSON for easy copy+paste sharing
+- Action bar profiles: export single or all profiles as JSON
+- Talent profiles: export all talent profiles as JSON
+- Keybinding profiles: export as JSON
+- Import auto-detects JSON format alongside legacy ABP and MySlot formats

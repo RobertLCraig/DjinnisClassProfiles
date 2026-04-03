@@ -381,8 +381,23 @@ function TP:BuildSettingsPanel(panel)
         end
     end)
 
+    y = W.AddButton(ioBody, y, "Export All Talent Profiles (JSON)", function()
+        local tpdb = db()
+        local cls = GetClassToken()
+        local profiles = GetClassProfiles(tpdb)
+        local data = {
+            format  = "DCP-JSON",
+            version = 1,
+            type    = "talentprofiles",
+            class   = cls,
+            profiles = profiles,
+            activeProfile = tpdb.activeProfile[cls],
+        }
+        DCP:CopyToClipboard(ns.json.encode(data), "Talent Profiles (" .. cls .. ")")
+    end)
+
     y = y - 8
-    y = W.AddDescription(ioBody, y, "Paste a Blizzard talent import string below:")
+    y = W.AddDescription(ioBody, y, "Paste a Blizzard talent import string or DCP JSON export below:")
 
     local importFrame = CreateFrame("Frame", nil, ioBody, "BackdropTemplate")
     importFrame:SetPoint("TOPLEFT", ioBody, "TOPLEFT", 22, y)
@@ -421,7 +436,30 @@ function TP:BuildSettingsPanel(panel)
             return
         end
 
-        -- Save as a new profile with a generated name
+        -- Check for JSON format
+        if text:sub(1, 1) == "{" and text:find('"DCP%-JSON"') then
+            local data = ns.json.decode(text)
+            if data and data.format == "DCP-JSON" and data.type == "talentprofiles" and type(data.profiles) == "table" then
+                local tpdb = TP:GetDB()
+                local cls = data.class or GetClassToken()
+                if not tpdb.profiles[cls] then tpdb.profiles[cls] = {} end
+                local count = 0
+                for name, profile in pairs(data.profiles) do
+                    tpdb.profiles[cls][name] = profile
+                    count = count + 1
+                end
+                importEB:SetText("")
+                DjinniMsg("Imported " .. count .. " talent profiles for " .. cls .. ".")
+                TP:UpdateData()
+                TP:RebuildProfileListUI(profBody)
+                return
+            else
+                DjinniMsg("Invalid DCP JSON format for talent profiles.")
+                return
+            end
+        end
+
+        -- Standard Blizzard talent string — save as a new profile
         local db2 = TP:GetDB()
         local cls = GetClassToken()
         local profiles = GetClassProfiles(db2)

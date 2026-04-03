@@ -663,7 +663,7 @@ function DCP:SetupOptions()
     local mainPanel = CreateScrollPanel()
 
     -- Build settings panels in order
-    local moduleOrder = { "actionbarprofiles", "talentprofiles" }
+    local moduleOrder = { "actionbarprofiles", "talentprofiles", "keybindingprofiles" }
     for _, key in ipairs(moduleOrder) do
         local mod = ns.modules[key]
         if mod and mod.BuildSettingsPanel then

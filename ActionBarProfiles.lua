@@ -39,6 +39,20 @@ local ICON_SIZE      = 18
 local MAX_ACTIONBAR_SLOT = 180
 local MAX_PROFILES       = 1000
 
+-- Action bar definitions: name → slot range
+local ACTION_BARS = {
+    { key = "main",        label = "Main Action Bar",   startSlot = 1,   endSlot = 12  },
+    { key = "stance",      label = "Stance/Bonus Bar",  startSlot = 13,  endSlot = 24  },
+    { key = "right1",      label = "Right Bar 1",       startSlot = 25,  endSlot = 36  },
+    { key = "right2",      label = "Right Bar 2",       startSlot = 37,  endSlot = 48  },
+    { key = "bottomright", label = "Bottom Right Bar",  startSlot = 49,  endSlot = 60  },
+    { key = "bottomleft",  label = "Bottom Left Bar",   startSlot = 61,  endSlot = 72  },
+    { key = "extra1",      label = "Extra Bar 1",       startSlot = 145, endSlot = 156 },
+    { key = "extra2",      label = "Extra Bar 2",       startSlot = 157, endSlot = 168 },
+    { key = "extra3",      label = "Extra Bar 3",       startSlot = 169, endSlot = 180 },
+}
+ns.ACTION_BARS = ACTION_BARS
+
 ---------------------------------------------------------------------------
 -- Defaults
 ---------------------------------------------------------------------------
@@ -55,6 +69,13 @@ local DEFAULTS = {
     showMySlot       = true,
     partialRestore   = false,  -- true = leave unfillable slots untouched instead of clearing
     minimapIcon      = { hide = false },  -- LibDBIcon settings
+    slotOverrides    = {},   -- { [charKey] = { [slotID] = slotData } } per-character slot replacements
+    barFilter        = {                  -- which bars to include in save/restore
+        main = true, stance = true,
+        right1 = true, right2 = true,
+        bottomright = true, bottomleft = true,
+        extra1 = true, extra2 = true, extra3 = true,
+    },
     clickActions = {
         leftClick       = "loadnext",
         rightClick      = "savecurrent",
@@ -107,6 +128,17 @@ local function GetCharacterKey()
     local name = UnitName("player") or "Unknown"
     local realm = GetRealmName() or ""
     return name .. " - " .. realm
+end
+
+local function IsSlotInEnabledBar(slotID, barFilter)
+    if not barFilter then return true end
+    for _, bar in ipairs(ACTION_BARS) do
+        if slotID >= bar.startSlot and slotID <= bar.endSlot then
+            return barFilter[bar.key] ~= false
+        end
+    end
+    -- Slots 73-144 are stance pages (7-12), always include
+    return true
 end
 
 local function TrimString(s)
@@ -200,10 +232,12 @@ end
 -- Core: Read action bar slots
 ---------------------------------------------------------------------------
 
-local function ReadActionBarSlots()
+local function ReadActionBarSlots(barFilter)
     local slots = {}
     for slotID = 1, MAX_ACTIONBAR_SLOT do
-        if C_ActionBar.HasAction(slotID) then
+        if not IsSlotInEnabledBar(slotID, barFilter) then
+            -- skip this slot, not in an enabled bar
+        elseif C_ActionBar.HasAction(slotID) then
             local actionType, id, subType = GetActionInfo(slotID)
             if actionType == "spell" then
                 slots[slotID] = { type = "spell", id = id }
@@ -364,10 +398,28 @@ local function CanPlaceAction(slotData)
     return false
 end
 
-local function ClearAndPlaceActions(targetSlots, partial)
+--- Apply per-character slot overrides to a copy of the target slots table.
+-- Returns a new table with overrides merged in (original is not modified).
+local function ApplySlotOverrides(targetSlots)
+    local db = ABP:GetDB()
+    local charKey = GetCharacterKey()
+    local overrides = db.slotOverrides[charKey]
+    if not overrides or not next(overrides) then return targetSlots end
+
+    local merged = CopyTable(targetSlots)
+    for slotID, slotData in pairs(overrides) do
+        -- Only override slots that exist in the profile (don't add new ones)
+        if merged[slotID] then
+            merged[slotID] = slotData
+        end
+    end
+    return merged
+end
+
+local function ClearAndPlaceActions(targetSlots, partial, barFilter)
     -- Phase 1: Clear slots that need changing
     for slotID = 1, MAX_ACTIONBAR_SLOT do
-        if C_ActionBar.HasAction(slotID) then
+        if IsSlotInEnabledBar(slotID, barFilter) and C_ActionBar.HasAction(slotID) then
             local target = targetSlots[slotID]
             if not target then
                 -- Slot is populated but not in target profile
@@ -390,7 +442,9 @@ local function ClearAndPlaceActions(targetSlots, partial)
     local placed, skipped = 0, 0
     local skipReasons = {}
     for slotID, slotData in pairs(targetSlots) do
-        if SlotMatchesCurrent(slotID, slotData) then
+        if not IsSlotInEnabledBar(slotID, barFilter) then
+            -- skip, this bar is filtered out
+        elseif SlotMatchesCurrent(slotID, slotData) then
             placed = placed + 1  -- already correct, count as placed
         else
             local ok, reason = PlaceActionInSlot(slotID, slotData)
@@ -441,7 +495,7 @@ local function SaveProfile(name)
     end
 
     profiles[name] = {
-        slots     = ReadActionBarSlots(),
+        slots     = ReadActionBarSlots(db.barFilter),
         slotCount = MAX_ACTIONBAR_SLOT,
         savedAt   = time(),
         savedBy   = GetCharacterKey(),
@@ -489,7 +543,7 @@ local function RestoreProfile(name, skipBackup)
             specID, specName = GetSpecializationInfo(specIdx)
         end
         db.previousLayout[cls] = {
-            slots     = ReadActionBarSlots(),
+            slots     = ReadActionBarSlots(db.barFilter),
             slotCount = MAX_ACTIONBAR_SLOT,
             savedAt   = time(),
             savedBy   = GetCharacterKey(),
@@ -499,7 +553,8 @@ local function RestoreProfile(name, skipBackup)
     end
 
     ABP.isRestoring = true
-    local placed, failed, skipReasons = ClearAndPlaceActions(profile.slots, db.partialRestore)
+    local slotsToRestore = ApplySlotOverrides(profile.slots)
+    local placed, failed, skipReasons = ClearAndPlaceActions(slotsToRestore, db.partialRestore, db.barFilter)
     ABP.isRestoring = false
 
     db.activeProfile[cls] = name
@@ -550,7 +605,7 @@ local function RestoreFromData(profileData, label, skipBackup)
             specID, specName = GetSpecializationInfo(specIdx)
         end
         db.previousLayout[cls] = {
-            slots     = ReadActionBarSlots(),
+            slots     = ReadActionBarSlots(db.barFilter),
             slotCount = MAX_ACTIONBAR_SLOT,
             savedAt   = time(),
             savedBy   = GetCharacterKey(),
@@ -560,7 +615,8 @@ local function RestoreFromData(profileData, label, skipBackup)
     end
 
     ABP.isRestoring = true
-    local placed, failed, skipReasons = ClearAndPlaceActions(profileData.slots, db.partialRestore)
+    local slotsToRestore = ApplySlotOverrides(profileData.slots)
+    local placed, failed, skipReasons = ClearAndPlaceActions(slotsToRestore, db.partialRestore, db.barFilter)
     ABP.isRestoring = false
     ABP.profileModified = false
 
@@ -1169,9 +1225,105 @@ local function ImportFullConfig(text)
     return true
 end
 
+---------------------------------------------------------------------------
+-- Export / Import: JSON format
+---------------------------------------------------------------------------
+
+local DCP_JSON_VERSION = 1
+
+local function ExportProfileAsJSON(name)
+    local db = ABP:GetDB()
+    local cls = GetClassToken()
+    local profiles = GetClassProfiles(db)
+    local profile = profiles[name]
+    if not profile then return nil end
+
+    local data = {
+        format  = "DCP-JSON",
+        version = DCP_JSON_VERSION,
+        type    = "profile",
+        class   = cls,
+        name    = name,
+        profile = profile,
+    }
+    return ns.json.encode(data)
+end
+
+local function ExportFullConfigAsJSON()
+    local db = ABP:GetDB()
+    local data = {
+        format         = "DCP-JSON",
+        version        = DCP_JSON_VERSION,
+        type           = "full",
+        profiles       = db.profiles,
+        activeProfile  = db.activeProfile,
+        autoLoadSpec   = db.autoLoadSpec,
+        previousLayout = db.previousLayout,
+    }
+    return ns.json.encode(data)
+end
+
+local function ImportJSON(text)
+    local data = ns.json.decode(text)
+    if not data or type(data) ~= "table" then
+        return false, "Failed to parse JSON."
+    end
+    if data.format ~= "DCP-JSON" then
+        return false, "Not a DCP JSON export."
+    end
+
+    local db = ABP:GetDB()
+
+    if data.type == "profile" then
+        local cls = data.class or GetClassToken()
+        local name = data.name or ("Imported " .. date("%Y-%m-%d %H:%M"))
+        if not db.profiles[cls] then db.profiles[cls] = {} end
+        db.profiles[cls][name] = data.profile
+        DjinniMsg("Imported profile: |cff00cc00" .. name .. "|r (" .. cls .. ")")
+        ABP:UpdateData()
+        return true
+    elseif data.type == "full" then
+        local profileCount, overwriteCount = 0, 0
+        if type(data.profiles) == "table" then
+            for cls, clsProfiles in pairs(data.profiles) do
+                if type(clsProfiles) == "table" then
+                    if not db.profiles[cls] then db.profiles[cls] = {} end
+                    for name, profile in pairs(clsProfiles) do
+                        if db.profiles[cls][name] then overwriteCount = overwriteCount + 1 end
+                        db.profiles[cls][name] = profile
+                        profileCount = profileCount + 1
+                    end
+                end
+            end
+        end
+        if type(data.autoLoadSpec) == "table" then
+            for key, val in pairs(data.autoLoadSpec) do db.autoLoadSpec[key] = val end
+        end
+        if type(data.activeProfile) == "table" then
+            for cls, name in pairs(data.activeProfile) do db.activeProfile[cls] = name end
+        end
+        if type(data.previousLayout) == "table" then
+            for cls, layout in pairs(data.previousLayout) do db.previousLayout[cls] = layout end
+        end
+        local msg = "Imported " .. profileCount .. " profiles."
+        if overwriteCount > 0 then msg = msg .. " (" .. overwriteCount .. " overwritten)" end
+        DjinniMsg(msg)
+        ABP:UpdateData()
+        return true
+    end
+
+    return false, "Unknown DCP JSON type: " .. tostring(data.type)
+end
+
 -- Auto-detect import format and process
 local function ImportString(text)
     if not text or text == "" then return false, "Empty import string." end
+
+    -- Check for JSON format (starts with { and contains DCP-JSON)
+    local trimmed = strtrim(text)
+    if trimmed:sub(1, 1) == "{" and trimmed:find('"DCP%-JSON"') then
+        return ImportJSON(trimmed)
+    end
 
     -- Check for full config
     if text:find("ABP%-FULL") then
@@ -1822,6 +1974,208 @@ function ABP:BuildSettingsPanel(panel)
         function() return db().partialRestore end,
         function(v) db().partialRestore = v end, r)
     y = W.AddNote(optBody, y, "When enabled, slots with unknown spells or missing macros keep their current action instead of being cleared.")
+
+    -- Bar filter checkboxes
+    y = y - 10
+    local barHeader = optBody:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    barHeader:SetPoint("TOPLEFT", optBody, "TOPLEFT", 18, y)
+    barHeader:SetText("Bars to Save/Restore")
+    y = y - 18
+    for _, bar in ipairs(ACTION_BARS) do
+        y = W.AddCheckbox(optBody, y, bar.label,
+            function() return db().barFilter[bar.key] ~= false end,
+            function(v) db().barFilter[bar.key] = v end, r)
+    end
+    W.EndSection(panel, y)
+
+    -- ── Slot Overrides ───────────────────────────────────────
+    local overBody = W.AddSection(panel, "Slot Overrides (Per-Character)", true)
+    y = 0
+    y = W.AddDescription(overBody, y,
+        "Override specific slots on this character. When restoring any profile, overridden slots will use " ..
+        "the action from your current bars instead of the profile's saved action. Useful for racial or " ..
+        "profession abilities that differ between characters.")
+
+    -- Container for override rows
+    local overContainer = CreateFrame("Frame", nil, overBody)
+    overContainer:SetPoint("TOPLEFT", overBody, "TOPLEFT", 18, y)
+    overContainer:SetPoint("RIGHT", overBody, "RIGHT", -18, 0)
+    overContainer:SetHeight(1)
+    overBody._overrideContainer = overContainer
+    overBody._overrideRows = {}
+
+    -- "Add override from current bar" controls
+    y = y - 4
+    local addFrame = CreateFrame("Frame", nil, overBody)
+    addFrame:SetPoint("TOPLEFT", overBody, "TOPLEFT", 18, y)
+    addFrame:SetSize(500, 26)
+
+    local addLabel = addFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    addLabel:SetPoint("LEFT", addFrame, "LEFT", 0, 0)
+    addLabel:SetText("Slot ID:")
+
+    local addEB = CreateFrame("EditBox", nil, addFrame, "InputBoxTemplate")
+    addEB:SetPoint("LEFT", addLabel, "RIGHT", 6, 0)
+    addEB:SetSize(60, 22)
+    addEB:SetAutoFocus(false)
+    addEB:SetNumeric(true)
+
+    local addBtn = CreateFrame("Button", nil, addFrame, "UIPanelButtonTemplate")
+    addBtn:SetPoint("LEFT", addEB, "RIGHT", 6, 0)
+    addBtn:SetSize(180, 22)
+    addBtn:SetText("Override from Current Bar")
+
+    local addStatus = addFrame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    addStatus:SetPoint("LEFT", addBtn, "RIGHT", 8, 0)
+
+    local function DescribeSlotData(slotData)
+        if not slotData then return "empty" end
+        if slotData.type == "spell" then
+            local name = C_Spell.GetSpellName(slotData.id)
+            return "Spell: " .. (name or ("ID " .. slotData.id))
+        elseif slotData.type == "macro" then
+            return "Macro: " .. (slotData.name or "?")
+        elseif slotData.type == "item" then
+            local name = C_Item.GetItemNameByID(slotData.id)
+            return "Item: " .. (name or ("ID " .. slotData.id))
+        elseif slotData.type == "flyout" then
+            return "Flyout: ID " .. slotData.id
+        elseif slotData.type == "summonpet" then
+            return "Pet: ID " .. slotData.id
+        end
+        return slotData.type .. ": " .. tostring(slotData.id)
+    end
+
+    local function GetBarNameForSlot(slotID)
+        for _, bar in ipairs(ACTION_BARS) do
+            if slotID >= bar.startSlot and slotID <= bar.endSlot then
+                return bar.label .. " (slot " .. slotID .. ")"
+            end
+        end
+        return "Slot " .. slotID
+    end
+
+    local function RebuildOverrideList()
+        for _, row in ipairs(overBody._overrideRows or {}) do
+            row:Hide()
+            row:SetParent(nil)
+        end
+        overBody._overrideRows = {}
+
+        local charKey = GetCharacterKey()
+        local overrides = db().slotOverrides[charKey]
+        if not overrides or not next(overrides) then
+            local emptyText = overContainer:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+            emptyText:SetPoint("TOPLEFT", 0, 0)
+            emptyText:SetText("No overrides set for this character.")
+            local emptyRow = CreateFrame("Frame", nil, overContainer)
+            emptyRow:SetPoint("TOPLEFT", 0, 0)
+            emptyRow:SetSize(1, 18)
+            -- Store the text on the row so it gets cleaned up
+            emptyText:SetParent(emptyRow)
+            overBody._overrideRows[1] = emptyRow
+            overContainer:SetHeight(18)
+            return
+        end
+
+        -- Sort by slot ID
+        local sortedSlots = {}
+        for slotID in pairs(overrides) do
+            sortedSlots[#sortedSlots + 1] = slotID
+        end
+        table.sort(sortedSlots)
+
+        local ry = 0
+        for _, slotID in ipairs(sortedSlots) do
+            local slotData = overrides[slotID]
+            local row = CreateFrame("Frame", nil, overContainer)
+            row:SetPoint("TOPLEFT", overContainer, "TOPLEFT", 0, ry)
+            row:SetPoint("RIGHT", overContainer, "RIGHT", 0, 0)
+            row:SetHeight(22)
+
+            local slotText = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            slotText:SetPoint("LEFT", row, "LEFT", 0, 0)
+            slotText:SetText("|cff66bbff" .. GetBarNameForSlot(slotID) .. "|r  →  " .. DescribeSlotData(slotData))
+
+            local removeBtn = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+            removeBtn:SetPoint("RIGHT", row, "RIGHT", 0, 0)
+            removeBtn:SetSize(60, 18)
+            removeBtn:SetText("Remove")
+            local capturedSlot = slotID
+            removeBtn:SetScript("OnClick", function()
+                local o = db().slotOverrides[charKey]
+                if o then o[capturedSlot] = nil end
+                RebuildOverrideList()
+            end)
+
+            overBody._overrideRows[#overBody._overrideRows + 1] = row
+            ry = ry - 24
+        end
+
+        overContainer:SetHeight(math.max(math.abs(ry), 1))
+    end
+
+    addBtn:SetScript("OnClick", function()
+        local slotID = tonumber(addEB:GetText())
+        if not slotID or slotID < 1 or slotID > MAX_ACTIONBAR_SLOT then
+            addStatus:SetText("|cffff4444Invalid slot (1-" .. MAX_ACTIONBAR_SLOT .. ")|r")
+            return
+        end
+        slotID = math.floor(slotID)
+
+        if not C_ActionBar.HasAction(slotID) then
+            addStatus:SetText("|cffff4444Slot " .. slotID .. " is empty|r")
+            return
+        end
+
+        -- Read current action in that slot
+        local actionType, id, subType = GetActionInfo(slotID)
+        local slotData
+        if actionType == "spell" then
+            slotData = { type = "spell", id = id }
+        elseif actionType == "macro" then
+            local macroName = TrimString(C_ActionBar.GetActionText(slotID))
+            slotData = { type = "macro", name = macroName or "", index = id }
+        elseif actionType == "item" then
+            slotData = { type = "item", id = id }
+        elseif actionType == "flyout" then
+            slotData = { type = "flyout", id = id }
+        elseif actionType == "summonpet" then
+            slotData = { type = "summonpet", id = id }
+        else
+            addStatus:SetText("|cffff4444Unsupported action type: " .. tostring(actionType) .. "|r")
+            return
+        end
+
+        local charKey = GetCharacterKey()
+        if not db().slotOverrides[charKey] then
+            db().slotOverrides[charKey] = {}
+        end
+        db().slotOverrides[charKey][slotID] = slotData
+        addEB:SetText("")
+        addStatus:SetText("|cff00ff00Added: " .. DescribeSlotData(slotData) .. "|r")
+        RebuildOverrideList()
+    end)
+    addEB:SetScript("OnEnterPressed", function(self) addBtn:Click(); self:ClearFocus() end)
+    addEB:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+
+    y = y - 30
+    RebuildOverrideList()
+
+    -- Clear all button
+    local clearAllBtn = CreateFrame("Button", nil, overBody, "UIPanelButtonTemplate")
+    clearAllBtn:SetPoint("TOPLEFT", overBody, "TOPLEFT", 18, y - 4)
+    clearAllBtn:SetSize(180, 22)
+    clearAllBtn:SetText("Clear All Overrides")
+    clearAllBtn:SetScript("OnClick", function()
+        local charKey = GetCharacterKey()
+        db().slotOverrides[charKey] = nil
+        addStatus:SetText("")
+        RebuildOverrideList()
+        DjinniMsg("Cleared all slot overrides for this character.")
+    end)
+
+    y = y - 30
     W.EndSection(panel, y)
 
     -- ── Profile Management ────────────────────────────────────
@@ -1943,23 +2297,22 @@ function ABP:BuildSettingsPanel(panel)
     local ioBody = W.AddSection(panel, "Import / Export", true)
     y = 0
 
-    -- Export buttons
-    y = W.AddButton(ioBody, y, "Export Current Profile", function()
+    -- Export buttons (JSON format)
+    y = W.AddButton(ioBody, y, "Export Current Profile (JSON)", function()
         local dbData = ABP:GetDB()
         local activeName = dbData.activeProfile[cls]
         if not activeName then
             DjinniMsg("No active profile to export.")
             return
         end
-        local profiles = GetClassProfiles(dbData)
-        local profile = profiles[activeName]
-        if not profile then return end
-        local exportStr = SerializeProfile(activeName, profile, cls)
-        DCP:CopyToClipboard(exportStr, "Profile: " .. activeName)
+        local exportStr = ExportProfileAsJSON(activeName)
+        if exportStr then
+            DCP:CopyToClipboard(exportStr, "Profile: " .. activeName)
+        end
     end)
 
-    y = W.AddButton(ioBody, y, "Export All Profiles", function()
-        local exportStr = ExportFullConfig()
+    y = W.AddButton(ioBody, y, "Export All Profiles (JSON)", function()
+        local exportStr = ExportFullConfigAsJSON()
         DCP:CopyToClipboard(exportStr, "Full Config Export")
     end)
 

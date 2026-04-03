@@ -14,6 +14,7 @@ This is a **standalone addon** (not a module of a larger framework like DDT), bu
 - **Settings.lua** — Blizzard Settings panel integration with widget helpers (checkbox, slider, dropdown, editbox, collapsible sections)
 - **ActionBarProfiles.lua** — Action bar module: profile CRUD, action bar read/write, restore logic, export/import, MySlot decoder, LDB data source, tooltip UI
 - **TalentProfiles.lua** — Talent module: save/restore talent loadouts as Blizzard export strings, cross-character sharing, action bar profile linking
+- **KeybindingProfiles.lua** — Keybinding module: save/restore keybinding layouts as named profiles, export/import, per-account storage
 - **DjinnisClassProfiles.toc** — TOC file targeting interface 120001
 
 ### Key Patterns
@@ -36,6 +37,9 @@ SavedVariables (DjinnisClassProfilesDB)
             ├─ activeProfile[classToken] = profileName
             ├─ previousLayout[classToken] = profileData (auto-backup)
             └─ autoLoadSpec[classToken-specID] = profileName
+       └─ ns.db.keybindingprofiles
+            ├─ profiles[profileName] = { bindings, savedAt, savedBy, bindingSet, boundCount }
+            └─ activeProfile = profileName
 ```
 
 ### Profile Slot Format
