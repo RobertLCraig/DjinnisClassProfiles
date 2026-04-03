@@ -118,6 +118,82 @@ local function GetClassProfiles(db)
 end
 
 ---------------------------------------------------------------------------
+-- Core: Racial and profession spell detection
+---------------------------------------------------------------------------
+
+local playerRacials = nil  -- cached set of player's racial spellIDs
+
+local function GetPlayerRacials()
+    if playerRacials then return playerRacials end
+    playerRacials = {}
+    if not (C_SpellBook and C_SpellBook.GetSpellBookSkillLineInfo) then return playerRacials end
+    local generalInfo = C_SpellBook.GetSpellBookSkillLineInfo(Enum.SpellBookSkillLineIndex.General)
+    if not generalInfo then return playerRacials end
+    for i = 1, generalInfo.numSpellBookItems do
+        local slotIdx = generalInfo.itemIndexOffset + i
+        local itemType, spellID = C_SpellBook.GetSpellBookItemType(slotIdx, Enum.SpellBookSpellBank.Player)
+        if itemType == Enum.SpellBookItemType.Spell and spellID then
+            local subtext = C_Spell.GetSpellSubtext(spellID)
+            if subtext and (subtext == "Racial" or subtext == "Racial Passive") then
+                playerRacials[spellID] = true
+            end
+        end
+    end
+    return playerRacials
+end
+
+local function IsRacialSpell(spellID)
+    if not spellID or not C_Spell or not C_Spell.GetSpellSubtext then return false end
+    local subtext = C_Spell.GetSpellSubtext(spellID)
+    return subtext and (subtext == "Racial" or subtext == "Racial Passive")
+end
+
+local professionSpellCache = nil
+
+local function BuildProfessionSpellCache()
+    if professionSpellCache then return professionSpellCache end
+    professionSpellCache = {}
+    if not (C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines) then return professionSpellCache end
+    -- Skill lines beyond General(1), Class(2), MainSpec(3) are off-specs or professions
+    -- Profession lines have no specID and no offSpecID
+    for lineIdx = 1, C_SpellBook.GetNumSpellBookSkillLines() do
+        local info = C_SpellBook.GetSpellBookSkillLineInfo(lineIdx)
+        if info and not info.specID and not info.offSpecID
+            and lineIdx ~= Enum.SpellBookSkillLineIndex.General
+            and lineIdx ~= Enum.SpellBookSkillLineIndex.Class then
+            -- This is likely a profession skill line
+            for i = 1, info.numSpellBookItems do
+                local slotIdx = info.itemIndexOffset + i
+                local itemType, spellID = C_SpellBook.GetSpellBookItemType(slotIdx, Enum.SpellBookSpellBank.Player)
+                if spellID then
+                    professionSpellCache[spellID] = info.name or "Profession"
+                end
+            end
+        end
+    end
+    return professionSpellCache
+end
+
+local function IsProfessionSpell(spellID)
+    if not spellID then return false, nil end
+    local cache = BuildProfessionSpellCache()
+    return cache[spellID] ~= nil, cache[spellID]
+end
+
+local function GetPlayerRacialList()
+    local racials = GetPlayerRacials()
+    local list = {}
+    for spellID in pairs(racials) do
+        local name = C_Spell.GetSpellName(spellID)
+        if name then
+            list[#list + 1] = name
+        end
+    end
+    table.sort(list)
+    return list
+end
+
+---------------------------------------------------------------------------
 -- Core: Read action bar slots
 ---------------------------------------------------------------------------
 
@@ -219,7 +295,21 @@ local function PlaceActionInSlot(slotID, slotData)
         if GetCursorInfo() then PlaceAction(slotID); ClearCursor(); return true end
         ClearCursor()
         local name = C_Spell.GetSpellName(slotData.id)
-        return false, "spell not known: " .. (name or ("ID " .. slotData.id))
+        local reason = "spell not known: " .. (name or ("ID " .. slotData.id))
+        if IsRacialSpell(slotData.id) then
+            local yours = GetPlayerRacialList()
+            if #yours > 0 then
+                reason = reason .. " (racial — yours: " .. table.concat(yours, ", ") .. ")"
+            else
+                reason = reason .. " (racial ability)"
+            end
+        else
+            local isProf, profName = IsProfessionSpell(slotData.id)
+            if isProf then
+                reason = reason .. " (profession: " .. profName .. ")"
+            end
+        end
+        return false, reason
     elseif slotData.type == "macro" then
         local idx = FindMacro(slotData.name, slotData.index)
         if not idx then
@@ -1254,6 +1344,8 @@ function ABP:Init()
         end
         if event == "PLAYER_SPECIALIZATION_CHANGED" then
             InvalidateFlyoutCache()
+            playerRacials = nil
+            professionSpellCache = nil
             ABP:UpdateData()
             CheckAutoLoadSpec()
             return
@@ -1909,16 +2001,7 @@ function ABP:RebuildProfileListUI(profBody)
                 nameText:SetTextColor(0.2, 1.0, 0.2)
             end
 
-            -- Meta (right side)
-            local meta = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            meta:SetPoint("RIGHT", row, "RIGHT", -200, 0)
-            local metaText = (profile.savedBy or "") .. " | " .. (profile.specName or "")
-            if profile.savedAt then
-                metaText = metaText .. " | " .. date("%Y-%m-%d", profile.savedAt)
-            end
-            meta:SetText("|cff888888" .. metaText .. "|r")
-
-            -- Buttons
+            -- Buttons (created before meta so meta can anchor to leftmost button)
             local loadBtn = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
             loadBtn:SetPoint("RIGHT", row, "RIGHT", 0, 0)
             loadBtn:SetSize(50, 20)
@@ -2001,6 +2084,18 @@ function ABP:RebuildProfileListUI(profBody)
                 }
                 StaticPopup_Show("DCP_ABP_RENAME")
             end)
+
+            -- Meta text (anchored between name and leftmost button to avoid overlap)
+            local meta = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            meta:SetPoint("LEFT", nameText, "RIGHT", 8, 0)
+            meta:SetPoint("RIGHT", renBtn, "LEFT", -6, 0)
+            meta:SetJustifyH("RIGHT")
+            meta:SetWordWrap(false)
+            local metaText = (profile.savedBy or "") .. " | " .. (profile.specName or "")
+            if profile.savedAt then
+                metaText = metaText .. " | " .. date("%Y-%m-%d", profile.savedAt)
+            end
+            meta:SetText("|cff888888" .. metaText .. "|r")
 
             profBody._profileRows[#profBody._profileRows + 1] = row
             ry = ry - 30

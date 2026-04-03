@@ -92,7 +92,7 @@ Based on the original implementation plan (baseprompt.md) and CoPilot review.
 - [x] Import/Export section — export current, export all, import editbox, MySlot toggle
 - [x] Click Actions section — 9 modifier+button dropdowns
 - [x] Collapsible sections with +/- toggle
-- [ ] Profile row metadata alignment cleanup (meta text overlaps buttons on narrow panels)
+- [x] Profile row metadata alignment cleanup (meta text overlaps buttons on narrow panels)
 
 ## Phase 9: Event Handling
 
@@ -124,8 +124,8 @@ Cross-character profile sharing means abilities may differ between characters of
 ### Planned Improvements
 - [x] **Detailed skip report** — show *which* specific abilities were skipped and why (spell not known, item not owned, etc.)
 - [x] **Spell availability check before restore** — pre-scan profile slots via `CanPlaceAction()` used by partial restore and optimized clear phase
-- [ ] **Racial ability substitution hints** — detect racial ability slots and suggest the character's own racial as a replacement
-- [ ] **Profession skill detection** — identify profession-specific abilities in profiles and flag them as "profession-dependent" in the save metadata
+- [x] **Racial ability substitution hints** — detect racial ability slots and suggest the character's own racial as a replacement
+- [x] **Profession skill detection** — identify profession-specific abilities in skip reports via spellbook skill line scanning
 - [ ] **Per-slot override system** — allow users to set per-character overrides for specific slots (e.g., "slot 45 is always my racial ability on this character")
 - [x] **"Partial restore" mode** — option to only restore slots the character can actually fill, leaving other slots untouched rather than clearing them
 
