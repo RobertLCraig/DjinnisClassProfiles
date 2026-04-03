@@ -70,6 +70,8 @@ local DEFAULTS = {
     partialRestore   = false,  -- true = leave unfillable slots untouched instead of clearing
     minimapIcon      = { hide = false },  -- LibDBIcon settings
     slotOverrides    = {},   -- { [charKey] = { [slotID] = slotData } } per-character slot replacements
+    profileOrder     = {},   -- { [classToken] = { "name1", "name2", ... } } custom sort order
+    profileTags      = {},   -- { [classToken] = { [profileName] = "tag" } } category tags
     barFilter        = {                  -- which bars to include in save/restore
         main = true, stance = true,
         right1 = true, right2 = true,
@@ -665,6 +667,14 @@ local function DeleteProfile(name)
             db.autoLoadSpec[key] = nil
         end
     end
+    -- Remove from profile order
+    if db.profileOrder[cls] then
+        for i, n in ipairs(db.profileOrder[cls]) do
+            if n == name then table.remove(db.profileOrder[cls], i); break end
+        end
+    end
+    -- Remove tag
+    if db.profileTags[cls] then db.profileTags[cls][name] = nil end
     DjinniMsg("Deleted profile: " .. name)
     ABP:UpdateData()
     return true
@@ -688,6 +698,17 @@ local function RenameProfile(oldName, newName)
         if profName == oldName then
             db.autoLoadSpec[key] = newName
         end
+    end
+    -- Update profile order
+    if db.profileOrder[cls] then
+        for i, n in ipairs(db.profileOrder[cls]) do
+            if n == oldName then db.profileOrder[cls][i] = newName; break end
+        end
+    end
+    -- Update tag
+    if db.profileTags[cls] and db.profileTags[cls][oldName] then
+        db.profileTags[cls][newName] = db.profileTags[cls][oldName]
+        db.profileTags[cls][oldName] = nil
     end
     DjinniMsg("Renamed profile: " .. oldName .. " → " .. newName)
     ABP:UpdateData()
@@ -714,13 +735,86 @@ end
 
 local function GetSortedProfileList()
     local db = ABP:GetDB()
+    local cls = GetClassToken()
     local profiles = GetClassProfiles(db)
+    local order = db.profileOrder[cls]
+
+    -- Build the list from custom order first, then append any unlisted profiles
     local list = {}
+    local seen = {}
+    if order then
+        for _, name in ipairs(order) do
+            if profiles[name] then
+                list[#list + 1] = name
+                seen[name] = true
+            end
+        end
+    end
+    -- Append profiles not in the custom order (alphabetically)
+    local extras = {}
     for name in pairs(profiles) do
+        if not seen[name] then
+            extras[#extras + 1] = name
+        end
+    end
+    table.sort(extras)
+    for _, name in ipairs(extras) do
         list[#list + 1] = name
     end
-    table.sort(list)
     return list
+end
+
+---------------------------------------------------------------------------
+-- Profile tags (categories)
+---------------------------------------------------------------------------
+
+local PROFILE_TAGS = {
+    { key = "",       label = "None",      color = "888888" },
+    { key = "pve",    label = "PvE",       color = "33ff99" },
+    { key = "pvp",    label = "PvP",       color = "ff4444" },
+    { key = "raid",   label = "Raid",      color = "ff8800" },
+    { key = "mplus",  label = "M+",        color = "a335ee" },
+    { key = "solo",   label = "Solo",      color = "66bbff" },
+    { key = "farm",   label = "Farm",      color = "ffcc00" },
+    { key = "alt",    label = "Alt",       color = "cc99ff" },
+}
+
+local TAG_COLORS = {}
+local TAG_LABELS = {}
+for _, t in ipairs(PROFILE_TAGS) do
+    TAG_COLORS[t.key] = t.color
+    TAG_LABELS[t.key] = t.label
+end
+
+local function GetProfileTag(name)
+    local db = ABP:GetDB()
+    local cls = GetClassToken()
+    return db.profileTags[cls] and db.profileTags[cls][name] or ""
+end
+
+local function SetProfileTag(name, tag)
+    local db = ABP:GetDB()
+    local cls = GetClassToken()
+    if not db.profileTags[cls] then db.profileTags[cls] = {} end
+    if tag == "" or tag == nil then
+        db.profileTags[cls][name] = nil
+    else
+        db.profileTags[cls][name] = tag
+    end
+end
+
+local function FormatTagLabel(tag)
+    if not tag or tag == "" then return "" end
+    local color = TAG_COLORS[tag] or "888888"
+    local label = TAG_LABELS[tag] or tag
+    return "|cff" .. color .. "[" .. label .. "]|r "
+end
+
+--- Persist current sort order for this class.
+local function SaveProfileOrder(list)
+    local db = ABP:GetDB()
+    local cls = GetClassToken()
+    db.profileOrder[cls] = list
 end
 
 ---------------------------------------------------------------------------
@@ -1774,7 +1868,8 @@ function ABP:BuildTooltipContent()
             row:SetPoint("RIGHT", c, "RIGHT", -PADDING, 0)
 
             row.icon:Hide()
-            row.text:SetText("  " .. name)
+            local tagPrefix = FormatTagLabel(GetProfileTag(name))
+            row.text:SetText("  " .. tagPrefix .. name)
             row.text:SetPoint("LEFT", row, "LEFT", ICON_SIZE + 10, 0)
 
             local isActive = (name == activeName)
@@ -2398,7 +2493,7 @@ function ABP:RebuildProfileListUI(profBody)
     local cls = GetClassToken()
     local ry = 0
 
-    for _, name in ipairs(profiles) do
+    for idx, name in ipairs(profiles) do
         local profile = GetClassProfiles(db)[name]
         if profile then
             local row = CreateFrame("Frame", nil, container)
@@ -2406,9 +2501,78 @@ function ABP:RebuildProfileListUI(profBody)
             row:SetPoint("RIGHT", container, "RIGHT", 0, 0)
             row:SetHeight(28)
 
+            -- Move up/down buttons
+            local rowIdx = idx
+            local upBtn = CreateFrame("Button", nil, row)
+            upBtn:SetPoint("LEFT", row, "LEFT", 0, 0)
+            upBtn:SetSize(14, 14)
+            local upText = upBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            upText:SetPoint("CENTER")
+            upText:SetText("|cff888888\226\150\178|r")  -- ▲
+            upBtn:SetScript("OnEnter", function() upText:SetText("|cffffffcc\226\150\178|r") end)
+            upBtn:SetScript("OnLeave", function() upText:SetText("|cff888888\226\150\178|r") end)
+            upBtn:SetScript("OnClick", function()
+                if rowIdx <= 1 then return end
+                local order = GetSortedProfileList()
+                order[rowIdx], order[rowIdx - 1] = order[rowIdx - 1], order[rowIdx]
+                SaveProfileOrder(order)
+                ABP:RebuildProfileListUI(profBody)
+            end)
+            if idx == 1 then upBtn:SetAlpha(0.3); upBtn:Disable() end
+
+            local downBtn = CreateFrame("Button", nil, row)
+            downBtn:SetPoint("LEFT", upBtn, "RIGHT", 0, 0)
+            downBtn:SetSize(14, 14)
+            local downText = downBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            downText:SetPoint("CENTER")
+            downText:SetText("|cff888888\226\150\188|r")  -- ▼
+            downBtn:SetScript("OnEnter", function() downText:SetText("|cffffffcc\226\150\188|r") end)
+            downBtn:SetScript("OnLeave", function() downText:SetText("|cff888888\226\150\188|r") end)
+            downBtn:SetScript("OnClick", function()
+                if rowIdx >= #profiles then return end
+                local order = GetSortedProfileList()
+                order[rowIdx], order[rowIdx + 1] = order[rowIdx + 1], order[rowIdx]
+                SaveProfileOrder(order)
+                ABP:RebuildProfileListUI(profBody)
+            end)
+            if idx == #profiles then downBtn:SetAlpha(0.3); downBtn:Disable() end
+
+            -- Tag button (cycle through tags on click)
+            local tagBtn = CreateFrame("Button", nil, row)
+            tagBtn:SetPoint("LEFT", downBtn, "RIGHT", 4, 0)
+            tagBtn:SetHeight(16)
+            local tagText = tagBtn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            tagText:SetPoint("LEFT")
+            local curTag = GetProfileTag(name)
+            local tagLabel = FormatTagLabel(curTag)
+            if tagLabel ~= "" then
+                tagText:SetText(tagLabel)
+                tagBtn:SetWidth(math.max(tagText:GetStringWidth() + 4, 30))
+            else
+                tagText:SetText("|cff555555[tag]|r")
+                tagBtn:SetWidth(28)
+            end
+            local profNameForTag = name
+            tagBtn:SetScript("OnClick", function()
+                local current = GetProfileTag(profNameForTag)
+                -- Find current tag index and advance to next
+                local nextIdx = 1
+                for i, t in ipairs(PROFILE_TAGS) do
+                    if t.key == current then nextIdx = (i % #PROFILE_TAGS) + 1; break end
+                end
+                SetProfileTag(profNameForTag, PROFILE_TAGS[nextIdx].key)
+                ABP:RebuildProfileListUI(profBody)
+            end)
+            tagBtn:SetScript("OnEnter", function()
+                if curTag == "" then tagText:SetText("|cffaaaaaa[tag]|r") end
+            end)
+            tagBtn:SetScript("OnLeave", function()
+                if curTag == "" then tagText:SetText("|cff555555[tag]|r") end
+            end)
+
             -- Name label
             local nameText = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-            nameText:SetPoint("LEFT", row, "LEFT", 4, 0)
+            nameText:SetPoint("LEFT", tagBtn, "RIGHT", 2, 0)
             nameText:SetText(name)
             if db.activeProfile[cls] == name then
                 nameText:SetTextColor(0.2, 1.0, 0.2)

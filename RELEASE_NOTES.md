@@ -2,7 +2,7 @@
 
 ## Version: 0.3.0
 
-### Keybinding Profiles, Per-Bar Filtering, Slot Overrides, JSON Export
+### Keybinding Profiles, Per-Bar Filtering, Slot Overrides, JSON Export, Profile Organization
 
 #### New: Keybinding Profiles
 - Save and restore keybinding layouts as named profiles
@@ -26,3 +26,11 @@
 - Talent profiles: export all talent profiles as JSON
 - Keybinding profiles: export as JSON
 - Import auto-detects JSON format alongside legacy ABP and MySlot formats
+
+#### New: Custom Profile Ordering
+- Up/down arrow buttons on each profile row in Settings
+- Custom order respected in tooltip, loadnext/loadprev cycling
+
+#### New: Profile Tags
+- Click-to-cycle tag button per profile: PvE, PvP, Raid, M+, Solo, Farm, Alt
+- Color-coded tag labels shown in both Settings and tooltip

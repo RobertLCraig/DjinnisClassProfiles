@@ -137,6 +137,6 @@ Cross-character profile sharing means abilities may differ between characters of
 - [x] **Keybinding profiles** — save/restore keybinding layouts (full CRUD, export/import, confirmation dialogs)
 - [x] **Profile sharing** — JSON export/import via copy+paste for all profile types (action bars, talents, keybindings)
 - [x] **Minimap button** — standalone minimap icon via LibDBIcon with settings toggle
-- [ ] **Drag-and-drop profile ordering** — custom sort order in tooltip
-- [ ] **Profile categories/tags** — organize profiles by purpose (PvP, PvE, etc.)
+- [x] **Custom profile ordering** — up/down arrow buttons in Settings to reorder profiles, order respected in tooltip and loadnext/loadprev
+- [x] **Profile categories/tags** — click-to-cycle tag button per profile (PvE, PvP, Raid, M+, Solo, Farm, Alt), shown in tooltip and settings
 - [x] **Per-bar profiles** — save/restore individual bars instead of all 180 slots (bar filter checkboxes in Options, engine filters in read/clear/place)
