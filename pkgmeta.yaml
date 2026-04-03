@@ -1,0 +1,21 @@
+## CurseForge / WoWInterface automatic packager configuration
+## https://support.curseforge.com/support/solutions/articles/9000197281
+
+package-as: DjinnisClassProfiles
+
+ignore:
+  - .git
+  - .gitignore
+  - .claude
+  - .agents
+  - CHANGELOG.md
+  - CLAUDE.md
+  - TODO.md
+  - deploy.ps1
+  - pkgmeta.yaml
+  - release.ps1
+  - RELEASE_NOTES.md
+  - releases
+  - baseprompt.md
+
+changelog: CHANGELOG.md
