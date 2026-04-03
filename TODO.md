@@ -99,7 +99,7 @@ Based on the original implementation plan (baseprompt.md) and CoPilot review.
 - [x] `PLAYER_ENTERING_WORLD` — initial data refresh + auto-load check
 - [x] `PLAYER_SPECIALIZATION_CHANGED` — update data + check auto-load
 - [x] `PLAYER_REGEN_ENABLED` — process deferred restore
-- [ ] `ACTIONBAR_SLOT_CHANGED` — optional: detect external bar changes and mark active profile as "modified"
+- [x] `ACTIONBAR_SLOT_CHANGED` — detect external bar changes and mark active profile as "modified"
 
 ## Phase 10: Polish & Improvements (from CoPilot review)
 
@@ -136,7 +136,7 @@ Cross-character profile sharing means abilities may differ between characters of
 - [ ] **Talent profile sync** — save and restore talent loadouts alongside action bar profiles (core goal of the "Class Profiles" vision)
 - [ ] **Keybinding profiles** — save/restore keybinding layouts
 - [ ] **Profile sharing** — in-game profile sharing between players (addon comms)
-- [ ] **Minimap button** — standalone minimap icon (without requiring an LDB display)
+- [x] **Minimap button** — standalone minimap icon via LibDBIcon with settings toggle
 - [ ] **Drag-and-drop profile ordering** — custom sort order in tooltip
 - [ ] **Profile categories/tags** — organize profiles by purpose (PvP, PvE, etc.)
 - [ ] **Per-bar profiles** — save/restore individual bars instead of all 180 slots

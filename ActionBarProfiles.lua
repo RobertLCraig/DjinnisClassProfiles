@@ -19,6 +19,8 @@ ABP.currentSpec    = ""
 ABP.currentSpecID  = 0
 ABP.pendingRestore = nil  -- deferred restore when leaving combat
 ABP.demoMode       = false
+ABP.profileModified = false  -- true when bars differ from active profile
+ABP.isRestoring     = false  -- suppress change detection during restore
 
 -- Tooltip
 local tooltipFrame = nil
@@ -52,6 +54,7 @@ local DEFAULTS = {
     autoLoadSpec     = {},   -- { [classToken .. "-" .. specID] = "profileName" }
     showMySlot       = true,
     partialRestore   = false,  -- true = leave unfillable slots untouched instead of clearing
+    minimapIcon      = { hide = false },  -- LibDBIcon settings
     clickActions = {
         leftClick       = "loadnext",
         rightClick      = "savecurrent",
@@ -447,6 +450,7 @@ local function SaveProfile(name)
     }
 
     db.activeProfile[cls] = name
+    ABP.profileModified = false
     DjinniMsg("Saved profile: |cff00cc00" .. name .. "|r")
     ABP:UpdateData()
     return true
@@ -494,9 +498,12 @@ local function RestoreProfile(name, skipBackup)
         }
     end
 
+    ABP.isRestoring = true
     local placed, failed, skipReasons = ClearAndPlaceActions(profile.slots, db.partialRestore)
+    ABP.isRestoring = false
 
     db.activeProfile[cls] = name
+    ABP.profileModified = false
     local msg = "Loaded profile: |cff00cc00" .. name .. "|r (" .. placed .. " placed"
     if failed > 0 then msg = msg .. ", " .. failed .. " skipped" end
     msg = msg .. ")"
@@ -552,7 +559,10 @@ local function RestoreFromData(profileData, label, skipBackup)
         }
     end
 
+    ABP.isRestoring = true
     local placed, failed, skipReasons = ClearAndPlaceActions(profileData.slots, db.partialRestore)
+    ABP.isRestoring = false
+    ABP.profileModified = false
 
     local msg = "Restored " .. (label or "layout") .. " (" .. placed .. " placed"
     if failed > 0 then msg = msg .. ", " .. failed .. " skipped" end
@@ -1240,6 +1250,7 @@ local function ExpandLabel(template)
     local result = template
 
     local activeName = db.activeProfile[cls] or "None"
+    if ABP.profileModified then activeName = activeName .. "*" end
     result = E(result, "profile", activeName)
 
     local profiles = GetClassProfiles(db)
@@ -1332,8 +1343,31 @@ ABP.dataobj = dataobj
 
 local eventFrame = CreateFrame("Frame")
 
+local function CheckSlotModified(slotID)
+    if ABP.isRestoring or ABP.profileModified then return end
+    local db = ABP:GetDB()
+    local cls = GetClassToken()
+    local activeName = db.activeProfile[cls]
+    if not activeName then return end
+    local profiles = GetClassProfiles(db)
+    local profile = profiles[activeName]
+    if not profile or not profile.slots then return end
+
+    local savedSlot = profile.slots[slotID]
+    if savedSlot then
+        if not SlotMatchesCurrent(slotID, savedSlot) then
+            ABP.profileModified = true
+            ABP:UpdateData()
+        end
+    elseif C_ActionBar.HasAction(slotID) then
+        -- Slot wasn't in profile but now has something
+        ABP.profileModified = true
+        ABP:UpdateData()
+    end
+end
+
 function ABP:Init()
-    eventFrame:SetScript("OnEvent", function(_, event)
+    eventFrame:SetScript("OnEvent", function(_, event, arg1)
         if event == "PLAYER_REGEN_ENABLED" then
             if ABP.pendingRestore then
                 local pr = ABP.pendingRestore
@@ -1356,12 +1390,24 @@ function ABP:Init()
             C_Timer.After(2, CheckAutoLoadSpec)
             return
         end
+        if event == "ACTIONBAR_SLOT_CHANGED" then
+            CheckSlotModified(arg1)
+            return
+        end
         ABP:UpdateData()
     end)
 
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    eventFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
+
+    -- Minimap icon
+    local icon = LibStub("LibDBIcon-1.0", true)
+    if icon then
+        local db = self:GetDB()
+        icon:Register("DjinnisClassProfiles", dataobj, db.minimapIcon)
+    end
 
     self:UpdateData()
 end
@@ -1581,7 +1627,11 @@ function ABP:BuildTooltipContent()
 
             local isActive = (name == activeName)
             if isActive then
-                row.status:SetText("|cff00cc00Active|r")
+                local statusText = "|cff00cc00Active|r"
+                if ABP.profileModified then
+                    statusText = "|cffffcc00Modified|r"
+                end
+                row.status:SetText(statusText)
                 row.activeBar:Show()
                 row.text:SetTextColor(1, 1, 1)
             else
@@ -1755,13 +1805,23 @@ function ABP:BuildSettingsPanel(panel)
     y = W.AddTooltipGrowDirection(body, y, db, r)
     W.EndSection(panel, y)
 
-    -- ── Restore Options ───────────────────────────────────────
-    local restBody = W.AddSection(panel, "Restore Options", true)
+    -- ── General Options ──────────────────────────────────────
+    local optBody = W.AddSection(panel, "Options", true)
     y = 0
-    y = W.AddCheckbox(restBody, y, "Partial restore (leave unfillable slots untouched)",
+    y = W.AddCheckbox(optBody, y, "Show minimap button",
+        function() return not db().minimapIcon.hide end,
+        function(v)
+            db().minimapIcon.hide = not v
+            local icon = LibStub("LibDBIcon-1.0", true)
+            if icon then
+                if v then icon:Show("DjinnisClassProfiles")
+                else icon:Hide("DjinnisClassProfiles") end
+            end
+        end, r)
+    y = W.AddCheckbox(optBody, y, "Partial restore (leave unfillable slots untouched)",
         function() return db().partialRestore end,
         function(v) db().partialRestore = v end, r)
-    y = W.AddNote(restBody, y, "When enabled, slots with unknown spells or missing macros keep their current action instead of being cleared.")
+    y = W.AddNote(optBody, y, "When enabled, slots with unknown spells or missing macros keep their current action instead of being cleared.")
     W.EndSection(panel, y)
 
     -- ── Profile Management ────────────────────────────────────
