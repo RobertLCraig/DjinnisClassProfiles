@@ -1,7 +1,7 @@
--- Djinni's Action Bar Profiles — Settings
+-- Djinni's Class Profiles — Settings
 -- Blizzard Settings integration and widget helpers.
 local addonName, ns = ...
-local DABP = ns.addon
+local DCP = ns.addon
 
 ---------------------------------------------------------------------------
 -- Widget helpers
@@ -658,7 +658,7 @@ end
 -- Blizzard Settings registration
 ---------------------------------------------------------------------------
 
-function DABP:SetupOptions()
+function DCP:SetupOptions()
     -- Single module — create one category with one panel
     local modPanel = CreateScrollPanel()
     local mod = ns.modules["actionbarprofiles"]
@@ -666,7 +666,7 @@ function DABP:SetupOptions()
         mod:BuildSettingsPanel(modPanel)
     end
 
-    local cat = Settings.RegisterCanvasLayoutCategory(modPanel, "Action Bar Profiles")
+    local cat = Settings.RegisterCanvasLayoutCategory(modPanel, "Djinni's Class Profiles")
     Settings.RegisterAddOnCategory(cat)
     self.settingsCategoryID = cat:GetID()
 end

@@ -1,4 +1,4 @@
--- Djinni's Action Bar Profiles — Core
+-- Djinni's Class Profiles — Core
 -- Standalone core: module system, shared helpers, tooltip factory, SavedVariables init.
 local addonName, ns = ...
 
@@ -6,9 +6,9 @@ local addonName, ns = ...
 -- Addon object
 ---------------------------------------------------------------------------
 
-local DABP = {}
-DABP.__index = DABP
-ns.addon = DABP
+local DCP = {}
+DCP.__index = DCP
+ns.addon = DCP
 
 ---------------------------------------------------------------------------
 -- Module system
@@ -43,8 +43,8 @@ end
 -- Print helper
 ---------------------------------------------------------------------------
 
-function DABP:Print(msg)
-    print("|cff33ff99DjinniABP:|r " .. tostring(msg))
+function DCP:Print(msg)
+    print("|cff33ff99DjinniDCP:|r " .. tostring(msg))
 end
 
 ---------------------------------------------------------------------------
@@ -64,21 +64,21 @@ ns.HIDE_DELAY = 0.15
 
 ---------------------------------------------------------------------------
 -- Font objects
--- Named to match DDT keys so ActionBarProfiles.lua needs no changes.
+-- Named DCPFont* for internal lookup by FontString helper.
 ---------------------------------------------------------------------------
 
 local FONT_OBJECTS = {}
 
 local function InitFonts()
-    local h = CreateFont("DABPFontHeader")
+    local h = CreateFont("DCPFontHeader")
     h:SetFont("Fonts\\FRIZQT__.TTF", 14, "")
-    local n = CreateFont("DABPFontNormal")
+    local n = CreateFont("DCPFontNormal")
     n:SetFont("Fonts\\FRIZQT__.TTF", 12, "")
-    local s = CreateFont("DABPFontSmall")
+    local s = CreateFont("DCPFontSmall")
     s:SetFont("Fonts\\FRIZQT__.TTF", 10, "")
-    FONT_OBJECTS["DDTFontHeader"] = h
-    FONT_OBJECTS["DDTFontNormal"] = n
-    FONT_OBJECTS["DDTFontSmall"]  = s
+    FONT_OBJECTS["DCPFontHeader"] = h
+    FONT_OBJECTS["DCPFontNormal"] = n
+    FONT_OBJECTS["DCPFontSmall"]  = s
 end
 
 function ns.FontString(parent, fontTemplate)
@@ -92,7 +92,7 @@ end
 -- Click action resolver
 ---------------------------------------------------------------------------
 
-function DABP:ResolveClickAction(button, clickActions)
+function DCP:ResolveClickAction(button, clickActions)
     if IsAltKeyDown() then
         if button == "LeftButton"  then return clickActions.altLeftClick end
         if button == "RightButton" then return clickActions.altRightClick end
@@ -113,7 +113,7 @@ end
 -- Hint bar builder
 ---------------------------------------------------------------------------
 
-function DABP:BuildHintText(clickActions, actionLabels)
+function DCP:BuildHintText(clickActions, actionLabels)
     local labels = {
         { key = "leftClick",       prefix = "LClick" },
         { key = "rightClick",      prefix = "RClick" },
@@ -140,9 +140,9 @@ end
 -- Copy-to-clipboard popup
 ---------------------------------------------------------------------------
 
-function DABP:CopyToClipboard(text, label)
-    if not DABPCopyFrame then
-        local f = CreateFrame("Frame", "DABPCopyFrame", UIParent, "BackdropTemplate")
+function DCP:CopyToClipboard(text, label)
+    if not DCPCopyFrame then
+        local f = CreateFrame("Frame", "DCPCopyFrame", UIParent, "BackdropTemplate")
         f:SetSize(500, 300)
         f:SetPoint("CENTER")
         f:SetFrameStrata("DIALOG")
@@ -163,11 +163,11 @@ function DABP:CopyToClipboard(text, label)
         title:SetPoint("TOP", 0, -10)
         f.titleText = title
 
-        local scroll = CreateFrame("ScrollFrame", "DABPCopyScroll", f, "UIPanelScrollFrameTemplate")
+        local scroll = CreateFrame("ScrollFrame", "DCPCopyScroll", f, "UIPanelScrollFrameTemplate")
         scroll:SetPoint("TOPLEFT", 12, -34)
         scroll:SetPoint("BOTTOMRIGHT", -30, 36)
 
-        local edit = CreateFrame("EditBox", "DABPCopyEditBox", scroll)
+        local edit = CreateFrame("EditBox", "DCPCopyEditBox", scroll)
         edit:SetMultiLine(true)
         edit:SetAutoFocus(true)
         edit:SetFontObject("GameFontHighlight")
@@ -184,18 +184,18 @@ function DABP:CopyToClipboard(text, label)
         hint:SetText("Ctrl+A to select all, Ctrl+C to copy, Escape to close")
     end
 
-    DABPCopyFrame.titleText:SetText("Action Bar Profiles — " .. (label or "Copy Text"))
-    DABPCopyFrame.editBox:SetText(text)
-    DABPCopyFrame:Show()
-    DABPCopyFrame.editBox:HighlightText()
-    DABPCopyFrame.editBox:SetFocus()
+    DCPCopyFrame.titleText:SetText("Class Profiles — " .. (label or "Copy Text"))
+    DCPCopyFrame.editBox:SetText(text)
+    DCPCopyFrame:Show()
+    DCPCopyFrame.editBox:HighlightText()
+    DCPCopyFrame.editBox:SetFocus()
 end
 
 ---------------------------------------------------------------------------
 -- Scrollbar helpers (used by tooltip FinalizeLayout)
 ---------------------------------------------------------------------------
 
-function DABP:UpdateScrollbar(f)
+function DCP:UpdateScrollbar(f)
     local contentH = f.content:GetHeight() or 0
     local clipH    = f.clipFrame:GetHeight() or 0
     if contentH > clipH + 1 then
@@ -213,7 +213,7 @@ function DABP:UpdateScrollbar(f)
     end
 end
 
-function DABP:UpdateHScrollbar(f)
+function DCP:UpdateHScrollbar(f)
     local contentW = f.content:GetWidth() or 0
     local clipW    = f.clipFrame:GetWidth() or 0
     if contentW > clipW + 1 then
@@ -257,7 +257,7 @@ function ns.CreateTooltipFrame(globalName, moduleRef)
     f:SetBackdropColor(0.05, 0.05, 0.05, 0.92)
     f:SetBackdropBorderColor(0.3, 0.3, 0.3, 1)
 
-    f.header = ns.FontString(f, "DDTFontHeader")
+    f.header = ns.FontString(f, "DCPFontHeader")
     f.header:SetPoint("TOPLEFT", f, "TOPLEFT", FACTORY_PADDING, -FACTORY_PADDING)
     f.header:SetPoint("TOPRIGHT", f, "TOPRIGHT", -FACTORY_PADDING, -FACTORY_PADDING)
     f.header:SetJustifyH("LEFT")
@@ -276,7 +276,7 @@ function ns.CreateTooltipFrame(globalName, moduleRef)
     f.hintSep:SetColorTexture(0.3, 0.3, 0.3, 0.5)
     f.hintSep:Hide()
 
-    f.hint = ns.FontString(f, "DDTFontSmall")
+    f.hint = ns.FontString(f, "DCPFontSmall")
     f.hint:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", FACTORY_PADDING, 10)
     f.hint:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -FACTORY_PADDING, 10)
     f.hint:SetJustifyH("CENTER")
@@ -331,8 +331,8 @@ function ns.CreateTooltipFrame(globalName, moduleRef)
         end
         self.content:ClearAllPoints()
         self.content:SetPoint("TOPLEFT", self.clipFrame, "TOPLEFT", -self.hScrollOffset, self.scrollOffset)
-        DABP:UpdateScrollbar(self)
-        DABP:UpdateHScrollbar(self)
+        DCP:UpdateScrollbar(self)
+        DCP:UpdateHScrollbar(self)
     end)
 
     f:SetScript("OnEnter", function()
@@ -388,8 +388,8 @@ function ns.CreateTooltipFrame(globalName, moduleRef)
             self.hintSep:Hide()
         end
 
-        DABP:UpdateScrollbar(self)
-        DABP:UpdateHScrollbar(self)
+        DCP:UpdateScrollbar(self)
+        DCP:UpdateHScrollbar(self)
     end
 
     f:Hide()
@@ -435,19 +435,19 @@ initFrame:SetScript("OnEvent", function(_, _, loadedAddon)
 
     InitFonts()
 
-    local svName = "DjinnisActionBarProfilesDB"
+    local svName = "DjinnisClassProfilesDB"
     if not _G[svName] then _G[svName] = {} end
     MergeDefaults(_G[svName], ns.defaults)
     ns.db = _G[svName]
 
     -- Settings UI (defined in Settings.lua)
-    DABP:SetupOptions()
+    DCP:SetupOptions()
 
     -- Slash command
-    SLASH_DABP1 = "/dabp"
-    SlashCmdList["DABP"] = function()
-        if DABP.settingsCategoryID then
-            Settings.OpenToCategory(DABP.settingsCategoryID)
+    SLASH_DCP1 = "/dcp"
+    SlashCmdList["DCP"] = function()
+        if DCP.settingsCategoryID then
+            Settings.OpenToCategory(DCP.settingsCategoryID)
         end
     end
 

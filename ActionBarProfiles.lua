@@ -1,8 +1,8 @@
--- Djinni's Action Bar Profiles
+-- Djinni's Class Profiles — Action Bar Profiles
 -- Save and restore action bar layouts as named profiles, shared across
 -- characters of the same class. MySlot interoperability.
 local addonName, ns = ...
-local DABP = ns.addon
+local DCP = ns.addon
 local LDB = LibStub("LibDataBroker-1.1")
 
 ---------------------------------------------------------------------------
@@ -83,7 +83,7 @@ ns.ABP_ACTION_VALUES = CLICK_ACTIONS
 ---------------------------------------------------------------------------
 
 local function DjinniMsg(msg)
-    DABP:Print("|cff33ff99Djinni:|r " .. msg)
+    DCP:Print("|cff33ff99Djinni:|r " .. msg)
 end
 
 ---------------------------------------------------------------------------
@@ -105,6 +105,11 @@ local function GetCharacterKey()
     return name .. " - " .. realm
 end
 
+local function TrimString(s)
+    if not s then return s end
+    return s:match("^%s*(.-)%s*$")
+end
+
 local function GetClassProfiles(db)
     local cls = GetClassToken()
     if not db.profiles[cls] then db.profiles[cls] = {} end
@@ -123,7 +128,7 @@ local function ReadActionBarSlots()
             if actionType == "spell" then
                 slots[slotID] = { type = "spell", id = id }
             elseif actionType == "macro" then
-                local macroName = C_ActionBar.GetActionText(slotID)
+                local macroName = TrimString(C_ActionBar.GetActionText(slotID))
                 slots[slotID] = { type = "macro", name = macroName, index = id }
             elseif actionType == "item" then
                 slots[slotID] = { type = "item", id = id }
@@ -144,23 +149,33 @@ end
 ---------------------------------------------------------------------------
 
 local function FindMacro(savedName, savedIndex)
+    local trimmed = TrimString(savedName)
     if savedIndex then
-        local name = GetMacroInfo(savedIndex)
-        if name == savedName then return savedIndex end
+        local name = TrimString(GetMacroInfo(savedIndex))
+        if name == trimmed then return savedIndex end
     end
     local numAccount, numCharacter = GetNumMacros()
     for i = 1, numAccount + numCharacter do
-        local name = GetMacroInfo(i)
-        if name == savedName then return i end
+        local name = TrimString(GetMacroInfo(i))
+        if name == trimmed then return i end
     end
     return nil
 end
 
 ---------------------------------------------------------------------------
--- Core: Find flyout in spellbook
+-- Core: Find flyout in spellbook (with session cache)
 ---------------------------------------------------------------------------
 
+local flyoutCache = {}  -- { [flyoutID] = spellbookSlotIdx }
+
+local function InvalidateFlyoutCache()
+    wipe(flyoutCache)
+end
+
 local function FindFlyoutInSpellbook(targetFlyoutID)
+    if flyoutCache[targetFlyoutID] then
+        return flyoutCache[targetFlyoutID]
+    end
     if not (C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines) then return nil end
     for lineIdx = 1, C_SpellBook.GetNumSpellBookSkillLines() do
         local info = C_SpellBook.GetSpellBookSkillLineInfo(lineIdx)
@@ -169,12 +184,32 @@ local function FindFlyoutInSpellbook(targetFlyoutID)
                 local slotIdx = info.itemIndexOffset + i
                 local itemType, actionID = C_SpellBook.GetSpellBookItemType(slotIdx, Enum.SpellBookSpellBank.Player)
                 if itemType == Enum.SpellBookItemType.Flyout and actionID == targetFlyoutID then
+                    flyoutCache[targetFlyoutID] = slotIdx
                     return slotIdx
                 end
             end
         end
     end
     return nil
+end
+
+---------------------------------------------------------------------------
+-- Core: Place a single action into a slot
+---------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+-- Core: Check if a slot already matches the desired action
+---------------------------------------------------------------------------
+
+local function SlotMatchesCurrent(slotID, slotData)
+    if not C_ActionBar.HasAction(slotID) then return false end
+    local actionType, id = GetActionInfo(slotID)
+    if actionType ~= slotData.type then return false end
+    if slotData.type == "macro" then
+        local macroName = TrimString(C_ActionBar.GetActionText(slotID))
+        return macroName == TrimString(slotData.name)
+    end
+    return id == slotData.id
 end
 
 ---------------------------------------------------------------------------
@@ -207,6 +242,37 @@ local function PlaceActionInSlot(slotID, slotData)
     end
     ClearCursor()
     return placed
+end
+
+---------------------------------------------------------------------------
+-- Core: Clear and place actions (optimized — only touches changed slots)
+---------------------------------------------------------------------------
+
+local function ClearAndPlaceActions(targetSlots)
+    -- Phase 1: Clear slots that are populated but either not in the target
+    -- profile or contain a different action than desired
+    for slotID = 1, MAX_ACTIONBAR_SLOT do
+        if C_ActionBar.HasAction(slotID) then
+            local target = targetSlots[slotID]
+            if not target or not SlotMatchesCurrent(slotID, target) then
+                PickupAction(slotID)
+                ClearCursor()
+            end
+        end
+    end
+
+    -- Phase 2: Place actions that are missing or differ
+    local placed, skipped = 0, 0
+    for slotID, slotData in pairs(targetSlots) do
+        if SlotMatchesCurrent(slotID, slotData) then
+            placed = placed + 1  -- already correct, count as placed
+        elseif PlaceActionInSlot(slotID, slotData) then
+            placed = placed + 1
+        else
+            skipped = skipped + 1
+        end
+    end
+    return placed, skipped
 end
 
 ---------------------------------------------------------------------------
@@ -277,6 +343,11 @@ local function RestoreProfile(name, skipBackup)
         return false
     end
 
+    if C_ActionBar.HasVehicleActionBar() or C_ActionBar.HasOverrideActionBar() then
+        DjinniMsg("Cannot restore profiles while a vehicle or override bar is active.")
+        return false
+    end
+
     -- Auto-backup current layout
     if not skipBackup then
         local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization() or 0
@@ -294,23 +365,7 @@ local function RestoreProfile(name, skipBackup)
         }
     end
 
-    -- Phase 1: Clear ALL slots
-    for slotID = 1, MAX_ACTIONBAR_SLOT do
-        if C_ActionBar.HasAction(slotID) then
-            PickupAction(slotID)
-            ClearCursor()
-        end
-    end
-
-    -- Phase 2: Place saved actions
-    local placed, failed = 0, 0
-    for slotID, slotData in pairs(profile.slots) do
-        if PlaceActionInSlot(slotID, slotData) then
-            placed = placed + 1
-        else
-            failed = failed + 1
-        end
-    end
+    local placed, failed = ClearAndPlaceActions(profile.slots)
 
     db.activeProfile[cls] = name
     local msg = "Loaded profile: |cff00cc00" .. name .. "|r (" .. placed .. " placed"
@@ -337,6 +392,11 @@ local function RestoreFromData(profileData, label, skipBackup)
         return false
     end
 
+    if C_ActionBar.HasVehicleActionBar() or C_ActionBar.HasOverrideActionBar() then
+        DjinniMsg("Cannot restore while a vehicle or override bar is active.")
+        return false
+    end
+
     local db = ABP:GetDB()
     local cls = GetClassToken()
 
@@ -357,23 +417,7 @@ local function RestoreFromData(profileData, label, skipBackup)
         }
     end
 
-    -- Clear ALL
-    for slotID = 1, MAX_ACTIONBAR_SLOT do
-        if C_ActionBar.HasAction(slotID) then
-            PickupAction(slotID)
-            ClearCursor()
-        end
-    end
-
-    -- Place
-    local placed, failed = 0, 0
-    for slotID, slotData in pairs(profileData.slots) do
-        if PlaceActionInSlot(slotID, slotData) then
-            placed = placed + 1
-        else
-            failed = failed + 1
-        end
-    end
+    local placed, failed = ClearAndPlaceActions(profileData.slots)
 
     local msg = "Restored " .. (label or "layout") .. " (" .. placed .. " placed"
     if failed > 0 then msg = msg .. ", " .. failed .. " skipped" end
@@ -439,6 +483,24 @@ local function RenameProfile(oldName, newName)
         end
     end
     DjinniMsg("Renamed profile: " .. oldName .. " → " .. newName)
+    ABP:UpdateData()
+    return true
+end
+
+local function DuplicateProfile(name, newName)
+    local db = ABP:GetDB()
+    local profiles = GetClassProfiles(db)
+    if not profiles[name] then
+        DjinniMsg("Profile not found: " .. name)
+        return false
+    end
+    if profiles[newName] then
+        DjinniMsg("A profile named '" .. newName .. "' already exists.")
+        return false
+    end
+    profiles[newName] = CopyTable(profiles[name])
+    profiles[newName].savedAt = time()
+    DjinniMsg("Duplicated profile: |cff00cc00" .. name .. "|r → |cff00cc00" .. newName .. "|r")
     ABP:UpdateData()
     return true
 end
@@ -1093,8 +1155,8 @@ local function ExecuteAction(action)
         RestorePreviousLayout()
 
     elseif action == "opensettings" then
-        if DABP.settingsCategoryID then
-            Settings.OpenToCategory(DABP.settingsCategoryID)
+        if DCP.settingsCategoryID then
+            Settings.OpenToCategory(DCP.settingsCategoryID)
         end
     end
 end
@@ -1103,11 +1165,11 @@ end
 -- LDB Data Object
 ---------------------------------------------------------------------------
 
-local dataobj = LDB:NewDataObject("DABP-ActionBarProfiles", {
+local dataobj = LDB:NewDataObject("DCP-ActionBarProfiles", {
     type  = "data source",
-    text  = "Action Bar Profiles",
+    text  = "Class Profiles",
     icon  = "Interface\\Icons\\INV_Misc_Book_09",
-    label = "Djinni's Action Bar Profiles",
+    label = "Djinni's Class Profiles",
     OnEnter = function(self)
         ABP:ShowTooltip(self)
     end,
@@ -1116,7 +1178,7 @@ local dataobj = LDB:NewDataObject("DABP-ActionBarProfiles", {
     end,
     OnClick = function(self, button)
         local db = ABP:GetDB()
-        local action = DABP:ResolveClickAction(button, db.clickActions or {})
+        local action = DCP:ResolveClickAction(button, db.clickActions or {})
         ExecuteAction(action)
     end,
 })
@@ -1140,6 +1202,7 @@ function ABP:Init()
             return
         end
         if event == "PLAYER_SPECIALIZATION_CHANGED" then
+            InvalidateFlyoutCache()
             ABP:UpdateData()
             CheckAutoLoadSpec()
             return
@@ -1193,7 +1256,8 @@ end
 ---------------------------------------------------------------------------
 
 local function CreateTooltipFrame()
-    return ns.CreateTooltipFrame("DABPActionBarProfilesTooltip", ABP)
+    return ns.CreateTooltipFrame("DCPActionBarProfilesTooltip", ABP)
+
 end
 
 ---------------------------------------------------------------------------
@@ -1218,11 +1282,11 @@ local function GetRow(parent, index)
     row.icon:SetSize(ICON_SIZE, ICON_SIZE)
     row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 
-    row.text = ns.FontString(row, "DDTFontNormal")
+    row.text = ns.FontString(row, "DCPFontNormal")
     row.text:SetPoint("LEFT", row.icon, "RIGHT", 6, 0)
     row.text:SetJustifyH("LEFT")
 
-    row.status = ns.FontString(row, "DDTFontNormal")
+    row.status = ns.FontString(row, "DCPFontNormal")
     row.status:SetPoint("RIGHT", row, "RIGHT", -6, 0)
     row.status:SetJustifyH("RIGHT")
 
@@ -1243,7 +1307,7 @@ local function GetHeader(parent, index)
         headerPool[index]:Show()
         return headerPool[index]
     end
-    local hdr = ns.FontString(parent, "DDTFontNormal")
+    local hdr = ns.FontString(parent, "DCPFontNormal")
     hdr:SetJustifyH("LEFT")
     hdr:SetTextColor(1, 0.82, 0)
     headerPool[index] = hdr
@@ -1289,7 +1353,7 @@ local function GetSaveEditBox(parent)
     eb:SetPoint("RIGHT", frame, "RIGHT", -60, 0)
     eb:SetHeight(20)
     eb:SetAutoFocus(false)
-    eb:SetFontObject("DDTFontNormal")
+    eb:SetFontObject("DCPFontNormal")
 
     local btn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
     btn:SetPoint("RIGHT", frame, "RIGHT", -4, 0)
@@ -1331,7 +1395,7 @@ function ABP:BuildTooltipContent()
     local c = f.content
     local db = self:GetDB()
     local cls = GetClassToken()
-    f.header:SetText("Action Bar Profiles")
+    f.header:SetText("Class Profiles")
 
     local rowIndex = 0
     local headerIndex = 0
@@ -1466,7 +1530,7 @@ function ABP:BuildTooltipContent()
     y = y - 28
 
     -- ── Hint bar ──────────────────────────────────────────────
-    local hintText = DABP:BuildHintText(db.clickActions or {}, CLICK_ACTIONS)
+    local hintText = DCP:BuildHintText(db.clickActions or {}, CLICK_ACTIONS)
     f.hint:SetText(hintText ~= "" and hintText or "|cff888888Click a profile to load|r")
 
     local ttWidth = db.tooltipWidth or TOOLTIP_WIDTH
@@ -1513,7 +1577,7 @@ end
 -- Settings panel
 ---------------------------------------------------------------------------
 
-ABP.settingsLabel = "Action Bar Profiles"
+ABP.settingsLabel = "Class Profiles"
 
 function ABP:BuildSettingsPanel(panel)
     local W = ns.SettingsWidgets
@@ -1575,7 +1639,7 @@ function ABP:BuildSettingsPanel(panel)
         -- Confirm overwrite if profile already exists
         local existing = GetClassProfiles(ABP:GetDB())
         if existing[name] then
-            StaticPopupDialogs["DABP_ABP_OVERWRITE"] = {
+            StaticPopupDialogs["DCP_ABP_OVERWRITE"] = {
                 text = "Overwrite existing profile '|cff00cc00" .. name .. "|r'?",
                 button1 = "Overwrite",
                 button2 = "Cancel",
@@ -1589,7 +1653,7 @@ function ABP:BuildSettingsPanel(panel)
                 hideOnEscape = true,
                 preferredIndex = 3,
             }
-            StaticPopup_Show("DABP_ABP_OVERWRITE")
+            StaticPopup_Show("DCP_ABP_OVERWRITE")
         else
             SaveProfile(name)
             saveEB:SetText("")
@@ -1679,12 +1743,12 @@ function ABP:BuildSettingsPanel(panel)
         local profile = profiles[activeName]
         if not profile then return end
         local exportStr = SerializeProfile(activeName, profile, cls)
-        DABP:CopyToClipboard(exportStr, "Profile: " .. activeName)
+        DCP:CopyToClipboard(exportStr, "Profile: " .. activeName)
     end)
 
     y = W.AddButton(ioBody, y, "Export All Profiles", function()
         local exportStr = ExportFullConfig()
-        DABP:CopyToClipboard(exportStr, "Full Config Export")
+        DCP:CopyToClipboard(exportStr, "Full Config Export")
     end)
 
     y = y - 8
@@ -1792,7 +1856,7 @@ function ABP:RebuildProfileListUI(profBody)
             delBtn:SetSize(54, 20)
             delBtn:SetText("Delete")
             delBtn:SetScript("OnClick", function()
-                StaticPopupDialogs["DABP_ABP_DELETE"] = {
+                StaticPopupDialogs["DCP_ABP_DELETE"] = {
                     text = "Delete profile '|cff00cc00" .. profName .. "|r'?\n\nThis cannot be undone.",
                     button1 = "Delete",
                     button2 = "Cancel",
@@ -1805,15 +1869,41 @@ function ABP:RebuildProfileListUI(profBody)
                     hideOnEscape = true,
                     preferredIndex = 3,
                 }
-                StaticPopup_Show("DABP_ABP_DELETE")
+                StaticPopup_Show("DCP_ABP_DELETE")
+            end)
+
+            local dupeBtn = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+            dupeBtn:SetPoint("RIGHT", delBtn, "LEFT", -4, 0)
+            dupeBtn:SetSize(50, 20)
+            dupeBtn:SetText("Dupe")
+            dupeBtn:SetScript("OnClick", function()
+                StaticPopupDialogs["DCP_ABP_DUPLICATE"] = {
+                    text = "Duplicate profile '" .. profName .. "' as:",
+                    button1 = "Duplicate",
+                    button2 = "Cancel",
+                    hasEditBox = true,
+                    OnShow = function(self) self.editBox:SetText(profName .. " Copy") end,
+                    OnAccept = function(self)
+                        local newName = strtrim(self.editBox:GetText())
+                        if newName ~= "" then
+                            DuplicateProfile(profName, newName)
+                            ABP:RebuildProfileListUI(profBody)
+                        end
+                    end,
+                    timeout = 0,
+                    whileDead = true,
+                    hideOnEscape = true,
+                    preferredIndex = 3,
+                }
+                StaticPopup_Show("DCP_ABP_DUPLICATE")
             end)
 
             local renBtn = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-            renBtn:SetPoint("RIGHT", delBtn, "LEFT", -4, 0)
+            renBtn:SetPoint("RIGHT", dupeBtn, "LEFT", -4, 0)
             renBtn:SetSize(62, 20)
             renBtn:SetText("Rename")
             renBtn:SetScript("OnClick", function()
-                StaticPopupDialogs["DABP_ABP_RENAME"] = {
+                StaticPopupDialogs["DCP_ABP_RENAME"] = {
                     text = "Rename profile '" .. profName .. "' to:",
                     button1 = "Rename",
                     button2 = "Cancel",
@@ -1831,7 +1921,7 @@ function ABP:RebuildProfileListUI(profBody)
                     hideOnEscape = true,
                     preferredIndex = 3,
                 }
-                StaticPopup_Show("DABP_ABP_RENAME")
+                StaticPopup_Show("DCP_ABP_RENAME")
             end)
 
             profBody._profileRows[#profBody._profileRows + 1] = row

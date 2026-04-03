@@ -1,10 +1,10 @@
 ## Interface: 120001
-## Title: Djinni's Action Bar Profiles
+## Title: Djinni's Class Profiles
 ## Author: Djinni
 ## Version: 0.1.0-alpha
-## Notes: Save and restore action bar layouts as named profiles, shared across characters of the same class. MySlot interoperability.
+## Notes: Save and restore action bar layouts (and soon talents) as named profiles, shared across characters of the same class. MySlot interoperability.
 ## Category: Action Bars
-## SavedVariables: DjinnisActionBarProfilesDB
+## SavedVariables: DjinnisClassProfilesDB
 ## OptionalDeps: Myslot
 
 # Libraries
