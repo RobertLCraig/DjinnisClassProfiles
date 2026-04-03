@@ -133,7 +133,7 @@ Cross-character profile sharing means abilities may differ between characters of
 
 ## Future Features (Post-MVP)
 
-- [ ] **Talent profile sync** — save and restore talent loadouts alongside action bar profiles (core goal of the "Class Profiles" vision)
+- [x] **Talent profile sync** — save and restore talent loadouts as named profiles using Blizzard export strings, with action bar linking
 - [ ] **Keybinding profiles** — save/restore keybinding layouts
 - [ ] **Profile sharing** — in-game profile sharing between players (addon comms)
 - [x] **Minimap button** — standalone minimap icon via LibDBIcon with settings toggle

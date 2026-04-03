@@ -13,6 +13,7 @@ This is a **standalone addon** (not a module of a larger framework like DDT), bu
 - **Core.lua** — Addon object (`DCP`), module system (`ns:RegisterModule`), SavedVariables init, shared helpers (tooltip factory, fonts, clipboard, scrollbars, click resolver, hint builder)
 - **Settings.lua** — Blizzard Settings panel integration with widget helpers (checkbox, slider, dropdown, editbox, collapsible sections)
 - **ActionBarProfiles.lua** — Action bar module: profile CRUD, action bar read/write, restore logic, export/import, MySlot decoder, LDB data source, tooltip UI
+- **TalentProfiles.lua** — Talent module: save/restore talent loadouts as Blizzard export strings, cross-character sharing, action bar profile linking
 - **DjinnisClassProfiles.toc** — TOC file targeting interface 120001
 
 ### Key Patterns

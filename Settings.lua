@@ -659,14 +659,19 @@ end
 ---------------------------------------------------------------------------
 
 function DCP:SetupOptions()
-    -- Single module — create one category with one panel
-    local modPanel = CreateScrollPanel()
-    local mod = ns.modules["actionbarprofiles"]
-    if mod and mod.BuildSettingsPanel then
-        mod:BuildSettingsPanel(modPanel)
+    -- Main panel with all modules
+    local mainPanel = CreateScrollPanel()
+
+    -- Build settings panels in order
+    local moduleOrder = { "actionbarprofiles", "talentprofiles" }
+    for _, key in ipairs(moduleOrder) do
+        local mod = ns.modules[key]
+        if mod and mod.BuildSettingsPanel then
+            mod:BuildSettingsPanel(mainPanel)
+        end
     end
 
-    local cat = Settings.RegisterCanvasLayoutCategory(modPanel, "Djinni's Class Profiles")
+    local cat = Settings.RegisterCanvasLayoutCategory(mainPanel, "Djinni's Class Profiles")
     Settings.RegisterAddOnCategory(cat)
     self.settingsCategoryID = cat:GetID()
 end
