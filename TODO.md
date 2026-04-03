@@ -50,7 +50,7 @@ Based on the original implementation plan (baseprompt.md) and CoPilot review.
 - [x] Full config import — `ImportFullConfig()` merges profiles, autoLoadSpec, activeProfile, previousLayout
 - [x] Auto-detect import format — ABP-FULL, ABP single, MySlot
 - [x] Export version tag (`ABP_EXPORT_VERSION = 1`)
-- [ ] Multi-line import editbox in Settings (currently single-line `InputBoxTemplate`)
+- [x] Multi-line import editbox in Settings (currently single-line `InputBoxTemplate`)
 
 ## Phase 5: MySlot Compatibility
 
@@ -108,7 +108,7 @@ Based on the original implementation plan (baseprompt.md) and CoPilot review.
 - [x] Flyout spellbook cache per session
 - [x] Macro name normalization (trim whitespace)
 - [x] Duplicate Profile button in settings panel
-- [ ] Multi-line import editbox (for large exports)
+- [x] Multi-line import editbox (for large exports)
 
 ---
 
@@ -122,12 +122,12 @@ Cross-character profile sharing means abilities may differ between characters of
 - [x] Rest of profile loads normally — one missing ability doesn't break the restore
 
 ### Planned Improvements
-- [ ] **Detailed skip report** — show *which* specific abilities were skipped and why (spell not known, item not owned, etc.)
-- [ ] **Spell availability check before restore** — pre-scan profile slots against `IsSpellKnown()` / `C_Spell.IsSpellUsable()` to warn user before committing
+- [x] **Detailed skip report** — show *which* specific abilities were skipped and why (spell not known, item not owned, etc.)
+- [x] **Spell availability check before restore** — pre-scan profile slots via `CanPlaceAction()` used by partial restore and optimized clear phase
 - [ ] **Racial ability substitution hints** — detect racial ability slots and suggest the character's own racial as a replacement
 - [ ] **Profession skill detection** — identify profession-specific abilities in profiles and flag them as "profession-dependent" in the save metadata
 - [ ] **Per-slot override system** — allow users to set per-character overrides for specific slots (e.g., "slot 45 is always my racial ability on this character")
-- [ ] **"Partial restore" mode** — option to only restore slots the character can actually fill, leaving other slots untouched rather than clearing them
+- [x] **"Partial restore" mode** — option to only restore slots the character can actually fill, leaving other slots untouched rather than clearing them
 
 ---
 

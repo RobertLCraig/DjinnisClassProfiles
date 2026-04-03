@@ -51,6 +51,7 @@ local DEFAULTS = {
     previousLayout   = {},   -- { [classToken] = profileData }
     autoLoadSpec     = {},   -- { [classToken .. "-" .. specID] = "profileName" }
     showMySlot       = true,
+    partialRestore   = false,  -- true = leave unfillable slots untouched instead of clearing
     clickActions = {
         leftClick       = "loadnext",
         rightClick      = "savecurrent",
@@ -194,10 +195,6 @@ local function FindFlyoutInSpellbook(targetFlyoutID)
 end
 
 ---------------------------------------------------------------------------
--- Core: Place a single action into a slot
----------------------------------------------------------------------------
-
----------------------------------------------------------------------------
 -- Core: Check if a slot already matches the desired action
 ---------------------------------------------------------------------------
 
@@ -217,62 +214,104 @@ end
 ---------------------------------------------------------------------------
 
 local function PlaceActionInSlot(slotID, slotData)
-    local placed = false
     if slotData.type == "spell" then
         C_Spell.PickupSpell(slotData.id)
-        if GetCursorInfo() then PlaceAction(slotID); placed = true end
+        if GetCursorInfo() then PlaceAction(slotID); ClearCursor(); return true end
+        ClearCursor()
+        local name = C_Spell.GetSpellName(slotData.id)
+        return false, "spell not known: " .. (name or ("ID " .. slotData.id))
     elseif slotData.type == "macro" then
         local idx = FindMacro(slotData.name, slotData.index)
-        if idx then
-            PickupMacro(idx)
-            if GetCursorInfo() then PlaceAction(slotID); placed = true end
+        if not idx then
+            return false, "macro not found: " .. (slotData.name or "?")
         end
+        PickupMacro(idx)
+        if GetCursorInfo() then PlaceAction(slotID); ClearCursor(); return true end
+        ClearCursor()
+        return false, "macro pickup failed: " .. (slotData.name or "?")
     elseif slotData.type == "item" then
         C_Item.PickupItem(slotData.id)
-        if GetCursorInfo() then PlaceAction(slotID); placed = true end
+        if GetCursorInfo() then PlaceAction(slotID); ClearCursor(); return true end
+        ClearCursor()
+        return false, "item not owned: ID " .. slotData.id
     elseif slotData.type == "flyout" then
         local sbSlot = FindFlyoutInSpellbook(slotData.id)
-        if sbSlot then
-            C_SpellBook.PickupSpellBookItem(sbSlot, Enum.SpellBookSpellBank.Player)
-            if GetCursorInfo() then PlaceAction(slotID); placed = true end
+        if not sbSlot then
+            return false, "flyout not in spellbook: ID " .. slotData.id
         end
+        C_SpellBook.PickupSpellBookItem(sbSlot, Enum.SpellBookSpellBank.Player)
+        if GetCursorInfo() then PlaceAction(slotID); ClearCursor(); return true end
+        ClearCursor()
+        return false, "flyout pickup failed: ID " .. slotData.id
     elseif slotData.type == "summonpet" then
         C_PetJournal.PickupPet(slotData.id)
-        if GetCursorInfo() then PlaceAction(slotID); placed = true end
+        if GetCursorInfo() then PlaceAction(slotID); ClearCursor(); return true end
+        ClearCursor()
+        return false, "pet not collected: ID " .. slotData.id
     end
-    ClearCursor()
-    return placed
+    return false, "unknown action type: " .. tostring(slotData.type)
 end
 
 ---------------------------------------------------------------------------
 -- Core: Clear and place actions (optimized — only touches changed slots)
 ---------------------------------------------------------------------------
 
-local function ClearAndPlaceActions(targetSlots)
-    -- Phase 1: Clear slots that are populated but either not in the target
-    -- profile or contain a different action than desired
+local function CanPlaceAction(slotData)
+    if slotData.type == "spell" then
+        return C_Spell.GetSpellName(slotData.id) ~= nil
+    elseif slotData.type == "macro" then
+        return FindMacro(slotData.name, slotData.index) ~= nil
+    elseif slotData.type == "item" then
+        return true  -- items can always be placed even if not owned
+    elseif slotData.type == "flyout" then
+        return FindFlyoutInSpellbook(slotData.id) ~= nil
+    elseif slotData.type == "summonpet" then
+        return true  -- pet journal handles this
+    end
+    return false
+end
+
+local function ClearAndPlaceActions(targetSlots, partial)
+    -- Phase 1: Clear slots that need changing
     for slotID = 1, MAX_ACTIONBAR_SLOT do
         if C_ActionBar.HasAction(slotID) then
             local target = targetSlots[slotID]
-            if not target or not SlotMatchesCurrent(slotID, target) then
-                PickupAction(slotID)
-                ClearCursor()
+            if not target then
+                -- Slot is populated but not in target profile
+                if not partial then
+                    PickupAction(slotID)
+                    ClearCursor()
+                end
+            elseif not SlotMatchesCurrent(slotID, target) then
+                -- Slot has a different action — clear it if we can replace it,
+                -- or if not in partial mode
+                if not partial or CanPlaceAction(target) then
+                    PickupAction(slotID)
+                    ClearCursor()
+                end
             end
         end
     end
 
     -- Phase 2: Place actions that are missing or differ
     local placed, skipped = 0, 0
+    local skipReasons = {}
     for slotID, slotData in pairs(targetSlots) do
         if SlotMatchesCurrent(slotID, slotData) then
             placed = placed + 1  -- already correct, count as placed
-        elseif PlaceActionInSlot(slotID, slotData) then
-            placed = placed + 1
         else
-            skipped = skipped + 1
+            local ok, reason = PlaceActionInSlot(slotID, slotData)
+            if ok then
+                placed = placed + 1
+            else
+                skipped = skipped + 1
+                if reason then
+                    skipReasons[#skipReasons + 1] = "  Slot " .. slotID .. ": " .. reason
+                end
+            end
         end
     end
-    return placed, skipped
+    return placed, skipped, skipReasons
 end
 
 ---------------------------------------------------------------------------
@@ -365,13 +404,19 @@ local function RestoreProfile(name, skipBackup)
         }
     end
 
-    local placed, failed = ClearAndPlaceActions(profile.slots)
+    local placed, failed, skipReasons = ClearAndPlaceActions(profile.slots, db.partialRestore)
 
     db.activeProfile[cls] = name
     local msg = "Loaded profile: |cff00cc00" .. name .. "|r (" .. placed .. " placed"
     if failed > 0 then msg = msg .. ", " .. failed .. " skipped" end
     msg = msg .. ")"
     DjinniMsg(msg)
+    if skipReasons and #skipReasons > 0 then
+        DjinniMsg("Skipped actions:")
+        for _, line in ipairs(skipReasons) do
+            DCP:Print(line)
+        end
+    end
 
     ABP:UpdateData()
     return true
@@ -417,12 +462,18 @@ local function RestoreFromData(profileData, label, skipBackup)
         }
     end
 
-    local placed, failed = ClearAndPlaceActions(profileData.slots)
+    local placed, failed, skipReasons = ClearAndPlaceActions(profileData.slots, db.partialRestore)
 
     local msg = "Restored " .. (label or "layout") .. " (" .. placed .. " placed"
     if failed > 0 then msg = msg .. ", " .. failed .. " skipped" end
     msg = msg .. ")"
     DjinniMsg(msg)
+    if skipReasons and #skipReasons > 0 then
+        DjinniMsg("Skipped actions:")
+        for _, line in ipairs(skipReasons) do
+            DCP:Print(line)
+        end
+    end
 
     ABP:UpdateData()
     return true
@@ -1612,6 +1663,15 @@ function ABP:BuildSettingsPanel(panel)
     y = W.AddTooltipGrowDirection(body, y, db, r)
     W.EndSection(panel, y)
 
+    -- ── Restore Options ───────────────────────────────────────
+    local restBody = W.AddSection(panel, "Restore Options", true)
+    y = 0
+    y = W.AddCheckbox(restBody, y, "Partial restore (leave unfillable slots untouched)",
+        function() return db().partialRestore end,
+        function(v) db().partialRestore = v end, r)
+    y = W.AddNote(restBody, y, "When enabled, slots with unknown spells or missing macros keep their current action instead of being cleared.")
+    W.EndSection(panel, y)
+
     -- ── Profile Management ────────────────────────────────────
     local profBody = W.AddSection(panel, "Profile Management")
     y = 0
@@ -1753,14 +1813,33 @@ function ABP:BuildSettingsPanel(panel)
 
     y = y - 8
 
-    -- Import editbox
+    -- Import editbox (multi-line with scroll)
     y = W.AddDescription(ioBody, y, "Paste a profile, full config, or MySlot export below:")
 
-    local importEB = CreateFrame("EditBox", nil, ioBody, "InputBoxTemplate")
-    importEB:SetPoint("TOPLEFT", ioBody, "TOPLEFT", 22, y)
-    importEB:SetSize(400, 22)
+    local importFrame = CreateFrame("Frame", nil, ioBody, "BackdropTemplate")
+    importFrame:SetPoint("TOPLEFT", ioBody, "TOPLEFT", 22, y)
+    importFrame:SetSize(400, 80)
+    importFrame:SetBackdrop({
+        bgFile   = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        edgeSize = 12, insets = { left = 3, right = 3, top = 3, bottom = 3 },
+    })
+    importFrame:SetBackdropColor(0.05, 0.05, 0.05, 0.8)
+    importFrame:SetBackdropBorderColor(0.3, 0.3, 0.3, 1)
+
+    local importScroll = CreateFrame("ScrollFrame", nil, importFrame, "UIPanelScrollFrameTemplate")
+    importScroll:SetPoint("TOPLEFT", 6, -6)
+    importScroll:SetPoint("BOTTOMRIGHT", -24, 6)
+
+    local importEB = CreateFrame("EditBox", nil, importScroll)
+    importEB:SetMultiLine(true)
     importEB:SetAutoFocus(false)
-    y = y - 28
+    importEB:SetFontObject("GameFontHighlight")
+    importEB:SetWidth(360)
+    importEB:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+    importScroll:SetScrollChild(importEB)
+
+    y = y - 86
 
     local importBtn = CreateFrame("Button", nil, ioBody, "UIPanelButtonTemplate")
     importBtn:SetPoint("TOPLEFT", ioBody, "TOPLEFT", 22, y)
@@ -1777,7 +1856,6 @@ function ABP:BuildSettingsPanel(panel)
             DjinniMsg("Import failed: " .. (err or "unknown error"))
         end
     end)
-    importEB:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
 
     y = y - 28
 
