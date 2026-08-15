@@ -493,7 +493,7 @@ local function SaveProfile(name)
     local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization() or 0
     local specID, specName = 0, ""
     if specIdx and specIdx > 0 then
-        specID, specName = GetSpecializationInfo(specIdx)
+        specID, specName = C_SpecializationInfo.GetSpecializationInfo(specIdx)
     end
 
     profiles[name] = {
@@ -542,7 +542,7 @@ local function RestoreProfile(name, skipBackup)
         local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization() or 0
         local specID, specName = 0, ""
         if specIdx and specIdx > 0 then
-            specID, specName = GetSpecializationInfo(specIdx)
+            specID, specName = C_SpecializationInfo.GetSpecializationInfo(specIdx)
         end
         db.previousLayout[cls] = {
             slots     = ReadActionBarSlots(db.barFilter),
@@ -604,7 +604,7 @@ local function RestoreFromData(profileData, label, skipBackup)
         local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization() or 0
         local specID, specName = 0, ""
         if specIdx and specIdx > 0 then
-            specID, specName = GetSpecializationInfo(specIdx)
+            specID, specName = C_SpecializationInfo.GetSpecializationInfo(specIdx)
         end
         db.previousLayout[cls] = {
             slots     = ReadActionBarSlots(db.barFilter),
@@ -1468,7 +1468,7 @@ local function CheckAutoLoadSpec()
     local cls = GetClassToken()
     local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization()
     if not specIdx or specIdx == 0 then return end
-    local specID = GetSpecializationInfo(specIdx)
+    local specID = C_SpecializationInfo.GetSpecializationInfo(specIdx)
     if not specID then return end
 
     local key = cls .. "-" .. specID
@@ -1668,7 +1668,7 @@ function ABP:UpdateData()
 
     local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization()
     if specIdx and specIdx > 0 then
-        local specID, specName = GetSpecializationInfo(specIdx)
+        local specID, specName = C_SpecializationInfo.GetSpecializationInfo(specIdx)
         self.currentSpecID = specID or 0
         self.currentSpec = specName or ""
     else
@@ -2352,7 +2352,7 @@ function ABP:BuildSettingsPanel(panel)
     local cls = GetClassToken()
     local numSpecs = GetNumSpecializations and GetNumSpecializations() or 0
     for i = 1, numSpecs do
-        local specID, specName = GetSpecializationInfo(i)
+        local specID, specName = C_SpecializationInfo.GetSpecializationInfo(i)
         if specID and specName then
             local specKey = cls .. "-" .. specID
 

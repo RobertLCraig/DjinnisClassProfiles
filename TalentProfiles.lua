@@ -89,7 +89,7 @@ local function SaveProfile(name)
     local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization() or 0
     local specID, specName = 0, ""
     if specIdx and specIdx > 0 then
-        specID, specName = GetSpecializationInfo(specIdx)
+        specID, specName = C_SpecializationInfo.GetSpecializationInfo(specIdx)
     end
 
     profiles[name] = {
@@ -467,7 +467,7 @@ function TP:BuildSettingsPanel(panel)
         local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization() or 0
         local specID, specName = 0, ""
         if specIdx and specIdx > 0 then
-            specID, specName = GetSpecializationInfo(specIdx)
+            specID, specName = C_SpecializationInfo.GetSpecializationInfo(specIdx)
         end
 
         local name = "Imported " .. date("%Y-%m-%d %H:%M")
