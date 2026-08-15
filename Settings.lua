@@ -599,6 +599,123 @@ ns.AddModuleClickActionsSection = AddModuleClickActionsSection
 -- Expose widget table (mirrors DDT's ns.SettingsWidgets)
 ---------------------------------------------------------------------------
 
+--- Label template as a regular collapsible section (no fixed header).
+local function AddLabelTemplateSection(panel, tags, getter, setter, refreshList, suggestions)
+    local body = AddSection(panel, "Label Template", true)
+    local y = 0
+
+    local text = body:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    text:SetPoint("TOPLEFT", body, "TOPLEFT", 18, y)
+    text:SetText("Template")
+
+    local editbox = CreateFrame("EditBox", nil, body, "InputBoxTemplate")
+    editbox:SetPoint("TOPLEFT", text, "BOTTOMLEFT", 4, -4)
+    editbox:SetSize(380, 20)
+    editbox:SetAutoFocus(false)
+    editbox:SetText(getter())
+
+    local lastCursorPos = nil
+    local lastText = nil
+
+    editbox:HookScript("OnEditFocusLost", function(self)
+        lastCursorPos = self:GetCursorPosition()
+        lastText = self:GetText()
+        setter(lastText)
+    end)
+    editbox:SetScript("OnEnterPressed", function(self) setter(self:GetText()); self:ClearFocus() end)
+    editbox:SetScript("OnEscapePressed", function(self) self:SetText(getter()); self:ClearFocus() end)
+    editbox:SetScript("OnTextChanged", function(self, userInput)
+        if userInput then setter(self:GetText()) end
+    end)
+
+    if refreshList then
+        table.insert(refreshList, function()
+            if not editbox:HasFocus() then editbox:SetText(getter()) end
+        end)
+    end
+
+    y = y - 44
+    local tagList = {}
+    for tag in tags:gmatch("%S+") do table.insert(tagList, tag) end
+
+    local xOffset    = 22
+    local maxRowWidth = 380
+
+    for _, tag in ipairs(tagList) do
+        local tagStr = "<" .. tag .. ">"
+        local btn = CreateFrame("Button", nil, body)
+        btn:SetHeight(20)
+
+        local btnText = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        btnText:SetPoint("CENTER")
+        btnText:SetText(tagStr)
+        btnText:SetTextColor(0.4, 0.78, 1.0)
+        local btnWidth = math.max(btnText:GetStringWidth() + 12, 40)
+        btn:SetWidth(btnWidth)
+
+        local bbg = btn:CreateTexture(nil, "BACKGROUND")
+        bbg:SetAllPoints()
+        bbg:SetColorTexture(0.15, 0.15, 0.15, 0.8)
+        local border = btn:CreateTexture(nil, "BORDER")
+        border:SetPoint("TOPLEFT", -1, 1)
+        border:SetPoint("BOTTOMRIGHT", 1, -1)
+        border:SetColorTexture(0.3, 0.3, 0.3, 0.6)
+
+        if xOffset + btnWidth > maxRowWidth + 22 then
+            xOffset = 22
+            y = y - 24
+        end
+        btn:SetPoint("TOPLEFT", body, "TOPLEFT", xOffset, y)
+        xOffset = xOffset + btnWidth + 4
+
+        btn:SetScript("OnEnter", function() bbg:SetColorTexture(0.25, 0.35, 0.45, 0.9); btnText:SetTextColor(1,1,1) end)
+        btn:SetScript("OnLeave", function() bbg:SetColorTexture(0.15, 0.15, 0.15, 0.8); btnText:SetTextColor(0.4,0.78,1.0) end)
+        btn:SetScript("OnClick", function()
+            local cur = lastText or getter()
+            local pos = lastCursorPos or #cur
+            lastCursorPos = nil; lastText = nil
+            local newVal = cur:sub(1, pos) .. tagStr .. cur:sub(pos + 1)
+            setter(newVal)
+            editbox:SetText(newVal)
+            editbox:SetFocus()
+            editbox:SetCursorPosition(pos + #tagStr)
+        end)
+    end
+
+    y = y - 26
+
+    if suggestions and #suggestions > 0 then
+        y = y - 2
+        local sugLabel = body:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+        sugLabel:SetPoint("TOPLEFT", body, "TOPLEFT", 22, y)
+        sugLabel:SetText("Presets:")
+        y = y - 14
+
+        for _, sug in ipairs(suggestions) do
+            local btn = CreateFrame("Button", nil, body)
+            btn:SetHeight(18)
+            btn:SetPoint("TOPLEFT", body, "TOPLEFT", 22, y)
+            btn:SetPoint("RIGHT", body, "RIGHT", -22, 0)
+
+            local btnText = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            btnText:SetPoint("LEFT", 6, 0)
+            btnText:SetJustifyH("LEFT")
+            btnText:SetText("|cff888888" .. sug[1] .. ":|r  " .. sug[2])
+
+            local sbg = btn:CreateTexture(nil, "BACKGROUND")
+            sbg:SetAllPoints()
+            sbg:SetColorTexture(0, 0, 0, 0)
+
+            btn:SetScript("OnEnter", function() sbg:SetColorTexture(0.2, 0.3, 0.4, 0.5) end)
+            btn:SetScript("OnLeave", function() sbg:SetColorTexture(0, 0, 0, 0) end)
+            btn:SetScript("OnClick", function() setter(sug[2]); editbox:SetText(sug[2]) end)
+            y = y - 20
+        end
+    end
+
+    EndSection(panel, y)
+end
+
 ns.SettingsWidgets = {
     AddCheckbox             = AddCheckbox,
     AddSlider               = AddSlider,
@@ -606,6 +723,7 @@ ns.SettingsWidgets = {
     AddDropdown             = AddDropdown,
     AddEditBox              = AddEditBox,
     AddLabelEditBox         = AddLabelEditBox,
+    AddLabelTemplateSection = AddLabelTemplateSection,
     AddButton               = AddButton,
     AddDescription          = AddDescription,
     AddNote                 = AddNote,
@@ -670,6 +788,14 @@ function DCP:SetupOptions()
             mod:BuildSettingsPanel(mainPanel)
         end
     end
+
+    -- Version footer
+    local version = C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata("DjinnisClassProfiles", "Version")
+        or GetAddOnMetadata and GetAddOnMetadata("DjinnisClassProfiles", "Version")
+        or "?"
+    local verFS = mainPanel.content:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    verFS:SetPoint("BOTTOMRIGHT", mainPanel.content, "BOTTOMRIGHT", -10, 6)
+    verFS:SetText("Djinni's Class Profiles v" .. version)
 
     local cat = Settings.RegisterCanvasLayoutCategory(mainPanel, "Djinni's Class Profiles")
     Settings.RegisterAddOnCategory(cat)

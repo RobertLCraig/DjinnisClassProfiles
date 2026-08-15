@@ -21,3 +21,5 @@ Settings.lua
 ActionBarProfiles.lua
 TalentProfiles.lua
 KeybindingProfiles.lua
+ProfileManager.lua
+CompanionFrame.lua

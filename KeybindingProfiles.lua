@@ -502,9 +502,9 @@ function KBP:RebuildProfileListUI(profBody)
                     button1 = "Duplicate",
                     button2 = "Cancel",
                     hasEditBox = true,
-                    OnShow = function(self) self.editBox:SetText(profName .. " Copy") end,
+                    OnShow = function(self) self.EditBox:SetText(profName .. " Copy") end,
                     OnAccept = function(self)
-                        local newName = strtrim(self.editBox:GetText())
+                        local newName = strtrim(self.EditBox:GetText())
                         if newName ~= "" then
                             DuplicateProfile(profName, newName)
                             KBP:RebuildProfileListUI(profBody)
@@ -549,9 +549,9 @@ function KBP:RebuildProfileListUI(profBody)
                     button1 = "Rename",
                     button2 = "Cancel",
                     hasEditBox = true,
-                    OnShow = function(self) self.editBox:SetText(profName) end,
+                    OnShow = function(self) self.EditBox:SetText(profName) end,
                     OnAccept = function(self)
-                        local newName = strtrim(self.editBox:GetText())
+                        local newName = strtrim(self.EditBox:GetText())
                         if newName ~= "" and newName ~= profName then
                             RenameProfile(profName, newName)
                             KBP:RebuildProfileListUI(profBody)

@@ -645,6 +645,68 @@ function ns.AnchorTooltip(tooltip, anchor, direction)
 end
 
 ---------------------------------------------------------------------------
+-- Notification toast system
+-- ns.Notify(msg, kind)  — kind: "success" | "warning" | "error"
+---------------------------------------------------------------------------
+
+local toastFrame    = nil
+local toastTimer    = nil
+local TOAST_W       = 340
+local TOAST_H       = 46
+
+local TOAST_THEMES = {
+    success = { bg = {0.04, 0.18, 0.04, 0.96}, border = {0.15, 0.9,  0.15, 1}, icon = "|cff44ff44[OK]|r" },
+    warning = { bg = {0.22, 0.18, 0.02, 0.96}, border = {1.0,  0.80, 0.0,  1}, icon = "|cffffcc00[!]|r"  },
+    error   = { bg = {0.22, 0.04, 0.04, 0.96}, border = {1.0,  0.20, 0.20, 1}, icon = "|cffff4444[X]|r"  },
+}
+
+local function EnsureToastFrame()
+    if toastFrame then return end
+    local f = CreateFrame("Frame", "DCPToastFrame", UIParent, "BackdropTemplate")
+    f:SetSize(TOAST_W, TOAST_H)
+    f:SetPoint("TOP", UIParent, "TOP", 0, -80)
+    f:SetFrameStrata("FULLSCREEN_DIALOG")
+    f:SetBackdrop({ bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        edgeSize = 12, insets = { left = 3, right = 3, top = 3, bottom = 3 } })
+    f:SetAlpha(0)
+    f:Hide()
+
+    local icon = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    icon:SetPoint("LEFT", f, "LEFT", 12, 0)
+    f._icon = icon
+
+    local msg = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    msg:SetPoint("LEFT", icon, "RIGHT", 8, 0)
+    msg:SetPoint("RIGHT", f, "RIGHT", -12, 0)
+    msg:SetJustifyH("LEFT")
+    msg:SetWordWrap(false)
+    f._msg = msg
+
+    toastFrame = f
+end
+
+function ns.Notify(msg, kind)
+    EnsureToastFrame()
+    kind = kind or "success"
+    local theme = TOAST_THEMES[kind] or TOAST_THEMES.success
+
+    if toastTimer then toastTimer:Cancel(); toastTimer = nil end
+    toastFrame:SetBackdropColor(unpack(theme.bg))
+    toastFrame:SetBackdropBorderColor(unpack(theme.border))
+    toastFrame._icon:SetText(theme.icon)
+    toastFrame._msg:SetText(msg)
+
+    toastFrame:Show()
+    UIFrameFadeIn(toastFrame, 0.15, toastFrame:GetAlpha(), 1)
+
+    toastTimer = C_Timer.NewTimer(3.5, function()
+        UIFrameFadeOut(toastFrame, 0.4, 1, 0)
+        C_Timer.After(0.45, function() toastFrame:Hide() end)
+    end)
+end
+
+---------------------------------------------------------------------------
 -- ADDON_LOADED — initialise SavedVariables, fonts, modules, settings
 ---------------------------------------------------------------------------
 
@@ -664,11 +726,22 @@ initFrame:SetScript("OnEvent", function(_, _, loadedAddon)
     -- Settings UI (defined in Settings.lua)
     DCP:SetupOptions()
 
-    -- Slash command
+    -- Public method to open settings
+    function DCP:OpenSettings()
+        if self.settingsCategoryID then
+            Settings.OpenToCategory(self.settingsCategoryID)
+        end
+    end
+
+    -- Slash command — opens Profile Manager window
     SLASH_DCP1 = "/dcp"
-    SlashCmdList["DCP"] = function()
-        if DCP.settingsCategoryID then
-            Settings.OpenToCategory(DCP.settingsCategoryID)
+    SlashCmdList["DCP"] = function(arg)
+        if arg == "settings" then
+            DCP:OpenSettings()
+        elseif ns.ProfileManager then
+            ns.ProfileManager:Toggle()
+        else
+            DCP:OpenSettings()
         end
     end
 

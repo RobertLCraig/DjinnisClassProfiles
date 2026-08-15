@@ -21,6 +21,8 @@ ABP.pendingRestore = nil  -- deferred restore when leaving combat
 ABP.demoMode       = false
 ABP.profileModified = false  -- true when bars differ from active profile
 ABP.isRestoring     = false  -- suppress change detection during restore
+ABP.slotPickerActive = false
+ABP.slotPickerCallback = nil
 
 -- Tooltip
 local tooltipFrame = nil
@@ -65,6 +67,7 @@ local DEFAULTS = {
     activeProfile    = {},   -- { [classToken] = "profileName" }
     profiles         = {},   -- { [classToken] = { [name] = profileData } }
     previousLayout   = {},   -- { [classToken] = profileData }
+    autoLoadEnabled  = false,  -- whether auto-load on spec change is active
     autoLoadSpec     = {},   -- { [classToken .. "-" .. specID] = "profileName" }
     showMySlot       = true,
     partialRestore   = false,  -- true = leave unfillable slots untouched instead of clearing
@@ -505,10 +508,14 @@ local function SaveProfile(name)
         specName  = specName or "",
     }
 
+    local slotCount = 0
+    for _ in pairs(profiles[name].slots) do slotCount = slotCount + 1 end
     db.activeProfile[cls] = name
     ABP.profileModified = false
-    DjinniMsg("Saved profile: |cff00cc00" .. name .. "|r")
+    DjinniMsg("Saved profile: |cff00cc00" .. name .. "|r (" .. slotCount .. " slots)")
+    ns.Notify("Saved: " .. name .. " (" .. slotCount .. " slots)", "success")
     ABP:UpdateData()
+    if ns.ProfileManager then ns.ProfileManager:Refresh() end
     return true
 end
 
@@ -572,7 +579,13 @@ local function RestoreProfile(name, skipBackup)
         end
     end
 
+    -- Visual toast feedback
+    local toastText = "Loaded: " .. name .. "  " .. placed .. " placed"
+    if failed > 0 then toastText = toastText .. ", " .. failed .. " skipped" end
+    ns.Notify(toastText, failed > 0 and "warning" or "success")
+
     ABP:UpdateData()
+    if ns.ProfileManager then ns.ProfileManager:Refresh() end
     return true
 end
 
@@ -1465,6 +1478,7 @@ end
 
 local function CheckAutoLoadSpec()
     local db = ABP:GetDB()
+    if not db.autoLoadEnabled then return end
     local cls = GetClassToken()
     local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization()
     if not specIdx or specIdx == 0 then return end
@@ -1569,15 +1583,26 @@ local dataobj = LDB:NewDataObject("DCP-ActionBarProfiles", {
     icon  = "Interface\\Icons\\INV_Misc_Book_09",
     label = "Djinni's Class Profiles",
     OnEnter = function(self)
-        ABP:ShowTooltip(self)
+        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        GameTooltip:ClearLines()
+        GameTooltip:AddLine("Djinni's Class Profiles", 1, 1, 1)
+        GameTooltip:AddLine("|cff888888Left-click: Open Profile Manager|r", 1, 1, 1)
+        GameTooltip:AddLine("|cff888888Right-click: Settings|r", 1, 1, 1)
+        GameTooltip:Show()
     end,
     OnLeave = function(self)
-        ABP:StartHideTimer()
+        GameTooltip:Hide()
     end,
     OnClick = function(self, button)
-        local db = ABP:GetDB()
-        local action = DCP:ResolveClickAction(button, db.clickActions or {})
-        ExecuteAction(action)
+        if button == "RightButton" then
+            DCP:OpenSettings()
+        else
+            if ns.ProfileManager then
+                ns.ProfileManager:Toggle()
+            else
+                DCP:OpenSettings()
+            end
+        end
     end,
 })
 
@@ -1656,6 +1681,51 @@ function ABP:Init()
     end
 
     self:UpdateData()
+
+    -- ── Slot Picker Overlay ──────────────────────────────────
+    local pickerFrame = CreateFrame("Frame", "DCPSlotPickerOverlay", UIParent, "BackdropTemplate")
+    pickerFrame:SetFrameStrata("DIALOG")
+    pickerFrame:SetSize(360, 50)
+    pickerFrame:SetPoint("TOP", UIParent, "TOP", 0, -80)
+    pickerFrame:SetBackdrop({
+        bgFile   = "Interface\\ChatFrame\\ChatFrameBackground",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        edgeSize = 14, insets = { left = 3, right = 3, top = 3, bottom = 3 },
+    })
+    pickerFrame:SetBackdropColor(0.1, 0.1, 0.15, 0.95)
+    pickerFrame:SetBackdropBorderColor(0.4, 0.6, 1, 1)
+    pickerFrame:Hide()
+
+    local pickerText = pickerFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    pickerText:SetPoint("LEFT", pickerFrame, "LEFT", 14, 0)
+    pickerText:SetText("Click an action bar slot to set override...")
+
+    local pickerCancel = CreateFrame("Button", nil, pickerFrame, "UIPanelButtonTemplate")
+    pickerCancel:SetPoint("RIGHT", pickerFrame, "RIGHT", -8, 0)
+    pickerCancel:SetSize(70, 22)
+    pickerCancel:SetText("Cancel")
+    pickerCancel:SetScript("OnClick", function()
+        ABP.slotPickerActive = false
+        ABP.slotPickerCallback = nil
+        pickerFrame:Hide()
+    end)
+
+    ABP.pickerFrame = pickerFrame
+
+    -- Hook action bar button clicks for slot picker
+    hooksecurefunc(ActionBarActionButtonMixin, "OnClick", function(btn)
+        if not ABP.slotPickerActive then return end
+        local slotID = btn.action
+        if not slotID or slotID < 1 or slotID > MAX_ACTIONBAR_SLOT then return end
+
+        ABP.slotPickerActive = false
+        pickerFrame:Hide()
+
+        if ABP.slotPickerCallback then
+            ABP.slotPickerCallback(slotID)
+            ABP.slotPickerCallback = nil
+        end
+    end)
 end
 
 ---------------------------------------------------------------------------
@@ -2024,33 +2094,75 @@ function ABP:BuildSettingsPanel(panel)
     local r = panel.refreshCallbacks
     local db = function() return ns.db.actionbarprofiles end
 
-    -- ── Label Template ────────────────────────────────────────
-    W.AddLabelEditBox(panel, "profile count class spec",
-        function() return db().labelTemplate end,
-        function(v) db().labelTemplate = v; self:UpdateData() end, r, {
-        { "Default",    "<profile>" },
-        { "With Count", "<profile> (<count>)" },
-        { "Class",      "<class>: <profile>" },
-        { "Spec Bars",  "<spec> Bars" },
-    })
-
-    -- ── Tooltip ───────────────────────────────────────────────
-    local body = W.AddSection(panel, "Tooltip", true)
+    -- ── Profile Management ────────────────────────────────────
+    local profBody = W.AddSection(panel, "Profile Management")
     local y = 0
-    y = W.AddSliderPair(body, y,
-        { label = "Scale", min = 0.5, max = 2.0, step = 0.05,
-          get = function() return db().tooltipScale end,
-          set = function(v) db().tooltipScale = v end },
-        { label = "Width", min = 200, max = 500, step = 10,
-          get = function() return db().tooltipWidth end,
-          set = function(v) db().tooltipWidth = v end }, r)
-    y = W.AddSliderPair(body, y,
-        { label = "Max Height", min = 100, max = 1000, step = 10,
-          get = function() return db().tooltipMaxHeight end,
-          set = function(v) db().tooltipMaxHeight = v end },
-        nil, r)
-    y = W.AddTooltipGrowDirection(body, y, db, r)
-    W.EndSection(panel, y)
+
+    -- Save current bars
+    y = W.AddDescription(profBody, y, "Enter a name and click Save to snapshot your current action bars.")
+
+    local saveFrame = CreateFrame("Frame", nil, profBody)
+    saveFrame:SetPoint("TOPLEFT", profBody, "TOPLEFT", 18, y)
+    saveFrame:SetSize(500, 30)
+
+    local saveEB = CreateFrame("EditBox", nil, saveFrame, "InputBoxTemplate")
+    saveEB:SetPoint("LEFT", saveFrame, "LEFT", 4, 0)
+    saveEB:SetSize(300, 22)
+    saveEB:SetAutoFocus(false)
+
+    local saveBtn = CreateFrame("Button", nil, saveFrame, "UIPanelButtonTemplate")
+    saveBtn:SetPoint("LEFT", saveEB, "RIGHT", 8, 0)
+    saveBtn:SetSize(140, 22)
+    saveBtn:SetText("Save Current Bars")
+
+    local function DoSettingsSave()
+        local name = strtrim(saveEB:GetText())
+        if name == "" then return end
+        local existing = GetClassProfiles(ABP:GetDB())
+        if existing[name] then
+            StaticPopupDialogs["DCP_ABP_OVERWRITE"] = {
+                text = "Overwrite existing profile '|cff00cc00" .. name .. "|r'?",
+                button1 = "Overwrite",
+                button2 = "Cancel",
+                OnAccept = function()
+                    SaveProfile(name)
+                    saveEB:SetText("")
+                    ABP:RebuildProfileListUI(profBody)
+                end,
+                timeout = 0,
+                whileDead = true,
+                hideOnEscape = true,
+                preferredIndex = 3,
+            }
+            StaticPopup_Show("DCP_ABP_OVERWRITE")
+        else
+            SaveProfile(name)
+            saveEB:SetText("")
+            ABP:RebuildProfileListUI(profBody)
+        end
+    end
+
+    saveBtn:SetScript("OnClick", DoSettingsSave)
+    saveEB:SetScript("OnEnterPressed", function(self)
+        DoSettingsSave()
+        self:ClearFocus()
+    end)
+    saveEB:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+
+    y = y - 36
+
+    -- Profile list container
+    local listContainer = CreateFrame("Frame", nil, profBody)
+    listContainer:SetPoint("TOPLEFT", profBody, "TOPLEFT", 18, y)
+    listContainer:SetPoint("RIGHT", profBody, "RIGHT", -18, 0)
+    listContainer:SetHeight(1)
+
+    profBody._listContainer = listContainer
+    profBody._listY = y
+    profBody._profileRows = {}
+
+    self:RebuildProfileListUI(profBody)
+    W.EndSection(panel, y - 10)
 
     -- ── General Options ──────────────────────────────────────
     local optBody = W.AddSection(panel, "Options", true)
@@ -2098,30 +2210,6 @@ function ABP:BuildSettingsPanel(panel)
     overContainer:SetHeight(1)
     overBody._overrideContainer = overContainer
     overBody._overrideRows = {}
-
-    -- "Add override from current bar" controls
-    y = y - 4
-    local addFrame = CreateFrame("Frame", nil, overBody)
-    addFrame:SetPoint("TOPLEFT", overBody, "TOPLEFT", 18, y)
-    addFrame:SetSize(500, 26)
-
-    local addLabel = addFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    addLabel:SetPoint("LEFT", addFrame, "LEFT", 0, 0)
-    addLabel:SetText("Slot ID:")
-
-    local addEB = CreateFrame("EditBox", nil, addFrame, "InputBoxTemplate")
-    addEB:SetPoint("LEFT", addLabel, "RIGHT", 6, 0)
-    addEB:SetSize(60, 22)
-    addEB:SetAutoFocus(false)
-    addEB:SetNumeric(true)
-
-    local addBtn = CreateFrame("Button", nil, addFrame, "UIPanelButtonTemplate")
-    addBtn:SetPoint("LEFT", addEB, "RIGHT", 6, 0)
-    addBtn:SetSize(180, 22)
-    addBtn:SetText("Override from Current Bar")
-
-    local addStatus = addFrame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    addStatus:SetPoint("LEFT", addBtn, "RIGHT", 8, 0)
 
     local function DescribeSlotData(slotData)
         if not slotData then return "empty" end
@@ -2210,20 +2298,24 @@ function ABP:BuildSettingsPanel(panel)
         overContainer:SetHeight(math.max(math.abs(ry), 1))
     end
 
-    addBtn:SetScript("OnClick", function()
-        local slotID = tonumber(addEB:GetText())
+    -- Status text for add operations
+    local addStatus = overBody:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    addStatus:SetPoint("TOPLEFT", overBody, "TOPLEFT", 200, y - 4)
+    addStatus:SetText("")
+
+    -- Shared function to add a slot override from a given slot ID
+    local function AddSlotOverride(slotID)
         if not slotID or slotID < 1 or slotID > MAX_ACTIONBAR_SLOT then
             addStatus:SetText("|cffff4444Invalid slot (1-" .. MAX_ACTIONBAR_SLOT .. ")|r")
-            return
+            return false
         end
         slotID = math.floor(slotID)
 
         if not C_ActionBar.HasAction(slotID) then
             addStatus:SetText("|cffff4444Slot " .. slotID .. " is empty|r")
-            return
+            return false
         end
 
-        -- Read current action in that slot
         local actionType, id, subType = GetActionInfo(slotID)
         local slotData
         if actionType == "spell" then
@@ -2239,7 +2331,7 @@ function ABP:BuildSettingsPanel(panel)
             slotData = { type = "summonpet", id = id }
         else
             addStatus:SetText("|cffff4444Unsupported action type: " .. tostring(actionType) .. "|r")
-            return
+            return false
         end
 
         local charKey = GetCharacterKey()
@@ -2247,9 +2339,56 @@ function ABP:BuildSettingsPanel(panel)
             db().slotOverrides[charKey] = {}
         end
         db().slotOverrides[charKey][slotID] = slotData
-        addEB:SetText("")
         addStatus:SetText("|cff00ff00Added: " .. DescribeSlotData(slotData) .. "|r")
         RebuildOverrideList()
+        return true
+    end
+
+    -- Pick Slot from Action Bar button
+    y = y - 4
+    local pickBtn = CreateFrame("Button", nil, overBody, "UIPanelButtonTemplate")
+    pickBtn:SetPoint("TOPLEFT", overBody, "TOPLEFT", 18, y)
+    pickBtn:SetSize(200, 22)
+    pickBtn:SetText("Pick Slot from Action Bar")
+    pickBtn:SetScript("OnClick", function()
+        ABP.slotPickerActive = true
+        ABP.slotPickerCallback = function(slotID)
+            AddSlotOverride(slotID)
+        end
+        ABP.pickerFrame:Show()
+        -- Close settings to let user click action bars
+        if SettingsPanel and SettingsPanel:IsShown() then
+            SettingsPanel:Hide()
+        end
+    end)
+
+    y = y - 28
+
+    -- Manual slot ID entry (fallback)
+    local addFrame = CreateFrame("Frame", nil, overBody)
+    addFrame:SetPoint("TOPLEFT", overBody, "TOPLEFT", 18, y)
+    addFrame:SetSize(500, 26)
+
+    local addLabel = addFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    addLabel:SetPoint("LEFT", addFrame, "LEFT", 0, 0)
+    addLabel:SetText("Or enter Slot ID:")
+
+    local addEB = CreateFrame("EditBox", nil, addFrame, "InputBoxTemplate")
+    addEB:SetPoint("LEFT", addLabel, "RIGHT", 6, 0)
+    addEB:SetSize(60, 22)
+    addEB:SetAutoFocus(false)
+    addEB:SetNumeric(true)
+
+    local addBtn = CreateFrame("Button", nil, addFrame, "UIPanelButtonTemplate")
+    addBtn:SetPoint("LEFT", addEB, "RIGHT", 6, 0)
+    addBtn:SetSize(80, 22)
+    addBtn:SetText("Add")
+
+    addBtn:SetScript("OnClick", function()
+        local slotID = tonumber(addEB:GetText())
+        if AddSlotOverride(slotID) then
+            addEB:SetText("")
+        end
     end)
     addEB:SetScript("OnEnterPressed", function(self) addBtn:Click(); self:ClearFocus() end)
     addEB:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
@@ -2273,81 +2412,16 @@ function ABP:BuildSettingsPanel(panel)
     y = y - 30
     W.EndSection(panel, y)
 
-    -- ── Profile Management ────────────────────────────────────
-    local profBody = W.AddSection(panel, "Profile Management")
-    y = 0
-
-    -- Save current bars
-    y = W.AddDescription(profBody, y, "Enter a name and click Save to snapshot your current action bars.")
-
-    local saveFrame = CreateFrame("Frame", nil, profBody)
-    saveFrame:SetPoint("TOPLEFT", profBody, "TOPLEFT", 18, y)
-    saveFrame:SetSize(500, 30)
-
-    local saveEB = CreateFrame("EditBox", nil, saveFrame, "InputBoxTemplate")
-    saveEB:SetPoint("LEFT", saveFrame, "LEFT", 4, 0)
-    saveEB:SetSize(300, 22)
-    saveEB:SetAutoFocus(false)
-
-    local saveBtn = CreateFrame("Button", nil, saveFrame, "UIPanelButtonTemplate")
-    saveBtn:SetPoint("LEFT", saveEB, "RIGHT", 8, 0)
-    saveBtn:SetSize(140, 22)
-    saveBtn:SetText("Save Current Bars")
-
-    local function DoSettingsSave()
-        local name = strtrim(saveEB:GetText())
-        if name == "" then return end
-        -- Confirm overwrite if profile already exists
-        local existing = GetClassProfiles(ABP:GetDB())
-        if existing[name] then
-            StaticPopupDialogs["DCP_ABP_OVERWRITE"] = {
-                text = "Overwrite existing profile '|cff00cc00" .. name .. "|r'?",
-                button1 = "Overwrite",
-                button2 = "Cancel",
-                OnAccept = function()
-                    SaveProfile(name)
-                    saveEB:SetText("")
-                    ABP:RebuildProfileListUI(profBody)
-                end,
-                timeout = 0,
-                whileDead = true,
-                hideOnEscape = true,
-                preferredIndex = 3,
-            }
-            StaticPopup_Show("DCP_ABP_OVERWRITE")
-        else
-            SaveProfile(name)
-            saveEB:SetText("")
-            ABP:RebuildProfileListUI(profBody)
-        end
-    end
-
-    saveBtn:SetScript("OnClick", DoSettingsSave)
-    saveEB:SetScript("OnEnterPressed", function(self)
-        DoSettingsSave()
-        self:ClearFocus()
-    end)
-    saveEB:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-
-    y = y - 36
-
-    -- Profile list container
-    local listContainer = CreateFrame("Frame", nil, profBody)
-    listContainer:SetPoint("TOPLEFT", profBody, "TOPLEFT", 18, y)
-    listContainer:SetPoint("RIGHT", profBody, "RIGHT", -18, 0)
-    listContainer:SetHeight(1) -- will be resized
-
-    profBody._listContainer = listContainer
-    profBody._listY = y
-    profBody._profileRows = {}
-
-    self:RebuildProfileListUI(profBody)
-    W.EndSection(panel, y - 10) -- approximate
-
     -- ── Auto-Load by Spec ─────────────────────────────────────
     local specBody = W.AddSection(panel, "Auto-Load on Spec Change", true)
     y = 0
-    y = W.AddDescription(specBody, y, "Automatically load a profile when switching to a specialization. Applies to all characters of this class.")
+
+    y = W.AddCheckbox(specBody, y, "Enable auto-load on spec change",
+        function() return db().autoLoadEnabled end,
+        function(v) db().autoLoadEnabled = v end, r)
+    y = W.AddNote(specBody, y, "When enabled, switching specializations will automatically load the assigned profile.")
+
+    y = W.AddDescription(specBody, y, "Assign a profile to each specialization. Applies to all characters of this class.")
 
     local cls = GetClassToken()
     local numSpecs = GetNumSpecializations and GetNumSpecializations() or 0
@@ -2356,7 +2430,6 @@ function ABP:BuildSettingsPanel(panel)
         if specID and specName then
             local specKey = cls .. "-" .. specID
 
-            -- Manual dropdown since profile list is dynamic
             local specLabel = specBody:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
             specLabel:SetPoint("TOPLEFT", specBody, "TOPLEFT", 18, y)
             specLabel:SetText(specName)
@@ -2465,6 +2538,34 @@ function ABP:BuildSettingsPanel(panel)
         function(v) db().showMySlot = v end, r)
 
     y = W.AddNote(ioBody, y, "Supports ABP profiles, full config bundles, and MySlot exports.")
+    W.EndSection(panel, y)
+
+    -- ── Label Template ────────────────────────────────────────
+    W.AddLabelTemplateSection(panel, "profile count class spec",
+        function() return db().labelTemplate end,
+        function(v) db().labelTemplate = v; self:UpdateData() end, r, {
+        { "Default",    "<profile>" },
+        { "With Count", "<profile> (<count>)" },
+        { "Class",      "<class>: <profile>" },
+        { "Spec Bars",  "<spec> Bars" },
+    })
+
+    -- ── Tooltip ───────────────────────────────────────────────
+    local ttBody = W.AddSection(panel, "Tooltip", true)
+    y = 0
+    y = W.AddSliderPair(ttBody, y,
+        { label = "Scale", min = 0.5, max = 2.0, step = 0.05,
+          get = function() return db().tooltipScale end,
+          set = function(v) db().tooltipScale = v end },
+        { label = "Width", min = 200, max = 500, step = 10,
+          get = function() return db().tooltipWidth end,
+          set = function(v) db().tooltipWidth = v end }, r)
+    y = W.AddSliderPair(ttBody, y,
+        { label = "Max Height", min = 100, max = 1000, step = 10,
+          get = function() return db().tooltipMaxHeight end,
+          set = function(v) db().tooltipMaxHeight = v end },
+        nil, r)
+    y = W.AddTooltipGrowDirection(ttBody, y, db, r)
     W.EndSection(panel, y)
 
     -- ── Click Actions ─────────────────────────────────────────
@@ -2620,9 +2721,9 @@ function ABP:RebuildProfileListUI(profBody)
                     button1 = "Duplicate",
                     button2 = "Cancel",
                     hasEditBox = true,
-                    OnShow = function(self) self.editBox:SetText(profName .. " Copy") end,
+                    OnShow = function(self) self.EditBox:SetText(profName .. " Copy") end,
                     OnAccept = function(self)
-                        local newName = strtrim(self.editBox:GetText())
+                        local newName = strtrim(self.EditBox:GetText())
                         if newName ~= "" then
                             DuplicateProfile(profName, newName)
                             ABP:RebuildProfileListUI(profBody)
@@ -2646,9 +2747,9 @@ function ABP:RebuildProfileListUI(profBody)
                     button1 = "Rename",
                     button2 = "Cancel",
                     hasEditBox = true,
-                    OnShow = function(self) self.editBox:SetText(profName) end,
+                    OnShow = function(self) self.EditBox:SetText(profName) end,
                     OnAccept = function(self)
-                        local newName = strtrim(self.editBox:GetText())
+                        local newName = strtrim(self.EditBox:GetText())
                         if newName ~= "" and newName ~= profName then
                             RenameProfile(profName, newName)
                             ABP:RebuildProfileListUI(profBody)
@@ -2680,6 +2781,29 @@ function ABP:RebuildProfileListUI(profBody)
     end
 
     container:SetHeight(math.max(math.abs(ry), 1))
+end
+
+---------------------------------------------------------------------------
+-- Public API (for CompanionFrame and other modules)
+---------------------------------------------------------------------------
+
+ABP.SaveProfile        = SaveProfile
+ABP.RestoreProfile     = RestoreProfile
+ABP.GetSortedProfileList = GetSortedProfileList
+ABP.GetClassProfiles   = GetClassProfiles
+ABP.DeleteProfile      = DeleteProfile
+ABP.RenameProfile      = RenameProfile
+ABP.DuplicateProfile   = DuplicateProfile
+ABP.PROFILE_TAGS       = PROFILE_TAGS
+ABP.TAG_COLORS         = TAG_COLORS
+ABP.TAG_LABELS         = TAG_LABELS
+ABP.GetProfileTag      = GetProfileTag
+ABP.SetProfileTag      = SetProfileTag
+ABP.ACTION_BARS        = ACTION_BARS
+
+function ABP.ReadCurrentSlots()
+    local db = ABP:GetDB()
+    return ReadActionBarSlots(db.barFilter)
 end
 
 ---------------------------------------------------------------------------

@@ -19,6 +19,8 @@ local DEFAULTS = {
     profiles = {},   -- { [classToken] = { [name] = talentProfileData } }
     activeProfile = {},  -- { [classToken] = "profileName" }
     linkToActionBars = {},  -- { [classToken .. "-" .. talentProfileName] = actionBarProfileName }
+    autoLoadEnabled = false,
+    autoLoadSpec = {},   -- { [classToken .. "-" .. specID] = "talentProfileName" }
 }
 
 ---------------------------------------------------------------------------
@@ -72,6 +74,140 @@ local function GetCurrentConfigName()
 end
 
 ---------------------------------------------------------------------------
+-- Parse talent export string into node data (for mini tree visualization)
+-- Returns: nodes[], specID, treeID (or nil on failure)
+-- Each node: { nodeID, posX, posY, isSelected, isGranted, ranksPurchased,
+--              maxRanks, isChoiceNode, choiceIndex, entryID, spellID, icon, name, subTreeID }
+---------------------------------------------------------------------------
+
+local BIT_WIDTH_VERSION = 8
+local BIT_WIDTH_SPECID  = 16
+local BIT_WIDTH_RANKS   = 6
+
+local function ParseTalentExportString(exportString)
+    if not exportString or exportString == "" then return nil end
+
+    local importStream = ExportUtil.MakeImportDataStream(exportString)
+    if not importStream then return nil end
+
+    -- Read header
+    local totalBits = importStream:GetNumberOfBits()
+    local headerSize = BIT_WIDTH_VERSION + BIT_WIDTH_SPECID + 128
+    if totalBits < headerSize then return nil end
+
+    local serializationVersion = importStream:ExtractValue(BIT_WIDTH_VERSION)
+    local specID = importStream:ExtractValue(BIT_WIDTH_SPECID)
+    -- Skip tree hash (128 bits = 16 x 8)
+    for i = 1, 16 do importStream:ExtractValue(8) end
+
+    -- Get tree for this spec
+    local treeID = C_ClassTalents.GetTraitTreeForSpec(specID)
+    if not treeID then return nil end
+
+    local treeNodes = C_Traits.GetTreeNodes(treeID)
+    if not treeNodes or #treeNodes == 0 then return nil end
+
+    -- We need a configID for GetNodeInfo — use active or view config
+    local configID = C_ClassTalents.GetActiveConfigID()
+    if not configID then return nil end
+
+    local nodes = {}
+    for i, treeNodeID in ipairs(treeNodes) do
+        local nodeInfo = C_Traits.GetNodeInfo(configID, treeNodeID)
+        if not nodeInfo then
+            -- Consume bits to keep stream aligned
+            local sel = importStream:ExtractValue(1)
+            if sel == 1 then
+                local purch = importStream:ExtractValue(1)
+                if purch == 1 then
+                    local partial = importStream:ExtractValue(1)
+                    if partial == 1 then importStream:ExtractValue(BIT_WIDTH_RANKS) end
+                    local choice = importStream:ExtractValue(1)
+                    if choice == 1 then importStream:ExtractValue(2) end
+                end
+            end
+        else
+            local isSelected = importStream:ExtractValue(1) == 1
+            local isPurchased = false
+            local isPartiallyRanked = false
+            local ranksPurchased = 0
+            local isChoiceNode = false
+            local choiceIndex = 1
+
+            if isSelected then
+                isPurchased = importStream:ExtractValue(1) == 1
+                if isPurchased then
+                    isPartiallyRanked = importStream:ExtractValue(1) == 1
+                    if isPartiallyRanked then
+                        ranksPurchased = importStream:ExtractValue(BIT_WIDTH_RANKS)
+                    else
+                        ranksPurchased = nodeInfo.maxRanks
+                    end
+                    isChoiceNode = importStream:ExtractValue(1) == 1
+                    if isChoiceNode then
+                        choiceIndex = importStream:ExtractValue(2) + 1
+                    end
+                end
+            end
+
+            -- Only include visible nodes with valid positions
+            if nodeInfo.isVisible and nodeInfo.posX ~= 0 and nodeInfo.posY ~= 0 then
+                local entryID = nil
+                local spellID = nil
+                local icon = nil
+                local nodeName = nil
+
+                if isSelected then
+                    if isChoiceNode and nodeInfo.entryIDs[choiceIndex] then
+                        entryID = nodeInfo.entryIDs[choiceIndex]
+                    elseif nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+                        entryID = nodeInfo.entryIDs[1]
+                    end
+                else
+                    -- Not selected: still get icon from first entry for display
+                    if nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+                        entryID = nodeInfo.entryIDs[1]
+                    end
+                end
+
+                if entryID then
+                    local entryInfo = C_Traits.GetEntryInfo(configID, entryID)
+                    if entryInfo and entryInfo.definitionID then
+                        local defInfo = C_Traits.GetDefinitionInfo(entryInfo.definitionID)
+                        if defInfo then
+                            spellID = defInfo.spellID
+                            icon = defInfo.overrideIcon
+                                or (defInfo.spellID and C_Spell.GetSpellTexture(defInfo.spellID))
+                            nodeName = defInfo.overrideName
+                                or (defInfo.spellID and C_Spell.GetSpellName(defInfo.spellID))
+                        end
+                    end
+                end
+
+                nodes[#nodes + 1] = {
+                    nodeID         = treeNodeID,
+                    posX           = nodeInfo.posX,
+                    posY           = nodeInfo.posY,
+                    isSelected     = isSelected,
+                    isGranted      = isSelected and not isPurchased,
+                    ranksPurchased = ranksPurchased,
+                    maxRanks       = nodeInfo.maxRanks,
+                    isChoiceNode   = isChoiceNode,
+                    choiceIndex    = choiceIndex,
+                    entryID        = entryID,
+                    spellID        = spellID,
+                    icon           = icon,
+                    name           = nodeName,
+                    subTreeID      = nodeInfo.subTreeID,
+                }
+            end
+        end
+    end
+
+    return nodes, specID, treeID
+end
+
+---------------------------------------------------------------------------
 -- Core: Save talent profile
 ---------------------------------------------------------------------------
 
@@ -103,6 +239,7 @@ local function SaveProfile(name)
 
     db.activeProfile[cls] = name
     DjinniMsg("Saved talent profile: |cff00cc00" .. name .. "|r")
+    ns.Notify("Saved talents: " .. name, "success")
     TP:UpdateData()
     return true
 end
@@ -151,6 +288,17 @@ local function RestoreProfile(name)
     if success then
         db.activeProfile[cls] = name
         DjinniMsg("Applied talent profile: |cff00cc00" .. name .. "|r")
+        ns.Notify("Loaded talents: " .. name, "success")
+
+        -- Auto-load linked action bar profile if one exists
+        local linkedAB = TP:GetLinkedActionBarProfile(name)
+        if linkedAB and linkedAB ~= "" then
+            local ABP = ns.ActionBarProfiles
+            if ABP and ABP.RestoreProfile then
+                DjinniMsg("Loading linked action bar profile: |cff00cc00" .. linkedAB .. "|r")
+                ABP.RestoreProfile(linkedAB, false)
+            end
+        end
     end
 
     TP:UpdateData()
@@ -258,6 +406,33 @@ function TP:SetLinkedActionBarProfile(talentProfileName, actionBarProfileName)
 end
 
 ---------------------------------------------------------------------------
+-- Auto-load on spec change
+---------------------------------------------------------------------------
+
+local function CheckAutoLoadSpec()
+    local db = TP:GetDB()
+    if not db.autoLoadEnabled then return end
+    local cls = GetClassToken()
+    local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization()
+    if not specIdx or specIdx == 0 then return end
+    local specID = C_SpecializationInfo.GetSpecializationInfo(specIdx)
+    if not specID then return end
+
+    local key = cls .. "-" .. specID
+    local profileName = db.autoLoadSpec[key]
+    if not profileName then return end
+
+    -- Skip if already active
+    if db.activeProfile[cls] == profileName then return end
+
+    local profiles = GetClassProfiles(db)
+    if profiles[profileName] then
+        DjinniMsg("Auto-loading talent profile for spec: |cff00cc00" .. profileName .. "|r")
+        RestoreProfile(profileName)
+    end
+end
+
+---------------------------------------------------------------------------
 -- Event handling
 ---------------------------------------------------------------------------
 
@@ -267,6 +442,12 @@ function TP:Init()
     eventFrame:SetScript("OnEvent", function(_, event)
         if event == "PLAYER_ENTERING_WORLD" then
             TP:UpdateData()
+            C_Timer.After(3, CheckAutoLoadSpec)
+            return
+        end
+        if event == "PLAYER_SPECIALIZATION_CHANGED" then
+            TP:UpdateData()
+            CheckAutoLoadSpec()
             return
         end
         if event == "TRAIT_CONFIG_UPDATED" or event == "ACTIVE_COMBAT_CONFIG_CHANGED" then
@@ -276,6 +457,7 @@ function TP:Init()
     end)
 
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+    eventFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
     eventFrame:RegisterEvent("TRAIT_CONFIG_UPDATED")
     eventFrame:RegisterEvent("ACTIVE_COMBAT_CONFIG_CHANGED")
 
@@ -298,7 +480,7 @@ TP.settingsLabel = "Talent Profiles"
 
 function TP:BuildSettingsPanel(panel)
     local W = ns.SettingsWidgets
-    local r = function() end  -- refresh callback placeholder
+    local r = panel.refreshCallbacks
 
     local function db() return TP:GetDB() end
 
@@ -488,6 +670,53 @@ function TP:BuildSettingsPanel(panel)
 
     y = y - 28
     W.EndSection(panel, y)
+
+    -- ── Auto-Load on Spec Change ─────────────────────────────
+    local specBody = W.AddSection(panel, "Auto-Load Talents on Spec Change", true)
+    y = 0
+
+    y = W.AddCheckbox(specBody, y, "Enable talent auto-load on spec change",
+        function() return db().autoLoadEnabled end,
+        function(v) db().autoLoadEnabled = v end, r)
+    y = W.AddNote(specBody, y, "When enabled, switching specializations will automatically load the assigned talent profile (and its linked action bar profile).")
+
+    y = W.AddDescription(specBody, y, "Assign a talent profile to each specialization:")
+
+    local cls = GetClassToken()
+    local numSpecs = GetNumSpecializations and GetNumSpecializations() or 0
+    for i = 1, numSpecs do
+        local specID, specName = C_SpecializationInfo.GetSpecializationInfo(i)
+        if specID and specName then
+            local specKey = cls .. "-" .. specID
+
+            local specLabel = specBody:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            specLabel:SetPoint("TOPLEFT", specBody, "TOPLEFT", 18, y)
+            specLabel:SetText(specName)
+
+            local specDD = CreateFrame("DropdownButton", nil, specBody, "WowStyle1DropdownTemplate")
+            specDD:SetPoint("TOPLEFT", specLabel, "BOTTOMLEFT", 0, -2)
+            specDD:SetWidth(200)
+
+            local capturedKey = specKey
+            specDD:SetupMenu(function(_, rootDescription)
+                rootDescription:CreateButton("(None)", function()
+                    db().autoLoadSpec[capturedKey] = nil
+                end):SetIsSelected(function() return not db().autoLoadSpec[capturedKey] end)
+
+                local list = GetSortedProfileList()
+                for _, n in ipairs(list) do
+                    local pName = n
+                    rootDescription:CreateButton(pName, function()
+                        db().autoLoadSpec[capturedKey] = pName
+                    end):SetIsSelected(function() return db().autoLoadSpec[capturedKey] == pName end)
+                end
+            end)
+
+            y = y - 52
+        end
+    end
+
+    W.EndSection(panel, y)
 end
 
 ---------------------------------------------------------------------------
@@ -579,9 +808,9 @@ function TP:RebuildProfileListUI(profBody)
                     button1 = "Rename",
                     button2 = "Cancel",
                     hasEditBox = true,
-                    OnShow = function(self) self.editBox:SetText(profName) end,
+                    OnShow = function(self) self.EditBox:SetText(profName) end,
                     OnAccept = function(self)
-                        local newName = strtrim(self.editBox:GetText())
+                        local newName = strtrim(self.EditBox:GetText())
                         if newName ~= "" and newName ~= profName then
                             RenameProfile(profName, newName)
                             TP:RebuildProfileListUI(profBody)
@@ -614,6 +843,120 @@ function TP:RebuildProfileListUI(profBody)
 
     container:SetHeight(math.max(math.abs(ry), 1))
 end
+
+---------------------------------------------------------------------------
+-- Import from Blizzard built-in loadouts
+---------------------------------------------------------------------------
+
+-- Returns a list of { configID, name, talentString } for every saved loadout
+-- the player has for the given specID (defaults to current spec).
+local function GetBlizzardLoadouts(specID)
+    specID = specID or (C_SpecializationInfo.GetSpecialization and
+        select(1, C_SpecializationInfo.GetSpecializationInfo(C_SpecializationInfo.GetSpecialization())) or nil)
+    if not specID then return {} end
+
+    local configIDs = C_ClassTalents.GetConfigIDsBySpecID(specID)
+    if not configIDs then return {} end
+
+    local results = {}
+    for _, configID in ipairs(configIDs) do
+        local info = C_Traits.GetConfigInfo(configID)
+        local name = (info and info.name and info.name ~= "") and info.name or ("Loadout #" .. configID)
+        local talentString = C_Traits.GenerateImportString(configID)
+        if talentString and talentString ~= "" then
+            results[#results + 1] = {
+                configID     = configID,
+                name         = name,
+                talentString = talentString,
+            }
+        end
+    end
+    return results
+end
+
+-- Import all Blizzard loadouts for the current spec as DCP talent profiles.
+-- Skips any whose name already exists (unless overwrite=true).
+-- Returns imported, skipped counts.
+local function ImportFromBlizzardLoadouts(overwrite)
+    local db      = TP:GetDB()
+    local cls     = GetClassToken()
+    local profs   = GetClassProfiles(db)
+
+    local specIdx = C_SpecializationInfo.GetSpecialization and C_SpecializationInfo.GetSpecialization()
+    local specID, specName = 0, ""
+    if specIdx and specIdx > 0 then
+        specID, specName = C_SpecializationInfo.GetSpecializationInfo(specIdx)
+    end
+
+    local loadouts = GetBlizzardLoadouts(specID)
+    local imported, skipped = 0, 0
+
+    for _, entry in ipairs(loadouts) do
+        local profileName = entry.name
+        if profs[profileName] and not overwrite then
+            skipped = skipped + 1
+        else
+            profs[profileName] = {
+                talentString = entry.talentString,
+                savedAt      = time(),
+                savedBy      = GetCharacterKey(),
+                specID       = specID or 0,
+                specName     = specName or "",
+                configName   = entry.name,
+            }
+            imported = imported + 1
+        end
+    end
+
+    if imported > 0 then
+        TP:UpdateData()
+        ns.Notify("Imported " .. imported .. " talent loadout(s)", "success")
+        DjinniMsg("Imported " .. imported .. " Blizzard loadout(s)" ..
+            (skipped > 0 and (", " .. skipped .. " skipped (already exist)") or "") .. ".")
+    elseif skipped > 0 then
+        DjinniMsg(skipped .. " loadout(s) already exist. Use 'overwrite' to replace them.")
+    else
+        DjinniMsg("No Blizzard loadouts found for current spec.")
+    end
+
+    return imported, skipped
+end
+
+TP.GetBlizzardLoadouts     = GetBlizzardLoadouts
+TP.ImportFromBlizzardLoadouts = ImportFromBlizzardLoadouts
+
+---------------------------------------------------------------------------
+-- Find matching profile: detect which saved profile matches current talents
+---------------------------------------------------------------------------
+
+local function FindMatchingProfile()
+    local currentStr = GetCurrentTalentString()
+    if not currentStr or currentStr == "" then return nil end
+    local db = TP:GetDB()
+    local cls = GetClassToken()
+    local profiles = GetClassProfiles(db)
+    for name, prof in pairs(profiles) do
+        if prof.talentString == currentStr then
+            return name
+        end
+    end
+    return nil
+end
+
+---------------------------------------------------------------------------
+-- Public API (for CompanionFrame and other modules)
+---------------------------------------------------------------------------
+
+TP.SaveProfile = SaveProfile
+TP.RestoreProfile = RestoreProfile
+TP.GetSortedProfileList = GetSortedProfileList
+TP.GetClassProfiles = GetClassProfiles
+TP.GetCurrentTalentString = GetCurrentTalentString
+TP.FindMatchingProfile = FindMatchingProfile
+TP.ParseTalentExportString = ParseTalentExportString
+TP.DeleteProfile = DeleteProfile
+TP.RenameProfile = RenameProfile
+TP.DuplicateProfile = DuplicateProfile
 
 ---------------------------------------------------------------------------
 -- Module registration
