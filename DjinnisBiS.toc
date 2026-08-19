@@ -1,0 +1,12 @@
+## Interface: 120100
+## Title: Djinni's BiS
+## Notes: Shows which druid specs want a dropped item. Season 2, The Venomous Abyss.
+## Author: Djinni
+## Version: 0.8.0
+## IconTexture: Interface\Icons\Ability_Druid_Maul
+## AddonCompartmentFunc: DjinnisBiS_Toggle
+## SavedVariables: DjinnisBiSDB
+## DefaultState: enabled
+## X-Category: Raid & Loot
+
+DjinnisBiS.lua

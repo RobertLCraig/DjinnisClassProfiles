@@ -1,0 +1,1148 @@
+-- Djinni's BiS -- "do I roll on this?" for all four druid specs.
+--
+-- ============================ EDIT THE LIST HERE ============================
+-- Season 2 / patch 12.1.0 / The Venomous Abyss.
+-- Sources: method.gg and icy-veins.com, both pulled 2026-08-19 (season week 1).
+--
+-- The two sites disagree on a lot of slots, so both picks are kept and the
+-- `site` field says who said what. "both" means they agree, which is the
+-- strongest signal in this table. A slot with two entries is a slot where the
+-- theorycrafters have not settled.
+--
+-- Item effects in this raid changed <24h before the season opened, so every
+-- public list is still in flux. Re-pull both sites when the sims settle.
+--
+-- Rings and trinkets are one slot each rather than "Finger 1 / Finger 2".
+-- The sites order those two arbitrarily and matching them up implies a
+-- precision that is not there.
+--
+-- Matching is by NAME, normalised (case and punctuation ignored).
+-- ponytail: name matching, so English clients only. Swap to item IDs if you
+-- ever play on a non-English client.
+-- ===========================================================================
+
+local M, IV, BOTH = "Method", "Icy Veins", "both"
+
+local BIS = {
+	Balance = {
+		{ slot = "Head",      name = "Gaze of the Coiled Watcher",               boss = "Ula'tek",              site = M },
+		{ slot = "Head",      name = "Enigmatic Dreamwatcher's Somnolent Stare", boss = "Ula'tek / Catalyst",   site = IV },
+		{ slot = "Neck",      name = "Aqirbane Reliquary",                       boss = "Ula'tek",              site = BOTH },
+		{ slot = "Shoulder",  name = "Frothing Venom Spaulders",                 boss = "Vashnik",              site = BOTH },
+		{ slot = "Back",      name = "Silken Voodoo Drape",                      boss = "The Coiled Altar",     site = BOTH },
+		{ slot = "Chest",     name = "Vestment of the Awakening",                boss = "Nek'zali",             site = M },
+		{ slot = "Chest",     name = "Enigmatic Dreamwatcher's Lunar Raiment",   boss = "Vashnik / Catalyst",   site = IV },
+		{ slot = "Wrist",     name = "Restless Spirit Shackles",                 boss = "Nek'zali",             site = BOTH },
+		{ slot = "Hands",     name = "Ruthless Slaughtergrips",                  boss = "Sszorak",              site = M },
+		{ slot = "Hands",     name = "Enigmatic Dreamwatcher's Gauntlets",       boss = "Entombed Sentinels / Catalyst", site = IV },
+		{ slot = "Waist",     name = "Sash of the Forlorn Vessel",               boss = "The Coiled Altar",     site = BOTH },
+		{ slot = "Legs",      name = "Coiled Hex Legguards",                     boss = "The Coiled Altar",     site = M },
+		{ slot = "Legs",      name = "Enigmatic Dreamwatcher's Leggings",        boss = "The Coiled Altar / Catalyst", site = IV },
+		{ slot = "Feet",      name = "Bespittled Slitherslippers",               boss = "The Twin Fangs",       site = M },
+		{ slot = "Feet",      name = "Silvermoon Agent's Sneakers",              boss = "Crafted",              site = IV },
+		{ slot = "Finger",    name = "Vile Alchemist's Band",                    boss = "Vashnik",              site = BOTH },
+		{ slot = "Finger",    name = "Apex Brute's Claw Ring",                   boss = "Sszorak",              site = M },
+		{ slot = "Finger",    name = "Charged Sandstone Band",                   boss = "Temple of Sethraliss", site = IV },
+		{ slot = "Trinket",   name = "Gebbo's Bottomless Bag",                   boss = "The Lost Explorers",   site = BOTH },
+		{ slot = "Trinket",   name = "Hex Lord's Dooming Idol",                  boss = "The Coiled Altar",     site = M },
+		{ slot = "Trinket",   name = "Vile Vial of Volatile Venom",              boss = "Altar of Fangs",       site = IV },
+		{ slot = "Main Hand", name = "Jan'thrazet, the Soul Fang",               boss = "Ula'tek",              site = BOTH },
+		{ slot = "Off Hand",  name = "Aln'hara Lantern",                         boss = "Crafted",              site = IV },
+	},
+	Feral = {
+		{ slot = "Head",      name = "Gaze of the Coiled Watcher",               boss = "Ula'tek",              site = M },
+		{ slot = "Head",      name = "Enigmatic Dreamwatcher's Somnolent Stare", boss = "Ula'tek / Catalyst",   site = IV },
+		{ slot = "Neck",      name = "Aqirbane Reliquary",                       boss = "Ula'tek",              site = BOTH },
+		{ slot = "Shoulder",  name = "Enigmatic Dreamwatcher's Plumage",         boss = "The Lost Explorers / Catalyst", site = IV },
+		{ slot = "Back",      name = "Silken Voodoo Drape",                      boss = "The Coiled Altar",     site = BOTH },
+		{ slot = "Chest",     name = "Enigmatic Dreamwatcher's Lunar Raiment",   boss = "Nek'zali / Catalyst",  site = IV },
+		{ slot = "Wrist",     name = "Silvermoon Agent's Deflectors",            boss = "Crafted",              site = BOTH },
+		{ slot = "Hands",     name = "Enigmatic Dreamwatcher's Gauntlets",       boss = "Murder Row / Catalyst", site = IV },
+		{ slot = "Waist",     name = "Sash of the Forlorn Vessel",               boss = "The Coiled Altar",     site = BOTH },
+		{ slot = "Legs",      name = "Coiled Hex Legguards",                     boss = "The Coiled Altar",     site = M },
+		{ slot = "Legs",      name = "Enigmatic Dreamwatcher's Leggings",        boss = "The Coiled Altar / Catalyst", site = IV },
+		{ slot = "Feet",      name = "Silvermoon Agent's Sneakers",              boss = "Crafted",              site = IV },
+		{ slot = "Finger",    name = "Sickening Signet of Atroxus",              boss = "Voidscar Arena",       site = BOTH },
+		{ slot = "Finger",    name = "Vile Alchemist's Band",                    boss = "Vashnik",              site = BOTH },
+		{ slot = "Trinket",   name = "Voracious Heart of Ula'tek",               boss = "Ula'tek",              site = BOTH },
+		{ slot = "Trinket",   name = "Zul'jin's Guillotine Technique",           boss = "The Coiled Altar",     site = BOTH },
+		{ slot = "Main Hand", name = "Abyssal Broodfiend's Bardiche",            boss = "Ula'tek",              site = BOTH },
+	},
+	Guardian = {
+		{ slot = "Head",      name = "Gaze of the Coiled Watcher",               boss = "Ula'tek",              site = BOTH },
+		{ slot = "Neck",      name = "Aqirbane Reliquary",                       boss = "Ula'tek",              site = BOTH },
+		{ slot = "Shoulder",  name = "Somber Spaulders",                         boss = "Voidscar Arena",       site = M },
+		{ slot = "Shoulder",  name = "Enigmatic Dreamwatcher's Plumage",         boss = "The Lost Explorers / Catalyst", site = IV },
+		{ slot = "Back",      name = "Silken Voodoo Drape",                      boss = "The Coiled Altar",     site = BOTH },
+		{ slot = "Chest",     name = "Enigmatic Dreamwatcher's Lunar Raiment",   boss = "Vashnik / Catalyst",   site = BOTH },
+		{ slot = "Wrist",     name = "Fury-Fletched Armlets",                    boss = "Murder Row",           site = M },
+		{ slot = "Wrist",     name = "Silvermoon Agent's Deflectors",            boss = "Crafted",              site = IV },
+		{ slot = "Hands",     name = "Gauntlets of Fevered Defense",             boss = "Murder Row",           site = M },
+		{ slot = "Hands",     name = "Enigmatic Dreamwatcher's Gauntlets",       boss = "Entombed Sentinels / Catalyst", site = IV },
+		{ slot = "Waist",     name = "Sash of the Forlorn Vessel",               boss = "The Coiled Altar",     site = BOTH },
+		{ slot = "Legs",      name = "Coiled Hex Legguards",                     boss = "The Coiled Altar",     site = M },
+		{ slot = "Legs",      name = "Enigmatic Dreamwatcher's Leggings",        boss = "The Coiled Altar / Catalyst", site = IV },
+		{ slot = "Feet",      name = "Breakwater Boots",                         boss = "Nymrissa Wavecaller",  site = M },
+		{ slot = "Feet",      name = "Bespittled Slitherslippers",               boss = "The Twin Fangs",       site = IV },
+		{ slot = "Finger",    name = "Ritual Binder's Ring",                     boss = "Kings' Rest",          site = M },
+		{ slot = "Finger",    name = "Alluring Bubbleband",                      boss = "Nymrissa Wavecaller",  site = M },
+		{ slot = "Finger",    name = "Apex Brute's Claw Ring",                   boss = "Sszorak",              site = IV },
+		{ slot = "Finger",    name = "Vile Alchemist's Band",                    boss = "Vashnik",              site = IV },
+		{ slot = "Trinket",   name = "Voracious Heart of Ula'tek",               boss = "Ula'tek",              site = M },
+		{ slot = "Trinket",   name = "Keeper's Seething Core",                   boss = "Entombed Sentinels",   site = M },
+		{ slot = "Trinket",   name = "Gebbo's Bottomless Bag",                   boss = "The Lost Explorers",   site = IV },
+		{ slot = "Trinket",   name = "Zul'jin's Guillotine Technique",           boss = "The Coiled Altar",     site = IV },
+		{ slot = "Main Hand", name = "Abyssal Broodfiend's Bardiche",            boss = "Ula'tek",              site = BOTH },
+	},
+	Resto = {
+		{ slot = "Head",      name = "Gaze of the Coiled Watcher",               boss = "Ula'tek",              site = M },
+		{ slot = "Head",      name = "Enigmatic Dreamwatcher's Somnolent Stare", boss = "Ula'tek / Catalyst",   site = IV },
+		{ slot = "Neck",      name = "Amulet of the Twin Fangs",                 boss = "The Twin Fangs",       site = BOTH },
+		{ slot = "Shoulder",  name = "Silvermoon Agent's Mantle",                boss = "Crafted",              site = BOTH },
+		{ slot = "Back",      name = "Silken Voodoo Drape",                      boss = "The Coiled Altar",     site = BOTH },
+		{ slot = "Chest",     name = "War Trial Vestments",                      boss = "Den of Nalorakk / Catalyst", site = M },
+		{ slot = "Chest",     name = "Enigmatic Dreamwatcher's Lunar Raiment",   boss = "Nek'zali / Catalyst",  site = IV },
+		{ slot = "Wrist",     name = "Silvermoon Agent's Deflectors",            boss = "Crafted",              site = BOTH },
+		{ slot = "Hands",     name = "Enigmatic Dreamwatcher's Gauntlets",       boss = "Entombed Sentinels / Catalyst", site = BOTH },
+		{ slot = "Waist",     name = "Sash of the Forlorn Vessel",               boss = "The Coiled Altar",     site = BOTH },
+		{ slot = "Legs",      name = "Coiled Hex Legguards",                     boss = "The Coiled Altar",     site = M },
+		{ slot = "Legs",      name = "Enigmatic Dreamwatcher's Leggings",        boss = "The Coiled Altar / Catalyst", site = IV },
+		{ slot = "Feet",      name = "Breakwater Boots",                         boss = "Nymrissa Wavecaller",  site = M },
+		{ slot = "Feet",      name = "Silvermoon Agent's Sneakers",              boss = "Crafted",              site = IV },
+		{ slot = "Finger",    name = "Sickening Signet of Atroxus",              boss = "Voidscar Arena",       site = BOTH },
+		{ slot = "Finger",    name = "Vile Alchemist's Band",                    boss = "Vashnik",              site = M },
+		{ slot = "Finger",    name = "Alluring Bubbleband",                      boss = "Nymrissa Wavecaller",  site = IV },
+		{ slot = "Trinket",   name = "Soulcoiler Ritual Vessel",                 boss = "Nek'zali",             site = BOTH },
+		{ slot = "Trinket",   name = "Wavecaller's Seastone",                    boss = "Nymrissa Wavecaller",  site = M },
+		{ slot = "Trinket",   name = "Gebbo's Bottomless Bag",                   boss = "The Lost Explorers",   site = IV },
+		{ slot = "Main Hand", name = "Jan'thrazet, the Soul Fang",               boss = "Ula'tek",              site = BOTH },
+		{ slot = "Off Hand",  name = "Spine of the Hissing Abyss",               boss = "Entombed Sentinels",   site = BOTH },
+		{ slot = "Two Hand",  name = "Staff of the Lightning Serpent",           boss = "Temple of Sethraliss", site = M },
+	},
+}
+
+-- ===========================================================================
+
+local SPEC_ORDER = { "Balance", "Feral", "Guardian", "Resto" }
+
+local SLOT_ORDER = {
+	"Head", "Neck", "Shoulder", "Back", "Chest", "Wrist", "Hands", "Waist",
+	"Legs", "Feet", "Finger", "Trinket", "Main Hand", "Off Hand", "Two Hand",
+}
+
+-- The eight Venomous Abyss bosses in kill order. Everything not listed falls to
+-- the bottom alphabetically, which is where the dungeon, world boss and crafted
+-- sources belong. Murder Row and Kings' Rest are dungeons, not raid bosses.
+local BOSS_ORDER = {
+	"Nek'zali", "Entombed Sentinels", "The Lost Explorers", "Vashnik",
+	"Sszorak", "The Twin Fangs", "The Coiled Altar", "Ula'tek",
+}
+
+-- Upgrade tracks. Exact per-rank numbers from method.gg, pulled 2026-08-19.
+-- Adventurer and Veteran are deliberately absent: nothing on this list drops on
+-- them, and no source publishes their per-rank numbers, so they would be guesses.
+local TRACKS = {
+	{ name = "Champion", ilvl = { 292, 295, 298, 302, 305, 308 } },
+	{ name = "Hero",     ilvl = { 305, 308, 311, 315, 318, 321 } },
+	{ name = "Myth",     ilvl = { 318, 321, 324, 328, 331, 334 } },
+}
+-- The last two Mythic bosses drop above the normal cap and take no upgrades.
+local MYTHIC_RAID = { name = "Mythic raid", ilvl = 344 }
+
+local function norm(name)
+	return (name:lower():gsub("[^%a]", ""))
+end
+
+local function bossOf(source)
+	return source:match("^(.-) / ") or source
+end
+
+-- normalised name -> { name, boss, specs = {...} }, for the tooltip and the roll
+local lookup = {}
+for _, spec in ipairs(SPEC_ORDER) do
+	for _, item in ipairs(BIS[spec]) do
+		local key = norm(item.name)
+		local entry = lookup[key]
+		if not entry then
+			entry = { name = item.name, boss = item.boss, specs = {}, seen = {} }
+			lookup[key] = entry
+		end
+		if not entry.seen[spec] then
+			entry.seen[spec] = true
+			entry.specs[#entry.specs + 1] = spec
+		end
+	end
+end
+do  -- keep spec lists in a stable, readable order
+	local rank = {}
+	for i, spec in ipairs(SPEC_ORDER) do rank[spec] = i end
+	for _, entry in pairs(lookup) do
+		table.sort(entry.specs, function(a, b) return rank[a] < rank[b] end)
+	end
+end
+
+local function match(itemName)
+	return itemName and lookup[norm(itemName)] or nil
+end
+
+local GREEN, GREY, GOLD, WHITE = "|cff00ff00", "|cff808080", "|cffffd100", "|cffffffff"
+
+-- The item level you are chasing -------------------------------------------
+--
+-- Per item, saved per account. This is a plan, not a reading of what you have
+-- equipped: the point is to record the rank you are actually aiming each piece
+-- at, so a drop can be judged against it.
+
+local function db()
+	DjinnisBiSDB = DjinnisBiSDB or {}
+	DjinnisBiSDB.gear = DjinnisBiSDB.gear or {}
+	return DjinnisBiSDB
+end
+
+local function setGear(itemName, track, rank)
+	db().gear[norm(itemName)] = track and { track = track, rank = rank } or nil
+end
+
+local function gearLabel(itemName)
+	local set = db().gear[norm(itemName)]
+	if not set then return GREY .. "set ilvl|r" end
+	if set.track == MYTHIC_RAID.name then
+		return GOLD .. MYTHIC_RAID.ilvl .. "|r " .. GREY .. "mythic|r"
+	end
+	for _, track in ipairs(TRACKS) do
+		if track.name == set.track and track.ilvl[set.rank] then
+			return GOLD .. track.ilvl[set.rank] .. "|r "
+				.. GREY .. track.name:sub(1, 1) .. " " .. set.rank .. "/6|r"
+		end
+	end
+	return GREY .. "set ilvl|r"  -- track was renamed or the save is stale
+end
+
+-- Item links ---------------------------------------------------------------
+--
+-- The Encounter Journal already holds this raid's whole loot table, with real
+-- item links in it. Reading it beats hardcoding ~90 item IDs by hand, and it
+-- stays right if Blizzard renames anything.
+
+local links = {}  -- normalised name -> item link
+
+local function resolveFromCache()
+	for key, entry in pairs(lookup) do
+		if not links[key] then
+			local _, link = C_Item.GetItemInfo(entry.name)
+			if link then links[key] = link end
+		end
+	end
+end
+
+local DRUID_CLASS_ID = 11
+
+local harvested = false
+local function harvestFromJournal()
+	if harvested or not EJ_GetNumTiers then return end
+	C_AddOns.LoadAddOn("Blizzard_EncounterJournal")
+	EJ_SelectTier(EJ_GetNumTiers())
+
+	local instanceID
+	local index = 1
+	while true do
+		local id, name = EJ_GetInstanceByIndex(index, true)  -- true = raids
+		if not id then break end
+		if name and name:find("Venomous Abyss") then instanceID = id break end
+		index = index + 1
+	end
+	if not instanceID then return end
+
+	EJ_SelectInstance(instanceID)
+	local found = 0
+	-- Two sweeps. Unfiltered misses the tier set, because tier only appears
+	-- once the journal has a class filter on it. That is why the Dreamwatcher
+	-- pieces came back linkless on the first build.
+	for _, classID in ipairs({ 0, DRUID_CLASS_ID }) do
+		EJ_SetLootFilter(classID, 0)
+		for i = 1, (EJ_GetNumLoot() or 0) do
+			local info = C_EncounterJournal.GetLootInfoByIndex(i)
+			if info and info.name and info.link then
+				links[norm(info.name)] = info.link
+				found = found + 1
+			end
+		end
+	end
+	EJ_SetLootFilter(0, 0)  -- leave the journal as we found it
+	harvested = found > 0
+end
+
+local function linkFor(name)
+	return links[norm(name)]
+end
+
+-- Raidbots import ----------------------------------------------------------
+--
+-- Raidbots has no copy button, but every report is downloadable as CSV at
+--     https://www.raidbots.com/simbot/report/<id>/data.csv
+-- and that CSV is machine generated rather than a UI layout, so it is a far
+-- safer thing to parse than anything scraped off the page.
+--
+-- Rows look like this, the first being the unmodified character:
+--     Djinni,101155.39,...
+--     -1/1311/dungeon-mythic-weekly10/271681/318/0/off_hand////,101375.64,...
+-- Splitting that label on "/" gives source, item id, item level and slot. Item
+-- ids beat names outright: exact, and immune to spelling and localisation.
+--
+-- A Droptimizer covers one spec at a time, so results are stored per spec.
+
+local function slashFields(label)
+	local out = {}
+	for part in (label .. "/"):gmatch("(.-)/") do out[#out + 1] = part end
+	return out
+end
+
+-- returns items keyed by item id, the baseline dps, and a count of bad rows
+local function parseSim(text)
+	local raw, baseline, unreadable = {}, nil, 0
+
+	for line in (text .. "\n"):gmatch("(.-)\r?\n") do
+		if line:match("%S") and not line:find("^name,") then
+			local label, dps = line:match("^(.-),([%d%.eE%+%-]+)")
+			dps = tonumber(dps)
+			if not (label and dps) then
+				unreadable = unreadable + 1
+			elseif not label:find("/", 1, true) then
+				baseline = baseline or dps  -- the character's own row
+			else
+				local field = slashFields(label)
+				local id = tonumber(field[4])
+				if id then
+					raw[id] = { dps = dps, ilvl = tonumber(field[5]), slot = field[7] or "" }
+				else
+					unreadable = unreadable + 1
+				end
+			end
+		end
+	end
+
+	if not baseline then return nil, nil, unreadable end
+
+	local items, count = {}, 0
+	for id, info in pairs(raw) do
+		local percent = ((info.dps - baseline) / baseline) * 100
+		items[id] = {
+			gain = math.floor(percent * 100 + 0.5) / 100,  -- two decimals
+			ilvl = info.ilvl,
+			slot = info.slot,
+		}
+		count = count + 1
+	end
+	return items, baseline, unreadable, count
+end
+
+local function itemIdFor(name)
+	local link = links[norm(name)]
+	return link and tonumber(link:match("item:(%d+)"))
+end
+
+local function simFor(spec)
+	local store = db().sim
+	return store and store[spec]
+end
+
+local function simGain(spec, itemName)
+	local sim = simFor(spec)
+	local id = itemIdFor(itemName)
+	local hit = id and sim and sim.items[id]
+	return hit and hit.gain
+end
+
+local function gainText(gain)
+	if not gain then return "" end
+	local colour = gain > 0 and GREEN or GREY
+	return "  " .. colour .. (gain > 0 and "+" or "") .. gain .. "%|r"
+end
+
+-- Tooltip ------------------------------------------------------------------
+
+TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip)
+	if tooltip ~= GameTooltip and tooltip ~= ItemRefTooltip then return end
+	local name, link, id = TooltipUtil.GetDisplayedItem(tooltip)
+	-- GetDisplayedItem's name comes from the item cache, which can be cold on
+	-- the first hover of a fresh drop. The link is always there, so read it.
+	if not name and link then name = link:match("|h%[(.-)%]|h") end
+	if not name then return end
+
+	-- only annotate gear, so bags and the auction house stay quiet
+	if id then
+		local _, _, _, equipLoc = C_Item.GetItemInfoInstant(id)
+		if not equipLoc or equipLoc == "" or equipLoc == "INVTYPE_NON_EQUIP_IGNORE" then return end
+	end
+
+	local entry = match(name)
+	if entry then
+		tooltip:AddLine(GREEN .. "BiS: " .. table.concat(entry.specs, ", ") .. "|r")
+	else
+		tooltip:AddLine(GREY .. "Not BiS" .. "|r")
+	end
+end)
+
+-- Bonus rolls ---------------------------------------------------------------
+--
+-- Season 2 brought bonus rolls back at one coin per instance, and they now roll
+-- at Great Vault item level rather than boss level, so a coin is worth more
+-- than it used to be. The only question this can answer is the useful one:
+-- can this place drop something you actually want?
+
+local function bisFrom(sourceName)
+	if not sourceName or sourceName == "" then return {} end
+	local want = sourceName:lower()
+	local found = {}
+	for _, entry in pairs(lookup) do
+		local boss = bossOf(entry.boss):lower()
+		-- loose both ways: the game says "Temple of Sethraliss" where a guide
+		-- might say "Sethraliss", and a boss name can be a substring either way
+		if boss ~= "crafted"
+			and (boss == want or want:find(boss, 1, true) or boss:find(want, 1, true)) then
+			found[#found + 1] = entry
+		end
+	end
+	table.sort(found, function(a, b) return a.name < b.name end)
+	return found
+end
+
+local function bonusRollVerdict(sourceName)
+	if not sourceName or sourceName == "" then return end
+	local found = bisFrom(sourceName)
+
+	if #found == 0 then
+		RaidWarningUtil.AddMessage("Bonus roll: NO\n" .. sourceName, ChatTypeInfo["RAID_WARNING"])
+		print(GREY .. "[BiS] nothing BiS drops from " .. sourceName .. ". Keep the coin.|r")
+		return
+	end
+
+	RaidWarningUtil.AddMessage("Bonus roll: YES\n" .. sourceName, ChatTypeInfo["RAID_WARNING"])
+	PlaySound(SOUNDKIT.RAID_WARNING)
+	print(GOLD .. "[BiS] worth a coin at " .. sourceName .. ":|r")
+	for _, entry in ipairs(found) do
+		print("   " .. (linkFor(entry.name) or entry.name)
+			.. GREEN .. "  " .. table.concat(entry.specs, ", ") .. "|r")
+	end
+end
+
+-- Loot roll ----------------------------------------------------------------
+
+local roll = CreateFrame("Frame")
+roll:RegisterEvent("START_LOOT_ROLL")
+roll:RegisterEvent("CHALLENGE_MODE_COMPLETED")
+roll:RegisterEvent("ENCOUNTER_END")
+roll:SetScript("OnEvent", function(_, event, arg1, arg2, _, _, success)
+	if event == "CHALLENGE_MODE_COMPLETED" then
+		bonusRollVerdict((GetInstanceInfo()))
+		return
+	end
+	if event == "ENCOUNTER_END" then
+		if success == 1 then bonusRollVerdict(arg2) end  -- arg2 is the boss name
+		return
+	end
+
+	local link = GetLootRollItemLink and GetLootRollItemLink(arg1)
+	if not link then return end
+	local name = link:match("|h%[(.-)%]|h")
+	local entry = match(name)
+
+	if entry then
+		local specs = table.concat(entry.specs, ", ")
+		-- RaidNotice_AddMessage is deprecation-shim only, and the shim is gated
+		-- behind the loadDeprecationFallbacks CVar. This is what it calls.
+		RaidWarningUtil.AddMessage("BiS: " .. specs .. "\n" .. name,
+			ChatTypeInfo["RAID_WARNING"])
+		PlaySound(SOUNDKIT.RAID_WARNING)
+		print(GREEN .. "[BiS] ROLL|r " .. link .. " -> " .. specs)
+	else
+		print(GREY .. "[BiS] pass|r " .. link)
+	end
+end)
+
+-- Lines --------------------------------------------------------------------
+--
+-- Both tabs render the same thing: a flat list of { text, link }. Only the
+-- grouping differs, so the scroll frame and the row pool are shared.
+
+local function byBossLines()
+	local groups, rank = {}, {}
+	for i, boss in ipairs(BOSS_ORDER) do rank[boss] = i end
+
+	for _, entry in pairs(lookup) do
+		local boss = bossOf(entry.boss)
+		groups[boss] = groups[boss] or {}
+		table.insert(groups[boss], entry)
+	end
+
+	local bosses = {}
+	for boss in pairs(groups) do bosses[#bosses + 1] = boss end
+	table.sort(bosses, function(a, b)
+		local ra, rb = rank[a] or 99, rank[b] or 99
+		if ra ~= rb then return ra < rb end
+		return a < b
+	end)
+
+	local lines = {
+		{ text = GREY .. "Every BiS item, grouped by who drops it." .. "|r" },
+		{ text = "" },
+	}
+	for _, boss in ipairs(bosses) do
+		lines[#lines + 1] = { text = GOLD .. boss .. "|r" }
+		local entries = groups[boss]
+		table.sort(entries, function(a, b) return a.name < b.name end)
+		for _, entry in ipairs(entries) do
+			local link = linkFor(entry.name)
+			lines[#lines + 1] = {
+				text = "  " .. (link or WHITE .. entry.name .. "|r")
+					.. GREEN .. "  " .. table.concat(entry.specs, ", ") .. "|r",
+				link = link,
+				name = entry.name,
+			}
+		end
+		lines[#lines + 1] = { text = "" }
+	end
+	return lines
+end
+
+-- Tab 2 mirrors the character sheet: slots down the left, slots down the right,
+-- weapons across the bottom. Where the two sites disagree the slot holds two
+-- items stacked, so the disagreement stays visible rather than me picking a
+-- winner and hiding it.
+
+-- Weapons hang off the bottom of the left column rather than sitting in a
+-- full-width band underneath. The right column carries the rings and trinkets
+-- and so runs much longer, which left a hole under Wrist; this fills it and
+-- keeps the whole spec on one screen without scrolling.
+local DOLL_LEFT  = { "Head", "Neck", "Shoulder", "Back", "Chest", "Wrist",
+                     "Main Hand", "Off Hand", "Two Hand" }
+local DOLL_RIGHT = { "Hands", "Waist", "Legs", "Feet", "Finger", "Trinket" }
+
+local function itemsBySlot(spec)
+	local groups = {}
+	for _, item in ipairs(BIS[spec]) do
+		groups[item.slot] = groups[item.slot] or {}
+		table.insert(groups[item.slot], item)
+	end
+	return groups
+end
+
+-- long form for the list, short form for the cramped doll cells
+local function shortSite(site)
+	if site == BOTH then return "" end
+	return GREY .. " (" .. (site == M and "M" or "IV") .. ")|r"
+end
+
+-- Window -------------------------------------------------------------------
+
+local ROW_HEIGHT = 15
+local ILVL_WIDTH = 70
+local WINDOW_W = 900  -- two columns wide enough for the long tier set names
+local CONTENT_W = WINDOW_W - 50  -- window minus the insets and the scrollbar
+local rowPool = {}
+local window
+local activeTab, activeSpec = 1, "Balance"
+-- forward declarations: the row closures and refresh reference these
+local refresh, openTrackMenu, renderList, renderDoll
+
+-- Both the list rows and the doll cells want the same two behaviours, so they
+-- are built once here rather than twice.
+
+local function attachIlvlButton(parent)
+	local b = CreateFrame("Button", nil, parent)
+	b:SetSize(ILVL_WIDTH, ROW_HEIGHT)
+	b:SetPoint("RIGHT", parent, "RIGHT")
+	b.text = b:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	b.text:SetAllPoints()
+	b.text:SetJustifyH("RIGHT")
+	b:SetScript("OnClick", function(self)
+		if self.itemName then openTrackMenu(self, self.itemName) end
+	end)
+	b:SetScript("OnEnter", function(self)
+		if not self.itemName then return end
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetText("Click to set the item level you are chasing")
+		GameTooltip:Show()
+	end)
+	b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	return b
+end
+
+local function attachItemHover(frame)
+	frame:SetScript("OnEnter", function(self)
+		if not self.link then return end
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetHyperlink(self.link)
+		GameTooltip:Show()
+	end)
+	frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	frame:SetScript("OnClick", function(self)
+		if self.link then HandleModifiedItemClick(self.link) end
+	end)
+end
+
+local function acquireRow(content, index)
+	local row = rowPool[index]
+	if not row then
+		row = CreateFrame("Button", nil, content)
+		row:SetHeight(ROW_HEIGHT)
+		row.text = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightLeft")
+		row.text:SetPoint("LEFT")
+		row.text:SetPoint("RIGHT", row, "RIGHT", -(ILVL_WIDTH + 4), 0)
+		row.text:SetJustifyH("LEFT")
+		row.text:SetWordWrap(false)  -- a wrapped name overlaps the row beneath
+		row.ilvl = attachIlvlButton(row)
+		attachItemHover(row)
+		row:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -(index - 1) * ROW_HEIGHT)
+		row:SetPoint("RIGHT", content, "RIGHT")
+		rowPool[index] = row
+	end
+	return row
+end
+
+-- Doll cells ---------------------------------------------------------------
+
+local CELL_ITEM, CELL_HEAD = 20, 16
+local SIM_EXTRAS_SHOWN = 12
+local cellPool = {}
+
+local function acquireCell(content, index)
+	local cell = cellPool[index]
+	if not cell then
+		cell = CreateFrame("Button", nil, content)
+		cell.icon = cell:CreateTexture(nil, "ARTWORK")
+		cell.icon:SetSize(16, 16)
+		cell.icon:SetPoint("LEFT")
+		cell.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)  -- trim the icon border
+		-- small font: the tier set names are long and the columns are narrow
+		cell.text = cell:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+		cell.text:SetJustifyH("LEFT")
+		cell.text:SetWordWrap(false)
+		cell.ilvl = attachIlvlButton(cell)
+		attachItemHover(cell)
+		cellPool[index] = cell
+	end
+	return cell
+end
+
+local function setHeaderCell(cell, slot)
+	cell:SetHeight(CELL_HEAD)
+	cell.icon:Hide()
+	cell.ilvl:Hide()
+	cell.link, cell.ilvl.itemName = nil, nil
+	cell.text:ClearAllPoints()
+	cell.text:SetPoint("LEFT", cell, "LEFT", 0, 0)
+	cell.text:SetPoint("RIGHT", cell, "RIGHT", 0, 0)
+	cell.text:SetText(GOLD .. slot .. "|r")
+end
+
+local function setItemCell(cell, item)
+	local link = linkFor(item.name)
+	cell:SetHeight(CELL_ITEM)
+	cell.icon:Show()
+	cell.ilvl:Show()
+	cell.text:ClearAllPoints()
+	cell.text:SetPoint("LEFT", cell.icon, "RIGHT", 4, 0)
+	cell.text:SetPoint("RIGHT", cell.ilvl, "LEFT", -4, 0)
+
+	local icon = link and select(5, C_Item.GetItemInfoInstant(link))
+	cell.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+	cell.text:SetText((link or WHITE .. item.name .. "|r") .. shortSite(item.site)
+		.. gainText(simGain(activeSpec, item.name)))
+	cell.link = link
+	cell.ilvl.itemName = item.name
+	cell.ilvl.text:SetText(gearLabel(item.name))
+end
+
+-- An item your sim rated that no BiS list mentions. Known only by item id, so
+-- the name and icon come from the client's item cache; a cold cache shows the
+-- bare id once and is correct on the next open.
+local function setSimCell(cell, id, info)
+	cell:SetHeight(CELL_ITEM)
+	cell.icon:Show()
+	cell.ilvl:Show()
+	cell.text:ClearAllPoints()
+	cell.text:SetPoint("LEFT", cell.icon, "RIGHT", 4, 0)
+	cell.text:SetPoint("RIGHT", cell.ilvl, "LEFT", -4, 0)
+
+	local _, link = C_Item.GetItemInfo(id)
+	if not link then C_Item.RequestLoadItemDataByID(id) end
+	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(id))
+		or "Interface\\Icons\\INV_Misc_QuestionMark")
+	cell.text:SetText((link or WHITE .. "item " .. id .. "|r") .. gainText(info.gain))
+	cell.link = link
+	cell.ilvl.itemName = nil  -- no target to set: the sim already fixed its level
+	cell.ilvl.text:SetText(GREY .. (info.ilvl or "?") .. "|r")
+end
+
+openTrackMenu = function(owner, itemName)
+	MenuUtil.CreateContextMenu(owner, function(_, root)
+		root:CreateTitle(itemName)
+		for _, track in ipairs(TRACKS) do
+			local submenu = root:CreateButton(track.name)
+			for rank, ilvl in ipairs(track.ilvl) do
+				submenu:CreateButton(rank .. "/6      " .. ilvl, function()
+					setGear(itemName, track.name, rank)
+					refresh()
+				end)
+			end
+		end
+		root:CreateButton(MYTHIC_RAID.name .. "      " .. MYTHIC_RAID.ilvl, function()
+			setGear(itemName, MYTHIC_RAID.name, 0)
+			refresh()
+		end)
+		root:CreateButton("Clear", function()
+			setGear(itemName, nil)
+			refresh()
+		end)
+	end)
+end
+
+refresh = function()
+	if not window then return end
+	pcall(harvestFromJournal)
+	pcall(resolveFromCache)
+
+	for i, button in ipairs(window.tabs) do
+		if i == activeTab then button:LockHighlight() else button:UnlockHighlight() end
+	end
+	for _, button in ipairs(window.specs) do
+		button:SetShown(activeTab == 2)
+		if button.spec == activeSpec then button:LockHighlight() else button:UnlockHighlight() end
+	end
+
+	if activeTab == 1 then
+		for i = 1, #cellPool do cellPool[i]:Hide() end
+		renderList(byBossLines())
+	else
+		for i = 1, #rowPool do rowPool[i]:Hide() end
+		renderDoll()
+	end
+	window.scroll:SetVerticalScroll(0)
+end
+
+renderList = function(lines)
+	for i, line in ipairs(lines) do
+		local row = acquireRow(window.content, i)
+		row.text:SetText(line.text)
+		row.link = line.link
+		row.ilvl.itemName = line.name
+		row.ilvl.text:SetText(line.name and gearLabel(line.name) or "")
+		row.ilvl:SetShown(line.name ~= nil)
+		row:Show()
+	end
+	for i = #lines + 1, #rowPool do rowPool[i]:Hide() end
+	window.content:SetSize(CONTENT_W, #lines * ROW_HEIGHT + 20)
+end
+
+renderDoll = function()
+	local content = window.content
+	local groups = itemsBySlot(activeSpec)
+	local colW = (CONTENT_W - 16) / 2
+	local used = 0
+
+	local function place(x, y, width, setup)
+		used = used + 1
+		local cell = acquireCell(content, used)
+		cell:ClearAllPoints()
+		cell:SetPoint("TOPLEFT", content, "TOPLEFT", x, -y)
+		cell:SetWidth(width)
+		setup(cell)
+		cell:Show()
+		return y + cell:GetHeight()
+	end
+
+	local function column(slots, x, y)
+		for _, slot in ipairs(slots) do
+			local items = groups[slot]
+			if items then
+				y = place(x, y, colW, function(cell) setHeaderCell(cell, slot) end)
+				for _, item in ipairs(items) do
+					y = place(x, y, colW, function(cell) setItemCell(cell, item) end)
+				end
+				y = y + 6
+			end
+		end
+		return y
+	end
+
+	local leftY  = column(DOLL_LEFT, 0, 4)
+	local rightY = column(DOLL_RIGHT, colW + 16, 4)
+	local y = math.max(leftY, rightY) + 10
+
+	-- Anything your own sim rates that the two BiS lists never mentioned. This
+	-- is the part no public list can give you, because it is your gear.
+	local sim = simFor(activeSpec)
+	if sim then
+		local onList = {}
+		for _, item in ipairs(BIS[activeSpec]) do
+			local id = itemIdFor(item.name)
+			if id then onList[id] = true end
+		end
+
+		local extras = {}
+		for id, info in pairs(sim.items) do
+			if not onList[id] and info.gain > 0 then
+				extras[#extras + 1] = { id = id, info = info }
+			end
+		end
+		table.sort(extras, function(a, b) return a.info.gain > b.info.gain end)
+
+		y = place(0, y, CONTENT_W - 20, function(cell)
+			setHeaderCell(cell, "Your sim rates these, and no BiS list mentions them")
+		end)
+		local shown = math.min(#extras, SIM_EXTRAS_SHOWN)
+		for i = 1, shown do
+			y = place(0, y, CONTENT_W - 20, function(cell)
+				setSimCell(cell, extras[i].id, extras[i].info)
+			end)
+		end
+		-- never hide a cut silently
+		if #extras > shown then
+			y = place(0, y, CONTENT_W - 20, function(cell)
+				setHeaderCell(cell, ("... and %d more gains below these, not shown")
+					:format(#extras - shown))
+			end)
+		end
+		y = place(0, y, CONTENT_W - 20, function(cell)
+			setHeaderCell(cell, ("Droptimizer imported %s, baseline %d dps")
+				:format(sim.when or "?", sim.baseline or 0))
+		end)
+	end
+
+	for i = used + 1, #cellPool do cellPool[i]:Hide() end
+	content:SetSize(CONTENT_W, y + 10)
+end
+
+local function buildWindow()
+	local f = CreateFrame("Frame", "DjinnisBiSFrame", UIParent, "BasicFrameTemplateWithInset")
+	f:SetSize(WINDOW_W, 560)
+	f:SetPoint("CENTER")
+	f:SetMovable(true)
+	f:EnableMouse(true)
+	f:RegisterForDrag("LeftButton")
+	f:SetScript("OnDragStart", f.StartMoving)
+	f:SetScript("OnDragStop", f.StopMovingOrSizing)
+	f:SetClampedToScreen(true)
+
+	-- own title rather than the template's, which has moved between patches
+	local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	title:SetPoint("TOP", f, "TOP", 0, -6)
+	title:SetText("Djinni's BiS  " .. GREY .. "The Venomous Abyss|r")
+
+	-- Plain buttons rather than PanelTabButtonTemplate: the tab templates want
+	-- PanelTemplates_ bookkeeping and give nothing back for two tabs.
+	f.tabs = {}
+	local TAB_LABELS = { "By Boss", "By Slot" }
+	for i, label in ipairs(TAB_LABELS) do
+		local button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+		button:SetSize(110, 22)
+		button:SetPoint("TOPLEFT", f, "TOPLEFT", 12 + (i - 1) * 114, -28)
+		button:SetText(label)
+		button:SetScript("OnClick", function() activeTab = i; refresh() end)
+		f.tabs[i] = button
+	end
+
+	local importButton = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	importButton:SetSize(130, 22)
+	importButton:SetPoint("TOPRIGHT", f, "TOPRIGHT", -14, -28)
+	importButton:SetText("Import sim")
+	importButton:SetScript("OnClick", function() DjinnisBiS_ShowImport(activeSpec) end)
+
+	f.specs = {}
+	for i, spec in ipairs(SPEC_ORDER) do
+		local button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+		button:SetSize(104, 22)
+		button:SetPoint("TOPLEFT", f, "TOPLEFT", 12 + (i - 1) * 108, -54)
+		button:SetText(spec)
+		button.spec = spec
+		button:SetScript("OnClick", function() activeSpec = spec; refresh() end)
+		f.specs[i] = button
+	end
+
+	local scroll = CreateFrame("ScrollFrame", "DjinnisBiSScroll", f, "UIPanelScrollFrameTemplate")
+	scroll:SetPoint("TOPLEFT", 12, -80)
+	scroll:SetPoint("BOTTOMRIGHT", -34, 10)
+	f.scroll = scroll
+
+	local content = CreateFrame("Frame", nil, scroll)
+	content:SetSize(CONTENT_W, 10)
+	scroll:SetScrollChild(content)
+	f.content = content
+
+	tinsert(UISpecialFrames, "DjinnisBiSFrame")  -- Escape closes it
+	return f
+end
+
+function DjinnisBiS_Toggle()
+	window = window or buildWindow()
+	if window:IsShown() then
+		window:Hide()
+	else
+		refresh()
+		window:Show()
+	end
+end
+
+-- Sim import window ---------------------------------------------------------
+
+local importWindow
+local function buildImportWindow()
+	local f = CreateFrame("Frame", "DjinnisBiSImport", UIParent, "BasicFrameTemplateWithInset")
+	f:SetSize(560, 420)
+	f:SetPoint("CENTER")
+	f:SetMovable(true)
+	f:EnableMouse(true)
+	f:SetFrameStrata("DIALOG")
+	f:RegisterForDrag("LeftButton")
+	f:SetScript("OnDragStart", f.StartMoving)
+	f:SetScript("OnDragStop", f.StopMovingOrSizing)
+
+	local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	title:SetPoint("TOP", f, "TOP", 0, -6)
+	title:SetText("Import a Raidbots Droptimizer")
+
+	local help = f:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	help:SetPoint("TOPLEFT", f, "TOPLEFT", 14, -32)
+	help:SetPoint("RIGHT", f, "RIGHT", -14, 0)
+	help:SetJustifyH("LEFT")
+	help:SetText(GREY .. "Open your report URL with |r/data.csv" .. GREY
+		.. " on the end, select all, copy, paste below. Pick the spec you simmed.|r")
+
+	f.specs = {}
+	for i, spec in ipairs(SPEC_ORDER) do
+		local button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+		button:SetSize(126, 22)
+		button:SetPoint("TOPLEFT", f, "TOPLEFT", 14 + (i - 1) * 130, -62)
+		button:SetText(spec)
+		button.spec = spec
+		button:SetScript("OnClick", function()
+			f.spec = spec
+			for _, other in ipairs(f.specs) do
+				if other.spec == spec then other:LockHighlight() else other:UnlockHighlight() end
+			end
+		end)
+		f.specs[i] = button
+	end
+
+	local box = CreateFrame("ScrollFrame", nil, f, "UIPanelScrollFrameTemplate")
+	box:SetPoint("TOPLEFT", f, "TOPLEFT", 14, -92)
+	box:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -34, 62)
+
+	local edit = CreateFrame("EditBox", nil, box)
+	edit:SetMultiLine(true)
+	edit:SetFontObject("ChatFontNormal")
+	edit:SetWidth(490)
+	edit:SetAutoFocus(false)
+	edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+	box:SetScrollChild(edit)
+	f.edit = edit
+
+	f.status = f:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	f.status:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 14, 16)
+	f.status:SetPoint("RIGHT", f, "RIGHT", -150, 0)
+	f.status:SetJustifyH("LEFT")
+
+	local go = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	go:SetSize(120, 24)
+	go:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -14, 12)
+	go:SetText("Import")
+	go:SetScript("OnClick", function()
+		local items, baseline, unreadable, count = parseSim(f.edit:GetText())
+		if not items then
+			f.status:SetText("|cffff0000Could not read that.|r " .. GREY
+				.. "No baseline row found, so it is not a Raidbots CSV.|r")
+			return
+		end
+		db().sim = db().sim or {}
+		db().sim[f.spec] = {
+			items = items,
+			baseline = baseline,
+			when = (date and date("%d %b %H:%M")) or "?",
+		}
+		f.status:SetText(GREEN .. count .. " items imported for " .. f.spec .. ".|r "
+			.. GREY .. unreadable .. " rows skipped.|r")
+		f.edit:SetText("")
+		refresh()
+	end)
+
+	return f
+end
+
+function DjinnisBiS_ShowImport(spec)
+	importWindow = importWindow or buildImportWindow()
+	importWindow.spec = spec or activeSpec
+	for _, button in ipairs(importWindow.specs) do
+		if button.spec == importWindow.spec then button:LockHighlight() else button:UnlockHighlight() end
+	end
+	importWindow.status:SetText("")
+	importWindow:Show()
+end
+
+-- The button ---------------------------------------------------------------
+
+local button
+local function buildButton()
+	local b = CreateFrame("Button", "DjinnisBiSButton", UIParent)
+	b:SetSize(32, 32)
+	b:SetNormalTexture("Interface\\Icons\\Ability_Druid_Maul")
+	b:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
+	b:SetMovable(true)
+	b:EnableMouse(true)
+	b:SetClampedToScreen(true)
+	b:RegisterForDrag("LeftButton")
+	b:SetScript("OnDragStart", b.StartMoving)
+	b:SetScript("OnDragStop", function(self)
+		self:StopMovingOrSizing()
+		local point, _, relPoint, x, y = self:GetPoint()
+		DjinnisBiSDB = DjinnisBiSDB or {}
+		DjinnisBiSDB.button = { point, relPoint, x, y }
+	end)
+	b:SetScript("OnClick", DjinnisBiS_Toggle)
+	b:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+		GameTooltip:SetText("Djinni's BiS")
+		GameTooltip:AddLine("Click to open. Drag to move.", 1, 1, 1)
+		GameTooltip:Show()
+	end)
+	b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+	local saved = DjinnisBiSDB and DjinnisBiSDB.button
+	if saved then
+		b:SetPoint(saved[1], UIParent, saved[2], saved[3], saved[4])
+	else
+		b:SetPoint("CENTER", UIParent, "CENTER", 0, -180)
+	end
+	return b
+end
+
+local loader = CreateFrame("Frame")
+loader:RegisterEvent("PLAYER_LOGIN")
+-- Blizzard's own typo, RECIEVED. The journal streams loot in after the request,
+-- so a harvest that ran too early gets thrown away and retried on next open.
+loader:RegisterEvent("EJ_LOOT_DATA_RECIEVED")
+loader:SetScript("OnEvent", function(_, event)
+	if event == "PLAYER_LOGIN" then
+		button = button or buildButton()
+	else
+		harvested = false
+	end
+end)
+
+-- /bis ---------------------------------------------------------------------
+
+local function listBySource(filter)
+	local want = filter:lower()
+	print(GOLD .. "Djinni's BiS|r -- items matching '" .. filter .. "':")
+	local names = {}
+	for _, entry in pairs(lookup) do
+		if entry.boss:lower():find(want, 1, true) then names[#names + 1] = entry.name end
+	end
+	table.sort(names)
+	if #names == 0 then
+		print("  " .. GREY .. "nothing. Try: ula, coiled, vashnik, nek, twin, sszorak, explorers, sentinels|r")
+		return
+	end
+	for _, name in ipairs(names) do
+		local entry = lookup[norm(name)]
+		print("  " .. name .. GREEN .. "  " .. table.concat(entry.specs, ", ") .. "|r"
+			.. GREY .. "  -- " .. entry.boss .. "|r")
+	end
+end
+
+-- one runnable check: /bis test
+local function selfTest()
+	local failed = 0
+	local function check(label, got, want)
+		if got ~= want then
+			failed = failed + 1
+			print("|cffff0000FAIL|r " .. label .. ": expected " .. tostring(want) .. ", got " .. tostring(got))
+		end
+	end
+
+	-- matching, including the normalisation that lets a guide's odd casing win
+	check("Sash of the Forlorn Vessel", #match("Sash of the Forlorn Vessel").specs, 4)
+	check("normalised name", #match("SASH  OF THE  FORLORN-VESSEL").specs, 4)
+	check("Jan'thrazet", #match("Jan'thrazet, the Soul Fang").specs, 2)
+	check("Hearthstone", match("Hearthstone") and 1 or 0, 0)
+
+	-- every item must land in a slot the By Slot tab knows how to draw
+	local known = {}
+	for _, slot in ipairs(SLOT_ORDER) do known[slot] = true end
+	for _, spec in ipairs(SPEC_ORDER) do
+		for _, item in ipairs(BIS[spec]) do
+			if not known[item.slot] then
+				failed = failed + 1
+				print("|cffff0000FAIL|r unknown slot '" .. tostring(item.slot) .. "' on " .. item.name)
+			end
+		end
+	end
+
+	-- the raidbots CSV parser, against real rows from a Droptimizer report
+	local sample = table.concat({
+		"name,dps_mean,dps_min,dps_max,dps_std_dev,dps_mean_std_dev",
+		"Djinni,100000.0,89317.2,117457.9,3456.4,25.7",
+		"-1/1311/dungeon-mythic-weekly10/271681/318/0/off_hand////,101000.0,1,2,3,4",
+		"-1/1311/dungeon-mythic-weekly10/159636/318/0/main_hand////,104230.0,1,2,3,4",
+		"a line that is not a csv row at all",
+	}, "\n")
+	local items, baseline, unreadable, count = parseSim(sample)
+	check("sim parse, baseline", baseline, 100000.0)
+	check("sim parse, item count", count, 2)
+	check("sim parse, unreadable", unreadable, 1)
+	check("sim parse, gain percent", items and items[159636] and items[159636].gain, 4.23)
+	check("sim parse, item level", items and items[271681] and items[271681].ilvl, 318)
+	check("sim parse, slot", items and items[271681] and items[271681].slot, "off_hand")
+
+	-- a paste that is not a Raidbots CSV must fail loudly, not half-work
+	local bad = parseSim("just some words\nand some more")
+	check("sim parse, rejects junk", bad, nil)
+
+	-- the bonus roll advice is only as good as the source matching
+	check("bonus roll, Ula'tek", #bisFrom("Ula'tek") > 0, true)
+	check("bonus roll, dungeon", #bisFrom("Temple of Sethraliss") > 0, true)
+	check("bonus roll, nowhere", #bisFrom("Stormwind"), 0)
+	check("bonus roll, no source", #bisFrom(nil), 0)
+
+	-- every slot must be drawn by one of the two doll columns, or its items
+	-- vanish from the By Slot tab without any error
+	local drawn = {}
+	for _, list in ipairs({ DOLL_LEFT, DOLL_RIGHT }) do
+		for _, slot in ipairs(list) do drawn[slot] = true end
+	end
+	for _, slot in ipairs(SLOT_ORDER) do
+		if not drawn[slot] then
+			failed = failed + 1
+			print("|cffff0000FAIL|r slot '" .. slot .. "' is in no doll column")
+		end
+	end
+
+	-- upgrade tracks must be six ranks and always climbing
+	for _, track in ipairs(TRACKS) do
+		check(track.name .. " rank count", #track.ilvl, 6)
+		for rank = 2, #track.ilvl do
+			if track.ilvl[rank] <= track.ilvl[rank - 1] then
+				failed = failed + 1
+				print("|cffff0000FAIL|r " .. track.name .. " " .. rank .. "/6 is not above " .. (rank - 1) .. "/6")
+			end
+		end
+	end
+
+	-- a saved target must survive the round trip and show its item level
+	setGear("zzz not a real item", "Myth", 6)
+	check("saved ilvl label", gearLabel("zzz not a real item"):find("334", 1, true) ~= nil, true)
+	setGear("zzz not a real item", nil)
+	check("cleared ilvl label", gearLabel("zzz not a real item"):find("334", 1, true) ~= nil, false)
+
+	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")
+		or ("|cffff0000[BiS] " .. failed .. " check(s) failed|r"))
+end
+
+SLASH_DJINNISBIS1 = "/bis"
+SlashCmdList.DJINNISBIS = function(msg)
+	msg = msg:match("^%s*(.-)%s*$")
+	if msg == "" then DjinnisBiS_Toggle()
+	elseif msg == "here" then bonusRollVerdict((GetInstanceInfo()))
+	elseif msg == "test" then selfTest()
+	else listBySource(msg) end
+end
