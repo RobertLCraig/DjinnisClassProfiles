@@ -460,6 +460,57 @@ roll:SetScript("OnEvent", function(_, event, arg1, arg2, _, _, success)
 	end
 end)
 
+-- What you are wearing -------------------------------------------------------
+--
+-- The slot ids and the GetDetailedItemLevelInfo route are lifted from
+-- DjinnisCharacterFrame/Data.lua, which already solved this properly. Copied
+-- rather than shared: that addon is dormant and is not installed in the game,
+-- so a runtime dependency on it would be a dependency on nothing.
+
+local SLOT_INVENTORY = {
+	Head     = { 1 },  Neck    = { 2 },      Shoulder = { 3 },
+	Chest    = { 5 },  Waist   = { 6 },      Legs     = { 7 },
+	Feet     = { 8 },  Wrist   = { 9 },      Hands    = { 10 },
+	Finger   = { 11, 12 },                   Trinket  = { 13, 14 },
+	Back     = { 15 },
+	["Main Hand"] = { 16 }, ["Off Hand"] = { 17 },
+	-- Two Hand deliberately has no slot: a two-hander already shows under Main
+	-- Hand, and listing slot 16 twice would print the same weapon twice.
+	["Two Hand"] = {},
+}
+
+local function itemLevelOf(link)
+	if not link or not C_Item.GetDetailedItemLevelInfo then return nil end
+	local ok, ilvl = pcall(C_Item.GetDetailedItemLevelInfo, link)
+	return ok and ilvl or nil
+end
+
+local function equippedIn(slot)
+	local worn = {}
+	for _, slotID in ipairs(SLOT_INVENTORY[slot] or {}) do
+		local link = GetInventoryItemLink("player", slotID)
+		if link then
+			worn[#worn + 1] = {
+				link = link,
+				ilvl = itemLevelOf(link),
+				id = tonumber(link:match("item:(%d+)")),
+			}
+		end
+	end
+	return worn
+end
+
+-- rebuilt on every render, so the ticks follow you changing gear
+local wornIds = {}
+local function refreshWornIds()
+	wornIds = {}
+	for slot in pairs(SLOT_INVENTORY) do
+		for _, worn in ipairs(equippedIn(slot)) do
+			if worn.id then wornIds[worn.id] = true end
+		end
+	end
+end
+
 -- Lines --------------------------------------------------------------------
 --
 -- Both tabs render the same thing: a flat list of { text, link }. Only the
@@ -647,11 +698,29 @@ local function setItemCell(cell, item)
 
 	local icon = link and select(5, C_Item.GetItemInfoInstant(link))
 	cell.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
-	cell.text:SetText((link or WHITE .. item.name .. "|r") .. shortSite(item.site)
+	local id = itemIdFor(item.name)
+	local have = id and wornIds[id] and "|TInterface\\RaidFrame\\ReadyCheck-Ready:12|t" or ""
+	cell.text:SetText(have .. (link or WHITE .. item.name .. "|r") .. shortSite(item.site)
 		.. gainText(simGain(activeSpec, item.name)))
 	cell.link = link
 	cell.ilvl.itemName = item.name
 	cell.ilvl.text:SetText(gearLabel(item.name))
+end
+
+local function setWearingCell(cell, worn)
+	cell:SetHeight(CELL_ITEM)
+	cell.icon:Show()
+	cell.ilvl:Show()
+	cell.text:ClearAllPoints()
+	cell.text:SetPoint("LEFT", cell.icon, "RIGHT", 4, 0)
+	cell.text:SetPoint("RIGHT", cell.ilvl, "LEFT", -4, 0)
+
+	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(worn.link))
+		or "Interface\\Icons\\INV_Misc_QuestionMark")
+	cell.text:SetText(GREY .. "on you |r" .. worn.link)
+	cell.link = worn.link
+	cell.ilvl.itemName = nil  -- this is what you have, not a target to set
+	cell.ilvl.text:SetText(GREY .. (worn.ilvl or "?") .. "|r")
 end
 
 -- An item your sim rated that no BiS list mentions. Known only by item id, so
@@ -740,6 +809,7 @@ renderDoll = function()
 	local groups = itemsBySlot(activeSpec)
 	local colW = (CONTENT_W - 16) / 2
 	local used = 0
+	refreshWornIds()
 
 	local function place(x, y, width, setup)
 		used = used + 1
@@ -757,6 +827,10 @@ renderDoll = function()
 			local items = groups[slot]
 			if items then
 				y = place(x, y, colW, function(cell) setHeaderCell(cell, slot) end)
+				-- what you have on right now, above what you are chasing
+				for _, worn in ipairs(equippedIn(slot)) do
+					y = place(x, y, colW, function(cell) setWearingCell(cell, worn) end)
+				end
 				for _, item in ipairs(items) do
 					y = place(x, y, colW, function(cell) setItemCell(cell, item) end)
 				end
@@ -1103,6 +1177,15 @@ local function selfTest()
 	check("bonus roll, dungeon", #bisFrom("Temple of Sethraliss") > 0, true)
 	check("bonus roll, nowhere", #bisFrom("Stormwind"), 0)
 	check("bonus roll, no source", #bisFrom(nil), 0)
+
+	-- every slot needs an inventory mapping, or its "on you" row silently
+	-- never appears
+	for _, slot in ipairs(SLOT_ORDER) do
+		if not SLOT_INVENTORY[slot] then
+			failed = failed + 1
+			print("|cffff0000FAIL|r slot '" .. slot .. "' has no inventory slot id")
+		end
+	end
 
 	-- every slot must be drawn by one of the two doll columns, or its items
 	-- vanish from the By Slot tab without any error
