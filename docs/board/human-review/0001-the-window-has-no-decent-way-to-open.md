@@ -33,15 +33,29 @@ The loot roll warning and the bonus roll verdict, which are event driven and nev
 Rebuilding `DjinnisDataTexts` or changing anything inside it beyond, at most, registering a new
 module.
 
-## The open question this card carries
+## Direction
 
-Whether to depend on `DjinnisDataTexts` at all.
+**2026-08-20, Rob: standalone.** No dependency on `DjinnisDataTexts`, in either direction.
 
-Making `DjinnisBiS` a data text module inside `DjinnisDataTexts` is the least code and the best
-placement, but it couples an addon that might go to CurseForge to one that is already published,
-and it means `DjinnisBiS` does nothing useful for anyone who does not run both. Registering from
-`DjinnisBiS` into `DjinnisDataTexts` if present, and falling back to its own button if absent, is
-more code but keeps the addon standalone. That is a call for Rob, not for an agent.
+That turned out to cost nothing, because LibDataBroker already solves it. The addon now registers a
+broker **data source**, which is the open standard every data text display reads, and LibDBIcon
+turns the same object into a minimap button. So the data text Rob asked for arrives through ElvUI or
+any other broker display, the minimap button arrives for free, and `DjinnisBiS` depends on nothing
+but its own embedded libraries.
+
+`DjinnisDataTexts` was checked and would not have helped anyway: it is a **producer** of broker
+objects, one per module, not a generic display, so it would not have picked up a foreign source
+without new code inside it.
+
+Libraries chosen to match the house pattern rather than invented: `DjinnisWarbandManager`,
+`DjinnisDelveTracker` and `DjinnisClassProfiles` all already register a minimap button this way.
+Four libraries embedded, LibStub, CallbackHandler-1.0, LibDataBroker-1.1, LibDBIcon-1.0, listed
+directly in the `.toc` rather than through an `embeds.xml`.
+
+The floating claw button is gone, not kept as a fallback.
+
+**Still open, and it is why this card is not done:** nobody has established why the addon compartment
+entry never appeared, and the tooltip summary has never been seen in a live client.
 
 ## Acceptance
 
@@ -50,9 +64,9 @@ more code but keeps the addon standalone. That is a call for Rob, not for an age
       restart, verified in a live client rather than reasoned about.
 - [ ] #2 WHEN the addon compartment entry is investigated, THE FINDING SHALL be written down: either
       the entry works and the earlier failure is explained, or the field is abandoned with a reason.
-- [ ] #3 IF the data text route is chosen, THE ADDON SHALL still open its window when
-      `DjinnisDataTexts` is absent or disabled.
-- [ ] #4 THE FLOATING CLAW BUTTON SHALL either be removed or become an opt-in, not the only route.
+- [x] #3 THE ADDON SHALL depend on no other addon, and SHALL expose its summary through an open
+      interface rather than a private one.
+- [x] #4 THE FLOATING CLAW BUTTON SHALL either be removed or become an opt-in, not the only route.
 <!-- AC:END -->
 
 ## Tasks
@@ -60,10 +74,11 @@ more code but keeps the addon standalone. That is a call for Rob, not for an age
 - [ ] Restart the client fully and record whether the compartment entry appears
 - [ ] Find out what actually puts `DjinnisDelveTracker` and `DjinnisWarbandManager` in that drawer,
       given neither declares `AddonCompartmentFunc`
-- [ ] Read how `DjinnisDataTexts` registers a module and what a module has to provide
-- [ ] Put the standalone-versus-coupled question to Rob with the cost of each
-- [ ] Build the chosen route
-- [ ] Check it in a live client, both with and without `DjinnisDataTexts` enabled
+- [x] Read how `DjinnisDataTexts` registers a module: it produces broker objects rather than
+      consuming them, so coupling would have needed new code inside it
+- [x] Put the standalone-versus-coupled question to Rob with the cost of each
+- [x] Build the chosen route: LibDataBroker data source plus a LibDBIcon minimap button
+- [ ] Check the minimap button and its tooltip summary in a live client
 
 ## Plan
 

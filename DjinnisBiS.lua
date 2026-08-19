@@ -1091,39 +1091,58 @@ end
 
 -- The button ---------------------------------------------------------------
 
-local button
-local function buildButton()
-	local b = CreateFrame("Button", "DjinnisBiSButton", UIParent)
-	b:SetSize(32, 32)
-	b:SetNormalTexture("Interface\\Icons\\Ability_Druid_Maul")
-	b:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
-	b:SetMovable(true)
-	b:EnableMouse(true)
-	b:SetClampedToScreen(true)
-	b:RegisterForDrag("LeftButton")
-	b:SetScript("OnDragStart", b.StartMoving)
-	b:SetScript("OnDragStop", function(self)
-		self:StopMovingOrSizing()
-		local point, _, relPoint, x, y = self:GetPoint()
-		DjinnisBiSDB = DjinnisBiSDB or {}
-		DjinnisBiSDB.button = { point, relPoint, x, y }
-	end)
-	b:SetScript("OnClick", DjinnisBiS_Toggle)
-	b:SetScript("OnEnter", function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-		GameTooltip:SetText("Djinni's BiS")
-		GameTooltip:AddLine("Click to open. Drag to move.", 1, 1, 1)
-		GameTooltip:Show()
-	end)
-	b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+-- A minimap button via LibDBIcon, which is what DjinnisWarbandManager,
+-- DjinnisDelveTracker and DjinnisClassProfiles already use. The floating claw
+-- icon this replaces was a placeholder: no minimap docking, no edge clamping
+-- to the ring, and no relationship to how the other addons present themselves.
+--
+-- Registering a LibDataBroker "data source" rather than only a button is the
+-- standalone answer to wanting this as a data text. Any broker display picks it
+-- up, ElvUI's data texts included, and nothing here depends on another addon
+-- being installed. Card 0001.
 
-	local saved = DjinnisBiSDB and DjinnisBiSDB.button
-	if saved then
-		b:SetPoint(saved[1], UIParent, saved[2], saved[3], saved[4])
-	else
-		b:SetPoint("CENTER", UIParent, "CENTER", 0, -180)
+local function summaryLines(tooltip)
+	tooltip:AddLine("Djinni's BiS")
+
+	local where = GetInstanceInfo and (GetInstanceInfo())
+	local here = where and bisFrom(where) or {}
+	if #here > 0 then
+		tooltip:AddLine(("|cff00ff00%d BiS item%s drop here|r")
+			:format(#here, #here == 1 and "" or "s"))
+		for i = 1, math.min(3, #here) do
+			tooltip:AddDoubleLine("  " .. here[i].name,
+				table.concat(here[i].specs, ", "))
+		end
+		if #here > 3 then
+			tooltip:AddLine(("|cff808080  and %d more|r"):format(#here - 3))
+		end
+	elseif where and where ~= "" then
+		tooltip:AddLine("|cff808080Nothing BiS drops here|r")
 	end
-	return b
+
+	tooltip:AddLine(" ")
+	tooltip:AddLine("|cffaaaaaaClick to open|r")
+end
+
+local function buildBroker()
+	if not LibStub then return end
+	local ldb = LibStub("LibDataBroker-1.1", true)
+	if not ldb then return end
+
+	local broker = ldb:NewDataObject("DjinnisBiS", {
+		type = "data source",
+		text = "BiS",
+		icon = "Interface\\Icons\\Ability_Druid_Maul",
+		OnClick = function() DjinnisBiS_Toggle() end,
+		OnTooltipShow = summaryLines,
+	})
+
+	local icon = LibStub("LibDBIcon-1.0", true)
+	if icon and broker then
+		DjinnisBiSDB = DjinnisBiSDB or {}
+		DjinnisBiSDB.minimap = DjinnisBiSDB.minimap or { hide = false }
+		icon:Register("DjinnisBiS", broker, DjinnisBiSDB.minimap)
+	end
 end
 
 local loader = CreateFrame("Frame")
@@ -1133,7 +1152,7 @@ loader:RegisterEvent("PLAYER_LOGIN")
 loader:RegisterEvent("EJ_LOOT_DATA_RECIEVED")
 loader:SetScript("OnEvent", function(_, event)
 	if event == "PLAYER_LOGIN" then
-		button = button or buildButton()
+		buildBroker()
 	else
 		harvested = false
 	end
