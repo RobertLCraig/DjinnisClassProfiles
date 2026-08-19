@@ -235,8 +235,6 @@ local function resolveFromCache()
 	end
 end
 
-local DRUID_CLASS_ID = 11
-
 local harvested = false
 local function harvestFromJournal()
 	if harvested or not EJ_GetNumTiers then return end
@@ -254,22 +252,59 @@ local function harvestFromJournal()
 	if not instanceID then return end
 
 	EJ_SelectInstance(instanceID)
-	local found = 0
-	-- Two sweeps. Unfiltered misses the tier set, because tier only appears
-	-- once the journal has a class filter on it. That is why the Dreamwatcher
-	-- pieces came back linkless on the first build.
-	for _, classID in ipairs({ 0, DRUID_CLASS_ID }) do
-		EJ_SetLootFilter(classID, 0)
-		for i = 1, (EJ_GetNumLoot() or 0) do
-			local info = C_EncounterJournal.GetLootInfoByIndex(i)
-			if info and info.name and info.link then
-				links[norm(info.name)] = info.link
-				found = found + 1
+
+	-- A slot filter left on by the journal UI hides most of the loot table.
+	-- Blizzard's own GetLootSlotsPresent resets it before counting, for the
+	-- same reason. Put it back afterwards so the journal looks untouched.
+	local slotFilter = C_EncounterJournal.GetSlotFilter()
+	C_EncounterJournal.ResetSlotFilter()
+
+	-- The tier set only appears with a class filter on. Setting that filter is
+	-- asynchronous: the loot list is stale until EJ_LOOT_DATA_RECIEVED lands,
+	-- so reading it immediately returns the previous, unfiltered list. That is
+	-- exactly why the Dreamwatcher pieces kept coming back without links.
+	local classID = select(3, UnitClass("player"))
+	local stale = false
+
+	for _, filter in ipairs({ 0, classID }) do
+		EJ_SetLootFilter(filter, 0)
+		if EJ_IsLootListOutOfDate and EJ_IsLootListOutOfDate() then
+			stale = true
+		else
+			for i = 1, (EJ_GetNumLoot() or 0) do
+				local info = C_EncounterJournal.GetLootInfoByIndex(i)
+				if info and info.name and info.link then
+					links[norm(info.name)] = info.link
+				end
 			end
 		end
 	end
-	EJ_SetLootFilter(0, 0)  -- leave the journal as we found it
-	harvested = found > 0
+
+	EJ_SetLootFilter(0, 0)
+	C_EncounterJournal.SetSlotFilter(slotFilter)
+
+	-- Only call it done when nothing was stale. Anything stale leaves this
+	-- false, and EJ_LOOT_DATA_RECIEVED brings us back for another pass.
+	harvested = not stale
+end
+
+-- Second source, free and already on disk: every item id in an imported
+-- Droptimizer. Once the client has cached an id we get its name and link, so
+-- any BiS item that appeared in a sim resolves without the journal at all.
+local function resolveFromSim()
+	local store = db().sim
+	if not store then return end
+	for _, sim in pairs(store) do
+		for id in pairs(sim.items or {}) do
+			local name, link = C_Item.GetItemInfo(id)
+			if name and link then
+				local key = norm(name)
+				if lookup[key] and not links[key] then links[key] = link end
+			elseif not name then
+				C_Item.RequestLoadItemDataByID(id)  -- ready on the next open
+			end
+		end
+	end
 end
 
 local function linkFor(name)
@@ -771,6 +806,7 @@ refresh = function()
 	if not window then return end
 	pcall(harvestFromJournal)
 	pcall(resolveFromCache)
+	pcall(resolveFromSim)
 
 	for i, button in ipairs(window.tabs) do
 		if i == activeTab then button:LockHighlight() else button:UnlockHighlight() end
