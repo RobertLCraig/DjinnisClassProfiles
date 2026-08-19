@@ -1,0 +1,447 @@
+param(
+    [string]$OutputDir   = (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Definition) "releases"),
+    # release (default), beta, or alpha -- controls git tag suffix so CurseForge sets the right file type
+    # Release: v1.2.3        -> CurseForge "Release"
+    # Beta:    v1.2.3-beta   -> CurseForge "Beta"
+    # Alpha:   v1.2.3-alpha  -> CurseForge "Alpha"
+    [ValidateSet("release","beta","alpha")]
+    [string]$ReleaseType = "release",
+    [switch]$DryRun,
+    [switch]$SkipTag,
+    [switch]$SkipPush
+)
+
+$ErrorActionPreference = "Stop"
+
+# ---------------------------------------------------------------------------
+# Guard the first positional parameter
+#
+# $OutputDir is positional, so any unrecognised argument binds to it and is
+# then treated as a path to create. `release.ps1 --help` therefore did not
+# print help: it built the release into a new directory literally named
+# "--help", and the resulting zip was committed and sat in the repo until
+# 2026-08-12. Refuse anything flag-shaped instead of making a folder out of it.
+# ---------------------------------------------------------------------------
+
+function Show-Usage {
+    Write-Host ""
+    Write-Host "  DjinnisBiS release script" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Usage: release.ps1 [-OutputDir <path>] [-ReleaseType release|beta|alpha]"
+    Write-Host "                     [-DryRun] [-SkipTag] [-SkipPush]"
+    Write-Host ""
+    Write-Host "  The version comes from the '## Version:' line in RELEASE_NOTES.md."
+    Write-Host "  -DryRun previews without writing, committing, tagging or pushing."
+    Write-Host ""
+}
+
+# Two checks, because the two ways of launching this script bind arguments
+# differently and only covering one of them is worse than covering neither: it
+# reads as guarded while still firing a real release.
+#
+#   pwsh -File release.ps1 --help   ->  $OutputDir keeps its default,
+#                                       "--help" lands in $args
+#   & .\release.ps1 --help          ->  "--help" binds positionally to $OutputDir
+#
+# Measured on 2026-08-15, after the -File form ran a genuine release while the
+# guard, which only inspected $OutputDir, sat there looking correct.
+
+# 1. Anything unbound. Every real parameter is declared above, so a non-empty
+#    $args means the caller typed something this script does not understand.
+if ($args.Count -gt 0) {
+    $first = [string]$args[0]
+    if ($first -match '^-{1,2}(h|help|\?)$') {
+        Show-Usage
+        exit 0
+    }
+    Write-Host ""
+    Write-Host "ERROR: unrecognised argument '$first'." -ForegroundColor Red
+    Write-Host "       Refusing rather than starting a release you did not ask for." -ForegroundColor Red
+    Show-Usage
+    exit 1
+}
+
+# 2. A flag that bound positionally, which would then be created as a folder.
+if ($OutputDir -match '^-') {
+    if ($OutputDir -match '^-{1,2}(h|help|\?)$') {
+        Show-Usage
+        exit 0
+    }
+    Write-Host ""
+    Write-Host "ERROR: '$OutputDir' looks like a flag, not an output directory." -ForegroundColor Red
+    Write-Host "       It would have been created as a folder. Refusing." -ForegroundColor Red
+    Show-Usage
+    exit 1
+}
+
+$Root             = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$AddonName        = "DjinnisBiS"
+$TocFile          = Join-Path $Root "$AddonName.toc"
+$ReleaseNotesFile = Join-Path $Root "RELEASE_NOTES.md"
+$ChangelogFile    = Join-Path $Root "CHANGELOG.md"
+
+# Resolve gh CLI -- check PATH first, then common install locations
+$_ghCmd = Get-Command "gh" -ErrorAction SilentlyContinue
+$GhExe  = if ($_ghCmd) { $_ghCmd.Source } else { $null }
+if (-not $GhExe) {
+    $candidates = @(
+        "C:\Program Files\GitHub CLI\gh.exe",
+        "$env:LOCALAPPDATA\Programs\GitHub CLI\gh.exe"
+    )
+    foreach ($c in $candidates) { if (Test-Path $c) { $GhExe = $c; break } }
+}
+
+function Write-Info    { param($m) Write-Host $m -ForegroundColor Cyan    }
+function Write-Success { param($m) Write-Host $m -ForegroundColor Green   }
+function Write-Warn    { param($m) Write-Host $m -ForegroundColor Yellow  }
+function Write-Err     { param($m) Write-Host "ERROR: $m" -ForegroundColor Red; exit 1 }
+
+function Make-Tag {
+    param([string]$ver, [string]$type)
+    if ($type -eq "release") { return "v$ver" }
+    return "v$ver-$type"
+}
+
+# ---------------------------------------------------------------------------
+# 1. Read version from RELEASE_NOTES.md
+# ---------------------------------------------------------------------------
+
+if (-not (Test-Path $ReleaseNotesFile)) {
+    Write-Err "RELEASE_NOTES.md not found. Create it with a '## Version: x.y.z' line."
+}
+
+$rnContent    = Get-Content $ReleaseNotesFile -Raw -Encoding UTF8
+$versionMatch = [regex]::Match($rnContent, '##\s+Version:\s*(\S+)')
+if (-not $versionMatch.Success) {
+    Write-Err "No '## Version: x.y.z' line found in RELEASE_NOTES.md."
+}
+$Version = $versionMatch.Groups[1].Value.TrimStart('v')
+$Tag     = Make-Tag $Version $ReleaseType
+
+Write-Info ""
+Write-Info "=== DjinnisBiS Release: $Tag ($ReleaseType) ==="
+if ($DryRun) { Write-Warn "  DRY RUN - no files will be written, committed, tagged, or pushed" }
+Write-Info ""
+
+# ---------------------------------------------------------------------------
+# 2. Sync TOC version (auto-update if it doesn't match)
+# ---------------------------------------------------------------------------
+
+$tocContent      = Get-Content $TocFile -Raw -Encoding UTF8
+$tocVersionMatch = [regex]::Match($tocContent, '##\s+Version:\s*(\S+)')
+if (-not $tocVersionMatch.Success) { Write-Err "No '## Version:' in $AddonName.toc." }
+$tocVersion = $tocVersionMatch.Groups[1].Value.TrimStart('v')
+
+if ($tocVersion -ne $Version) {
+    Write-Warn "  TOC version ($tocVersion) differs from RELEASE_NOTES.md ($Version) - auto-updating .toc"
+    $tocContent = $tocContent -replace '(##\s+Version:\s*)\S+', "`${1}$Version"
+    if (-not $DryRun) {
+        [System.IO.File]::WriteAllText($TocFile, $tocContent, (New-Object System.Text.UTF8Encoding $false))
+        Write-Success "  Updated $AddonName.toc to $Version"
+    }
+} else {
+    Write-Info "  TOC version: $tocVersion  OK"
+}
+
+# ---------------------------------------------------------------------------
+# 3. Check git state (RELEASE_NOTES.md and .toc are managed by this script)
+# ---------------------------------------------------------------------------
+
+$gitStatus  = & git -C $Root status --porcelain 2>&1
+$rnFileName  = [System.IO.Path]::GetFileName($ReleaseNotesFile)
+$tocFileName = [System.IO.Path]::GetFileName($TocFile)
+$dirtyFiles = $gitStatus | Where-Object {
+    $_ -match '^\s*[MADRCU?]' -and
+    $_ -notmatch '\.claude' -and
+    $_ -notmatch ([regex]::Escape($rnFileName)) -and
+    $_ -notmatch ([regex]::Escape($tocFileName))
+}
+
+if ($dirtyFiles) {
+    Write-Warn "  Uncommitted changes detected:"
+    $dirtyFiles | ForEach-Object { Write-Warn "    $_" }
+    if (-not $DryRun) {
+        Write-Err "Commit or stash non-release changes before releasing. Use -DryRun to preview without this check."
+    }
+}
+
+$tagExists = & git -C $Root tag -l $Tag 2>&1
+if ($tagExists -contains $Tag) {
+    Write-Warn "  Tag '$Tag' already exists - auto-bumping patch version..."
+
+    # Parse numeric version and increment patch until a free tag is found
+    # Strip any pre-release suffix (e.g. "0-beta" -> "0") before casting to int
+    $parts = $Version.Split('.')
+    $major = [int]$parts[0]
+    $minor = [int]$parts[1]
+    $patch = [int]($parts[2] -replace '[^0-9].*', '')
+
+    do {
+        $patch++
+        $Version  = "$major.$minor.$patch"
+        $Tag      = Make-Tag $Version $ReleaseType
+        $tagCheck = & git -C $Root tag -l $Tag 2>&1
+    } while ($tagCheck -contains $Tag)
+
+    Write-Success "  Bumped to: $Tag"
+
+    # Both rewrites are DryRun-guarded. They were not until 0.9.15, which made
+    # -DryRun a liar in exactly the case you would most want to preview: a
+    # version that has already been tagged. The in-memory $rnContent and
+    # $tocContent are still updated either way, so the rest of the run previews
+    # the bumped version correctly without touching the working tree.
+    $rnContent  = $rnContent  -replace '(##\s+Version:\s*)\S+', "`${1}$Version"
+    $tocContent = $tocContent -replace '(##\s+Version:\s*)\S+', "`${1}$Version"
+
+    if ($DryRun) {
+        Write-Warn "  [DryRun] Would update RELEASE_NOTES.md and $AddonName.toc to $Version"
+    } else {
+        [System.IO.File]::WriteAllText($ReleaseNotesFile, $rnContent, (New-Object System.Text.UTF8Encoding $false))
+        Write-Success "  Updated RELEASE_NOTES.md"
+
+        [System.IO.File]::WriteAllText($TocFile, $tocContent, (New-Object System.Text.UTF8Encoding $false))
+        Write-Success "  Updated $AddonName.toc"
+
+        # Re-read so the changelog extraction below sees exactly what was
+        # written. Skipped on a dry run, where nothing was written and the
+        # in-memory copy above is already the bumped text.
+        $rnContent = Get-Content $ReleaseNotesFile -Raw -Encoding UTF8
+    }
+}
+
+# ---------------------------------------------------------------------------
+# 4. Extract release notes body
+# ---------------------------------------------------------------------------
+
+# Strip comment blocks, top-level heading, and Version header line
+$notesBody = $rnContent -replace '(?s)<!--.*?-->\s*', ''
+$notesBody = $notesBody -replace '(?m)^#\s+Release Notes\s*(\r?\n)?', ''
+$notesBody = $notesBody -replace '(?m)^##\s+Version:.*(\r?\n)?', ''
+$notesBody = $notesBody.Trim()
+
+# ---------------------------------------------------------------------------
+# 5. Prepend entry to CHANGELOG.md
+# ---------------------------------------------------------------------------
+
+$today          = (Get-Date).ToString("yyyy-MM-dd")
+# Beta/alpha: embed suffix in the version bracket (e.g. [0.3.1-beta]) to match the git tag
+$versionLabel   = if ($ReleaseType -ne "release") { "$Version-$ReleaseType" } else { $Version }
+$changelogEntry = "## [$versionLabel] - $today`r`n`r`n$notesBody`r`n"
+
+if (-not $DryRun) {
+    $existing = ""
+    if (Test-Path $ChangelogFile) { $existing = Get-Content $ChangelogFile -Raw -Encoding UTF8 }
+
+    # Skip prepend if this version is already the top entry (prevents duplicates on re-run)
+    if ($existing -match "(?m)^##\s+\[$([regex]::Escape($versionLabel))\]") {
+        Write-Warn "  CHANGELOG.md already contains [$versionLabel] -- skipping prepend"
+    } else {
+        # Detect the file's line-ending style so the separator search always matches
+        $nl        = if ($existing -match "`r`n") { "`r`n" } else { "`n" }
+        $separator = "${nl}---${nl}"
+        $sepIndex  = $existing.IndexOf($separator)
+
+        if ($sepIndex -ge 0) {
+            $before       = $existing.Substring(0, $sepIndex + $separator.Length)
+            $after        = $existing.Substring($sepIndex + $separator.Length)
+            $newChangelog = $before + $nl + $changelogEntry + $nl + $after
+        } else {
+            $newChangelog = $existing + "${nl}---${nl}${nl}" + $changelogEntry
+        }
+
+        [System.IO.File]::WriteAllText($ChangelogFile, $newChangelog, (New-Object System.Text.UTF8Encoding $false))
+        Write-Success "  CHANGELOG.md updated"
+    }
+} else {
+    Write-Warn "  [DryRun] Would prepend to CHANGELOG.md:"
+    Write-Host $changelogEntry -ForegroundColor DarkGray
+}
+
+# ---------------------------------------------------------------------------
+# 6. Build the local zip (for local testing; CurseForge builds its own from git)
+# ---------------------------------------------------------------------------
+
+# Exclusions come from pkgmeta.yaml's `ignore:` block, the same list the CurseForge
+# packager and deploy.ps1 read, so this zip and the one users download from CurseForge
+# hold the same files. This script used to keep its own copy and the two diverged.
+# Edit pkgmeta.yaml, not this.
+function Get-PkgmetaIgnore {
+    param([string]$PkgmetaPath)
+
+    if (-not (Test-Path $PkgmetaPath)) {
+        throw "pkgmeta.yaml not found at '$PkgmetaPath'. It owns the exclusion list, so building without it would ship docs, tooling and git internals to users. Refusing."
+    }
+
+    $ignore  = @()
+    $inBlock = $false
+    foreach ($line in (Get-Content $PkgmetaPath)) {
+        if ($line -match '^ignore:\s*$')      { $inBlock = $true;  continue }
+        if ($inBlock -and $line -match '^\S') { $inBlock = $false }
+        if ($inBlock -and $line -match '^\s+-\s+(.+?)\s*$') { $ignore += $Matches[1] }
+    }
+
+    if ($ignore.Count -eq 0) {
+        throw "pkgmeta.yaml has no entries under 'ignore:'. Refusing to build rather than shipping every file in the repo."
+    }
+    return $ignore
+}
+
+# A path is excluded if it equals an entry or sits underneath one. Compared with
+# forward slashes so the YAML entries read the same on either side.
+function Test-Excluded {
+    param([string]$RelPath, [string[]]$Ignore)
+
+    $rel = $RelPath -replace '\\', '/'
+    foreach ($ex in $Ignore) {
+        $e = ($ex -replace '\\', '/').TrimEnd('/')
+        if ($rel -eq $e -or $rel.StartsWith("$e/", [StringComparison]::OrdinalIgnoreCase)) { return $true }
+    }
+    return $false
+}
+
+$ExcludeNames = Get-PkgmetaIgnore (Join-Path $Root "pkgmeta.yaml")
+
+$ZipName = "$AddonName-$Tag.zip"
+$ZipPath = Join-Path $OutputDir $ZipName
+
+if (-not $DryRun) {
+    if (-not (Test-Path $OutputDir)) { New-Item -ItemType Directory -Path $OutputDir | Out-Null }
+    if (Test-Path $ZipPath)         { Remove-Item $ZipPath -Force }
+}
+
+Write-Info "  Building zip: $ZipPath"
+
+$allItems   = Get-ChildItem -Path $Root -Recurse
+$filesToZip = $allItems | Where-Object {
+    if ($_.PSIsContainer) { return $false }
+    $rel = $_.FullName.Substring($Root.Length).TrimStart('\','/')
+    return -not (Test-Excluded $rel $ExcludeNames)
+}
+
+if ($DryRun) {
+    $count = @($filesToZip).Count
+    Write-Warn "  [DryRun] Would include $count files in zip:"
+    $filesToZip | ForEach-Object {
+        $rel = $_.FullName.Substring($Root.Length).TrimStart('\','/')
+        # Show the entry name the zip actually gets, so the preview is comparable
+        $entryName = ("$AddonName/" + $rel) -replace '\\', '/'
+        Write-Host "    $entryName" -ForegroundColor DarkGray
+    }
+} else {
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::Open($ZipPath, 'Create')
+    try {
+        foreach ($file in $filesToZip) {
+            $rel       = $file.FullName.Substring($Root.Length).TrimStart('\','/')
+            $entryName = ("$AddonName/" + $rel) -replace '\\', '/'
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+                $zip, $file.FullName, $entryName,
+                [System.IO.Compression.CompressionLevel]::Optimal
+            ) | Out-Null
+        }
+    } finally {
+        $zip.Dispose()
+    }
+    $sizeKB = [math]::Round((Get-Item $ZipPath).Length / 1KB, 1)
+    $count  = @($filesToZip).Count
+    Write-Success "  Zip created: $ZipName ($sizeKB KB, $count files)"
+}
+
+# ---------------------------------------------------------------------------
+# 7. Commit, tag, and push
+# ---------------------------------------------------------------------------
+
+if (-not $DryRun) {
+    & git -C $Root add CHANGELOG.md RELEASE_NOTES.md "$TocFile" | Out-Null
+    $commitMsg = "Release $Tag"
+    & git -C $Root commit -m $commitMsg | Out-Null
+    Write-Success "  Committed: $commitMsg"
+
+    if (-not $SkipTag) {
+        & git -C $Root tag -a $Tag -m $commitMsg
+        Write-Success "  Tagged:    $Tag"
+    }
+
+    if (-not $SkipPush) {
+        Write-Info "  Pushing to origin..."
+        & git -C $Root push origin HEAD
+        Write-Success "  Pushed commits"
+        if (-not $SkipTag) {
+            & git -C $Root push origin $Tag
+            Write-Success "  Pushed tag $Tag -> CurseForge webhook will trigger packaging as [$ReleaseType]"
+        }
+    } else {
+        Write-Warn "  SkipPush set - run manually: git push origin HEAD && git push origin $Tag"
+    }
+} else {
+    Write-Warn "  [DryRun] Would commit, tag '$Tag', push commits, and push tag to trigger CurseForge"
+}
+
+# ---------------------------------------------------------------------------
+# 8. Create GitHub Release with zip attached (requires gh CLI)
+# ---------------------------------------------------------------------------
+
+$ghAvailable = $null -ne $GhExe
+
+if (-not $ghAvailable) {
+    Write-Warn ""
+    Write-Warn "  GitHub CLI (gh) not found -- skipping GitHub Release creation."
+    Write-Warn "  Install from https://cli.github.com then run 'gh auth login'."
+    Write-Warn "  To create the release manually:"
+    Write-Warn "    gh release create $Tag '$ZipPath' --title '$Tag' --notes-file '$ReleaseNotesFile'"
+} elseif ($SkipPush -or $SkipTag) {
+    Write-Warn "  Skipping GitHub Release (SkipPush or SkipTag is set)"
+} elseif ($DryRun) {
+    Write-Warn "  [DryRun] Would create GitHub Release '$Tag' with $(Split-Path $ZipPath -Leaf) attached"
+} else {
+    Write-Info "  Creating GitHub Release $Tag..."
+
+    $isPrerelease = ($ReleaseType -ne "release")
+
+    # Write release notes to a temp file so special characters survive
+    $tmpNotes = [System.IO.Path]::GetTempFileName()
+    [System.IO.File]::WriteAllText($tmpNotes, $notesBody, (New-Object System.Text.UTF8Encoding $false))
+
+    # Attach zip with a versioned display label (shown as download filename on the release page)
+    $ZipLabel  = "$AddonName-$Tag.zip"
+    $ZipAsset  = "${ZipPath}#${ZipLabel}"
+
+    $ghArgs = @(
+        "release", "create", $Tag,
+        $ZipAsset,
+        "--title", $Tag,
+        "--notes-file", $tmpNotes
+    )
+    if ($isPrerelease) {
+        $ghArgs += "--prerelease"
+        $ghArgs += "--latest=false"
+    }
+
+    & $GhExe @ghArgs
+    Remove-Item $tmpNotes -Force
+
+    if ($LASTEXITCODE -eq 0) {
+        Write-Success "  GitHub Release created: https://github.com/RobertLCraig/DjinnisBiS/releases/tag/$Tag"
+    } else {
+        Write-Warn "  gh release create failed (exit $LASTEXITCODE) -- create it manually:"
+        Write-Warn "    & '$GhExe' release create $Tag '$ZipPath' --title '$Tag' --notes-file RELEASE_NOTES.md"
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Done
+# ---------------------------------------------------------------------------
+
+Write-Info ""
+Write-Success "=== Release $Tag complete! ==="
+Write-Info ""
+Write-Info "  Local zip:  $ZipPath"
+if (-not $DryRun -and -not $SkipPush -and -not $SkipTag) {
+    Write-Info "  GitHub:     https://github.com/RobertLCraig/DjinnisBiS/releases/tag/$Tag"
+    Write-Info "  CurseForge: packaging triggered by pushed tag (file type: $ReleaseType)"
+}
+Write-Info ""
+Write-Info "Next steps:"
+Write-Info "  1. Verify the zip locally: extract and load in WoW"
+Write-Info "  2. Clear RELEASE_NOTES.md and set the next version placeholder"
+Write-Info ""
