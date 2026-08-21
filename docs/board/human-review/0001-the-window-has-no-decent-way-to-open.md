@@ -1,5 +1,37 @@
 # The window has no decent way to open
 
+## What I need from you
+
+Five minutes in a live client. Nothing left on this card can be settled from the repository or from
+research: the code is written, and the only remaining question is whether Blizzard's UI actually
+shows the control, which only a running client answers. Do a **full client restart**, not a
+`/reload`, then report three things. Does *Djinni's BiS* appear in the minimap addon drawer. Does
+the minimap button appear on the ring. Does hovering it show the summary tooltip.
+
+One of the open tasks no longer needs chasing, because the answer is in this repository.
+`Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua:508-526` calls `AddonCompartmentFrame:RegisterAddon(...)`
+whenever a button's saved settings carry `showInCompartment = true`. That is what puts
+`DjinnisDelveTracker` and `DjinnisWarbandManager` in the drawer with no `AddonCompartmentFunc` line
+anywhere: the library registers them at runtime, the `.toc` never comes into it. Their own files sit
+outside this sandbox, so that last step is read off the shared library rather than off their code.
+
+Which leaves this addon on the single route that has already failed once:
+
+| Route into the drawer | Where it lives | On in DjinnisBiS today |
+|---|---|---|
+| `## AddonCompartmentFunc: DjinnisBiS_Toggle` | `DjinnisBiS.toc:7` | yes, and it is the only one |
+| `showInCompartment = true` in the LibDBIcon db | `DjinnisBiS.lua:1143` | **no**, the table is `{ hide = false }` |
+| Minimap ring button (not the drawer) | `DjinnisBiS.lua:1144` | yes |
+
+Both compartment routes on together would almost certainly show two *Djinni's BiS* entries, so it is
+one or the other. My reading is that the `.toc` field is sound and only ever needed the restart, but
+the sibling addons prove the library route works in your client and it costs one word to switch to
+it. If the restart shows no drawer entry, take the library route and drop the `.toc` field.
+
+That last bit is a choice, not a build, and it is the only choice left on the card. It is left
+inline rather than split into its own decision card, because the observation comes first and may
+settle it without anyone having to choose. Split it if you would rather decide it separately.
+
 ## Why
 
 Opening the window is the weakest part of the addon, and it has already failed once in front of a
@@ -56,6 +88,8 @@ The floating claw button is gone, not kept as a fallback.
 
 **Still open, and it is why this card is not done:** nobody has established why the addon compartment
 entry never appeared, and the tooltip summary has never been seen in a live client.
+
+**2026-08-21** bin/decision-prep.ps1 prepared this card unattended and wrote an ask. The agent returned no report of what it assumed, so what it read and what it could not determine is not recorded here. The run is in storage/logs/decision-prep.log.
 
 ## Acceptance
 
