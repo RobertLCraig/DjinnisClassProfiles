@@ -10,7 +10,10 @@ ignore:
   - .agents
   - CHANGELOG.md
   - CLAUDE.md
+  - CURSEFORGE.md
+  - README.md
   - TODO.md
+  - docs
   - deploy.ps1
   - pkgmeta.yaml
   - release.ps1
