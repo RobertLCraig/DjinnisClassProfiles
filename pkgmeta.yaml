@@ -20,5 +20,6 @@ ignore:
   - RELEASE_NOTES.md
   - releases
   - baseprompt.md
+  - DjinnisClassProfilesDB.lua
 
 changelog: CHANGELOG.md
