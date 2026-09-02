@@ -1,10 +1,40 @@
 # Trinket tiers borrowed from ClassCodex
 
+## Comments
+
+**2026-09-02, seen working.** Rob opened the By Slot tab on Balance and the feature is doing its
+job: coloured tiers on the Trinket slot, tiers on the equipped rows, the ranked block underneath
+with its `ClassCodex 1.3.1, read 2026-09-02` stamp, and `BiS: Balance` on the item tooltip.
+
+**A reported "`/bis` does nothing" was not a bug in this addon.** It was `/bis` typed into the
+Claude Code terminal rather than into WoW, which answered `Unknown command: /bis`. Before that was
+known, the addon was cleared properly rather than guessed at: the deployed file was hash-identical
+to source, in one folder only, with no BOM, plain ASCII, LF endings and 80 file-scope locals against
+Lua's limit of 200; no other installed addon registers `/bis`; and the deployed file was loaded in a
+stub harness with Rob's real SavedVariables and driven through every route into the window. All
+green, which is what said to go looking outside the addon. **Keep that harness in mind** rather than
+reasoning about load failures: it is at `%TEMP%\load_bis.lua` and it took minutes to write.
+
+**One real bug was found in that screenshot and is fixed.** `Gebbo's Bottomless Bag` was rated
+`C/S` in the ranked list and blank in the Trinket slot directly above it, the same trinket twice
+with two different answers. The ranked list reaches an item by the id in the tier table; the BiS
+list reaches it by name, through an Encounter Journal link whose item id for that trinket is a
+different one. Tiers now fall back to matching on the item name when the id misses, which is the
+thing both routes agree on. The regression check was watched failing with the fix removed
+(`expected S, got nil`) before it was watched passing.
+
 ## What I need from you
 
-Ten minutes in a live client, with **ClassCodex still disabled**, which is how you have it today.
-Open `/bis`, go to the **By Slot** tab, and work through the four spec buttons. Four things to
-report:
+**Most of this is now done, see Comments.** What is left is two things, and the second is the one
+that matters:
+
+1. `/reload`, then check `Gebbo's Bottomless Bag` in the Trinket slot now carries `C/S`, matching
+   the ranked list below it. It was blank before today's fix.
+2. **Enable ClassCodex, `/reload`.** Every tier must vanish and the ranked block must be replaced
+   by one grey line saying ClassCodex is loaded. Disable it and they come back. This is the part
+   you asked for and the only part still unproven.
+
+The original four checks, kept because the other three specs were never looked at:
 
 1. Under the two columns there is a new **Trinket ranks** block. Does it list trinkets with a
    coloured letter beside each, and do the names resolve to real item links rather than `item
@@ -121,8 +151,12 @@ tier, and carrying it would have meant a sixth colour for one item.
       why in place of the ranked list rather than going silently missing.
 - [x] #3 THE ADDON SHALL survive an item id it has no tier for, a spec it has no table for, and a
       name whose link has not resolved, returning nothing in each case rather than throwing.
-- [ ] #4 THE RANKED TRINKET LIST SHALL render in a live client with real item links, verified by a
-      person, both with ClassCodex disabled and with it enabled.
+- [x] #4a THE RANKED TRINKET LIST SHALL render in a live client with real item links, with
+      ClassCodex disabled. **Seen working 2026-09-02**, screenshot on this card's Comments.
+- [ ] #4b THE TIERS SHALL all disappear when ClassCodex is enabled, verified by a person. **Still
+      open, and it is the half that was asked for.**
+- [x] #6 THE SAME TRINKET SHALL carry the same tier wherever it appears in the window, whether it
+      is reached by item id or by name.
 - [x] #5 REFRESHING THE TIERS SHALL be one repeatable command with a dry run, SHALL be safe to
       re-run when nothing has changed, and SHALL fail loudly rather than write a partial table.
 <!-- AC:END -->

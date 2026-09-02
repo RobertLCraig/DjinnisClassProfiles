@@ -569,8 +569,41 @@ local function tiersForId(spec, id)
 	return perSpec and perSpec[id] or nil
 end
 
-local function tiersFor(spec, itemName)
-	return tiersForId(spec, itemIdFor(itemName))
+-- spec -> normalised item name -> tiers, built from the ids above via the
+-- client's item cache. Rebuilt on refresh because a cold cache answers nil and
+-- is right on the next open, the same as everywhere else in this file.
+local tierNames = {}
+
+local function refreshTierNames()
+	for spec, items in pairs(TRINKET_TIER) do
+		local byName = tierNames[spec]
+		if not byName then byName = {}; tierNames[spec] = byName end
+		for id, tiers in pairs(items) do
+			local name = C_Item.GetItemInfo(id)
+			if name then byName[norm(name)] = tiers end
+		end
+	end
+end
+
+-- One item can be reachable by more than one item id: the id the tier table
+-- carries and the id the Encounter Journal link carries are not always the
+-- same, which is why "Gebbo's Bottomless Bag" was rated in the ranked list and
+-- blank in the Trinket slot on 2026-09-02 despite being the same trinket. The
+-- name is the thing both agree on, so it is the fallback.
+--
+-- ponytail: two different items sharing one name would take each other's tier.
+-- Item id is still tried first, so that only bites where the ids already
+-- disagree, and no trinket in this table shares a name with another.
+local function tiersFor(spec, id, itemName)
+	local byId = tiersForId(spec, id)
+	if byId then return byId end
+	if not itemName or classCodexLoaded() then return nil end
+	local byName = tierNames[spec]
+	return byName and byName[norm(itemName)] or nil
+end
+
+local function nameFromLink(link)
+	return link and link:match("|h%[(.-)%]|h") or nil
 end
 
 local function bestTier(tiers)
@@ -938,7 +971,7 @@ local function setItemCell(cell, item)
 	local id = itemIdFor(item.name)
 	local have = id and wornIds[id] and "|TInterface\\RaidFrame\\ReadyCheck-Ready:12|t" or ""
 	cell.text:SetText(have .. (link or WHITE .. item.name .. "|r") .. shortSite(item.site)
-		.. tierText(tiersForId(activeSpec, id))
+		.. tierText(tiersFor(activeSpec, id, item.name))
 		.. gainText(simGain(activeSpec, item.name)))
 	cell.link = link
 	cell.ilvl.itemName = item.name
@@ -951,7 +984,7 @@ local function setWearingCell(cell, worn)
 	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(worn.link))
 		or "Interface\\Icons\\INV_Misc_QuestionMark")
 	cell.text:SetText(GREY .. "on you |r" .. worn.link
-		.. tierText(tiersForId(activeSpec, worn.id)))
+		.. tierText(tiersFor(activeSpec, worn.id, nameFromLink(worn.link))))
 	cell.link = worn.link
 	cell.ilvl.itemName = nil  -- this is what you have, not a target to set
 	cell.ilvl.text:SetText(GREY .. (worn.ilvl or "?") .. "|r")
@@ -968,7 +1001,7 @@ local function setSimCell(cell, id, info)
 	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(id))
 		or "Interface\\Icons\\INV_Misc_QuestionMark")
 	cell.text:SetText((link or WHITE .. "item " .. id .. "|r")
-		.. tierText(tiersForId(activeSpec, id)) .. gainText(info.gain))
+		.. tierText(tiersFor(activeSpec, id, nameFromLink(link))) .. gainText(info.gain))
 	cell.link = link
 	cell.ilvl.itemName = nil  -- no target to set: the sim already fixed its level
 	cell.ilvl.text:SetText(GREY .. (info.ilvl or "?") .. "|r")
@@ -1019,6 +1052,7 @@ refresh = function()
 	pcall(harvestFromJournal)
 	pcall(resolveFromCache)
 	pcall(resolveFromSim)
+	pcall(refreshTierNames)
 
 	for i, button in ipairs(window.tabs) do
 		if i == activeTab then button:LockHighlight() else button:UnlockHighlight() end
@@ -1555,8 +1589,21 @@ local function selfTest()
 	check("ClassCodex check is a boolean", type(classCodexLoaded()), "boolean")
 	if classCodexLoaded() then
 		check("tiers suppressed while ClassCodex is loaded", tiersForId("Feral", 193701), nil)
+		check("name fallback suppressed too", tiersFor("Feral", nil, "zzz"), nil)
 	else
 		check("tiers resolve by item id", tiersForId("Feral", 193701) ~= nil, true)
+
+		-- The name fallback is what stopped a BiS trinket being rated in the
+		-- ranked list and blank in its own slot, when the two item ids for it
+		-- disagreed. Plant a name, then look it up by a name-only call.
+		tierNames.Feral = tierNames.Feral or {}
+		tierNames.Feral[norm("Zzz Test Trinket")] = { u = "S" }
+		check("falls back to the name when the id misses",
+			(tiersFor("Feral", 999999, "Zzz Test Trinket") or {}).u, "S")
+		check("id still wins over the name",
+			(tiersFor("Feral", 193701, "Zzz Test Trinket") or {}).u, "S")
+		check("unknown name is still nil", tiersFor("Feral", 999999, "Not A Trinket"), nil)
+		tierNames.Feral[norm("Zzz Test Trinket")] = nil
 	end
 
 	-- a saved target must survive the round trip and show its item level
