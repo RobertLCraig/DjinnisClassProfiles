@@ -39,16 +39,47 @@ stores it, and an id does not care about spelling or locale. A trinket only gets
 Encounter Journal harvest has given its name a link, and a link gives an id. A trinket with no
 resolved link gets no letter, which is the correct outcome rather than a wrong one.
 
+## Refreshing them is now one command
+
+`update-trinket-tiers.ps1` regenerates the table. Always the dry run first:
+
+```powershell
+cd C:\Dev\WoWAddons\DjinnisBiS
+.\update-trinket-tiers.ps1 -WhatIf
+.\update-trinket-tiers.ps1
+```
+
+It is idempotent: run it when nothing has moved and it prints `Already current` and writes nothing.
+The window shows the stamp it was generated with, so staleness is on screen rather than in your
+memory. **ClassCodex does not need to be enabled for this**, only installed, because CurseForge
+refreshes its data files on disk either way.
+
+**Pulling from the sites directly was tried and they are closed to a script.** Measured 2026-09-02:
+Archon answers a plain request with `403`, so it is behind bot protection. Wowhead, Icy Veins and
+u.gg publish no API and render their rankings client side, so it would mean owning an HTML parser
+that breaks whenever they restyle. Bloodmallet is reachable but documents no endpoint; guessed ones
+returned `500` and `404`. ClassCodex already does all of that scraping, maintains those parsers and
+ships the result as parseable Lua, so reusing its output inherits that maintenance for free. The
+script's header carries this in full; read it before proposing a scraper.
+
+**No addon can do any of this at runtime.** There is no HTTP call anywhere in Blizzard's API
+surface, checked against `wow-ui-source`. This has to be author-time work, which is what the script
+is.
+
 ## Not this card
 
-**Making the tiers refresh themselves.** They will not. Regenerating means re-reading those two
-ClassCodex files, which is a person's job and a small one. Nothing here pretends otherwise, and the
-comment above the table says so.
+**Raidbots as the tier source.** Its Droptimizer CSV is already imported by this addon for the thing
+it is genuinely better at, your own character's dps gain per item. It is a per-character sim, not a
+public per-spec ranking, so it cannot answer "what tier is this trinket for Feral". The two sit side
+by side in the window on purpose.
 
 **Reading ClassCodex's data live instead of copying it.** That was considered and dropped. It would
 be a runtime dependency on an addon you have disabled, which is a dependency on nothing, and it is
 the same reasoning already written into `DjinnisBiS.lua` above `SLOT_INVENTORY` about
 `DjinnisCharacterFrame`.
+
+**A refresh schedule.** Nothing runs this for you. It is one command when you feel the letters have
+drifted, and the on-screen stamp is what tells you.
 
 **Anything about ClassCodex's own bug.** See Direction; it is a finding, not work.
 
@@ -92,6 +123,8 @@ tier, and carrying it would have meant a sixth colour for one item.
       name whose link has not resolved, returning nothing in each case rather than throwing.
 - [ ] #4 THE RANKED TRINKET LIST SHALL render in a live client with real item links, verified by a
       person, both with ClassCodex disabled and with it enabled.
+- [x] #5 REFRESHING THE TIERS SHALL be one repeatable command with a dry run, SHALL be safe to
+      re-run when nothing has changed, and SHALL fail loudly rather than write a partial table.
 <!-- AC:END -->
 
 ## Tasks
@@ -103,6 +136,8 @@ tier, and carrying it would have meant a sixth colour for one item.
 - [x] Suppress the lot when ClassCodex is loaded, and say so on screen
 - [x] Extend `/bis test` to cover the tier table, the badge and the suppression
 - [x] Check the two addons for slash, global and tooltip conflicts
+- [x] Establish whether any site can be pulled from directly, by trying them rather than assuming
+- [x] Write `update-trinket-tiers.ps1` and prove its three failure paths
 - [ ] Run the four in-game checks at the top of this card
 
 ## Plan
@@ -117,6 +152,12 @@ The three item-shaped cell builders had eight identical layout lines each; those
 `beginItemCell` call, which is why the diff is smaller than the feature. The new `setTierCell`
 follows the same cold-cache pattern `setSimCell` already used, so an id the client has never seen
 resolves on the next open instead of erroring.
+
+**The generator was written twice, and that is the check on the data.** A throwaway Python pass
+produced the first table; `update-trinket-tiers.ps1` was then written independently and produced
+the same 100 entries with the same letters for all four specs. The only difference was the
+tie-break inside a tier band, which the PowerShell version settles on item id so the file is stable
+between runs and a diff shows a real change rather than a reshuffle.
 
 `373` offline checks were run against the generated table and the tier helpers before deploying:
 every letter has a colour and a rank, every entry rates at least one source, the badge collapses on

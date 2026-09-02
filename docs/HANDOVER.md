@@ -51,6 +51,12 @@ than a task.
 
 ## Key files / structure
 - `DjinnisBiS.lua` - the whole addon.
+- `update-trinket-tiers.ps1` - **author tooling, never shipped** (it is in `pkgmeta.yaml`'s ignore
+  list). Rewrites the block between the `-- BEGIN/END GENERATED TRINKET TIERS` markers in
+  `DjinnisBiS.lua` from ClassCodex's data files. **Its header carries the full reasoning for why
+  that source and not the sites**, including what each site actually answered when tried. Read it
+  before proposing a scraper. Those two markers are load-bearing: the script refuses to write
+  without them rather than guessing where the table is.
 - `Libs/LibDBIcon-1.0/` - the minimap button and, at `LibDBIcon-1.0.lua:508-526`, the runtime
   `AddonCompartmentFrame:RegisterAddon(...)` call that card `0001` turns on. **Read that card before
   touching how the window opens**; the two routes into the addon drawer are mutually exclusive and
@@ -59,6 +65,21 @@ than a task.
 - `CHANGELOG.md`, `RELEASE_NOTES.md` - `RELEASE_NOTES.md` is what the first release will say.
 
 ## Decisions locked
+- **Trinket tiers come from ClassCodex's shipped data files, not from the sites** (2026-09-02).
+  A WoW addon cannot make a network request: there is no HTTP call anywhere in Blizzard's API
+  surface, checked against `wow-ui-source`. So tier data is baked in at author time by
+  `update-trinket-tiers.ps1`. **The sites themselves were tried and are closed to a script:**
+  Archon answers a plain GET with `403`, Wowhead, Icy Veins and u.gg publish no API, and
+  Bloodmallet is reachable but documents no endpoint (guesses returned `500` and `404` on
+  2026-09-02). ClassCodex already scrapes u.gg and Icy Veins, maintains those parsers and ships
+  the result as parseable Lua keyed by item id, and **CurseForge refreshes those files on disk
+  whether or not the addon is enabled in the game**, which is what makes this work while
+  ClassCodex stays disabled. The cost is that this is second-hand data; the script fails loudly
+  rather than writing a partial table if ClassCodex changes shape or goes away.
+- **Raidbots is not the source for tiers, and that is not an oversight.** Its Droptimizer CSV is
+  already imported elsewhere in this addon, for the thing it is genuinely better at: your own
+  character's dps gain per item. It is a per-character sim, not a public per-spec ranking, so it
+  cannot answer "what tier is this trinket for Feral".
 - **One route into the addon compartment, not two.** Today it is the `.toc`
   `## AddonCompartmentFunc: DjinnisBiS_Toggle` line. The alternative is `showInCompartment = true`
   in the LibDBIcon saved settings. Card `0001` decides which, and both on at once is wrong.
@@ -94,8 +115,12 @@ of you.
   it show the summary tooltip.
 - **Card `0002` needs Rob in a live client too.** The ranked trinket block with ClassCodex disabled,
   then the same window with it enabled to confirm every tier disappears.
-- **The tier table goes stale on somebody else's schedule**, exactly as the BiS list does. Nothing
-  here refreshes it; regenerating means re-reading those two ClassCodex files by hand.
+- **The tier table goes stale on somebody else's schedule**, exactly as the BiS list does, but it
+  is now **one command** rather than a hand edit: `.\update-trinket-tiers.ps1 -WhatIf` then the
+  same without. It is idempotent, so running it when nothing has moved prints `Already current`
+  and writes nothing. The panel shows the stamp it was generated with, so staleness is on screen
+  rather than in somebody's memory. **The BiS list above it still has no such tool** and is still
+  hand-maintained from method.gg and Icy Veins.
 - **No GitHub remote and never published.** `WoWAddons#0004` is the remote question for the
   workspace. Publishing is a separate call.
 - **Season-scoped data.** Nothing here records who refreshes it or when.

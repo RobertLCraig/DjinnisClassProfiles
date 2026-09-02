@@ -36,6 +36,9 @@ ignore:
   - deploy.sh
   - release.ps1
   - pkgmeta.yaml
+  # Author tooling: regenerates the trinket tier table from ClassCodex's data
+  # files. Runs on the author's machine, never in anybody's game folder.
+  - update-trinket-tiers.ps1
   - releases
   # A SavedVariables file, if one is ever copied into the repo to reproduce a bug
   - DjinnisBiSDB.lua

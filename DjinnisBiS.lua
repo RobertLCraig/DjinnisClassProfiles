@@ -125,10 +125,19 @@ local BIS = {
 
 -- Trinket tiers -------------------------------------------------------------
 --
--- GENERATED, do not hand-edit. Lifted from ClassCodex 1.3.1's own data files,
--- `Data/db_ugg.lua` and `Data/db_icyveins.lua`, read on 2026-09-02. `u` is
--- u.gg, `iv` is Icy Veins. Regenerate by re-reading those two files rather than
--- patching a letter here.
+-- GENERATED, do not hand-edit. Everything between the BEGIN and END markers
+-- below is rewritten by `update-trinket-tiers.ps1`, which reads ClassCodex's
+-- own shipped data files. `u` is u.gg, `iv` is Icy Veins. Patching a letter
+-- here loses the patch the next time that script runs.
+--
+-- ClassCodex is the source because it is the only one that is not a fight. The
+-- sites themselves are closed to a script: Archon answers a plain request with
+-- 403, Wowhead, Icy Veins and u.gg publish no API and scraping their HTML means
+-- owning a parser that breaks whenever they restyle a page. ClassCodex already
+-- does that work, ships the result as parseable Lua, and CurseForge keeps those
+-- files current on disk **whether or not the addon is enabled in the game**. So
+-- the refresh costs one command and no maintenance. The full reasoning, and
+-- what each site actually answered, is in that script's header.
 --
 -- Keyed by item id, not by name, because that is how ClassCodex stores it and
 -- an id does not care about spelling or locale. The join to the BiS list above
@@ -143,11 +152,13 @@ local BIS = {
 -- BiS list, which is the point: the list says what is best, the tiers say what
 -- to do with the thing that actually dropped.
 
+-- BEGIN GENERATED TRINKET TIERS
+local TRINKET_TIER_SOURCE = "ClassCodex 1.3.1, read 2026-09-02"
 local TRINKET_TIER = {
 	Balance = {
-		[273796] = { u = "A", iv = "S" },
 		[270164] = { u = "C", iv = "S" },
 		[270167] = { u = "C", iv = "S" },
+		[273796] = { u = "A", iv = "S" },
 		[249346] = { u = "A" },
 		[250215] = { u = "B", iv = "A" },
 		[270169] = { iv = "A" },
@@ -157,37 +168,37 @@ local TRINKET_TIER = {
 		[250224] = { u = "C", iv = "B" },
 		[250259] = { iv = "B" },
 		[270161] = { iv = "B" },
-		[274493] = { u = "C" },
-		[250144] = { u = "C" },
 		[158368] = { iv = "C" },
 		[193757] = { iv = "C" },
+		[250144] = { u = "C" },
 		[270168] = { iv = "C" },
 		[273649] = { iv = "C" },
 		[273794] = { iv = "C" },
+		[274493] = { u = "C" },
 	},
 	Feral = {
 		[193701] = { u = "S" },
-		[270175] = { u = "C", iv = "S" },
 		[270164] = { iv = "S" },
 		[270173] = { iv = "S" },
-		[273796] = { u = "B", iv = "A" },
+		[270175] = { u = "C", iv = "S" },
 		[159617] = { u = "C", iv = "A" },
 		[250228] = { u = "C", iv = "A" },
 		[270165] = { iv = "A" },
+		[273796] = { u = "B", iv = "A" },
+		[241288] = { iv = "B" },
+		[248583] = { u = "C", iv = "B" },
 		[249343] = { u = "B" },
 		[250214] = { u = "B", iv = "B" },
 		[250215] = { u = "C", iv = "B" },
 		[250225] = { u = "C", iv = "B" },
-		[248583] = { u = "C", iv = "B" },
 		[251792] = { u = "C", iv = "B" },
-		[241288] = { iv = "B" },
 		[265657] = { iv = "B" },
 		[270166] = { iv = "B" },
 		[158374] = { u = "C", iv = "C" },
-		[274493] = { u = "C", iv = "C" },
 		[250259] = { iv = "C" },
 		[251785] = { iv = "C" },
 		[270168] = { iv = "C" },
+		[274493] = { u = "C", iv = "C" },
 		[241340] = { iv = "D" },
 		[246304] = { iv = "D" },
 		[246305] = { iv = "D" },
@@ -199,60 +210,61 @@ local TRINKET_TIER = {
 		[274497] = { iv = "D" },
 	},
 	Guardian = {
-		[273796] = { u = "B", iv = "S" },
 		[270164] = { iv = "S" },
 		[270168] = { iv = "S" },
 		[270173] = { iv = "S" },
 		[270175] = { iv = "S" },
+		[273796] = { u = "B", iv = "S" },
 		[270160] = { iv = "A" },
 		[270165] = { iv = "A" },
 		[270166] = { iv = "A" },
 		[270174] = { iv = "A" },
 		[273797] = { iv = "A" },
 		[249343] = { u = "B" },
-		[250228] = { u = "B", iv = "B" },
-		[250215] = { u = "B", iv = "B" },
-		[250245] = { u = "B", iv = "B" },
-		[268292] = { u = "B" },
 		[250214] = { u = "C", iv = "B" },
+		[250215] = { u = "B", iv = "B" },
 		[250225] = { u = "C", iv = "B" },
+		[250228] = { u = "B", iv = "B" },
 		[250243] = { iv = "B" },
 		[250244] = { iv = "B" },
+		[250245] = { u = "B", iv = "B" },
 		[250259] = { iv = "B" },
-		[250256] = { u = "C" },
-		[193701] = { u = "C" },
-		[260235] = { u = "C" },
-		[274493] = { u = "C" },
+		[268292] = { u = "B" },
 		[159617] = { u = "C", iv = "C" },
 		[159618] = { iv = "C" },
+		[193701] = { u = "C" },
 		[193757] = { iv = "C" },
+		[250256] = { u = "C" },
+		[260235] = { u = "C" },
+		[274493] = { u = "C" },
 		[158374] = { iv = "D" },
 	},
 	Resto = {
 		[270162] = { u = "B", iv = "S" },
-		[270167] = { u = "B", iv = "S" },
 		[270164] = { iv = "S" },
-		[249343] = { u = "A", iv = "B" },
-		[250214] = { u = "B", iv = "A" },
+		[270167] = { u = "B", iv = "S" },
 		[193757] = { iv = "A" },
 		[248583] = { iv = "A" },
+		[249343] = { u = "A", iv = "B" },
+		[250214] = { u = "B", iv = "A" },
 		[270169] = { iv = "A" },
 		[249809] = { u = "B" },
-		[250256] = { u = "B" },
-		[268292] = { u = "B" },
-		[251792] = { u = "C", iv = "B" },
 		[249811] = { iv = "B" },
+		[250256] = { u = "B" },
+		[251792] = { u = "C", iv = "B" },
+		[268292] = { u = "B" },
 		[273649] = { iv = "B" },
-		[273796] = { u = "C", iv = "C" },
-		[274493] = { u = "C" },
-		[250255] = { u = "C", iv = "C" },
 		[250248] = { iv = "C" },
 		[250254] = { iv = "C" },
+		[250255] = { u = "C", iv = "C" },
+		[273796] = { u = "C", iv = "C" },
+		[274493] = { u = "C" },
 		[264507] = { iv = "D" },
 		[264701] = { iv = "D" },
 		[270171] = { iv = "D" },
 	},
 }
+-- END GENERATED TRINKET TIERS
 
 -- ===========================================================================
 
@@ -1098,9 +1110,12 @@ renderDoll = function()
 				return a.id < b.id
 			end)
 
+			-- the stamp is on screen on purpose: this table is a copy of a
+			-- moving thing, so how old it is belongs next to what it claims
 			y = place(0, y, CONTENT_W - 20, function(cell)
 				setHeaderCell(cell, "Trinket ranks  " .. GREY
-					.. "u.gg / Icy Veins, two letters where they disagree|r")
+					.. "u.gg / Icy Veins, two letters where they disagree  --  "
+					.. TRINKET_TIER_SOURCE .. "|r")
 			end)
 			local shown = math.min(#ranked, TIER_ROWS_SHOWN)
 			for i = 1, shown do
