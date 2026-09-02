@@ -21,7 +21,7 @@
   the file wins even if it is commented out.
 -->
 
-## Version: 0.9.1
+## Version: 0.10.0
 
 First packaged version. Not yet released anywhere.
 
@@ -35,5 +35,9 @@ timer is running.
 - A per item target item level, Champion / Hero / Myth ranks, saved per account
 - A bonus roll verdict when a Mythic+ finishes and when a raid boss dies
 - Raidbots Droptimizer import, read from the report's data.csv by item id
+- Trinket tiers from u.gg and Icy Veins, S through D, on every trinket in the
+  By Slot tab plus a ranked list of every trinket those two sites rate
+- The tiers turn themselves off whenever ClassCodex is loaded, because that
+  addon is where they came from and it keeps them current
 
 Item data covers Midnight Season 2, The Venomous Abyss.

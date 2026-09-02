@@ -123,6 +123,139 @@ local BIS = {
 
 -- ===========================================================================
 
+-- Trinket tiers -------------------------------------------------------------
+--
+-- GENERATED, do not hand-edit. Lifted from ClassCodex 1.3.1's own data files,
+-- `Data/db_ugg.lua` and `Data/db_icyveins.lua`, read on 2026-09-02. `u` is
+-- u.gg, `iv` is Icy Veins. Regenerate by re-reading those two files rather than
+-- patching a letter here.
+--
+-- Keyed by item id, not by name, because that is how ClassCodex stores it and
+-- an id does not care about spelling or locale. The join to the BiS list above
+-- happens at runtime: the Encounter Journal harvest gives a name an item link,
+-- and the link gives an id. A trinket with no resolved link gets no tier, and
+-- that is the correct outcome rather than a wrong one.
+--
+-- PvP-context entries are dropped: this addon is about PvE drops. So is one
+-- Icy Veins entry graded "F-", which is a joke rather than a tier.
+--
+-- These tiers rate ALL trinkets a spec might wear, not only the ones on the
+-- BiS list, which is the point: the list says what is best, the tiers say what
+-- to do with the thing that actually dropped.
+
+local TRINKET_TIER = {
+	Balance = {
+		[273796] = { u = "A", iv = "S" },
+		[270164] = { u = "C", iv = "S" },
+		[270167] = { u = "C", iv = "S" },
+		[249346] = { u = "A" },
+		[250215] = { u = "B", iv = "A" },
+		[270169] = { iv = "A" },
+		[270170] = { iv = "A" },
+		[249343] = { u = "B" },
+		[250214] = { u = "B", iv = "B" },
+		[250224] = { u = "C", iv = "B" },
+		[250259] = { iv = "B" },
+		[270161] = { iv = "B" },
+		[274493] = { u = "C" },
+		[250144] = { u = "C" },
+		[158368] = { iv = "C" },
+		[193757] = { iv = "C" },
+		[270168] = { iv = "C" },
+		[273649] = { iv = "C" },
+		[273794] = { iv = "C" },
+	},
+	Feral = {
+		[193701] = { u = "S" },
+		[270175] = { u = "C", iv = "S" },
+		[270164] = { iv = "S" },
+		[270173] = { iv = "S" },
+		[273796] = { u = "B", iv = "A" },
+		[159617] = { u = "C", iv = "A" },
+		[250228] = { u = "C", iv = "A" },
+		[270165] = { iv = "A" },
+		[249343] = { u = "B" },
+		[250214] = { u = "B", iv = "B" },
+		[250215] = { u = "C", iv = "B" },
+		[250225] = { u = "C", iv = "B" },
+		[248583] = { u = "C", iv = "B" },
+		[251792] = { u = "C", iv = "B" },
+		[241288] = { iv = "B" },
+		[265657] = { iv = "B" },
+		[270166] = { iv = "B" },
+		[158374] = { u = "C", iv = "C" },
+		[274493] = { u = "C", iv = "C" },
+		[250259] = { iv = "C" },
+		[251785] = { iv = "C" },
+		[270168] = { iv = "C" },
+		[241340] = { iv = "D" },
+		[246304] = { iv = "D" },
+		[246305] = { iv = "D" },
+		[246306] = { iv = "D" },
+		[246307] = { iv = "D" },
+		[251783] = { iv = "D" },
+		[273797] = { iv = "D" },
+		[274496] = { iv = "D" },
+		[274497] = { iv = "D" },
+	},
+	Guardian = {
+		[273796] = { u = "B", iv = "S" },
+		[270164] = { iv = "S" },
+		[270168] = { iv = "S" },
+		[270173] = { iv = "S" },
+		[270175] = { iv = "S" },
+		[270160] = { iv = "A" },
+		[270165] = { iv = "A" },
+		[270166] = { iv = "A" },
+		[270174] = { iv = "A" },
+		[273797] = { iv = "A" },
+		[249343] = { u = "B" },
+		[250228] = { u = "B", iv = "B" },
+		[250215] = { u = "B", iv = "B" },
+		[250245] = { u = "B", iv = "B" },
+		[268292] = { u = "B" },
+		[250214] = { u = "C", iv = "B" },
+		[250225] = { u = "C", iv = "B" },
+		[250243] = { iv = "B" },
+		[250244] = { iv = "B" },
+		[250259] = { iv = "B" },
+		[250256] = { u = "C" },
+		[193701] = { u = "C" },
+		[260235] = { u = "C" },
+		[274493] = { u = "C" },
+		[159617] = { u = "C", iv = "C" },
+		[159618] = { iv = "C" },
+		[193757] = { iv = "C" },
+		[158374] = { iv = "D" },
+	},
+	Resto = {
+		[270162] = { u = "B", iv = "S" },
+		[270167] = { u = "B", iv = "S" },
+		[270164] = { iv = "S" },
+		[249343] = { u = "A", iv = "B" },
+		[250214] = { u = "B", iv = "A" },
+		[193757] = { iv = "A" },
+		[248583] = { iv = "A" },
+		[270169] = { iv = "A" },
+		[249809] = { u = "B" },
+		[250256] = { u = "B" },
+		[268292] = { u = "B" },
+		[251792] = { u = "C", iv = "B" },
+		[249811] = { iv = "B" },
+		[273649] = { iv = "B" },
+		[273796] = { u = "C", iv = "C" },
+		[274493] = { u = "C" },
+		[250255] = { u = "C", iv = "C" },
+		[250248] = { iv = "C" },
+		[250254] = { iv = "C" },
+		[264507] = { iv = "D" },
+		[264701] = { iv = "D" },
+		[270171] = { iv = "D" },
+	},
+}
+
+-- ===========================================================================
+
 local SPEC_ORDER = { "Balance", "Feral", "Guardian", "Resto" }
 
 local SLOT_ORDER = {
@@ -392,6 +525,56 @@ local function gainText(gain)
 	if not gain then return "" end
 	local colour = gain > 0 and GREEN or GREY
 	return "  " .. colour .. (gain > 0 and "+" or "") .. gain .. "%|r"
+end
+
+-- Trinket tiers, and standing aside for ClassCodex ---------------------------
+--
+-- ClassCodex is where the table above came from and it re-ships that data every
+-- time the sites move. This copy cannot. So when ClassCodex is loaded it wins
+-- outright: every tier this addon would draw is suppressed, and the panel says
+-- so rather than going quietly missing. Two panels of the same tiers, one of
+-- them stale, is worse than one panel.
+--
+-- Checked per render rather than once at load: an addon's load order is not
+-- ours to assume, and this is one table lookup.
+
+local CLASS_CODEX = "ClassCodex"
+
+local function classCodexLoaded()
+	return C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded(CLASS_CODEX) and true or false
+end
+
+-- The same five hex values ClassCodex uses, which are WoW's own item quality
+-- colours, so a letter means the same thing in both addons.
+local TIER_COLOUR = {
+	S = "|cffff8000", A = "|cffa335ee", B = "|cff0070dd", C = "|cff1eff00", D = "|cff9d9d9d",
+}
+local TIER_RANK = { S = 1, A = 2, B = 3, C = 4, D = 5 }
+
+local function tiersForId(spec, id)
+	if not id or classCodexLoaded() then return nil end
+	local perSpec = TRINKET_TIER[spec]
+	return perSpec and perSpec[id] or nil
+end
+
+local function tiersFor(spec, itemName)
+	return tiersForId(spec, itemIdFor(itemName))
+end
+
+local function bestTier(tiers)
+	return math.min(TIER_RANK[tiers.u] or 99, TIER_RANK[tiers.iv] or 99)
+end
+
+-- "S" when both sources agree or only one rated it, "A/S" when they disagree,
+-- u.gg first then Icy Veins. A disagreement is worth seeing, not averaging.
+local function tierText(tiers)
+	if not tiers then return "" end
+	local u, iv = tiers.u, tiers.iv
+	if u and iv and u ~= iv then
+		return "  " .. TIER_COLOUR[u] .. u .. "|r" .. GREY .. "/|r" .. TIER_COLOUR[iv] .. iv .. "|r"
+	end
+	local tier = u or iv
+	return "  " .. TIER_COLOUR[tier] .. tier .. "|r"
 end
 
 -- Tooltip ------------------------------------------------------------------
@@ -690,6 +873,7 @@ end
 
 local CELL_ITEM, CELL_HEAD = 20, 16
 local SIM_EXTRAS_SHOWN = 12
+local TIER_ROWS_SHOWN = 12
 local cellPool = {}
 
 local function acquireCell(content, index)
@@ -722,20 +906,27 @@ local function setHeaderCell(cell, slot)
 	cell.text:SetText(GOLD .. slot .. "|r")
 end
 
-local function setItemCell(cell, item)
-	local link = linkFor(item.name)
+-- every item-shaped cell lays out the same way: icon, then text, then the
+-- right-hand item level button
+local function beginItemCell(cell)
 	cell:SetHeight(CELL_ITEM)
 	cell.icon:Show()
 	cell.ilvl:Show()
 	cell.text:ClearAllPoints()
 	cell.text:SetPoint("LEFT", cell.icon, "RIGHT", 4, 0)
 	cell.text:SetPoint("RIGHT", cell.ilvl, "LEFT", -4, 0)
+end
+
+local function setItemCell(cell, item)
+	local link = linkFor(item.name)
+	beginItemCell(cell)
 
 	local icon = link and select(5, C_Item.GetItemInfoInstant(link))
 	cell.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
 	local id = itemIdFor(item.name)
 	local have = id and wornIds[id] and "|TInterface\\RaidFrame\\ReadyCheck-Ready:12|t" or ""
 	cell.text:SetText(have .. (link or WHITE .. item.name .. "|r") .. shortSite(item.site)
+		.. tierText(tiersForId(activeSpec, id))
 		.. gainText(simGain(activeSpec, item.name)))
 	cell.link = link
 	cell.ilvl.itemName = item.name
@@ -743,16 +934,12 @@ local function setItemCell(cell, item)
 end
 
 local function setWearingCell(cell, worn)
-	cell:SetHeight(CELL_ITEM)
-	cell.icon:Show()
-	cell.ilvl:Show()
-	cell.text:ClearAllPoints()
-	cell.text:SetPoint("LEFT", cell.icon, "RIGHT", 4, 0)
-	cell.text:SetPoint("RIGHT", cell.ilvl, "LEFT", -4, 0)
+	beginItemCell(cell)
 
 	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(worn.link))
 		or "Interface\\Icons\\INV_Misc_QuestionMark")
-	cell.text:SetText(GREY .. "on you |r" .. worn.link)
+	cell.text:SetText(GREY .. "on you |r" .. worn.link
+		.. tierText(tiersForId(activeSpec, worn.id)))
 	cell.link = worn.link
 	cell.ilvl.itemName = nil  -- this is what you have, not a target to set
 	cell.ilvl.text:SetText(GREY .. (worn.ilvl or "?") .. "|r")
@@ -762,21 +949,34 @@ end
 -- the name and icon come from the client's item cache; a cold cache shows the
 -- bare id once and is correct on the next open.
 local function setSimCell(cell, id, info)
-	cell:SetHeight(CELL_ITEM)
-	cell.icon:Show()
-	cell.ilvl:Show()
-	cell.text:ClearAllPoints()
-	cell.text:SetPoint("LEFT", cell.icon, "RIGHT", 4, 0)
-	cell.text:SetPoint("RIGHT", cell.ilvl, "LEFT", -4, 0)
+	beginItemCell(cell)
 
 	local _, link = C_Item.GetItemInfo(id)
 	if not link then C_Item.RequestLoadItemDataByID(id) end
 	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(id))
 		or "Interface\\Icons\\INV_Misc_QuestionMark")
-	cell.text:SetText((link or WHITE .. "item " .. id .. "|r") .. gainText(info.gain))
+	cell.text:SetText((link or WHITE .. "item " .. id .. "|r")
+		.. tierText(tiersForId(activeSpec, id)) .. gainText(info.gain))
 	cell.link = link
 	cell.ilvl.itemName = nil  -- no target to set: the sim already fixed its level
 	cell.ilvl.text:SetText(GREY .. (info.ilvl or "?") .. "|r")
+end
+
+-- A trinket rated by u.gg or Icy Veins, drawn whether or not any BiS list or
+-- sim mentions it. Same cold-cache handling as the sim cell above: an id the
+-- client has never seen shows bare once and is right on the next open.
+local function setTierCell(cell, id, tiers, worn)
+	beginItemCell(cell)
+
+	local _, link = C_Item.GetItemInfo(id)
+	if not link then C_Item.RequestLoadItemDataByID(id) end
+	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(id))
+		or "Interface\\Icons\\INV_Misc_QuestionMark")
+	local have = worn and "|TInterface\\RaidFrame\\ReadyCheck-Ready:12|t" or ""
+	cell.text:SetText(have .. (link or WHITE .. "item " .. id .. "|r") .. tierText(tiers))
+	cell.link = link
+	cell.ilvl.itemName = nil  -- a rating, not a piece you are aiming at a rank
+	cell.ilvl.text:SetText("")
 end
 
 openTrackMenu = function(owner, itemName)
@@ -879,6 +1079,45 @@ renderDoll = function()
 	local leftY  = column(DOLL_LEFT, 0, 4)
 	local rightY = column(DOLL_RIGHT, colW + 16, 4)
 	local y = math.max(leftY, rightY) + 10
+
+	-- Every trinket the two sites rate for this spec, best first. The BiS list
+	-- above answers "what should I chase"; this answers "the thing that just
+	-- dropped is not on the list, is it any good".
+	if classCodexLoaded() then
+		y = place(0, y, CONTENT_W - 20, function(cell)
+			setHeaderCell(cell, "Trinket ranks are off: ClassCodex is loaded and keeps them current")
+		end)
+	else
+		local ranked = {}
+		for id, tiers in pairs(TRINKET_TIER[activeSpec] or {}) do
+			ranked[#ranked + 1] = { id = id, tiers = tiers, rank = bestTier(tiers) }
+		end
+		if #ranked > 0 then
+			table.sort(ranked, function(a, b)
+				if a.rank ~= b.rank then return a.rank < b.rank end
+				return a.id < b.id
+			end)
+
+			y = place(0, y, CONTENT_W - 20, function(cell)
+				setHeaderCell(cell, "Trinket ranks  " .. GREY
+					.. "u.gg / Icy Veins, two letters where they disagree|r")
+			end)
+			local shown = math.min(#ranked, TIER_ROWS_SHOWN)
+			for i = 1, shown do
+				local entry = ranked[i]
+				y = place(0, y, CONTENT_W - 20, function(cell)
+					setTierCell(cell, entry.id, entry.tiers, wornIds[entry.id])
+				end)
+			end
+			-- never hide a cut silently
+			if #ranked > shown then
+				y = place(0, y, CONTENT_W - 20, function(cell)
+					setHeaderCell(cell, ("... and %d lower-rated trinkets, not shown")
+						:format(#ranked - shown))
+				end)
+			end
+		end
+	end
 
 	-- Anything your own sim rates that the two BiS lists never mentioned. This
 	-- is the part no public list can give you, because it is your gear.
@@ -1264,6 +1503,45 @@ local function selfTest()
 				print("|cffff0000FAIL|r " .. track.name .. " " .. rank .. "/6 is not above " .. (rank - 1) .. "/6")
 			end
 		end
+	end
+
+	-- every tier letter must have a colour, or tierText concatenates a nil and
+	-- throws inside a render rather than anywhere findable
+	for spec, items in pairs(TRINKET_TIER) do
+		if not BIS[spec] then
+			failed = failed + 1
+			print("|cffff0000FAIL|r tier table has unknown spec '" .. tostring(spec) .. "'")
+		end
+		for id, tiers in pairs(items) do
+			if not (tiers.u or tiers.iv) then
+				failed = failed + 1
+				print("|cffff0000FAIL|r tier entry " .. id .. " (" .. spec .. ") rates nothing")
+			end
+			for _, letter in pairs(tiers) do
+				if not (TIER_COLOUR[letter] and TIER_RANK[letter]) then
+					failed = failed + 1
+					print("|cffff0000FAIL|r unknown tier '" .. tostring(letter) .. "' on item " .. id)
+				end
+			end
+		end
+	end
+
+	-- the badge: agreement collapses to one letter, disagreement keeps both
+	check("tier badge, agreed", tierText({ u = "S", iv = "S" }):find("S", 1, true) ~= nil, true)
+	check("tier badge, one source", tierText({ iv = "A" }):find("A", 1, true) ~= nil, true)
+	check("tier badge, disagreed", tierText({ u = "A", iv = "S" }):find("A", 1, true) ~= nil
+		and tierText({ u = "A", iv = "S" }):find("S", 1, true) ~= nil, true)
+	check("tier badge, no data", tierText(nil), "")
+	check("tier best of two", bestTier({ u = "C", iv = "S" }), 1)
+	check("tier best of one", bestTier({ u = "B" }), 3)
+
+	-- ClassCodex ships the same tiers, so it turns ours off. If that check ever
+	-- stops returning a boolean the suppression silently stops working.
+	check("ClassCodex check is a boolean", type(classCodexLoaded()), "boolean")
+	if classCodexLoaded() then
+		check("tiers suppressed while ClassCodex is loaded", tiersForId("Feral", 193701), nil)
+	else
+		check("tiers resolve by item id", tiersForId("Feral", 193701) ~= nil, true)
 	end
 
 	-- a saved target must survive the round trip and show its item level
