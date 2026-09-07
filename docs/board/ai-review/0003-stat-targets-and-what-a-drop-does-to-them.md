@@ -164,6 +164,29 @@ redistributed or modified**, unlike ClassCodex, which is MIT.
 The pane also now sizes itself to its footer instead of guessing. The footer is one line or two
 depending on what it is saying, and the guess is what put text outside the border in the screenshot.
 
+**2026-09-07, second look (Rob). The v0.11.1 fix overshot: the pane landed in the middle of the
+screen, and it did not follow the sheet when it was dragged.** Two separate faults in one change,
+and both are worth keeping written down because both looked right.
+
+**The measurement was too trusting.** `sheetRightEdge()` walked every descendant of
+`CharacterFrame` and took the furthest right of them. Other addons parent frames to
+`CharacterFrame`, and **a frame's own `IsShown` flag reads true even when an ancestor is hidden**, so
+`IsShown()` is not "visible": the walk found something far away, believed it, and put the pane there.
+It now asks three named Blizzard frames instead, `CharacterFrame`, `CharacterFrameInsetRight` and
+`CharacterStatsPane`, and takes the widest. Those are what the sheet is made of, a replacement fills
+them rather than escaping them, and a fixed list cannot run away. `IsVisible()` is used now, not
+`IsShown()`.
+
+**Anchoring to coordinates is not anchoring.** The point was set to `UIParent` with a measured x and
+y, so it was correct at the instant it was set and then sat still while the sheet was dragged out
+from under it. The point is now set to the widest sheet frame itself, so a drag carries the pane
+along for nothing. `OnSizeChanged` and `OnDragStop` are still hooked, but only for the two things an
+anchor cannot do: the sheet changing width, and a drag that carries it near enough to the edge of
+the screen that the pane should swap to the other side.
+
+**It swaps sides now rather than going off screen**, which was an open question on the first pass
+and is answered rather than left.
+
 ## Links
 
 - `0002` is where the trinket tiers came from, and this card renames the script that card wrote,

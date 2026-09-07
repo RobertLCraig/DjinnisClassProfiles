@@ -2108,33 +2108,37 @@ end
 --
 -- Not `CharacterFrame:GetRight()`. A child frame is not clipped to its parent,
 -- so a sheet replacement can widen the thing on screen without CharacterFrame's
--- own bounds moving at all, and Chonky Character Sheet does exactly that: its
--- stat sections hang off CharacterStatsPane and reach hundreds of pixels past
--- the frame they descend from. Anchoring to CharacterFrame's own right edge put
--- this pane on top of them.
+-- own bounds moving at all, and Chonky Character Sheet does exactly that: it
+-- fills CharacterStatsPane, which is Blizzard's own frame, with stat sections
+-- that reach past the frame they descend from. Anchoring to CharacterFrame's
+-- right edge put this pane on top of them.
 --
--- So the edge is measured rather than asked for: the furthest right any shown
--- descendant reaches. That is correct for a plain sheet, for Chonky, and for
--- whatever replaces Chonky, and it needs to know nothing about any of them.
+-- These three named frames are what the sheet is made of, and the widest of
+-- them is its edge. They are all Blizzard's, which is the point: this reads
+-- correctly for a plain sheet and for a replacement that fills them, and it
+-- names no other addon.
 --
--- Depth 4 covers CharacterFrame > inset > stats pane > scroll > section, which
--- is as deep as the widening goes. It is a few dozen frames, walked when the
--- sheet opens and not per frame.
-local function sheetRightEdge()
-	local right = CharacterFrame:GetRight() or 0
+-- IT USED TO WALK EVERY DESCENDANT AND TAKE THE FURTHEST RIGHT, AND THAT PUT
+-- THE PANE IN THE MIDDLE OF THE SCREEN. Other addons parent frames to
+-- CharacterFrame, and a frame's own IsShown flag reads true even when an
+-- ancestor is hidden, so the walk found something far away and believed it. A
+-- fixed list cannot do that, and it is the smaller thing as well.
+local SHEET_FRAMES = { "CharacterFrame", "CharacterFrameInsetRight", "CharacterStatsPane" }
 
-	local function walk(frame, depth)
-		if depth > 4 then return end
-		for _, child in ipairs({ frame:GetChildren() }) do
-			if child:IsShown() then
-				local childRight = child:GetRight()
-				if childRight and childRight > right then right = childRight end
-				walk(child, depth + 1)
-			end
+-- Returns the FRAME, not the number. Anchoring to a frame is what makes the
+-- pane follow the sheet when it is dragged: a point set from coordinates is
+-- measured once and then sits there while the sheet walks away from it, which
+-- is what the first version of this did.
+local function widestSheetFrame()
+	local widest, right = CharacterFrame, CharacterFrame:GetRight() or 0
+	for _, name in ipairs(SHEET_FRAMES) do
+		local frame = _G[name]
+		if frame and frame:IsVisible() then
+			local edge = frame:GetRight()
+			if edge and edge > right then widest, right = frame, edge end
 		end
 	end
-	walk(CharacterFrame, 1)
-	return right
+	return widest, right
 end
 
 local function buildCharacterPane()
@@ -2153,13 +2157,28 @@ local function buildCharacterPane()
 	pane:SetPoint("TOPRIGHT")
 	holder:SetHeight(pane:GetHeight())
 
-	-- Measured on every open, because the sheet is not always the same width:
-	-- Chonky's own panels can be collapsed, and a sheet that was narrow last
-	-- time it was open would leave this pane sitting in a gap.
+	-- Re-anchored on every open, because the sheet is not always the same width:
+	-- panels can be collapsed, and a sheet that was narrow last time it was open
+	-- would leave this pane sitting in a gap. The POINT is to a frame every
+	-- time, so between opens the pane is dragged around by the sheet for free.
 	local function place()
+		local widest, right = widestSheetFrame()
 		holder:ClearAllPoints()
-		holder:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT",
-			sheetRightEdge() + 6, CharacterFrame:GetTop() or 0)
+
+		-- No room on that side of the screen, so it goes on the other one.
+		-- Anchored to CharacterFrame rather than to the widest frame, because
+		-- nothing widens a sheet leftwards and its own left edge is the honest
+		-- one to sit beside.
+		local screenRight = UIParent:GetRight() or 0
+		if right + PANE_W + 6 > screenRight then
+			holder:SetPoint("TOPRIGHT", CharacterFrame, "TOPLEFT", -6, 0)
+			return
+		end
+
+		-- Line the top up with the sheet, not with whatever happened to be the
+		-- widest piece of it, which can start well below the title bar.
+		local drop = (widest:GetTop() or 0) - (CharacterFrame:GetTop() or 0)
+		holder:SetPoint("TOPLEFT", widest, "TOPRIGHT", 6, drop)
 	end
 
 	-- Follow the sheet rather than tracking its show and hide separately, so
@@ -2176,7 +2195,10 @@ local function buildCharacterPane()
 	end)
 	CharacterFrame:HookScript("OnHide", function() holder:Hide() end)
 
-	-- Dragging the sheet, or a panel of it opening, both move that edge
+	-- The pane follows a drag on its own now, because it is anchored to a frame.
+	-- These two are for the cases an anchor cannot follow: the sheet changing
+	-- width under it, and a drag that carries it near enough to the edge of the
+	-- screen that it should swap sides.
 	CharacterFrame:HookScript("OnSizeChanged", place)
 	CharacterFrame:HookScript("OnDragStop", place)
 	holder:SetShown(CharacterFrame:IsShown())

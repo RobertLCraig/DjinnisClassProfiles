@@ -6,15 +6,16 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.11.1, `Interface: 120100`. No remote.
+**Status:** v0.11.2, `Interface: 120100`. No remote.
 **Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
 everything is under `[Unreleased]`.
 **Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in
 `human-review/` and are Rob's: `0001`, "the window has no decent way to open", needs a **full client
 restart**, not a `/reload`. `0002`, "trinket tiers borrowed from ClassCodex", needs ten minutes with
 ClassCodex disabled and then enabled. `0003`, "stat targets, and what a drop does to them", is in
-`ai-review/` and has never been seen on a screen by anybody.
-_Last updated: 2026-09-07 (card 0003: stat target bars in three places, deployed at 0.11.0)_
+`ai-review/`; Rob has now seen it twice and both looks found placement faults, fixed at 0.11.1 and
+0.11.2 and **not looked at since**.
+_Last updated: 2026-09-07 (card 0003: stat target bars in three places, deployed at 0.11.2)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -118,6 +119,14 @@ a plain sheet and for any replacement. It also wears Chonky's own section backdr
 Chonky's border colour off a named global frame rather than out of its source**, which matters:
 Chonky ships All Rights Reserved, no modification and no redistribution, unlike ClassCodex, which is
 MIT.
+
+**v0.11.2, the fix to the fix, and two traps worth carrying to any other addon here.** 0.11.1 walked
+every descendant of `CharacterFrame` and took the furthest right; the pane landed in the middle of
+the screen. **`IsShown()` is not "visible"**: a frame's own flag reads true while an ancestor is
+hidden, and other addons parent frames to `CharacterFrame`, so the walk found something far away and
+believed it. It asks three named Blizzard frames now and uses `IsVisible()`. Second: **a point set
+from coordinates is not an anchor.** It was correct when set and then sat still while the sheet was
+dragged away from it. The point is set to a frame now, so a drag carries the pane for free.
 
 **"Breakpoint" is deliberately not the word used.** These numbers are observed from logs, not
 solved. A few are real mechanical breakpoints; most are just where good gear settles. The addon says
