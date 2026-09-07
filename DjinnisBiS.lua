@@ -1707,18 +1707,69 @@ end
 local statPanes = {}
 local previewLink
 
+-- Chonky Character Sheet draws its own stat sections with exactly this
+-- backdrop, so a pane wearing it reads as one more of them rather than as a
+-- bolted-on box. It is a plain Blizzard dialog border, so it is equally at home
+-- when Chonky is not installed at all.
+local PANE_BACKDROP = {
+	bgFile   = "Interface\\Buttons\\WHITE8X8",
+	edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+	edgeSize = 6,
+	insets   = { left = 2, right = 2, top = 2, bottom = 2 },
+}
+
+-- Chonky lets the player recolour its borders, including "use my class colour",
+-- and it keeps that choice in a table this addon cannot see. What it CAN see is
+-- the result, because every section it draws is a named global frame and the
+-- backdrop colour of a frame is public. So the colour is read off the finished
+-- article rather than guessed, and falls back to Blizzard's own grey.
+local function paneBorderColour()
+	local section = _G["CCS_Section_SECONDARY"]
+	if section and section.GetBackdropBorderColor then
+		local ok, r, g, b, a = pcall(section.GetBackdropBorderColor, section)
+		if ok and r then return r, g, b, a or 1 end
+	end
+	return 0.6, 0.6, 0.6, 1
+end
+
+local HEADER_H = 22
+
 local function buildStatPane(parent, opts)
-	local pane = CreateFrame("Frame", nil, parent)
+	local pane = CreateFrame("Frame", nil, parent, "BackdropTemplate")
 	pane:SetWidth(PANE_W)
 
-	pane.heading = pane:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-	pane.heading:SetPoint("TOPLEFT", 12, -8)
-	pane.heading:SetPoint("RIGHT", pane, "RIGHT", -12, 0)
-	pane.heading:SetJustifyH("LEFT")
+	if opts.framed then
+		pane:SetBackdrop(PANE_BACKDROP)
+		pane:SetBackdropColor(0.05, 0.05, 0.05, 0.92)
+		pane:SetBackdropBorderColor(paneBorderColour())
+	end
+
+	-- A titled bar across the top, which is the shape every panel on that side
+	-- of the sheet already has.
+	pane.header = pane:CreateTexture(nil, "ARTWORK")
+	pane.header:SetPoint("TOPLEFT", 4, -4)
+	pane.header:SetPoint("TOPRIGHT", -4, -4)
+	pane.header:SetHeight(HEADER_H)
+	pane.header:SetColorTexture(0.16, 0.10, 0.22, 0.85)
+	pane.header:SetShown(opts.framed or false)
+
+	pane.title = pane:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+	pane.title:SetPoint("LEFT", pane.header, "LEFT", 8, 0)
+	pane.title:SetText("Stat targets")
+	pane.title:SetShown(opts.framed or false)
+
+	local top = opts.framed and (HEADER_H + 8) or 4
 
 	pane.context = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-	pane.context:SetSize(88, 20)
-	pane.context:SetPoint("TOPRIGHT", -12, -4)
+	pane.context:SetSize(80, 18)
+	pane.context:SetPoint("TOPRIGHT", -8, -(top))
+
+	pane.heading = pane:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+	pane.heading:SetPoint("TOPLEFT", 12, -(top + 4))
+	pane.heading:SetPoint("RIGHT", pane.context, "LEFT", -6, 0)
+	pane.heading:SetJustifyH("LEFT")
+	pane.heading:SetWordWrap(false)
+
 	pane.context:SetScript("OnClick", function()
 		local now = statContext()
 		db().statContext = (now == "raid") and "mplus" or "raid"
@@ -1726,7 +1777,7 @@ local function buildStatPane(parent, opts)
 	end)
 
 	pane.rows = CreateFrame("Frame", nil, pane)
-	pane.rows:SetPoint("TOPLEFT", 0, -30)
+	pane.rows:SetPoint("TOPLEFT", 0, -(top + 24))
 	pane.rows:SetSize(PANE_W, #STATS * BAR_ROW_H)
 	pane.bars = {}
 	for i, _ in ipairs(STATS) do
@@ -1734,12 +1785,22 @@ local function buildStatPane(parent, opts)
 	end
 
 	pane.footer = pane:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
-	pane.footer:SetPoint("TOPLEFT", pane.rows, "BOTTOMLEFT", 12, -4)
+	pane.footer:SetPoint("TOPLEFT", pane.rows, "BOTTOMLEFT", 12, -2)
 	pane.footer:SetPoint("RIGHT", pane, "RIGHT", -12, 0)
 	pane.footer:SetJustifyH("LEFT")
 	pane.footer:SetWordWrap(true)
 
-	pane:SetHeight(30 + #STATS * BAR_ROW_H + 46)
+	-- The fixed part of the height. The footer is added after it has text in
+	-- it, because a two-line note and a one-line note are different heights and
+	-- guessing at one of them is how text ends up outside the border.
+	pane.fixedHeight = top + 24 + #STATS * BAR_ROW_H + 10
+	pane:SetHeight(pane.fixedHeight + 14)
+
+	function pane:Resize()
+		local extra = math.max(12, math.ceil(self.footer:GetStringHeight() or 12))
+		self:SetHeight(self.fixedHeight + extra + 4)
+		if opts.onResize then opts.onResize(self) end
+	end
 
 	function pane:Update()
 		-- opts.spec is a function so the window's pane follows its spec buttons
@@ -1756,6 +1817,7 @@ local function buildStatPane(parent, opts)
 			self.heading:SetText(GREY .. "No stat targets for this spec.|r")
 			for _, row in ipairs(self.bars) do row:Hide() end
 			self.footer:SetText("")
+			self:Resize()
 			return
 		end
 		for _, row in ipairs(self.bars) do row:Show() end
@@ -1787,6 +1849,7 @@ local function buildStatPane(parent, opts)
 			note = GREY .. STAT_TARGET_SOURCE .. "|r"
 		end
 		self.footer:SetText(note)
+		self:Resize()
 	end
 
 	statPanes[#statPanes + 1] = pane
@@ -2041,26 +2104,81 @@ end
 -- would be fighting for the same textures. Riding alongside costs one anchor
 -- and takes that fight off the table.
 
+-- WHERE THE RIGHT EDGE OF THE CHARACTER SHEET ACTUALLY IS.
+--
+-- Not `CharacterFrame:GetRight()`. A child frame is not clipped to its parent,
+-- so a sheet replacement can widen the thing on screen without CharacterFrame's
+-- own bounds moving at all, and Chonky Character Sheet does exactly that: its
+-- stat sections hang off CharacterStatsPane and reach hundreds of pixels past
+-- the frame they descend from. Anchoring to CharacterFrame's own right edge put
+-- this pane on top of them.
+--
+-- So the edge is measured rather than asked for: the furthest right any shown
+-- descendant reaches. That is correct for a plain sheet, for Chonky, and for
+-- whatever replaces Chonky, and it needs to know nothing about any of them.
+--
+-- Depth 4 covers CharacterFrame > inset > stats pane > scroll > section, which
+-- is as deep as the widening goes. It is a few dozen frames, walked when the
+-- sheet opens and not per frame.
+local function sheetRightEdge()
+	local right = CharacterFrame:GetRight() or 0
+
+	local function walk(frame, depth)
+		if depth > 4 then return end
+		for _, child in ipairs({ frame:GetChildren() }) do
+			if child:IsShown() then
+				local childRight = child:GetRight()
+				if childRight and childRight > right then right = childRight end
+				walk(child, depth + 1)
+			end
+		end
+	end
+	walk(CharacterFrame, 1)
+	return right
+end
+
 local function buildCharacterPane()
 	if not CharacterFrame then return end
 
-	local holder = CreateFrame("Frame", "DjinnisBiSCharacterPane", CharacterFrame,
-		"TooltipBackdropTemplate")
-	holder:SetPoint("TOPLEFT", CharacterFrame, "TOPRIGHT", 4, -12)
+	local holder = CreateFrame("Frame", "DjinnisBiSCharacterPane", CharacterFrame)
 	holder:SetWidth(PANE_W)
 	holder:SetFrameStrata("HIGH")
 
-	local pane = buildStatPane(holder, { spec = playerSpec })
+	local pane = buildStatPane(holder, {
+		spec = playerSpec,
+		framed = true,
+		onResize = function(self) holder:SetHeight(self:GetHeight()) end,
+	})
 	pane:SetPoint("TOPLEFT")
-	holder:SetHeight(pane:GetHeight() + 12)
+	pane:SetPoint("TOPRIGHT")
+	holder:SetHeight(pane:GetHeight())
+
+	-- Measured on every open, because the sheet is not always the same width:
+	-- Chonky's own panels can be collapsed, and a sheet that was narrow last
+	-- time it was open would leave this pane sitting in a gap.
+	local function place()
+		holder:ClearAllPoints()
+		holder:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT",
+			sheetRightEdge() + 6, CharacterFrame:GetTop() or 0)
+	end
 
 	-- Follow the sheet rather than tracking its show and hide separately, so
 	-- there is no state to get out of step.
 	CharacterFrame:HookScript("OnShow", function()
+		place()
 		holder:Show()
 		pane:Update()
+		-- And again once this frame's OnShow handlers have all run. A sheet
+		-- replacement lays its panels out in its own OnShow, and hook order is
+		-- not ours to assume, so the first measurement can be of a sheet that
+		-- has not finished widening yet.
+		if C_Timer then C_Timer.After(0, place) end
 	end)
 	CharacterFrame:HookScript("OnHide", function() holder:Hide() end)
+
+	-- Dragging the sheet, or a panel of it opening, both move that edge
+	CharacterFrame:HookScript("OnSizeChanged", place)
+	CharacterFrame:HookScript("OnDragStop", place)
 	holder:SetShown(CharacterFrame:IsShown())
 
 	-- Gear changes and a respec both move every number on this pane.

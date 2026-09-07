@@ -122,13 +122,47 @@ drawing instead, and that same mutation does fail them.
 built and parsed and offline-checked, and not verified.
 
 - [ ] `/bis`, third tab, "Stats". Four bars, a Raid/Mythic+ button, the spec buttons above.
-- [ ] Open the character sheet. A pane should appear on its right, following it open and closed.
-- [ ] With Chonky Character Sheet enabled, the same pane, still not overlapping.
+- [x] Open the character sheet. A pane should appear on its right, following it open and closed.
+      **Seen 2026-09-07. It appeared and it overlapped**, which is the Comments entry below.
+- [ ] With Chonky Character Sheet enabled, the pane clear of the stat columns, wearing the same
+      border as them. **This is the v0.11.1 fix and it has not been looked at.**
 - [ ] Hover a piece of gear in your bags. Both open panes should show a ghost segment, and the
       tooltip should gain a line per stat the item carries.
 - [ ] Hover a ring when you are wearing two. The comparison should be against the weaker one.
 - [ ] The heading should name your hero talent. If it says "all hero talents" while you have one
       chosen, the slug did not match and that is a bug, not a display choice.
+
+## Comments
+
+**2026-09-07, first look in a live client (Rob).** The pane worked and sat **on top of** Chonky
+Character Sheet's stat columns, and looked like a bolted-on box rather than part of the sheet.
+Fixed at v0.11.1.
+
+**The anchoring bug is worth writing down, because the obvious fix is the wrong one.** The pane was
+anchored to `CharacterFrame`'s own `TOPRIGHT`, which reads as correct and is not: **a child frame is
+not clipped to its parent**, so a sheet replacement can widen what is on screen without
+`CharacterFrame`'s own bounds moving at all. Chonky does exactly that. Its stat sections descend
+from `CharacterStatsPane` and reach several hundred pixels past the frame they belong to, so
+`CharacterFrame:GetRight()` was still reporting the narrow default and the pane landed inside the
+sheet.
+
+The fix measures rather than asks: `sheetRightEdge()` walks `CharacterFrame`'s shown descendants to
+depth 4 and takes the furthest right any of them reaches. That is correct for a plain sheet, for
+Chonky, and for whatever replaces Chonky, and it needs to know nothing about any of them. It runs
+when the sheet opens, again on the next frame (hook order is not ours to assume, and a sheet
+replacement lays its panels out in its own `OnShow`), and on resize and drag.
+
+**Styling now matches rather than resembles.** The pane wears the same backdrop Chonky's own
+sections wear: `UI-DialogBox-Border`, `edgeSize` 6, insets of 2. **Chonky's border colour is read off
+the finished article, not copied from its source.** It lets the player recolour borders, including
+"use my class colour", and keeps that choice in a private table this addon cannot see; but every
+section it draws is a named global frame, and a frame's backdrop colour is public. So
+`CCS_Section_SECONDARY:GetBackdropBorderColor()` is asked, and Blizzard's grey is the fallback.
+Nothing is copied out of Chonky's code, which matters: it ships **All Rights Reserved, may not be
+redistributed or modified**, unlike ClassCodex, which is MIT.
+
+The pane also now sizes itself to its footer instead of guessing. The footer is one line or two
+depending on what it is saying, and the guess is what put text outside the border in the screenshot.
 
 ## Links
 

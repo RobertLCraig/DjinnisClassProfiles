@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.11.0, `Interface: 120100`. No remote.
+**Status:** v0.11.1, `Interface: 120100`. No remote.
 **Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
 everything is under `[Unreleased]`.
 **Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in
@@ -108,6 +108,16 @@ the piece it would actually replace.
 Druid of the Claw wants 1225 crit and the all-hero aggregate says 775. When there is no entry for
 the player's hero talent the pane falls back to the aggregate **and says so on screen**, because a
 silent fallback here can be wrong by more than half.
+
+**v0.11.1, same day, after Rob's first look in a client: the character sheet pane sat on top of
+Chonky Character Sheet.** Worth knowing because the obvious anchor is the wrong one. **A child frame
+is not clipped to its parent**, so a sheet replacement widens what is on screen without
+`CharacterFrame`'s own bounds moving, and `CharacterFrame:GetRight()` still reports the narrow
+default. The pane now measures the furthest right any shown descendant reaches, which is right for
+a plain sheet and for any replacement. It also wears Chonky's own section backdrop and **reads
+Chonky's border colour off a named global frame rather than out of its source**, which matters:
+Chonky ships All Rights Reserved, no modification and no redistribution, unlike ClassCodex, which is
+MIT.
 
 **"Breakpoint" is deliberately not the word used.** These numbers are observed from logs, not
 solved. A few are real mechanical breakpoints; most are just where good gear settles. The addon says
