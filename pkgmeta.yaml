@@ -36,9 +36,11 @@ ignore:
   - deploy.sh
   - release.ps1
   - pkgmeta.yaml
-  # Author tooling: regenerates the trinket tier table from ClassCodex's data
-  # files. Runs on the author's machine, never in anybody's game folder.
-  - update-trinket-tiers.ps1
+  # Author tooling: regenerates the trinket tier and stat target tables from
+  # ClassCodex's data files, and runs the addon's own self-test outside the
+  # game. Both run on the author's machine, never in anybody's game folder.
+  - update-classcodex-data.ps1
+  - offline-check.lua
   - releases
   # A SavedVariables file, if one is ever copied into the repo to reproduce a bug
   - DjinnisBiSDB.lua

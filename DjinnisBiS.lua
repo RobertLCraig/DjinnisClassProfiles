@@ -126,7 +126,7 @@ local BIS = {
 -- Trinket tiers -------------------------------------------------------------
 --
 -- GENERATED, do not hand-edit. Everything between the BEGIN and END markers
--- below is rewritten by `update-trinket-tiers.ps1`, which reads ClassCodex's
+-- below is rewritten by `update-classcodex-data.ps1`, which reads ClassCodex's
 -- own shipped data files. `u` is u.gg, `iv` is Icy Veins. Patching a letter
 -- here loses the patch the next time that script runs.
 --
@@ -265,6 +265,91 @@ local TRINKET_TIER = {
 	},
 }
 -- END GENERATED TRINKET TIERS
+
+-- Stat targets --------------------------------------------------------------
+--
+-- GENERATED, do not hand-edit. Same script, same source files, second block.
+--
+-- The secondary-stat ratings the top 20% of each spec are actually running, per
+-- hero talent, for raid and for Mythic+. u.gg only: Icy Veins writes prose about
+-- which stat to favour and publishes no number to aim at.
+--
+-- These are OBSERVED, not simulated. They are what the best logged players wear,
+-- which is why there is no "breakpoint" language here and no claim that hitting
+-- one does anything mechanical. A few genuinely are breakpoints (a haste value
+-- that fits another tick into a channel); most are just where the gear settles.
+-- Treating all of them the same way is the honest reading of what the data is.
+--
+-- `all` is the aggregate across every hero talent, and it is the fallback when
+-- the player's hero talent has no entry of its own. That fallback matters: for
+-- Feral raid, Druid of the Claw wants 1225 crit and the aggregate says 775, so
+-- showing the aggregate to a Druid of the Claw player would be wrong by more
+-- than half. When the fallback is in use the panel says so.
+--
+-- Only the top-20% bin is carried. u.gg also publishes top 50% and top 80%, and
+-- a selector between three bins is a control nobody asked for.
+--
+-- BEGIN GENERATED STAT TARGETS
+local STAT_TARGET_SOURCE = "ClassCodex 1.3.1, u.gg top 20%, read 2026-09-07"
+local STAT_TARGET = {
+	Balance = {
+		all = {
+			raid  = { crit = 975, haste = 1011, mastery = 1071, versatility = 347 },
+			mplus = { crit = 973, haste = 1062, mastery = 1094, versatility = 303 },
+		},
+		["elunes-chosen"] = {
+			raid  = { crit = 975, haste = 1011, mastery = 1071, versatility = 347 },
+			mplus = { crit = 973, haste = 1062, mastery = 1094, versatility = 303 },
+		},
+		["keeper-of-the-grove"] = {
+			raid  = { crit = 925, haste = 1075, mastery = 975, versatility = 375 },
+			mplus = { crit = 825, haste = 575, mastery = 1125, versatility = 225 },
+		},
+	},
+	Feral = {
+		all = {
+			raid  = { crit = 775, haste = 1008, mastery = 1195, versatility = 325 },
+			mplus = { crit = 850, haste = 1265, mastery = 1161, versatility = 445 },
+		},
+		["druid-of-the-claw"] = {
+			raid  = { crit = 1225, haste = 1075, mastery = 975, versatility = 375 },
+			mplus = { crit = 850, haste = 1265, mastery = 1161, versatility = 445 },
+		},
+		wildstalker = {
+			raid  = { crit = 775, haste = 1008, mastery = 1195, versatility = 325 },
+			mplus = { crit = 915, haste = 1125, mastery = 1195, versatility = 475 },
+		},
+	},
+	Guardian = {
+		all = {
+			raid  = { crit = 858, haste = 1355, mastery = 608, versatility = 685 },
+			mplus = { crit = 975, haste = 1329, mastery = 811, versatility = 666 },
+		},
+		["druid-of-the-claw"] = {
+			raid  = { crit = 1075, haste = 1125, mastery = 575, versatility = 375 },
+			mplus = { crit = 1100, haste = 1200, mastery = 975, versatility = 458 },
+		},
+		["elunes-chosen"] = {
+			raid  = { crit = 858, haste = 1355, mastery = 608, versatility = 685 },
+			mplus = { crit = 975, haste = 1329, mastery = 811, versatility = 666 },
+		},
+	},
+	Resto = {
+		all = {
+			raid  = { crit = 542, haste = 1533, mastery = 1242, versatility = 325 },
+			mplus = { crit = 564, haste = 1408, mastery = 1343, versatility = 519 },
+		},
+		["keeper-of-the-grove"] = {
+			raid  = { crit = 425, haste = 1225, mastery = 1225, versatility = 25 },
+			mplus = { crit = 835, haste = 1404, mastery = 1132, versatility = 575 },
+		},
+		wildstalker = {
+			raid  = { crit = 542, haste = 1533, mastery = 1242, versatility = 325 },
+			mplus = { crit = 564, haste = 1408, mastery = 1343, versatility = 519 },
+		},
+	},
+}
+-- END GENERATED STAT TARGETS
 
 -- ===========================================================================
 
@@ -622,6 +707,278 @@ local function tierText(tiers)
 	return "  " .. TIER_COLOUR[tier] .. tier .. "|r"
 end
 
+-- Stat targets: where you are, where you want to be, and what a drop does ----
+--
+-- Three surfaces, one set of numbers: a Stats tab in this window, a pane that
+-- rides alongside the character sheet, and lines on any gear tooltip. They all
+-- go through the same helpers below, because three answers to "how much haste
+-- do I want" that could disagree is the failure this section exists to avoid.
+
+local STATS = { "crit", "haste", "mastery", "versatility" }
+local STAT_LABEL = {
+	crit = "Crit", haste = "Haste", mastery = "Mastery", versatility = "Vers",
+}
+local ZERO_STATS = { crit = 0, haste = 0, mastery = 0, versatility = 0 }
+
+-- C_Item.GetItemStats keys. Two spellings are accepted per stat because the
+-- game has shipped both and which one an item answers with is not worth
+-- guessing: the first key that returns a number wins, and they are never added
+-- together, which would double-count an item that carries both.
+local STAT_ITEM_KEYS = {
+	crit        = { "ITEM_MOD_CRIT_RATING_SHORT",    "ITEM_MOD_CRIT_RATING" },
+	haste       = { "ITEM_MOD_HASTE_RATING_SHORT",   "ITEM_MOD_HASTE_RATING" },
+	mastery     = { "ITEM_MOD_MASTERY_RATING_SHORT", "ITEM_MOD_MASTERY_RATING" },
+	versatility = { "ITEM_MOD_VERSATILITY",          "ITEM_MOD_VERSATILITY_SHORT" },
+}
+
+-- Read at call time rather than stored in a table at file scope: these are
+-- FrameXML constants and this file should not care what order it loaded in.
+local function ratingIndexFor(stat)
+	if stat == "crit" then return CR_CRIT_MELEE end
+	if stat == "haste" then return CR_HASTE_MELEE end
+	if stat == "mastery" then return CR_MASTERY end
+	if stat == "versatility" then return CR_VERSATILITY_DAMAGE_DONE end
+end
+
+-- 12.1 secret values. A secret may not be compared or used in arithmetic, and
+-- `type()` still answers "number" for one, so the guard this workspace reaches
+-- for first does not see it. These two globals are the guard that does.
+--
+-- This is not a defensive guess: Blizzard's own API documentation flags
+-- GetCombatRating with `SecretWhenUnitStatsRestricted`, so there is a
+-- documented state where every number below arrives unusable. See
+-- C:\Dev\WoWAddons\docs\DECISIONS.md for the two traps this workspace has
+-- already been bitten by.
+local canRead
+if canaccessvalue then
+	canRead = canaccessvalue
+elseif issecretvalue then
+	canRead = function(value) return not issecretvalue(value) end
+else
+	canRead = function() return true end
+end
+
+-- Ratings move with every proc, so reading them mid-fight makes a bar that
+-- jitters and a comparison that means nothing. Read out of combat, serve the
+-- last good reading during it.
+local ratingCache = {}
+
+local function ratingOf(stat)
+	local index = ratingIndexFor(stat)
+	if not index or not GetCombatRating then return ratingCache[stat] end
+	if not InCombatLockdown() then
+		local ok, value = pcall(GetCombatRating, index)
+		if ok and value and canRead(value) then
+			ratingCache[stat] = value
+			return value
+		end
+	end
+	return ratingCache[stat]
+end
+
+local SPEC_BY_ID = { [102] = "Balance", [103] = "Feral", [104] = "Guardian", [105] = "Resto" }
+
+local function playerSpec()
+	local api = C_SpecializationInfo
+	if not (api and api.GetSpecialization and api.GetSpecializationInfo) then return nil end
+	local index = api.GetSpecialization()
+	if not index then return nil end
+	local ok, id = pcall(api.GetSpecializationInfo, index)
+	return ok and SPEC_BY_ID[id] or nil
+end
+
+-- u.gg's hero keys are the display name lowercased, apostrophes dropped and
+-- spaces hyphenated: "Druid of the Claw" -> "druid-of-the-claw", "Elune's
+-- Chosen" -> "elunes-chosen". Deriving the key beats a hardcoded id table,
+-- which would need editing every time Blizzard adds a hero tree. Kept separate
+-- from the API call so /bis test can prove the rule without a game client.
+-- Both apostrophes are stripped. The game has shipped the typographic one
+-- (U+2019, "\226\128\153" in UTF-8) in names before, and it would not match a
+-- plain one, so the slug would silently miss and fall back to the aggregate.
+local function heroSlug(displayName)
+	if not displayName or displayName == "" then return nil end
+	local slug = displayName:lower()
+	slug = slug:gsub("\226\128\153", ""):gsub("'", "")
+	slug = slug:gsub("%s+", "-"):gsub("[^%w%-]", "")
+	return slug ~= "" and slug or nil
+end
+
+local function activeHero()
+	if not (C_ClassTalents and C_ClassTalents.GetActiveHeroTalentSpec) then return nil end
+	if not (C_Traits and C_Traits.GetSubTreeInfo) then return nil end
+	local subTreeID = C_ClassTalents.GetActiveHeroTalentSpec()
+	if not subTreeID or subTreeID == 0 then return nil end
+	local ok, info = pcall(C_Traits.GetSubTreeInfo, subTreeID)
+	if not ok or not info or not info.name then return nil end
+	return heroSlug(info.name)
+end
+
+-- Raid or Mythic+, read off where you are standing. That is right more often
+-- than a remembered setting, and it is still overridable, because gearing for
+-- Tuesday happens in a city.
+local function autoContext()
+	if not GetInstanceInfo then return nil end
+	local _, instanceType = GetInstanceInfo()
+	if instanceType == "party" then return "mplus" end
+	if instanceType == "raid" then return "raid" end
+	return nil
+end
+
+local function statContext()
+	local chosen = db().statContext
+	if chosen == "raid" or chosen == "mplus" then return chosen, true end
+	return autoContext() or "raid", false
+end
+
+local CONTEXT_LABEL = { raid = "Raid", mplus = "Mythic+" }
+
+-- Returns the four target ratings, and the hero key they came from. A nil hero
+-- means the aggregate was used, which the panel says out loud: for Feral raid
+-- the aggregate wants 775 crit and Druid of the Claw wants 1225, so a silent
+-- fallback would be wrong by more than half.
+local function targetsFor(spec, context)
+	local bySpec = STAT_TARGET[spec]
+	if not bySpec then return nil end
+
+	-- The hero talent read is the player's own. Applying it to a spec the
+	-- player is not in would be reading one character's talents onto another
+	-- spec's targets, so it only counts when the two agree.
+	local hero = (spec == playerSpec()) and activeHero() or nil
+	if hero and bySpec[hero] and bySpec[hero][context] then
+		return bySpec[hero][context], hero
+	end
+	return bySpec.all and bySpec.all[context] or nil, nil
+end
+
+local function statsOf(link)
+	if not link or not C_Item or not C_Item.GetItemStats then return nil end
+	local ok, stats = pcall(C_Item.GetItemStats, link)
+	if not ok or type(stats) ~= "table" then return nil end
+	local out = {}
+	for _, stat in ipairs(STATS) do
+		out[stat] = 0
+		for _, key in ipairs(STAT_ITEM_KEYS[stat]) do
+			local value = tonumber(stats[key])
+			if value then
+				out[stat] = value
+				break
+			end
+		end
+	end
+	return out
+end
+
+-- INVTYPE -> the inventory slots an item of that type can go in. SLOT_INVENTORY
+-- above answers the same question for this addon's own slot names; this one
+-- answers it for an arbitrary item link, which is what a tooltip has.
+local INVTYPE_SLOTS = {
+	INVTYPE_HEAD = { 1 },            INVTYPE_NECK = { 2 },
+	INVTYPE_SHOULDER = { 3 },        INVTYPE_CLOAK = { 15 },
+	INVTYPE_CHEST = { 5 },           INVTYPE_ROBE = { 5 },
+	INVTYPE_WAIST = { 6 },           INVTYPE_LEGS = { 7 },
+	INVTYPE_FEET = { 8 },            INVTYPE_WRIST = { 9 },
+	INVTYPE_HAND = { 10 },
+	INVTYPE_FINGER = { 11, 12 },     INVTYPE_TRINKET = { 13, 14 },
+	INVTYPE_WEAPON = { 16, 17 },     INVTYPE_2HWEAPON = { 16 },
+	INVTYPE_WEAPONMAINHAND = { 16 }, INVTYPE_WEAPONOFFHAND = { 17 },
+	INVTYPE_HOLDABLE = { 17 },       INVTYPE_SHIELD = { 17 },
+	INVTYPE_RANGED = { 16 },         INVTYPE_RANGEDRIGHT = { 16 },
+}
+
+-- What this item would take off you, as four rating deltas.
+--
+-- For a slot you wear two of (rings, trinkets, dual weapons) the piece that
+-- comes off is the weaker one, so that is what it is compared against. Weaker
+-- here means the lower total of the four secondary ratings, which is the same
+-- question the comparison is about; item level would be the wrong measure,
+-- because a higher-level piece with the wrong two stats is exactly the thing
+-- this panel exists to catch.
+--
+-- An empty slot counts as zero rather than being skipped: an empty ring finger
+-- is a real comparison and the honest answer is "all of it".
+local function deltaAgainstEquipped(link)
+	local incoming = statsOf(link)
+	if not incoming then return nil end
+
+	local id = tonumber(link:match("item:(%d+)"))
+	if not id then return nil end
+	local _, _, _, equipLoc = C_Item.GetItemInfoInstant(id)
+	local slots = INVTYPE_SLOTS[equipLoc or ""]
+	if not slots then return nil end
+
+	local weakest, weakestTotal, replacedLink
+	for _, slotID in ipairs(slots) do
+		local worn = GetInventoryItemLink("player", slotID)
+		local wornStats = worn and statsOf(worn) or ZERO_STATS
+		local total = 0
+		for _, stat in ipairs(STATS) do total = total + wornStats[stat] end
+		if not weakestTotal or total < weakestTotal then
+			weakest, weakestTotal, replacedLink = wornStats, total, worn
+		end
+	end
+	if not weakest then return nil end
+
+	local delta = {}
+	for _, stat in ipairs(STATS) do delta[stat] = incoming[stat] - weakest[stat] end
+	return delta, replacedLink
+end
+
+-- How a rating stands against its target. Within 5% is "at": these numbers are
+-- observed from logs, not solved, so treating 1220 and 1225 as different would
+-- be reading precision into them that is not there.
+local function statVerdict(current, target)
+	if not current or not target or target <= 0 then return nil end
+	local off = (current - target) / target
+	if math.abs(off) < 0.05 then return "at" end
+	return off > 0 and "above" or "below"
+end
+
+local VERDICT_COLOUR = { at = "|cff40ff70", above = "|cff5aa9ff", below = "|cffff6666" }
+local VERDICT_WORD   = { at = "on target",  above = "over",       below = "under" }
+
+-- Defined with the panes further down, because that is where the panes it
+-- pushes to are built. Declared here so the tooltip hook, which comes first,
+-- can call it: the hook is the one place that already sees every item the
+-- player looks at, wherever they look at it.
+local setPreview
+
+-- The same answer as the pane, in words, on the item itself. One line per stat
+-- the item actually carries: a line reading "Crit 0 -> 0" is noise, and a piece
+-- with no secondary stats at all gets nothing rather than four zeroes.
+local function addStatLines(tooltip, link)
+	if not link then return end
+	local spec = playerSpec()
+	if not spec then return end
+
+	local context = statContext()
+	local targets = targetsFor(spec, context)
+	if not targets then return end
+
+	local deltas = deltaAgainstEquipped(link)
+	if not deltas then return end
+
+	local any = false
+	for _, stat in ipairs(STATS) do
+		local delta = deltas[stat]
+		if delta ~= 0 then
+			if not any then
+				tooltip:AddLine(GREY .. "Against your " .. CONTEXT_LABEL[context]
+					.. " targets, versus what it replaces:|r")
+				any = true
+			end
+			local current = ratingOf(stat) or 0
+			local after = current + delta
+			local verdict = statVerdict(after, targets[stat])
+			tooltip:AddDoubleLine(
+				("  %s %s%+d|r"):format(STAT_LABEL[stat],
+					delta > 0 and GREEN or "|cffff6666", delta),
+				("%s%d|r %s/ %d, %s|r"):format(
+					VERDICT_COLOUR[verdict] or WHITE, after,
+					GREY, targets[stat], VERDICT_WORD[verdict] or "?"))
+		end
+	end
+end
+
 -- Tooltip ------------------------------------------------------------------
 
 TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip)
@@ -644,7 +1001,16 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
 	else
 		tooltip:AddLine(GREY .. "Not BiS" .. "|r")
 	end
+
+	-- Feed the stat panes, then say the same thing here in words. The panes are
+	-- the picture; a loot roll does not always have one open.
+	if link then setPreview(link) end
+	addStatLines(tooltip, link)
 end)
+
+-- Clearing on hide, not on the next hover, so a pane does not sit there showing
+-- what a bag item would have done ten seconds after the mouse left it.
+GameTooltip:HookScript("OnHide", function() setPreview(nil) end)
 
 -- Bonus rolls ---------------------------------------------------------------
 --
@@ -1058,8 +1424,17 @@ refresh = function()
 		if i == activeTab then button:LockHighlight() else button:UnlockHighlight() end
 	end
 	for _, button in ipairs(window.specs) do
-		button:SetShown(activeTab == 2)
+		-- the Stats tab is per spec too, so its buttons stay up on both
+		button:SetShown(activeTab ~= 1)
 		if button.spec == activeSpec then button:LockHighlight() else button:UnlockHighlight() end
+	end
+
+	window.scroll:SetShown(activeTab ~= 3)
+	window.statPane:SetShown(activeTab == 3)
+
+	if activeTab == 3 then
+		window.statPane:Update()
+		return
 	end
 
 	if activeTab == 1 then
@@ -1212,6 +1587,223 @@ renderDoll = function()
 	content:SetSize(CONTENT_W, y + 10)
 end
 
+-- The stat pane -------------------------------------------------------------
+--
+-- One pane, built twice: once as a tab in this window, once bolted to the side
+-- of the character sheet. Both call Update, so neither can drift.
+--
+-- The bar runs to 130% of the target, with a tick on the target itself. Two
+-- reasons for the overshoot room rather than filling to 100%: a bar that is
+-- simply full cannot show HOW far over you are, and being over is a real state
+-- worth seeing, because rating spent above a target is rating not spent on the
+-- stat that is under one.
+
+local PANE_W = 300
+local BAR_W, BAR_H = PANE_W - 24, 14
+local BAR_SCALE = 1.3
+local BAR_ROW_H = 34
+
+local BAR_RGB = {
+	at    = { 0.25, 0.85, 0.40 },
+	above = { 0.30, 0.62, 0.95 },
+	below = { 0.85, 0.30, 0.30 },
+}
+
+local function makeStatRow(parent, index)
+	local row = CreateFrame("Frame", nil, parent)
+	row:SetSize(BAR_W, BAR_ROW_H)
+	row:SetPoint("TOPLEFT", parent, "TOPLEFT", 12, -(index - 1) * BAR_ROW_H)
+
+	row.label = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	row.label:SetPoint("TOPLEFT")
+	row.label:SetJustifyH("LEFT")
+
+	row.value = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	row.value:SetPoint("TOPRIGHT")
+	row.value:SetJustifyH("RIGHT")
+
+	local bar = CreateFrame("Frame", nil, row)
+	bar:SetSize(BAR_W, BAR_H)
+	bar:SetPoint("BOTTOMLEFT")
+
+	bar.bg = bar:CreateTexture(nil, "BACKGROUND")
+	bar.bg:SetAllPoints()
+	bar.bg:SetColorTexture(0.08, 0.08, 0.08, 0.9)
+
+	bar.fill = bar:CreateTexture(nil, "ARTWORK")
+	bar.fill:SetPoint("TOPLEFT")
+	bar.fill:SetPoint("BOTTOMLEFT")
+	bar.fill:SetColorTexture(1, 1, 1, 1)
+
+	-- What the hovered item would add or take away, drawn from where you are
+	-- now to where you would be. Its own layer so it sits over the fill when it
+	-- is a loss and beside it when it is a gain.
+	bar.ghost = bar:CreateTexture(nil, "OVERLAY")
+	bar.ghost:SetPoint("TOP")
+	bar.ghost:SetPoint("BOTTOM")
+
+	bar.tick = bar:CreateTexture(nil, "OVERLAY", nil, 2)
+	bar.tick:SetPoint("TOP")
+	bar.tick:SetPoint("BOTTOM")
+	bar.tick:SetWidth(2)
+	bar.tick:SetColorTexture(1, 0.85, 0.35, 1)
+
+	row.bar = bar
+	return row
+end
+
+-- x offset on the bar for a rating, clamped to the bar
+local function barX(rating, target)
+	if not target or target <= 0 then return 0 end
+	local ratio = rating / (target * BAR_SCALE)
+	return math.max(0, math.min(1, ratio)) * BAR_W
+end
+
+local function setStatRow(row, stat, current, target, delta)
+	local verdict = statVerdict(current, target)
+	local rgb = BAR_RGB[verdict] or BAR_RGB.below
+
+	row.label:SetText(STAT_LABEL[stat])
+
+	local text = ("%d %s/ %d|r"):format(current, GREY, target)
+	if delta and delta ~= 0 then
+		local after = current + delta
+		local afterVerdict = statVerdict(after, target)
+		text = ("%d %s->|r %s%d|r %s/ %d|r"):format(
+			current, GREY,
+			VERDICT_COLOUR[afterVerdict] or WHITE, after,
+			GREY, target)
+	end
+	row.value:SetText(text)
+
+	local bar = row.bar
+	local x = barX(current, target)
+	bar.fill:SetWidth(math.max(1, x))
+	bar.fill:SetColorTexture(rgb[1], rgb[2], rgb[3], 0.85)
+	bar.tick:ClearAllPoints()
+	bar.tick:SetPoint("TOP", bar, "TOPLEFT", BAR_W / BAR_SCALE, 0)
+	bar.tick:SetPoint("BOTTOM", bar, "BOTTOMLEFT", BAR_W / BAR_SCALE, 0)
+
+	if not delta or delta == 0 then
+		bar.ghost:Hide()
+		return
+	end
+
+	local afterX = barX(current + delta, target)
+	local left, right = math.min(x, afterX), math.max(x, afterX)
+	bar.ghost:ClearAllPoints()
+	bar.ghost:SetPoint("LEFT", bar, "LEFT", left, 0)
+	bar.ghost:SetWidth(math.max(1, right - left))
+	if delta > 0 then
+		bar.ghost:SetColorTexture(1, 1, 1, 0.75)
+	else
+		bar.ghost:SetColorTexture(0.95, 0.2, 0.2, 0.9)
+	end
+	bar.ghost:Show()
+end
+
+-- Every pane built, so one hover updates all of them. Two entries at most, but
+-- the list is what makes "they cannot disagree" true rather than hoped for.
+local statPanes = {}
+local previewLink
+
+local function buildStatPane(parent, opts)
+	local pane = CreateFrame("Frame", nil, parent)
+	pane:SetWidth(PANE_W)
+
+	pane.heading = pane:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+	pane.heading:SetPoint("TOPLEFT", 12, -8)
+	pane.heading:SetPoint("RIGHT", pane, "RIGHT", -12, 0)
+	pane.heading:SetJustifyH("LEFT")
+
+	pane.context = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
+	pane.context:SetSize(88, 20)
+	pane.context:SetPoint("TOPRIGHT", -12, -4)
+	pane.context:SetScript("OnClick", function()
+		local now = statContext()
+		db().statContext = (now == "raid") and "mplus" or "raid"
+		for _, other in ipairs(statPanes) do other:Update() end
+	end)
+
+	pane.rows = CreateFrame("Frame", nil, pane)
+	pane.rows:SetPoint("TOPLEFT", 0, -30)
+	pane.rows:SetSize(PANE_W, #STATS * BAR_ROW_H)
+	pane.bars = {}
+	for i, _ in ipairs(STATS) do
+		pane.bars[i] = makeStatRow(pane.rows, i)
+	end
+
+	pane.footer = pane:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
+	pane.footer:SetPoint("TOPLEFT", pane.rows, "BOTTOMLEFT", 12, -4)
+	pane.footer:SetPoint("RIGHT", pane, "RIGHT", -12, 0)
+	pane.footer:SetJustifyH("LEFT")
+	pane.footer:SetWordWrap(true)
+
+	pane:SetHeight(30 + #STATS * BAR_ROW_H + 46)
+
+	function pane:Update()
+		-- opts.spec is a function so the window's pane follows its spec buttons
+		-- and the character sheet's pane follows the character.
+		local spec = opts.spec and opts.spec() or playerSpec()
+		local context, pinned = statContext()
+		self.context:SetText(CONTEXT_LABEL[context] .. (pinned and "" or " *"))
+
+		-- `spec and targetsFor(...)` would keep only the first return, which is
+		-- how the hero name would silently go missing
+		local targets, hero
+		if spec then targets, hero = targetsFor(spec, context) end
+		if not targets then
+			self.heading:SetText(GREY .. "No stat targets for this spec.|r")
+			for _, row in ipairs(self.bars) do row:Hide() end
+			self.footer:SetText("")
+			return
+		end
+		for _, row in ipairs(self.bars) do row:Show() end
+
+		local deltas, replaced
+		if previewLink then deltas, replaced = deltaAgainstEquipped(previewLink) end
+
+		self.heading:SetText(("%s%s|r  %s%s|r"):format(
+			GOLD, spec,
+			GREY, hero and hero:gsub("-", " ") or "all hero talents"))
+
+		for i, stat in ipairs(STATS) do
+			setStatRow(self.bars[i], stat, ratingOf(stat) or 0, targets[stat],
+				deltas and deltas[stat])
+		end
+
+		local note
+		if deltas then
+			local name = previewLink:match("|h%[(.-)%]|h") or "that item"
+			note = ("%svs %s|r"):format(GREY, replaced
+				and ("your " .. (replaced:match("|h%[(.-)%]|h") or "equipped piece"))
+				or "an empty slot")
+			note = ("%s%s|r\n%s"):format(WHITE, name, note)
+		elseif not hero then
+			-- Say it, do not hide it: the aggregate can be half the right number
+			note = GREY .. "No targets for your hero talent, so this is the "
+				.. "average across all of them.|r"
+		else
+			note = GREY .. STAT_TARGET_SOURCE .. "|r"
+		end
+		self.footer:SetText(note)
+	end
+
+	statPanes[#statPanes + 1] = pane
+	return pane
+end
+
+-- A hover anywhere is the preview. The tooltip post-call already runs on every
+-- item the player looks at, so this rides it rather than hooking bags, the
+-- loot frame, the encounter journal and the auction house one at a time.
+setPreview = function(link)
+	if link == previewLink then return end
+	previewLink = link
+	for _, pane in ipairs(statPanes) do
+		if pane:IsShown() then pane:Update() end
+	end
+end
+
 local function buildWindow()
 	local f = CreateFrame("Frame", "DjinnisBiSFrame", UIParent, "BasicFrameTemplateWithInset")
 	f:SetSize(WINDOW_W, 560)
@@ -1231,7 +1823,7 @@ local function buildWindow()
 	-- Plain buttons rather than PanelTabButtonTemplate: the tab templates want
 	-- PanelTemplates_ bookkeeping and give nothing back for two tabs.
 	f.tabs = {}
-	local TAB_LABELS = { "By Boss", "By Slot" }
+	local TAB_LABELS = { "By Boss", "By Slot", "Stats" }
 	for i, label in ipairs(TAB_LABELS) do
 		local button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 		button:SetSize(110, 22)
@@ -1267,6 +1859,13 @@ local function buildWindow()
 	content:SetSize(CONTENT_W, 10)
 	scroll:SetScrollChild(content)
 	f.content = content
+
+	-- The Stats tab. It sits over the scroll frame rather than inside it: four
+	-- bars never need scrolling, and a scroll child that is sometimes 40 pixels
+	-- tall fights the scrollbar.
+	f.statPane = buildStatPane(f, { spec = function() return activeSpec end })
+	f.statPane:SetPoint("TOPLEFT", 12, -80)
+	f.statPane:Hide()
 
 	tinsert(UISpecialFrames, "DjinnisBiSFrame")  -- Escape closes it
 	return f
@@ -1433,6 +2032,65 @@ local function buildBroker()
 	end
 end
 
+-- The character sheet pane --------------------------------------------------
+--
+-- Anchored beside CharacterFrame, never inside it. Nothing Blizzard owns is
+-- moved, resized, reparented or hidden, which is the whole reason this can
+-- coexist with a character sheet replacement such as Chonky Character Sheet:
+-- that addon reskins Blizzard's frame hard, and anything that also edited it
+-- would be fighting for the same textures. Riding alongside costs one anchor
+-- and takes that fight off the table.
+
+local function buildCharacterPane()
+	if not CharacterFrame then return end
+
+	local holder = CreateFrame("Frame", "DjinnisBiSCharacterPane", CharacterFrame,
+		"TooltipBackdropTemplate")
+	holder:SetPoint("TOPLEFT", CharacterFrame, "TOPRIGHT", 4, -12)
+	holder:SetWidth(PANE_W)
+	holder:SetFrameStrata("HIGH")
+
+	local pane = buildStatPane(holder, { spec = playerSpec })
+	pane:SetPoint("TOPLEFT")
+	holder:SetHeight(pane:GetHeight() + 12)
+
+	-- Follow the sheet rather than tracking its show and hide separately, so
+	-- there is no state to get out of step.
+	CharacterFrame:HookScript("OnShow", function()
+		holder:Show()
+		pane:Update()
+	end)
+	CharacterFrame:HookScript("OnHide", function() holder:Hide() end)
+	holder:SetShown(CharacterFrame:IsShown())
+
+	-- Gear changes and a respec both move every number on this pane.
+	--
+	-- Handler first, then one event at a time, each verified. 12.1 can refuse a
+	-- registration SILENTLY: pcall does not see it, so an addon that registered
+	-- four events in a row and asked nothing would sit waiting forever for one
+	-- that never arrives. See C:\Dev\WoWAddons\docs\DECISIONS.md.
+	local watcher = CreateFrame("Frame")
+	watcher:SetScript("OnEvent", function()
+		wipe(ratingCache)
+		for _, each in ipairs(statPanes) do
+			if each:IsShown() then each:Update() end
+		end
+	end)
+	for _, event in ipairs({
+		"PLAYER_EQUIPMENT_CHANGED",
+		"TRAIT_CONFIG_UPDATED",
+		"PLAYER_SPECIALIZATION_CHANGED",
+		"COMBAT_RATING_UPDATE",
+	}) do
+		watcher:RegisterEvent(event)
+		if not watcher:IsEventRegistered(event) then
+			print(GOLD .. "Djinni's BiS|r " .. GREY
+				.. "could not register " .. event
+				.. ", so the stat pane will not refresh by itself. Reopen it to update.|r")
+		end
+	end
+end
+
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 -- Blizzard's own typo, RECIEVED. The journal streams loot in after the request,
@@ -1441,6 +2099,7 @@ loader:RegisterEvent("EJ_LOOT_DATA_RECIEVED")
 loader:SetScript("OnEvent", function(_, event)
 	if event == "PLAYER_LOGIN" then
 		buildBroker()
+		pcall(buildCharacterPane)
 	else
 		harvested = false
 	end
@@ -1605,6 +2264,68 @@ local function selfTest()
 		check("unknown name is still nil", tiersFor("Feral", 999999, "Not A Trinket"), nil)
 		tierNames.Feral[norm("Zzz Test Trinket")] = nil
 	end
+
+	-- Stat targets. Every spec needs an `all` set, because that is the fallback
+	-- when the player's hero talent has no entry of its own, and a spec missing
+	-- it would show an empty pane rather than an error.
+	for _, spec in ipairs(SPEC_ORDER) do
+		local bySpec = STAT_TARGET[spec]
+		if not bySpec or not bySpec.all then
+			failed = failed + 1
+			print("|cffff0000FAIL|r no fallback stat targets for " .. spec)
+		else
+			for _, context in ipairs({ "raid", "mplus" }) do
+				local set = bySpec.all[context]
+				if not set then
+					failed = failed + 1
+					print("|cffff0000FAIL|r " .. spec .. " has no " .. context .. " targets")
+				else
+					for _, stat in ipairs(STATS) do
+						if type(set[stat]) ~= "number" then
+							failed = failed + 1
+							print("|cffff0000FAIL|r " .. spec .. " " .. context
+								.. " is missing " .. stat)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	-- Every hero key must be a slug heroSlug() can actually produce, or the
+	-- lookup misses and every player silently gets the aggregate.
+	for spec, bySpec in pairs(STAT_TARGET) do
+		for hero in pairs(bySpec) do
+			if hero ~= heroSlug(hero) then
+				failed = failed + 1
+				print("|cffff0000FAIL|r " .. spec .. " hero key '" .. hero
+					.. "' is not a slug this addon can build")
+			end
+		end
+	end
+
+	check("hero slug, spaces", heroSlug("Druid of the Claw"), "druid-of-the-claw")
+	check("hero slug, apostrophe", heroSlug("Elune's Chosen"), "elunes-chosen")
+	check("hero slug, curly apostrophe", heroSlug("Elune\226\128\153s Chosen"), "elunes-chosen")
+	check("hero slug, nothing", heroSlug(""), nil)
+
+	-- within 5% is "at", because these numbers are observed and not solved
+	check("verdict, exactly on", statVerdict(1000, 1000), "at")
+	check("verdict, 4% under", statVerdict(960, 1000), "at")
+	check("verdict, 10% under", statVerdict(900, 1000), "below")
+	check("verdict, 10% over", statVerdict(1100, 1000), "above")
+	check("verdict, no target", statVerdict(900, 0), nil)
+
+	-- The bar must not draw past its own end, and being ON target must still
+	-- leave room to the right, or there is nowhere to show an overshoot. Asked
+	-- as facts about the drawing, not as the formula restated: a check written
+	-- in terms of BAR_SCALE would agree with any value of BAR_SCALE.
+	check("bar, empty", barX(0, 1000), 0)
+	check("bar, on target leaves headroom", barX(1000, 1000) < BAR_W, true)
+	check("bar, on target is most of the bar", barX(1000, 1000) > BAR_W * 0.6, true)
+	check("bar, far over is clamped", barX(99999, 1000), BAR_W)
+	check("bar, climbs with the rating", barX(900, 1000) > barX(500, 1000), true)
+	check("bar, no target", barX(500, 0), 0)
 
 	-- a saved target must survive the round trip and show its item level
 	setGear("zzz not a real item", "Myth", 6)

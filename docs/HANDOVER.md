@@ -6,15 +6,15 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.10.0, `Interface: 120100`. No remote.
+**Status:** v0.11.0, `Interface: 120100`. No remote.
 **Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
 everything is under `[Unreleased]`.
-**Two live cards and both are waiting on Rob**, both in `human-review/` and both wanting a live
-client. `0001`, "the window has no decent way to open", needs a **full client restart**, not a
-`/reload`. `0002`, "trinket tiers borrowed from ClassCodex", needs ten minutes with ClassCodex
-disabled and then enabled.
-_Last updated: 2026-09-02 (card 0002: trinket tiers copied out of ClassCodex, deployed at 0.10.0;
-this file was untracked until this commit)_
+**Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in
+`human-review/` and are Rob's: `0001`, "the window has no decent way to open", needs a **full client
+restart**, not a `/reload`. `0002`, "trinket tiers borrowed from ClassCodex", needs ten minutes with
+ClassCodex disabled and then enabled. `0003`, "stat targets, and what a drop does to them", is in
+`ai-review/` and has never been seen on a screen by anybody.
+_Last updated: 2026-09-07 (card 0003: stat target bars in three places, deployed at 0.11.0)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -51,12 +51,19 @@ than a task.
 
 ## Key files / structure
 - `DjinnisBiS.lua` - the whole addon.
-- `update-trinket-tiers.ps1` - **author tooling, never shipped** (it is in `pkgmeta.yaml`'s ignore
-  list). Rewrites the block between the `-- BEGIN/END GENERATED TRINKET TIERS` markers in
-  `DjinnisBiS.lua` from ClassCodex's data files. **Its header carries the full reasoning for why
-  that source and not the sites**, including what each site actually answered when tried. Read it
-  before proposing a scraper. Those two markers are load-bearing: the script refuses to write
-  without them rather than guessing where the table is.
+- `update-classcodex-data.ps1` - **author tooling, never shipped** (it is in `pkgmeta.yaml`'s ignore
+  list). Rewrites **two** blocks in `DjinnisBiS.lua`, `GENERATED TRINKET TIERS` and `GENERATED STAT
+  TARGETS`, from ClassCodex's data files. **Its header carries the full reasoning for why that
+  source and not the sites**, including what each site actually answered when tried. Read it before
+  proposing a scraper. Those markers are load-bearing: the script refuses to write without them
+  rather than guessing where a table is. **It reads disk and does not fetch**, so run
+  `python C:\Dev\WoWAddons\WoWClassCodexDownloader\download_classcodex.py` first to force ClassCodex
+  itself current. It was called `update-trinket-tiers.ps1` until 2026-09-07.
+- `offline-check.lua` - **author tooling, never shipped.** Runs the addon's own `/bis test` outside
+  the game, under plain Lua, by stubbing enough of Blizzard's API to load the file: `lua
+  offline-check.lua`, exit code 0 for a pass. **It proves the data and the pure logic and it proves
+  no frame**, because every stubbed frame method does nothing, so a layout, anchor or event fault
+  passes straight through it.
 - `Libs/LibDBIcon-1.0/` - the minimap button and, at `LibDBIcon-1.0.lua:508-526`, the runtime
   `AddonCompartmentFrame:RegisterAddon(...)` call that card `0001` turns on. **Read that card before
   touching how the window opens**; the two routes into the addon drawer are mutually exclusive and
@@ -68,7 +75,7 @@ than a task.
 - **Trinket tiers come from ClassCodex's shipped data files, not from the sites** (2026-09-02).
   A WoW addon cannot make a network request: there is no HTTP call anywhere in Blizzard's API
   surface, checked against `wow-ui-source`. So tier data is baked in at author time by
-  `update-trinket-tiers.ps1`. **The sites themselves were tried and are closed to a script:**
+  `update-classcodex-data.ps1`. **The sites themselves were tried and are closed to a script:**
   Archon answers a plain GET with `403`, Wowhead, Icy Veins and u.gg publish no API, and
   Bloodmallet is reachable but documents no endpoint (guesses returned `500` and `404` on
   2026-09-02). ClassCodex already scrapes u.gg and Icy Veins, maintains those parsers and ships
@@ -87,8 +94,24 @@ than a task.
   bundled libraries ship inside the addon, so they are part of the artefact.
 
 ## Current state
-Built, deployed locally, unpublished, and **blocked on in-game observation**. The board has two
-cards and both are in `human-review/`. Nothing is in `todo/`.
+Built, deployed locally, unpublished, and **blocked on in-game observation**. The board has three
+cards: `0001` and `0002` in `human-review/`, `0003` in `ai-review/`. Nothing is in `todo/`.
+
+**2026-09-07, card 0003: stat targets, at v0.11.0.** The ratings the top 20% of each druid spec are
+observed to run, per hero talent, for raid and Mythic+, out of the same ClassCodex files the trinket
+tiers came from. They are drawn as four bars in three places: a new Stats tab in `/bis`, a pane
+anchored beside the character sheet, and lines on any gear tooltip. Hovering an item anywhere shows
+a ghost segment on every open bar, and lines on the tooltip, saying what that item would do against
+the piece it would actually replace.
+
+**Hero talent, not one set per spec, and that is the whole point of the card.** For Feral raid,
+Druid of the Claw wants 1225 crit and the all-hero aggregate says 775. When there is no entry for
+the player's hero talent the pane falls back to the aggregate **and says so on screen**, because a
+silent fallback here can be wrong by more than half.
+
+**"Breakpoint" is deliberately not the word used.** These numbers are observed from logs, not
+solved. A few are real mechanical breakpoints; most are just where good gear settles. The addon says
+"targets" and the comment above the generated table says why.
 
 **2026-09-02, card 0002: the S/A/B/C trinket tiers now live in this addon, at v0.10.0.** They were
 generated out of ClassCodex 1.3.1's own `Data/db_ugg.lua` and `Data/db_icyveins.lua`, which store
@@ -105,9 +128,11 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this**, and today that is two cards, `0001` and `0002`, both waiting on Rob and
-both wanting a live client. They are one trip: open `/bis` once and both cards' checks are in front
-of you.
+**`docs/board/` owns this**, and today that is three cards, `0001`, `0002` and `0003`, all wanting a
+live client. **They are one trip.** Open `/bis` once and `0001`'s and `0002`'s checks are in front of
+you; click the new Stats tab, open the character sheet and hover a ring in your bags and `0003`'s
+are too. `0003` also wants an adversarial pass before it can move on, which is what `ai-review/` is
+for and does not need Rob.
 
 ## Blockers / open questions
 - **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's BiS*
@@ -115,12 +140,15 @@ of you.
   it show the summary tooltip.
 - **Card `0002` needs Rob in a live client too.** The ranked trinket block with ClassCodex disabled,
   then the same window with it enabled to confirm every tier disappears.
-- **The tier table goes stale on somebody else's schedule**, exactly as the BiS list does, but it
-  is now **one command** rather than a hand edit: `.\update-trinket-tiers.ps1 -WhatIf` then the
-  same without. It is idempotent, so running it when nothing has moved prints `Already current`
-  and writes nothing. The panel shows the stamp it was generated with, so staleness is on screen
-  rather than in somebody's memory. **The BiS list above it still has no such tool** and is still
-  hand-maintained from method.gg and Icy Veins.
+- **The tier table and the stat targets go stale on somebody else's schedule**, exactly as the BiS
+  list does, but that is now **two commands** rather than a hand edit:
+  `python C:\Dev\WoWAddons\WoWClassCodexDownloader\download_classcodex.py` to force ClassCodex
+  itself current, then `.\update-classcodex-data.ps1 -WhatIf` and the same without. It is
+  idempotent, so running it when nothing has moved prints `Already current` and writes nothing, and
+  since 2026-09-07 it ignores its own date stamp when deciding that, so a re-run on a later day no
+  longer reports a change that is only a moved date. The panel shows the stamp it was generated
+  with, so staleness is on screen rather than in somebody's memory. **The BiS list above it still
+  has no such tool** and is still hand-maintained from method.gg and Icy Veins.
 - **No GitHub remote and never published.** `WoWAddons#0004` is the remote question for the
   workspace. Publishing is a separate call.
 - **Season-scoped data.** Nothing here records who refreshes it or when.
@@ -144,6 +172,14 @@ of you.
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
+- **2026-09-07** Card `0003`. Stat targets and their bars, deployed at v0.11.0. Three side effects
+  worth knowing about. `update-trinket-tiers.ps1` is renamed `update-classcodex-data.ps1`, because
+  it now writes two generated blocks rather than one. `offline-check.lua` is new: it runs `/bis
+  test` outside the game, and a mutation test through it caught a bar check that was the formula
+  restated and therefore worthless. And a workspace-level finding that is **not yet in
+  `C:\Dev\WoWAddons\docs\DECISIONS.md`**: the guard for a 12.1 secret value is `canaccessvalue`,
+  falling back to `issecretvalue`. That log already records that `type()` cannot see a secret; it
+  does not yet name the two globals that can.
 - **2026-09-02** Card `0002`. Trinket tiers copied out of ClassCodex, deployed at v0.10.0. Also a
   finding about ClassCodex itself, written up on that card: it ships a `ReduceTaint.lua` whose
   functions are named `FixMultiActionBarTaint` and `FixMicroButtonTaint`, and it calls

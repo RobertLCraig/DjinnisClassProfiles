@@ -71,12 +71,12 @@ resolved link gets no letter, which is the correct outcome rather than a wrong o
 
 ## Refreshing them is now one command
 
-`update-trinket-tiers.ps1` regenerates the table. Always the dry run first:
+`update-classcodex-data.ps1` regenerates the table. Always the dry run first:
 
 ```powershell
 cd C:\Dev\WoWAddons\DjinnisBiS
-.\update-trinket-tiers.ps1 -WhatIf
-.\update-trinket-tiers.ps1
+.\update-classcodex-data.ps1 -WhatIf
+.\update-classcodex-data.ps1
 ```
 
 It is idempotent: run it when nothing has moved and it prints `Already current` and writes nothing.
@@ -171,7 +171,7 @@ tier, and carrying it would have meant a sixth colour for one item.
 - [x] Extend `/bis test` to cover the tier table, the badge and the suppression
 - [x] Check the two addons for slash, global and tooltip conflicts
 - [x] Establish whether any site can be pulled from directly, by trying them rather than assuming
-- [x] Write `update-trinket-tiers.ps1` and prove its three failure paths
+- [x] Write `update-classcodex-data.ps1` and prove its three failure paths
 - [ ] Run the four in-game checks at the top of this card
 
 ## Plan
@@ -188,7 +188,7 @@ follows the same cold-cache pattern `setSimCell` already used, so an id the clie
 resolves on the next open instead of erroring.
 
 **The generator was written twice, and that is the check on the data.** A throwaway Python pass
-produced the first table; `update-trinket-tiers.ps1` was then written independently and produced
+produced the first table; `update-classcodex-data.ps1` was then written independently and produced
 the same 100 entries with the same letters for all four specs. The only difference was the
 tie-break inside a tier band, which the PowerShell version settles on item id so the file is stable
 between runs and a diff shows a real change rather than a reshuffle.
