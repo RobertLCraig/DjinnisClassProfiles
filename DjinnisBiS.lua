@@ -1601,7 +1601,16 @@ end
 local PANE_W = 300
 local BAR_W, BAR_H = PANE_W - 24, 14
 local BAR_SCALE = 1.3
-local BAR_ROW_H = 34
+local BAR_ROW_H = 36
+
+-- Chonky Character Sheet's own numbers, read off its stat sections rather than
+-- picked to taste: its content rows sit on 0.05 black at 60%, its section
+-- headers on 0.1 black at 40%, and its sections are 238 wide. Matching those
+-- three is what makes this pane read as one more of its panels instead of as a
+-- box parked next to them. They are also perfectly ordinary values, so nothing
+-- looks wrong when Chonky is not installed.
+local ROW_BG = { 0.05, 0.05, 0.05, 0.6 }
+local HEADER_BG = { 0.1, 0.1, 0.1, 0.4 }
 
 local BAR_RGB = {
 	at    = { 0.25, 0.85, 0.40 },
@@ -1609,26 +1618,33 @@ local BAR_RGB = {
 	below = { 0.85, 0.30, 0.30 },
 }
 
-local function makeStatRow(parent, index)
+local function makeStatRow(parent, index, width)
+	local barW = width - 24
 	local row = CreateFrame("Frame", nil, parent)
-	row:SetSize(BAR_W, BAR_ROW_H)
+	row:SetSize(barW, BAR_ROW_H - 3)
 	row:SetPoint("TOPLEFT", parent, "TOPLEFT", 12, -(index - 1) * BAR_ROW_H)
+	row.barW = barW
+
+	row.bg = row:CreateTexture(nil, "BACKGROUND")
+	row.bg:SetPoint("TOPLEFT", -3, 0)
+	row.bg:SetPoint("BOTTOMRIGHT", 3, 0)
+	row.bg:SetColorTexture(unpack(ROW_BG))
 
 	row.label = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	row.label:SetPoint("TOPLEFT")
+	row.label:SetPoint("TOPLEFT", 2, -1)
 	row.label:SetJustifyH("LEFT")
 
 	row.value = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	row.value:SetPoint("TOPRIGHT")
+	row.value:SetPoint("TOPRIGHT", -2, -1)
 	row.value:SetJustifyH("RIGHT")
 
 	local bar = CreateFrame("Frame", nil, row)
-	bar:SetSize(BAR_W, BAR_H)
-	bar:SetPoint("BOTTOMLEFT")
+	bar:SetSize(barW - 4, BAR_H)
+	bar:SetPoint("BOTTOMLEFT", 2, 2)
 
 	bar.bg = bar:CreateTexture(nil, "BACKGROUND")
 	bar.bg:SetAllPoints()
-	bar.bg:SetColorTexture(0.08, 0.08, 0.08, 0.9)
+	bar.bg:SetColorTexture(0.02, 0.02, 0.02, 0.95)
 
 	bar.fill = bar:CreateTexture(nil, "ARTWORK")
 	bar.fill:SetPoint("TOPLEFT")
@@ -1653,13 +1669,14 @@ local function makeStatRow(parent, index)
 end
 
 -- x offset on the bar for a rating, clamped to the bar
-local function barX(rating, target)
+local function barX(rating, target, width)
 	if not target or target <= 0 then return 0 end
 	local ratio = rating / (target * BAR_SCALE)
-	return math.max(0, math.min(1, ratio)) * BAR_W
+	return math.max(0, math.min(1, ratio)) * width
 end
 
 local function setStatRow(row, stat, current, target, delta)
+	local width = row.bar:GetWidth()
 	local verdict = statVerdict(current, target)
 	local rgb = BAR_RGB[verdict] or BAR_RGB.below
 
@@ -1677,19 +1694,19 @@ local function setStatRow(row, stat, current, target, delta)
 	row.value:SetText(text)
 
 	local bar = row.bar
-	local x = barX(current, target)
+	local x = barX(current, target, width)
 	bar.fill:SetWidth(math.max(1, x))
 	bar.fill:SetColorTexture(rgb[1], rgb[2], rgb[3], 0.85)
 	bar.tick:ClearAllPoints()
-	bar.tick:SetPoint("TOP", bar, "TOPLEFT", BAR_W / BAR_SCALE, 0)
-	bar.tick:SetPoint("BOTTOM", bar, "BOTTOMLEFT", BAR_W / BAR_SCALE, 0)
+	bar.tick:SetPoint("TOP", bar, "TOPLEFT", width / BAR_SCALE, 0)
+	bar.tick:SetPoint("BOTTOM", bar, "BOTTOMLEFT", width / BAR_SCALE, 0)
 
 	if not delta or delta == 0 then
 		bar.ghost:Hide()
 		return
 	end
 
-	local afterX = barX(current + delta, target)
+	local afterX = barX(current + delta, target, width)
 	local left, right = math.min(x, afterX), math.max(x, afterX)
 	bar.ghost:ClearAllPoints()
 	bar.ghost:SetPoint("LEFT", bar, "LEFT", left, 0)
@@ -1732,29 +1749,41 @@ local function paneBorderColour()
 	return 0.6, 0.6, 0.6, 1
 end
 
-local HEADER_H = 22
+local HEADER_H = 23
+
+-- Chonky's sections are a fixed width and this pane sits in a row with them, so
+-- it takes theirs when they are there. Read off the finished frame rather than
+-- hardcoded, so a future version that changes the number carries this along.
+local function paneWidth()
+	local section = _G["CCS_Section_SECONDARY"]
+	local width = section and section:GetWidth()
+	if width and width > 120 then return math.floor(width + 0.5) end
+	return PANE_W
+end
 
 local function buildStatPane(parent, opts)
 	local pane = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-	pane:SetWidth(PANE_W)
+	local width = opts.framed and paneWidth() or PANE_W
+	pane:SetWidth(width)
 
 	if opts.framed then
 		pane:SetBackdrop(PANE_BACKDROP)
-		pane:SetBackdropColor(0.05, 0.05, 0.05, 0.92)
+		pane:SetBackdropColor(0.05, 0.05, 0.05, 0.85)
 		pane:SetBackdropBorderColor(paneBorderColour())
 	end
 
-	-- A titled bar across the top, which is the shape every panel on that side
-	-- of the sheet already has.
+	-- A titled bar across the top, the shape and the colour every panel on that
+	-- side of the sheet already has: near-black at 40%, with the title centred
+	-- rather than tucked into the corner.
 	pane.header = pane:CreateTexture(nil, "ARTWORK")
-	pane.header:SetPoint("TOPLEFT", 4, -4)
-	pane.header:SetPoint("TOPRIGHT", -4, -4)
+	pane.header:SetPoint("TOPLEFT", 5, -5)
+	pane.header:SetPoint("TOPRIGHT", -5, -5)
 	pane.header:SetHeight(HEADER_H)
-	pane.header:SetColorTexture(0.16, 0.10, 0.22, 0.85)
+	pane.header:SetColorTexture(unpack(HEADER_BG))
 	pane.header:SetShown(opts.framed or false)
 
-	pane.title = pane:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	pane.title:SetPoint("LEFT", pane.header, "LEFT", 8, 0)
+	pane.title = pane:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+	pane.title:SetPoint("CENTER", pane.header, "CENTER", 0, 0)
 	pane.title:SetText("Stat targets")
 	pane.title:SetShown(opts.framed or false)
 
@@ -1778,10 +1807,10 @@ local function buildStatPane(parent, opts)
 
 	pane.rows = CreateFrame("Frame", nil, pane)
 	pane.rows:SetPoint("TOPLEFT", 0, -(top + 24))
-	pane.rows:SetSize(PANE_W, #STATS * BAR_ROW_H)
+	pane.rows:SetSize(width, #STATS * BAR_ROW_H)
 	pane.bars = {}
 	for i, _ in ipairs(STATS) do
-		pane.bars[i] = makeStatRow(pane.rows, i)
+		pane.bars[i] = makeStatRow(pane.rows, i, width)
 	end
 
 	pane.footer = pane:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
@@ -2196,12 +2225,31 @@ local function buildCharacterPane()
 	CharacterFrame:HookScript("OnHide", function() holder:Hide() end)
 
 	-- The pane follows a drag on its own now, because it is anchored to a frame.
-	-- These two are for the cases an anchor cannot follow: the sheet changing
-	-- width under it, and a drag that carries it near enough to the edge of the
-	-- screen that it should swap sides.
+	-- These are for the one thing an anchor cannot do: decide which SIDE of the
+	-- sheet to be on, which only changes when the sheet is near the edge of the
+	-- screen.
 	CharacterFrame:HookScript("OnSizeChanged", place)
+
+	-- Hooking OnDragStop is not enough and that is why swapping sides only
+	-- worked on a window resize. CharacterFrame is not movable in Blizzard's own
+	-- UI, so whatever is dragging it here is another addon, and that addon
+	-- starts and stops the move by calling the frame's own methods rather than
+	-- through CharacterFrame's drag scripts. Hooking the METHOD catches any
+	-- addon that moves it the ordinary way; the script hook stays for one that
+	-- moves it the other way.
 	CharacterFrame:HookScript("OnDragStop", place)
-	holder:SetShown(CharacterFrame:IsShown())
+	if hooksecurefunc then
+		hooksecurefunc(CharacterFrame, "StopMovingOrSizing", place)
+	end
+	-- This runs while the sheet is already open, one frame after it opened, so
+	-- that open's OnShow has already been and gone and will not do this for us.
+	if CharacterFrame:IsShown() then
+		place()
+		holder:Show()
+		pane:Update()
+	else
+		holder:Hide()
+	end
 
 	-- Gear changes and a respec both move every number on this pane.
 	--
@@ -2231,6 +2279,27 @@ local function buildCharacterPane()
 	end
 end
 
+-- Built on the first frame AFTER the sheet is first opened, not at login.
+--
+-- The pane takes its width and its border colour from the sheet it sits beside,
+-- and a sheet replacement builds the panels those are read from when the sheet
+-- is first opened, in its own OnShow. At login there is nothing there to read,
+-- so the pane would take the fallback and keep it for the whole session. One
+-- frame later there is, and by then hook order does not matter either.
+local function armCharacterPane()
+	if not CharacterFrame then return end
+	local armed = false
+	CharacterFrame:HookScript("OnShow", function()
+		if armed then return end
+		armed = true
+		if C_Timer then
+			C_Timer.After(0, function() pcall(buildCharacterPane) end)
+		else
+			pcall(buildCharacterPane)
+		end
+	end)
+end
+
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 -- Blizzard's own typo, RECIEVED. The journal streams loot in after the request,
@@ -2239,7 +2308,7 @@ loader:RegisterEvent("EJ_LOOT_DATA_RECIEVED")
 loader:SetScript("OnEvent", function(_, event)
 	if event == "PLAYER_LOGIN" then
 		buildBroker()
-		pcall(buildCharacterPane)
+		pcall(armCharacterPane)
 	else
 		harvested = false
 	end
@@ -2460,12 +2529,16 @@ local function selfTest()
 	-- leave room to the right, or there is nowhere to show an overshoot. Asked
 	-- as facts about the drawing, not as the formula restated: a check written
 	-- in terms of BAR_SCALE would agree with any value of BAR_SCALE.
-	check("bar, empty", barX(0, 1000), 0)
-	check("bar, on target leaves headroom", barX(1000, 1000) < BAR_W, true)
-	check("bar, on target is most of the bar", barX(1000, 1000) > BAR_W * 0.6, true)
-	check("bar, far over is clamped", barX(99999, 1000), BAR_W)
-	check("bar, climbs with the rating", barX(900, 1000) > barX(500, 1000), true)
-	check("bar, no target", barX(500, 0), 0)
+	check("bar, empty", barX(0, 1000, BAR_W), 0)
+	check("bar, on target leaves headroom", barX(1000, 1000, BAR_W) < BAR_W, true)
+	check("bar, on target is most of the bar", barX(1000, 1000, BAR_W) > BAR_W * 0.6, true)
+	check("bar, far over is clamped", barX(99999, 1000, BAR_W), BAR_W)
+	check("bar, climbs with the rating",
+		barX(900, 1000, BAR_W) > barX(500, 1000, BAR_W), true)
+	check("bar, no target", barX(500, 0, BAR_W), 0)
+	-- the bar is sized off the pane now, and the pane is sized off Chonky's
+	-- sections when they are there, so the maths has to hold at any width
+	check("bar, narrow pane still clamps", barX(99999, 1000, 120), 120)
 
 	-- a saved target must survive the round trip and show its item level
 	setGear("zzz not a real item", "Myth", 6)

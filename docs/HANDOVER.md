@@ -6,16 +6,17 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.11.2, `Interface: 120100`. No remote.
+**Status:** v0.11.3, `Interface: 120100`. No remote.
 **Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
 everything is under `[Unreleased]`.
 **Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in
 `human-review/` and are Rob's: `0001`, "the window has no decent way to open", needs a **full client
 restart**, not a `/reload`. `0002`, "trinket tiers borrowed from ClassCodex", needs ten minutes with
 ClassCodex disabled and then enabled. `0003`, "stat targets, and what a drop does to them", is in
-`ai-review/`; Rob has now seen it twice and both looks found placement faults, fixed at 0.11.1 and
-0.11.2 and **not looked at since**.
-_Last updated: 2026-09-07 (card 0003: stat target bars in three places, deployed at 0.11.2)_
+`ai-review/`; Rob has now looked three times. Placement and dragging are **confirmed working at
+0.11.2**. What is fixed and **not looked at** is 0.11.3: matching Chonky's row backing, header and
+width, and swapping sides on a drag rather than only on a window resize.
+_Last updated: 2026-09-07 (card 0003: stat target bars in three places, deployed at 0.11.3)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -127,6 +128,15 @@ hidden, and other addons parent frames to `CharacterFrame`, so the walk found so
 believed it. It asks three named Blizzard frames now and uses `IsVisible()`. Second: **a point set
 from coordinates is not an anchor.** It was correct when set and then sat still while the sheet was
 dragged away from it. The point is set to a frame now, so a drag carries the pane for free.
+
+**v0.11.3, two more, both about reading another addon's finished frames rather than guessing.**
+`CharacterFrame` is not movable in Blizzard's UI, so whatever drags it here is an addon calling the
+frame's own `StopMovingOrSizing`, not its drag scripts, which is why hooking `OnDragStop` caught
+nothing and swapping sides only worked on a window resize; the METHOD is hooked now. And the pane
+takes Chonky's actual row colours, header colour and section width, the last read at runtime off
+`CCS_Section_SECONDARY`. **That forced the pane to be built on the first frame after the sheet is
+first opened rather than at login**, because a sheet replacement builds those panels in its own
+`OnShow` and at login there is nothing there to read.
 
 **"Breakpoint" is deliberately not the word used.** These numbers are observed from logs, not
 solved. A few are real mechanical breakpoints; most are just where good gear settles. The addon says

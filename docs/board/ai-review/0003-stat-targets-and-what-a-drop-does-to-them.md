@@ -124,8 +124,12 @@ built and parsed and offline-checked, and not verified.
 - [ ] `/bis`, third tab, "Stats". Four bars, a Raid/Mythic+ button, the spec buttons above.
 - [x] Open the character sheet. A pane should appear on its right, following it open and closed.
       **Seen 2026-09-07. It appeared and it overlapped**, which is the Comments entry below.
-- [ ] With Chonky Character Sheet enabled, the pane clear of the stat columns, wearing the same
-      border as them. **This is the v0.11.1 fix and it has not been looked at.**
+- [x] With Chonky Character Sheet enabled, the pane clear of the stat columns. **Confirmed
+      2026-09-07 at v0.11.2.** Dragging the sheet carries it, confirmed at the same time.
+- [ ] The pane the same width as the stat column beside it, rows on the same backing, title centred
+      like Chonky's section titles. **This is the v0.11.3 change and it has not been looked at.**
+- [ ] Drag the sheet to the right edge of the screen. The pane should swap to its left side.
+      **Only a window resize did that before v0.11.3.**
 - [ ] Hover a piece of gear in your bags. Both open panes should show a ghost segment, and the
       tooltip should gain a line per stat the item carries.
 - [ ] Hover a ring when you are wearing two. The comparison should be against the weaker one.
@@ -186,6 +190,34 @@ the screen that the pane should swap to the other side.
 
 **It swaps sides now rather than going off screen**, which was an open question on the first pass
 and is answered rather than left.
+
+**2026-09-07, third look (Rob).** Position confirmed good, dragging confirmed glued. Two things
+left, and both are fixed at v0.11.3.
+
+**Swapping sides only worked on a window resize, not on a drag.** `CharacterFrame` is not movable in
+Blizzard's own UI, so whatever is dragging it in Rob's client is another addon, and that addon starts
+and stops the move by calling the frame's own `StartMoving` and `StopMovingOrSizing` rather than
+through `CharacterFrame`'s drag scripts. Hooking `OnDragStop` therefore caught nothing. It now also
+hooks the METHOD, with `hooksecurefunc(CharacterFrame, "StopMovingOrSizing", place)`, which catches
+any addon moving it the ordinary way. The script hook stays for one that moves it another way.
+
+**"Still doesn't quite match."** Chonky's numbers are now used rather than approximated, and they
+were read out of its source rather than guessed at: content rows on `0.05` black at 60%, section
+headers on `0.1` black at 40%, sections 238 wide. Three changes follow. Each stat row now sits on the
+row background, so the pane reads as a list of rows instead of four floating bars. The title bar is
+the header colour and the title is centred, which is where Chonky puts its section titles. And the
+pane takes its width from `CCS_Section_SECONDARY:GetWidth()` when that exists, so it lines up with
+the column beside it instead of being 300 wide next to 238.
+
+**That width read forced a build-order change worth knowing about.** Chonky builds those sections
+when the character sheet is FIRST OPENED, in its own `OnShow`, so at `PLAYER_LOGIN` there is nothing
+to read and the pane would take its fallback width and keep it for the session. The pane is now
+built on the first frame after the sheet is first opened. That also makes hook order irrelevant,
+which the placement code had been working around with a deferred re-place.
+
+**The bar maths is no longer tied to one width.** `barX` takes the width as an argument and the
+check for it now includes a narrow pane, because a bar sized off another addon's frame is a bar that
+can be any width.
 
 ## Links
 
