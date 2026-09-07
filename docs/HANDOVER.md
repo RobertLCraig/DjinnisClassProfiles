@@ -6,17 +6,18 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.11.3, `Interface: 120100`. No remote.
+**Status:** v0.12.0, `Interface: 120100`. No remote.
 **Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
 everything is under `[Unreleased]`.
 **Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in
 `human-review/` and are Rob's: `0001`, "the window has no decent way to open", needs a **full client
 restart**, not a `/reload`. `0002`, "trinket tiers borrowed from ClassCodex", needs ten minutes with
 ClassCodex disabled and then enabled. `0003`, "stat targets, and what a drop does to them", is in
-`ai-review/`; Rob has now looked three times. Placement and dragging are **confirmed working at
-0.11.2**. What is fixed and **not looked at** is 0.11.3: matching Chonky's row backing, header and
-width, and swapping sides on a drag rather than only on a window resize.
-_Last updated: 2026-09-07 (card 0003: stat target bars in three places, deployed at 0.11.3)_
+`ai-review/`; Rob has now looked four times. Placement, dragging, side-swapping and the styling are
+all **confirmed working at 0.11.3**. What is fixed and **not looked at** is 0.12.0, and it is the
+card's actual subject rather than its chrome: the hero talent was never being read, and a one-handed
+weapon was compared against an empty off-hand while a two-hander was equipped.
+_Last updated: 2026-09-07 (card 0003: stat target bars in three places, deployed at 0.12.0)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -137,6 +138,16 @@ takes Chonky's actual row colours, header colour and section width, the last rea
 `CCS_Section_SECONDARY`. **That forced the pane to be built on the first frame after the sheet is
 first opened rather than at login**, because a sheet replacement builds those panels in its own
 `OnShow` and at login there is nothing there to read.
+
+**v0.12.0, two faults Rob's screenshots carried that nobody flagged, and both were the point of the
+card rather than its chrome.** First, **the hero talent was never being read at all**, so every
+player got the aggregate: `C_Traits.GetSubTreeInfo` takes `(configID, subTreeID)`, both of them, and
+this addon passed the subtree alone. It returns nothing, the `pcall` succeeds, and the fallback runs
+and says so in a sentence that reads like a design choice. **That is the risk with a soft fallback:
+it cannot be told apart from working.** Second, **an empty slot always wins on a total of zero**,
+which is right for a bare ring finger and wrong the moment an unusable slot is in the list: a
+one-hander hovered against a two-hander compared itself with the empty off-hand and read as pure
+gain. The pick is a pure function with five checks on it now.
 
 **"Breakpoint" is deliberately not the word used.** These numbers are observed from logs, not
 solved. A few are real mechanical breakpoints; most are just where good gear settles. The addon says

@@ -806,9 +806,21 @@ end
 local function activeHero()
 	if not (C_ClassTalents and C_ClassTalents.GetActiveHeroTalentSpec) then return nil end
 	if not (C_Traits and C_Traits.GetSubTreeInfo) then return nil end
+	if not C_ClassTalents.GetActiveConfigID then return nil end
+
 	local subTreeID = C_ClassTalents.GetActiveHeroTalentSpec()
 	if not subTreeID or subTreeID == 0 then return nil end
-	local ok, info = pcall(C_Traits.GetSubTreeInfo, subTreeID)
+
+	-- GetSubTreeInfo takes (configID, subTreeID), BOTH of them. Called with the
+	-- subtree alone it returns nothing, and the failure is silent: the pane just
+	-- says "all hero talents" and shows the aggregate, which for Feral raid is
+	-- 775 crit where Druid of the Claw wants 1225. Checked against
+	-- wow-ui-source's SharedTraitsDocumentation after Rob's screenshot showed
+	-- the fallback wording while he had a hero talent chosen.
+	local configID = C_ClassTalents.GetActiveConfigID()
+	if not configID then return nil end
+
+	local ok, info = pcall(C_Traits.GetSubTreeInfo, configID, subTreeID)
 	if not ok or not info or not info.name then return nil end
 	return heroSlug(info.name)
 end
@@ -895,7 +907,43 @@ local INVTYPE_SLOTS = {
 -- this panel exists to catch.
 --
 -- An empty slot counts as zero rather than being skipped: an empty ring finger
--- is a real comparison and the honest answer is "all of it".
+-- is a real comparison and the honest answer is "all of it". THAT ONLY HOLDS
+-- WHERE THE EMPTY SLOT IS ACTUALLY USABLE, which is what twoHandedMainHand
+-- below is about.
+--
+-- Pure, so /bis test can prove it without a game client. This is where the
+-- weapon fault below actually showed: an empty slot always wins on a total of
+-- zero, so the moment an unusable slot is in the list the answer is wrong.
+local function weakestOf(worn)
+	local best, bestTotal
+	for _, entry in ipairs(worn) do
+		local total = 0
+		for _, stat in ipairs(STATS) do total = total + (entry.stats[stat] or 0) end
+		if not bestTotal or total < bestTotal then best, bestTotal = entry, total end
+	end
+	return best
+end
+
+-- A two-handed weapon fills the main hand and leaves the off-hand slot EMPTY
+-- BUT UNUSABLE. Rob hovered a one-handed dagger while wearing a staff and the
+-- pane answered "vs an empty slot", so it read as pure gain when what actually
+-- happens is that the staff comes off and its mastery goes with it.
+local TWO_HANDED = {
+	INVTYPE_2HWEAPON = true, INVTYPE_RANGED = true, INVTYPE_RANGEDRIGHT = true,
+}
+local ONE_HANDED = {
+	INVTYPE_WEAPON = true, INVTYPE_WEAPONMAINHAND = true,
+	INVTYPE_WEAPONOFFHAND = true, INVTYPE_HOLDABLE = true, INVTYPE_SHIELD = true,
+}
+
+local function twoHandedMainHand()
+	local worn = GetInventoryItemLink("player", 16)
+	local id = worn and tonumber(worn:match("item:(%d+)"))
+	if not id then return false end
+	local _, _, _, equipLoc = C_Item.GetItemInfoInstant(id)
+	return TWO_HANDED[equipLoc or ""] or false
+end
+
 local function deltaAgainstEquipped(link)
 	local incoming = statsOf(link)
 	if not incoming then return nil end
@@ -906,21 +954,24 @@ local function deltaAgainstEquipped(link)
 	local slots = INVTYPE_SLOTS[equipLoc or ""]
 	if not slots then return nil end
 
-	local weakest, weakestTotal, replacedLink
+	-- Anything one-handed, main hand or off hand, unseats a two-hander
+	if ONE_HANDED[equipLoc or ""] and twoHandedMainHand() then slots = { 16 } end
+
+	local worn = {}
 	for _, slotID in ipairs(slots) do
-		local worn = GetInventoryItemLink("player", slotID)
-		local wornStats = worn and statsOf(worn) or ZERO_STATS
-		local total = 0
-		for _, stat in ipairs(STATS) do total = total + wornStats[stat] end
-		if not weakestTotal or total < weakestTotal then
-			weakest, weakestTotal, replacedLink = wornStats, total, worn
-		end
+		local wornLink = GetInventoryItemLink("player", slotID)
+		worn[#worn + 1] = {
+			link = wornLink,
+			stats = (wornLink and statsOf(wornLink)) or ZERO_STATS,
+		}
 	end
+
+	local weakest = weakestOf(worn)
 	if not weakest then return nil end
 
 	local delta = {}
-	for _, stat in ipairs(STATS) do delta[stat] = incoming[stat] - weakest[stat] end
-	return delta, replacedLink
+	for _, stat in ipairs(STATS) do delta[stat] = incoming[stat] - weakest.stats[stat] end
+	return delta, weakest.link
 end
 
 -- How a rating stands against its target. Within 5% is "at": these numbers are
@@ -2539,6 +2590,21 @@ local function selfTest()
 	-- the bar is sized off the pane now, and the pane is sized off Chonky's
 	-- sections when they are there, so the maths has to hold at any width
 	check("bar, narrow pane still clamps", barX(99999, 1000, 120), 120)
+
+	-- Which worn piece a drop replaces. An empty slot wins on a total of zero,
+	-- which is right for a bare ring finger and wrong the moment a slot that
+	-- cannot be used is in the list, so both are asked.
+	local strong = { crit = 100, haste = 100, mastery = 100, versatility = 100 }
+	local weak   = { crit = 10,  haste = 10,  mastery = 10,  versatility = 10 }
+	check("replaces the weaker of two",
+		weakestOf({ { link = "A", stats = strong }, { link = "B", stats = weak } }).link, "B")
+	check("order does not decide it",
+		weakestOf({ { link = "B", stats = weak }, { link = "A", stats = strong } }).link, "B")
+	check("an empty slot beats any worn piece",
+		weakestOf({ { link = "A", stats = strong }, { link = nil, stats = ZERO_STATS } }).link, nil)
+	check("one candidate is the answer",
+		weakestOf({ { link = "A", stats = strong } }).link, "A")
+	check("nothing to compare against", weakestOf({}), nil)
 
 	-- a saved target must survive the round trip and show its item level
 	setGear("zzz not a real item", "Myth", 6)

@@ -126,10 +126,16 @@ built and parsed and offline-checked, and not verified.
       **Seen 2026-09-07. It appeared and it overlapped**, which is the Comments entry below.
 - [x] With Chonky Character Sheet enabled, the pane clear of the stat columns. **Confirmed
       2026-09-07 at v0.11.2.** Dragging the sheet carries it, confirmed at the same time.
-- [ ] The pane the same width as the stat column beside it, rows on the same backing, title centred
-      like Chonky's section titles. **This is the v0.11.3 change and it has not been looked at.**
-- [ ] Drag the sheet to the right edge of the screen. The pane should swap to its left side.
-      **Only a window resize did that before v0.11.3.**
+- [x] The pane the same width as the stat column beside it, rows on the same backing, title centred
+      like Chonky's section titles. **Confirmed 2026-09-07 at v0.11.3.**
+- [x] Drag the sheet to the right edge of the screen. The pane should swap to its left side.
+      **Confirmed 2026-09-07 at v0.11.3.**
+- [ ] **The heading must name your hero talent, not say "all hero talents".** It said the wrong one
+      through every look so far and nobody caught it, because the fallback is a sentence rather than
+      an error. Fixed at v0.12.0 and not looked at.
+- [ ] **Hover a one-handed weapon while wearing a two-hander.** The footer should name the
+      two-hander, not "an empty slot", and mastery should go DOWN. Fixed at v0.12.0 and not looked
+      at.
 - [ ] Hover a piece of gear in your bags. Both open panes should show a ghost segment, and the
       tooltip should gain a line per stat the item carries.
 - [ ] Hover a ring when you are wearing two. The comparison should be against the weaker one.
@@ -218,6 +224,30 @@ which the placement code had been working around with a deferred re-place.
 **The bar maths is no longer tied to one width.** `barX` takes the width as an argument and the
 check for it now includes a narrow pane, because a bar sized off another addon's frame is a bar that
 can be any width.
+
+**2026-09-07, fourth look (Rob). Styling and side-swap both accepted.** But his screenshots carried
+**two faults he did not flag**, and both are the card's actual subject rather than its chrome. Fixed
+at v0.12.0.
+
+**The hero talent was never being read, so every player was getting the aggregate.** The pane said
+"all hero talents" and the footer said "No targets for your hero talent" while Rob had one chosen.
+The cause: **`C_Traits.GetSubTreeInfo` takes `(configID, subTreeID)`, both of them**, and this addon
+was calling it with the subtree alone. It returns nothing, the `pcall` succeeds, `activeHero()`
+answers nil and the fallback runs. **That is the whole point of the card failing silently and
+looking like a design choice**: for Feral raid the aggregate wants 775 crit and Druid of the Claw
+wants 1225. Checked against `wow-ui-source`'s `SharedTraitsDocumentation.lua`. ClassCodex gets this
+right by trying one argument and falling back to two, which is why its panel worked and this one did
+not.
+
+**A one-handed weapon was compared against an empty off-hand while a two-hander was equipped.** Rob
+hovered a dagger while wearing a staff and the pane said "vs an empty slot", reading as pure gain,
+when what actually happens is the staff comes off and its mastery goes with it. **An empty slot wins
+on a total of zero, always**, which is correct for a bare ring finger and wrong the moment a slot
+that cannot be used is in the list. Anything one-handed, main hand or off hand, now compares against
+slot 16 when the main hand holds a two-hander.
+
+**The pick is now a pure function, `weakestOf`, with five checks on it**, including both sides of
+that rule. A mutation test confirmed they bite: flipping `<` to `>` fails three of them.
 
 ## Links
 
