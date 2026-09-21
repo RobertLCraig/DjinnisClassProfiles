@@ -26,8 +26,7 @@ working on Retail.
 - Character sheet (`0005`), shopping list (`0007`), equip button.
 - Bank and warband bank windows: not this card.
 - Bag addons other than Baganator (Bagnon, ElvUI bags, AdiBags): not this card.
-- EnhanceQoLBags is also installed (2026-09-21); which one Rob actually opens is a question for him
-  on this card before building.
+- EnhanceQoLBags is also installed, but Rob uses Baganator (see Comments), so it is not this card.
 
 ## Acceptance
 
@@ -71,3 +70,5 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
 
 - 2026-09-21 Claude: card written from Rob's ask, "highlight / glow items to equip / change from
   bags". Nothing is built yet.
+- 2026-09-21 Rob: **Decided:** Baganator is the bag he opens, not EnhanceQoL Bags. Build for
+  Baganator first; the default bags are the fallback when it is not loaded.

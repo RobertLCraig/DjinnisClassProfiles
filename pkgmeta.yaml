@@ -40,6 +40,10 @@ ignore:
   # ClassCodex's data files, and runs the addon's own self-test outside the
   # game. Both run on the author's machine, never in anybody's game folder.
   - update-classcodex-data.ps1
+  # Bakes a Raidbots Top Gear result into the gear plan table, and the saved
+  # reports its -SelfTest runs against.
+  - update-gear-plan.ps1
+  - fixtures
   - offline-check.lua
   - releases
   # A SavedVariables file, if one is ever copied into the repo to reproduce a bug

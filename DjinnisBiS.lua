@@ -351,6 +351,52 @@ local STAT_TARGET = {
 }
 -- END GENERATED STAT TARGETS
 
+-- Gear plan -----------------------------------------------------------------
+--
+-- GENERATED, do not hand-edit. Rewritten by update-gear-plan.ps1 from finished
+-- Raidbots Top Gear reports, one report per cell: spec, then scenario (`st` is
+-- one target, `2t` is two). A cell no report has filled is simply absent.
+--
+-- Unlike the two tables above this one is about ONE character: it is what the
+-- sim said Djinni should wear out of what Djinni owned on the day in `simmed`.
+-- It goes stale the moment a better piece drops, and the fix is a fresh Top
+-- Gear run and the script again, not an edit here.
+--
+-- Each slot is the sim's own simc gear line, cut down to the parts the game can
+-- check, plus the item level Raidbots printed for it. parsePlanLine reads it.
+-- An empty slot (the off hand under a two-hander) has no entry. `talents` is
+-- the string the talent import box takes; nothing here applies it.
+--
+-- BEGIN GENERATED GEAR PLAN
+local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-21"
+local GEAR_PLAN = {
+	Feral = {
+		["st"] = {
+			report = "ttktB9kVE77x2zkadhVgPn", simmed = "2026-09-21", dps = 176492,
+			loadout = "DotC Raid ST *",
+			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWAzGMmZwMmFmZmxYmZGAAAAAAgBAAAgZWmlZmZAALgZGgFmhBAAwMbYA",
+			slots = {
+				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
+				neck      = "id=251142,gem_id=240983,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Pendant of Malefic Fury
+				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
+				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
+				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
+				wrist     = "id=251135,bonus_id=12849/13440/6652/13695/13662/12699,gem_id=240908,ilevel=318", -- Fury-fletched Armlets
+				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
+				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
+				feet      = "id=272240,enchant_id=8018,bonus_id=6652/13662/12835,ilevel=298", -- Miststalker's Striders
+				finger1   = "id=251093,enchant_id=7967,gem_id=240894,bonus_id=13440/6652/13668/12699/12798,ilevel=276", -- Omission of Light
+				finger2   = "id=251194,enchant_id=7966,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
+				trinket1  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
+				trinket2  = "id=270166,bonus_id=6652/13334/12843,ilevel=311", -- Vashnik's Sanguine Rancor
+				main_hand = "id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,ilevel=308", -- Abyssal Broodfiend's Bardiche
+			},
+		},
+	},
+}
+-- END GENERATED GEAR PLAN
+
 -- ===========================================================================
 
 local SPEC_ORDER = { "Balance", "Feral", "Guardian", "Resto" }
@@ -1178,6 +1224,73 @@ local function equippedIn(slot)
 		end
 	end
 	return worn
+end
+
+-- Gear plan lookups ----------------------------------------------------------
+--
+-- The plan is keyed by simc's slot names, because that is what the report
+-- speaks. This is the one place they become inventory slot ids.
+local PLAN_SLOT_INVENTORY = {
+	head = 1, neck = 2, shoulder = 3, back = 15, chest = 5, wrist = 9,
+	hands = 10, waist = 6, legs = 7, feet = 8, finger1 = 11, finger2 = 12,
+	trinket1 = 13, trinket2 = 14, main_hand = 16, off_hand = 17,
+}
+-- Either of a pair can sit in either slot, and the sim does not care which.
+local PLAN_PAIRS = { { "finger1", "finger2" }, { "trinket1", "trinket2" } }
+
+local function idList(text)
+	local list = {}
+	for n in (text or ""):gmatch("%d+") do list[#list + 1] = tonumber(n) end
+	return list
+end
+
+-- "id=1,enchant_id=2,gem_id=3/4,bonus_id=5/6,ilevel=300" -> a plan entry, or
+-- nil for a line with no item id on it.
+local function parsePlanLine(line)
+	local field = {}
+	for key, value in (line or ""):gmatch("([%a_]+)=([%d/]+)") do field[key] = value end
+	if not field.id then return nil end
+	return {
+		id = tonumber(field.id),
+		ilvl = tonumber(field.ilevel),
+		enchant = tonumber(field.enchant_id),
+		gems = idList(field.gem_id),
+		bonus = idList(field.bonus_id),
+	}
+end
+
+-- Item id AND item level, never the name: the same id drops on every track,
+-- and the Champion copy of a Myth plan piece is not the piece the sim chose.
+-- A level the client has not cached yet reads as no match, not as a match.
+local function planMatches(entry, id, ilvl)
+	return entry ~= nil and id ~= nil and ilvl ~= nil
+		and entry.id == id and entry.ilvl == ilvl
+end
+
+local function planMatchesLink(entry, link)
+	if not link then return false end
+	return planMatches(entry, tonumber(link:match("item:(%d+)")), itemLevelOf(link))
+end
+
+-- Two planned pieces against two worn ones, each { id =, ilvl = } or nil.
+local function planPairMatches(planA, planB, wornA, wornB)
+	local function m(entry, worn) return planMatches(entry, worn and worn.id, worn and worn.ilvl) end
+	return (m(planA, wornA) and m(planB, wornB)) or (m(planA, wornB) and m(planB, wornA))
+end
+
+-- The parsed plan for one spec and scenario: { report, simmed, dps, loadout,
+-- talents, slots = { head = entry, ... } }, or nil where no report filled it.
+local function gearPlanFor(spec, scenario)
+	local cell = GEAR_PLAN[spec] and GEAR_PLAN[spec][scenario]
+	if not cell then return nil end
+	if not cell.parsed then
+		cell.parsed = {}
+		for slot, line in pairs(cell.slots) do cell.parsed[slot] = parsePlanLine(line) end
+	end
+	return {
+		report = cell.report, simmed = cell.simmed, dps = cell.dps,
+		loadout = cell.loadout, talents = cell.talents, slots = cell.parsed,
+	}
 end
 
 -- rebuilt on every render, so the ticks follow you changing gear
@@ -2605,6 +2718,65 @@ local function selfTest()
 	check("one candidate is the answer",
 		weakestOf({ { link = "A", stats = strong } }).link, "A")
 	check("nothing to compare against", weakestOf({}), nil)
+
+	-- Gear plan. The block is generated, so what is asked of it is its shape:
+	-- a cell that names a spec or a slot the addon does not know would be
+	-- skipped by everything that draws it, without an error.
+	for spec, byScenario in pairs(GEAR_PLAN) do
+		if not BIS[spec] then
+			failed = failed + 1
+			print("|cffff0000FAIL|r gear plan block holds a slot table per spec and scenario: unknown spec '" .. tostring(spec) .. "'")
+		end
+		for scenario, cell in pairs(byScenario) do
+			local where = "gear plan block holds a slot table per spec and scenario: " .. spec .. " " .. scenario
+			check(where .. ", scenario is st or 2t", scenario == "st" or scenario == "2t", true)
+			check(where .. ", has a talent string", type(cell.talents) == "string" and cell.talents ~= "", true)
+			local plan = gearPlanFor(spec, scenario)
+			local count = 0
+			for slot in pairs(cell.slots) do
+				count = count + 1
+				local entry = plan.slots[slot]
+				check(where .. ", " .. slot .. " is a slot", PLAN_SLOT_INVENTORY[slot] ~= nil, true)
+				check(where .. ", " .. slot .. " has an id and a level",
+					entry ~= nil and entry.id ~= nil and entry.ilvl ~= nil, true)
+			end
+			check(where .. ", is a whole set", count >= 14, true)
+		end
+	end
+	check("gear plan, a cell nobody filled is nil", gearPlanFor("Feral", "no such scenario"), nil)
+
+	local entry = parsePlanLine("id=251093,enchant_id=7967,gem_id=240894/240908,bonus_id=13440/6652,ilevel=276")
+	local lineTest = "plan parses enchant and gem ids from a simc gear line"
+	check(lineTest .. ", enchant", entry.enchant, 7967)
+	check(lineTest .. ", first gem", entry.gems[1], 240894)
+	check(lineTest .. ", second gem", entry.gems[2], 240908)
+	check(lineTest .. ", gem count", #entry.gems, 2)
+	check(lineTest .. ", enchant is a number", type(entry.enchant), "number")
+	check(lineTest .. ", bonus ids are not gems", entry.bonus[2], 6652)
+	check(lineTest .. ", no enchant is nil", parsePlanLine("id=1,ilevel=300").enchant, nil)
+	check(lineTest .. ", no gem is an empty list", #parsePlanLine("id=1,ilevel=300").gems, 0)
+	check(lineTest .. ", no id is no entry", parsePlanLine("enchant_id=7967"), nil)
+
+	local matchTest = "plan match compares item id and item level"
+	check(matchTest .. ", same both", planMatches(entry, 251093, 276), true)
+	check(matchTest .. ", same id on a lower track", planMatches(entry, 251093, 263), false)
+	check(matchTest .. ", same level, other item", planMatches(entry, 251194, 276), false)
+	check(matchTest .. ", level not cached yet", planMatches(entry, 251093, nil), false)
+	check(matchTest .. ", empty slot", planMatchesLink(entry, nil), false)
+	check(matchTest .. ", no plan entry", planMatches(nil, 251093, 276), false)
+
+	local pairTest = "paired slots match in either order"
+	local ringA, ringB = parsePlanLine("id=1,ilevel=300"), parsePlanLine("id=2,ilevel=310")
+	local wornA, wornB = { id = 1, ilvl = 300 }, { id = 2, ilvl = 310 }
+	check(pairTest .. ", as planned", planPairMatches(ringA, ringB, wornA, wornB), true)
+	check(pairTest .. ", swapped", planPairMatches(ringA, ringB, wornB, wornA), true)
+	check(pairTest .. ", one wrong", planPairMatches(ringA, ringB, wornA, { id = 3, ilvl = 310 }), false)
+	check(pairTest .. ", one finger bare", planPairMatches(ringA, ringB, wornA, nil), false)
+	check(pairTest .. ", the same ring twice is not the pair", planPairMatches(ringA, ringB, wornA, wornA), false)
+	for _, pair in ipairs(PLAN_PAIRS) do
+		check(pairTest .. ", " .. pair[1] .. " is a slot", PLAN_SLOT_INVENTORY[pair[1]] ~= nil, true)
+		check(pairTest .. ", " .. pair[2] .. " is a slot", PLAN_SLOT_INVENTORY[pair[2]] ~= nil, true)
+	end
 
 	-- a saved target must survive the round trip and show its item level
 	setGear("zzz not a real item", "Myth", 6)

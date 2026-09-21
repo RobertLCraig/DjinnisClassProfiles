@@ -32,22 +32,22 @@ This card is the data half only. Cards `0005`, `0006` and `0007` draw it.
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] WHEN the generator is given a Raidbots Top Gear report id, THE TOOL SHALL write the winning combo's item id, bonus ids, enchant id and gem ids for every slot into the `GENERATED GEAR PLAN` block of `DjinnisBiS.lua`. proves: `gear plan block holds a slot table per spec and scenario`
-- [ ] WHEN a slot line carries `enchant_id` or `gem_id`, THE ADDON SHALL expose them as numbers on that slot's plan entry. proves: `plan parses enchant and gem ids from a simc gear line`
-- [ ] WHEN a plan entry is asked whether an equipped item link matches it, THE ADDON SHALL compare item id and item level, not name. proves: `plan match compares item id and item level`
-- [ ] WHEN a ring or trinket pair is planned, THE ADDON SHALL match the pair in either order. proves: `paired slots match in either order`
-- [ ] WHEN the generator runs twice on the same reports, THE TOOL SHALL write nothing the second time. proves: `generator is idempotent`
-- [ ] WHEN the generator is given a full report URL instead of an id, THE TOOL SHALL accept it the same. proves: `generator accepts a report url or a bare id`
-- [ ] WHEN a report is not a Top Gear report, or its spec cannot be read, THE TOOL SHALL stop, name the report and write nothing. proves: `generator refuses a report it cannot place`
+- [x] WHEN the generator is given a Raidbots Top Gear report id, THE TOOL SHALL write the winning combo's item id, bonus ids, enchant id and gem ids for every slot into the `GENERATED GEAR PLAN` block of `DjinnisBiS.lua`. proves: `gear plan block holds a slot table per spec and scenario`
+- [x] WHEN a slot line carries `enchant_id` or `gem_id`, THE ADDON SHALL expose them as numbers on that slot's plan entry. proves: `plan parses enchant and gem ids from a simc gear line`
+- [x] WHEN a plan entry is asked whether an equipped item link matches it, THE ADDON SHALL compare item id and item level, not name. proves: `plan match compares item id and item level`
+- [x] WHEN a ring or trinket pair is planned, THE ADDON SHALL match the pair in either order. proves: `paired slots match in either order`
+- [x] WHEN the generator runs twice on the same reports, THE TOOL SHALL write nothing the second time. proves: `generator is idempotent`
+- [x] WHEN the generator is given a full report URL instead of an id, THE TOOL SHALL accept it the same. proves: `generator accepts a report url or a bare id`
+- [x] WHEN a report is not a Top Gear report, or its spec cannot be read, THE TOOL SHALL stop, name the report and write nothing. proves: `generator refuses a report it cannot place`
 <!-- AC:END -->
 
 ## Tasks
 
-- [ ] Read the report format and write down which field holds the winning combo (see Plan).
-- [ ] Generator script `update-gear-plan.ps1` beside `update-classcodex-data.ps1`, same marker discipline.
-- [ ] Plan table: `spec` (Feral, Balance, Guardian, Restoration) by `scenario` (`st`, `2t`) by slot.
-- [ ] Per scenario, the loadout name to use and its export string.
-- [ ] Offline checks in `offline-check.lua` under the names above.
+- [x] Read the report format and write down which field holds the winning combo (see Plan).
+- [x] Generator script `update-gear-plan.ps1` beside `update-classcodex-data.ps1`, same marker discipline.
+- [x] Plan table: `spec` (Feral, Balance, Guardian, Restoration) by `scenario` (`st`, `2t`) by slot.
+- [x] Per scenario, the loadout name to use and its export string.
+- [x] Offline checks in `offline-check.lua` under the names above.
 
 ## Plan
 
@@ -89,3 +89,23 @@ Deploy with `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then wit
   an addon that gives me the changes you are proposing in game (similar to AskMrRobot)", then
   "highlight / glow items to equip / change from bags / character frame", and "DjinnisBiS may be a
   better place for this". Nothing is built yet.
+- **2026-09-21** Built, at v0.13.0, deployed. **The open question is settled, and the answer is a
+  different file.** `simbot.input` in `data.json` is one chunk of the last Smart Sim stage, which is
+  why it held Combo 142 and not the winner. Every combo is in
+  `https://www.raidbots.com/reports/<id>/input.txt`, each gear line under a comment giving the
+  item's name and item level, so the level is stored and the match is id plus level as asked. The
+  form data also lists the gear but without the gems Top Gear adds (the winner's wrist gem is not
+  in it), so it is not read. The base actor is Combo 1 and has no `profilesets.results` row; it is
+  compared separately and can win.
+- **2026-09-21** **Only one cell is filled: Feral `st`, from `ttktB9kVE77x2zkadhVgPn`.** The four
+  reports named in the SecondBrain output are Advanced sims comparing talent builds, not Top Gear,
+  and the generator refuses them by name, which is criterion 7 doing its job. Feral `2t` and both
+  Balance cells need a Top Gear run each. Spec key is `Resto`, not `Restoration`, to match every
+  other table in the addon.
+- **2026-09-21** Where each `proves:` runs. The first four are `check` labels in `/bis test`, run by
+  `lua offline-check.lua`; the first is also asserted on the generator's output. The last three, and
+  the first again, are `.\update-gear-plan.ps1 -SelfTest`, against trimmed copies of two real
+  reports in `fixtures/gear-plan/`. Both exit 0. A mutation that made the match ignore item level
+  turned `plan match compares item id and item level` red, so that check bites. The self-test also
+  caught a real fault on its first run: indexing an `[ordered]` table with an int is by position, so
+  one enemy was filed as `2t`. **Nothing here has been in a game client, and nothing in it draws.**

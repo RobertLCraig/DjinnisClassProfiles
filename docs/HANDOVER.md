@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.12.0, `Interface: 120100`. No remote.
+**Status:** v0.13.0, `Interface: 120100`. No remote.
 **Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
 everything is under `[Unreleased]`.
 **Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in
@@ -17,7 +17,10 @@ ClassCodex disabled and then enabled. `0003`, "stat targets, and what a drop doe
 all **confirmed working at 0.11.3**. What is fixed and **not looked at** is 0.12.0, and it is the
 card's actual subject rather than its chrome: the hero talent was never being read, and a one-handed
 weapon was compared against an empty off-hand while a two-hander was equipped.
-_Last updated: 2026-09-07 (card 0003: stat target bars in three places, deployed at 0.12.0)_
+**2026-09-21: card `0004` is built and in `ai-review/`**, a gear plan table baked in from a Raidbots
+Top Gear report, data only. One cell of it is filled, Feral single target. Cards `0005`, `0006` and
+`0007` in `todo/` draw it and none is started.
+_Last updated: 2026-09-21 (card 0004: the gear plan table and its generator, deployed at 0.13.0)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -62,6 +65,13 @@ than a task.
   rather than guessing where a table is. **It reads disk and does not fetch**, so run
   `python C:\Dev\WoWAddons\WoWClassCodexDownloader\download_classcodex.py` first to force ClassCodex
   itself current. It was called `update-trinket-tiers.ps1` until 2026-09-07.
+- `update-gear-plan.ps1` - **author tooling, never shipped.** Writes the third generated block,
+  `GENERATED GEAR PLAN`, from finished Raidbots Top Gear reports: one report fills one cell, spec by
+  scenario (`st` one target, `2t` two), and cells it was not given are kept, because a report
+  expires after 30 days. **Unlike the ClassCodex script it fetches**, two files per report. Its
+  header says where the winning combo really is, which is `input.txt` and not the `simbot.input`
+  field that looks like it. `.\update-gear-plan.ps1 -SelfTest` runs its checks against
+  `fixtures/gear-plan/`, trimmed copies of two real reports.
 - `offline-check.lua` - **author tooling, never shipped.** Runs the addon's own `/bis test` outside
   the game, under plain Lua, by stubbing enough of Blizzard's API to load the file: `lua
   offline-check.lua`, exit code 0 for a pass. **It proves the data and the pure logic and it proves
@@ -97,8 +107,16 @@ than a task.
   bundled libraries ship inside the addon, so they are part of the artefact.
 
 ## Current state
+**2026-09-21, card 0004: a gear plan, at v0.13.0. Data only, nothing draws it yet.** `GEAR_PLAN` in
+`DjinnisBiS.lua` holds, per spec and scenario, the gear a Top Gear sim chose: each slot's item id,
+item level, enchant, gems and bonus ids, plus the talent loadout's name and import string.
+`gearPlanFor(spec, scenario)` hands it over parsed, and `planMatches` compares **item id and item
+level, never name**, because the same id drops on every track. **Only Feral `st` is filled.** The
+other reports from that day were Advanced sims, which the generator refuses by name; each missing
+cell wants one Top Gear run.
+
 Built, deployed locally, unpublished, and **blocked on in-game observation**. The board has three
-cards: `0001` and `0002` in `human-review/`, `0003` in `ai-review/`. Nothing is in `todo/`.
+cards: `0001` and `0002` in `human-review/`, `0003` and `0004` in `ai-review/`. `todo/` holds `0005`, `0006` and `0007`, which all draw the gear plan `0004` built.
 
 **2026-09-07, card 0003: stat targets, at v0.11.0.** The ratings the top 20% of each druid spec are
 observed to run, per hero talent, for raid and Mythic+, out of the same ClassCodex files the trinket
@@ -168,7 +186,7 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this**, and today that is three cards, `0001`, `0002` and `0003`, all wanting a
+**`docs/board/` owns this**, and the next buildable work is `0005`, `0006` and `0007` in `todo/`. Ahead of them are three cards, `0001`, `0002` and `0003`, all wanting a
 live client. **They are one trip.** Open `/bis` once and `0001`'s and `0002`'s checks are in front of
 you; click the new Stats tab, open the character sheet and hover a ring in your bags and `0003`'s
 are too. `0003` also wants an adversarial pass before it can move on, which is what `ai-review/` is
@@ -200,7 +218,11 @@ for and does not need Rob.
 3. Deploy from the workspace and never edit the game folder:
    `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then the same without `-WhatIf`. The
    dry run is the plan.
-4. Check any API against `C:\Dev\WoWAddons\wow-ui-source\`, never from memory. Anything defined only
+4. To refresh the gear plan after a Top Gear run, with or without an agent. It takes ids or full
+   report links, several at once, and says which spec and scenario each one fills:
+   `.\update-gear-plan.ps1 -WhatIf <report link>`, then the same without `-WhatIf`, adding
+   `-Deploy` to put it in the game.
+5. Check any API against `C:\Dev\WoWAddons\wow-ui-source\`, never from memory. Anything defined only
    under `Blizzard_Deprecated*/` is CVar-gated and is not safe to rely on.
 
 ## Sibling docs
@@ -212,6 +234,10 @@ for and does not need Rob.
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
+- **2026-09-21** Card `0004`. The gear plan table, `update-gear-plan.ps1` and its fixtures, deployed
+  at v0.13.0. Worth carrying: a Raidbots `data.json` does not hold the winning combo's gear, the
+  report's `input.txt` does. And in PowerShell, `[ordered]@{ 1 = 'st' }[1]` indexes by position;
+  the script's self-test caught that filing one enemy as two.
 - **2026-09-07** Card `0003`. Stat targets and their bars, deployed at v0.11.0. Three side effects
   worth knowing about. `update-trinket-tiers.ps1` is renamed `update-classcodex-data.ps1`, because
   it now writes two generated blocks rather than one. `offline-check.lua` is new: it runs `/bis
