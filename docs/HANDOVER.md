@@ -199,11 +199,15 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this**, and the next buildable work is `0005`, `0006` and `0007` in `todo/`. Ahead of them are three cards, `0001`, `0002` and `0003`, all wanting a
-live client. **They are one trip.** Open `/bis` once and `0001`'s and `0002`'s checks are in front of
-you; click the new Stats tab, open the character sheet and hover a ring in your bags and `0003`'s
-are too. `0003` also wants an adversarial pass before it can move on, which is what `ai-review/` is
-for and does not need Rob.
+**`docs/board/` owns this. The one buildable card is `0007` in `todo/`**, the Plan tab with talents
+per boss and a shopping list (as of 2026-09-21). It carries `not_for_the_loop:` because Rob builds
+this addon by hand in a session on msiraider. It can reuse what `0005` and `0006` left in
+`DjinnisBiS.lua`: `readWorn`, `slotStates`, `wantedFrom`, `planLocation` and `planScenario`.
+
+Five cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005` and `0006`, all wanting a live
+client. **They are one trip**, and each card lists its own checks under `## What I need from you`.
+Open `/bis` for `0001` and `0002`; open the character sheet, hit a dummy and hover a ring for
+`0003` and `0005`; open Baganator for `0006`.
 
 ## Blockers / open questions
 - **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's BiS*
