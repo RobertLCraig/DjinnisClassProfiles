@@ -256,3 +256,20 @@ that rule. A mutation test confirmed they bite: flipping `<` to `>` fails three 
   before running either.
 - `WoWAddons` `docs/DECISIONS.md` holds the two 12.1 traps this card had to work inside, and is
   missing the `canaccessvalue` / `issecretvalue` finding above.
+
+## Comments
+
+- 2026-09-21 Claude, from two of Rob's in-game screenshots at 0.12.0, Feral, Druid of the Claw,
+  with Chonky Character Sheet and Baganator open:
+  - **Working, out of combat.** The pane sits beside the sheet with four bars against the Mythic+
+    targets. Hovering Ula'tek's Bind in Baganator drew ghost segments on all four bars and added
+    tooltip lines "Against your Mythic+ targets, versus what it replaces: Crit -61, Haste +148,
+    Mastery -80", naming Vile Alchemist's Band as the piece replaced. So the hero talent is now read
+    (the header says "druid of the claw") and the hover path works through Baganator.
+  - **Broken in combat.** An earlier screenshot the same day, taken while hitting a dummy, showed
+    every bar as `0 / <target>` and the sheet's GCD line as `<Secret>`. The ratings come back
+    secret in combat and the pane draws them as zero. It should hold the last value read out of
+    combat, the way the Feral combo point module in `DjinnisUIEnhancements` does, or hide until
+    combat ends. Not yet fixed.
+  - **Not seen:** whether the Mythic+ / Raid switch in the pane's header works. Rob raids, so it
+    matters which one is showing.
