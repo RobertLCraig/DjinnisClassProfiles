@@ -397,6 +397,49 @@ local GEAR_PLAN = {
 }
 -- END GENERATED GEAR PLAN
 
+-- HAND-KEPT, and outside the markers on purpose: update-gear-plan.ps1 rewrites
+-- everything between them from Raidbots reports, and neither table below is in
+-- a report.
+--
+-- The game has no call that turns an enchant id into a name. These are the ids
+-- the plan above uses, named from raidbots.com/static/data/live/enchantments.json
+-- on 2026-09-21. An id missing here prints as "enchant 1234", which is the cue
+-- to add it.
+local PlanTab = {}  -- one name for the whole Plan tab: this file sits at Lua's 200-local limit
+PlanTab.ENCHANT_NAME = {
+	[7961] = "Empowered Hex of Leeching (rank 2)",
+	[7966] = "Eyes of the Eagle (rank 1)",
+	[7967] = "Eyes of the Eagle (rank 2)",
+	[7973] = "Akil'zon's Swiftness (rank 2)",
+	[7982] = "Berserker's Rage (rank 1)",
+	[7987] = "Mark of the Worldsoul (rank 2)",
+	[7991] = "Empowered Blessing of Speed (rank 2)",
+	[8018] = "Farstrider's Hunt (rank 1)",
+	[8159] = "Forest Hunter's Armor Kit (rank 2)",
+}
+
+-- Which saved loadout and which gear scenario go with which boss. The hero tree
+-- per boss is Dreamgrove's Feral compendium as updated 2026-09-18. The NAMES are
+-- the loadouts DjinnisDreamgrove imported on 2026-09-02, because those are what
+-- exist in the game to click. Dreamgrove's newer one-build-per-boss strings sim
+-- about 1.5% over these and have no loadout yet; when DjinnisDreamgrove is
+-- refreshed, change the names here to match.
+-- `scenario` picks the gear plan cell. There are only two, so a boss that is
+-- neither clean single target nor sustained two target takes `st`.
+PlanTab.BOSSES = {
+	Feral = {
+		{ boss = "Nek'zali",            scenario = "st", loadout = "WS Raid Most Bosses" },
+		{ boss = "Entombed Sentinels",  scenario = "st", loadout = "DotC Raid ST *" },
+		{ boss = "The Lost Explorers",  scenario = "2t", loadout = "WS Raid 2T *" },
+		{ boss = "Vashnik",             scenario = "st", loadout = "WS Raid Most Bosses" },
+		{ boss = "Sszorak",             scenario = "st", loadout = "DotC Raid ST *" },
+		{ boss = "The Twin Fangs",      scenario = "2t", loadout = "WS Raid 2T *" },
+		{ boss = "The Coiled Altar",    scenario = "st", loadout = "WS Raid Coiled Altar" },
+		{ boss = "Ula'tek",             scenario = "st", loadout = "WS Raid Most Bosses" },
+		{ boss = "Nymrissa Wavecaller", scenario = "st", loadout = "DotC Raid Most Bosses *" },
+	},
+}
+
 -- ===========================================================================
 
 local SPEC_ORDER = { "Balance", "Feral", "Guardian", "Resto" }
@@ -1376,16 +1419,22 @@ end
 
 -- { [inventory slot id] = { state =, entry = } } for every slot that is not
 -- "ok". `wornBySlot` is keyed by the plan's slot names. No plan, no marks.
-local function slotStates(plan, wornBySlot)
-	local marks = {}
-	if not plan then return marks end
+-- The plan's entry for each slot, with each ring and trinket pair turned the
+-- way round that matches what is worn.
+function PlanTab.entries(plan, wornBySlot)
 	local entryFor = {}
 	for slot, entry in pairs(plan.slots) do entryFor[slot] = entry end
 	for _, pair in ipairs(PLAN_PAIRS) do
 		entryFor[pair[1]], entryFor[pair[2]] = planPairOrder(
 			plan.slots[pair[1]], plan.slots[pair[2]], wornBySlot[pair[1]], wornBySlot[pair[2]])
 	end
-	for slot, entry in pairs(entryFor) do
+	return entryFor
+end
+
+local function slotStates(plan, wornBySlot)
+	local marks = {}
+	if not plan then return marks end
+	for slot, entry in pairs(PlanTab.entries(plan, wornBySlot)) do
 		local state = slotState(entry, wornBySlot[slot])
 		if state ~= "ok" then
 			marks[PLAN_SLOT_INVENTORY[slot]] = { state = state, entry = entry }
@@ -1400,6 +1449,62 @@ local function planLocation(inBags, bankCount)
 	if inBags then return "bags" end
 	if (bankCount or 0) > 0 then return "bank" end
 	return "missing"
+end
+
+-- The Plan tab's shopping list: { { kind = "enchant" | "gem", id =, count = } },
+-- each thing once with how many, enchants first. Second return is how many
+-- planned pieces are not worn.
+-- ponytail: a planned piece that is not worn is not counted at all, because the
+-- copy in the bags may already carry its enchant and gem. Read the bag copy's
+-- link through wornFromLink if the list needs to be complete before equipping.
+function PlanTab.shoppingList(plan, wornBySlot)
+	local count, unworn = { enchant = {}, gem = {} }, 0
+	for slot, entry in pairs(plan and PlanTab.entries(plan, wornBySlot) or {}) do
+		local worn = wornBySlot[slot]
+		if not worn or not planMatches(entry, worn.id, worn.ilvl) then
+			unworn = unworn + 1
+		else
+			if entry.enchant and worn.enchant ~= entry.enchant then
+				count.enchant[entry.enchant] = (count.enchant[entry.enchant] or 0) + 1
+			end
+			-- planned gems less the worn ones, one for one
+			local have = {}
+			for _, gem in ipairs(worn.gems or {}) do have[gem] = (have[gem] or 0) + 1 end
+			for _, gem in ipairs(entry.gems) do
+				if (have[gem] or 0) > 0 then
+					have[gem] = have[gem] - 1
+				else
+					count.gem[gem] = (count.gem[gem] or 0) + 1
+				end
+			end
+		end
+	end
+	local list = {}
+	for kind, byId in pairs(count) do
+		for id, n in pairs(byId) do list[#list + 1] = { kind = kind, id = id, count = n } end
+	end
+	table.sort(list, function(a, b)
+		if a.kind ~= b.kind then return a.kind < b.kind end  -- "enchant" sorts first
+		return a.id < b.id
+	end)
+	return list, unworn
+end
+
+-- `nameOf(kind, id)` is handed in so /bis test can run this with no item cache.
+function PlanTab.shoppingLines(list, nameOf)
+	if #list == 0 then return { "Nothing to buy" } end
+	local lines = {}
+	for i, want in ipairs(list) do
+		lines[i] = ("%dx %s"):format(want.count, nameOf(want.kind, want.id))
+	end
+	return lines
+end
+
+-- "match", "mismatch", or "unknown" when the game would not say which loadout
+-- is active. Unknown is never drawn red: red means "go and change it".
+function PlanTab.loadoutState(planned, active)
+	if not active or not planned then return "unknown" end
+	return planned == active and "match" or "mismatch"
 end
 
 local PLAN_SCENARIOS = { "st", "2t" }
@@ -1716,7 +1821,8 @@ local function attachItemHover(frame)
 	end)
 	frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
 	frame:SetScript("OnClick", function(self)
-		if self.link then HandleModifiedItemClick(self.link) end
+		if self.onClick then self.onClick()
+		elseif self.link then HandleModifiedItemClick(self.link) end
 	end)
 end
 
@@ -1883,8 +1989,9 @@ refresh = function()
 		if i == activeTab then button:LockHighlight() else button:UnlockHighlight() end
 	end
 	for _, button in ipairs(window.specs) do
-		-- the Stats tab is per spec too, so its buttons stay up on both
-		button:SetShown(activeTab ~= 1)
+		-- the Stats tab is per spec too, so its buttons stay up on both. The Plan
+		-- tab is about the spec you are IN, so it has no use for them.
+		button:SetShown(activeTab == 2 or activeTab == 3)
 		if button.spec == activeSpec then button:LockHighlight() else button:UnlockHighlight() end
 	end
 
@@ -1896,9 +2003,9 @@ refresh = function()
 		return
 	end
 
-	if activeTab == 1 then
+	if activeTab == 1 or activeTab == 4 then
 		for i = 1, #cellPool do cellPool[i]:Hide() end
-		renderList(byBossLines())
+		renderList(activeTab == 1 and byBossLines() or PlanTab.lines())
 	else
 		for i = 1, #rowPool do rowPool[i]:Hide() end
 		renderDoll()
@@ -1911,6 +2018,7 @@ renderList = function(lines)
 		local row = acquireRow(window.content, i)
 		row.text:SetText(line.text)
 		row.link = line.link
+		row.onClick = line.onClick
 		row.ilvl.itemName = line.name
 		row.ilvl.text:SetText(line.name and gearLabel(line.name) or "")
 		row.ilvl:SetShown(line.name ~= nil)
@@ -2387,7 +2495,7 @@ local function buildWindow()
 	-- Plain buttons rather than PanelTabButtonTemplate: the tab templates want
 	-- PanelTemplates_ bookkeeping and give nothing back for two tabs.
 	f.tabs = {}
-	local TAB_LABELS = { "By Boss", "By Slot", "Stats" }
+	local TAB_LABELS = { "By Boss", "By Slot", "Stats", "Plan" }
 	for i, label in ipairs(TAB_LABELS) do
 		local button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 		button:SetSize(110, 22)
@@ -2433,6 +2541,15 @@ local function buildWindow()
 
 	tinsert(UISpecialFrames, "DjinnisBiSFrame")  -- Escape closes it
 	return f
+end
+
+-- What the plan strip under the character sheet opens: the list behind its
+-- "N slots to fix".
+function PlanTab.open()
+	window = window or buildWindow()
+	activeTab = 4
+	refresh()
+	window:Show()
 end
 
 function DjinnisBiS_Toggle()
@@ -2675,11 +2792,15 @@ local function itemName(id)
 	return id and C_Item.GetItemInfo(id) or ("item " .. tostring(id))
 end
 
+function PlanTab.enchantName(id)
+	return PlanTab.ENCHANT_NAME[id] or ("enchant " .. tostring(id))
+end
+
 -- One line saying what the plan wants in this slot and where that is.
 local function planLineFor(mark)
 	local entry = mark.entry
 	if mark.state == "enchant" then
-		return ("Plan: wants enchant %d here"):format(entry.enchant)
+		return "Plan: enchant with " .. PlanTab.enchantName(entry.enchant)
 	elseif mark.state == "gem" then
 		local names = {}
 		for i, gem in ipairs(entry.gems) do names[i] = itemName(gem) end
@@ -2689,6 +2810,108 @@ local function planLineFor(mark)
 	local inBank = C_Item.GetItemCount(entry.id, true, false, true, true) - C_Item.GetItemCount(entry.id)
 	return ("Plan: %s (%d), %s"):format(itemName(entry.id), entry.ilvl,
 		LOCATION_WORD[planLocation(planItemInBags(entry), inBank)])
+end
+
+-- The Plan tab ----------------------------------------------------------------
+--
+-- One boss picked, three answers under it: which loadout, which slots to
+-- change, what to buy. It names a loadout and NEVER applies one: an addon that
+-- calls C_ClassTalents.LoadConfig or CommitConfig is the known route to action
+-- bars that stop updating in combat (card 0002 found ClassCodex doing it).
+
+-- The saved loadout picked in the talent window, by name, or nil.
+-- ponytail: this is the last loadout SELECTED. Talents changed by hand after
+-- that still read as that loadout. Compare the import string if it matters.
+function PlanTab.activeLoadoutName()
+	local spec = C_SpecializationInfo
+	if not (spec and spec.GetSpecialization and C_ClassTalents and C_Traits) then return nil end
+	local ok, specID = pcall(spec.GetSpecializationInfo, spec.GetSpecialization())
+	if not ok or not specID then return nil end
+	local okConfig, configID = pcall(C_ClassTalents.GetLastSelectedSavedConfigID, specID)
+	if not okConfig or not configID then return nil end
+	local okInfo, info = pcall(C_Traits.GetConfigInfo, configID)
+	local name = okInfo and info and info.name
+	return name and canRead(name) and name or nil
+end
+
+-- PlanTab.boss is the boss picked in the tab; the first one until a click.
+function PlanTab.lines()
+	local RED = "|cffff2020"
+	local LOADOUT_COLOUR = { match = GREEN, mismatch = RED, unknown = WHITE }
+	local spec = playerSpec()
+	local bosses = spec and PlanTab.BOSSES[spec]
+	if not bosses then
+		return { { text = ("%sNo boss plan for %s yet. Only Feral has one.|r"):format(GREY, spec or "this spec") } }
+	end
+
+	local picked = bosses[1]
+	for _, row in ipairs(bosses) do
+		if row.boss == PlanTab.boss then picked = row end
+	end
+
+	local active = PlanTab.activeLoadoutName()
+	local lines = {
+		{ text = ("%sPick the boss you are about to pull. Everything below is for that boss.|r"):format(GREY) },
+		{ text = "" },
+		{ text = ("%s1. Talents|r   %syour loadout now: |r%s%s|r"):format(GOLD, GREY, WHITE, active or "not known") },
+	}
+	for _, row in ipairs(bosses) do
+		local isPicked = row == picked
+		-- Only the picked boss is judged. Red on every other row would be nine
+		-- warnings about fights nobody is standing in front of.
+		local colour = isPicked and LOADOUT_COLOUR[PlanTab.loadoutState(row.loadout, active)] or GREY
+		lines[#lines + 1] = {
+			text = ("%s%s|r   %s%s|r   %s%s|r"):format(
+				isPicked and (WHITE .. "> ") or (GREY .. "   "), row.boss,
+				colour, row.loadout, GREY, SCENARIO_LABEL[row.scenario]),
+			onClick = function() PlanTab.boss = row.boss; refresh() end,
+		}
+	end
+	if PlanTab.loadoutState(picked.loadout, active) == "mismatch" then
+		lines[#lines + 1] = { text = ("%sOpen talents and pick \"%s\" before %s.|r"):format(RED, picked.loadout, picked.boss) }
+	end
+
+	lines[#lines + 1] = { text = "" }
+	lines[#lines + 1] = { text = ("%s2. Gear to change|r   %s%s plan|r"):format(GOLD, GREY, SCENARIO_LABEL[picked.scenario]) }
+	local plan = gearPlanFor(spec, picked.scenario)
+	local worn = plan and readWorn()
+	if not plan then
+		lines[#lines + 1] = { text = ("%s   No %s gear plan yet. Run a Raidbots Top Gear sim on %s,|r"):format(
+			GREY, SCENARIO_LABEL[picked.scenario], SCENARIO_LABEL[picked.scenario]) }
+		lines[#lines + 1] = { text = GREY .. "   then: .\\update-gear-plan.ps1 <report link> -Deploy|r" }
+		return lines
+	elseif not worn then
+		lines[#lines + 1] = { text = GREY .. "   Your gear cannot be read right now. Open this again out of combat.|r" }
+		return lines
+	end
+
+	local marks, slotIDs = slotStates(plan, worn), {}
+	for slotID in pairs(marks) do slotIDs[#slotIDs + 1] = slotID end
+	table.sort(slotIDs)
+	for _, slotID in ipairs(slotIDs) do
+		local _, link = C_Item.GetItemInfo(marks[slotID].entry.id)
+		lines[#lines + 1] = {
+			text = ("   %s%s:|r %s"):format(WHITE, PLAN_SLOT_LABEL[slotID] or "?",
+				(planLineFor(marks[slotID]):gsub("^Plan: ", ""))),
+			link = marks[slotID].state == "change" and link or nil,
+		}
+	end
+	if #slotIDs == 0 then lines[#lines + 1] = { text = GREEN .. "   Every slot matches the plan.|r" } end
+
+	lines[#lines + 1] = { text = "" }
+	lines[#lines + 1] = { text = GOLD .. "3. To buy|r" }
+	local list, unworn = PlanTab.shoppingList(plan, worn)
+	local wanted = PlanTab.shoppingLines(list, function(kind, id)
+		return kind == "enchant" and PlanTab.enchantName(id) or itemName(id)
+	end)
+	for _, text in ipairs(wanted) do
+		lines[#lines + 1] = { text = "   " .. (#list == 0 and GREEN or WHITE) .. text .. "|r" }
+	end
+	if unworn > 0 then
+		lines[#lines + 1] = { text = ("%s   %d planned piece%s not worn yet, so %s enchants and gems are not counted.|r"):format(
+			GREY, unworn, unworn == 1 and " is" or "s are", unworn == 1 and "its" or "their") }
+	end
+	return lines
 end
 
 -- Returns the refresh function. `holder` is the character pane's frame and
@@ -2778,14 +3001,19 @@ local function buildSlotMarks(holder, below)
 		if not spec then
 			strip.text:SetText(GREY .. "Gear plan: no spec.|r")
 		elseif not plan then
-			strip.text:SetText(("%sNo gear plan for %s, %s.|r"):format(GREY, spec, SCENARIO_LABEL[scenario]))
+			strip.text:SetText(("%sNo %s gear plan for %s yet. Click for how.|r"):format(GREY, SCENARIO_LABEL[scenario], spec))
 		elseif count == 0 then
 			strip.text:SetText(("%sGear plan:|r %severy slot matches|r"):format(GOLD, GREEN))
 		else
-			strip.text:SetText(("%sGear plan:|r %s%d slot%s to fix|r"):format(
-				GOLD, WHITE, count, count == 1 and "" or "s"))
+			strip.text:SetText(("%sGear plan:|r %s%d slot%s to fix.|r %sClick for the list.|r"):format(
+				GOLD, WHITE, count, count == 1 and "" or "s", GREY))
 		end
 	end
+
+	-- "7 slots to fix" on its own says nothing about which or how (Rob,
+	-- 2026-09-21). The list lives in the Plan tab, and this opens it.
+	strip:EnableMouse(true)
+	strip:SetScript("OnMouseUp", PlanTab.open)
 
 	strip.scenario:SetScript("OnClick", function()
 		local spec = playerSpec()
@@ -3404,6 +3632,52 @@ local function selfTest()
 	for slot, slotID in pairs(PLAN_SLOT_INVENTORY) do
 		check(lineTest2 .. ", every plan slot has a label, " .. slot, PLAN_SLOT_LABEL[slotID] ~= nil, true)
 	end
+
+	-- the Plan tab (card 0007)
+	local bossTest = "plan tab lists a loadout per boss for the spec"
+	local planned = {}
+	for _, row in ipairs(PlanTab.BOSSES.Feral) do
+		planned[row.boss] = true
+		check(bossTest .. ", a loadout, " .. row.boss, type(row.loadout) == "string" and row.loadout ~= "", true)
+		check(bossTest .. ", a scenario with a label, " .. row.boss, SCENARIO_LABEL[row.scenario] ~= nil, true)
+	end
+	for _, boss in ipairs(BOSS_ORDER) do
+		check(bossTest .. ", every raid boss is listed, " .. boss, planned[boss], true)
+	end
+
+	local flagTest = "loadout mismatch is flagged by name"
+	check(flagTest .. ", another loadout", PlanTab.loadoutState("WS Raid 2T *", "DotC Raid ST *"), "mismatch")
+	check(flagTest .. ", the same loadout", PlanTab.loadoutState("WS Raid 2T *", "WS Raid 2T *"), "match")
+	check(flagTest .. ", the game will not say", PlanTab.loadoutState("WS Raid 2T *", nil), "unknown")
+
+	local shopTest = "shopping list counts each missing enchant and gem once"
+	local shopPlan = { slots = {
+		finger1 = parsePlanLine("id=1,enchant_id=7967,gem_id=50,ilevel=300"),
+		finger2 = parsePlanLine("id=2,enchant_id=7967,gem_id=50/51,ilevel=300"),
+		back    = parsePlanLine("id=3,enchant_id=9,ilevel=300"),
+		head    = parsePlanLine("id=4,enchant_id=8,ilevel=300"),
+		neck    = parsePlanLine("id=5,gem_id=60/60,ilevel=300"),
+	} }
+	local shop, unworn = PlanTab.shoppingList(shopPlan, {
+		finger1 = { id = 1, ilvl = 300, gems = {} },
+		finger2 = { id = 2, ilvl = 300, enchant = 1, gems = { 51 } },
+		back    = { id = 3, ilvl = 300, enchant = 9, gems = {} },
+		neck    = { id = 5, ilvl = 300, gems = { 60 } },
+	})
+	check(shopTest .. ", three things", #shop, 3)
+	check(shopTest .. ", one worn gem covers one planned gem, not two", shop[3].count, 1)
+	check(shopTest .. ", the enchant once", shop[1].kind .. shop[1].id, "enchant7967")
+	check(shopTest .. ", counted on both rings", shop[1].count, 2)
+	check(shopTest .. ", the gem once", shop[2].kind .. shop[2].id, "gem50")
+	check(shopTest .. ", a worn gem is not bought again", shop[2].count, 2)
+	check(shopTest .. ", an unworn piece is set aside", unworn, 1)
+	local function plainName(kind, id) return kind .. " " .. id end
+	check(shopTest .. ", by name with a count", PlanTab.shoppingLines(shop, plainName)[1], "2x enchant 7967")
+
+	local emptyTest = "empty shopping list says nothing to buy"
+	check(emptyTest, PlanTab.shoppingLines(PlanTab.shoppingList(shopPlan, {}), plainName)[1], "Nothing to buy")
+	check(emptyTest .. ", no plan", PlanTab.shoppingLines(PlanTab.shoppingList(nil, {}), plainName)[1], "Nothing to buy")
+	check(emptyTest .. ", one line only", #PlanTab.shoppingLines({}, plainName), 1)
 
 	-- a saved target must survive the round trip and show its item level
 	setGear("zzz not a real item", "Myth", 6)
