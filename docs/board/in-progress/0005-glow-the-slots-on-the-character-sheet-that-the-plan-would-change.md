@@ -1,4 +1,5 @@
 ---
+not_for_the_loop: Rob, 2026-09-21: building DjinnisBiS by hand in a session on msiraider
 model: fable  # Rob, 2026-09-21: the gear plan cards go to Fable
 needs: 0004
 ---

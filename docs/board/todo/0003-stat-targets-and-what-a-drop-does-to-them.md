@@ -1,3 +1,6 @@
+---
+not_for_the_loop: Rob, 2026-09-21: building DjinnisBiS by hand in a session on msiraider
+---
 # 0003 Stat targets, and what a drop does to them
 
 ## Ask
