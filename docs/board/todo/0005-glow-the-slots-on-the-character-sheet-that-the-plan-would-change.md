@@ -1,4 +1,5 @@
 ---
+model: fable  # Rob, 2026-09-21: the gear plan cards go to Fable
 needs: 0004
 ---
 # 0005 Glow the slots on the character sheet that the plan would change

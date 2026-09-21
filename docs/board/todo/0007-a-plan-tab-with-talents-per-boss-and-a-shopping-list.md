@@ -1,4 +1,5 @@
 ---
+model: fable  # Rob, 2026-09-21: the gear plan cards go to Fable
 needs: 0004
 ---
 # 0007 A Plan tab: talents per boss, and a shopping list
