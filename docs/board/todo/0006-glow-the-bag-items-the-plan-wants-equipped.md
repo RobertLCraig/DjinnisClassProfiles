@@ -25,7 +25,9 @@ working on Retail.
 
 - Character sheet (`0005`), shopping list (`0007`), equip button.
 - Bank and warband bank windows: not this card.
-- Third-party bag addons (Baganator, Bagnon, ElvUI bags): not this card. Record which one Rob uses.
+- Bag addons other than Baganator (Bagnon, ElvUI bags, AdiBags): not this card.
+- EnhanceQoLBags is also installed (2026-09-21); which one Rob actually opens is a question for him
+  on this card before building.
 
 ## Acceptance
 
