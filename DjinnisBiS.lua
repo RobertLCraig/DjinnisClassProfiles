@@ -1387,8 +1387,11 @@ local PLAN_SCENARIOS = { "st", "2t" }
 local SCENARIO_LABEL = { st = "1 target", ["2t"] = "2 targets" }
 
 local function planScenario(spec)
+	-- Only a scenario that has a label: the saved file is editable by hand, and
+	-- an unknown one would reach a format() as nil on every sheet open.
 	local saved = db().planScenario
-	return saved and saved[spec] or "st"
+	local scenario = type(saved) == "table" and saved[spec]
+	return SCENARIO_LABEL[scenario] and scenario or "st"
 end
 
 -- rebuilt on every render, so the ticks follow you changing gear
@@ -2522,7 +2525,7 @@ local function buildSlotMarks(holder, below)
 		-- ponytail: the sheet redraws that tooltip a few times a second and the
 		-- line goes with it. Add it on the redraw too if an empty slot matters.
 		button:HookScript("OnEnter", function(self)
-			local mark = marks[self:GetID()]
+			local mark = not InCombatLockdown() and marks[self:GetID()]
 			if mark and not GetInventoryItemLink("player", self:GetID()) then
 				GameTooltip:AddLine(GOLD .. planLineFor(mark) .. "|r")
 				GameTooltip:Show()
@@ -2597,7 +2600,9 @@ local function buildSlotMarks(holder, below)
 	end)
 
 	addPlanLine = function(tooltip, owner)
-		if not owner or not glows[owner] then return end
+		-- Not in combat: the marks are held still there and can be stale, and the
+		-- card's rule is that nothing of ours changes a frame until combat ends.
+		if not owner or not glows[owner] or InCombatLockdown() then return end
 		local mark = marks[owner:GetID()]
 		if mark then tooltip:AddLine(GOLD .. planLineFor(mark) .. "|r") end
 	end
@@ -3108,7 +3113,8 @@ local function selfTest()
 		slotState(full, wornAs("|Hitem:251093:7967:240908::::|h[x]|h", 276, 1)), "gem")
 	check(gemTest .. ", an unplanned empty socket",
 		slotState(parsePlanLine("id=251093,ilevel=276"), wornAs("|Hitem:251093::::::|h[x]|h", 276, 1)), "gem")
-	check(gemTest .. ", same gems in another order", sameGems({ 1, 2 }, { 2, 1 }), true)
+	-- Neither list is in order, so dropping either sort turns this red.
+	check(gemTest .. ", same gems in another order", sameGems({ 2, 1, 3 }, { 3, 1, 2 }), true)
 
 	local locationTest = "planned item location resolves to bags bank or missing"
 	check(locationTest .. ", bags", planLocation(true, 0), "bags")
@@ -3116,6 +3122,14 @@ local function selfTest()
 	check(locationTest .. ", bank", planLocation(false, 1), "bank")
 	check(locationTest .. ", missing", planLocation(false, 0), "missing")
 	check(locationTest .. ", count not known", planLocation(false, nil), "missing")
+
+	-- /bis test runs in the game too, so the player's own choice goes back after.
+	local keptScenario = db().planScenario
+	db().planScenario = { Feral = "2t", Balance = "not a scenario" }
+	check("saved scenario is read back", planScenario("Feral"), "2t")
+	check("saved scenario nobody offers falls back to st", planScenario("Balance"), "st")
+	check("saved scenario, none saved", planScenario("Resto"), "st")
+	db().planScenario = keptScenario
 
 	check("no plan for spec marks no slots", next(slotStates(nil, {})), nil)
 	local twoRings = { slots = { finger1 = ringA, finger2 = ringB } }
