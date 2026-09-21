@@ -54,8 +54,16 @@ Stand in `C:\Dev\WoWAddons\DjinnisBiS`. Read `docs/HANDOVER.md` and
 
 Check against `C:\Dev\WoWAddons\wow-ui-source\`: `C_Container.GetContainerItemLink`,
 `C_Container.GetContainerNumSlots`, the container frame item buttons in `Blizzard_ContainerUI`, and
-how the combined bag view enumerates its buttons. Do not assume the default bags are what Rob uses;
-ask him on the card if a bag addon replaces them, before building for the default.
+how the combined bag view enumerates its buttons.
+
+**Rob's bags are Baganator** (installed in `C:\Games\World of Warcraft\_retail_\Interface\AddOns`,
+2026-09-21), so the default bag buttons may never be on screen. Baganator has a public API in
+`Baganator\API\Main.lua`, and three of its hooks fit this card better than drawing on its buttons:
+`RegisterCornerWidget` (line 229, an icon in a corner of each item), `RegisterUpgradePlugin`
+(line 129, feeds Baganator's own upgrade marker) and `RegisterItemSetSource` (line 265, lets the
+plan appear as a named set). Read those before choosing, prefer one of them over hooking its
+frames, and support the default bags as well when Baganator is not loaded. Baganator is not in
+`C:\Dev\WoWAddons`; read it in the game folder and never edit it there.
 
 Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without `-WhatIf`.
 
