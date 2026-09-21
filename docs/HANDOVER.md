@@ -6,7 +6,12 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.15.1, `Interface: 120100`. No remote.
+**Status:** v0.16.1, `Interface: 120100`. No remote.
+**2026-09-21, after everything below: card `0007` is built, reviewed and in `human-review/`.** A
+fourth tab, Plan, names the talent loadout per boss, the slots to change and what to buy. Its review
+made the checks read the drawn tab and fixed three small faults at 0.16.1. It wants eight looks in
+the game. **`todo/` is now empty**, and six cards wait on one trip to a live client. The main chunk
+of `DjinnisBiS.lua` has nine top-level locals left of Lua's 200: add to a table, not a local.
 **Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
 everything is under `[Unreleased]`.
 **Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in

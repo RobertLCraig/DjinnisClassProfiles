@@ -5,6 +5,34 @@ needs: 0004
 ---
 # 0007 A Plan tab: talents per boss, and a shopping list
 
+## What I need from you
+
+**Eight looks in the game, on your Feral druid, out of combat.** It is v0.16.1 and already deployed.
+
+1. Type `/reload`, then `/bis`. The window has a fourth button at the top, "Plan".
+2. Click "Plan". You see nine bosses. Each has a talent loadout name and "1 target" or "2 targets".
+3. Click a boss. The `>` moves to it. Its loadout name is **red** if it is not the one you have
+   picked now, with a red line under the list telling you which to pick.
+4. Open talents, pick the loadout it named, close and reopen `/bis`. That name is now **green**.
+5. With a "1 target" boss picked, "Gear to change" names about seven slots. Hover a row that names
+   an item: its tooltip shows.
+6. Click a "2 targets" boss. It says there is no 2 target plan yet and how to make one.
+7. "To buy" lists enchants and gems by name with a count, such as "2x Eyes of the Eagle (rank 2)".
+8. Open your character sheet. Click the strip under it that says "N slots to fix. Click for the
+   list." The Plan tab opens. Then on the "By Boss" tab, shift-click an item: it still links in chat.
+
+**Pass** is all of:
+- every step shows what it says
+- no red Lua error box
+- "your loadout now" at the top of the tab names the loadout you really have picked
+
+**Fail** is any step that differs. Write the step number and what you saw in `## Comments`. If
+"your loadout now" says "not known" while a saved loadout is picked, say so: that is the one call
+nobody could test outside the game.
+
+**Why it needs you:** the only place this shows is inside the game, and no agent can run the game.
+Everything that can be checked outside it has been, and says nothing about what is on screen.
+
 ## Why
 
 Two parts of the 2026-09-21 advice have nowhere to live in the game. **Talents:** the best Feral
@@ -53,16 +81,9 @@ did not exist in the game until card `0004`.
 
 ## Plan
 
-Stand in `C:\Dev\WoWAddons\DjinnisBiS`. Read `docs/HANDOVER.md` and cards `0002` and `0004`.
-
-The boss-to-build mapping for Feral is on `https://dreamgrove.gg/blog/feral/compendium` (updated
-2026-09-18): one build per boss, with its hero tree. A 2026-09-21 session extracted all 17 Dreamgrove
-strings with labels to `C:\Users\r\AppData\Local\Temp\sims\builds.txt`; that is a temp folder, so
-re-extract if it is gone. Balance had not changed since 2026-09-01.
-
-Check every talent API against `C:\Dev\WoWAddons\wow-ui-source\` and use read-only calls only:
-the active config id, its loadout name, and the saved configs list.
-
+Built. Stand in `C:\Dev\WoWAddons\DjinnisBiS`; the code is `PlanTab` in `DjinnisBiS.lua`. The boss
+to build mapping is `https://dreamgrove.gg/blog/feral/compendium` (updated 2026-09-18). Talent APIs
+are read-only and checked against `C:\Dev\WoWAddons\wow-ui-source\`. Checks: `lua offline-check.lua`.
 Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without `-WhatIf`.
 
 ## Comments
@@ -91,3 +112,33 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
   the bag copy may already carry its enchant.
   **Trap for the next card:** `DjinnisBiS.lua` is at Lua's limit of 200 top-level locals. The first
   build would not load. Everything new went into one `PlanTab` table. Add to a table, not a local.
+- 2026-09-21 Claude, adversarial review, a different session from the build. **Passed to
+  human-review with four small fixes, `235f8c2`, v0.16.1, deployed. No frame was seen: the only
+  surface is a game client, no agent can run one, so nothing in-game is claimed to work.**
+  **Broke:** (1) The checks for criteria 1 and 2 proved the tables only. A copy that drew a
+  mismatch in green, and one that drew no loadout name at all, both passed. They now draw the tab
+  and read it back, and both copies go red. Criteria 3 and 4 went red when broken, five ways.
+  (2) With the starter build active the game still reports the last saved loadout, so the tab could
+  show a stale green. It now asks `GetStarterBuildActive` first, as Blizzard's talent frame does.
+  (3) The strip counts the scenario saved for the sheet and the tab opened on the first boss, so
+  "slots to fix" on 2 targets opened a 1 target list. It opens on a boss of the strip's scenario.
+  (4) "Click for how" on a spec with no boss table led to a line that did not say how. It does now.
+  **Held:** nil paths (no spec, not a druid, no saved loadout, nil into `GetSpecializationInfo`
+  under `pcall`, an uncached item name or link). The loadout name goes through `canRead` before it
+  is compared or formatted, and is only ever a format argument, so `%` in a name is inert; a `|` in
+  a name could bend one line's colour and no more. In combat the tab says gear cannot be read if a
+  worn link is secret. No bag, item or talent call it makes has a secret return in the generated
+  docs. The strip and window are our own plain frames, nothing secure is touched. Shared rows:
+  `row.onClick` is reset on every draw, so By Boss rows and the ilvl button act as before. The
+  `slotStates` refactor is the same loop, and the `0005` and `0006` checks pass. All five APIs are
+  in `Blizzard_APIDocumentationGenerated` at 12.1.0 (69875), none only under `Blizzard_Deprecated*`.
+  The fence held: nothing calls `LoadConfig` or `CommitConfig`. **Locals:** `lua` on this PATH is
+  5.4.6, not 5.1. Under the real 5.1.5 in `C:\Program Files (x86)\Lua\5.1` the file parses, the
+  checks pass, and the main chunk has 191 of 200 live at its end: nine left.
+  **Security.** Weakest: the tab trusts "last selected loadout", so talents changed by hand after
+  picking one still read green; the code says so. Unchecked: a loadout name is player text drawn
+  raw into a coloured line; it is your own and goes nowhere. `/bis test` swaps
+  `PlanTab.activeLoadoutName` for a moment and puts it back. Leaks: nothing leaves the machine; a
+  failure shows "not known" or a grey line, never an id or a trace. **Not fixed, for you to weigh:**
+  a red gear row's tooltip is the base item, not the planned item level, and the tab does not
+  redraw itself when you swap talents or gear while it is open.
