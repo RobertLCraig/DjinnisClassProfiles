@@ -22,7 +22,8 @@ Top Gear report, data only. One cell of it is filled, Feral single target. Cards
 `0007` in `todo/` draw it and none is started.
 **2026-09-21, later: card `0005` is built at 0.14.0 and in `ai-review/`.** Slots on the character
 sheet that differ from the gear plan now glow, red for a wrong item and amber for a wrong enchant
-or gem. Not yet seen in a client. `0004` is in `done/`, and `0003` is back in `todo/` on its
+or gem. Not yet seen in a client. **It passed its adversarial review the same day, with three
+fixes, and is now in `human-review/` for four looks in the game.** `0004` is in `done/`, and `0003` is back in `todo/` on its
 in-combat zero. The four open cards carry `not_for_the_loop:` because Rob builds this addon by hand
 on msiraider.
 _Last updated: 2026-09-21 (card 0005: slot marks on the character sheet, deployed at 0.14.0)_

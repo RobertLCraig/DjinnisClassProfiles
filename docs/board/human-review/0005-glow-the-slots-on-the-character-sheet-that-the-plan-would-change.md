@@ -5,6 +5,31 @@ needs: 0004
 ---
 # 0005 Glow the slots on the character sheet that the plan would change
 
+## What I need from you
+
+**Four looks in the game, on Feral, with the character sheet open.** `/reload` first.
+
+1. Look at the slots. Wrong items glow red. A right item with a wrong enchant or gem glows amber
+   and has the word "enchant" or "gem" on it.
+2. Hover a glowing slot. The tooltip gains a gold "Plan:" line ending in "in your bags", "in the
+   bank" or "not owned".
+3. Click "1 target" in the strip under the stat pane. The button reads "2 targets" and the strip
+   says there is no gear plan for it. Click again to go back.
+4. Hit a training dummy, then swap a weapon and hover a glowing slot. No glow moves and no "Plan:"
+   line shows until combat ends. Then the glows catch up.
+
+**Pass** is all of:
+- all four steps look as written
+- no Lua error, with `/console scriptErrors 1` on
+- slots still click, drag and equip as before
+
+**Fail** is anything else. Say which step and what you saw in `## Comments`, with a screenshot if
+you can, and the card goes back to `todo/`.
+
+**Why it needs you.** The glows and the tooltip only exist in a running game, and no agent can
+run one. The offline checks prove the logic behind steps 1 to 3 and prove no frame. Step 4 has no
+offline check at all.
+
 ## Why
 
 With the character sheet open, nothing tells Rob which of his sixteen slots are wrong. On
@@ -39,7 +64,7 @@ themselves.
 - [x] WHEN the equipped item matches but a socket is empty or holds a different gem, THE ADDON SHALL show an amber glow and "gem". proves: `slot state is gem when a socket differs`
 - [x] WHEN a marked slot is hovered, THE ADDON SHALL add a tooltip line naming the planned item and where it is (bags, bank, not owned). proves: `planned item location resolves to bags bank or missing`
 - [x] WHEN the plan has no entry for the current spec, THE ADDON SHALL mark nothing and say so once in the pane. proves: `no plan for spec marks no slots`
-- [ ] WHEN the player enters combat, THE ADDON SHALL change no frame until combat ends.
+- [ ] WHEN the player enters combat, THE ADDON SHALL change no frame until combat ends. proves: manual
 <!-- AC:END -->
 
 The last criterion has no offline test: it is checked in the client by Rob.
@@ -94,3 +119,52 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
   Three known soft spots. `C_Item.GetItemNumSockets` is assumed to count filled sockets too. The
   bank is asked by item id only, so a lower-track copy reads as "bank". An EMPTY marked slot loses
   its Plan line when the sheet redraws the tooltip.
+- 2026-09-21 Claude, adversarial pass. I did not build this. Three fixes, one commit, `1585109`.
+  **Attacked the acceptance.** Twelve mutations of the guarded logic, each in a temp copy, never in
+  the real file. All five named checks go red when their logic is broken: item compare, bare slot,
+  enchant compare, "the plan wants none", empty socket, wrong gem, bank, bags, the no-plan guard,
+  the ring order, and the link field order.
+  **One check could not fail, fixed.** "same gems in another order" stayed green with one of
+  `sameGems`' two sorts removed, because its planned list was already in order. Both lists are
+  unordered now, and removing either sort fails it.
+  **One path broke the combat criterion, fixed.** `refresh` holds the glows still in combat, but
+  the tooltip "Plan:" line was still added in combat, from marks that can be stale, with a bag scan
+  on every tooltip redraw. `addPlanLine` and the empty-slot `OnEnter` hook now do nothing in combat.
+  The scenario click, the sheet's `OnShow` and `glowFor` all go through `refresh`, which returns
+  first thing in combat, so no frame of this card's is made or changed there. The criterion had no
+  `proves:` and now says `proves: manual`.
+  **Checked against `wow-ui-source`, and held.**
+  - `C_Item.GetItemNumSockets` counts filled sockets too. Blizzard's only caller,
+    `PaperDollItemSocketDisplayMixin:SetItem`, shows a socket for each index up to the count and
+    draws the gem inside it. That soft spot is closed.
+  - `C_Item.GetItemCount` is `(item, bank, uses, reagent bank, account bank)`, which is the order
+    used, and its count is not nilable.
+  - `bags-glow-white` is a real atlas (`ContainerFrame.lua:1702`).
+  - The slot buttons are not protected, and nothing is written onto them: the glows sit in our own
+    table keyed by button, and the hook is `HookScript`. Taint risk is low.
+  - No item, link or bag API here is documented as returning a secret, and `C_Secrets` has no item
+    predicate. The `canRead` guard on the link is extra. Item level and socket count are compared
+    unguarded, which is right for today's documentation.
+  - A missing colour, a missing label, a nil `entry.ilvl` in the format, and `owner:GetID()` on a
+    stranger's frame cannot happen: all three states have a colour, all 15 plan lines carry
+    `ilevel`, and the owner is only used if it is a button we made a glow for.
+  - A bare finger scores zero either way round and marks red. An off hand worn against a planned
+    two-hander is not marked itself; the main hand is, and fixing that empties the off hand.
+  - Events: handler first, one at a time, each checked with `IsEventRegistered`.
+  **Left, none of them blocking.**
+  - If a worn link ever came back secret, `refresh` returns after the scenario button's text has
+    changed, so the button and the glows can disagree until the next event. Not reachable on
+    today's API.
+  - An item level the client has not cached reads as a wrong item, so a slot can flash red on the
+    first open after login. The next refresh clears it.
+  - The bag scan reads an item level for every bag slot on each tooltip redraw. Hover only.
+  **Security.** 1. Weakest: the saved scenario, which is the one value here that comes off disk.
+  It was trusted as read, and anything but `st` or `2t` reached `string.format` as nil and threw
+  on every sheet open. Fixed: `planScenario` falls back to `st`, with three checks, and removing
+  the guard fails one. 2. Unchecked: the only input is the player's own item links and a baked-in table. No chat, no
+  addon message, no other player's data reaches this code. 3. Leaks: nothing. It prints one line
+  if an event is refused and it sends nothing anywhere.
+  **No client.** There is no browser surface, and the UI exists only in a running game that no
+  agent can run. I have not seen a single frame of this. `lua offline-check.lua` passes and the fix
+  is deployed at 0.14.0. The four looks at the top of the card are Rob's, so this goes to
+  `human-review/` and not `done/`.
