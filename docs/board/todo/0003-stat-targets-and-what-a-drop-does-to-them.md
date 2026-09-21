@@ -273,3 +273,22 @@ that rule. A mutation test confirmed they bite: flipping `<` to `>` fails three 
     combat ends. Not yet fixed.
   - **Not seen:** whether the Mythic+ / Raid switch in the pane's header works. Rob raids, so it
     matters which one is showing.
+- 2026-09-21 Claude, adversarial pass by a session that did not build it. **Bounced to `todo/` on
+  one finding, the one the entry above already names.** Checked at 0.13.0: it is still in the code.
+  - **The fault.** `ratingOf` only fills `ratingCache` when something asks for a rating out of
+    combat, and both callers draw `ratingOf(stat) or 0` (the pane's `setStatRow` call and the
+    tooltip's `current`). The pane is built on the first sheet open. So a sheet first opened in
+    combat, or any `/reload` in combat, has a cold cache and every bar reads `0 / <target>`, with
+    every tooltip delta measured from zero. A wrong number that looks like a right one.
+  - **What done looks like.** Fill the cache at `PLAYER_LOGIN` when not in combat and again on
+    `PLAYER_REGEN_ENABLED`. When the cache is still empty, say so on the pane ("ratings hidden in
+    combat") and add no tooltip lines, never a zero. Register those events one at a time and check
+    `IsEventRegistered`, per `C:\Dev\WoWAddons\docs\DECISIONS.md`. Add one offline check that a nil
+    rating does not reach `statVerdict` as 0.
+  - **What held.** `lua offline-check.lua` exits 0. The secret guard is `canaccessvalue`, then
+    `issecretvalue`, which is the right pair. `GetSubTreeInfo` is called with both arguments.
+    Item links and item levels are not unit reads, so no secret reaches a table key.
+  - **Security.** No input from outside the client, no saved data written by this card, nothing to
+    leak. Weakest point is the one above: a silent zero.
+  - **Still owed by a person, after the fix:** the five unticked looks under "What a person has to
+    look at", and the Raid / Mythic+ switch.

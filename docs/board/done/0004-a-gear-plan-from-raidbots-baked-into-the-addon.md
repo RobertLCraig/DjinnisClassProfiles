@@ -52,40 +52,6 @@ This card is the data half only. Cards `0005`, `0006` and `0007` draw it.
 - [x] Per scenario, the loadout name to use and its export string.
 - [x] Offline checks in `offline-check.lua` under the names above.
 
-## Plan
-
-Stand in `C:\Dev\WoWAddons\DjinnisBiS`. Read `docs/HANDOVER.md` there first, then
-`C:\Dev\WoWAddons\docs\DECISIONS.md`.
-
-**Where the data comes from.** A Raidbots report is public JSON at
-`https://www.raidbots.com/reports/<id>/data.json`, no login (checked 2026-09-21 on report
-`ttktB9kVE77x2zkadhVgPn`, 420 KB). The DPS of each Top Gear combo is in `sim.profilesets.results`
-(`name`, `mean`). The gear of a combo is in `simbot.input` as lines of the form
-`profileset."Combo 142"+=head=,id=271528,enchant_id=7991,bonus_id=...`. **Open question to settle
-first:** in that report the winning combo (`Combo 145`) had no `profileset` lines in `simbot.input`,
-only 142 did. Either the winner equals the base profile (the lines above the profilesets) or Smart
-Sim's staging keeps its lines somewhere else. Find out before writing the parser; do not guess.
-
-**Which reports, and who runs it.** The 2026-09-21 session's reports are listed in the output file
-named in `## Why`. **Both routes must work** (Rob, 2026-09-21): usually he asks a session to re-sim,
-and the session runs this generator and deploys; sometimes he runs Top Gear himself and runs the
-generator with no agent. So the generator is a command Rob can type: it takes one or more report
-links or ids, says which spec and scenario each one fills, prints what changed slot by slot, and
-deploys only when asked (`-Deploy`). Its usage goes in `docs/HANDOVER.md` under How to pick up.
-
-**Shape.** Mirror `GENERATED TRINKET TIERS`: a Lua table between begin and end markers, a date stamp
-shown in the UI, and a generator that refuses to write if the markers are missing. Key slots by the
-simc slot names (`head`, `neck`, `shoulder`, `back`, `chest`, `wrist`, `hands`, `waist`, `legs`,
-`feet`, `finger1`, `finger2`, `trinket1`, `trinket2`, `main_hand`, `off_hand`) and map them to
-inventory slot ids in one place.
-
-**Item level.** Bonus ids decide item level. Store the level Raidbots reports for the item if the
-JSON carries it; if it does not, match on item id plus the bonus ids and say so on the card.
-
-**Checks.** `lua offline-check.lua` must exit 0. It proves data and pure logic, no frame.
-
-Deploy with `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without `-WhatIf`.
-
 ## Comments
 
 - 2026-09-21 Claude: card written from Rob's ask in a SecondBrain session: "build in this advice to
@@ -122,3 +88,31 @@ Deploy with `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then wit
   holds every combo. **Two things of its were better and are worth taking when card 0007 draws the
   plan:** a slot list in paper-doll order, and a `levelOf` argument on the link match so it can be
   tested without a client. This card still wants its adversarial pass.
+- **2026-09-21** **Adversarial pass, by a session that did not build it. Passed, with three small
+  fixes made in place in `update-gear-plan.ps1`.** No UI surface: this card draws nothing, so there
+  was no screen to look at.
+  - **Ran:** `lua offline-check.lua` and `.\update-gear-plan.ps1 -SelfTest`, both exit 0. A dry run
+    of the real report against the real `DjinnisBiS.lua` said "Already current".
+  - **Mutated, on a temp copy, and what went red.** Lua: no swapped-pair branch, match ignores the
+    id, gems read from `bonus_id`, enchant left a string, a slot line with no id, an unknown slot
+    name, two slots removed. All seven red. Generator: winner forced to Combo 1, no `simType`
+    refusal, URL form refused, lowest dps wins. All four red.
+  - **Two checks could not fail, and now can.** `generator is idempotent` ran twice on the same
+    day, so deleting the date-stamp strip left it green; the self-test now back-dates the stamp
+    before the second run. Nothing tested the `$KEEP` filter, so `content_tuning` could reach the
+    Lua file; the first check now asserts it does not. Both mutations are red after the fix.
+  - **One latent fault fixed.** `[regex]::Replace($lua, $pattern, {..}, 1)`: on the static overload
+    that `1` is `RegexOptions.IgnoreCase`, not a count of one. Harmless while the markers occur
+    once. Now the instance overload, where it is a count.
+  - **Not proven, and it is the ordinary case.** The only Top Gear fixture compares several talent
+    loadouts, so every combo carries a `talents=` line. A one-loadout report may not put one in the
+    winner's section. If so the generator stops with "no talent string" and writes nothing, which is
+    loud and safe, but it would refuse the report Rob is most likely to run himself. Settle it on
+    the first real one-loadout report (Feral `2t` needs one anyway); the fix would be to fall back
+    to the base actor's `talents=` line. Not built, because the format has not been seen.
+  - **Security. Weakest point:** report text reaching a `.lua` file the game executes. It holds:
+    gear tokens must match `^[a-z_]+=[\d/]+$`, the talent string `[A-Za-z0-9+/]+`, the id is
+    alphanumeric, the item name lands in a line comment with CR and LF removed, and the loadout name
+    loses `\`, `"`, CR and LF before it goes inside quotes. **Unchecked:** the host of a pasted URL,
+    which does not matter because only the id is kept and the fetch always goes to raidbots.com.
+    **Leaks:** nothing; failures name the report id and the exception message only.

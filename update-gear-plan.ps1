@@ -262,7 +262,8 @@ function Update-GearPlan {
     $changes | ForEach-Object { Write-Host $_ }
 
     if ($DryRun) { Write-Host 'DRY RUN - nothing written.' -ForegroundColor Yellow; return $false }
-    [System.IO.File]::WriteAllText($Target, [regex]::Replace($lua, $pattern, { $block }, 1))
+    # the instance overload: on the static one a trailing 1 is RegexOptions.IgnoreCase, not a count
+    [System.IO.File]::WriteAllText($Target, ([regex]$pattern).Replace($lua, { $block }, 1))
     Write-Host "Wrote the gear plan to $Target" -ForegroundColor Green
     return $true
 }
@@ -289,9 +290,14 @@ if ($SelfTest) {
             $lua -match 'chest\s+= "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321"' -and
             # a gem Top Gear added, which the form data does not carry
             $lua -match 'wrist\s+= "id=251135,bonus_id=[\d/]+,gem_id=240908,ilevel=318"' -and
+            # sim plumbing on the winner's neck line, which $KEEP must drop
+            $lua -notmatch 'content_tuning' -and
             $lua -notmatch 'off_hand\s+=' -and $lua -match 'loadout = "DotC Raid ST \*"' -and
             $lua.StartsWith('local x = 1') -and $lua.TrimEnd().EndsWith('return x'))
 
+        # an older date stamp, or a same-day re-run proves nothing about the date being ignored
+        $lua = $lua -replace 'written \d{4}-\d{2}-\d{2}', 'written 2000-01-01'
+        [System.IO.File]::WriteAllText($tmp, $lua)
         $wrote = Update-GearPlan -Report $topGear -Target $tmp -From $fx 6>$null
         Test-That 'generator is idempotent' ((-not $wrote) -and [System.IO.File]::ReadAllText($tmp) -eq $lua)
 
