@@ -822,6 +822,19 @@ local function ratingOf(stat)
 	return ratingCache[stat]
 end
 
+-- All four ratings or nothing. A sheet first opened in combat, or a /reload in
+-- combat, has never had a readable rating, and drawing that as 0 is a wrong
+-- number that looks like a right one. `read` is ratingOf outside the checks.
+local function allRatings(read)
+	local ratings = {}
+	for _, stat in ipairs(STATS) do
+		local value = read(stat)
+		if value == nil then return nil end
+		ratings[stat] = value
+	end
+	return ratings
+end
+
 local SPEC_BY_ID = { [102] = "Balance", [103] = "Feral", [104] = "Guardian", [105] = "Resto" }
 
 local function playerSpec()
@@ -1056,6 +1069,11 @@ local function addStatLines(tooltip, link)
 	local deltas = deltaAgainstEquipped(link)
 	if not deltas then return end
 
+	-- No readable ratings yet, so no lines: a delta measured from zero is worse
+	-- than none.
+	local ratings = allRatings(ratingOf)
+	if not ratings then return end
+
 	local any = false
 	for _, stat in ipairs(STATS) do
 		local delta = deltas[stat]
@@ -1065,8 +1083,7 @@ local function addStatLines(tooltip, link)
 					.. " targets, versus what it replaces:|r")
 				any = true
 			end
-			local current = ratingOf(stat) or 0
-			local after = current + delta
+			local after = ratings[stat] + delta
 			local verdict = statVerdict(after, targets[stat])
 			tooltip:AddDoubleLine(
 				("  %s %s%+d|r"):format(STAT_LABEL[stat],
@@ -2291,6 +2308,17 @@ local function buildStatPane(parent, opts)
 			self:Resize()
 			return
 		end
+
+		-- Say it rather than draw four bars at zero. PLAYER_REGEN_ENABLED fills
+		-- the cache and runs this again.
+		local ratings = allRatings(ratingOf)
+		if not ratings then
+			self.heading:SetText(GREY .. "Ratings are hidden in combat.|r")
+			for _, row in ipairs(self.bars) do row:Hide() end
+			self.footer:SetText(GREY .. "The bars come back when combat ends.|r")
+			self:Resize()
+			return
+		end
 		for _, row in ipairs(self.bars) do row:Show() end
 
 		local deltas, replaced
@@ -2301,7 +2329,7 @@ local function buildStatPane(parent, opts)
 			GREY, hero and hero:gsub("-", " ") or "all hero talents"))
 
 		for i, stat in ipairs(STATS) do
-			setStatRow(self.bars[i], stat, ratingOf(stat) or 0, targets[stat],
+			setStatRow(self.bars[i], stat, ratings[stat], targets[stat],
 				deltas and deltas[stat])
 		end
 
@@ -2932,6 +2960,27 @@ local function armCharacterPane()
 	end)
 end
 
+-- The rating cache is filled here, not by whoever first asks: the pane is built
+-- on the first sheet open, and if that is in combat nobody has ever asked.
+-- Handler first, then the event, then verified, per DECISIONS.md.
+local function armRatingCache()
+	local function warm()
+		if InCombatLockdown() then return end
+		for _, stat in ipairs(STATS) do ratingOf(stat) end
+		for _, pane in ipairs(statPanes) do
+			if pane:IsShown() then pane:Update() end
+		end
+	end
+	local watcher = CreateFrame("Frame")
+	watcher:SetScript("OnEvent", warm)
+	watcher:RegisterEvent("PLAYER_REGEN_ENABLED")
+	if not watcher:IsEventRegistered("PLAYER_REGEN_ENABLED") then
+		print(GOLD .. "Djinni's BiS|r " .. GREY
+			.. "could not register PLAYER_REGEN_ENABLED, so stat bars first opened in combat stay hidden until the sheet is reopened.|r")
+	end
+	warm()
+end
+
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 -- Blizzard's own typo, RECIEVED. The journal streams loot in after the request,
@@ -2942,6 +2991,7 @@ loader:SetScript("OnEvent", function(_, event)
 		buildBroker()
 		pcall(armCharacterPane)
 		pcall(armBagMarks)
+		pcall(armRatingCache)
 	else
 		harvested = false
 	end
@@ -3313,6 +3363,15 @@ local function selfTest()
 	for slot, slotID in pairs(PLAN_SLOT_INVENTORY) do
 		check("every plan slot has a button, " .. slot, SLOT_BUTTONS[slotID] ~= nil, true)
 	end
+
+	-- Ratings nobody has been able to read yet must never be drawn as 0.
+	local nilTest = "a nil rating does not reach statVerdict as 0"
+	local partial = { crit = 900, haste = 1200, mastery = 1000 }
+	check(nilTest .. ", one stat unread", allRatings(function(stat) return partial[stat] end), nil)
+	check(nilTest .. ", none read", allRatings(function() return nil end), nil)
+	local whole = allRatings(function(stat) return partial[stat] or 300 end)
+	check(nilTest .. ", all read", whole and whole.versatility, 300)
+	check(nilTest .. ", a real zero is kept", (allRatings(function() return 0 end) or {}).crit, 0)
 
 	-- Bag marks. The plan wants a cloak and two rings; ringA is worn, the cloak
 	-- slot holds something else and one finger is bare.

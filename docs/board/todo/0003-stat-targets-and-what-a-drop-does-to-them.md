@@ -295,3 +295,14 @@ that rule. A mutation test confirmed they bite: flipping `<` to `>` fails three 
     leak. Weakest point is the one above: a silent zero.
   - **Still owed by a person, after the fix:** the five unticked looks under "What a person has to
     look at", and the Raid / Mythic+ switch.
+- 2026-09-21 Claude, by hand on msiraider: the in-combat zero is fixed at 0.15.1 and deployed, to
+  the shape the entry above asked for. Not seen in a client.
+  - The rating cache is filled at `PLAYER_LOGIN` and again on `PLAYER_REGEN_ENABLED`, both out of
+    combat only. The event is registered after its handler and checked with `IsEventRegistered`.
+  - `allRatings` gives all four ratings or nothing. With nothing, the pane says "Ratings are
+    hidden in combat", hides its bars, and the tooltip adds no stat lines. No path draws `or 0`.
+  - After combat the same handler redraws every open pane, so the bars come back by themselves.
+  - Offline check `a nil rating does not reach statVerdict as 0`, four cases. Turning the nil into
+    a 0 inside `allRatings` makes three of them fail.
+  - To look at: `/reload` while hitting a dummy, then open the sheet. The pane must say ratings are
+    hidden, with no bars. Stop hitting. The bars must appear with real numbers, without a reopen.
