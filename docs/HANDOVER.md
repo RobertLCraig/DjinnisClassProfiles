@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.13.0, `Interface: 120100`. No remote.
+**Status:** v0.14.0, `Interface: 120100`. No remote.
 **Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
 everything is under `[Unreleased]`.
 **Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in
@@ -20,7 +20,12 @@ weapon was compared against an empty off-hand while a two-hander was equipped.
 **2026-09-21: card `0004` is built and in `ai-review/`**, a gear plan table baked in from a Raidbots
 Top Gear report, data only. One cell of it is filled, Feral single target. Cards `0005`, `0006` and
 `0007` in `todo/` draw it and none is started.
-_Last updated: 2026-09-21 (card 0004: the gear plan table and its generator, deployed at 0.13.0)_
+**2026-09-21, later: card `0005` is built at 0.14.0 and in `ai-review/`.** Slots on the character
+sheet that differ from the gear plan now glow, red for a wrong item and amber for a wrong enchant
+or gem. Not yet seen in a client. `0004` is in `done/`, and `0003` is back in `todo/` on its
+in-combat zero. The four open cards carry `not_for_the_loop:` because Rob builds this addon by hand
+on msiraider.
+_Last updated: 2026-09-21 (card 0005: slot marks on the character sheet, deployed at 0.14.0)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -234,6 +239,10 @@ for and does not need Rob.
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
+- **2026-09-21, second session** Card `0005`. Slot marks, a scenario button and a plan strip under
+  the stat pane, deployed at v0.14.0. Worth carrying: Chonky moves Blizzard's slot buttons rather
+  than drawing its own, and an item link carries enchant and gem item ids in fields 2 to 6, so
+  neither needs an API call.
 - **2026-09-21** Card `0004`. The gear plan table, `update-gear-plan.ps1` and its fixtures, deployed
   at v0.13.0. Worth carrying: a Raidbots `data.json` does not hold the winning combo's gear, the
   report's `input.txt` does. And in PowerShell, `[ordered]@{ 1 = 'st' }[1]` indexes by position;

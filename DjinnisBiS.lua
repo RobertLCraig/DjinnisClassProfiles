@@ -1038,6 +1038,7 @@ local VERDICT_WORD   = { at = "on target",  above = "over",       below = "under
 -- can call it: the hook is the one place that already sees every item the
 -- player looks at, wherever they look at it.
 local setPreview
+local addPlanLine  -- set by the slot marks, once the character pane is built
 
 -- The same answer as the pane, in words, on the item itself. One line per stat
 -- the item actually carries: a line reading "Crit 0 -> 0" is noise, and a piece
@@ -1103,6 +1104,9 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
 	-- the picture; a loot roll does not always have one open.
 	if link then setPreview(link) end
 	addStatLines(tooltip, link)
+	-- Here rather than in a slot button's OnEnter, because the sheet redraws a
+	-- slot's tooltip several times a second and this runs on every redraw.
+	if addPlanLine then addPlanLine(tooltip, tooltip:GetOwner()) end
 end)
 
 -- Clearing on hide, not on the next hover, so a pane does not sit there showing
@@ -1291,6 +1295,100 @@ local function gearPlanFor(spec, scenario)
 		report = cell.report, simmed = cell.simmed, dps = cell.dps,
 		loadout = cell.loadout, talents = cell.talents, slots = cell.parsed,
 	}
+end
+
+-- Slot marks ------------------------------------------------------------------
+--
+-- What is worn against what the plan wants, one word per slot. Everything down
+-- to slotStates is pure, so /bis test covers it outside the game.
+
+-- The field order is Blizzard's own, written out in Blizzard_Reports.lua:
+-- item:itemID:enchantID:gemID1:gemID2:gemID3:gemID4:... A gem field holds the
+-- gem's ITEM id, which is what simc's gem_id holds too.
+local function wornFromLink(link)
+	if not link then return nil end
+	local id, enchant, g1, g2, g3, g4 = link:match("item:(%d+):(%d*):(%d*):(%d*):(%d*):(%d*)")
+	if not id then return nil end
+	local gems = {}
+	for _, gem in ipairs({ g1, g2, g3, g4 }) do
+		if gem ~= "" then gems[#gems + 1] = tonumber(gem) end
+	end
+	return { link = link, id = tonumber(id), enchant = tonumber(enchant), gems = gems }
+end
+
+local function sameGems(planned, worn)
+	if #planned ~= #worn then return false end
+	local a, b = {}, {}
+	for i = 1, #planned do a[i], b[i] = planned[i], worn[i] end
+	table.sort(a)
+	table.sort(b)
+	for i = 1, #a do
+		if a[i] ~= b[i] then return false end
+	end
+	return true
+end
+
+-- `worn` is wornFromLink's table plus `ilvl` and `sockets`, or nil for a bare
+-- slot. A slot the plan leaves empty is "ok": the only one is the off hand
+-- under a two-hander, and nothing can be worn there anyway.
+local function slotState(entry, worn)
+	if not entry then return "ok" end
+	if not worn or not planMatches(entry, worn.id, worn.ilvl) then return "change" end
+	if entry.enchant and worn.enchant ~= entry.enchant then return "enchant" end
+	local gems = worn.gems or {}
+	if (worn.sockets or 0) > #gems then return "gem" end
+	-- A gem the plan never listed is no worse than none, so only a planned gem
+	-- can be the wrong one.
+	if #entry.gems > 0 and not sameGems(entry.gems, gems) then return "gem" end
+	return "ok"
+end
+
+-- Which planned ring goes with which finger: whichever way round matches more
+-- of what is worn, so a swapped pair is not two red slots.
+local function planPairOrder(planA, planB, wornA, wornB)
+	local function m(entry, worn)
+		return planMatches(entry, worn and worn.id, worn and worn.ilvl) and 1 or 0
+	end
+	if m(planA, wornB) + m(planB, wornA) > m(planA, wornA) + m(planB, wornB) then
+		return planB, planA
+	end
+	return planA, planB
+end
+
+-- { [inventory slot id] = { state =, entry = } } for every slot that is not
+-- "ok". `wornBySlot` is keyed by the plan's slot names. No plan, no marks.
+local function slotStates(plan, wornBySlot)
+	local marks = {}
+	if not plan then return marks end
+	local entryFor = {}
+	for slot, entry in pairs(plan.slots) do entryFor[slot] = entry end
+	for _, pair in ipairs(PLAN_PAIRS) do
+		entryFor[pair[1]], entryFor[pair[2]] = planPairOrder(
+			plan.slots[pair[1]], plan.slots[pair[2]], wornBySlot[pair[1]], wornBySlot[pair[2]])
+	end
+	for slot, entry in pairs(entryFor) do
+		local state = slotState(entry, wornBySlot[slot])
+		if state ~= "ok" then
+			marks[PLAN_SLOT_INVENTORY[slot]] = { state = state, entry = entry }
+		end
+	end
+	return marks
+end
+
+-- ponytail: the bank is asked by item id alone, so a lower-track copy in the
+-- bank reads as "bank". Scan the bank by link if that ever misleads.
+local function planLocation(inBags, bankCount)
+	if inBags then return "bags" end
+	if (bankCount or 0) > 0 then return "bank" end
+	return "missing"
+end
+
+local PLAN_SCENARIOS = { "st", "2t" }
+local SCENARIO_LABEL = { st = "1 target", ["2t"] = "2 targets" }
+
+local function planScenario(spec)
+	local saved = db().planScenario
+	return saved and saved[spec] or "st"
 end
 
 -- rebuilt on every render, so the ticks follow you changing gear
@@ -2334,6 +2432,199 @@ local function widestSheetFrame()
 	return widest, right
 end
 
+-- Slot marks on the character sheet -------------------------------------------
+--
+-- Blizzard's own buttons, by inventory slot id. Chonky Character Sheet moves
+-- these same buttons rather than drawing its own (read in its Modules/MOP.lua,
+-- 2026-09-21), so a glow anchored to the button lands right under either sheet.
+local SLOT_BUTTONS = {
+	[1] = "CharacterHeadSlot", [2] = "CharacterNeckSlot", [3] = "CharacterShoulderSlot",
+	[5] = "CharacterChestSlot", [6] = "CharacterWaistSlot", [7] = "CharacterLegsSlot",
+	[8] = "CharacterFeetSlot", [9] = "CharacterWristSlot", [10] = "CharacterHandsSlot",
+	[11] = "CharacterFinger0Slot", [12] = "CharacterFinger1Slot",
+	[13] = "CharacterTrinket0Slot", [14] = "CharacterTrinket1Slot",
+	[15] = "CharacterBackSlot", [16] = "CharacterMainHandSlot",
+	[17] = "CharacterSecondaryHandSlot",
+}
+local MARK_COLOUR = { change = { 1, 0.15, 0.15 }, enchant = { 1, 0.7, 0 }, gem = { 1, 0.7, 0 } }
+local MARK_LABEL = { change = "", enchant = "enchant", gem = "gem" }
+local LOCATION_WORD = { bags = "in your bags", bank = "in the bank", missing = "not owned" }
+local PLAN_STRIP_H = 44
+
+local function planItemInBags(entry)
+	if not (C_Container and C_Container.GetContainerItemLink) then return false end
+	for bag = 0, NUM_TOTAL_EQUIPPED_BAG_SLOTS or 5 do
+		for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
+			if planMatchesLink(entry, C_Container.GetContainerItemLink(bag, slot)) then return true end
+		end
+	end
+	return false
+end
+
+local function itemName(id)
+	return id and C_Item.GetItemInfo(id) or ("item " .. tostring(id))
+end
+
+-- One line saying what the plan wants in this slot and where that is.
+local function planLineFor(mark)
+	local entry = mark.entry
+	if mark.state == "enchant" then
+		return ("Plan: wants enchant %d here"):format(entry.enchant)
+	elseif mark.state == "gem" then
+		local names = {}
+		for i, gem in ipairs(entry.gems) do names[i] = itemName(gem) end
+		return #names > 0 and ("Plan: wants " .. table.concat(names, ", "))
+			or "Plan: a socket is empty"
+	end
+	local inBank = C_Item.GetItemCount(entry.id, true, false, true, true) - C_Item.GetItemCount(entry.id)
+	return ("Plan: %s (%d), %s"):format(itemName(entry.id), entry.ilvl,
+		LOCATION_WORD[planLocation(planItemInBags(entry), inBank)])
+end
+
+-- Returns the refresh function. `holder` is the character pane's frame and
+-- `below` is what the strip sits under.
+local function buildSlotMarks(holder, below)
+	local strip = CreateFrame("Frame", nil, holder, "BackdropTemplate")
+	strip:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -4)
+	strip:SetPoint("TOPRIGHT", below, "BOTTOMRIGHT", 0, -4)
+	strip:SetHeight(PLAN_STRIP_H - 4)
+	strip:SetBackdrop(PANE_BACKDROP)
+	strip:SetBackdropColor(0.05, 0.05, 0.05, 0.85)
+	strip:SetBackdropBorderColor(paneBorderColour())
+
+	strip.scenario = CreateFrame("Button", nil, strip, "UIPanelButtonTemplate")
+	strip.scenario:SetSize(80, 18)
+	strip.scenario:SetPoint("RIGHT", -8, 0)
+
+	strip.text = strip:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+	strip.text:SetPoint("LEFT", 12, 0)
+	strip.text:SetPoint("RIGHT", strip.scenario, "LEFT", -6, 0)
+	strip.text:SetJustifyH("LEFT")
+
+	local glows, marks, dirty = {}, {}, false
+
+	local function glowFor(button)
+		if glows[button] then return glows[button] end
+		-- A frame of our own on top of the button, not a texture on Blizzard's:
+		-- it takes no mouse, so the slot underneath clicks and drags as before.
+		local glow = CreateFrame("Frame", nil, button)
+		glow:SetAllPoints()
+		glow.ring = glow:CreateTexture(nil, "OVERLAY")
+		glow.ring:SetAllPoints()
+		glow.ring:SetAtlas("bags-glow-white")
+		glow.ring:SetBlendMode("ADD")
+		glow.label = glow:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+		glow.label:SetPoint("BOTTOM", 0, 2)
+		glows[button] = glow
+
+		-- An empty slot shows no item tooltip, so the tooltip post-call never
+		-- runs for it and the line is added here instead.
+		-- ponytail: the sheet redraws that tooltip a few times a second and the
+		-- line goes with it. Add it on the redraw too if an empty slot matters.
+		button:HookScript("OnEnter", function(self)
+			local mark = marks[self:GetID()]
+			if mark and not GetInventoryItemLink("player", self:GetID()) then
+				GameTooltip:AddLine(GOLD .. planLineFor(mark) .. "|r")
+				GameTooltip:Show()
+			end
+		end)
+		return glow
+	end
+
+	local function refresh()
+		-- Nothing on screen changes in combat. The marks that were up stay up,
+		-- and PLAYER_REGEN_ENABLED runs this again.
+		if InCombatLockdown() then dirty = true return end
+		dirty = false
+
+		local spec = playerSpec()
+		local scenario = spec and planScenario(spec)
+		local plan = spec and gearPlanFor(spec, scenario)
+		strip.scenario:SetText(SCENARIO_LABEL[scenario or "st"])
+
+		local worn = {}
+		if plan then
+			for slot, slotID in pairs(PLAN_SLOT_INVENTORY) do
+				local link = GetInventoryItemLink("player", slotID)
+				-- A secret link cannot be matched, and reading it as a bare slot
+				-- would paint the whole sheet red. Leave everything as it was.
+				if link and not canRead(link) then return end
+				local item = wornFromLink(link)
+				if item then
+					item.ilvl = itemLevelOf(link)
+					local ok, sockets = pcall(C_Item.GetItemNumSockets, link)
+					item.sockets = ok and sockets or 0
+				end
+				worn[slot] = item
+			end
+		end
+
+		marks = slotStates(plan, worn)
+		local count = 0
+		for slotID, name in pairs(SLOT_BUTTONS) do
+			local button, mark = _G[name], marks[slotID]
+			if button and mark then
+				count = count + 1
+				local glow = glowFor(button)
+				glow.ring:SetVertexColor(unpack(MARK_COLOUR[mark.state]))
+				glow.label:SetText(MARK_LABEL[mark.state])
+				glow:Show()
+			elseif button and glows[button] then
+				glows[button]:Hide()
+			end
+		end
+
+		if not spec then
+			strip.text:SetText(GREY .. "Gear plan: no spec.|r")
+		elseif not plan then
+			strip.text:SetText(("%sNo gear plan for %s, %s.|r"):format(GREY, spec, SCENARIO_LABEL[scenario]))
+		elseif count == 0 then
+			strip.text:SetText(("%sGear plan:|r %severy slot matches|r"):format(GOLD, GREEN))
+		else
+			strip.text:SetText(("%sGear plan:|r %s%d slot%s to fix|r"):format(
+				GOLD, WHITE, count, count == 1 and "" or "s"))
+		end
+	end
+
+	strip.scenario:SetScript("OnClick", function()
+		local spec = playerSpec()
+		if not spec then return end
+		local saved = db()
+		saved.planScenario = saved.planScenario or {}
+		saved.planScenario[spec] = (planScenario(spec) == PLAN_SCENARIOS[1])
+			and PLAN_SCENARIOS[2] or PLAN_SCENARIOS[1]
+		refresh()
+	end)
+
+	addPlanLine = function(tooltip, owner)
+		if not owner or not glows[owner] then return end
+		local mark = marks[owner:GetID()]
+		if mark then tooltip:AddLine(GOLD .. planLineFor(mark) .. "|r") end
+	end
+
+	-- Handler first, then one event at a time, each verified: see the watcher
+	-- below and C:\Dev\WoWAddons\docs\DECISIONS.md.
+	local watcher = CreateFrame("Frame")
+	watcher:SetScript("OnEvent", function(_, event)
+		if event == "PLAYER_REGEN_ENABLED" and not dirty then return end
+		if CharacterFrame:IsShown() or dirty then refresh() end
+	end)
+	for _, event in ipairs({
+		"PLAYER_EQUIPMENT_CHANGED",
+		"PLAYER_SPECIALIZATION_CHANGED",
+		"PLAYER_REGEN_ENABLED",
+	}) do
+		watcher:RegisterEvent(event)
+		if not watcher:IsEventRegistered(event) then
+			print(GOLD .. "Djinni's BiS|r " .. GREY
+				.. "could not register " .. event
+				.. ", so the slot marks will not refresh by themselves. Reopen the sheet to update.|r")
+		end
+	end
+
+	return refresh
+end
+
 local function buildCharacterPane()
 	if not CharacterFrame then return end
 
@@ -2344,11 +2635,12 @@ local function buildCharacterPane()
 	local pane = buildStatPane(holder, {
 		spec = playerSpec,
 		framed = true,
-		onResize = function(self) holder:SetHeight(self:GetHeight()) end,
+		onResize = function(self) holder:SetHeight(self:GetHeight() + PLAN_STRIP_H) end,
 	})
+	local refreshMarks = buildSlotMarks(holder, pane)
 	pane:SetPoint("TOPLEFT")
 	pane:SetPoint("TOPRIGHT")
-	holder:SetHeight(pane:GetHeight())
+	holder:SetHeight(pane:GetHeight() + PLAN_STRIP_H)
 
 	-- Re-anchored on every open, because the sheet is not always the same width:
 	-- panels can be collapsed, and a sheet that was narrow last time it was open
@@ -2380,6 +2672,7 @@ local function buildCharacterPane()
 		place()
 		holder:Show()
 		pane:Update()
+		refreshMarks()
 		-- And again once this frame's OnShow handlers have all run. A sheet
 		-- replacement lays its panels out in its own OnShow, and hook order is
 		-- not ours to assume, so the first measurement can be of a sheet that
@@ -2411,6 +2704,7 @@ local function buildCharacterPane()
 		place()
 		holder:Show()
 		pane:Update()
+		refreshMarks()
 	else
 		holder:Hide()
 	end
@@ -2776,6 +3070,64 @@ local function selfTest()
 	for _, pair in ipairs(PLAN_PAIRS) do
 		check(pairTest .. ", " .. pair[1] .. " is a slot", PLAN_SLOT_INVENTORY[pair[1]] ~= nil, true)
 		check(pairTest .. ", " .. pair[2] .. " is a slot", PLAN_SLOT_INVENTORY[pair[2]] ~= nil, true)
+	end
+
+	-- Slot marks. `full` is a plan entry with everything on it, and each check
+	-- breaks one thing about what is worn.
+	local full = parsePlanLine("id=251093,enchant_id=7967,gem_id=240894,bonus_id=1,ilevel=276")
+	local function wornAs(link, ilvl, sockets)
+		local worn = wornFromLink(link)
+		worn.ilvl, worn.sockets = ilvl, sockets
+		return worn
+	end
+	local good = "|Hitem:251093:7967:240894::::::80:103|h[Omission of Light]|h"
+	check("worn link gives id, enchant and gems, id", wornFromLink(good).id, 251093)
+	check("worn link gives id, enchant and gems, enchant", wornFromLink(good).enchant, 7967)
+	check("worn link gives id, enchant and gems, gem", wornFromLink(good).gems[1], 240894)
+	check("worn link gives id, enchant and gems, gem count", #wornFromLink(good).gems, 1)
+	check("worn link gives id, enchant and gems, no link", wornFromLink(nil), nil)
+
+	check("slot state is ok when everything matches", slotState(full, wornAs(good, 276, 1)), "ok")
+	check("slot state is ok when the plan leaves the slot empty", slotState(nil, nil), "ok")
+	local changeTest = "slot state is change when item differs from plan"
+	check(changeTest .. ", other item",
+		slotState(full, wornAs("|Hitem:251194:7967:240894::::|h[x]|h", 276, 1)), "change")
+	check(changeTest .. ", lower track", slotState(full, wornAs(good, 263, 1)), "change")
+	check(changeTest .. ", bare slot", slotState(full, nil), "change")
+	local enchantTest = "slot state is enchant when enchant differs"
+	check(enchantTest .. ", none",
+		slotState(full, wornAs("|Hitem:251093::240894::::|h[x]|h", 276, 1)), "enchant")
+	check(enchantTest .. ", another",
+		slotState(full, wornAs("|Hitem:251093:7966:240894::::|h[x]|h", 276, 1)), "enchant")
+	check(enchantTest .. ", the plan wants none",
+		slotState(parsePlanLine("id=251093,ilevel=276"), wornAs("|Hitem:251093:7966:::::|h[x]|h", 276, 0)), "ok")
+	local gemTest = "slot state is gem when a socket differs"
+	check(gemTest .. ", empty socket",
+		slotState(full, wornAs("|Hitem:251093:7967:::::|h[x]|h", 276, 1)), "gem")
+	check(gemTest .. ", another gem",
+		slotState(full, wornAs("|Hitem:251093:7967:240908::::|h[x]|h", 276, 1)), "gem")
+	check(gemTest .. ", an unplanned empty socket",
+		slotState(parsePlanLine("id=251093,ilevel=276"), wornAs("|Hitem:251093::::::|h[x]|h", 276, 1)), "gem")
+	check(gemTest .. ", same gems in another order", sameGems({ 1, 2 }, { 2, 1 }), true)
+
+	local locationTest = "planned item location resolves to bags bank or missing"
+	check(locationTest .. ", bags", planLocation(true, 0), "bags")
+	check(locationTest .. ", bags beats bank", planLocation(true, 1), "bags")
+	check(locationTest .. ", bank", planLocation(false, 1), "bank")
+	check(locationTest .. ", missing", planLocation(false, 0), "missing")
+	check(locationTest .. ", count not known", planLocation(false, nil), "missing")
+
+	check("no plan for spec marks no slots", next(slotStates(nil, {})), nil)
+	local twoRings = { slots = { finger1 = ringA, finger2 = ringB } }
+	check("slot states, a swapped pair marks nothing",
+		next(slotStates(twoRings, { finger1 = wornB, finger2 = wornA })), nil)
+	local oneWrong = slotStates(twoRings, { finger1 = { id = 3, ilvl = 1, gems = {} }, finger2 = wornA })
+	check("slot states, a swapped pair with one wrong marks the wrong finger",
+		oneWrong[11] and oneWrong[11].state, "change")
+	check("slot states, and wants the other ring there", oneWrong[11] and oneWrong[11].entry, ringB)
+	check("slot states, and leaves the right finger alone", oneWrong[12], nil)
+	for slot, slotID in pairs(PLAN_SLOT_INVENTORY) do
+		check("every plan slot has a button, " .. slot, SLOT_BUTTONS[slotID] ~= nil, true)
 	end
 
 	-- a saved target must survive the round trip and show its item level
