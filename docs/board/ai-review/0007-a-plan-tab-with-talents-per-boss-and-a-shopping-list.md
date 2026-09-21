@@ -38,18 +38,18 @@ did not exist in the game until card `0004`.
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] WHEN the Plan tab is open, THE ADDON SHALL list each boss of the current raid with the planned loadout name and scenario for the current spec. proves: `plan tab lists a loadout per boss for the spec`
-- [ ] WHEN the active loadout's name differs from the planned one for the boss selected in the tab, THE ADDON SHALL show the planned name in red. proves: `loadout mismatch is flagged by name`
-- [ ] WHEN any planned slot lacks its enchant or gem, THE ADDON SHALL list each missing enchant and gem once, by name, with a count. proves: `shopping list counts each missing enchant and gem once`
-- [ ] WHEN nothing is missing, THE ADDON SHALL say "Nothing to buy". proves: `empty shopping list says nothing to buy`
+- [x] WHEN the Plan tab is open, THE ADDON SHALL list each boss of the current raid with the planned loadout name and scenario for the current spec. proves: `plan tab lists a loadout per boss for the spec`
+- [x] WHEN the active loadout's name differs from the planned one for the boss selected in the tab, THE ADDON SHALL show the planned name in red. proves: `loadout mismatch is flagged by name`
+- [x] WHEN any planned slot lacks its enchant or gem, THE ADDON SHALL list each missing enchant and gem once, by name, with a count. proves: `shopping list counts each missing enchant and gem once`
+- [x] WHEN nothing is missing, THE ADDON SHALL say "Nothing to buy". proves: `empty shopping list says nothing to buy`
 <!-- AC:END -->
 
 ## Tasks
 
-- [ ] Boss-to-scenario table per spec in the generated plan block (from Dreamgrove's per-boss builds).
-- [ ] Active loadout name via `C_ClassTalents` read-only calls.
-- [ ] Tab in the existing `/bis` window beside Stats.
-- [ ] Offline checks under the names above.
+- [x] Boss-to-scenario table per spec in the generated plan block (from Dreamgrove's per-boss builds).
+- [x] Active loadout name via `C_ClassTalents` read-only calls.
+- [x] Tab in the existing `/bis` window beside Stats.
+- [x] Offline checks under the names above.
 
 ## Plan
 
@@ -70,3 +70,24 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
 - 2026-09-21 Claude: card written from the same session as `0004`. The talent and enchant advice it
   carries is in `C:\Users\r\OneDrive\Desktop\SecondBrain\outputs\2026-09-21 Raid DPS as Feral or
   Balance.md`. Nothing is built yet.
+- 2026-09-21 Claude: built at v0.16.0 (`bc3b651`) and deployed. `lua offline-check.lua` passes, and
+  a copy broken on purpose in four places failed all four named checks, so the checks can fail.
+  **No frame has been seen in a client.** Four things differ from the plan above:
+  1. **The boss table is outside the generated block**, straight after its END marker, and is kept
+     by hand. `update-gear-plan.ps1` rewrites the block from Raidbots reports and a boss list is
+     not in a report, so inside the block it would be deleted on the next run.
+  2. **The loadout names are the ones DjinnisDreamgrove imported on 2026-09-02**, because those are
+     what exist in the game to click. The hero tree per boss follows Dreamgrove's 2026-09-18 page.
+     The newer per-boss builds have no loadout yet; when that addon is refreshed, change the names
+     in `PlanTab.BOSSES`.
+  3. **Enchant names are a hand table**, `PlanTab.ENCHANT_NAME`. The game has no call from an
+     enchant id to a name (checked in `wow-ui-source`). Names came from
+     `raidbots.com/static/data/live/enchantments.json`. An id not in the table prints as
+     `enchant 1234`.
+  4. **Rob's screenshots mid-build: "7 slots to fix" did not say which slots or what to do.** So the
+     tab also lists each slot to change, and the strip under the character sheet now says "Click
+     for the list" and opens this tab. That touches `0005`'s strip, text and one click only.
+  A planned piece that is not worn is left out of the shopping list, and the tab says so, because
+  the bag copy may already carry its enchant.
+  **Trap for the next card:** `DjinnisBiS.lua` is at Lua's limit of 200 top-level locals. The first
+  build would not load. Everything new went into one `PlanTab` table. Add to a table, not a local.
