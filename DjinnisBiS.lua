@@ -1509,14 +1509,22 @@ local function buildBagGlows()
 		return
 	end
 
-	-- Blizzard's bags, combined or separate: both run UpdateItems over the same
-	-- enumerator, so one pass over every container frame covers either.
-	if not ContainerFrameUtil_EnumerateContainerFrames then return end
+	-- Blizzard's bags, combined or separate: whichever is in use is the one
+	-- that is shown, so one pass over all of them covers either. The frames are
+	-- read off their globals and NOT through
+	-- ContainerFrameUtil_EnumerateContainerFrames: that builds its list on first
+	-- use, and built from here the list is tainted for every secure caller after.
+	-- The glows live in a table here, never in a field on Blizzard's button, for
+	-- the same reason.
+	local separate = ContainerFrameContainer and ContainerFrameContainer.ContainerFrames
+	if not (ContainerFrameCombinedBags or separate) then return end
 	local glows = {}
 	refreshBagGlows = function()
 		if InCombatLockdown() then return end
-		for _, frame in ContainerFrameUtil_EnumerateContainerFrames() do
-			if frame:IsShown() then
+		local frames = { ContainerFrameCombinedBags }
+		for _, frame in ipairs(separate or {}) do frames[#frames + 1] = frame end
+		for _, frame in ipairs(frames) do
+			if frame:IsShown() and frame.EnumerateValidItems then
 				for _, button in frame:EnumerateValidItems() do
 					local link = C_Container.GetContainerItemLink(button:GetBagID(), button:GetID())
 					local show = wantedSlotForLink(link) ~= nil
