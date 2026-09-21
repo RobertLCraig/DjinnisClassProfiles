@@ -2310,12 +2310,14 @@ local function buildStatPane(parent, opts)
 		end
 
 		-- Say it rather than draw four bars at zero. PLAYER_REGEN_ENABLED fills
-		-- the cache and runs this again.
+		-- the cache and runs this again. The wording does not say "in combat":
+		-- Blizzard documents the restriction as "when access to unit stats would
+		-- generally produce secret values", which is not promised to be combat only.
 		local ratings = allRatings(ratingOf)
 		if not ratings then
-			self.heading:SetText(GREY .. "Ratings are hidden in combat.|r")
+			self.heading:SetText(GREY .. "Ratings are hidden right now.|r")
 			for _, row in ipairs(self.bars) do row:Hide() end
-			self.footer:SetText(GREY .. "The bars come back when combat ends.|r")
+			self.footer:SetText(GREY .. "The bars come back when combat or the encounter ends.|r")
 			self:Resize()
 			return
 		end
@@ -2919,7 +2921,10 @@ local function buildCharacterPane()
 	-- that never arrives. See C:\Dev\WoWAddons\docs\DECISIONS.md.
 	local watcher = CreateFrame("Frame")
 	watcher:SetScript("OnEvent", function()
-		wipe(ratingCache)
+		-- Never in combat. COMBAT_RATING_UPDATE fires on every proc, ratingOf
+		-- cannot refill until combat ends, and an emptied cache blanks the pane
+		-- and every tooltip for the whole fight with a good reading thrown away.
+		if not InCombatLockdown() then wipe(ratingCache) end
 		for _, each in ipairs(statPanes) do
 			if each:IsShown() then each:Update() end
 		end
