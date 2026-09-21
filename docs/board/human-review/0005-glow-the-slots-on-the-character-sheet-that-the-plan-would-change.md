@@ -168,3 +168,4 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
   agent can run. I have not seen a single frame of this. `lua offline-check.lua` passes and the fix
   is deployed at 0.14.0. The four looks at the top of the card are Rob's, so this goes to
   `human-review/` and not `done/`.
+- 2026-09-21 Claude, from Rob's first screenshots at 0.15.1 (`![sheet](../attachments/0005-2026-09-21-1.png)`): the strip said "7 slots to fix" and Rob said it was unclear what to do. Fixed under card `0007`: the strip now says "Click for the list" and opens the Plan tab, which names each slot. **Still open here:** in the screenshot the "gem" label shows on the wrist, but no red glow is easy to see on the six slots that hold a wrong item. Chonky's item bars may sit over the glow. Rob to say whether he can see red rings on neck, back, waist, feet, one ring and one trinket.
