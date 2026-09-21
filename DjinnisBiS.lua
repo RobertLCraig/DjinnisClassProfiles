@@ -2545,7 +2545,21 @@ end
 
 -- What the plan strip under the character sheet opens: the list behind its
 -- "N slots to fix".
-function PlanTab.open()
+-- `scenario` is the one the strip is counting. The tab opens on a boss of that
+-- scenario, or "7 slots to fix" on 2 targets would open a 1 target list.
+function PlanTab.bossFor(bosses, pickedBoss, scenario)
+	local first
+	for _, row in ipairs(bosses or {}) do
+		if row.scenario == scenario then
+			if row.boss == pickedBoss then return pickedBoss end
+			first = first or row.boss
+		end
+	end
+	return first or pickedBoss
+end
+
+function PlanTab.open(scenario)
+	PlanTab.boss = PlanTab.bossFor(PlanTab.BOSSES[playerSpec() or ""], PlanTab.boss, scenario)
 	window = window or buildWindow()
 	activeTab = 4
 	refresh()
@@ -2827,6 +2841,11 @@ function PlanTab.activeLoadoutName()
 	if not (spec and spec.GetSpecialization and C_ClassTalents and C_Traits) then return nil end
 	local ok, specID = pcall(spec.GetSpecializationInfo, spec.GetSpecialization())
 	if not ok or not specID then return nil end
+	-- The starter build is not a saved loadout, and while it is active the last
+	-- SELECTED id still names the old one, which would draw a stale green.
+	-- Blizzard's own talent frame makes the same check first.
+	local okStarter, starter = pcall(C_ClassTalents.GetStarterBuildActive)
+	if okStarter and starter then return nil end
 	local okConfig, configID = pcall(C_ClassTalents.GetLastSelectedSavedConfigID, specID)
 	if not okConfig or not configID then return nil end
 	local okInfo, info = pcall(C_Traits.GetConfigInfo, configID)
@@ -2835,13 +2854,18 @@ function PlanTab.activeLoadoutName()
 end
 
 -- PlanTab.boss is the boss picked in the tab; the first one until a click.
-function PlanTab.lines()
+-- `forSpec` is for /bis test only, which has to pass whatever spec runs it.
+function PlanTab.lines(forSpec)
 	local RED = "|cffff2020"
 	local LOADOUT_COLOUR = { match = GREEN, mismatch = RED, unknown = WHITE }
-	local spec = playerSpec()
+	local spec = forSpec or playerSpec()
 	local bosses = spec and PlanTab.BOSSES[spec]
 	if not bosses then
-		return { { text = ("%sNo boss plan for %s yet. Only Feral has one.|r"):format(GREY, spec or "this spec") } }
+		-- the strip under the character sheet says "Click for how", so say how
+		return {
+			{ text = ("%sNo boss plan for %s yet. Only Feral has one.|r"):format(GREY, spec or "this spec") },
+			{ text = GREY .. "For a gear plan: run a Raidbots Top Gear sim, then: .\\update-gear-plan.ps1 <report link> -Deploy|r" },
+		}
 	end
 
 	local picked = bosses[1]
@@ -3013,7 +3037,10 @@ local function buildSlotMarks(holder, below)
 	-- "7 slots to fix" on its own says nothing about which or how (Rob,
 	-- 2026-09-21). The list lives in the Plan tab, and this opens it.
 	strip:EnableMouse(true)
-	strip:SetScript("OnMouseUp", PlanTab.open)
+	strip:SetScript("OnMouseUp", function()
+		local spec = playerSpec()
+		PlanTab.open(spec and planScenario(spec))
+	end)
 
 	strip.scenario:SetScript("OnClick", function()
 		local spec = playerSpec()
@@ -3678,6 +3705,37 @@ local function selfTest()
 	check(emptyTest, PlanTab.shoppingLines(PlanTab.shoppingList(shopPlan, {}), plainName)[1], "Nothing to buy")
 	check(emptyTest .. ", no plan", PlanTab.shoppingLines(PlanTab.shoppingList(nil, {}), plainName)[1], "Nothing to buy")
 	check(emptyTest .. ", one line only", #PlanTab.shoppingLines({}, plainName), 1)
+
+	-- The tab AS DRAWN (0007 review): the checks above prove the tables, and a
+	-- tab that drew mismatch in green, or no loadout at all, passed every one.
+	-- A 2 target boss is picked so lines() stops before it reads gear or bags.
+	local realActive, realBoss = PlanTab.activeLoadoutName, PlanTab.boss
+	local function drawn(active)
+		PlanTab.activeLoadoutName = function() return active end
+		local texts = {}
+		for i, line in ipairs(PlanTab.lines("Feral")) do texts[i] = line.text end
+		return table.concat(texts, "\n")
+	end
+	PlanTab.boss = "The Twin Fangs"
+	local wrong, right, unknown = drawn("DotC Raid ST *"), drawn("WS Raid 2T *"), drawn(nil)
+	PlanTab.activeLoadoutName, PlanTab.boss = realActive, realBoss
+	for _, row in ipairs(PlanTab.BOSSES.Feral) do
+		local colour = row.boss == "The Twin Fangs" and "|cffff2020" or GREY
+		check(bossTest .. ", drawn with loadout and scenario, " .. row.boss, wrong:find(
+			row.boss .. "|r   " .. colour .. row.loadout .. "|r   " .. GREY .. SCENARIO_LABEL[row.scenario], 1, true) ~= nil, true)
+	end
+	check(flagTest .. ", drawn red", wrong:find("|cffff2020WS Raid 2T *|r", 1, true) ~= nil, true)
+	check(flagTest .. ", and told to change it", wrong:find("Open talents and pick \"WS Raid 2T *\"", 1, true) ~= nil, true)
+	check(flagTest .. ", a match is drawn green", right:find("> The Twin Fangs|r   " .. GREEN .. "WS Raid 2T *|r", 1, true) ~= nil, true)
+	check(flagTest .. ", a match is not red", right:find("|cffff2020", 1, true), nil)
+	check(flagTest .. ", unknown is never red", unknown:find("|cffff2020", 1, true), nil)
+
+	local openTest = "the strip opens the tab on a boss of its own scenario"
+	check(openTest .. ", first 2 target boss", PlanTab.bossFor(PlanTab.BOSSES.Feral, nil, "2t"), "The Lost Explorers")
+	check(openTest .. ", keeps a pick that already fits", PlanTab.bossFor(PlanTab.BOSSES.Feral, "The Twin Fangs", "2t"), "The Twin Fangs")
+	check(openTest .. ", moves a pick that does not", PlanTab.bossFor(PlanTab.BOSSES.Feral, "The Twin Fangs", "st"), "Nek'zali")
+	check(openTest .. ", no scenario leaves the pick alone", PlanTab.bossFor(PlanTab.BOSSES.Feral, "Vashnik", nil), "Vashnik")
+	check(openTest .. ", no boss table", PlanTab.bossFor(nil, nil, "st"), nil)
 
 	-- a saved target must survive the round trip and show its item level
 	setGear("zzz not a real item", "Myth", 6)

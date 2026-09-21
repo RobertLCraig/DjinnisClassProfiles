@@ -67,6 +67,7 @@ C_Item = {
 	GetDetailedItemLevelInfo = function() return nil end,
 	GetItemInfo = function() return nil end,
 	GetItemIcon = function() return nil end,
+	GetItemCount = function() return 0 end,  -- the Plan tab's gear lines, once a drawn boss has a plan
 }
 C_SpecializationInfo = {
 	GetSpecialization = function() return 2 end,
