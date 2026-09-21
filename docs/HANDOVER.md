@@ -28,7 +28,8 @@ in-combat zero. The four open cards carry `not_for_the_loop:` because Rob builds
 on msiraider.
 **2026-09-21, later still: card `0006` is built at 0.15.0.** A planned piece that sits in the bags
 unworn glows green, through Baganator's corner widget API, or on Blizzard's bag buttons when
-Baganator is not loaded. Not yet seen in a client.
+Baganator is not loaded. It passed its adversarial review the same day, with one taint fix, and
+is now in `human-review/` for five looks in the game.
 _Last updated: 2026-09-21 (card 0006: bag marks, deployed at 0.15.0)_
 
 ## Goal & success criteria
