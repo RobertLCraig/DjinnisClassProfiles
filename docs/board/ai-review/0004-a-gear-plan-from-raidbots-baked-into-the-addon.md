@@ -109,3 +109,13 @@ Deploy with `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then wit
   turned `plan match compares item id and item level` red, so that check bites. The self-test also
   caught a real fault on its first run: indexing an `[ordered]` table with an int is by position, so
   one enemy was filed as `2t`. **Nothing here has been in a game client, and nothing in it draws.**
+- **2026-09-21** **The code for this card is in commit `5e208a0`, whose message is about card 0006.
+  That is not a mistake in the code.** Two sessions built this card at once, one here and one
+  unattended on the other PC, because Syncthing replicates `C:\Dev` with its `.git` folders. This
+  session's files synced across and a `git add` there swept them into that commit. The other build
+  was on branch `card/0004` (`ca83a6a`, now deleted; Rob chose this one). It was set aside for three
+  reasons: its pair match indexed a nil and threw on a bare ring finger, it wrote the report's text
+  into the Lua file unfiltered, and it fetched a report per Smart Sim chunk where one `input.txt`
+  holds every combo. **Two things of its were better and are worth taking when card 0007 draws the
+  plan:** a slot list in paper-doll order, and a `levelOf` argument on the link match so it can be
+  tested without a client. This card still wants its adversarial pass.
