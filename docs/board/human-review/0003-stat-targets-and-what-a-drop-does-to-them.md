@@ -3,6 +3,36 @@ not_for_the_loop: Rob, 2026-09-21: building DjinnisBiS by hand in a session on m
 ---
 # 0003 Stat targets, and what a drop does to them
 
+## What I need from you
+
+**Six looks in the game, at 0.15.1 after a `/reload`.** Out of combat unless it says otherwise.
+
+1. Open the character sheet, then hit a dummy until something procs. The four bars must stay, with
+   the numbers they had before the pull. Hover gear mid-fight: the tooltip keeps its stat lines.
+2. Still hitting the dummy, `/reload`, then open the sheet. The pane must say "Ratings are hidden
+   right now", with no bars and never `0 / <target>`. Stop hitting. The bars must come back with
+   real numbers, without a reopen.
+3. Click the Raid / Mythic+ button in the pane's header. The targets must change and the button
+   must name the one showing.
+4. `/bis`, third tab, "Stats". Four bars and the same button. Hover gear in your bags: this pane
+   and the sheet's pane must both draw the ghost segment.
+5. Wearing a two-hander, hover a one-handed weapon. The footer must name the two-hander, not "an
+   empty slot", and mastery must go down.
+6. Wearing two rings, hover a third. The footer must name the weaker of the two, by summed
+   secondary stats, not by item level.
+
+**Pass** is all six as written.
+
+**Fail** is any one of them. Say which number and what you saw, in `## Comments`; a screenshot in
+`docs/board/attachments/` helps. The card goes back to `todo/`. In look 2, a blank block between
+the heading and the footer is known. Say if it bothers you.
+
+**Why it needs you.** The pane, the tooltip and the `/bis` tab exist only in a running game client,
+and no agent can run one. Two adversarial passes have attacked the code and the offline checks are
+green. Left out because you already confirmed them: placement, dragging, side-swap and styling at
+0.11.3, and the hero talent in the heading, ghost segments on the sheet's pane and tooltip lines
+at 0.12.0.
+
 ## Ask
 
 Rob, 2026-09-07: "want to consider what the optimum stats are, and rank new gear in a way that
@@ -306,3 +336,47 @@ that rule. A mutation test confirmed they bite: flipping `<` to `>` fails three 
     a 0 inside `allRatings` makes three of them fail.
   - To look at: `/reload` while hitting a dummy, then open the sheet. The pane must say ratings are
     hidden, with no bars. Stop hitting. The bars must appear with real numbers, without a reopen.
+- 2026-09-21 Claude, adversarial pass on the 0.15.1 fix, by a session that did not build it.
+  **Passed to `human-review/` with one fix of my own, commit `ba7d612`.** Scope was the in-combat
+  zero only, measured against "What done looks like" two entries up.
+  - **What broke.** The pane's event watcher in `buildCharacterPane` wiped `ratingCache` on
+    `COMBAT_RATING_UPDATE`, which fires in combat on every proc. `ratingOf` cannot refill in combat.
+    So: log in out of combat, cache warm, pull, first proc, cache empty. The pane then said
+    "hidden in combat" and every tooltip lost its stat lines for the whole fight, with a good
+    reading thrown away a second earlier. That contradicts the comment above `ratingCache` and the
+    Direction on this card. It is also the likeliest cause of Rob's original `0 / <target>`
+    screenshot, since he was out of combat before he hit the dummy. The 0.15.1 fix warmed the cache
+    and left the thing that emptied it.
+  - **Fixed.** The wipe now runs out of combat only. Out of combat it stays, on purpose: after a
+    gear change with ratings unreadable, "hidden" is honest and a stale number is not. In combat the
+    last reading is held, and a weapon swap mid-fight is corrected when combat ends. No offline
+    check added: the handler is a closure inside `buildCharacterPane` and there is no pure seam.
+  - **Fixed, wording.** `SecretWhenUnitStatsRestricted` is documented in
+    `SecretPredicatesDocumentation.lua` as "when access to unit stats would generally produce secret
+    values". It does not say combat only. The pane now says "Ratings are hidden right now" and "The
+    bars come back when combat or the encounter ends", which is true either way.
+  - **What held.** `lua offline-check.lua` exits 0 before and after. Three mutations of `allRatings`
+    in a temp copy all FAIL rather than error: nil turned into 0 (two checks red), the guard deleted
+    (two red), a falsy test that drops a real zero (one red). The builder's entry says three fail on
+    the first; it is two. `ratingOf` has three callers, the tooltip, the pane and `warm`, and the
+    first two go through `allRatings`. No `or 0` is left near a rating. `deltaAgainstEquipped`, the
+    broker tooltip and `setStatRow` never read a rating themselves. A partial cache gives nil, so
+    all four or nothing. The `/bis` Stats tab is the same `buildStatPane`, so it is covered. Ghost
+    segments are children of the hidden rows and are redrawn on the next show. The context button
+    label is set before either early return. `statPanes` is declared at line 2183, well above
+    `armRatingCache`. The handler is set before `RegisterEvent` and checked with
+    `IsEventRegistered`. A `/reload` in combat returns early at login and fills on
+    `PLAYER_REGEN_ENABLED`.
+  - **Left, cosmetic.** With the bars hidden the pane keeps its full height, so there is a blank
+    block between the heading and the footer. Not a wrong number. Rob's look decides if it matters.
+  - **Left, unknowable here.** Whether ratings are already readable at the instant
+    `PLAYER_REGEN_ENABLED` fires. If not, the bars stay hidden until the next rating event or a
+    reopen. An error inside `warm` is swallowed by the `pcall` at login and goes to the error
+    handler from the event, the same exposure as the older watcher.
+  - **Security.** Weakest point: a number that looks right and is not, now only a stale rating held
+    through one fight after an in-combat weapon swap. Unchecked: nothing new comes in, the two
+    events carry no payload this code reads, and the only input is Blizzard's own return value,
+    guarded by `canaccessvalue`. Leaks: nothing. No saved data, no chat, no network, and a secret is
+    never compared, concatenated or used as a key, because it is dropped at `canRead`.
+  - **No browser surface.** The UI exists only in a live game client and no agent can run one. This
+    pass saw no screen.

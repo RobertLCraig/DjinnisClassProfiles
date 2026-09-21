@@ -30,6 +30,9 @@ on msiraider.
 unworn glows green, through Baganator's corner widget API, or on Blizzard's bag buttons when
 Baganator is not loaded. It passed its adversarial review the same day, with one taint fix, and
 is now in `human-review/` for five looks in the game.
+**2026-09-21, last: card `0003` is now in `human-review/`, not `ai-review/` or `todo/`.** Its in-combat
+zero was fixed at 0.15.1, a second adversarial pass stopped a proc from emptying the rating cache
+mid-fight, and what is left is six looks only a game client can settle.
 _Last updated: 2026-09-21 (card 0006: bag marks, deployed at 0.15.0)_
 
 ## Goal & success criteria
