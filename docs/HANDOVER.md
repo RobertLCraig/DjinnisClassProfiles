@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.14.0, `Interface: 120100`. No remote.
+**Status:** v0.15.0, `Interface: 120100`. No remote.
 **Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
 everything is under `[Unreleased]`.
 **Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in
@@ -26,7 +26,10 @@ or gem. Not yet seen in a client. **It passed its adversarial review the same da
 fixes, and is now in `human-review/` for four looks in the game.** `0004` is in `done/`, and `0003` is back in `todo/` on its
 in-combat zero. The four open cards carry `not_for_the_loop:` because Rob builds this addon by hand
 on msiraider.
-_Last updated: 2026-09-21 (card 0005: slot marks on the character sheet, deployed at 0.14.0)_
+**2026-09-21, later still: card `0006` is built at 0.15.0.** A planned piece that sits in the bags
+unworn glows green, through Baganator's corner widget API, or on Blizzard's bag buttons when
+Baganator is not loaded. Not yet seen in a client.
+_Last updated: 2026-09-21 (card 0006: bag marks, deployed at 0.15.0)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the

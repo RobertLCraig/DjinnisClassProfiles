@@ -1039,6 +1039,7 @@ local VERDICT_WORD   = { at = "on target",  above = "over",       below = "under
 -- player looks at, wherever they look at it.
 local setPreview
 local addPlanLine  -- set by the slot marks, once the character pane is built
+local addBagLine   -- set by the bag marks, further down
 
 -- The same answer as the pane, in words, on the item itself. One line per stat
 -- the item actually carries: a line reading "Crit 0 -> 0" is noise, and a piece
@@ -1107,6 +1108,7 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
 	-- Here rather than in a slot button's OnEnter, because the sheet redraws a
 	-- slot's tooltip several times a second and this runs on every redraw.
 	if addPlanLine then addPlanLine(tooltip, tooltip:GetOwner()) end
+	if addBagLine then addBagLine(tooltip, link) end
 end)
 
 -- Clearing on hide, not on the next hover, so a pane does not sit there showing
@@ -1392,6 +1394,173 @@ local function planScenario(spec)
 	local saved = db().planScenario
 	local scenario = type(saved) == "table" and saved[spec]
 	return SCENARIO_LABEL[scenario] and scenario or "st"
+end
+
+-- What is worn, keyed by the plan's slot names, or nil when any link came back
+-- secret and nothing about the gear can be trusted.
+local function readWorn()
+	local worn = {}
+	for slot, slotID in pairs(PLAN_SLOT_INVENTORY) do
+		local link = GetInventoryItemLink("player", slotID)
+		if link and not canRead(link) then return nil end
+		local item = wornFromLink(link)
+		if item then
+			item.ilvl = itemLevelOf(link)
+			local ok, sockets = pcall(C_Item.GetItemNumSockets, link)
+			item.sockets = ok and sockets or 0
+		end
+		worn[slot] = item
+	end
+	return worn
+end
+
+-- Bag marks -------------------------------------------------------------------
+--
+-- A bag item is wanted when it is the planned piece for a slot that is wearing
+-- something else. "The planned piece" is planMatches, the same rule the slot
+-- marks use: item id AND item level, so of two copies only the planned one is
+-- wanted, and a planned piece that is already worn leaves no slot to want it.
+
+local PLAN_SLOT_LABEL = {
+	[1] = "Head", [2] = "Neck", [3] = "Shoulder", [5] = "Chest", [6] = "Waist",
+	[7] = "Legs", [8] = "Feet", [9] = "Wrist", [10] = "Hands", [11] = "Finger",
+	[12] = "Finger", [13] = "Trinket", [14] = "Trinket", [15] = "Back",
+	[16] = "Main Hand", [17] = "Off Hand",
+}
+
+-- { { entry =, slotID = }, ... }: the planned pieces that are not being worn.
+local function wantedFrom(plan, wornBySlot)
+	local wanted = {}
+	for slotID, mark in pairs(slotStates(plan, wornBySlot)) do
+		if mark.state == "change" then
+			wanted[#wanted + 1] = { entry = mark.entry, slotID = slotID }
+		end
+	end
+	return wanted
+end
+
+-- The inventory slot id a bag item is wanted for, or nil.
+local function wantedSlot(wanted, id, ilvl)
+	for _, want in ipairs(wanted) do
+		if planMatches(want.entry, id, ilvl) then return want.slotID end
+	end
+	return nil
+end
+
+local function wantedLine(slotID, scenario)
+	return ("Plan: equip in %s, %s"):format(PLAN_SLOT_LABEL[slotID] or "?", SCENARIO_LABEL[scenario] or "?")
+end
+
+-- Rebuilt out of combat only. In combat the last list stands, so nothing here
+-- reads gear or bags until PLAYER_REGEN_ENABLED.
+local bagWanted, bagScenario = {}, "st"
+local refreshBagGlows  -- set once the bag glows are built
+
+local function rebuildBagWanted()
+	if InCombatLockdown() then return end
+	local spec = playerSpec()
+	bagScenario = spec and planScenario(spec) or "st"
+	local plan = spec and gearPlanFor(spec, bagScenario)
+	local worn = plan and readWorn()
+	if plan and not worn then return end
+	bagWanted = plan and wantedFrom(plan, worn) or {}
+	if refreshBagGlows then refreshBagGlows() end
+end
+
+local function wantedSlotForLink(link)
+	if not link or not canRead(link) or #bagWanted == 0 then return nil end
+	return wantedSlot(bagWanted, tonumber(link:match("item:(%d+)")), itemLevelOf(link))
+end
+
+-- A wanted piece is by definition not worn, so any tooltip showing that link
+-- is showing a copy to equip, wherever it is hovered.
+addBagLine = function(tooltip, link)
+	local slotID = wantedSlotForLink(link)
+	if slotID then tooltip:AddLine(GREEN .. wantedLine(slotID, bagScenario) .. "|r") end
+end
+
+-- Baganator is the bag Rob opens, and it has an API for exactly this: a corner
+-- widget is asked about every item it draws. The holder it positions is tiny;
+-- the glow inside is pinned to the whole button, so it reads as a glow and not
+-- as a corner icon. The default bags are the fallback when it is not loaded.
+local function newBagGlow(button, parent)
+	local glow = (parent or button):CreateTexture(nil, "OVERLAY")
+	glow:SetAllPoints(button)
+	glow:SetAtlas("bags-glow-white")
+	glow:SetBlendMode("ADD")
+	glow:SetVertexColor(0.1, 1, 0.1)
+	return glow
+end
+
+local function buildBagGlows()
+	if Baganator and Baganator.API and Baganator.API.RegisterCornerWidget then
+		Baganator.API.RegisterCornerWidget("Djinni's BiS: gear plan", "djinnisbis_plan",
+			function(_, details) return wantedSlotForLink(details.itemLink) ~= nil end,
+			function(itemButton)
+				local holder = CreateFrame("Frame", nil, itemButton)
+				holder:SetSize(1, 1)
+				newBagGlow(itemButton, holder)
+				return holder
+			end,
+			{ corner = "top_right", priority = 1 })
+		refreshBagGlows = function()
+			if Baganator.API.RequestItemButtonsRefresh then Baganator.API.RequestItemButtonsRefresh() end
+		end
+		return
+	end
+
+	-- Blizzard's bags, combined or separate: both run UpdateItems over the same
+	-- enumerator, so one pass over every container frame covers either.
+	if not ContainerFrameUtil_EnumerateContainerFrames then return end
+	local glows = {}
+	refreshBagGlows = function()
+		if InCombatLockdown() then return end
+		for _, frame in ContainerFrameUtil_EnumerateContainerFrames() do
+			if frame:IsShown() then
+				for _, button in frame:EnumerateValidItems() do
+					local link = C_Container.GetContainerItemLink(button:GetBagID(), button:GetID())
+					local show = wantedSlotForLink(link) ~= nil
+					if show and not glows[button] then glows[button] = newBagGlow(button) end
+					if glows[button] then glows[button]:SetShown(show) end
+				end
+			end
+		end
+	end
+	-- GenerateFrame is a bag opening, UpdateAll is its contents changing.
+	for _, name in ipairs({ "ContainerFrame_GenerateFrame", "ContainerFrame_UpdateAll" }) do
+		if hooksecurefunc and _G[name] then hooksecurefunc(name, function() refreshBagGlows() end) end
+	end
+	return true
+end
+
+-- Handler first, then one event at a time, each verified. See
+-- C:\Dev\WoWAddons\docs\DECISIONS.md.
+local function armBagMarks()
+	-- Baganator redraws its own items when a bag changes and asks the widget
+	-- again, so only Blizzard's bags need telling.
+	local defaultBags = buildBagGlows()
+	local watcher = CreateFrame("Frame")
+	watcher:SetScript("OnEvent", function(_, event)
+		if event == "BAG_UPDATE_DELAYED" then
+			if refreshBagGlows and not InCombatLockdown() then refreshBagGlows() end
+		else
+			rebuildBagWanted()
+		end
+	end)
+	for _, event in ipairs({
+		"PLAYER_EQUIPMENT_CHANGED",
+		"PLAYER_SPECIALIZATION_CHANGED",
+		"PLAYER_REGEN_ENABLED",
+		defaultBags and "BAG_UPDATE_DELAYED" or nil,
+	}) do
+		watcher:RegisterEvent(event)
+		if not watcher:IsEventRegistered(event) then
+			print(GOLD .. "Djinni's BiS|r " .. GREY
+				.. "could not register " .. event
+				.. ", so the bag marks will not refresh by themselves.|r")
+		end
+	end
+	rebuildBagWanted()
 end
 
 -- rebuilt on every render, so the ticks follow you changing gear
@@ -2545,21 +2714,12 @@ local function buildSlotMarks(holder, below)
 		local plan = spec and gearPlanFor(spec, scenario)
 		strip.scenario:SetText(SCENARIO_LABEL[scenario or "st"])
 
+		-- A secret link cannot be matched, and reading it as a bare slot would
+		-- paint the whole sheet red. Leave everything as it was.
 		local worn = {}
 		if plan then
-			for slot, slotID in pairs(PLAN_SLOT_INVENTORY) do
-				local link = GetInventoryItemLink("player", slotID)
-				-- A secret link cannot be matched, and reading it as a bare slot
-				-- would paint the whole sheet red. Leave everything as it was.
-				if link and not canRead(link) then return end
-				local item = wornFromLink(link)
-				if item then
-					item.ilvl = itemLevelOf(link)
-					local ok, sockets = pcall(C_Item.GetItemNumSockets, link)
-					item.sockets = ok and sockets or 0
-				end
-				worn[slot] = item
-			end
+			worn = readWorn()
+			if not worn then return end
 		end
 
 		marks = slotStates(plan, worn)
@@ -2597,6 +2757,7 @@ local function buildSlotMarks(holder, below)
 		saved.planScenario[spec] = (planScenario(spec) == PLAN_SCENARIOS[1])
 			and PLAN_SCENARIOS[2] or PLAN_SCENARIOS[1]
 		refresh()
+		rebuildBagWanted()
 	end)
 
 	addPlanLine = function(tooltip, owner)
@@ -2772,6 +2933,7 @@ loader:SetScript("OnEvent", function(_, event)
 	if event == "PLAYER_LOGIN" then
 		buildBroker()
 		pcall(armCharacterPane)
+		pcall(armBagMarks)
 	else
 		harvested = false
 	end
@@ -3142,6 +3304,33 @@ local function selfTest()
 	check("slot states, and leaves the right finger alone", oneWrong[12], nil)
 	for slot, slotID in pairs(PLAN_SLOT_INVENTORY) do
 		check("every plan slot has a button, " .. slot, SLOT_BUTTONS[slotID] ~= nil, true)
+	end
+
+	-- Bag marks. The plan wants a cloak and two rings; ringA is worn, the cloak
+	-- slot holds something else and one finger is bare.
+	local cloak = parsePlanLine("id=193763,ilevel=311")
+	local bagPlan = { slots = { back = cloak, finger1 = ringA, finger2 = ringB } }
+	local bagWorn = { back = { id = 9, ilvl = 300, gems = {} }, finger1 = wornA }
+	local want = wantedFrom(bagPlan, bagWorn)
+	local wantedTest = "bag item is wanted when it matches an unfilled plan slot"
+	check(wantedTest .. ", the cloak", wantedSlot(want, 193763, 311), 15)
+	check(wantedTest .. ", the missing ring, on the bare finger", wantedSlot(want, 2, 310), 12)
+	check(wantedTest .. ", an item the plan never named", wantedSlot(want, 12345, 311), nil)
+	check(wantedTest .. ", no plan wants nothing", #wantedFrom(nil, {}), 0)
+	local copyTest = "only the planned copy of a duplicate is wanted"
+	check(copyTest .. ", lower track copy", wantedSlot(want, 193763, 298), nil)
+	check(copyTest .. ", higher track copy", wantedSlot(want, 193763, 324), nil)
+	check(copyTest .. ", level not cached yet", wantedSlot(want, 193763, nil), nil)
+	local equippedTest = "equipped planned item glows no bag copy"
+	check(equippedTest .. ", a second copy of the worn ring", wantedSlot(want, 1, 300), nil)
+	local enchantOnly = wantedFrom({ slots = { back = parsePlanLine("id=193763,enchant_id=5,ilevel=311") } },
+		{ back = { id = 193763, ilvl = 311, gems = {} } })
+	check(equippedTest .. ", worn but missing its enchant", wantedSlot(enchantOnly, 193763, 311), nil)
+	local lineTest2 = "wanted bag item names its slot and scenario"
+	check(lineTest2 .. ", back, one target", wantedLine(15, "st"), "Plan: equip in Back, 1 target")
+	check(lineTest2 .. ", finger, two targets", wantedLine(12, "2t"), "Plan: equip in Finger, 2 targets")
+	for slot, slotID in pairs(PLAN_SLOT_INVENTORY) do
+		check(lineTest2 .. ", every plan slot has a label, " .. slot, PLAN_SLOT_LABEL[slotID] ~= nil, true)
 	end
 
 	-- a saved target must survive the round trip and show its item level

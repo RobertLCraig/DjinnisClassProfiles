@@ -33,10 +33,10 @@ working on Retail.
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] WHEN the bags are open AND a bag item matches a planned slot that is not currently equipped with it, THE ADDON SHALL show a green glow on that bag slot. proves: `bag item is wanted when it matches an unfilled plan slot`
-- [ ] WHEN two copies of the planned item are in the bags, THE ADDON SHALL glow only the copy whose item level matches the plan. proves: `only the planned copy of a duplicate is wanted`
-- [ ] WHEN the planned item is already equipped, THE ADDON SHALL not glow any bag copy of it. proves: `equipped planned item glows no bag copy`
-- [ ] WHEN a glowing bag item is hovered, THE ADDON SHALL add a tooltip line naming the slot and the scenario it is planned for. proves: `wanted bag item names its slot and scenario`
+- [x] WHEN the bags are open AND a bag item matches a planned slot that is not currently equipped with it, THE ADDON SHALL show a green glow on that bag slot. proves: `bag item is wanted when it matches an unfilled plan slot`
+- [x] WHEN two copies of the planned item are in the bags, THE ADDON SHALL glow only the copy whose item level matches the plan. proves: `only the planned copy of a duplicate is wanted`
+- [x] WHEN the planned item is already equipped, THE ADDON SHALL not glow any bag copy of it. proves: `equipped planned item glows no bag copy`
+- [x] WHEN a glowing bag item is hovered, THE ADDON SHALL add a tooltip line naming the slot and the scenario it is planned for. proves: `wanted bag item names its slot and scenario`
 - [ ] WHEN the player is in combat, THE ADDON SHALL not rescan the bags until combat ends.
 <!-- AC:END -->
 
@@ -44,9 +44,9 @@ The last criterion is checked in the client by Rob.
 
 ## Tasks
 
-- [ ] Scan bags with `C_Container` on `BAG_UPDATE_DELAYED` and bag open, out of combat.
-- [ ] Glow on the default container item buttons (combined and separate bags).
-- [ ] Offline checks under the names above.
+- [x] Scan bags with `C_Container` on `BAG_UPDATE_DELAYED` and bag open, out of combat.
+- [x] Glow on the default container item buttons (combined and separate bags).
+- [x] Offline checks under the names above.
 
 ## Plan
 
@@ -74,3 +74,22 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
   bags". Nothing is built yet.
 - 2026-09-21 Rob: **Decided:** Baganator is the bag he opens, not EnhanceQoL Bags. Build for
   Baganator first; the default bags are the fallback when it is not loaded.
+- 2026-09-21 Claude, by hand on msiraider: built at 0.15.0 and deployed. `lua offline-check.lua`
+  passes, and three mutations made it fail, so the checks bite. **The ticks prove the logic and no
+  frame.** Nothing here has been in a client. What was chosen and why:
+  - Baganator's `RegisterCornerWidget`, out of the three hooks the Plan names. The upgrade plugin
+    allows one active plugin at a time, so taking it would switch off whatever Rob has there. An
+    item set source gives a search word and no glow. The widget shows as "Djinni's BiS: gear plan"
+    in Baganator's icon corner settings, top right by default.
+  - The widget's frame is 1 pixel. The glow inside it is pinned to the whole item button, so it
+    reads as a green glow and not as a corner icon. It is the client's `bags-glow-white` atlas.
+  - Without Baganator the same glow goes on Blizzard's own buttons, combined or separate.
+  - "Which copy" is `planMatches`, the rule card `0005` uses: item id and item level.
+  - The wanted list is rebuilt out of combat only. In combat the last list stands.
+  To look at in the client, on Feral, with a planned piece in the bags and not worn:
+  1. Open Baganator. That piece glows green. A lower copy of the same item does not.
+  2. Hover it. The tooltip gains a green "Plan: equip in <slot>, 1 target" line.
+  3. Equip it. The glow goes.
+  4. `/reload` with Baganator disabled. The default bags show the same glow.
+  Known soft spot: if Rob has removed the widget from every corner in Baganator's settings,
+  nothing glows, and nothing here says so.
