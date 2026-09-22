@@ -3268,6 +3268,96 @@ function PlanTab.sendToAuctionator(list)
 	return true
 end
 
+-- KeystoneLoot (card 0021) ---------------------------------------------------
+--
+-- Every planned item, from every filled cell of every spec, as a Best in Slot
+-- favourite in KeystoneLoot, whose reminders (a loot spec card on entering a
+-- key, a "favourite dropped" alert, marks on bag and character sheet icons)
+-- all run off that list. Its API is KeystoneLoot\modules\api.lua: colon
+-- methods on the global KeystoneLootAPI, every one pcalled here. What this
+-- addon added is remembered in DjinnisBiSDB.keystoneLoot per KeystoneLoot
+-- character key, and only those are ever removed. Rob's own favourites are
+-- never touched.
+
+function PlanTab.keystoneLoot()
+	local api = KeystoneLootAPI
+	return api and api.AddFavorite and api or nil
+end
+
+-- { ["specId:itemId"] = { item =, spec =, entry = } }, one per item per spec
+-- across every filled cell. The first cell to name an item keeps its enchant
+-- and gems. Pure.
+function PlanTab.keystoneLootWanted()
+	local wanted = {}
+	for specId, spec in pairs(SPEC_BY_ID) do
+		for scenario in pairs(SCENARIO_LABEL) do
+			local plan = gearPlanFor(spec, scenario)
+			for _, entry in pairs(plan and plan.slots or {}) do
+				local key = specId .. ":" .. entry.id
+				wanted[key] = wanted[key] or { item = entry.id, spec = specId, entry = entry }
+			end
+		end
+	end
+	return wanted
+end
+
+-- Returns added, removed, refused after a send; nil when nothing was sent,
+-- with the reason printed. "Refused" is an item KeystoneLoot's own lists do
+-- not know, which its AddFavorite answers false to.
+function PlanTab.sendToKeystoneLoot()
+	local api = PlanTab.keystoneLoot()
+	local function say(text) print(GOLD .. "Djinni's BiS|r " .. GREY .. text .. "|r") end
+	if not api then say("KeystoneLoot is not loaded.") return nil end
+	local function call(method, ...)
+		local ok, result = pcall(api[method], api, ...)
+		if not ok then say("KeystoneLoot refused " .. method .. ": " .. tostring(result)) end
+		return ok, result
+	end
+	local ok, ready = call("IsReady")
+	if not ok then return nil end
+	if not ready then
+		-- READY fires once its saved variables are in. A click before that
+		-- waits for it once rather than adding to a list that is not there yet.
+		call("RegisterCallback", "READY", function() PlanTab.sendToKeystoneLoot() end, "DjinnisBiS")
+		say("KeystoneLoot is not ready yet. The plan goes over when it is.")
+		return nil
+	end
+	local tier = api.Tier and api.Tier.BIS
+	local okKey, charKey = call("GetCurrentCharacterKey")
+	if not okKey then return nil end
+	if not tier or not charKey then say("KeystoneLoot has no Best in Slot tier or no character key for you.") return nil end
+	local d = db()
+	d.keystoneLoot = d.keystoneLoot or {}
+	d.keystoneLoot[charKey] = d.keystoneLoot[charKey] or {}
+	local sent = d.keystoneLoot[charKey]
+	local wanted, added, removed, refused = PlanTab.keystoneLootWanted(), 0, 0, 0
+	-- Every wanted item goes over every time, so a changed enchant or gem
+	-- lands; "added" counts only what this addon had not sent before.
+	for key, want in pairs(wanted) do
+		local e = want.entry
+		local okAdd, did = call("AddFavorite", want.item, want.spec, tier,
+			{ bonusIds = e.bonus, gems = e.gems, enchant = e.enchant, characterKey = charKey })
+		if not okAdd then return nil end
+		if did then
+			if not sent[key] then added = added + 1 end
+			sent[key] = { item = want.item, spec = want.spec }
+		else
+			refused = refused + 1
+		end
+	end
+	for key, was in pairs(sent) do
+		if not wanted[key] then
+			local okRemove = call("RemoveFavorite", was.item, was.spec, charKey)
+			if not okRemove then return nil end
+			sent[key] = nil  -- gone, or already gone by hand: forgotten either way
+			removed = removed + 1
+		end
+	end
+	say(("%d favourite%s added to KeystoneLoot, %d removed%s."):format(added, added == 1 and "" or "s", removed,
+		refused > 0 and (", " .. refused .. " refused as not in its item lists") or ""))
+	return added, removed, refused
+end
+
 -- A Blizzard equipment set for each plan (card 0012) -------------------------
 --
 -- Saved from what is WORN, because that is all C_EquipmentSet can save from
@@ -3710,6 +3800,13 @@ function PlanTab.lines(forSpec)
 	if unworn > 0 then
 		lines[#lines + 1] = { text = ("%s   %d planned piece%s not worn yet, so %s enchants and gems are not counted.|r"):format(
 			GREY, unworn, unworn == 1 and " is" or "s are", unworn == 1 and "its" or "their") }
+	end
+	-- Only with KeystoneLoot loaded (card 0021). Every spec's plan goes, not the picked boss's.
+	if PlanTab.keystoneLoot() then
+		lines[#lines + 1] = { text = "" }
+		lines[#lines + 1] = { text = GREY .. "   Every planned item, every spec, as a Best in Slot favourite in KeystoneLoot.|r",
+			button = { label = "KeystoneLoot", tip = "Send to KeystoneLoot: add every planned item as a Best in Slot favourite for its spec, and drop the ones this addon added that the plan no longer wants. Favourites you made yourself are never touched.",
+				onClick = function() PlanTab.sendToKeystoneLoot() end } }
 	end
 	return lines
 end
@@ -5024,6 +5121,86 @@ local function selfTest()
 		check(noneTest .. ", no total row drawn", totalRow(), nil)
 		GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, PlanTab.boss = wasWornLink, wasLevel, wasBoss
 		Auctionator, print = wasAuctionator, wasPrint
+	end
+
+	-- KeystoneLoot (card 0021): a pretend KeystoneLootAPI that records what it
+	-- was asked and refuses one item, as its real one does for an item its
+	-- lists do not know. The global and the saved record are put back after.
+	do
+		local wasKL, wasPrint, wasRecord, wasBoss = KeystoneLootAPI, print, db().keystoneLoot, PlanTab.boss
+		local said, favs, gone, callbacks = {}, {}, {}, {}
+		-- Recorded AND passed on, so this block's own FAIL lines still reach offline-check.lua.
+		print = function(...) said[#said + 1] = table.concat({ ... }, " "); wasPrint(...) end
+		db().keystoneLoot = nil
+		PlanTab.boss = "Nek'zali"
+		local function klRow()
+			for _, line in ipairs(PlanTab.lines("Feral")) do
+				if line.button and line.button.label == "KeystoneLoot" then return line end
+			end
+		end
+		KeystoneLootAPI = nil
+		local noneTest = "no keystoneloot button without keystoneloot"
+		check(noneTest .. ", no api", PlanTab.keystoneLoot(), nil)
+		check(noneTest .. ", send refuses", PlanTab.sendToKeystoneLoot(), nil)
+		check(noneTest .. ", send says why", said[#said] and said[#said]:find("not loaded", 1, true) ~= nil, true)
+		check(noneTest .. ", no row drawn", klRow(), nil)
+		local ready, charKey = true, "Djinni-Bloodfeather"
+		KeystoneLootAPI = {
+			Tier = { BIS = 3 },
+			IsReady = function() return ready end,
+			GetCurrentCharacterKey = function() return charKey end,
+			RegisterCallback = function(_, event, fn, owner) callbacks[#callbacks + 1] = { event = event, fn = fn, owner = owner } return true end,
+			AddFavorite = function(_, itemId, specId, tier, options)
+				if itemId == 193763 then return false end  -- the back: a stranger to its lists
+				favs[specId .. ":" .. itemId] = { tier = tier, options = options }
+				return true
+			end,
+			RemoveFavorite = function(_, itemId, specId, key) gone[#gone + 1] = { item = itemId, spec = specId, key = key } return true end,
+		}
+		local wanted, count = PlanTab.keystoneLootWanted(), 0
+		for _ in pairs(wanted) do count = count + 1 end
+		local sendTest = "plan items become keystoneloot favourites per spec"
+		check(sendTest .. ", the plan has items to send", count > 1, true)
+		check(sendTest .. ", the wrist is wanted for Feral", wanted["103:251135"] ~= nil, true)
+		check(sendTest .. ", only for specs with a plan", wanted["102:251135"], nil)
+		local added, removed, refused = PlanTab.sendToKeystoneLoot()
+		check(sendTest .. ", added all but the refused one", added, count - 1)
+		check(sendTest .. ", the refused one is counted", refused, 1)
+		check(sendTest .. ", nothing removed", removed, 0)
+		check(sendTest .. ", as best in slot", favs["103:251135"] and favs["103:251135"].tier, 3)
+		check(sendTest .. ", for this character", favs["103:251135"] and favs["103:251135"].options.characterKey, charKey)
+		check(sendTest .. ", with the gem", favs["103:251135"] and favs["103:251135"].options.gems[1], 240908)
+		check(sendTest .. ", with the enchant", favs["103:271528"] and favs["103:271528"].options.enchant, 7991)
+		check(sendTest .. ", with the bonus ids", favs["103:271528"] and table.concat(favs["103:271528"].options.bonusIds, "/"), "6652/13696/13692/13698/12846")
+		check(sendTest .. ", the refused one is not remembered", db().keystoneLoot[charKey]["103:193763"], nil)
+		check(sendTest .. ", the wrist is remembered", db().keystoneLoot[charKey]["103:251135"] ~= nil, true)
+		local reportTest = "send reports added and removed counts"
+		check(reportTest, said[#said] and said[#said]:find((count - 1) .. " favourites added to KeystoneLoot, 0 removed", 1, true) ~= nil, true)
+		check(reportTest .. ", and the refused", said[#said] and said[#said]:find("1 refused", 1, true) ~= nil, true)
+		check(reportTest .. ", second send adds nothing new", (PlanTab.sendToKeystoneLoot()), 0)
+		check(reportTest .. ", and says 0 added", said[#said] and said[#said]:find("0 favourites added", 1, true) ~= nil, true)
+		-- One the addon sent that the plan has since dropped, beside one Rob made by hand.
+		local removeTest = "only favourites the addon added are removed"
+		db().keystoneLoot[charKey]["103:1"] = { item = 1, spec = 103 }
+		favs["103:999"] = { tier = 2, options = {} }
+		local _, removedNow = PlanTab.sendToKeystoneLoot()
+		check(removeTest .. ", the dropped one is removed", removedNow, 1)
+		check(removeTest .. ", by item, spec and character", gone[1] and gone[1].item == 1 and gone[1].spec == 103 and gone[1].key == charKey, true)
+		check(removeTest .. ", and forgotten", db().keystoneLoot[charKey]["103:1"], nil)
+		check(removeTest .. ", the hand-made one is not", #gone, 1)
+		check(removeTest .. ", said", said[#said] and said[#said]:find("1 removed", 1, true) ~= nil, true)
+		local drawn = klRow()
+		check(sendTest .. ", drawn with its button", drawn and drawn.button.label, "KeystoneLoot")
+		check(sendTest .. ", the button has a hover", drawn and drawn.button.tip and drawn.button.tip:find("never touched", 1, true) ~= nil, true)
+		ready = false
+		check(sendTest .. ", waits for READY when not ready", PlanTab.sendToKeystoneLoot(), nil)
+		check(sendTest .. ", registered for READY", callbacks[1] and callbacks[1].event, "READY")
+		check(sendTest .. ", said it is waiting", said[#said] and said[#said]:find("not ready", 1, true) ~= nil, true)
+		ready = true
+		KeystoneLootAPI.AddFavorite = function() error("Contact the maintainer") end
+		check(sendTest .. ", a refusal is caught", PlanTab.sendToKeystoneLoot(), nil)
+		check(sendTest .. ", a refusal is shown", said[#said] and said[#said]:find("refused AddFavorite", 1, true) ~= nil, true)
+		db().keystoneLoot, KeystoneLootAPI, print, PlanTab.boss = wasRecord, wasKL, wasPrint, wasBoss
 	end
 
 	-- The tab AS DRAWN (0007 review): the checks above prove the tables, and a
