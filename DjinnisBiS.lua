@@ -2791,7 +2791,8 @@ end
 -- Both arrive from the game, so each is tested with canRead before it is
 -- compared: a secret one would throw (docs/DECISIONS.md, 2026-08-21).
 function PlanTab.bossRow(bosses, id, name)
-	if id ~= nil and canRead(id) then
+	-- canRead before `~= nil`: the comparison is the thing a secret throws on
+	if canRead(id) and id ~= nil then
 		for _, row in ipairs(bosses or {}) do
 			if row.id == id then return row end
 		end
@@ -4780,8 +4781,18 @@ local function selfTest()
 		check(idTest .. ", a name, " .. tostring(row.boss), type(row.boss) == "string" and row.boss ~= "", true)
 		if row.scenario ~= "mplus" then  -- the Mythic+ row is a plan for any key, not a boss
 			check(idTest .. ", an id, " .. row.boss, type(row.id) == "number", true)
-			check(idTest .. ", an id used once, " .. row.boss, seenID[row.id], nil)
-			seenID[row.id] = row.boss
+			check(idTest .. ", an id used once, " .. row.boss, seenID[row.id or 0], nil)  -- `or 0`: a missing id is one red line, not a nil-key error that ends the test
+			seenID[row.id or 0] = row.boss
+		end
+	end
+	-- the name path answers the first row the event name starts with, so no row's
+	-- name may start with another's: the earlier one would win every time
+	for i, row in ipairs(PlanTab.BOSSES.Feral) do
+		for j, other in ipairs(PlanTab.BOSSES.Feral) do
+			if i ~= j then
+				check(idTest .. ", no name starts with another's, " .. row.boss .. " vs " .. other.boss,
+					norm(row.boss):find(norm(other.boss), 1, true) == 1, false)
+			end
 		end
 	end
 	local agreeTest = "a name and id that disagree fail the check"

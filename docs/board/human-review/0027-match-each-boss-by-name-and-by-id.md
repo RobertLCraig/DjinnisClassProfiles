@@ -49,6 +49,11 @@ There is no test client, so nothing here has been seen in the game. Two looks:
    the look is indirect: BigWigs enables its boss module off `ENCOUNTER_START` by the same id this
    card copied, so if BigWigs' Nek'zali timers start on the Nek'zali pull, id 3470 is the one the
    event carries. If BigWigs stays quiet, the id is wrong and so is this table.
+3. (added in review) Before that same pull, paste this once, it prints what the event carries:
+   `/run local f=CreateFrame("Frame") f:RegisterEvent("ENCOUNTER_START")
+   f:SetScript("OnEvent", function(_,_,id,name) print(id, name, canaccessvalue(id), canaccessvalue(name)) end)`
+   before the pull. Expect `3470 Nek'zali the Soulcoiler true true` for Nek'zali. Anything but
+   `true true` means the payload is secret in practice and `bossRow` will answer nil for every boss.
 
 ## Comments
 
@@ -88,3 +93,39 @@ There is no test client, so nothing here has been seen in the game. Two looks:
   handler still passes the name to `bonusRollVerdict`; that is the BiS list's source matching, a
   different table, and I left it alone rather than widen this diff into a card two other sessions
   may be touching. The `update-gear-plan.ps1` task was dropped as stated above.
+- 2026-09-22 Claude (review, branch `worktree-agent-aee97ee737c4a8cc6`): **pass, with two small
+  fixes in place; moved to `human-review/` because nothing here has run in the game.**
+  **The ids.** All nine checked by me against both sources, not three: every
+  `mod:SetEncounterID(...)` in `BigWigs_TheVenomousAbyss\*.lua` and `BigWigs_MidnightLairs\Nymrissa.lua`,
+  and every `L["Encounter-NNNN"]` in `ArchonTooltip\Localization.lua` (enUS block). Nine of nine
+  agree with the table, and the long event names ("Nek'zali the Soulcoiler", "Vashnik the
+  Malignant") are BigWigs' `NewBoss` names as well. `EncounterInfoDocumentation.lua` in the local
+  Blizzard source has `encounterID` then `encounterName` as the first two payload fields of both
+  events and no `SecretWhen` flag on either, as the build comment says.
+  **The checks.** `lua offline-check.lua` under 5.4 and the 5.1 exe both exit 0, before and after
+  the fixes. Seven mutants, each on a temp copy, each run under both versions, each red: Sszorak
+  given the Twin Fangs id (disagree and used-once red), the `return nil` after the id loop removed
+  (unknown id falls back red), Vashnik's id deleted, the name tried before the id, the prefix match
+  narrowed to exact (the long event name red), the id compared as a string, and a row named
+  "Nek'zali Wavecaller" (the new prefix check below red).
+  **What broke.** Two things, both fixed in `DjinnisBiS.lua`, no new top-level local. (1) In
+  `PlanTab.bossRow` the guard read `id ~= nil and canRead(id)`, so the comparison a secret throws on
+  ran before the guard meant to stop it; now `canRead(id) and id ~= nil`. Belt and braces still, since
+  the payload carries no secret flag, but a guard that runs second guards nothing. (2) The Vashnik
+  mutant did not go red, it crashed: a row with no id made `seenID[nil] = ...` raise "table index is
+  nil" and end the whole self-test, offline and in `/djbis test` alike. Now `seenID[row.id or 0]`,
+  and the mutant is one red line. Also added, inside the existing `every boss row has a name and an
+  id` group: no row's normalised name may start with another's, because the name path answers the
+  first row the event name starts with and an earlier row would win every time. The table passes
+  today; the check is for the next hand edit.
+  **What held.** Id wins over a disagreeing name; an unknown id answers nil rather than the name; the
+  Mythic+ row has no id and cannot be reached by one; `type(name)` before `canRead(name)` is safe
+  because `type()` sees through a secret (DECISIONS 2026-09-04) and a non-string never gets compared;
+  `norm()` strips non-ASCII bytes so a deDE name cannot match an enUS row, which is the id's job.
+  **Security.** Weakest: the name path's prefix match, where a future row whose name is a prefix of
+  another's would silently answer the wrong plan; the new check makes that a red `/djbis test`
+  rather than a wrong loadout. Unchecked: nothing, both arguments come from a Blizzard event with
+  no secret flag and are tested with `canRead` before use; `bossRow` has no caller yet, so no path
+  in exists until `0013` or `0023`. Leaks: nothing, it returns a row of the addon's own hand-kept
+  table or nil, and no id or name goes to chat or SavedVariables.
+  **Not looked at in the game**, the two looks above stand; a third is added below.
