@@ -635,20 +635,25 @@ local function resolveFromCache()
 	end
 end
 
-local harvested = false
-local function harvestFromJournal()
-	if harvested or not EJ_GetNumTiers then return end
+-- The journal id of the current tier's raid whose name holds `fragment`, or
+-- nil. Loads the journal and selects the tier on the way, so the caller can
+-- go straight to EJ_SelectInstance. On PlanTab only for the local budget.
+function PlanTab.raidInstanceID(fragment)
 	C_AddOns.LoadAddOn("Blizzard_EncounterJournal")
 	EJ_SelectTier(EJ_GetNumTiers())
-
-	local instanceID
 	local index = 1
 	while true do
 		local id, name = EJ_GetInstanceByIndex(index, true)  -- true = raids
-		if not id then break end
-		if name and name:find("Venomous Abyss") then instanceID = id break end
+		if not id then return nil end
+		if name and name:find(fragment) then return id end
 		index = index + 1
 	end
+end
+
+local harvested = false
+local function harvestFromJournal()
+	if harvested or not EJ_GetNumTiers then return end
+	local instanceID = PlanTab.raidInstanceID("Venomous Abyss")
 	if not instanceID then return end
 
 	EJ_SelectInstance(instanceID)
@@ -2769,6 +2774,119 @@ local function buildWindow()
 	return f
 end
 
+-- Loot spec per boss (card 0022) ----------------------------------------------
+--
+-- A boss drops one item from the pool for your loot spec, so the spec whose
+-- pool is smallest for the planned items it holds is the one to set. The pools
+-- come from the journal, per encounter and per spec, once a session.
+
+-- dungeon encounter id (the one PlanTab.BOSSES carries) -> spec -> set of item
+-- ids. Filled cell by cell: a filter the journal has not answered yet leaves
+-- its cell nil and the next pass fills it, so a pass never redoes a cell.
+PlanTab.POOL = {}
+PlanTab.poolsDone = false
+
+function PlanTab.harvestPools()
+	if PlanTab.poolsDone or not EJ_GetNumTiers or InCombatLockdown() then return end
+	-- never walk the journal under the player: every call below moves its selection
+	if EncounterJournal and EncounterJournal:IsShown() then return end
+	local instanceID = PlanTab.raidInstanceID("Venomous Abyss")
+	if not instanceID then return end
+	EJ_SelectInstance(instanceID)
+
+	local classID = select(3, UnitClass("player"))
+	local keptClass, keptSpec = EJ_GetLootFilter()
+	local slotFilter = C_EncounterJournal.GetSlotFilter()
+	C_EncounterJournal.ResetSlotFilter()  -- a slot filter left on would shrink every pool
+
+	local stale = false
+	local index = 1
+	while true do
+		local _, _, journalID = EJ_GetEncounterInfoByIndex(index)
+		if not journalID then break end
+		-- the seventh return, checked against Blizzard_EncounterJournal.lua:3577
+		local dungeonID = select(7, EJ_GetEncounterInfo(journalID))
+		if dungeonID then
+			local pool = PlanTab.POOL[dungeonID] or {}
+			PlanTab.POOL[dungeonID] = pool
+			for specID, spec in pairs(SPEC_BY_ID) do
+				if not pool[spec] then
+					EJ_SelectEncounter(journalID)
+					EJ_SetLootFilter(classID, specID)
+					-- a filter change is asynchronous: the list is the previous
+					-- one until EJ_LOOT_DATA_RECIEVED lands, and reading it now
+					-- would file another spec's pool under this one
+					if EJ_IsLootListOutOfDate() then
+						stale = true
+					else
+						local ids = {}
+						for i = 1, (EJ_GetNumLoot() or 0) do
+							local info = C_EncounterJournal.GetLootInfoByIndex(i)
+							if info and info.itemID then ids[info.itemID] = true end
+						end
+						pool[spec] = ids
+					end
+				end
+			end
+		end
+		index = index + 1
+	end
+
+	EJ_SetLootFilter(keptClass or 0, keptSpec or 0)
+	C_EncounterJournal.SetSlotFilter(slotFilter)
+	PlanTab.poolsDone = not stale
+end
+
+-- Every item id in every filled cell of a spec's gear plan, raid and key
+-- alike: a planned piece is wanted whichever fight the sim ran.
+function PlanTab.plannedIds(spec)
+	local ids = {}
+	for scenario in pairs(GEAR_PLAN[spec] or {}) do
+		for _, entry in pairs(gearPlanFor(spec, scenario).slots) do ids[entry.id] = true end
+	end
+	return ids
+end
+
+-- The loot spec with the best chance of a planned drop from one boss: planned
+-- items in that spec's pool over the pool's size. `pool` is spec -> set of
+-- item ids for the boss, `planned` is spec -> set of planned item ids.
+-- Returns { spec, hits = sorted id list, size } or nil when no spec has a hit.
+-- A tie goes to `current` when it is one of the tied, else to the first in
+-- SPEC_ORDER, so the answer is the same on every draw.
+function PlanTab.bestLootSpec(pool, planned, current)
+	local best
+	for _, spec in ipairs(SPEC_ORDER) do
+		local size, hits = 0, {}
+		for id in pairs(pool and pool[spec] or {}) do
+			size = size + 1
+			if planned[spec] and planned[spec][id] then hits[#hits + 1] = id end
+		end
+		if #hits > 0 then
+			-- cross-multiplied: hits/size against best's, with no float compare
+			local mine, theirs = #hits * (best and best.size or 1), best and #best.hits * size or 0
+			if mine > theirs or (mine == theirs and spec == current) then
+				table.sort(hits)
+				best = { spec = spec, hits = hits, size = size }
+			end
+		end
+	end
+	return best
+end
+
+function PlanTab.lootSpecText(best)  -- "Guardian: 2 of 5"
+	return ("%s: %d of %d"):format(best.spec, #best.hits, best.size)
+end
+
+-- The planned items behind that text, by name where the client knows it.
+function PlanTab.itemNames(ids)
+	local names = {}
+	for i, id in ipairs(ids) do
+		local name = C_Item.GetItemInfo(id)
+		names[i] = (name and canRead(name)) and name or ("item " .. id)
+	end
+	return table.concat(names, ", ")
+end
+
 -- What the plan strip under the character sheet opens: the list behind its
 -- "N slots to fix".
 -- `scenario` is the one the strip is counting. The tab opens on a boss of that
@@ -3736,6 +3854,11 @@ function PlanTab.lines(forSpec)
 	-- Hindsight's last pull per boss against the plan (card 0023). One import
 	-- string per loadout name, read once per draw and only with pulls to judge.
 	local pulls, plannedString = PlanTab.hindsightPulls(), {}
+	-- The loot spec per boss (card 0022): the pools are read once a session,
+	-- and a row whose pool holds no planned item for any spec says nothing.
+	pcall(PlanTab.harvestPools)
+	local planned, pickedBest = {}, nil
+	for _, s in ipairs(SPEC_ORDER) do planned[s] = PlanTab.plannedIds(s) end
 	for _, row in ipairs(bosses) do
 		local isPicked = row == picked
 		-- Only the picked boss is judged. Red on every other row would be nine
@@ -3746,16 +3869,24 @@ function PlanTab.lines(forSpec)
 			if plannedString[row.loadout] == nil then plannedString[row.loadout] = PlanTab.savedLoadoutString(row.loadout) or false end
 			pulled = PlanTab.pullSpec(pulls, row.id, spec, plannedString[row.loadout] or nil)
 		end
+		local best = row.id and PlanTab.bestLootSpec(PlanTab.POOL[row.id], planned, spec)
+		if isPicked then pickedBest = best end
 		lines[#lines + 1] = {
 			text = ("%s%s|r   %s%s|r   %s%s|r%s"):format(
 				isPicked and (WHITE .. "> ") or (GREY .. "   "), row.boss,
 				colour, row.loadout, GREY, SCENARIO_LABEL[row.scenario],
-				pulled and ("   %slast pull: other build, as %s|r"):format(isPicked and RED or GREY, (pulled:gsub("^%a+:", ""))) or ""),
+				(best and ("   " .. GREY .. "loot spec " .. WHITE .. PlanTab.lootSpecText(best) .. "|r") or "")
+				.. (pulled and ("   %slast pull: other build, as %s|r"):format(isPicked and RED or GREY, (pulled:gsub("^%a+:", ""))) or "")),
 			onClick = function() PlanTab.boss = row.boss; refresh() end,
 		}
 	end
 	if PlanTab.loadoutState(picked.loadout, active, edited) == "mismatch" then
 		lines[#lines + 1] = { text = ("%sClick Talents to load \"%s\" before %s.|r"):format(RED, picked.loadout, picked.boss) }
+	end
+	if pickedBest then
+		lines[#lines + 1] = { text = ("%sLoot spec %s before %s: %d of its %d drops %s planned: %s|r"):format(
+			GREY, pickedBest.spec, picked.boss, #pickedBest.hits, pickedBest.size,
+			#pickedBest.hits == 1 and "is" or "are", PlanTab.itemNames(pickedBest.hits)) }
 	end
 
 	lines[#lines + 1] = { text = "" }
@@ -4189,6 +4320,7 @@ loader:SetScript("OnEvent", function(_, event)
 		pcall(PlanTab.armSimc)  -- Simulationcraft loads after this addon (S after D) and is not load-on-demand, so it is here by login
 	else
 		harvested = false
+		PlanTab.poolsDone = false  -- the pools' next pass fills only the cells still nil (card 0022)
 	end
 end)
 
@@ -5489,6 +5621,59 @@ local function selfTest()
 	check(oldTest .. ", re-sim in the hover", oldLine.tip:find("Re-sim?", 1, true) ~= nil, true)
 	check(oldTest .. ", fresh is not amber", freshLine.text:find("|cffffb300", 1, true), nil)
 	check(oldTest .. ", fresh does not say re-sim", freshLine.tip:find("Re-sim", 1, true), nil)
+
+	-- the loot spec per boss (card 0022), against hand-made pools
+	do
+		local function set(...) local s = {} for _, id in ipairs({ ... }) do s[id] = true end return s end
+		local bestTest = "plan tab names the best loot spec per boss"
+		local planned = { Feral = set(1, 2), Guardian = set(1, 2), Resto = set(3) }
+		local pool = { Feral = set(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), Guardian = set(1, 2, 3, 4, 5), Resto = set(3, 11) }
+		local best = PlanTab.bestLootSpec(pool, planned, "Feral")
+		check(bestTest .. ", the smallest pool for its hits wins", best and best.spec, "Resto")
+		check(bestTest .. ", read as text", best and PlanTab.lootSpecText(best), "Resto: 1 of 2")
+		pool.Resto = nil
+		best = PlanTab.bestLootSpec(pool, planned, "Feral")
+		check(bestTest .. ", 2 of 5 beats 2 of 10 whatever spec you are", best and best.spec, "Guardian")
+		check(bestTest .. ", its planned items are named", best and table.concat(best.hits, ","), "1,2")
+		check(bestTest .. ", and its pool size", best and best.size, 5)
+		check(bestTest .. ", no pool read yet says nothing", PlanTab.bestLootSpec(nil, planned, "Feral"), nil)
+		local head = GEAR_PLAN.Feral.st.slots.head:match("id=(%d+)")
+		check(bestTest .. ", the planned ids come from the gear plan", PlanTab.plannedIds("Feral")[tonumber(head)], true)
+		check(bestTest .. ", a spec with no plan has none", next(PlanTab.plannedIds("Resto")), nil)
+
+		local tieTest = "a tie goes to the current spec"
+		local tied = { Feral = set(1, 2), Guardian = set(1, 3) }
+		local both = { Feral = set(1), Guardian = set(1) }
+		check(tieTest .. ", Guardian", PlanTab.bestLootSpec(tied, both, "Guardian").spec, "Guardian")
+		check(tieTest .. ", Feral", PlanTab.bestLootSpec(tied, both, "Feral").spec, "Feral")
+		check(tieTest .. ", neither: the first in spec order", PlanTab.bestLootSpec(tied, both, "Resto").spec, "Feral")
+		check(tieTest .. ", but a better chance still beats the current spec", PlanTab.bestLootSpec({ Feral = set(1, 2, 3), Guardian = set(1, 3) }, both, "Feral").spec, "Guardian")
+
+		local noneTest = "no loot spec line without a planned item"
+		check(noneTest .. ", pure", PlanTab.bestLootSpec({ Feral = set(7, 8) }, planned, "Feral"), nil)
+		-- as drawn: Nek'zali's row carries the text with a planned item in the
+		-- pool and no such text without one, and the picked line names the item
+		local realBoss5, realPool = PlanTab.boss, PlanTab.POOL
+		PlanTab.boss = "Nek'zali"
+		local function nekRow()
+			local row, said
+			for _, line in ipairs(PlanTab.lines("Feral")) do
+				if line.text:find("Nek'zali|r", 1, true) then row = line end
+				if line.text:find("Loot spec Feral before Nek'zali", 1, true) then said = line end
+			end
+			return row, said
+		end
+		PlanTab.POOL = { [3470] = { Feral = set(tonumber(head), 7, 8, 9), Guardian = set(7, 8) } }
+		local row, said = nekRow()
+		check(bestTest .. ", drawn on the boss row", row and row.text:find("loot spec |cffffffffFeral: 1 of 4", 1, true) ~= nil, true)
+		-- the item's id offline, its name in the game: either is an item named
+		check(bestTest .. ", drawn under the picked boss with the item", said and said.text:match("1 of its 4 drops is planned: %S") ~= nil, true)
+		PlanTab.POOL = { [3470] = { Feral = set(7, 8, 9), Guardian = set(7, 8) } }
+		row, said = nekRow()
+		check(noneTest .. ", drawn: the row has no loot spec", row and row.text:find("loot spec", 1, true), nil)
+		check(noneTest .. ", drawn: no line under the picked boss", said, nil)
+		PlanTab.boss, PlanTab.POOL = realBoss5, realPool
+	end
 
 	-- a saved target must survive the round trip and show its item level
 	setGear("zzz not a real item", "Myth", 6)
