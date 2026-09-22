@@ -2,7 +2,7 @@
 not_for_the_loop: Rob, 2026-09-22: building DjinnisBiS by hand in a session on msiraider
 needs: 0008
 ---
-# 0010 A Blizzard equipment set for each plan
+# 0012 A Blizzard equipment set for each plan
 
 ## Why
 
@@ -66,3 +66,6 @@ and `(INVSLOT_TABARD)`, then `GetEquipmentSetID(name)`, then `SaveEquipmentSet(i
 
 - 2026-09-22 Claude: written from Rob's "A" to the AskMrRobot ideas, in a SecondBrain session.
   Ideation only. Nothing is built.
+- 2026-09-22 Claude, reviewing `0010`: this card was `0010` too. Two sessions allocated the same
+  number the same night, and the lower-rank card had three commits under it by the time it was
+  seen, so this one, unbuilt and referenced nowhere by number, took the next free one.

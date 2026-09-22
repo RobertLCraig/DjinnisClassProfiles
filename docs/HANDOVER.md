@@ -225,11 +225,11 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this. Two buildable cards sit in `todo/`: `0009`**, a Mythic+ plan beside
-the raid plan, and **`0011`**, a Talents button that loads the loadout through Blizzard's own
-helper (as of 2026-09-22). Both carry `not_for_the_loop:` because Rob builds this addon by hand on
-msiraider. Whoever builds either adds to the `PlanTab` table rather than a new top-level local:
-the main chunk holds 190 of Lua's 200.
+**`docs/board/` owns this. Three buildable cards sit in `todo/`: `0009`**, a Mythic+ plan beside
+the raid plan, **`0011`**, a Talents button that loads the loadout through Blizzard's own helper,
+and **`0012`**, a Blizzard equipment set saved after Equip all (as of 2026-09-22). All carry
+`not_for_the_loop:` because Rob builds this addon by hand on msiraider. Whoever builds one adds
+to the `PlanTab` table rather than a new top-level local: the main chunk holds 190 of Lua's 200.
 
 Seven cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006`, `0007` and `0010`,
 all wanting a live client. **They are one trip**, and each card lists its own checks under
@@ -284,7 +284,9 @@ One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count 
   Worth carrying: a sort key that "reads right" is a claim until the data is checked, and here
   Wowhead's tooltips said the opposite of the builder's reading; and a drawn row nobody asserts
   on can be deleted without a check noticing, so the tab-as-drawn checks from the 0007 review are
-  the pattern for anything new on the Plan tab.
+  the pattern for anything new on the Plan tab. Also: two sessions gave `0010` to two cards the
+  same night; the unbuilt equipment-set card is `0012` now. Check `ls docs/board/*/` for the
+  highest number before allocating, not the lane you are in.
 - **2026-09-22** Card `0008` reviewed, three fixes, deployed at v0.17.1. Worth carrying: a check
   with nothing to act on cannot fail, and the equip checks were exactly that until `selfTest` got
   a pretend bag; `a and b or c` is wrong the moment `b` may be nil; and the slot-mark watcher does

@@ -10,28 +10,24 @@ needs: 0008
 **Four looks in the game, on your Feral druid, out of combat, with the Flawless Masterful Garnet
 still in your wrist.** It is v0.18.1 and already deployed.
 
-1. Type `/reload`, then open the character sheet. The wrist slot has a grey ring with the word
-   "rank" under it, not an amber one saying "gem". Hover the wrist: the gold line reads
-   "Plan: fine. Masterful Garnet (rank 3 of 4) is on; a higher rank exists".
-2. Type `/bis`, click "Plan". Under "2. Gear to change" the wrist row reads "Wrist: fine. ..."
-   in the same words. Under "3. To buy" the first line is green "Nothing to buy" (if every other
-   slot is right), and below it a grey line "Higher ranks exist, if you want to spend on them:"
-   with "1x Masterful Garnet (rank 4 of 4)" and a Search AH button.
-3. At the auction house, click that Search AH: the search box says "Masterful Garnet" and the
-   results include both the plain and the Flawless ones.
-4. Put a wrong gem in something planned (any Peridot in the wrist would do), or take the garnet
-   out: the ring turns amber and says "gem", and "To buy" lists the garnet again.
+1. `/reload`, open the character sheet. The wrist has a grey ring saying "rank", not an amber
+   one saying "gem". Hover it: "Plan: fine. Masterful Garnet (rank 3 of 4) is on; a higher rank
+   exists".
+2. `/bis`, click "Plan". Under "2. Gear to change" the wrist row says "Wrist: fine. ..." in the
+   same words. Under "3. To buy": green "Nothing to buy" (if every other slot is right), then a
+   grey "Higher ranks exist, if you want to spend on them:" with "1x Masterful Garnet (rank 4 of
+   4)" and a Search AH button.
+3. At the auction house, click that Search AH: the box says "Masterful Garnet" and the results
+   include both the plain and the Flawless ones.
+4. Put a Peridot in the wrist instead, or take the garnet out: the ring turns amber and says
+   "gem", and "To buy" lists the garnet again.
 
-**Pass** is all of:
-- steps 1 to 4 show what they say
-- no red Lua error box
-
+**Pass** is all four steps as written and no red Lua error box.
 **Fail** is any step that differs. Write the step number and what you saw in `## Comments`.
 
-**Why it needs you:** the only place these marks exist is inside the game, and no agent can run
-it. One thing is yours to call, not a check: the tab names your gem "Masterful Garnet (rank 3
-of 4)" and the game calls it "Flawless Masterful Garnet". If you would rather read the game's
-name, say so and it is one line.
+**Why it needs you:** the marks exist only inside the game, and no agent can run it. One thing is
+a call, not a check: the tab names your gem "Masterful Garnet (rank 3 of 4)" where the game says
+"Flawless Masterful Garnet". If you would rather read the game's name, say so; it is one line.
 
 ## Why
 
@@ -101,10 +97,10 @@ compare ids, and nothing told it which ids were the same thing at another rank.
   extra worn gem, a higher worn rank (ok), two planned of one family against one worn; the pool
   is removed from after the inner loop. `planLineFor` for "lesser" reads `mark.worn.enchant`
   unguarded, and every such mark comes from `slotStates`, which sets `worn`. `wantedFrom` takes
-  "change" only, so 0005 and 0006 are unchanged. Search AH for an enchant is Raidbots' `itemName`,
-  the scroll the house sells, confirmed on 0008 step 5. The script keeps the line ending, its user
-  agent gets 200, `--check` exits 0 when current, and only the marked block is rewritten. No
-  planned family collides with a "Perfect " gem from an old expansion. Locals: 190 of 200.
+  "change" only, so 0005 and 0006 are unchanged. Search AH for an enchant is the scroll's item
+  name, confirmed on 0008 step 5. The script keeps the line ending, gets 200, `--check` exits 0
+  when current, rewrites only the marked block; no planned family collides with a "Perfect " gem
+  from an old expansion. Locals: 190 of 200.
   **Security.** Weakest: the table trusts Raidbots at author time, so a wrong family name there
   would make two gems read as one; the script refuses to write when a planned id is missing.
   Unchecked: every id reaching `PlanTab.RANK` is a plan constant or parsed from a link that
