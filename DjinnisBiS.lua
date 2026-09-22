@@ -2837,6 +2837,22 @@ local function planItemInBags(entry)
 	return nil
 end
 
+-- The bags, and the bank too while it is open: at the bank its tabs are
+-- containers like any other (Enum.BagIndex.CharacterBankTab_1 .. AccountBankTab_5,
+-- 6 to 16) and a pickup from one equips the same way. Rob pressed Equip all
+-- standing at the bank on 2026-09-22 with five pieces in it and nothing moved.
+function PlanTab.holding(entry)
+	local bag, slot = planItemInBags(entry)
+	if bag then return bag, slot, "bags" end
+	if not (C_Bank and C_Bank.AreAnyBankTypesViewable and C_Bank.AreAnyBankTypesViewable()) then return nil end
+	for tab = 6, 16 do
+		for s = 1, C_Container.GetContainerNumSlots(tab) or 0 do
+			if planMatchesLink(entry, C_Container.GetContainerItemLink(tab, s)) then return tab, s, "bank" end
+		end
+	end
+	return nil
+end
+
 -- The three buttons (Rob, 2026-09-22: "planner should have a button to change
 -- talents / gear / shop for gems and enchants on the AH").
 
@@ -2854,7 +2870,7 @@ end
 -- finger. Out of combat only. Returns true when an equip was asked for.
 function PlanTab.equip(entry, slotID)
 	if InCombatLockdown() then return false end
-	local bag, slot = planItemInBags(entry)
+	local bag, slot = PlanTab.holding(entry)
 	if not bag then return false end
 	-- Step for step what Blizzard's own equipment sets do
 	-- (Blizzard_FrameXML/Mainline/EquipmentManager.lua, EquipmentManager_EquipContainerItem),
@@ -2868,7 +2884,7 @@ function PlanTab.equip(entry, slotID)
 	end
 	ClearCursor()
 	C_Container.PickupContainerItem(bag, slot)
-	if not CursorHasItem() then return refused("could not pick it up (the bag slot is locked, or the bank is holding it)") end
+	if not CursorHasItem() then return refused("could not pick it up (the slot is locked, a move is still in flight)") end
 	if not C_PaperDollInfo.CanCursorCanGoInSlot(slotID) then return refused("the game says it cannot go in " .. (PLAN_SLOT_LABEL[slotID] or "that slot")) end
 	if IsInventoryItemLocked(slotID) then return refused((PLAN_SLOT_LABEL[slotID] or "that slot") .. " is locked, a move is still in flight") end
 	PickupInventoryItem(slotID)
@@ -3014,19 +3030,20 @@ function PlanTab.lines(forSpec)
 	for _, slotID in ipairs(slotIDs) do
 		local mark = marks[slotID]
 		local _, link = C_Item.GetItemInfo(mark.entry.id)
-		local canEquip = mark.state == "change" and planItemInBags(mark.entry) ~= nil
+		local _, _, where = mark.state == "change" and PlanTab.holding(mark.entry)
+		local canEquip = where ~= nil
 		if canEquip then inBags[#inBags + 1] = slotID end
 		lines[#lines + 1] = {
 			text = ("   %s%s:|r %s"):format(WHITE, PLAN_SLOT_LABEL[slotID] or "?",
 				(planLineFor(mark):gsub("^Plan: ", ""))),
 			link = mark.state == "change" and link or nil,
-			button = canEquip and { label = "Equip", tip = "Equip the copy in your bags into this slot.",
+			button = canEquip and { label = "Equip", tip = ("Equip the copy in %s into this slot."):format(where == "bank" and "the open bank" or "your bags"),
 				onClick = function() PlanTab.equip(mark.entry, slotID) end } or nil,
 		}
 	end
 	if #inBags > 0 then
-		lines[#lines + 1] = { text = ("   %s%d of these %s in your bags.|r"):format(GREY, #inBags, #inBags == 1 and "is" or "are"),
-			button = { label = "Equip all", tip = "Equip every planned piece that is in your bags.",
+		lines[#lines + 1] = { text = ("   %s%d of these can go on from here.|r"):format(GREY, #inBags),
+			button = { label = "Equip all", tip = "Equip every planned piece in your bags, and in the bank while it is open.",
 				onClick = function()
 					for _, slotID in ipairs(inBags) do PlanTab.equip(marks[slotID].entry, slotID) end
 				end } }
