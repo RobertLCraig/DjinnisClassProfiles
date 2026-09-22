@@ -2571,6 +2571,9 @@ local function buildWindow()
 	f.statPane:Hide()
 
 	tinsert(UISpecialFrames, "DjinnisBiSFrame")  -- Escape closes it
+	-- A new frame is born shown, so without this the first /djbis after a
+	-- reload "toggled" it closed and only the second opened it (Rob, 2026-09-22).
+	f:Hide()
 	return f
 end
 
@@ -2853,15 +2856,22 @@ function PlanTab.equip(entry, slotID)
 	if InCombatLockdown() then return false end
 	local bag, slot = planItemInBags(entry)
 	if not bag then return false end
+	-- Step for step what Blizzard's own equipment sets do
+	-- (Blizzard_FrameXML/Mainline/EquipmentManager.lua, EquipmentManager_EquipContainerItem),
+	-- because that is what works at a bank, a vendor and in a raid. Each refusal
+	-- says why in chat: Rob pressed Equip all at the bank on 2026-09-22 and
+	-- nothing moved and nothing said so.
+	local function refused(why)
+		ClearCursor()  -- never leave it on the cursor: a click on the world from there is the destroy prompt
+		print(("%sDjinni's BiS|r %s%s not equipped: %s|r"):format(GOLD, GREY, C_Item.GetItemInfo(entry.id) or ("item " .. entry.id), why))
+		return false
+	end
 	ClearCursor()
 	C_Container.PickupContainerItem(bag, slot)
-	-- A locked slot (a move still in flight) picks nothing up. Blizzard's
-	-- EquipmentManager_EquipContainerItem makes the same two checks.
-	if not CursorHasItem() then return false end
-	EquipCursorItem(slotID)
-	-- Refused? Never leave it on the cursor: a click on the world from there
-	-- is the destroy-item prompt.
-	if CursorHasItem() then ClearCursor() end
+	if not CursorHasItem() then return refused("could not pick it up (the bag slot is locked, or the bank is holding it)") end
+	if not C_PaperDollInfo.CanCursorCanGoInSlot(slotID) then return refused("the game says it cannot go in " .. (PLAN_SLOT_LABEL[slotID] or "that slot")) end
+	if IsInventoryItemLocked(slotID) then return refused((PLAN_SLOT_LABEL[slotID] or "that slot") .. " is locked, a move is still in flight") end
+	PickupInventoryItem(slotID)
 	return true
 end
 
@@ -3817,8 +3827,11 @@ local function selfTest()
 	-- passed with the combat guard deleted, because there was nothing to do.)
 	local ring = parsePlanLine("id=1,ilevel=300")
 	local wasInCombat, wasContainer, wasIlvl = InCombatLockdown, C_Container, C_Item.GetDetailedItemLevelInfo
-	local wasClear, wasHas, wasEquip = ClearCursor, CursorHasItem, EquipCursorItem
-	local held, picked, equippedTo
+	local wasClear, wasHas, wasEquip = ClearCursor, CursorHasItem, PickupInventoryItem
+	local wasDoll, wasLocked = C_PaperDollInfo, IsInventoryItemLocked
+	local held, picked, equippedTo, slotLocked, canGo = nil, nil, nil, false, true
+	C_PaperDollInfo = { CanCursorCanGoInSlot = function() return canGo end }
+	IsInventoryItemLocked = function() return slotLocked end
 	C_Container = {
 		GetContainerNumSlots = function(bag) return bag == 0 and 2 or 0 end,
 		GetContainerItemLink = function(bag, slot) return bag == 0 and slot == 2 and "|Hitem:1::::::|h[Ring]|h" or nil end,
@@ -3827,7 +3840,7 @@ local function selfTest()
 	C_Item.GetDetailedItemLevelInfo = function() return 300 end
 	ClearCursor = function() held = false end
 	CursorHasItem = function() return held == true end
-	EquipCursorItem = function(slotID) equippedTo, held = slotID, false end
+	PickupInventoryItem = function(slotID) equippedTo, held = slotID, false end
 	InCombatLockdown = function() return true end
 	check("equip button does nothing in combat", PlanTab.equip(ring, 11), false)
 	check("equip button does nothing in combat, picks nothing up", picked, nil)
@@ -3839,8 +3852,17 @@ local function selfTest()
 	check(equipTest .. ", that bag slot", picked and picked[1] .. "," .. picked[2], "0,2")
 	check(equipTest .. ", that inventory slot", equippedTo, 11)
 	check(equipTest .. ", nothing left on the cursor", held, false)
+	-- the two refusals Blizzard's equipment sets make, each clearing the cursor
+	equippedTo, slotLocked = nil, true
+	check("equip button refuses a locked slot", PlanTab.equip(ring, 11), false)
+	check("equip button refuses a locked slot, equips nothing", equippedTo, nil)
+	check("equip button refuses a locked slot, nothing left on the cursor", held, false)
+	slotLocked, canGo = false, false
+	check("equip button refuses a slot the item cannot go in", PlanTab.equip(ring, 11), false)
+	check("equip button refuses a slot the item cannot go in, nothing left on the cursor", held, false)
 	InCombatLockdown, C_Container, C_Item.GetDetailedItemLevelInfo = wasInCombat, wasContainer, wasIlvl
-	ClearCursor, CursorHasItem, EquipCursorItem = wasClear, wasHas, wasEquip
+	ClearCursor, CursorHasItem, PickupInventoryItem = wasClear, wasHas, wasEquip
+	C_PaperDollInfo, IsInventoryItemLocked = wasDoll, wasLocked
 	check("search button without the auction house open", PlanTab.searchAH("x"), false)
 
 	local emptyTest = "empty shopping list says nothing to buy"
