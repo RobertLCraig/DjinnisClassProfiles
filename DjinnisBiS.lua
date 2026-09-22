@@ -2996,7 +2996,7 @@ local function buildWindow()
 	-- The template's inset starts at -60; two rows of buttons need it lower.
 	f.Inset:SetPoint("TOPLEFT", f, "TOPLEFT", 4, -90)
 
-	-- The content choice at the top of the Plan tab: three buttons, lit,
+	-- The content choice at the top of the Plan tab: one button per PlanTab.CHOICES, lit,
 	-- greyed with a reason, never a button that goes round (rule 11).
 	f.choices = {}
 	for i, key in ipairs(PlanTab.CHOICES) do
@@ -4767,7 +4767,7 @@ function PlanTab.lines(forSpec)
 end
 
 -- Pins the content choice, from the strip's button or the Plan tab's row of
--- three (card 0020). Picking Mythic+ pins the stat pane's switch to Mythic+;
+-- choices (card 0020). Picking Mythic+ pins the stat pane's switch to Mythic+;
 -- picking a raid scenario pins it to Raid, because the choice is one thing to
 -- press, not two. Inside an instance the place decides, and a click on the
 -- choice the place already made writes nothing. Then everything that reads the
@@ -5606,7 +5606,7 @@ PlanTab.SIDEBAR_RIVAL = "TalentLoadoutManager"  -- its own sidebar on the same w
 
 -- One row per loadout the content asks for, in the order the boss table
 -- names them, each with its bosses. `context` is statContext(): Raid takes
--- the 1 and 2 target rows, Mythic+ the key row. `mark` is "active" when the
+-- every row that is not the key row, Mythic+ the key row. `mark` is "active" when the
 -- talents are that loadout, "edited" when they were and a point has since
 -- moved (card 0014), nil otherwise. Pure, for /bis test.
 function PlanTab.sidebarRows(bosses, context, active, edited)
