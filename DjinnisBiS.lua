@@ -976,9 +976,9 @@ local function activeHero()
 	return heroSlug(info.name)
 end
 
--- Raid or Mythic+, read off where you are standing. That is right more often
--- than a remembered setting, and it is still overridable, because gearing for
--- Tuesday happens in a city.
+-- Raid or Mythic+, read off where you are standing. Inside an instance this
+-- is the answer and the switch below cannot override it (card 0009); outside,
+-- nil, and the switch decides, because gearing for Tuesday happens in a city.
 local function autoContext()
 	if not GetInstanceInfo then return nil end
 	local _, instanceType = GetInstanceInfo()
@@ -1594,7 +1594,6 @@ function PlanTab.loadoutState(planned, active)
 	return planned == active and "match" or "mismatch"
 end
 
-local PLAN_SCENARIOS = { "st", "2t" }  -- the raid ones; "mplus" is a content, not a target count
 local SCENARIO_LABEL = { st = "1 target", ["2t"] = "2 targets", mplus = "Mythic+" }
 
 -- The plan cell in use. In a key, or with the stat pane's switch on Mythic+,
@@ -1613,9 +1612,13 @@ end
 -- The next stop on the strip's button: 1 target, 2 targets, Mythic+, round
 -- again. Picking Mythic+ pins the content switch to Mythic+; picking a raid
 -- scenario pins it to Raid, because the button is one thing to press, not two.
-function PlanTab.nextScenario(scenario)
+-- `here` is autoContext(): in a raid the instance refuses Mythic+, so the
+-- button goes 1, 2, 1 (without this it stuck on 2 targets for good); in a
+-- dungeon there is nothing to cycle and the button stays put.
+function PlanTab.nextScenario(scenario, here)
+	if here == "mplus" then return "mplus" end
 	if scenario == "st" then return "2t" end
-	if scenario == "2t" then return "mplus" end
+	if scenario == "2t" and here ~= "raid" then return "mplus" end
 	return "st"
 end
 
@@ -1786,6 +1789,7 @@ local function armBagMarks()
 		"PLAYER_EQUIPMENT_CHANGED",
 		"PLAYER_SPECIALIZATION_CHANGED",
 		"PLAYER_REGEN_ENABLED",
+		"PLAYER_ENTERING_WORLD",  -- zoning into a key or a raid changes which plan the bags follow (card 0009)
 		"SOCKET_INFO_CLOSE",  -- a gem went in (or the socket window shut): the Plan tab's gem lines
 		defaultBags and "BAG_UPDATE_DELAYED" or nil,
 	}) do
@@ -2500,6 +2504,9 @@ local function buildStatPane(parent, opts)
 	pane.heading:SetWordWrap(false)
 
 	pane.context:SetScript("OnClick", function()
+		-- Inside an instance the button is disabled; if a click lands anyway,
+		-- writing the pin here would flip it unseen and surprise the next city.
+		if autoContext() then return end
 		local now = statContext()
 		db().statContext = (now == "raid") and "mplus" or "raid"
 		for _, other in ipairs(statPanes) do other:Update() end
@@ -2537,6 +2544,7 @@ local function buildStatPane(parent, opts)
 		local spec = opts.spec and opts.spec() or playerSpec()
 		local context, pinned = statContext()
 		self.context:SetText(CONTEXT_LABEL[context] .. (pinned and "" or " *"))
+		self.context:SetEnabled(autoContext() == nil)  -- where you stand is not a choice
 
 		-- `spec and targetsFor(...)` would keep only the first return, which is
 		-- how the hero name would silently go missing
@@ -3258,6 +3266,7 @@ local function buildSlotMarks(holder, below)
 		local scenario = spec and planScenario(spec)
 		local plan = spec and gearPlanFor(spec, scenario)
 		strip.scenario:SetText(SCENARIO_LABEL[scenario or "st"])
+		strip.scenario:SetEnabled(autoContext() ~= "mplus")  -- in a dungeon there is nothing to cycle
 
 		-- A secret link cannot be matched, and reading it as a bare slot would
 		-- paint the whole sheet red. Leave everything as it was.
@@ -3306,7 +3315,8 @@ local function buildSlotMarks(holder, below)
 		local spec = playerSpec()
 		if not spec then return end
 		local saved = db()
-		local next = PlanTab.nextScenario(planScenario(spec))
+		local next = PlanTab.nextScenario(planScenario(spec), autoContext())
+		if next == planScenario(spec) then return end  -- nowhere to go, so write nothing
 		saved.statContext = next == "mplus" and "mplus" or "raid"
 		if next ~= "mplus" then
 			saved.planScenario = saved.planScenario or {}
@@ -3898,7 +3908,20 @@ local function selfTest()
 	check(contentTest .. ", outside, no switch, is raid", planScenario("Feral"), "2t")
 	check(contentTest .. ", the button goes 1, 2, Mythic+, round",
 		PlanTab.nextScenario("st") .. PlanTab.nextScenario("2t") .. PlanTab.nextScenario("mplus"), "2tmplusst")
+	check(contentTest .. ", in a raid the button goes 1, 2, 1",
+		PlanTab.nextScenario("st", "raid") .. PlanTab.nextScenario("2t", "raid"), "2tst")
+	check(contentTest .. ", in a dungeon the button stays on Mythic+", PlanTab.nextScenario("mplus", "mplus"), "mplus")
+	-- The bag list is rebuilt from the current content and nothing else: in a
+	-- dungeon with no Mythic+ cell it is empty, not the raid list.
+	GetInstanceInfo = function() return "Nowhere", "none" end
+	db().statContext, db().planScenario = nil, nil  -- outside, unpinned, the 1 target cell (the filled one)
+	rebuildBagWanted()
+	check(contentTest .. ", outside, the bags follow the raid plan", bagScenario == "st" and #bagWanted > 0, true)
+	GetInstanceInfo = function() return "Somewhere", "party" end
+	rebuildBagWanted()
+	check(contentTest .. ", in a dungeon the bags follow the Mythic+ plan, empty", bagScenario == "mplus" and #bagWanted == 0, true)
 	GetInstanceInfo, db().statContext, db().planScenario = keptInstance, keptContext, keptScenario
+	rebuildBagWanted()
 	check(contentTest .. ", every scenario has a label", SCENARIO_LABEL.mplus ~= nil and SCENARIO_LABEL.st ~= nil, true)
 
 	local mplusTest = "missing mplus plan is said, not filled from raid"
