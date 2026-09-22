@@ -2001,10 +2001,13 @@ end
 -- frame, for the same taint reason as the bag glows.
 PlanTab.ROLL_GLOWS = {}
 function PlanTab.markRollFrame(frame)
+	-- No early return: a pooled frame keeps its glow from the last roll unless
+	-- this show hides it, so an unreadable or missing roll id hides it too.
 	local rollID = frame.rollID
-	if not (canRead(rollID) and rollID and frame.IconFrame) then return false end
-	local link = GetLootRollItemLink and GetLootRollItemLink(rollID)
-	local lines = PlanTab.planLinesForLink(link)
+	local lines
+	if canRead(rollID) and rollID and frame.IconFrame then
+		lines = PlanTab.planLinesForLink(GetLootRollItemLink and GetLootRollItemLink(rollID))
+	end
 	local show = lines ~= nil and #lines > 0
 	if show and not PlanTab.ROLL_GLOWS[frame] then PlanTab.ROLL_GLOWS[frame] = newBagGlow(frame.IconFrame) end
 	if PlanTab.ROLL_GLOWS[frame] then PlanTab.ROLL_GLOWS[frame]:SetShown(show) end
@@ -7025,6 +7028,13 @@ local function selfTest()
 		local listTest = "tooltip lists each plan that has the item"
 		local headId = tonumber(GEAR_PLAN.Feral.st.slots.head:match("id=(%d+)"))
 		local headLink = "|Hitem:" .. headId .. "::::::::80:::::|h[x]|h"
+		-- Nothing worn, held or levelled for the whole block: in a client these
+		-- three read the real character, and a worn head or a bare link that
+		-- levels below the plan turned four checks red (review, 2026-09-22).
+		local wasWorn, wasCount, wasLevel = GetInventoryItemLink, C_Item.GetItemCount, C_Item.GetDetailedItemLevelInfo
+		GetInventoryItemLink = function() return nil end
+		C_Item.GetItemCount = function() return 0 end
+		C_Item.GetDetailedItemLevelInfo = function() return nil end
 		local index = PlanTab.buildPlanIndex()
 		check(listTest .. ", the planned head is under Feral raid", index[headId] and (index[headId][1].spec .. " " .. index[headId][1].content), "Feral raid")
 		check(listTest .. ", with its planned level", index[headId] and index[headId][1].ilvl ~= nil, true)
@@ -7076,9 +7086,15 @@ local function selfTest()
 		check(listTest .. ", and keeps its glow", PlanTab.ROLL_GLOWS[frame] ~= nil, true)
 		frame.rollID = 2
 		check(noneTest .. ", the roll frame with an unplanned item is not marked", PlanTab.markRollFrame(frame), false)
-		check(noneTest .. ", a roll frame with no roll is not marked", PlanTab.markRollFrame({ IconFrame = frame.IconFrame }), false)
+		-- the pooled frame's next show with no readable roll hides the glow it kept, rather than leaving it up
+		local shown
+		PlanTab.ROLL_GLOWS[frame] = { SetShown = function(_, value) shown = value end }
+		frame.rollID = nil
+		check(noneTest .. ", a roll frame with no roll is not marked", PlanTab.markRollFrame(frame), false)
+		check(noneTest .. ", and its old glow is hidden", shown, false)
 		PlanTab.ROLL_GLOWS[frame] = nil
 		GetLootRollItemLink = keptRoll
+		GetInventoryItemLink, C_Item.GetItemCount, C_Item.GetDetailedItemLevelInfo = wasWorn, wasCount, wasLevel
 	end
 
 	-- Card 0024: the spec prompt when a group finder listing takes you. The
