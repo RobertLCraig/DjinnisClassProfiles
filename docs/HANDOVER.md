@@ -6,14 +6,21 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.18.1, `/djbis` (and `/bis`), `Interface: 120100`. No remote.
-**2026-09-22, latest: card `0010` is built, reviewed and in `human-review/` at v0.18.1.** A lower
+**Status:** v0.19.1, `/djbis` (and `/bis`), `Interface: 120100`. No remote.
+**2026-09-22, latest: card `0009` is built, reviewed and in `human-review/` at v0.19.1.** Mythic+
+is a third plan cell beside the raid ones, `mplus`, filed by the generator off `simbot.fightStyle`
+starting `Dungeon`; the cell is empty until Rob runs one DungeonSlice Top Gear. **The content rule
+changed: where you stand beats the pinned switch now** (before, the pin won), so a key shows the
+Mythic+ plan whatever was pinned in a city. The review fixed the strip button sticking on 2 targets
+inside a raid, greyed both switches inside an instance, and made zoning rebuild the bag glows.
+Seven looks are on the card. The fix is inside `3e181ba`, a concurrent session's board commit.
+**2026-09-22, earlier: card `0010` is built, reviewed and in `human-review/` at v0.18.1.** A lower
 rank of the planned enchant or gem is "lesser" now, a grey "rank" mark and "Plan: fine.", and the
 Plan tab lists the higher rank under "Higher ranks exist" instead of "To buy". The ranks come from
 a fourth generated block written by `update-plan-ranks.py` out of Raidbots. Its review turned the
 gem order round (quality first, then item level: Wowhead's stats say the rare at 278 beats the
 uncommon at 295) and added three checks against the tab as drawn. Four looks in the game are on
-the card. `todo/` holds `0009` and `0011`.
+the card.
 **2026-09-22, earlier: card `0008` is in `done/`, confirmed by Rob in the game.**
 The Plan tab has buttons now: Talents opens the talent window and loads nothing, Equip puts the
 exact bag copy in the planned slot, Search AH runs the auction house's own search. Its review
@@ -52,7 +59,7 @@ is now in `human-review/` for five looks in the game.
 **2026-09-21, last: card `0003` is now in `human-review/`, not `ai-review/` or `todo/`.** Its in-combat
 zero was fixed at 0.15.1, a second adversarial pass stopped a proc from emptying the rating cache
 mid-fight, and what is left is six looks only a game client can settle.
-_Last updated: 2026-09-22 (card 0010 reviewed and in human-review, v0.18.1)_
+_Last updated: 2026-09-22 (card 0009 reviewed and in human-review, v0.19.1)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -146,6 +153,14 @@ than a task.
   bundled libraries ship inside the addon, so they are part of the artefact.
 
 ## Current state
+**2026-09-22, card 0009: where you stand beats the pinned switch, at v0.19.0 and 0.19.1.**
+`statContext()` answers the instance first (`party` is Mythic+, `raid` is Raid), then the stat
+pane's pinned switch, then Raid. Until this card the pin won, and a Raid pin from a city followed
+Rob into a key. `planScenario(spec)` is `mplus` whenever that content is Mythic+, else the saved
+1 or 2 target raid cell, so the stat targets, slot glows, bag glows and Plan tab read one rule.
+Inside an instance both switches are greyed because the content is not a choice there; the strip's
+button cycles 1, 2, Mythic+ outside, 1, 2 in a raid, and stays put in a dungeon.
+
 **2026-09-21, card 0004: a gear plan, at v0.13.0. Data only, nothing draws it yet.** `GEAR_PLAN` in
 `DjinnisBiS.lua` holds, per spec and scenario, the gear a Top Gear sim chose: each slot's item id,
 item level, enchant, gems and bonus ids, plus the talent loadout's name and import string.
@@ -225,17 +240,19 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this. Three buildable cards sit in `todo/`: `0009`**, a Mythic+ plan beside
-the raid plan, **`0011`**, a Talents button that loads the loadout through Blizzard's own helper,
-and **`0012`**, a Blizzard equipment set saved after Equip all (as of 2026-09-22). All carry
-`not_for_the_loop:` because Rob builds this addon by hand on msiraider. Whoever builds one adds
-to the `PlanTab` table rather than a new top-level local: the main chunk holds 190 of Lua's 200.
+**`docs/board/` owns this.** `todo/` holds `0011`, a Talents button through Blizzard's own
+helper, `0012`, a Blizzard equipment set after Equip all, `0020`, the game-window look (its rule 11
+is the three-button Raid / Mythic+ row the Plan tab still lacks), and `0013` to `0027`, ideas from
+other addons, one card each (as of 2026-09-22). All carry `not_for_the_loop:` because Rob builds
+this addon by hand on msiraider. Whoever builds one adds to the `PlanTab` table rather than a new
+top-level local: the main chunk holds 189 of Lua's 200.
 
-Seven cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006`, `0007` and `0010`,
-all wanting a live client. **They are one trip**, and each card lists its own checks under
+Eight cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006`, `0007`, `0009` and
+`0010`, all wanting a live client. **They are one trip**, and each card lists its own checks under
 `## What I need from you`. Open `/bis` for `0001` and `0002`; open the character sheet, hit a
 dummy and hover a ring for `0003` and `0005`; open Baganator for `0006`; open the Plan tab for
-`0007`; hover the wrist with the rank 3 garnet in it for `0010`. The buttons (`0008`) are
+`0007`; click the strip's button round and zone into a dungeon for `0009`, then run one DungeonSlice
+Top Gear; hover the wrist with the rank 3 garnet in it for `0010`. The buttons (`0008`) are
 confirmed working; only the Equip all ring-order path is unseen.
 
 ## Blockers / open questions
@@ -280,6 +297,13 @@ confirmed working; only the Equip all ring-order path is unseen.
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
+- **2026-09-22, last** Card `0009` reviewed, four fixes and four checks, deployed at v0.19.1.
+  Worth carrying: a button that cycles a list must be told which stops the place has removed, or
+  it sticks on the last one it can reach; a switch the place overrides should be greyed, not left
+  writing a pin nobody sees; and a cached list keyed on the content needs a zone event, because
+  gear and spec events do not fire on a loading screen. Also: two sessions on this repo at once,
+  and the other's `git commit` took my staged files into its board commit (`3e181ba`). Stage and
+  commit in one step, and check `git log -1` before staging anything.
 - **2026-09-22, later** Card `0010` reviewed, one fix and three checks, deployed at v0.18.1.
   Worth carrying: a sort key that "reads right" is a claim until the data is checked, and here
   Wowhead's tooltips said the opposite of the builder's reading; and a drawn row nobody asserts
