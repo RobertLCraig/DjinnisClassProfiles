@@ -6,60 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.19.1, `/djbis` (and `/bis`), `Interface: 120100`. No remote.
-**2026-09-22, latest: card `0009` is built, reviewed and in `human-review/` at v0.19.1.** Mythic+
-is a third plan cell beside the raid ones, `mplus`, filed by the generator off `simbot.fightStyle`
-starting `Dungeon`; the cell is empty until Rob runs one DungeonSlice Top Gear. **The content rule
-changed: where you stand beats the pinned switch now** (before, the pin won), so a key shows the
-Mythic+ plan whatever was pinned in a city. The review fixed the strip button sticking on 2 targets
-inside a raid, greyed both switches inside an instance, and made zoning rebuild the bag glows.
-Seven looks are on the card. The fix is inside `3e181ba`, a concurrent session's board commit.
-**2026-09-22, earlier: card `0010` is built, reviewed and in `human-review/` at v0.18.1.** A lower
-rank of the planned enchant or gem is "lesser" now, a grey "rank" mark and "Plan: fine.", and the
-Plan tab lists the higher rank under "Higher ranks exist" instead of "To buy". The ranks come from
-a fourth generated block written by `update-plan-ranks.py` out of Raidbots. Its review turned the
-gem order round (quality first, then item level: Wowhead's stats say the rare at 278 beats the
-uncommon at 295) and added three checks against the tab as drawn. Four looks in the game are on
-the card.
-**2026-09-22, earlier: card `0008` is in `done/`, confirmed by Rob in the game.**
-The Plan tab has buttons now: Talents opens the talent window and loads nothing, Equip puts the
-exact bag copy in the planned slot, Search AH runs the auction house's own search. Its review
-fixed three faults at 0.17.1: an unnamed enchant searched by item id, a refused equip left on
-the cursor, and a redraw that only worked once the character sheet had been opened. Rob then saw
-all three buttons work, and 0.17.2 made them look like buttons. **`todo/` holds one card, `0009`**, a Mythic+ plan beside the raid plan, written
-by Rob the same night; six cards wait on one trip to a live client.
-**2026-09-21: card `0007` is built, reviewed and in `human-review/`.** A
-fourth tab, Plan, names the talent loadout per boss, the slots to change and what to buy. Its review
-made the checks read the drawn tab and fixed three small faults at 0.16.1. It wants eight looks in
-the game. **`todo/` is now empty**, and six cards wait on one trip to a live client. The main chunk
-of `DjinnisBiS.lua` has nine top-level locals left of Lua's 200: add to a table, not a local.
-**Built and deployed locally and never published**, which `CHANGELOG.md` states in as many words:
-everything is under `[Unreleased]`.
-**Three live cards and every one of them is waiting on a live client.** `0001` and `0002` sit in
-`human-review/` and are Rob's: `0001`, "the window has no decent way to open", needs a **full client
-restart**, not a `/reload`. `0002`, "trinket tiers borrowed from ClassCodex", needs ten minutes with
-ClassCodex disabled and then enabled. `0003`, "stat targets, and what a drop does to them", is in
-`ai-review/`; Rob has now looked four times. Placement, dragging, side-swapping and the styling are
-all **confirmed working at 0.11.3**. What is fixed and **not looked at** is 0.12.0, and it is the
-card's actual subject rather than its chrome: the hero talent was never being read, and a one-handed
-weapon was compared against an empty off-hand while a two-hander was equipped.
-**2026-09-21: card `0004` is built and in `ai-review/`**, a gear plan table baked in from a Raidbots
-Top Gear report, data only. One cell of it is filled, Feral single target. Cards `0005`, `0006` and
-`0007` in `todo/` draw it and none is started.
-**2026-09-21, later: card `0005` is built at 0.14.0 and in `ai-review/`.** Slots on the character
-sheet that differ from the gear plan now glow, red for a wrong item and amber for a wrong enchant
-or gem. Not yet seen in a client. **It passed its adversarial review the same day, with three
-fixes, and is now in `human-review/` for four looks in the game.** `0004` is in `done/`, and `0003` is back in `todo/` on its
-in-combat zero. The four open cards carry `not_for_the_loop:` because Rob builds this addon by hand
-on msiraider.
-**2026-09-21, later still: card `0006` is built at 0.15.0.** A planned piece that sits in the bags
-unworn glows green, through Baganator's corner widget API, or on Blizzard's bag buttons when
-Baganator is not loaded. It passed its adversarial review the same day, with one taint fix, and
-is now in `human-review/` for five looks in the game.
-**2026-09-21, last: card `0003` is now in `human-review/`, not `ai-review/` or `todo/`.** Its in-combat
-zero was fixed at 0.15.1, a second adversarial pass stopped a proc from emptying the rating cache
-mid-fight, and what is left is six looks only a game client can settle.
-_Last updated: 2026-09-22 (card 0009 reviewed and in human-review, v0.19.1)_
+**Status:** v0.21.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Sixteen cards sit in `human-review/` and every one waits on one trip to a live client; `0020` is being built by an agent in a worktree.
+_Last updated: 2026-09-22 (v0.21.0: seven cards built by sub-agents in git worktrees and merged, Feral Mythic+ cell filled)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -153,6 +101,14 @@ than a task.
   bundled libraries ship inside the addon, so they are part of the artefact.
 
 ## Current state
+**2026-09-22, traps from the sub-agent build (v0.20.0 to v0.21.0).**
+- **Parallel builds conflict in two places only**: the tail of `selfTest` (every card appends its checks there) and the Plan tab's boss rows in `PlanTab.lines` (0022 and 0023 both add a suffix). Both resolve by keeping both sides; a `do ... end` check block needs its own `end` when two land together.
+- **A Raidbots paste must be the whole `/simc` export, checksum line included.** Trimming the bag list flips the page to Unverified Input. Card 0018 appends its block after the checksum for the same reason.
+- **The "planned build" question is open and blocks two cards.** `0014` and `0023` both read the planned talent string from the saved loadout, and Blizzard writes a hand edit into that loadout on Apply, so the compare can never see an edit. Both are in `todo/` with the same finding; the fix must be one decision (compare against the plan's own `talents` string, or accept the saved loadout and say so).
+- **The Feral Mythic+ cell is filled** (report `ttC3zNmZSvC7C2XQNSe6Bi`, DungeonSlice, loadout `WS M+`). Checks that need an empty cell take it away for the check and put it back; do not empty the block to test.
+- **Not proven anywhere but offline**: every card merged today (0011, 0012, 0018, 0021, 0022, 0025, 0026, 0027). Each lists its looks under `## What I need from you`; none has been seen in a client.
+- The main chunk holds 177 top-level locals of Lua's 200. Add to `PlanTab`, never a local.
+
 **2026-09-22, card 0009: where you stand beats the pinned switch, at v0.19.0 and 0.19.1.**
 `statContext()` answers the instance first (`party` is Mythic+, `raid` is Raid), then the stat
 pane's pinned switch, then Raid. Until this card the pin won, and a Raid pin from a city followed
@@ -240,22 +196,12 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this.** `todo/` holds `0011`, a Talents button through Blizzard's own
-helper, `0012`, a Blizzard equipment set after Equip all, `0020`, the game-window look (its rule 11
-is the three-button Raid / Mythic+ row the Plan tab still lacks), and `0013` to `0027`, ideas from
-other addons, one card each (as of 2026-09-22). All carry `not_for_the_loop:` because Rob builds
-this addon by hand on msiraider. Whoever builds one adds to the `PlanTab` table rather than a new
-top-level local: the main chunk holds 189 of Lua's 200.
+**`docs/board/` owns this.** `0020` (the game-window look, with the three-button Raid / Mythic+ row) is in an agent's worktree now and merges first. Then the cards that draw by its rules: `0013`, `0015`, `0016`, `0019`, `0024`, and `0017` after `0013`. `0014` and `0023` wait on the planned-build decision above.
 
-Eight cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006`, `0007`, `0009` and
-`0010`, all wanting a live client. **They are one trip**, and each card lists its own checks under
-`## What I need from you`. Open `/bis` for `0001` and `0002`; open the character sheet, hit a
-dummy and hover a ring for `0003` and `0005`; open Baganator for `0006`; open the Plan tab for
-`0007`; click the strip's button round and zone into a dungeon for `0009`, then run one DungeonSlice
-Top Gear; hover the wrist with the rank 3 garnet in it for `0010`. The buttons (`0008`) are
-confirmed working; only the Equip all ring-order path is unseen.
+Sixteen cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.21.0.
 
 ## Blockers / open questions
+- **Rob's call, blocking `0014` and `0023`: what is the planned talent string?** The saved loadout (overwritten by Apply) or the plan cell's own string (only ST and Mythic+ cells carry one today).
 - **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's BiS*
   appear in the minimap addon drawer, does the minimap button appear on the ring, and does hovering
   it show the summary tooltip.
@@ -297,6 +243,7 @@ confirmed working; only the Equip all ring-order path is unseen.
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
+- **2026-09-22, last** Seven cards built by sub-agents, each in its own git worktree (`.claude/worktrees/`), merged one branch at a time with both Lua checks after each merge, then reviewed the same way. `git log --format='%ad %s'` has the order. Worth carrying: resume a rate-limited agent with a message rather than relaunching, its worktree keeps the edits.
 - **2026-09-22, last** Card `0009` reviewed, four fixes and four checks, deployed at v0.19.1.
   Worth carrying: a button that cycles a list must be told which stops the place has removed, or
   it sticks on the last one it can reach; a switch the place overrides should be greyed, not left

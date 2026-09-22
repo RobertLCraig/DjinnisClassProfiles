@@ -1,3 +1,5 @@
 # Syncthing's in-flight and conflict copies. C:\Dev is a Syncthing folder.
 ~syncthing~*
 *.sync-conflict-*
+# agent worktrees and session scaffolding, never shipped (pkgmeta.yaml ignores it too)
+.claude/
