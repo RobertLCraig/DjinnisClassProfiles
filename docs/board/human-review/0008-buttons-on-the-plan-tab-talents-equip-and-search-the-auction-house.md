@@ -101,15 +101,12 @@ How it came to be: `0007` was scoped to say, not to do, because applying a loado
   a click on the world is the destroy prompt; `equip` makes Blizzard's own two `CursorHasItem`
   checks now. (4) The redraw rode `0005`'s watcher, which only exists once the character sheet has
   been opened; it rides the bag-mark watcher now, alive from login.
-  **Held:** the rank strip and the house guard go red when broken. `PlanTab.entries` turns each
-  ring pair to match what is worn, so one wrong finger wants the other ring; Equip all runs in one
-  script and the game queues `PLAYER_EQUIPMENT_CHANGED` until it returns, so the loop finishes on
-  the state it was drawn from. Both rings in the bags at once is the one path unproven outside the
-  game (step 3). The shared button resets `onClick` and `tip` on every draw and By Boss rows carry
-  neither. All seven APIs are in `Blizzard_APIDocumentationGenerated` at 12.1.0, none deprecated,
-  none with a secret return; `SearchBar` is a plain frame and one click is one query, so the house's
-  own throttle applies. No `LoadConfig`, `CommitConfig` or any purchase call in the file. Locals:
-  191 of 200 under 5.1, unchanged by this card.
+  **Held:** the rank strip and the house guard go red when broken. Ring pairs are turned to match
+  what is worn, and Equip all finishes its loop before the game delivers `PLAYER_EQUIPMENT_CHANGED`;
+  both rings in the bags at once is the one path unproven outside the game (step 3). The shared
+  button resets `onClick` and `tip` on every draw. All seven APIs are in the generated docs at
+  12.1.0, none deprecated, none secret; one click is one query, so the house's own throttle
+  applies. No `LoadConfig`, `CommitConfig` or purchase call in the file. Locals: 191 of 200.
   **Security.** Weakest: Equip trusts the plan's slot id, and a wrong one asks the game to put a
   ring on a head, which it refuses and the cursor is cleared. Unchecked: the search term is our own
   table or the client's item name, never player text. Leaks: nothing leaves the machine; a failure
