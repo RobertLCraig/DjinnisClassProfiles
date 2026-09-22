@@ -84,3 +84,51 @@ What it saves: one paste instead of one per build, for Rob's own runs and for "C
   `SimulationcraftAPI.GetSimcProfile` copy other addons call is not wrapped, because `/simc` does
   not go through it and nothing here needs it; offspec loadouts, because the plan is per current
   spec; and TLM itself was not read, because it is not installed on this machine.
+- 2026-09-22 Claude (review): **pass with two real faults fixed in place**, both in feature
+  commit `0dad3e4`, both invisible to the offline checks because the checks faked the thing that was
+  wrong. Attacked: the three criteria and their checks, the wrapper against the installed
+  Simulationcraft 12.1.0-03 source, and the pure functions against the real export
+  `2026-09-22 Feral v1.txt`.
+  **Fault 1, the feature never armed.** `armSimc` read `_G.Simulationcraft`. That global does not
+  exist: `core.lua` line 4 is `local _, Simulationcraft = ...` and line 6 assigns the Ace addon
+  object to that same local, and neither `extras.lua` nor `bonusrolls.lua` exports it. In the game
+  `armSimc` returned false at every login and `/simc` was untouched. Fixed: the addon object comes
+  from `LibStub("AceAddon-3.0", true):GetAddon("Simulationcraft", true)`, which is the only handle
+  to it; the check now fakes that registry instead of a global, and a mutant reading the global goes
+  red (4 FAIL lines).
+  **Fault 2, the block broke the addon's checksum.** The SimC addon ends its text with
+  `# Checksum: <adler32 of everything before it>` (`core.lua` line 1410). The block was inserted
+  after the last `# talents=` line, inside the checksummed text. Raidbots reads a mismatch as a
+  tampered paste: on simc-addon issue 47 the Raidbots author asks loadout addons not to touch the
+  checksum, which is why they append after it. Verified against the real export: its checksum
+  matches an adler32 of the text before the line, and a one-line insert in the middle does not.
+  Fixed: the block goes after the checksum line; `simcInsert` and its three checks are gone, the
+  wrapper check now asserts the addon's text survives byte for byte and the block follows the
+  checksum, and a mutant inserting before the checksum goes red (4 FAIL lines). The third mutant,
+  dropping the `not saved[]` guard, goes red as before (5).
+  **Held:** the read of saved names is guarded by `canRead` before any key use; the plan's `WS M+`
+  string equals the one the game had saved in the real export; ten boss lines follow the checksum;
+  the chat line names an unsaved loadout with no plan string once; a `simcPrintError` from the addon
+  passes through with no block; a non-Feral spec leaves the text alone. Both offline checks exit 0
+  under Lua 5.4 and 5.1, 31 checks on this card (three gone, two added), and the top-level local
+  count is still 177.
+  **Security:** weakest point is the wrapper itself, one swapped field on another addon's table,
+  which a later Simulationcraft release can rename and the feature then silently does nothing, which
+  is the safe direction; unchecked path is none, every input is plan data or a `canRead`-guarded
+  name and every game read is inside `pcall`; on failure it leaks nothing, the addon's own text is
+  returned unchanged and the only new output is loadout names Rob wrote.
+  **Not verified here, and this is the whole check:** whether Raidbots reads `# Saved Loadout` pairs
+  placed after its checksum line. The evidence is issue 47 (the author says loadout addons append
+  after it) and that TLM's users get their loadouts simmed; look (d) below settles it.
+
+## What I need from you
+
+- (a) `/simc` on Feral: the `# Djinni's BiS plan (Feral): boss -> loadout` block is now the last
+  thing in the window, after `# Checksum:`, ten boss lines. If it is not there at all, the Ace
+  registry path failed and `/dump LibStub("AceAddon-3.0"):GetAddon("Simulationcraft")` is the first
+  thing to look at.
+- (b) Delete or rename `WS Raid Coiled Altar`, `/simc` again: one grey chat line names it.
+- (c) Delete `WS M+` instead: a `# Saved Loadout: WS M+ (DBiS plan)` pair in the block.
+- (d) Paste that export into Raidbots: no "modified" or checksum warning, and `WS M+ (DBiS plan)`
+  is offered as a talent set. This is the one that decides the card.
+- (e) Disable Simulationcraft, log in: no error, `/simc` unknown as before.
