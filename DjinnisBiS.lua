@@ -3761,6 +3761,239 @@ function PlanTab.saveSetAndSay(spec, scenario)
 	return ok
 end
 
+-- A spec prompt when a group finder listing takes you (card 0024). On
+-- LFG_LIST_APPLICATION_STATUS_UPDATED with the new status "inviteaccepted"
+-- (LFGListInfoDocumentation.lua: searchResultID, newStatus, oldStatus,
+-- groupName; the name is a kstring and is never read here) the role comes
+-- from C_LFGList.GetApplicationInfo, the fifth return as Blizzard's own
+-- invite dialog reads it (LFGList.lua, LFGListInviteDialog_Show; the function
+-- is not in the generated docs, so every value is pcall'd and canRead), and
+-- the place from the listing's first activity. Nothing changes without the
+-- click. The prompt frame is the small one below; card 0013 builds a fuller
+-- popup and the two should become one frame once both are merged.
+PlanTab.ROLE_SPECS = { TANK = { "Guardian" }, HEALER = { "Resto" }, DAMAGER = { "Feral", "Balance" } }
+PlanTab.ROLE_LABEL = { TANK = "Tank", HEALER = "Healer", DAMAGER = "Damage" }
+
+-- The spec the plan wants for `role`: the current one when it already fills
+-- the role, else the first of the role's specs with a plan for `scenario`,
+-- else the first named. nil for a role the table does not know. Pure.
+function PlanTab.specForRole(role, current, scenario)
+	local specs = PlanTab.ROLE_SPECS[role]
+	if not specs then return nil end
+	for _, spec in ipairs(specs) do if spec == current then return spec end end
+	for _, spec in ipairs(specs) do if gearPlanFor(spec, scenario) then return spec end end
+	return specs[1]
+end
+
+-- The steps still to take, or nil when spec, loadout and gear already fit.
+-- `state` is what is true now: the spec key, the active loadout name and the
+-- worn gear (nil when unreadable, which counts as not fitting). A spec change
+-- means the loadout and the set both follow; the same spec offers only the
+-- parts that differ. A spec with no plan cell has only the spec step. Pure.
+function PlanTab.setupSteps(spec, scenario, state)
+	local plan = gearPlanFor(spec, scenario)
+	local steps = {}
+	if state.spec ~= spec then steps.spec = spec end
+	if plan and plan.loadout and (steps.spec or state.loadout ~= plan.loadout) then steps.loadout = plan.loadout end
+	if plan and (steps.spec or not state.worn or #PlanTab.missingSlots(plan, state.worn) > 0) then
+		steps.set = PlanTab.setName(spec, scenario)
+	end
+	return next(steps) and steps or nil
+end
+
+-- The index of our spec key in the Specializations tab, for
+-- ClassTalentHelper.SwitchToSpecializationByIndex: the index needs no name,
+-- so no locale and nothing that could be secret. A druid has four.
+function PlanTab.specIndexOf(key)
+	local api = C_SpecializationInfo
+	if not (api and api.GetSpecializationInfo) then return nil end
+	for i = 1, 4 do
+		local ok, id = pcall(api.GetSpecializationInfo, i)
+		if ok and SPEC_BY_ID[id] == key then return i end
+	end
+	return nil
+end
+
+-- A small prompt: a title, some lines and a row of buttons, each
+-- { label, onClick }. Any button closes it. One frame, reused.
+function PlanTab.prompt(title, lines, buttons)
+	local f = PlanTab.promptFrame
+	if not f then
+		f = CreateFrame("Frame", "DjinnisBiSPrompt", UIParent, "BasicFrameTemplateWithInset")
+		f:SetWidth(380)
+		f:SetPoint("TOP", UIParent, "TOP", 0, -180)
+		f:SetMovable(true)
+		f:EnableMouse(true)
+		f:SetFrameStrata("DIALOG")
+		f:SetClampedToScreen(true)
+		f:RegisterForDrag("LeftButton")
+		f:SetScript("OnDragStart", f.StartMoving)
+		f:SetScript("OnDragStop", f.StopMovingOrSizing)
+		f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		f.title:SetPoint("TOP", f, "TOP", 0, -6)
+		f.text = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		f.text:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -34)
+		f.text:SetPoint("RIGHT", f, "RIGHT", -16, 0)
+		f.text:SetJustifyH("LEFT")
+		f.text:SetSpacing(4)
+		f.buttons = {}
+		tinsert(UISpecialFrames, "DjinnisBiSPrompt")
+		PlanTab.promptFrame = f
+	end
+	f.title:SetText(title)
+	f.text:SetText(table.concat(lines, "\n"))
+	for i, spec in ipairs(buttons) do
+		local button = f.buttons[i]
+		if not button then
+			button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+			button:SetSize(120, PlanTab.SIZE.button)
+			button:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 16 + (i - 1) * 126, 12)
+			f.buttons[i] = button
+		end
+		button:SetText(spec.label)
+		button:SetScript("OnClick", function()
+			f:Hide()
+			if spec.onClick then spec.onClick() end
+		end)
+		button:Show()
+	end
+	for i = #buttons + 1, #f.buttons do f.buttons[i]:Hide() end
+	-- ponytail: 18 a line is a guess for GameFontHighlight plus the spacing; measure with GetStringHeight if a line ever wraps
+	f:SetHeight(34 + #lines * 18 + 16 + PlanTab.SIZE.button + 12)
+	f:Show()
+	return f
+end
+
+-- Decides what the prompt says and shows it, or shows nothing when the
+-- current setup already fits. Returns the steps and the lines for the checks.
+function PlanTab.offerSetup(role, place, mplus)
+	local current = playerSpec()
+	local spec = PlanTab.specForRole(role, current, mplus and "mplus" or "st")
+	if not spec then return nil end
+	local scenario = mplus and "mplus" or planScenario(spec)
+	local steps = PlanTab.setupSteps(spec, scenario, {
+		spec = current, loadout = (PlanTab.activeLoadoutName()), worn = readWorn(),
+	})
+	if not steps then return nil end
+	local lines = {
+		(PlanTab.ROLE_LABEL[role] or role) .. " for " .. place,
+		"Plan: " .. spec .. ", " .. (SCENARIO_LABEL[scenario] or scenario),
+	}
+	if steps.spec then lines[#lines + 1] = "Change spec to " .. spec end
+	if steps.loadout then lines[#lines + 1] = "Load loadout \"" .. steps.loadout .. "\"" end
+	if steps.set then lines[#lines + 1] = "Equip set " .. steps.set end
+	PlanTab.prompt("Group joined", lines, {
+		{ label = "Set up", onClick = function() PlanTab.pendingSetup = steps; PlanTab.setupStep() end },
+		{ label = "Not now" },
+	})
+	return steps, lines
+end
+
+-- The event's payload, read with every guard, into offerSetup. nil when it
+-- was not an acceptance or the game will not say the role.
+function PlanTab.onAccepted(id, status)
+	if not (canRead(status) and status == "inviteaccepted") then return nil end
+	local api = C_LFGList
+	if not (api and api.GetApplicationInfo and api.GetSearchResultInfo) then return nil end
+	local ok, _, _, _, _, role = pcall(api.GetApplicationInfo, id)
+	if not (ok and role and canRead(role)) then return nil end
+	local place, mplus = "the group", false
+	local okInfo, info = pcall(api.GetSearchResultInfo, id)
+	local activity = okInfo and type(info) == "table" and type(info.activityIDs) == "table" and info.activityIDs[1]
+	if activity and api.GetActivityInfoTable then
+		local okAct, act = pcall(api.GetActivityInfoTable, activity)
+		if okAct and type(act) == "table" then
+			if act.fullName and canRead(act.fullName) then place = act.fullName end
+			mplus = canRead(act.isMythicPlusActivity) and act.isMythicPlusActivity == true
+		end
+	end
+	return PlanTab.offerSetup(role, place, mplus)
+end
+
+-- Runs the next pending step and answers which: "spec" asked Blizzard's
+-- helper for the spec change and waits for PLAYER_SPECIALIZATION_CHANGED,
+-- "loadout" asked for the loadout (card 0011's route) and waits for
+-- TRAIT_CONFIG_UPDATED, "set" equipped the set and is done, "no set" said
+-- the set is not saved, "waiting" is combat, "done" had nothing left. Never
+-- in combat; PLAYER_REGEN_ENABLED calls it again. The spec change is by
+-- index through ClassTalentHelper, the same helper 0011 uses for the loadout,
+-- so the file calls no C_ClassTalents function that writes; without the
+-- helper the Specializations tab is opened instead and the rest is dropped.
+function PlanTab.setupStep()
+	local steps = PlanTab.pendingSetup
+	if not steps then return "done" end
+	if InCombatLockdown() then return "waiting" end
+	if steps.spec then
+		if playerSpec() ~= steps.spec then
+			local index = PlanTab.specIndexOf(steps.spec)
+			if not (index and ClassTalentHelper and ClassTalentHelper.SwitchToSpecializationByIndex) then
+				PlanTab.pendingSetup = nil
+				if PlayerSpellsUtil and PlayerSpellsUtil.OpenToClassSpecializationsTab then PlayerSpellsUtil.OpenToClassSpecializationsTab() end
+				return "no helper"
+			end
+			ClassTalentHelper.SwitchToSpecializationByIndex(index)
+			return "spec"
+		end
+		steps.spec = nil
+	end
+	if steps.loadout then
+		local name = steps.loadout
+		steps.loadout = nil
+		if PlanTab.loadTalents(name) == "loaded" then return "loadout" end
+		-- missing or no helper: the window is open and one line said so; the gear still goes on
+	end
+	local name = steps.set
+	PlanTab.pendingSetup = nil
+	if not name then return "done" end
+	local api = C_EquipmentSet
+	local id = api and api.GetEquipmentSetID and api.UseEquipmentSet and api.GetEquipmentSetID(name)
+	if not id then
+		print(("%sDjinni's BiS|r %sno equipment set named \"%s\". Equip all on the Plan tab, then Save set.|r"):format(GOLD, GREY, name))
+		return "no set"
+	end
+	api.UseEquipmentSet(id)
+	print(("%sDjinni's BiS|r %sequipping %s.|r"):format(GOLD, WHITE, name))
+	return "set"
+end
+
+-- The watcher's handler. A spec change lands a beat before the new spec's
+-- talents can take a loadout, so that step waits a second; a talent update
+-- only moves things on once the spec step is over, or it would ask for the
+-- spec change twice.
+function PlanTab.onGroupEvent(event, id, status)
+	if event == "LFG_LIST_APPLICATION_STATUS_UPDATED" then return PlanTab.onAccepted(id, status) end
+	local steps = PlanTab.pendingSetup
+	if not steps then return nil end
+	if event == "PLAYER_SPECIALIZATION_CHANGED" then
+		-- ponytail: one second is a guess; if the loadout step says "commit in progress" in the game, lengthen it or wait for TRAIT_CONFIG_UPDATED instead
+		if C_Timer then C_Timer.After(1, PlanTab.setupStep) else return PlanTab.setupStep() end
+	elseif event == "TRAIT_CONFIG_UPDATED" then
+		if not steps.spec then return PlanTab.setupStep() end
+	elseif event == "PLAYER_REGEN_ENABLED" then
+		return PlanTab.setupStep()
+	end
+	return nil
+end
+
+-- Handler first, then one event at a time, each verified (DECISIONS.md).
+function PlanTab.armGroupPrompt()
+	local watcher = CreateFrame("Frame")
+	watcher:SetScript("OnEvent", function(_, event, id, status) PlanTab.onGroupEvent(event, id, status) end)
+	for _, event in ipairs({
+		"LFG_LIST_APPLICATION_STATUS_UPDATED",
+		"PLAYER_SPECIALIZATION_CHANGED",
+		"TRAIT_CONFIG_UPDATED",
+		"PLAYER_REGEN_ENABLED",
+	}) do
+		watcher:RegisterEvent(event)
+		if not watcher:IsEventRegistered(event) then
+			print(GOLD .. "Djinni's BiS|r " .. GREY
+				.. "could not register " .. event
+				.. ", so the group prompt will not run by itself.|r")
+		end
+	end
+end
+
 local function itemName(id)
 	return id and C_Item.GetItemInfo(id) or ("item " .. tostring(id))
 end
@@ -4492,6 +4725,7 @@ loader:SetScript("OnEvent", function(_, event)
 		pcall(armBagMarks)
 		pcall(armRatingCache)
 		pcall(PlanTab.armSimc)  -- Simulationcraft loads after this addon (S after D) and is not load-on-demand, so it is here by login
+		pcall(PlanTab.armGroupPrompt)  -- the spec prompt when a group finder listing takes you (card 0024)
 	else
 		harvested = false
 		PlanTab.poolsDone = false  -- the pools' next pass fills only the cells still nil (card 0022)
@@ -5933,6 +6167,132 @@ local function selfTest()
 		check(choiceTest .. ", and the raid cell is untouched", db().planScenario.Feral, "st")
 		GetInstanceInfo, db().statContext, db().planScenario, PlanTab.refreshStrip = keptInstance, keptContext, keptScenario, keptStrip
 		rebuildBagWanted()  -- the picks above rebuilt the bag list on test pins; put it back on the real ones
+	end
+
+	-- Card 0024: the spec prompt when a group finder listing takes you. The
+	-- listing, the role, the spec, the loadout and the worn gear are all
+	-- pretended; the prompt is swapped for a recorder, and the helper, the
+	-- loadout call and the equipment manager record what they were asked.
+	do
+		local wasLFG, wasSets, wasHelper, wasUtil, wasCombat, wasPrint, wasTimer = C_LFGList, C_EquipmentSet, ClassTalentHelper, PlayerSpellsUtil, InCombatLockdown, print, C_Timer
+		local wasSpecInfo, wasSpec, wasWornLink, wasLevel = C_SpecializationInfo.GetSpecializationInfo, C_SpecializationInfo.GetSpecialization, GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo
+		local wasPrompt, wasActive, wasLoad, wasPending = PlanTab.prompt, PlanTab.activeLoadoutName, PlanTab.loadTalents, PlanTab.pendingSetup
+		local role, mplus, active, current, bare = "HEALER", true, "WS M+", 2, nil
+		local shown, asked, loaded, used, opened, printed = nil, nil, nil, nil, 0, {}
+		local specIDs = { 102, 103, 104, 105 }  -- Balance, Feral, Guardian, Resto in tab order
+		C_SpecializationInfo.GetSpecialization = function() return current end
+		C_SpecializationInfo.GetSpecializationInfo = function(i) return specIDs[i] end
+		C_LFGList = {
+			GetApplicationInfo = function(id) return id, "inviteaccepted", nil, 0, role end,
+			GetSearchResultInfo = function() return { activityIDs = { 9 } } end,
+			GetActivityInfoTable = function() return { fullName = "Ara-Kara, City of Echoes", isMythicPlusActivity = mplus } end,
+		}
+		C_EquipmentSet = { GetEquipmentSetID = function(name) return name == "DBiS Feral M+" and 5 or nil end, UseEquipmentSet = function(id) used = id return true end }
+		ClassTalentHelper = { SwitchToSpecializationByIndex = function(i) asked = i end }
+		PlayerSpellsUtil = { OpenToClassSpecializationsTab = function() opened = opened + 1 end }
+		C_Timer = nil
+		PlanTab.prompt = function(title, lines, buttons) shown = { title = title, lines = lines, buttons = buttons } end
+		PlanTab.activeLoadoutName = function() return active end
+		PlanTab.loadTalents = function(name) loaded = name return "loaded" end
+		print = function(...)
+			local line = tostring((...))
+			if line:find("|cffff0000FAIL|r", 1, true) then wasPrint(...) else printed[#printed + 1] = line end
+		end
+		-- the Feral Mythic+ plan worn in full, or with one slot bare
+		local mplusPlan = gearPlanFor("Feral", "mplus")
+		local entryBySlotID, ilvlById = {}, {}
+		for slot, entry in pairs(mplusPlan.slots) do
+			entryBySlotID[PLAN_SLOT_INVENTORY[slot]] = entry
+			ilvlById[entry.id] = entry.ilvl
+		end
+		GetInventoryItemLink = function(_, slotID)
+			local entry = slotID ~= bare and entryBySlotID[slotID]
+			return entry and ("|Hitem:%d::::::|h[x]|h"):format(entry.id) or nil
+		end
+		C_Item.GetDetailedItemLevelInfo = function(link) return ilvlById[tonumber(link:match("item:(%d+)"))] end
+		local function said(needle)
+			for _, line in ipairs(shown and shown.lines or {}) do if line:find(needle, 1, true) then return true end end
+			return false
+		end
+
+		local roleTest = "prompt names role, place and spec on acceptance"
+		check(roleTest .. ", the role maps to a spec", PlanTab.specForRole("HEALER", "Feral", "mplus"), "Resto")
+		check(roleTest .. ", a damage role keeps a damage spec", PlanTab.specForRole("DAMAGER", "Balance", "mplus"), "Balance")
+		check(roleTest .. ", a damage role from a tank picks the spec with a Mythic+ plan", PlanTab.specForRole("DAMAGER", "Guardian", "mplus"), "Feral")
+		check(roleTest .. ", an unknown role maps to nothing", PlanTab.specForRole("NONE", "Feral", "mplus"), nil)
+		local steps = PlanTab.onAccepted(7, "inviteaccepted")
+		check(roleTest, shown ~= nil, true)
+		check(roleTest .. ", names the role and the place", said("Healer for Ara-Kara, City of Echoes"), true)
+		check(roleTest .. ", names the planned spec and content", said("Plan: Resto, Mythic+"), true)
+		check(roleTest .. ", offers the spec change", steps and steps.spec, "Resto")
+		check(roleTest .. ", two buttons, Set up first", shown and #shown.buttons == 2 and shown.buttons[1].label, "Set up")
+		check(roleTest .. ", nothing changed before the click", tostring(asked) .. tostring(loaded) .. tostring(used), "nilnilnil")
+		shown = nil
+		check(roleTest .. ", not on an invite still to answer", PlanTab.onAccepted(7, "invited"), nil)
+		check(roleTest .. ", not on a decline", PlanTab.onAccepted(7, "declined"), nil)
+		check(roleTest .. ", no prompt for either", shown, nil)
+
+		local fitTest = "no prompt when spec, loadout and gear already fit"
+		role, shown = "DAMAGER", nil
+		check(fitTest, PlanTab.onAccepted(7, "inviteaccepted"), nil)
+		check(fitTest .. ", no prompt", shown, nil)
+		active = "DotC Raid ST *"
+		steps = PlanTab.onAccepted(7, "inviteaccepted")
+		check(fitTest .. ", the loadout alone differs: only the loadout is offered", steps and steps.loadout, "WS M+")
+		check(fitTest .. ", the loadout alone differs: not the spec", steps and steps.spec, nil)
+		check(fitTest .. ", the loadout alone differs: not the set", steps and steps.set, nil)
+		check(fitTest .. ", the loadout alone differs: the prompt says which", said("Load loadout \"WS M+\""), true)
+		active, bare, shown = "WS M+", 1, nil
+		steps = PlanTab.onAccepted(7, "inviteaccepted")
+		check(fitTest .. ", the gear alone differs: only the set is offered", steps and steps.set, "DBiS Feral M+")
+		check(fitTest .. ", the gear alone differs: not the loadout", steps and steps.loadout, nil)
+		check(fitTest .. ", the gear alone differs: the prompt says which", said("Equip set DBiS Feral M+"), true)
+		bare = nil
+
+		-- the button: spec, then loadout, then set, each waiting for its event.
+		-- A damage listing taken as Guardian: Feral is the damage spec with a
+		-- Mythic+ plan, so all three steps are on.
+		local stepTest = "set up changes spec, then loadout, then set, out of combat"
+		role, current, shown = "DAMAGER", 3, nil
+		steps = PlanTab.onAccepted(7, "inviteaccepted")
+		check(stepTest .. ", all three steps offered", steps and steps.spec and steps.loadout and steps.set, "DBiS Feral M+")
+		InCombatLockdown = function() return true end
+		shown.buttons[1].onClick()
+		check(stepTest .. ", in combat the click waits", PlanTab.pendingSetup ~= nil and asked, nil)
+		InCombatLockdown = wasCombat
+		check(stepTest .. ", combat ending asks for the spec", PlanTab.onGroupEvent("PLAYER_REGEN_ENABLED"), "spec")
+		check(stepTest .. ", by its index in the tab", asked, 2)
+		asked = nil
+		check(stepTest .. ", a talent update during the spec change asks nothing", PlanTab.onGroupEvent("TRAIT_CONFIG_UPDATED"), nil)
+		check(stepTest .. ", a talent update during the spec change asks nothing, really", asked, nil)
+		current = 2
+		check(stepTest .. ", the spec landing loads the loadout", PlanTab.onGroupEvent("PLAYER_SPECIALIZATION_CHANGED"), "loadout")
+		check(stepTest .. ", the Feral Mythic+ loadout", loaded, "WS M+")
+		check(stepTest .. ", the loadout landing equips the set", PlanTab.onGroupEvent("TRAIT_CONFIG_UPDATED"), "set")
+		check(stepTest .. ", by its id", used, 5)
+		check(stepTest .. ", and nothing is pending after", PlanTab.pendingSetup, nil)
+		check(stepTest .. ", the next event does nothing", PlanTab.onGroupEvent("TRAIT_CONFIG_UPDATED"), nil)
+		-- a set nobody saved is said, not equipped
+		used = nil
+		PlanTab.pendingSetup = { set = "DBiS Resto M+" }
+		check(stepTest .. ", a set nobody saved is said", PlanTab.setupStep(), "no set")
+		check(stepTest .. ", a set nobody saved is said, by name", printed[#printed] and printed[#printed]:find("DBiS Resto M+", 1, true) ~= nil, true)
+		check(stepTest .. ", a set nobody saved is not equipped", used, nil)
+		-- without the helper the Specializations tab opens and the rest is dropped
+		ClassTalentHelper = nil
+		PlanTab.pendingSetup = { spec = "Resto", loadout = "x", set = "y" }
+		current = 2
+		check(stepTest .. ", no helper opens the Specializations tab", PlanTab.setupStep(), "no helper")
+		check(stepTest .. ", no helper opens the Specializations tab, once", opened, 1)
+		check(stepTest .. ", no helper drops the rest", PlanTab.pendingSetup, nil)
+		-- the real prompt frame builds and carries its buttons
+		PlanTab.prompt = wasPrompt
+		local frame = PlanTab.prompt("t", { "a", "b" }, { { label = "One" }, { label = "Two" } })
+		check("the prompt frame builds with its buttons", frame and #frame.buttons, 2)
+
+		C_LFGList, C_EquipmentSet, ClassTalentHelper, PlayerSpellsUtil, InCombatLockdown, print, C_Timer = wasLFG, wasSets, wasHelper, wasUtil, wasCombat, wasPrint, wasTimer
+		C_SpecializationInfo.GetSpecializationInfo, C_SpecializationInfo.GetSpecialization, GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo = wasSpecInfo, wasSpec, wasWornLink, wasLevel
+		PlanTab.activeLoadoutName, PlanTab.loadTalents, PlanTab.pendingSetup = wasActive, wasLoad, wasPending
 	end
 
 	-- a saved target must survive the round trip and show its item level
