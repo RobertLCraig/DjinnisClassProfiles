@@ -3104,9 +3104,47 @@ function PlanTab.savedLoadoutNames()
 	for _, id in ipairs(ids) do
 		local okInfo, info = pcall(C_Traits.GetConfigInfo, id)
 		local name = okInfo and info and info.name
-		if name and canRead(name) then names[name] = true end
+		-- name -> config id; a set to every caller but savedLoadoutString
+		if name and canRead(name) then names[name] = id end
 	end
 	return names
+end
+
+-- The talent import string of the saved loadout named `name`, or nil when
+-- it is not saved, the game will not say, or in combat (card 0023).
+function PlanTab.savedLoadoutString(name)
+	if InCombatLockdown() then return nil end
+	local saved = PlanTab.savedLoadoutNames()
+	local id = saved and saved[name]
+	if not (id and C_Traits.GenerateImportString) then return nil end
+	local ok, str = pcall(C_Traits.GenerateImportString, id)
+	return ok and str or nil
+end
+
+-- Hindsight (1.8.9) saves the last pull on each boss with the spec and the
+-- talent string it was pulled on (card 0023). Its key for our spec name.
+PlanTab.HINDSIGHT_SPEC = { Balance = "Druid:Balance", Feral = "Druid:Feral", Guardian = "Druid:Guardian", Resto = "Druid:Restoration" }
+
+-- Hindsight's saved pulls, keyed by encounter id AS A STRING, or nil when it
+-- is not loaded or its layout is not the one read on 2026-09-22: schema 1,
+-- `HindsightCharDB.pulls[tostring(encounterID)]` with `.specKey` and `.build`.
+-- Read only, never written. Nothing here errors without Hindsight.
+function PlanTab.hindsightPulls()
+	if type(HindsightDB) ~= "table" or HindsightDB.schema ~= 1 then return nil end
+	if type(HindsightCharDB) ~= "table" or type(HindsightCharDB.pulls) ~= "table" then return nil end
+	return HindsightCharDB.pulls
+end
+
+-- The spec key of the last saved pull on boss `id` when it used another build
+-- than `planned`, the plan's import string for `spec`: another spec is another
+-- build whether or not a string was saved, the same spec compares the strings.
+-- nil when the pull matched, or nothing can be said. Pure, for /bis test.
+function PlanTab.pullSpec(pulls, id, spec, planned)
+	local pull = pulls and id and pulls[tostring(id)]
+	if type(pull) ~= "table" or type(pull.specKey) ~= "string" then return nil end
+	if pull.specKey ~= PlanTab.HINDSIGHT_SPEC[spec] then return pull.specKey end
+	if PlanTab.talentStringsDiffer(pull.build, planned) then return pull.specKey end
+	return nil
 end
 
 -- The Talents button. Answers what it did, for the checks: "combat" did
@@ -3599,15 +3637,24 @@ function PlanTab.lines(forSpec)
 			button = { label = "Talents", tip = ("Load \"%s\" through Blizzard's own talent helper, as its slash command would. Out of combat only."):format(picked.loadout),
 				onClick = function() PlanTab.loadTalents(picked.loadout) end } },
 	}
+	-- Hindsight's last pull per boss against the plan (card 0023). One import
+	-- string per loadout name, read once per draw and only with pulls to judge.
+	local pulls, plannedString = PlanTab.hindsightPulls(), {}
 	for _, row in ipairs(bosses) do
 		local isPicked = row == picked
 		-- Only the picked boss is judged. Red on every other row would be nine
 		-- warnings about fights nobody is standing in front of.
 		local colour = isPicked and LOADOUT_COLOUR[PlanTab.loadoutState(row.loadout, active, edited)] or GREY
+		local pulled
+		if pulls and row.id then
+			if plannedString[row.loadout] == nil then plannedString[row.loadout] = PlanTab.savedLoadoutString(row.loadout) or false end
+			pulled = PlanTab.pullSpec(pulls, row.id, spec, plannedString[row.loadout] or nil)
+		end
 		lines[#lines + 1] = {
-			text = ("%s%s|r   %s%s|r   %s%s|r"):format(
+			text = ("%s%s|r   %s%s|r   %s%s|r%s"):format(
 				isPicked and (WHITE .. "> ") or (GREY .. "   "), row.boss,
-				colour, row.loadout, GREY, SCENARIO_LABEL[row.scenario]),
+				colour, row.loadout, GREY, SCENARIO_LABEL[row.scenario],
+				pulled and ("   %slast pull: other build, as %s|r"):format(isPicked and RED or GREY, (pulled:gsub("^%a+:", ""))) or ""),
 			onClick = function() PlanTab.boss = row.boss; refresh() end,
 		}
 	end
@@ -5056,6 +5103,57 @@ local function selfTest()
 	check(flagTest .. ", a match is drawn green", right:find("> The Twin Fangs|r   " .. GREEN .. "WS Raid 2T *|r", 1, true) ~= nil, true)
 	check(flagTest .. ", a match is not red", right:find("|cffff2020", 1, true), nil)
 	check(flagTest .. ", unknown is never red", unknown:find("|cffff2020", 1, true), nil)
+
+	-- Hindsight's last pull against the plan (card 0023), on a pretend
+	-- HindsightCharDB in its 1.8.9 shape: keys are the encounter id as a string.
+	do
+		local pullTest = "boss row says the last pull used a different build"
+		local sameTest2 = "no build line when the pull matched the plan"
+		local noneTest = "no error without hindsight or with a new layout"
+		local wasDB, wasChar, wasString = HindsightDB, HindsightCharDB, PlanTab.savedLoadoutString
+		local pulls = {
+			["3421"] = { specKey = "Druid:Feral", build = bString },      -- The Twin Fangs, other build
+			["3470"] = { specKey = "Druid:Feral", build = aString },      -- Nek'zali, the planned one
+			["3445"] = { specKey = "Druid:Guardian" },                     -- Entombed Sentinels, other spec, no string
+			["3455"] = { specKey = "Druid:Feral" },                        -- Vashnik, no string saved
+			["3420"] = { build = aString },                                -- Sszorak, no spec saved
+		}
+		check(pullTest .. ", other build on the same spec", PlanTab.pullSpec(pulls, 3421, "Feral", aString), "Druid:Feral")
+		check(pullTest .. ", other spec without a string", PlanTab.pullSpec(pulls, 3445, "Feral", aString), "Druid:Guardian")
+		check(pullTest .. ", a number id finds the string key", PlanTab.pullSpec(pulls, 3421, "Feral", aString) ~= nil, true)
+		check(sameTest2 .. ", same string", PlanTab.pullSpec(pulls, 3470, "Feral", aString), nil)
+		check(sameTest2 .. ", no string saved", PlanTab.pullSpec(pulls, 3455, "Feral", aString), nil)
+		check(sameTest2 .. ", no spec saved", PlanTab.pullSpec(pulls, 3420, "Feral", aString), nil)
+		check(sameTest2 .. ", no planned string", PlanTab.pullSpec(pulls, 3421, "Feral", nil), nil)
+		check(sameTest2 .. ", no pull on the boss", PlanTab.pullSpec(pulls, 3492, "Feral", aString), nil)
+		check(sameTest2 .. ", no id", PlanTab.pullSpec(pulls, nil, "Feral", aString), nil)
+		HindsightDB, HindsightCharDB = nil, nil
+		check(noneTest .. ", not loaded", PlanTab.hindsightPulls(), nil)
+		HindsightDB, HindsightCharDB = { schema = 2 }, { pulls = pulls }
+		check(noneTest .. ", schema 2", PlanTab.hindsightPulls(), nil)
+		HindsightDB, HindsightCharDB = { schema = 1 }, { pulls = "not a table" }
+		check(noneTest .. ", pulls not a table", PlanTab.hindsightPulls(), nil)
+		HindsightDB, HindsightCharDB = { schema = 1 }, { pulls = pulls }
+		check(pullTest .. ", schema 1 is read", PlanTab.hindsightPulls(), pulls)
+		-- as drawn: the planned string is stubbed, the game has no loadouts here
+		PlanTab.savedLoadoutString = function(name) return name == "WS Raid 2T *" and aString or nil end
+		PlanTab.boss = "The Twin Fangs"
+		local drawnPulls = drawn("WS Raid 2T *", false)
+		PlanTab.boss = "Nek'zali"
+		local drawnOther = drawn("WS Raid Most Bosses", false)
+		HindsightDB = { schema = 2 }
+		local drawnNew = drawn("WS Raid 2T *", false)
+		HindsightDB, HindsightCharDB, PlanTab.savedLoadoutString = wasDB, wasChar, wasString
+		PlanTab.activeLoadoutName, PlanTab.boss = realActive, realBoss
+		check(pullTest .. ", drawn red on the picked row", drawnPulls:find("> The Twin Fangs|r   " .. GREEN .. "WS Raid 2T *|r   " .. GREY .. "2 targets|r   |cffff2020last pull: other build, as Feral|r", 1, true) ~= nil, true)
+		check(pullTest .. ", drawn grey on another row", drawnPulls:find("Entombed Sentinels|r   " .. GREY .. "DotC Raid ST *|r   " .. GREY .. "1 target|r   " .. GREY .. "last pull: other build, as Guardian|r", 1, true) ~= nil, true)
+		check(pullTest .. ", grey when not picked", drawnOther:find("|cffff2020last pull", 1, true), nil)
+		check(pullTest .. ", still said when not picked", drawnOther:find(GREY .. "last pull: other build, as Feral|r", 1, true) ~= nil, true)
+		check(sameTest2 .. ", drawn", drawnPulls:find("Nek'zali|r   " .. GREY .. "WS Raid Most Bosses|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", no planned string, drawn", drawnPulls:find("Vashnik|r   " .. GREY .. "WS Raid Most Bosses|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
+		check(noneTest .. ", schema 2 draws no pull line", drawnNew:find("last pull", 1, true), nil)
+		check(noneTest .. ", not loaded draws no pull line", wrong:find("last pull", 1, true), nil)
+	end
 
 	local openTest = "the strip opens the tab on a boss of its own scenario"
 	check(openTest .. ", first 2 target boss", PlanTab.bossFor(PlanTab.BOSSES.Feral, nil, "2t"), "The Lost Explorers")
