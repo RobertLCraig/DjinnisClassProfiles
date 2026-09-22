@@ -1777,6 +1777,8 @@ local function armBagMarks()
 	watcher:SetScript("OnEvent", function(_, event)
 		if event == "BAG_UPDATE_DELAYED" then
 			if refreshBagGlows and not InCombatLockdown() then refreshBagGlows() end
+		elseif event == "TRAIT_CONFIG_UPDATED" or event == "CONFIG_COMMIT_FAILED" then
+			PlanTab.onTalentEvent(event)
 		else
 			rebuildBagWanted()
 			-- The Plan tab lists what to equip, so an equip redraws it. This
@@ -1791,6 +1793,8 @@ local function armBagMarks()
 		"PLAYER_REGEN_ENABLED",
 		"PLAYER_ENTERING_WORLD",  -- zoning into a key or a raid changes which plan the bags follow (card 0009)
 		"SOCKET_INFO_CLOSE",  -- a gem went in (or the socket window shut): the Plan tab's gem lines
+		"TRAIT_CONFIG_UPDATED",  -- a loadout landed: the Plan tab's "your loadout now" (card 0011)
+		"CONFIG_COMMIT_FAILED",  -- the game refused a loadout: one chat line (card 0011)
 		defaultBags and "BAG_UPDATE_DELAYED" or nil,
 	}) do
 		watcher:RegisterEvent(event)
@@ -2968,13 +2972,71 @@ end
 -- The three buttons (Rob, 2026-09-22: "planner should have a button to change
 -- talents / gear / shop for gems and enchants on the AH").
 
--- Opens the talent window. It does NOT load the loadout: C_ClassTalents.LoadConfig
--- from addon code is the known route to action bars that freeze in combat
--- (card 0002 found ClassCodex doing it). Rob clicks the loadout himself.
+-- Opens the talent window. The fallback when the loadout cannot be loaded.
 function PlanTab.openTalents()
 	if PlayerSpellsUtil and PlayerSpellsUtil.OpenToClassTalentsTab then
 		PlayerSpellsUtil.OpenToClassTalentsTab()
 	end
+end
+
+-- The Talents button loads the loadout through ClassTalentHelper (card 0011),
+-- the code behind Blizzard's own /loadout-by-name slash command
+-- (Blizzard_ChatFrame/Shared/ClassTalentHelper.lua). It fires an event that
+-- Blizzard's talent frame answers with LoadConfigByName, so the frame runs
+-- the change and this file calls no C_ClassTalents or C_Traits function that
+-- writes: LoadConfig or CommitConfig from addon code is the known route to
+-- action bars that freeze in combat (card 0002 found ClassCodex doing it).
+-- Rob ran the same call by hand on 2026-09-22: loaded, no frozen bar.
+
+-- The saved loadout names for the spec as a set, or nil when the game will
+-- not say. Read only, the same two calls Blizzard's frame makes to fill its
+-- own dropdown (Blizzard_ClassTalentsFrame.lua, RefreshLoadoutOptions).
+function PlanTab.savedLoadoutNames()
+	local spec = C_SpecializationInfo
+	if not (spec and spec.GetSpecialization and C_ClassTalents and C_ClassTalents.GetConfigIDsBySpecID
+		and C_Traits and C_Traits.GetConfigInfo) then return nil end
+	local ok, specID = pcall(spec.GetSpecializationInfo, spec.GetSpecialization())
+	if not ok or not specID then return nil end
+	local okIDs, ids = pcall(C_ClassTalents.GetConfigIDsBySpecID, specID)
+	if not okIDs or type(ids) ~= "table" then return nil end
+	local names = {}
+	for _, id in ipairs(ids) do
+		local okInfo, info = pcall(C_Traits.GetConfigInfo, id)
+		local name = okInfo and info and info.name
+		if name and canRead(name) then names[name] = true end
+	end
+	return names
+end
+
+-- The Talents button. Answers what it did, for the checks: "combat" did
+-- nothing; "missing" opened the window and said which name is not saved;
+-- "loaded" asked Blizzard's helper; "no helper" opened the window as before.
+-- When the game will not list the loadouts the helper is still asked, and
+-- Blizzard's frame says ERR_TALENT_FAILED_INVALID_CONFIG itself if need be.
+function PlanTab.loadTalents(name)
+	if InCombatLockdown() then return "combat" end
+	local saved = PlanTab.savedLoadoutNames()
+	if saved and not saved[name] then
+		PlanTab.openTalents()
+		print(("%sDjinni's BiS|r %sno saved loadout named \"%s\" for this spec. Save one with that name.|r"):format(GOLD, GREY, name))
+		return "missing"
+	end
+	if not (ClassTalentHelper and ClassTalentHelper.SwitchToLoadoutByName) then
+		PlanTab.openTalents()
+		return "no helper"
+	end
+	ClassTalentHelper.SwitchToLoadoutByName(name)
+	return "loaded"
+end
+
+-- TRAIT_CONFIG_UPDATED is a loadout landing, CONFIG_COMMIT_FAILED is the game
+-- refusing one. One chat line for the refusal, and either way the tab's "your
+-- loadout now" is redrawn. Called from the bag-mark watcher.
+function PlanTab.onTalentEvent(event)
+	if event == "CONFIG_COMMIT_FAILED" then
+		print(GOLD .. "Djinni's BiS|r " .. GREY .. "the talent change did not go through (CONFIG_COMMIT_FAILED). Stand still, out of combat, and click Talents again.|r")
+	end
+	if PlanTab.redraw then PlanTab.redraw() end
 end
 
 -- Picks the exact bag copy up and drops it in the slot the plan chose, so a
@@ -3065,9 +3127,11 @@ end
 -- The Plan tab ----------------------------------------------------------------
 --
 -- One boss picked, three answers under it: which loadout, which slots to
--- change, what to buy. It names a loadout and NEVER applies one: an addon that
--- calls C_ClassTalents.LoadConfig or CommitConfig is the known route to action
--- bars that stop updating in combat (card 0002 found ClassCodex doing it).
+-- change, what to buy. It names a loadout and applies one only through
+-- Blizzard's own ClassTalentHelper (card 0011, PlanTab.loadTalents): an addon
+-- that calls C_ClassTalents.LoadConfig or CommitConfig itself is the known
+-- route to action bars that stop updating in combat (card 0002 found
+-- ClassCodex doing it).
 
 -- The saved loadout picked in the talent window, by name, or nil.
 -- ponytail: this is the last loadout SELECTED. Talents changed by hand after
@@ -3114,8 +3178,8 @@ function PlanTab.lines(forSpec)
 		{ text = ("%sPick the boss you are about to pull. Everything below is for that boss.|r"):format(GREY) },
 		{ text = "" },
 		{ text = ("%s1. Talents|r   %syour loadout now: |r%s%s|r"):format(GOLD, GREY, WHITE, active or "not known"),
-			button = { label = "Talents", tip = "Open the talent window. Pick the loadout named below.",
-				onClick = PlanTab.openTalents } },
+			button = { label = "Talents", tip = ("Load \"%s\" through Blizzard's own talent helper, as its slash command would. Out of combat only."):format(picked.loadout),
+				onClick = function() PlanTab.loadTalents(picked.loadout) end } },
 	}
 	for _, row in ipairs(bosses) do
 		local isPicked = row == picked
@@ -3130,7 +3194,7 @@ function PlanTab.lines(forSpec)
 		}
 	end
 	if PlanTab.loadoutState(picked.loadout, active) == "mismatch" then
-		lines[#lines + 1] = { text = ("%sOpen talents and pick \"%s\" before %s.|r"):format(RED, picked.loadout, picked.boss) }
+		lines[#lines + 1] = { text = ("%sClick Talents to load \"%s\" before %s.|r"):format(RED, picked.loadout, picked.boss) }
 	end
 
 	lines[#lines + 1] = { text = "" }
@@ -4116,6 +4180,67 @@ local function selfTest()
 	C_PaperDollInfo, IsInventoryItemLocked = wasDoll, wasLocked
 	check("search button without the auction house open", PlanTab.searchAH("x"), false)
 
+	-- The Talents button (card 0011): Blizzard's ClassTalentHelper, never a
+	-- C_ClassTalents or C_Traits call that writes. Two saved loadouts are
+	-- pretended, the helper and the window record what they were asked, and
+	-- every C_ClassTalents / C_Traits key the button touches is recorded, so a
+	-- LoadConfig or CommitConfig call from our own code goes red.
+	do
+		local wasHelper, wasUtil, wasTalents, wasTraits, wasPrint, wasCombat = ClassTalentHelper, PlayerSpellsUtil, C_ClassTalents, C_Traits, print, InCombatLockdown
+		local asked, opened, printed, touched = nil, 0, {}, {}
+		ClassTalentHelper = { SwitchToLoadoutByName = function(name) asked = name end }
+		PlayerSpellsUtil = { OpenToClassTalentsTab = function() opened = opened + 1 end }
+		local reads = {
+			GetConfigIDsBySpecID = function() return { 1, 2 } end,
+			GetConfigInfo = function(id) return { name = ({ "WS Raid 2T *", "DotC Raid ST *" })[id] } end,
+		}
+		-- an unknown key answers a function that does nothing, so a write call
+		-- from our code is reported by the "reads only" check, not by a crash
+		local function watched() return setmetatable({}, { __index = function(_, k) touched[k] = true return reads[k] or function() end end }) end
+		C_ClassTalents, C_Traits = watched(), watched()
+		-- check() reports through print too, so a FAIL line goes to the real
+		-- one: with it captured, five red checks here read as a pass (0011 build)
+		print = function(...)
+			local line = tostring((...))
+			if line:find("|cffff0000FAIL|r", 1, true) then wasPrint(...) else printed[#printed + 1] = line end
+		end
+		InCombatLockdown = function() return true end
+		check("talents button does nothing in combat", PlanTab.loadTalents("WS Raid 2T *"), "combat")
+		InCombatLockdown = wasCombat
+		check("talents button does nothing in combat, asks nothing", asked, nil)
+		check("talents button does nothing in combat, opens nothing", opened, 0)
+		local missTest = "talents button falls back when the loadout is missing"
+		check(missTest, PlanTab.loadTalents("Not Saved"), "missing")
+		check(missTest .. ", opens the window", opened, 1)
+		check(missTest .. ", asks nothing", asked, nil)
+		check(missTest .. ", names the missing loadout", printed[1] and printed[1]:find("\"Not Saved\"", 1, true) ~= nil, true)
+		check(missTest .. ", in one line", #printed, 1)
+		local loadTest = "talents button loads a saved loadout through ClassTalentHelper"
+		check(loadTest, PlanTab.loadTalents("WS Raid 2T *"), "loaded")
+		check(loadTest .. ", by name", asked, "WS Raid 2T *")
+		check(loadTest .. ", without opening the window", opened, 1)
+		local keys = {}
+		for k in pairs(touched) do keys[#keys + 1] = k end
+		table.sort(keys)
+		check("no talent-changing call in the file, the button reads only", table.concat(keys, ","), "GetConfigIDsBySpecID,GetConfigInfo")
+		-- the two events: nothing said for a landing, one line for a refusal
+		printed = {}
+		PlanTab.onTalentEvent("TRAIT_CONFIG_UPDATED")
+		check("a loadout landing says nothing", #printed, 0)
+		PlanTab.onTalentEvent("CONFIG_COMMIT_FAILED")
+		check("a refused talent commit says so in one line", #printed, 1)
+		-- the tab AS DRAWN: the button carries the picked boss's loadout
+		local realBoss = PlanTab.boss
+		PlanTab.boss = "The Twin Fangs"
+		asked = nil
+		for _, line in ipairs(PlanTab.lines("Feral")) do
+			if line.button and line.button.label == "Talents" then line.button.onClick() end
+		end
+		PlanTab.boss = realBoss
+		check("drawn Talents button loads the picked boss's loadout", asked, "WS Raid 2T *")
+		ClassTalentHelper, PlayerSpellsUtil, C_ClassTalents, C_Traits, print, InCombatLockdown = wasHelper, wasUtil, wasTalents, wasTraits, wasPrint, wasCombat
+	end
+
 	-- ranks: a lower rank of the right enchant or gem is "lesser", never wrong
 	do
 		local rankTest = "a lower rank of the planned gem or enchant is lesser, not wrong"
@@ -4191,7 +4316,7 @@ local function selfTest()
 			row.boss .. "|r   " .. colour .. row.loadout .. "|r   " .. GREY .. SCENARIO_LABEL[row.scenario], 1, true) ~= nil, true)
 	end
 	check(flagTest .. ", drawn red", wrong:find("|cffff2020WS Raid 2T *|r", 1, true) ~= nil, true)
-	check(flagTest .. ", and told to change it", wrong:find("Open talents and pick \"WS Raid 2T *\"", 1, true) ~= nil, true)
+	check(flagTest .. ", and told to change it", wrong:find("Click Talents to load \"WS Raid 2T *\"", 1, true) ~= nil, true)
 	check(flagTest .. ", a match is drawn green", right:find("> The Twin Fangs|r   " .. GREEN .. "WS Raid 2T *|r", 1, true) ~= nil, true)
 	check(flagTest .. ", a match is not red", right:find("|cffff2020", 1, true), nil)
 	check(flagTest .. ", unknown is never red", unknown:find("|cffff2020", 1, true), nil)
