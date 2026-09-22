@@ -3264,6 +3264,94 @@ function PlanTab.activeLoadoutName()
 	return name, PlanTab.talentsEdited(configID)
 end
 
+-- The /simc export (card 0018). The Simulationcraft addon already writes every
+-- saved loadout of the spec as "# Saved Loadout: NAME" then "# talents=...",
+-- so Raidbots sims them all from one paste. What it cannot say is which boss
+-- wants which one, and a planned loadout that is not saved in the game just
+-- is not there. This adds a comment block of boss -> loadout, and for a
+-- planned loadout the game has not saved, the plan's own talent string where
+-- the gear plan carries one, else the name goes to chat and the loadout is
+-- left out.
+--
+-- Pure: `saved` is a set of the names saved in the game, `cells` maps a
+-- loadout name to the plan's talent string. Returns the lines and the names
+-- left out, so /bis test can prove both without a client.
+function PlanTab.simcLines(spec, bosses, saved, cells)
+	local lines = { ("# Djinni's BiS plan (%s): boss -> loadout"):format(spec) }
+	local missing, seen = {}, {}
+	for _, row in ipairs(bosses) do
+		lines[#lines + 1] = ("# %s -> %s"):format(row.boss, row.loadout)
+	end
+	for _, row in ipairs(bosses) do
+		if not saved[row.loadout] and not seen[row.loadout] then
+			seen[row.loadout] = true
+			local talents = cells[row.loadout]
+			if talents then
+				lines[#lines + 1] = ("# Saved Loadout: %s (DBiS plan)"):format(row.loadout)
+				lines[#lines + 1] = "# talents=" .. talents
+			else
+				missing[#missing + 1] = row.loadout
+			end
+		end
+	end
+	return lines, missing
+end
+
+-- Where the block goes: after the last "# talents=" line, so it sits with the
+-- SimC addon's own loadouts, else after the live "talents=" line, else the end.
+function PlanTab.simcInsert(profile, block)
+	local at  -- index of the last character of the line the block follows
+	for e in profile:gmatch("\n# talents=[^\n]*()") do at = e - 1 end
+	if not at then at = select(2, profile:find("\ntalents=[^\n]*")) end
+	if not at then return profile .. "\n" .. block .. "\n" end
+	return profile:sub(1, at) .. "\n" .. block .. profile:sub(at + 1)
+end
+
+function PlanTab.simcAppend(profile)
+	local spec = playerSpec()
+	local bosses = spec and PlanTab.BOSSES[spec]
+	if not bosses then return profile end
+	local saved = {}
+	if C_ClassTalents and C_ClassTalents.GetConfigIDsBySpecID and C_Traits and C_Traits.GetConfigInfo then
+		local okSpec, specID = pcall(C_SpecializationInfo.GetSpecializationInfo, C_SpecializationInfo.GetSpecialization())
+		local okIDs, ids = pcall(C_ClassTalents.GetConfigIDsBySpecID, okSpec and specID or nil)
+		for _, id in ipairs(okIDs and ids or {}) do
+			local okInfo, info = pcall(C_Traits.GetConfigInfo, id)
+			local name = okInfo and info and info.name
+			if name and canRead(name) then saved[name] = true end
+		end
+	end
+	local cells = {}
+	for _, cell in pairs(GEAR_PLAN[spec] or {}) do
+		if cell.loadout and cell.talents then cells[cell.loadout] = cell.talents end
+	end
+	local lines, missing = PlanTab.simcLines(spec, bosses, saved, cells)
+	if #missing > 0 then
+		print(GOLD .. "Djinni's BiS|r " .. GREY .. "not saved in the game, so left out of the /simc export: |r"
+			.. table.concat(missing, ", "))
+	end
+	return PlanTab.simcInsert(profile, table.concat(lines, "\n"))
+end
+
+-- Wrap the Simulationcraft addon's profile builder, once, and only when it is
+-- loaded. A plain wrapper, not hooksecurefunc: the block has to go into the
+-- returned string. Nothing of Blizzard's is touched.
+function PlanTab.armSimc()
+	local simc = _G.Simulationcraft
+	if type(simc) ~= "table" or type(simc.GetSimcProfile) ~= "function" or simc.DjinnisBiSWrapped then return false end
+	local build = simc.GetSimcProfile
+	simc.GetSimcProfile = function(self, ...)
+		local profile, err = build(self, ...)
+		if type(profile) == "string" and not err then
+			local ok, more = pcall(PlanTab.simcAppend, profile)
+			if ok and more then profile = more end
+		end
+		return profile, err
+	end
+	simc.DjinnisBiSWrapped = true
+	return true
+end
+
 -- PlanTab.boss is the boss picked in the tab; the first one until a click.
 -- `forSpec` is for /bis test only, which has to pass whatever spec runs it.
 function PlanTab.lines(forSpec)
@@ -3714,6 +3802,7 @@ loader:SetScript("OnEvent", function(_, event)
 		pcall(armCharacterPane)
 		pcall(armBagMarks)
 		pcall(armRatingCache)
+		pcall(PlanTab.armSimc)  -- Simulationcraft loads after this addon (S after D) and is not load-on-demand, so it is here by login
 	else
 		harvested = false
 	end
@@ -4250,6 +4339,68 @@ local function selfTest()
 	check(combatTest .. ", and it was a read", reads, 4)
 	C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString = wasActiveID, wasGenerate
 	InCombatLockdown, PlanTab.lastEdited = wasCombat, wasLast
+
+	-- The /simc export (card 0018). Names are the real Feral plan's, so a plan
+	-- edit that drops one of them fails here rather than in a Raidbots run.
+	local simcTest = "simc export carries each planned loadout"
+	local allSaved = {}
+	for _, row in ipairs(PlanTab.BOSSES.Feral) do allSaved[row.loadout] = true end
+	local ferals = { ["DotC Raid ST *"] = "AAAA", ["WS M+"] = "BBBB" }
+	local lines, missing = PlanTab.simcLines("Feral", PlanTab.BOSSES.Feral, allSaved, ferals)
+	local text = table.concat(lines, "\n")
+	check(simcTest .. ", a header", lines[1]:find("Feral", 1, true) ~= nil, true)
+	for _, row in ipairs(PlanTab.BOSSES.Feral) do
+		check(simcTest .. ", " .. row.boss, text:find("# " .. row.boss .. " -> " .. row.loadout, 1, true) ~= nil, true)
+	end
+	check(simcTest .. ", nothing added when all are saved", text:find("Saved Loadout", 1, true), nil)
+	check(simcTest .. ", nothing missing when all are saved", #missing, 0)
+	local missTest = "a missing loadout is left out and named"
+	local someSaved = {}
+	for name in pairs(allSaved) do someSaved[name] = true end
+	someSaved["WS Raid Coiled Altar"], someSaved["DotC Raid ST *"] = nil, nil
+	lines, missing = PlanTab.simcLines("Feral", PlanTab.BOSSES.Feral, someSaved, ferals)
+	text = table.concat(lines, "\n")
+	check(missTest .. ", named once", table.concat(missing, ","), "WS Raid Coiled Altar")
+	check(missTest .. ", no talents line for it", text:find("Coiled Altar (DBiS plan)", 1, true), nil)
+	check(missTest .. ", the plan's string stands in when it has one",
+		text:find("# Saved Loadout: DotC Raid ST * (DBiS plan)\n# talents=AAAA", 1, true) ~= nil, true)
+	check(missTest .. ", and that one is not named as missing", text:find("Saved Loadout: DotC", 1, true) ~= nil and #missing, 1)
+	lines = PlanTab.simcLines("Feral", PlanTab.BOSSES.Feral, {}, {})
+	local stand = 0
+	for _, line in ipairs(lines) do if line:find("^# Saved Loadout") then stand = stand + 1 end end
+	check(missTest .. ", nothing saved and no plan string adds no loadout", stand, 0)
+	local insTest = "simc block sits with the addon's own loadouts"
+	local profile = "# head\ntalents=LIVE\n\n# Saved Loadout: A\n# talents=AAA\n# Saved Loadout: B\n# talents=BBB\n\nhead=x\n"
+	check(insTest .. ", after the last saved one", PlanTab.simcInsert(profile, "# X"),
+		"# head\ntalents=LIVE\n\n# Saved Loadout: A\n# talents=AAA\n# Saved Loadout: B\n# talents=BBB\n# X\n\nhead=x\n")
+	check(insTest .. ", after the live talents when none are saved", PlanTab.simcInsert("# head\ntalents=LIVE\n\nhead=x\n", "# X"),
+		"# head\ntalents=LIVE\n# X\n\nhead=x\n")
+	check(insTest .. ", at the end when there are no talents", PlanTab.simcInsert("# head\nhead=x", "# X"), "# head\nhead=x\n# X\n")
+	local hookTest = "no error without the simc addon"
+	local wasSimc, wasIDs, wasInfo = _G.Simulationcraft, C_ClassTalents.GetConfigIDsBySpecID, C_Traits.GetConfigInfo
+	_G.Simulationcraft = nil
+	local okArm, armed = pcall(PlanTab.armSimc)
+	check(hookTest .. ", no error", okArm, true)
+	check(hookTest .. ", nothing armed", armed, false)
+	local fake = { GetSimcProfile = function(self, a) return self.text .. tostring(a), nil end, text = profile }
+	_G.Simulationcraft = fake
+	C_ClassTalents.GetConfigIDsBySpecID = function() return { 1, 2 } end
+	C_Traits.GetConfigInfo = function(id) return { name = ({ "WS Raid Most Bosses", "DotC Raid ST *" })[id] } end
+	check(hookTest .. ", armed when present", PlanTab.armSimc(), true)
+	check(hookTest .. ", armed once", PlanTab.armSimc(), false)
+	local out, err = fake:GetSimcProfile("!")
+	check(hookTest .. ", the addon's own text survives", out:find("# Saved Loadout: B\n# talents=BBB\n# Djinni's BiS plan (Feral)", 1, true) ~= nil, true)
+	check(hookTest .. ", the arguments reach the addon", out:sub(-1), "!")
+	check(hookTest .. ", saved names are read from the game", out:find("Saved Loadout: WS Raid Most Bosses (DBiS", 1, true), nil)
+	check(hookTest .. ", the plan's string for an unsaved one", out:find("# Saved Loadout: WS M+ (DBiS plan)\n# talents=" .. GEAR_PLAN.Feral.mplus.talents, 1, true) ~= nil, true)
+	check(hookTest .. ", no error back", err, nil)
+	fake.GetSimcProfile = function() return nil, "boom" end
+	fake.DjinnisBiSWrapped = nil
+	PlanTab.armSimc()
+	out, err = fake:GetSimcProfile()
+	check(hookTest .. ", an error from the addon passes through", err, "boom")
+	check(hookTest .. ", with no profile", out, nil)
+	_G.Simulationcraft, C_ClassTalents.GetConfigIDsBySpecID, C_Traits.GetConfigInfo = wasSimc, wasIDs, wasInfo
 
 	local shopTest = "shopping list counts each missing enchant and gem once"
 	local shopPlan = { slots = {
