@@ -124,3 +124,56 @@ come from our own table, so refuse any such name rather than escape it.
   **Left out and why:** route 2, the secure macro button, because route 1 passed Rob's hand test;
   the `;` and newline refusal from the Plan, because it guarded macro text and there is none;
   loading on zone-in or on a boss, which the card fences off.
+- 2026-09-22 Claude, adversarial review in a worktree (merge `d62c4e3`, feature `519d400`), no
+  game client. **Passes offline; the load itself is the game's to prove, so human-review, not done.**
+  **Attacked:** every `proves:` check ran green under Lua 5.4 and 5.1 (both exit 0), then each guard
+  was broken in a temp copy: combat guard deleted (3 red), missing-name fallback turned off (6 red),
+  helper call swapped for `C_ClassTalents.SwitchToLoadoutByName` (4 red), a dead
+  `C_ClassTalents.LoadConfig(1)` in code (red), the `CONFIG_COMMIT_FAILED` line removed (1 red), the
+  drawn button put back to open-only (1 red), the helper call replaced by opening the window (3 red).
+  Dropping `canRead` on the loadout name stays green, as expected: no offline check can hand the file
+  a secret, so that guard is proved by reading only. **Checked against `wow-ui-source` (branch
+  `live`):** `ClassTalentHelper.SwitchToLoadoutByName` exists and only calls
+  `C_ClassTalents.SwitchToLoadoutByName` (`HasRestrictions`, `SecretArguments = AllowedWhenUntainted`),
+  whose event Blizzard answers with `PlayerSpellsFrame.TalentsFrame:LoadConfigByName`;
+  `GetConfigIDsBySpecID`, `C_Traits.GetConfigInfo`, `C_SpecializationInfo.GetSpecialization` and
+  `GetSpecializationInfo` are documented with the signatures used; `TRAIT_CONFIG_UPDATED` and
+  `CONFIG_COMMIT_FAILED` are documented events, both registered one at a time after the handler and
+  verified with `IsEventRegistered`. Every `C_ClassTalents` / `C_Traits` call in the file is a read
+  and the file scan in `offline-check.lua` enforces it. The name is used as a table key only after
+  `canRead`, and the printed name is our own table's, so the three 12.1 traps are covered. No new
+  top-level local (177). **Held, with two notes, neither changed:** (1) Blizzard's `LoadConfigByName`
+  matches case-insensitively (`strcmputf8i`); our missing-name check is exact, so a loadout saved as
+  `dotc raid st *` would get the grey "no saved loadout" line where Blizzard would have loaded it.
+  The names are Rob's own table and the red mismatch line (`0007`) is exact too, so this is
+  consistent rather than wrong. (2) `CONFIG_COMMIT_FAILED` fires for any refused commit, including a
+  hand edit in the talent window, and the line says "click Talents again" either way. Harmless, one
+  grey line. **The one thing only the game can settle, and the builder already named it:**
+  `LoadConfigByPredicate` refuses with `ERR_TALENT_FAILED_NO_DATA` until the talent frame's
+  `variablesLoaded` is set, which happens on `Blizzard_PlayerSpells`'s `ADDON_LOADED`. The helper
+  loads that addon on demand, so the very first click after login, with the talent window never
+  opened, may say "no data". If it does, the fix is one line: `C_AddOns.LoadAddOn("Blizzard_PlayerSpells")`
+  when the Plan tab first draws. Not added before the game says it is needed. **Security:** weakest
+  point is the loadout name handed to Blizzard's frame, and it comes from the addon's own baked table,
+  never from chat, a tooltip or another player. Unchecked paths in: none, the only inputs are two game
+  events with a numeric configID that is not read, and a click. On failure it leaks one grey chat
+  line naming a loadout from our own table, nothing else. Nothing fixed, nothing bounced.
+
+## What I need from you
+
+Out of combat, on Feral, after `/reload`:
+
+1. `/bis`, Plan tab, pick a boss whose loadout line is red, click Talents once. Expected: the
+   talent-change cast bar, the loadout loads, the line goes green on its own. If the game says
+   "no data" or nothing happens on this very first click, say so: that is the `variablesLoaded`
+   note above, and the one-line fix is named there.
+2. Then pull a target dummy and press every action bar button for 30 seconds. Expected: no frozen
+   bar, no "blocked" message. This is the taint question from a button's OnClick, which `/run` did
+   not settle.
+3. Rename the picked boss's loadout in the talent window, click Talents. Expected: the window opens
+   and one grey chat line names the missing loadout. Rename it back.
+4. Click Talents while moving so the commit fails. Expected: one grey line about
+   `CONFIG_COMMIT_FAILED`.
+5. Hover Talents. Expected: the tip names the loadout it will load.
+
+Say which of the five you saw, and this card can go to done.
