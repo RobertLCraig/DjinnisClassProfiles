@@ -1691,6 +1691,7 @@ local function readWorn()
 	end
 	return worn
 end
+PlanTab.readWorn = readWorn  -- for /bis test only: selfTest sits at Lua 5.1's 60-upvalue limit
 
 -- The data broker line (card 0026): "BiS: 2 off plan" on any broker display,
 -- so nothing has to be opened to know. `count` nil is no plan or unreadable
@@ -4097,12 +4098,7 @@ function PlanTab.lines(forSpec)
 	if #inBags > 0 then
 		lines[#lines + 1] = { text = ("   %s%d of these can go on from here.|r"):format(GREY, #inBags),
 			button = { label = "Equip all", tip = "Equip every planned piece in your bags, and in the bank while it is open.",
-				onClick = function()
-					for _, slotID in ipairs(inBags) do PlanTab.equip(marks[slotID].entry, slotID) end
-					-- Not now: the pickups above are in flight, and the slots read
-					-- stale until the server answers (card 0012).
-					if C_Timer then C_Timer.After(2, function() PlanTab.saveSetAndSay(spec, picked.scenario) end) end
-				end } }
+				onClick = function() PlanTab.equipAll(marks, inBags, spec, picked.scenario) end } }
 	end
 	-- Every planned PIECE on, whatever its enchants and gems, is enough for a
 	-- set, and the button is how a set gets saved when Equip all's timer read
@@ -4178,6 +4174,332 @@ function PlanTab.pickScenario(next)
 	end
 	PlanTab.redraw()
 	return true
+end
+
+-- The "wrong setup here" popup (card 0013) ------------------------------------
+--
+-- On the way into a raid or a key, on a ready check and after a boss goes
+-- down: one popup naming the place, the boss in front of you, and the loadout
+-- and slots that differ from its plan. Nothing changes without a click, and
+-- its buttons are the Plan tab's own (loadTalents, equipAll, open). It never
+-- shows in combat, in a running key or in a boss fight, and waits for that to
+-- end; 12.1 fences Encounter and ChallengeMode for addons and says so through
+-- C_RestrictedActions. Closed, it stays closed until the answer for this
+-- place changes. What differs is ONE test, PlanTab.wrongHere, so the ready
+-- check list (card 0017) asks the same question rather than a second one.
+
+-- Equips every planned piece in `slotIDs` from the bags (and the open bank),
+-- then saves the set once the pickups have landed (card 0012): not now, the
+-- pickups are in flight and the slots read stale until the server answers.
+-- The Plan tab's Equip all and the popup's both come here.
+function PlanTab.equipAll(marks, slotIDs, spec, scenario)
+	local asked = 0
+	for _, slotID in ipairs(slotIDs) do
+		if PlanTab.equip(marks[slotID].entry, slotID) then asked = asked + 1 end
+	end
+	if C_Timer then C_Timer.After(2, function() PlanTab.saveSetAndSay(spec, scenario) end) end
+	return asked
+end
+
+-- Pure. What differs between the plan for `row` and what is on: `loadout` is
+-- the loadout name in play when it is not the row's, `change` the slots
+-- wearing the wrong item, `fix` the slots wanting an enchant or a gem, and
+-- `marks` the slot states behind them. A lower rank of the right thing is not
+-- wrong (card 0010) and is not here. nil when nothing differs, or when there
+-- is nothing to judge: no row, or no gear plan and no loadout in play.
+function PlanTab.wrongHere(row, active, edited, plan, worn)
+	if not row then return nil end
+	local wrong = { change = {}, fix = {}, marks = {} }
+	if PlanTab.loadoutState(row.loadout, active, edited) == "mismatch" then
+		wrong.loadout = active .. (edited and " (edited)" or "")
+	end
+	if plan and worn then
+		wrong.marks = slotStates(plan, worn)
+		for slotID, mark in pairs(wrong.marks) do
+			if mark.state == "change" then wrong.change[#wrong.change + 1] = slotID
+			elseif mark.state == "enchant" or mark.state == "gem" then wrong.fix[#wrong.fix + 1] = slotID end
+		end
+		table.sort(wrong.change)
+		table.sort(wrong.fix)
+	end
+	if not wrong.loadout and #wrong.change == 0 and #wrong.fix == 0 then return nil end
+	return wrong
+end
+
+-- Pure. The row to set up for: in a key the Mythic+ row; in a raid the row
+-- after the last one killed (`killedID` from ENCOUNTER_END), the first raid
+-- row when none has been, and nil once the last row has, because nothing is
+-- left to pull. Elsewhere nil.
+-- ponytail: table order is pull order. Nymrissa's row is a lair boss after
+-- Ula'tek's, so after the raid's last kill the popup names her once; a
+-- subzone table is the upgrade if that ever misleads.
+function PlanTab.rowHere(bosses, here, killedID)
+	local raid = {}
+	for _, row in ipairs(bosses or {}) do
+		if here == "mplus" and row.scenario == "mplus" then return row end
+		if row.scenario ~= "mplus" then raid[#raid + 1] = row end
+	end
+	if here ~= "raid" then return nil end
+	if killedID == nil then return raid[1] end
+	for i, row in ipairs(raid) do
+		if row.id == killedID then return raid[i + 1] end
+	end
+	return raid[1]
+end
+
+-- Why the popup may not show right now, or nil: "combat", "a key" or "a boss
+-- fight". The 12.1 restriction predicate first (RestrictedActionsDocumentation.lua,
+-- SecretArguments AllowedWhenUntainted, and it answers false while its own
+-- event is being dispatched, which is why the retry waits two seconds), then
+-- the plain reads, so a client that fences answers the same as one that only
+-- reports.
+function PlanTab.fenced()
+	if InCombatLockdown() then return "combat" end
+	local api, kinds = C_RestrictedActions, Enum and Enum.AddOnRestrictionType
+	local function restricted(kind)
+		if not (api and api.IsAddOnRestrictionActive and kinds and kinds[kind]) then return false end
+		local ok, active = pcall(api.IsAddOnRestrictionActive, kinds[kind])
+		return ok and active == true
+	end
+	if restricted("ChallengeMode") or (C_ChallengeMode and C_ChallengeMode.IsChallengeModeActive
+		and C_ChallengeMode.IsChallengeModeActive()) then return "a key" end
+	if restricted("Encounter") or (C_InstanceEncounter and C_InstanceEncounter.IsEncounterInProgress
+		and C_InstanceEncounter.IsEncounterInProgress()) then return "a boss fight" end
+	return nil
+end
+
+-- One string for "the plan's answer for this place": the place, the boss and
+-- what differs. Once closed, the popup stays closed while this is the same.
+function PlanTab.setupKey(place, row, wrong)
+	return table.concat({ place or "?", row.boss, wrong.loadout or "",
+		table.concat(wrong.change, ","), table.concat(wrong.fix, ",") }, "|")
+end
+
+-- The popup's title, lines and buttons for `wrong`, each button only when
+-- its part differs: Switch talents for the loadout, Equip all for a wrong
+-- item that is in the bags, Open Plan for what those two cannot do (an
+-- enchant, a gem, a piece not owned). Colour as everywhere: green right, amber
+-- a small fix, red a wrong item.
+function PlanTab.setupPopup(place, row, spec, wrong)
+	local RED, AMBER = "|cffff2020", "|cffffb300"
+	local title = ("%s: %s"):format(place or "Here", row.boss)
+	local lines, inBags = {}, {}
+	if wrong.loadout then
+		lines[#lines + 1] = ("%sTalents|r   planned %s%s|r, now %s%s|r"):format(GOLD, GREEN, row.loadout, RED, wrong.loadout)
+	else
+		lines[#lines + 1] = ("%sTalents|r   %s%s|r"):format(GOLD, GREEN, row.loadout)
+	end
+	for _, slotID in ipairs(wrong.change) do
+		local mark = wrong.marks[slotID]
+		if PlanTab.holding(mark.entry) then inBags[#inBags + 1] = slotID end
+		lines[#lines + 1] = ("%s%s|r   %s%s|r"):format(GOLD, PLAN_SLOT_LABEL[slotID] or "?", RED, (planLineFor(mark):gsub("^Plan: ", "")))
+	end
+	for _, slotID in ipairs(wrong.fix) do
+		lines[#lines + 1] = ("%s%s|r   %s%s|r"):format(GOLD, PLAN_SLOT_LABEL[slotID] or "?", AMBER, (planLineFor(wrong.marks[slotID]):gsub("^Plan: ", "")))
+	end
+	local buttons = {}
+	if wrong.loadout then
+		buttons[#buttons + 1] = { label = "Switch talents",
+			tip = ("Load \"%s\" through Blizzard's own talent helper. Out of combat only."):format(row.loadout),
+			onClick = function() PlanTab.loadTalents(row.loadout); PlanTab.recheckSoon() end }
+	end
+	if #inBags > 0 then
+		buttons[#buttons + 1] = { label = "Equip all",
+			tip = "Equip every planned piece in your bags, and in the bank while it is open. Out of combat only.",
+			onClick = function() PlanTab.equipAll(wrong.marks, inBags, spec, row.scenario); PlanTab.recheckSoon() end }
+	end
+	if #wrong.fix > 0 or #wrong.change > #inBags then
+		buttons[#buttons + 1] = { label = "Open Plan", tip = "Open the Plan tab on this boss.",
+			onClick = function() PlanTab.boss = row.boss; PlanTab.open(row.scenario) end }
+	end
+	return title, lines, buttons
+end
+
+-- Runs `fn` after `seconds` in the game; at once where there is no timer,
+-- which is /bis test outside it.
+function PlanTab.later(seconds, fn)
+	if C_Timer and C_Timer.After then C_Timer.After(seconds, fn) else fn() end
+end
+
+-- A button click changes talents or gear through a server round trip, so the
+-- popup is judged again two seconds on: it goes when everything matches, and
+-- redraws with what is left when not.
+function PlanTab.recheckSoon()
+	if C_Timer and C_Timer.After then C_Timer.After(2, PlanTab.checkSetup) end
+end
+
+-- Reads the game and shows the popup, or not. Answers what it did, for the
+-- checks: "elsewhere" (not in a raid or a dungeon), "no plan" (no row for
+-- this spec here, or the last boss is down), "fenced" (combat, a key or a
+-- fight: it will try again when that ends), "matches", "closed" (Rob closed
+-- this answer already) or "shown".
+function PlanTab.checkSetup()
+	local here = autoContext()
+	if not here then PlanTab.popupPending = nil; PlanTab.hidePopup(); return "elsewhere" end
+	local spec = playerSpec()
+	local row = PlanTab.rowHere(spec and PlanTab.BOSSES[spec], here, PlanTab.lastKill)
+	if not row then PlanTab.hidePopup(); return "no plan" end
+	if PlanTab.fenced() then PlanTab.popupPending = true; return "fenced" end
+	PlanTab.popupPending = nil
+	local active, edited = PlanTab.activeLoadoutName()
+	local plan = gearPlanFor(spec, row.scenario)
+	local wrong = PlanTab.wrongHere(row, active, edited, plan, plan and readWorn())
+	if not wrong then PlanTab.hidePopup(); return "matches" end
+	local place = (GetInstanceInfo())
+	if type(place) ~= "string" or not canRead(place) then place = nil end
+	local key = PlanTab.setupKey(place, row, wrong)
+	if key == PlanTab.popupClosed then return "closed" end
+	local title, lines, buttons = PlanTab.setupPopup(place, row, spec, wrong)
+	PlanTab.popup(title, lines, buttons, function() PlanTab.popupClosed = key end)
+	return "shown"
+end
+
+-- The popup's events, one at a time and each verified (docs/DECISIONS.md,
+-- 2026-08-21): a refused one is said once in chat, and the rest still work.
+-- All of them are in Blizzard_APIDocumentationGenerated: ENCOUNTER_START and
+-- ENCOUNTER_END (EncounterInfo), READY_CHECK (PartyInfo), CHALLENGE_MODE_START
+-- (ChallengeModeInfo), PLAYER_ENTERING_WORLD (System), PLAYER_REGEN_ENABLED
+-- (Unit) and ADDON_RESTRICTION_STATE_CHANGED (RestrictedActions).
+PlanTab.SETUP_EVENTS = { "PLAYER_ENTERING_WORLD", "READY_CHECK", "ENCOUNTER_START", "ENCOUNTER_END",
+	"CHALLENGE_MODE_START", "PLAYER_REGEN_ENABLED", "ADDON_RESTRICTION_STATE_CHANGED" }
+
+-- One event, as the watcher handles it. Pure enough for /bis test: every read
+-- is behind checkSetup. `id`, `name` and `success` are ENCOUNTER_END's first,
+-- second and fifth payload fields; each is tested with canRead before it is
+-- compared, per DECISIONS.md, though the payload carries no secret flag.
+function PlanTab.onSetupEvent(event, id, name, _, _, success)
+	if event == "PLAYER_ENTERING_WORLD" then
+		PlanTab.lastKill = nil  -- a fresh zone-in starts at the first boss
+		PlanTab.later(2, PlanTab.checkSetup)  -- as EnhanceQoL does: the instance is not readable at once
+	elseif event == "READY_CHECK" then
+		return PlanTab.checkSetup()
+	elseif event == "ENCOUNTER_START" or event == "CHALLENGE_MODE_START" then
+		-- A fight or a key is not the time; if the popup was up, it comes back
+		-- after, and a running key is answered by the restriction event.
+		if PlanTab.popupModel then PlanTab.popupPending = true end
+		PlanTab.hidePopup()
+	elseif event == "ENCOUNTER_END" then
+		local spec = playerSpec()
+		local row = PlanTab.bossRow(spec and PlanTab.BOSSES[spec], id, name)
+		if row and row.id and canRead(success) and success == 1 then PlanTab.lastKill = row.id end
+		PlanTab.later(2, PlanTab.checkSetup)
+	elseif PlanTab.popupPending then
+		-- PLAYER_REGEN_ENABLED or ADDON_RESTRICTION_STATE_CHANGED: the fence
+		-- may be coming down. Two seconds, because the predicate answers false
+		-- during its own event's dispatch, and checkSetup re-asks it anyway.
+		PlanTab.later(2, PlanTab.checkSetup)
+	end
+end
+
+function PlanTab.armSetupWatch()
+	local watcher = CreateFrame("Frame")
+	watcher:SetScript("OnEvent", function(_, ...) PlanTab.onSetupEvent(...) end)
+	for _, event in ipairs(PlanTab.SETUP_EVENTS) do
+		watcher:RegisterEvent(event)
+		if not watcher:IsEventRegistered(event) then
+			print(GOLD .. "Djinni's BiS|r " .. GREY .. "could not register " .. event
+				.. ", so the wrong-setup popup will not answer it.|r")
+		end
+	end
+	PlanTab.setupWatcher = watcher
+end
+
+-- A small window of lines and buttons, one for the whole addon; card 0024's
+-- spec prompt shares it. PlanTab.popup(title, lines, buttons, onClose):
+-- `lines` are strings, colour codes and all; `buttons` are { label, tip,
+-- onClick } in a row along the bottom; `onClose` runs when the X or Escape
+-- hides it, not when the addon hides it itself (hidePopup). Card 0020's rules:
+-- normal fonts, buttons 24 high. Checked in wow-ui-source:
+-- BasicFrameTemplateWithInset (Blizzard_UIPanelTemplates/Mainline/UIPanelTemplates.xml).
+PlanTab.POPUP = { w = 480, line = 20, button = 130, pad = 14 }
+function PlanTab.buildPopup()
+	local P = PlanTab.POPUP
+	local f = CreateFrame("Frame", "DjinnisBiSPopup", UIParent, "BasicFrameTemplateWithInset")
+	f:SetSize(P.w, 120)
+	f:SetPoint("TOP", UIParent, "TOP", 0, -140)
+	f:SetMovable(true)
+	f:EnableMouse(true)
+	f:SetFrameStrata("DIALOG")
+	f:SetClampedToScreen(true)
+	f:RegisterForDrag("LeftButton")
+	f:SetScript("OnDragStart", f.StartMoving)
+	f:SetScript("OnDragStop", f.StopMovingOrSizing)
+	f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	f.title:SetPoint("TOP", f, "TOP", 0, -6)
+	f.lines, f.buttons = {}, {}
+	f:SetScript("OnHide", function(self) PlanTab.popupHidden(self) end)
+	tinsert(UISpecialFrames, "DjinnisBiSPopup")  -- Escape closes it, as the X does
+	f:Hide()
+	PlanTab.popupFrame = f
+	return f
+end
+
+function PlanTab.popup(title, lines, buttons, onClose)
+	local P = PlanTab.POPUP
+	local f = PlanTab.popupFrame or PlanTab.buildPopup()
+	PlanTab.popupModel = { title = title, lines = lines, buttons = buttons }
+	f.title:SetText(title)
+	for i, text in ipairs(lines) do
+		local fs = f.lines[i]
+		if not fs then
+			fs = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+			fs:SetPoint("TOPLEFT", f, "TOPLEFT", P.pad, -(30 + (i - 1) * P.line))
+			fs:SetWidth(P.w - 2 * P.pad)
+			fs:SetJustifyH("LEFT")
+			fs:SetWordWrap(false)
+			f.lines[i] = fs
+		end
+		fs:SetText(text)
+		fs:Show()
+	end
+	for i = #lines + 1, #f.lines do f.lines[i]:Hide() end
+	for i, spec in ipairs(buttons) do
+		local button = f.buttons[i]
+		if not button then
+			button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+			button:SetSize(P.button, PlanTab.SIZE.button)
+			button:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", P.pad + (i - 1) * (P.button + 6), 10)
+			button:SetScript("OnClick", function(self) if self.onClick then self.onClick() end end)
+			button:SetScript("OnEnter", function(self)
+				if not self.tip then return end
+				GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+				GameTooltip:SetText(self.tip, nil, nil, nil, nil, true)
+				GameTooltip:Show()
+			end)
+			button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+			f.buttons[i] = button
+		end
+		button:SetText(spec.label)
+		button.tip, button.onClick = spec.tip, spec.onClick
+		button:Show()
+	end
+	for i = #buttons + 1, #f.buttons do f.buttons[i]:Hide() end
+	f:SetHeight(30 + #lines * P.line + (#buttons > 0 and (PlanTab.SIZE.button + 20) or 12))
+	f.onClose = onClose
+	f:Show()
+	return f
+end
+
+-- The addon taking it down: no onClose, so a closed key is not recorded.
+function PlanTab.hidePopup()
+	local f = PlanTab.popupFrame
+	if f then f.onClose = nil; f:Hide() end
+	PlanTab.popupModel = nil
+end
+
+-- The frame's OnHide: the X, Escape, or hidePopup above.
+function PlanTab.popupHidden(f)
+	local fn = f.onClose
+	f.onClose, PlanTab.popupModel = nil, nil
+	if fn then fn() end
+end
+
+-- The X, as the checks press it; in the game the frame's OnHide does this.
+function PlanTab.closePopup()
+	local f = PlanTab.popupFrame
+	if not f then return end
+	f:Hide()
+	PlanTab.popupHidden(f)
 end
 
 -- Returns the refresh function. `holder` is the character pane's frame and
@@ -4492,6 +4814,7 @@ loader:SetScript("OnEvent", function(_, event)
 		pcall(armBagMarks)
 		pcall(armRatingCache)
 		pcall(PlanTab.armSimc)  -- Simulationcraft loads after this addon (S after D) and is not load-on-demand, so it is here by login
+		pcall(PlanTab.armSetupWatch)  -- the wrong-setup popup's events (card 0013)
 	else
 		harvested = false
 		PlanTab.poolsDone = false  -- the pools' next pass fills only the cells still nil (card 0022)
@@ -5933,6 +6256,191 @@ local function selfTest()
 		check(choiceTest .. ", and the raid cell is untouched", db().planScenario.Feral, "st")
 		GetInstanceInfo, db().statContext, db().planScenario, PlanTab.refreshStrip = keptInstance, keptContext, keptScenario, keptStrip
 		rebuildBagWanted()  -- the picks above rebuilt the bag list on test pins; put it back on the real ones
+	end
+
+	-- Card 0013: the wrong-setup popup. The frame needs a person; these prove
+	-- the one "what differs" test, the row the place picks, the fence, the
+	-- popup's content and buttons as built, and the closed key, driving
+	-- checkSetup through the stubbed game the other blocks use.
+	do
+		local plan = gearPlanFor("Feral", "st")
+		local entryBySlotID, ilvlById = {}, {}
+		for slot, entry in pairs(plan.slots) do
+			entryBySlotID[PLAN_SLOT_INVENTORY[slot]] = entry
+			ilvlById[entry.id] = entry.ilvl
+		end
+		local bare, wrongEnchant = nil, nil  -- a slot id worn empty, a slot id worn with enchant 1
+		local wasWornLink, wasLevel, wasInstance = GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, GetInstanceInfo
+		local wasActive, wasCombat, wasContainer = PlanTab.activeLoadoutName, InCombatLockdown, C_Container
+		local wasCM, wasIE, wasRA, wasEnumRA = C_ChallengeMode, C_InstanceEncounter, C_RestrictedActions, Enum.AddOnRestrictionType
+		-- the frame itself is reused, never rebuilt: in the game it is a named frame
+		local wasClosed, wasKill, wasPending = PlanTab.popupClosed, PlanTab.lastKill, PlanTab.popupPending
+		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.popupPending = nil, nil, nil
+		GetInventoryItemLink = function(_, slotID)
+			local entry = slotID ~= bare and entryBySlotID[slotID]
+			if not entry then return nil end
+			return ("|Hitem:%d:%s:%s:%s:::|h[x]|h"):format(entry.id,
+				slotID == wrongEnchant and 1 or entry.enchant or "", entry.gems[1] or "", entry.gems[2] or "")
+		end
+		C_Item.GetDetailedItemLevelInfo = function(link) return ilvlById[tonumber(link:match("item:(%d+)"))] end
+		C_Container = nil  -- no bags: nothing to Equip until a check says so
+		local active, edited = "WS Raid Most Bosses", nil  -- Nek'zali's, the first raid row
+		PlanTab.activeLoadoutName = function() return active, edited end
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		local nek = PlanTab.BOSSES.Feral[1]
+		local function labels()
+			local names = {}
+			for i, b in ipairs(PlanTab.popupModel and PlanTab.popupModel.buttons or {}) do names[i] = b.label end
+			return table.concat(names, ", ")
+		end
+
+		local namesTest = "popup names what differs from the plan here"
+		check(namesTest .. ", pure: everything on and the right loadout differs nowhere", PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn()), nil)
+		check(namesTest .. ", pure: no row is nothing to judge", PlanTab.wrongHere(nil, "X", nil, plan, PlanTab.readWorn()), nil)
+		check(namesTest .. ", pure: another loadout is named", PlanTab.wrongHere(nek, "DotC Raid ST *", nil, nil, nil).loadout, "DotC Raid ST *")
+		check(namesTest .. ", pure: an edited loadout says so", PlanTab.wrongHere(nek, "WS Raid Most Bosses", true, nil, nil).loadout, "WS Raid Most Bosses (edited)")
+		check(namesTest .. ", pure: an unknown loadout is not a difference", PlanTab.wrongHere(nek, nil, nil, nil, nil), nil)
+		bare = 1
+		check(namesTest .. ", pure: a wrong item is a change", table.concat(PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn()).change, ","), "1")
+		bare, wrongEnchant = nil, 1
+		local wrong = PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn())
+		check(namesTest .. ", pure: a wrong enchant is a fix, not a change", table.concat(wrong.fix, ",") .. "/" .. #wrong.change, "1/0")
+		wrongEnchant = nil
+		check(namesTest .. ", the place picks the row: a raid starts at the first boss", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil).boss, "Nek'zali")
+		check(namesTest .. ", after a kill the next boss", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3470).boss, "Entombed Sentinels")
+		check(namesTest .. ", after the last kill nothing", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3379), nil)
+		check(namesTest .. ", a dungeon is the Mythic+ row", PlanTab.rowHere(PlanTab.BOSSES.Feral, "mplus", 3470).scenario, "mplus")
+		check(namesTest .. ", elsewhere no row", PlanTab.rowHere(PlanTab.BOSSES.Feral, nil, nil), nil)
+		check(namesTest .. ", a spec with no plan no row", PlanTab.rowHere(nil, "raid", nil), nil)
+		active = "DotC Raid ST *"
+		check(namesTest .. ", shown", PlanTab.checkSetup(), "shown")
+		check(namesTest .. ", the title is the place and the boss", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
+		check(namesTest .. ", the line says planned and now", PlanTab.popupModel and PlanTab.popupModel.lines[1], "|cffffd100Talents|r   planned |cff00ff00WS Raid Most Bosses|r, now |cffff2020DotC Raid ST *|r")
+		bare = 1
+		PlanTab.checkSetup()
+		check(namesTest .. ", a wrong item is a line naming the slot in red", PlanTab.popupModel and PlanTab.popupModel.lines[2] and PlanTab.popupModel.lines[2]:match("^|cffffd100Head|r   |cffff2020") ~= nil, true)
+		bare = nil
+		GetInstanceInfo = function() return "A Dungeon", "party" end
+		active = "WS Raid Most Bosses"
+		check(namesTest .. ", in a dungeon it is the Mythic+ plan", PlanTab.checkSetup() == "shown" and PlanTab.popupModel.title, "A Dungeon: Mythic+, any key")
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+
+		local noneTest = "no popup when the setup matches"
+		check(noneTest, PlanTab.checkSetup(), "matches")
+		check(noneTest .. ", and one that was up is taken down", PlanTab.popupModel, nil)
+		GetInstanceInfo = function() return "Nowhere", "none" end
+		check(noneTest .. ", outside an instance", PlanTab.checkSetup(), "elsewhere")
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		PlanTab.lastKill = 3379
+		check(noneTest .. ", after the last boss", PlanTab.checkSetup(), "no plan")
+		PlanTab.lastKill = nil
+
+		local buttonsTest = "popup buttons follow what differs"
+		local function built(w) local _, _, b = PlanTab.setupPopup("P", nek, "Feral", w) local n = {} for i, x in ipairs(b) do n[i] = x.label end return table.concat(n, ", ") end
+		check(buttonsTest .. ", only the loadout: Switch talents", built({ loadout = "X", change = {}, fix = {}, marks = {} }), "Switch talents")
+		bare = 1
+		local w = PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn())
+		check(buttonsTest .. ", a wrong item not owned: Open Plan", built(w), "Open Plan")
+		C_Container = {
+			GetContainerNumSlots = function(bag) return bag == 0 and 1 or 0 end,
+			GetContainerItemLink = function(bag, slot) return bag == 0 and slot == 1 and ("|Hitem:%d::::::|h[x]|h"):format(entryBySlotID[1].id) or nil end,
+		}
+		check(buttonsTest .. ", a wrong item in the bags: Equip all", built(w), "Equip all")
+		w.loadout = "X"
+		check(buttonsTest .. ", both: both", built(w), "Switch talents, Equip all")
+		C_Container = nil
+		bare, wrongEnchant = nil, 1
+		check(buttonsTest .. ", an enchant: Open Plan", built(PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn())), "Open Plan")
+		wrongEnchant = nil
+		-- the buttons do what the Plan tab's do
+		local loaded, wasLoad = nil, PlanTab.loadTalents
+		PlanTab.loadTalents = function(name) loaded = name return "loaded" end
+		local _, _, b = PlanTab.setupPopup("P", nek, "Feral", { loadout = "X", change = {}, fix = {}, marks = {} })
+		b[1].onClick()
+		PlanTab.loadTalents = wasLoad
+		check(buttonsTest .. ", Switch talents loads the row's loadout through loadTalents", loaded, "WS Raid Most Bosses")
+		local equipped, wasEquip = {}, PlanTab.equip
+		PlanTab.equip = function(entry, slotID) equipped[#equipped + 1] = slotID return true end
+		check(buttonsTest .. ", Equip all equips each slot through equip", PlanTab.equipAll({ [1] = { entry = {} }, [3] = { entry = {} } }, { 1, 3 }, "Feral", "st"), 2)
+		PlanTab.equip = wasEquip
+		check(buttonsTest .. ", in those slots", table.concat(equipped, ","), "1,3")
+
+		local waitTest = "popup waits for combat, keys and fights"
+		active = "WS M+"  -- no raid row's, so every raid boss differs
+		InCombatLockdown = function() return true end
+		check(waitTest .. ", combat", PlanTab.checkSetup(), "fenced")
+		check(waitTest .. ", nothing shown", PlanTab.popupModel, nil)
+		check(waitTest .. ", and it is pending", PlanTab.popupPending, true)
+		InCombatLockdown = wasCombat
+		PlanTab.onSetupEvent("PLAYER_REGEN_ENABLED")
+		check(waitTest .. ", shown when combat ends", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
+		check(waitTest .. ", and no longer pending", PlanTab.popupPending, nil)
+		PlanTab.onSetupEvent("ENCOUNTER_START", 3470, "Nek'zali the Soulcoiler")
+		check(waitTest .. ", a pull takes it down", PlanTab.popupModel, nil)
+		check(waitTest .. ", and keeps it pending", PlanTab.popupPending, true)
+		C_InstanceEncounter = { IsEncounterInProgress = function() return true end }
+		check(waitTest .. ", a fight fences", PlanTab.fenced(), "a boss fight")
+		C_InstanceEncounter = nil
+		C_ChallengeMode = { IsChallengeModeActive = function() return true end }
+		check(waitTest .. ", a key fences", PlanTab.fenced(), "a key")
+		C_ChallengeMode = nil
+		Enum.AddOnRestrictionType = { Encounter = 1, ChallengeMode = 2 }
+		C_RestrictedActions = { IsAddOnRestrictionActive = function(kind) return kind == 2 end }
+		check(waitTest .. ", the 12.1 key restriction fences", PlanTab.fenced(), "a key")
+		C_RestrictedActions = { IsAddOnRestrictionActive = function(kind) return kind == 1 end }
+		check(waitTest .. ", the 12.1 encounter restriction fences", PlanTab.fenced(), "a boss fight")
+		C_RestrictedActions, Enum.AddOnRestrictionType = wasRA, wasEnumRA
+		check(waitTest .. ", nothing fences out of combat", PlanTab.fenced(), nil)
+		PlanTab.onSetupEvent("ENCOUNTER_END", 3470, "Nek'zali the Soulcoiler", 16, 20, 0)
+		check(waitTest .. ", a wipe keeps the boss", PlanTab.lastKill, nil)
+		check(waitTest .. ", and the popup is back for it", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
+		PlanTab.onSetupEvent("ENCOUNTER_END", 3470, "Nek'zali the Soulcoiler", 16, 20, 1)
+		check(waitTest .. ", a kill moves to the next boss", PlanTab.lastKill, 3470)
+		check(waitTest .. ", and the popup names it", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Entombed Sentinels")
+		PlanTab.onSetupEvent("ENCOUNTER_END", 9999, "Trash", 16, 20, 1)
+		check(waitTest .. ", an unknown kill changes nothing", PlanTab.lastKill, 3470)
+		PlanTab.onSetupEvent("CHALLENGE_MODE_START", 1)
+		check(waitTest .. ", a key starting takes it down", PlanTab.popupModel, nil)
+		GetInstanceInfo = function() return "Nowhere", "none" end
+		PlanTab.onSetupEvent("ADDON_RESTRICTION_STATE_CHANGED", 1, 0)
+		check(waitTest .. ", the fence lifting outside the place shows nothing", PlanTab.popupModel, nil)
+		check(waitTest .. ", and drops the wait", PlanTab.popupPending, nil)
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		PlanTab.onSetupEvent("PLAYER_ENTERING_WORLD")
+		check(waitTest .. ", a zone-in starts over at the first boss", PlanTab.lastKill, nil)
+		check(waitTest .. ", and shows", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
+
+		local closedTest = "a closed popup stays closed here"
+		PlanTab.closePopup()
+		check(closedTest .. ", closed", PlanTab.popupModel, nil)
+		check(closedTest .. ", the answer is remembered", PlanTab.popupClosed, "The Venomous Abyss|Nek'zali|WS M+||")
+		check(closedTest .. ", the same answer is not shown again", PlanTab.checkSetup(), "closed")
+		check(closedTest .. ", nor on a ready check", PlanTab.onSetupEvent("READY_CHECK", "Someone", 30), "closed")
+		bare = 1
+		check(closedTest .. ", a changed answer is", PlanTab.checkSetup(), "shown")
+		PlanTab.closePopup()
+		bare = nil
+		check(closedTest .. ", and the first answer again is", PlanTab.checkSetup(), "shown")
+		PlanTab.hidePopup()
+		check(closedTest .. ", the addon taking it down remembers nothing", PlanTab.checkSetup(), "shown")
+		check(closedTest .. ", closing runs onClose once", (function()
+			local n = 0
+			PlanTab.popup("T", { "a" }, {}, function() n = n + 1 end)
+			PlanTab.closePopup()
+			PlanTab.closePopup()
+			return n
+		end)(), 1)
+		-- the plain shape card 0024 calls: show(title, lines, buttons), one frame
+		check(closedTest .. ", the shared popup is one frame and holds what it was given", (function()
+			local f = PlanTab.popup("T", { "a", "b" }, { { label = "Go", onClick = function() end } })
+			return tostring(f == PlanTab.popupFrame) .. "/" .. PlanTab.popupModel.title .. "/" .. PlanTab.popupModel.lines[2] .. "/" .. PlanTab.popupModel.buttons[1].label
+		end)(), "true/T/b/Go")
+		PlanTab.hidePopup()
+
+		GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, GetInstanceInfo = wasWornLink, wasLevel, wasInstance
+		PlanTab.activeLoadoutName, InCombatLockdown, C_Container = wasActive, wasCombat, wasContainer
+		C_ChallengeMode, C_InstanceEncounter = wasCM, wasIE
+		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.popupPending = wasClosed, wasKill, wasPending
 	end
 
 	-- a saved target must survive the round trip and show its item level
