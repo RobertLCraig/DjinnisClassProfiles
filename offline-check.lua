@@ -59,6 +59,8 @@ GetCombatRating = function(index) return RATINGS[index] or 0 end
 
 GetInstanceInfo = function() return "Nowhere", "none" end
 GetInventoryItemLink = function() return nil end
+time, date = os.time, os.date  -- WoW exposes both as globals; the plan's age reads time()
+GetBuildInfo = function() return "12.1.0", "00000", "Sep 10 2026", 120100 end
 
 C_AddOns = { IsAddOnLoaded = function() return false end }
 C_Item = {
