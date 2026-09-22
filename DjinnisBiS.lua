@@ -3030,7 +3030,13 @@ function PlanTab.lines(forSpec)
 	for _, slotID in ipairs(slotIDs) do
 		local mark = marks[slotID]
 		local _, link = C_Item.GetItemInfo(mark.entry.id)
-		local _, _, where = mark.state == "change" and PlanTab.holding(mark.entry)
+		-- Not `state == "change" and PlanTab.holding(...)`: an `and` keeps only the
+		-- first of a call's returns, and that is how 0.17.5 drew no Equip at all.
+		local where
+		if mark.state == "change" then
+			local _, _, w = PlanTab.holding(mark.entry)
+			where = w
+		end
 		local canEquip = where ~= nil
 		if canEquip then inBags[#inBags + 1] = slotID end
 		lines[#lines + 1] = {
@@ -3869,6 +3875,29 @@ local function selfTest()
 	check(equipTest .. ", that bag slot", picked and picked[1] .. "," .. picked[2], "0,2")
 	check(equipTest .. ", that inventory slot", equippedTo, 11)
 	check(equipTest .. ", nothing left on the cursor", held, false)
+	-- The tab AS DRAWN with a planned piece in the pretend bag: it has to offer
+	-- Equip for that slot and Equip all under the list. At 0.17.5 it offered
+	-- neither, and every check above still passed.
+	do
+		local neck = GEAR_PLAN.Feral.st.slots.neck:match("id=(%d+)")
+		local ilvl = tonumber(GEAR_PLAN.Feral.st.slots.neck:match("ilevel=(%d+)"))
+		local wasLink, wasLevel = C_Container.GetContainerItemLink, C_Item.GetDetailedItemLevelInfo
+		C_Container.GetContainerItemLink = function(bag, slot)
+			return bag == 0 and slot == 2 and ("|Hitem:%s::::::|h[Neck]|h"):format(neck) or nil
+		end
+		C_Item.GetDetailedItemLevelInfo = function() return ilvl end
+		local realBoss2 = PlanTab.boss
+		PlanTab.boss = "Nek'zali"  -- a 1 target boss, so the tab reads gear
+		local equipRows, equipAll = 0, false
+		for _, line in ipairs(PlanTab.lines("Feral")) do
+			if line.button and line.button.label == "Equip" then equipRows = equipRows + 1 end
+			if line.button and line.button.label == "Equip all" then equipAll = true end
+		end
+		PlanTab.boss = realBoss2
+		C_Container.GetContainerItemLink, C_Item.GetDetailedItemLevelInfo = wasLink, wasLevel
+		check("drawn tab offers Equip for the one planned piece in the bags", equipRows, 1)
+		check("drawn tab offers Equip all when a planned piece is in the bags", equipAll, true)
+	end
 	-- the two refusals Blizzard's equipment sets make, each clearing the cursor
 	equippedTo, slotLocked = nil, true
 	check("equip button refuses a locked slot", PlanTab.equip(ring, 11), false)
