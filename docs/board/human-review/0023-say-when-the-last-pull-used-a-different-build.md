@@ -151,6 +151,36 @@ knows if it was the build or the play.
   exit 0. Two mutations in a temp copy, both red: the loadout-name guard removed (1 check, the
   "row's loadout is not the cell's" draw), the planned string forced nil at the call site (2
   checks, the red picked row and the grey unpicked one). Not seen in a client.
+- 2026-09-22 Claude (review of the Option A rebuild, to human-review): attacked the three criteria,
+  `PlanTab.pullSpec`, `hindsightPulls`, `savedLoadoutNames`, the boss loop in `lines`, the
+  deletion of `savedLoadoutString` (no caller left, grep clean), and the 31 checks. Coherent with
+  the merged 0014 review: both read `PlanTab.plannedTalents` and hand the string on only when the
+  cell's `loadout` is the one in question (`activeLoadoutName` against the loaded name, this card
+  against the row's), and `talentsEdited`'s per-string hold is not touched by this card. APIs
+  re-checked against `wow-ui-source` `Blizzard_APIDocumentationGenerated`: `GetConfigIDsBySpecID`,
+  `GetLastSelectedSavedConfigID`, `GetStarterBuildActive` (ClassTalents), `GenerateImportString`,
+  `GetConfigInfo` (SharedTraits, `AllowedWhenUntainted`), `GetSpecialization`,
+  `GetSpecializationInfo` (SpecializationInfo); nothing from `Blizzard_Deprecated*`. Hindsight
+  1.8.9 re-read from the installed source: `Rotation.lua` 1197 `p.specKey = CurrentSpecKey()`, a
+  plain string by its own comment; `Core.lua` 3459 stamps `schema`; `Encode.lua` 464 to 530 sets
+  `encoderOK` true or false. Both interpreters exit 0; 177 top-level locals, none added.
+  Held: the schema and type guards, the string-key lookup, the `encoderOK` and loadout-name guards
+  (both mutated red again here: "encoder unverified, no string compare" and "the row's loadout is
+  not the cell's, drawn"), `GenerateImportString` counted at zero across the draws, and every
+  fixture global put back.
+  **Fixed in place, one.** `pullSpec` type-guarded `pull.specKey` and then compared it and, on the
+  row, `gsub`'d it, but `type()` passes a secret (DECISIONS.md 2026-08-21) and the rule for a
+  third-party table is canRead before any compare. Now `PlanTab.canRead(pull.specKey)` or nothing
+  is said; one check, "a secret spec key says nothing", red with the guard removed. Also the loop's
+  inner `local planned` shadowed the loot-spec `planned` table two lines up inside its block; it is
+  `cellString, cellLoadout` now, no behaviour change, so the next merge in this loop (HANDOVER names
+  it as one of three conflict points) cannot pick the wrong one.
+  Security: weakest point is still two third-party tables read on every tab draw, bounded to the
+  ten boss rows by `BOSSES`, every field type-guarded and now canRead-guarded; unchecked path none,
+  `encoderOK` is read only after `hindsightPulls` proved `HindsightDB` a table, nothing in Hindsight
+  is written, no talent API is called by this card at all; leaks nothing, the pull string never
+  prints and the only text drawn is the spec name after its class prefix.
+  Not seen in a client; the looks below stand.
 
 ## What I need from you
 
