@@ -3769,6 +3769,9 @@ end
 function PlanTab.pullSpec(pulls, id, spec, planned)
 	local pull = pulls and id and pulls[tostring(id)]
 	if type(pull) ~= "table" or type(pull.specKey) ~= "string" then return nil end
+	-- type() passes a secret; the key is compared, then gsub'd on the row
+	-- (DECISIONS.md 2026-08-21). Through PlanTab.canRead so /bis test can hand it one.
+	if not PlanTab.canRead(pull.specKey) then return nil end
 	if pull.specKey ~= PlanTab.HINDSIGHT_SPEC[spec] then return pull.specKey end
 	if PlanTab.talentStringsDiffer(pull.build, planned) then return pull.specKey end
 	return nil
@@ -4639,8 +4642,9 @@ function PlanTab.lines(forSpec)
 			-- against C_Traits.GenerateImportString at login and after every
 			-- client build (Encode.lua, VerifyEncoder). Until it says the two
 			-- agree, no string is compared (0023 review): another spec still is.
-			local planned, plannedFor = PlanTab.plannedTalents(spec, row.scenario)
-			pulled = PlanTab.pullSpec(pulls, row.id, spec, HindsightDB.encoderOK == true and plannedFor == row.loadout and planned or nil)
+			-- Not `planned`: that is the loot-spec id table two lines up.
+			local cellString, cellLoadout = PlanTab.plannedTalents(spec, row.scenario)
+			pulled = PlanTab.pullSpec(pulls, row.id, spec, HindsightDB.encoderOK == true and cellLoadout == row.loadout and cellString or nil)
 		end
 		local best = row.id and PlanTab.bestLootSpec(PlanTab.POOL[row.id], planned, spec)
 		if isPicked then pickedBest = best end
@@ -7007,6 +7011,11 @@ local function selfTest()
 		check(sameTest2 .. ", another game build's header", PlanTab.pullSpec(pulls, 3429, "Feral", aString), nil)
 		check(sameTest2 .. ", no pull on the boss", PlanTab.pullSpec(pulls, 3379, "Feral", aString), nil)
 		check(sameTest2 .. ", no id", PlanTab.pullSpec(pulls, nil, "Feral", aString), nil)
+		-- a secret spec key is skipped before the compare and the gsub (0023 review)
+		local wasRead = PlanTab.canRead
+		PlanTab.canRead = function(v) return v ~= "Druid:Guardian" end
+		check(noneTest .. ", a secret spec key says nothing", PlanTab.pullSpec(pulls, 3455, "Feral", aString), nil)
+		PlanTab.canRead = wasRead
 		HindsightDB, HindsightCharDB = nil, nil
 		check(noneTest .. ", not loaded", PlanTab.hindsightPulls(), nil)
 		HindsightDB, HindsightCharDB = { schema = 2 }, { pulls = pulls }
