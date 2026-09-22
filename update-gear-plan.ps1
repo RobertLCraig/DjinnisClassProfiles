@@ -73,7 +73,10 @@ $SPECS = [ordered]@{
 # A plain hashtable on purpose: indexing an [ordered] one with an int is BY POSITION,
 # so [1] answered '2t'. The self-test caught it.
 $SCENARIOS = @{ 1 = 'st'; 2 = '2t' }
-$SCENARIO_ORDER = @('st', '2t')
+# A dungeon fight style (Raidbots' DungeonSlice or DungeonRoute, read off
+# simbot.fightStyle) files as mplus whatever its enemy count says: a key is
+# its own content, not a raid boss with more adds. Card 0009.
+$SCENARIO_ORDER = @('st', '2t', 'mplus')
 $SLOTS = @('head', 'neck', 'shoulder', 'back', 'chest', 'wrist', 'hands', 'waist', 'legs', 'feet',
     'finger1', 'finger2', 'trinket1', 'trinket2', 'main_hand', 'off_hand')
 # The only parts of a simc gear line the addon reads. Everything else on the
@@ -124,8 +127,8 @@ function Read-Plan {
     $player = $data.sim.players[0]
     $spec = $SPECS[[string]$player.specialization]
     if (-not $spec) { throw "Report ${Id}: cannot place spec '$($player.specialization)'. Nothing written." }
-    $scenario = $SCENARIOS[[int]$data.simbot.enemyCount]
-    if (-not $scenario) { throw "Report ${Id}: $($data.simbot.enemyCount) enemies is neither st (1) nor 2t (2). Nothing written." }
+    $scenario = if ([string]$data.simbot.fightStyle -match '^Dungeon') { 'mplus' } else { $SCENARIOS[[int]$data.simbot.enemyCount] }
+    if (-not $scenario) { throw "Report ${Id}: fight style '$($data.simbot.fightStyle)' with $($data.simbot.enemyCount) enemies is neither st (1), 2t (2) nor a dungeon style. Nothing written." }
 
     # the winner, with the base actor in the running as Combo 1
     $winner = 'Combo 1'
@@ -300,6 +303,13 @@ if ($SelfTest) {
         [System.IO.File]::WriteAllText($tmp, $lua)
         $wrote = Update-GearPlan -Report $topGear -Target $tmp -From $fx 6>$null
         Test-That 'generator is idempotent' ((-not $wrote) -and [System.IO.File]::ReadAllText($tmp) -eq $lua)
+
+        # the same report with simbot.fightStyle set to DungeonSlice, made by hand
+        $wrote = Update-GearPlan -Report 'dungeonSliceSelfTest0000' -Target $tmp -From $fx 6>$null
+        $lua = [System.IO.File]::ReadAllText($tmp)
+        Test-That 'generator files a report under raid or mplus by fight style' (
+            $wrote -and $lua -match '(?s)\tFeral = \{\n\t\t\["st"\] = \{.*?\n\t\t\["mplus"\] = \{.*?report = "dungeonSliceSelfTest0000"' -and
+            ($lua -split '\["st"\]').Count -eq 2)
 
         Test-That 'generator accepts a report url or a bare id' (
             (Get-ReportId $topGear) -eq $topGear -and

@@ -355,7 +355,8 @@ local STAT_TARGET = {
 --
 -- GENERATED, do not hand-edit. Rewritten by update-gear-plan.ps1 from finished
 -- Raidbots Top Gear reports, one report per cell: spec, then scenario (`st` is
--- one target, `2t` is two). A cell no report has filled is simply absent.
+-- one raid target, `2t` is two, `mplus` is a dungeon fight style). A cell no
+-- report has filled is simply absent.
 --
 -- Unlike the two tables above this one is about ONE character: it is what the
 -- sim said Djinni should wear out of what Djinni owned on the day in `simmed`.
@@ -481,6 +482,10 @@ PlanTab.BOSSES = {
 		{ boss = "The Coiled Altar",    scenario = "st", loadout = "WS Raid Coiled Altar" },
 		{ boss = "Ula'tek",             scenario = "st", loadout = "WS Raid Most Bosses" },
 		{ boss = "Nymrissa Wavecaller", scenario = "st", loadout = "DotC Raid Most Bosses *" },
+		-- One Mythic+ loadout, not one per dungeon (card 0009). "WS M+" simmed
+		-- 214,785 against "DotC M+" 207,837 on two targets, 2026-09-21; a
+		-- dungeon-style sim should settle it, and none has run yet.
+		{ boss = "Mythic+, any key",   scenario = "mplus", loadout = "WS M+" },
 	},
 }
 
@@ -982,10 +987,16 @@ local function autoContext()
 	return nil
 end
 
+-- Where you stand first, then the switch, then Raid. Until card 0009 the
+-- switch beat the instance; that left a key showing the raid plan when Raid
+-- had been pinned in a city on Tuesday, which is the wrong answer for the
+-- whole run. Inside an instance the content is not a choice.
 local function statContext()
+	local here = autoContext()
+	if here then return here, false end
 	local chosen = db().statContext
 	if chosen == "raid" or chosen == "mplus" then return chosen, true end
-	return autoContext() or "raid", false
+	return "raid", false
 end
 
 local CONTEXT_LABEL = { raid = "Raid", mplus = "Mythic+" }
@@ -1583,15 +1594,29 @@ function PlanTab.loadoutState(planned, active)
 	return planned == active and "match" or "mismatch"
 end
 
-local PLAN_SCENARIOS = { "st", "2t" }
-local SCENARIO_LABEL = { st = "1 target", ["2t"] = "2 targets" }
+local PLAN_SCENARIOS = { "st", "2t" }  -- the raid ones; "mplus" is a content, not a target count
+local SCENARIO_LABEL = { st = "1 target", ["2t"] = "2 targets", mplus = "Mythic+" }
 
+-- The plan cell in use. In a key, or with the stat pane's switch on Mythic+,
+-- it is the Mythic+ cell; in a raid, or with the switch on Raid, it is the
+-- saved 1 or 2 target raid cell. One switch drives the stat targets, the slot
+-- glows, the bag glows and the Plan tab (card 0009).
 local function planScenario(spec)
+	if statContext() == "mplus" then return "mplus" end
 	-- Only a scenario that has a label: the saved file is editable by hand, and
 	-- an unknown one would reach a format() as nil on every sheet open.
 	local saved = db().planScenario
 	local scenario = type(saved) == "table" and saved[spec]
-	return SCENARIO_LABEL[scenario] and scenario or "st"
+	return (scenario == "st" or scenario == "2t") and scenario or "st"
+end
+
+-- The next stop on the strip's button: 1 target, 2 targets, Mythic+, round
+-- again. Picking Mythic+ pins the content switch to Mythic+; picking a raid
+-- scenario pins it to Raid, because the button is one thing to press, not two.
+function PlanTab.nextScenario(scenario)
+	if scenario == "st" then return "2t" end
+	if scenario == "2t" then return "mplus" end
+	return "st"
 end
 
 -- What is worn, keyed by the plan's slot names, or nil when any link came back
@@ -3105,8 +3130,11 @@ function PlanTab.lines(forSpec)
 	local plan = gearPlanFor(spec, picked.scenario)
 	local worn = plan and readWorn()
 	if not plan then
-		lines[#lines + 1] = { text = ("%s   No %s gear plan yet. Run a Raidbots Top Gear sim on %s,|r"):format(
-			GREY, SCENARIO_LABEL[picked.scenario], SCENARIO_LABEL[picked.scenario]) }
+		-- Said, never filled from the raid plan: a key and a raid boss want
+		-- different gear, and a silent fallback reads like an answer.
+		lines[#lines + 1] = { text = ("%s   No %s gear plan yet. Run a Raidbots Top Gear sim %s,|r"):format(
+			GREY, SCENARIO_LABEL[picked.scenario],
+			picked.scenario == "mplus" and "with the DungeonSlice fight style" or ("on " .. SCENARIO_LABEL[picked.scenario])) }
 		lines[#lines + 1] = { text = GREY .. "   then: .\\update-gear-plan.ps1 <report link> -Deploy|r" }
 		return lines
 	elseif not worn then
@@ -3278,11 +3306,17 @@ local function buildSlotMarks(holder, below)
 		local spec = playerSpec()
 		if not spec then return end
 		local saved = db()
-		saved.planScenario = saved.planScenario or {}
-		saved.planScenario[spec] = (planScenario(spec) == PLAN_SCENARIOS[1])
-			and PLAN_SCENARIOS[2] or PLAN_SCENARIOS[1]
+		local next = PlanTab.nextScenario(planScenario(spec))
+		saved.statContext = next == "mplus" and "mplus" or "raid"
+		if next ~= "mplus" then
+			saved.planScenario = saved.planScenario or {}
+			saved.planScenario[spec] = next
+		end
 		refresh()
 		rebuildBagWanted()
+		for _, pane in ipairs(statPanes) do
+			if pane:IsShown() then pane:Update() end  -- the stat targets follow the same switch
+		end
 	end)
 
 	addPlanLine = function(tooltip, owner)
@@ -3845,6 +3879,47 @@ local function selfTest()
 	check("saved scenario, none saved", planScenario("Resto"), "st")
 	db().planScenario = keptScenario
 
+	-- Mythic+ beside raid (card 0009). The content rule is statContext, shared
+	-- with the stat pane: where you stand first, then the switch.
+	local contentTest = "current content follows instance type then the switch"
+	local keptInstance, keptContext = GetInstanceInfo, db().statContext
+	db().planScenario = { Feral = "2t" }
+	GetInstanceInfo = function() return "Somewhere", "raid" end
+	db().statContext = "mplus"
+	check(contentTest .. ", a raid instance beats a Mythic+ switch", planScenario("Feral"), "2t")
+	GetInstanceInfo = function() return "Somewhere", "party" end
+	db().statContext = "raid"
+	check(contentTest .. ", a dungeon beats a Raid switch", planScenario("Feral"), "mplus")
+	GetInstanceInfo = function() return "Nowhere", "none" end
+	check(contentTest .. ", outside, the switch on Raid", planScenario("Feral"), "2t")
+	db().statContext = "mplus"
+	check(contentTest .. ", outside, the switch on Mythic+", planScenario("Feral"), "mplus")
+	db().statContext = nil
+	check(contentTest .. ", outside, no switch, is raid", planScenario("Feral"), "2t")
+	check(contentTest .. ", the button goes 1, 2, Mythic+, round",
+		PlanTab.nextScenario("st") .. PlanTab.nextScenario("2t") .. PlanTab.nextScenario("mplus"), "2tmplusst")
+	GetInstanceInfo, db().statContext, db().planScenario = keptInstance, keptContext, keptScenario
+	check(contentTest .. ", every scenario has a label", SCENARIO_LABEL.mplus ~= nil and SCENARIO_LABEL.st ~= nil, true)
+
+	local mplusTest = "missing mplus plan is said, not filled from raid"
+	check(mplusTest .. ", the cell is empty", gearPlanFor("Feral", "mplus"), nil)
+	check(mplusTest .. ", the Plan tab has a Mythic+ row", PlanTab.bossFor(PlanTab.BOSSES.Feral, nil, "mplus"), "Mythic+, any key")
+	do
+		local realBoss3 = PlanTab.boss
+		PlanTab.boss = "Mythic+, any key"
+		local text = {}
+		for i, line in ipairs(PlanTab.lines("Feral")) do text[i] = line.text end
+		text = table.concat(text, "\n")
+		PlanTab.boss = realBoss3
+		check(mplusTest .. ", drawn", text:find("No Mythic+ gear plan yet", 1, true) ~= nil, true)
+		check(mplusTest .. ", says which fight style", text:find("DungeonSlice", 1, true) ~= nil, true)
+		check(mplusTest .. ", no raid gear listed", text:find("in the bank", 1, true) == nil and text:find("in your bags", 1, true) == nil, true)
+		check("plan tab shows the current content and can switch, the Mythic+ row is picked",
+			text:find("> Mythic+, any key", 1, true) ~= nil, true)
+		check("plan tab shows the current content and can switch, the raid rows stay to click",
+			text:find("   Nek'zali", 1, true) ~= nil, true)
+	end
+
 	check("no plan for spec marks no slots", next(slotStates(nil, {})), nil)
 	local twoRings = { slots = { finger1 = ringA, finger2 = ringB } }
 	check("slot states, a swapped pair marks nothing",
@@ -3882,6 +3957,16 @@ local function selfTest()
 	check(copyTest .. ", lower track copy", wantedSlot(want, 193763, 298), nil)
 	check(copyTest .. ", higher track copy", wantedSlot(want, 193763, 324), nil)
 	check(copyTest .. ", level not cached yet", wantedSlot(want, 193763, nil), nil)
+	-- The bag glows read one plan, the current content's, so a piece both
+	-- plans want is one wanted piece, not two glows or two lines.
+	local bothTest = "an item planned for both contents is wanted once"
+	local raidPlan = { slots = { back = cloak } }
+	local mplusPlan = { slots = { back = parsePlanLine("id=193763,ilevel=311") } }
+	local both = wantedFrom(raidPlan, {})
+	check(bothTest .. ", one plan, one want", #both, 1)
+	check(bothTest .. ", the other plan wants the same piece", wantedSlot(wantedFrom(mplusPlan, {}), 193763, 311), 15)
+	check(bothTest .. ", the glow list holds one plan at a time", wantedSlot(both, 193763, 311) == 15 and #both == 1, true)
+
 	local equippedTest = "equipped planned item glows no bag copy"
 	check(equippedTest .. ", a second copy of the worn ring", wantedSlot(want, 1, 300), nil)
 	local enchantOnly = wantedFrom({ slots = { back = parsePlanLine("id=193763,enchant_id=5,ilevel=311") } },
