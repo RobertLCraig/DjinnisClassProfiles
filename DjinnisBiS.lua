@@ -4928,23 +4928,30 @@ end
 -- this answer already) or "shown".
 function PlanTab.checkSetup()
 	local here = autoContext()
-	if not here then PlanTab.popupPending = nil; PlanTab.hidePopup(); return "elsewhere" end
+	if not here then PlanTab.popupPending = nil; PlanTab.hideSetup(); return "elsewhere" end
 	local spec = playerSpec()
 	local row = PlanTab.rowHere(spec and PlanTab.BOSSES[spec], here, PlanTab.lastKill)
-	if not row then PlanTab.hidePopup(); return "no plan" end
+	if not row then PlanTab.hideSetup(); return "no plan" end
 	if PlanTab.fenced() then PlanTab.popupPending = true; return "fenced" end
 	PlanTab.popupPending = nil
 	local active, edited = PlanTab.activeLoadoutName()
 	local plan = gearPlanFor(spec, row.scenario)
 	local wrong = PlanTab.wrongHere(row, active, edited, plan, plan and readWorn())
-	if not wrong then PlanTab.hidePopup(); return "matches" end
+	if not wrong then PlanTab.hideSetup(); return "matches" end
 	local place = (GetInstanceInfo())
 	if type(place) ~= "string" or not canRead(place) then place = nil end
 	local key = PlanTab.setupKey(place, row, wrong)
 	if key == PlanTab.popupClosed then return "closed" end
 	local title, lines, buttons = PlanTab.setupPopup(place, row, spec, wrong)
 	PlanTab.popup(title, lines, buttons, function() PlanTab.popupClosed = key end)
+	PlanTab.popupModel.setup = true
 	return "shown"
+end
+
+-- The frame is shared (card 0017's list, 0024's prompt): "nothing is wrong
+-- here" takes down this card's popup and leaves another card's alone.
+function PlanTab.hideSetup()
+	if PlanTab.popupModel and PlanTab.popupModel.setup then PlanTab.hidePopup() end
 end
 
 -- The popup's events, one at a time and each verified (docs/DECISIONS.md,
@@ -4962,7 +4969,9 @@ PlanTab.SETUP_EVENTS = { "PLAYER_ENTERING_WORLD", "READY_CHECK", "ENCOUNTER_STAR
 -- compared, per DECISIONS.md, though the payload carries no secret flag.
 function PlanTab.onSetupEvent(event, id, name, _, _, success)
 	if event == "PLAYER_ENTERING_WORLD" then
-		PlanTab.lastKill = nil  -- a fresh zone-in starts at the first boss
+		-- a fresh zone-in starts at the first boss, and a closed answer was for
+		-- the last visit: walking back in set up wrong is what the card is for
+		PlanTab.lastKill, PlanTab.popupClosed = nil, nil
 		PlanTab.later(2, PlanTab.checkSetup)  -- as EnhanceQoL does: the instance is not readable at once
 	elseif event == "READY_CHECK" then
 		return PlanTab.checkSetup()
@@ -7451,6 +7460,9 @@ local function selfTest()
 		local noneTest = "no popup when the setup matches"
 		check(noneTest, PlanTab.checkSetup(), "matches")
 		check(noneTest .. ", and one that was up is taken down", PlanTab.popupModel, nil)
+		PlanTab.popup("Another card's", { "x" }, {})
+		check(noneTest .. ", but another card's popup on the shared frame is left up", PlanTab.checkSetup() == "matches" and PlanTab.popupModel and PlanTab.popupModel.title, "Another card's")
+		PlanTab.hidePopup()
 		GetInstanceInfo = function() return "Nowhere", "none" end
 		check(noneTest .. ", outside an instance", PlanTab.checkSetup(), "elsewhere")
 		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
@@ -7546,6 +7558,9 @@ local function selfTest()
 		check(closedTest .. ", and the first answer again is", PlanTab.checkSetup(), "shown")
 		PlanTab.hidePopup()
 		check(closedTest .. ", the addon taking it down remembers nothing", PlanTab.checkSetup(), "shown")
+		PlanTab.closePopup()
+		PlanTab.onSetupEvent("PLAYER_ENTERING_WORLD")
+		check(closedTest .. ", and a fresh zone-in forgets the closed answer", PlanTab.popupClosed == nil and PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
 		check(closedTest .. ", closing runs onClose once", (function()
 			local n = 0
 			PlanTab.popup("T", { "a" }, {}, function() n = n + 1 end)
