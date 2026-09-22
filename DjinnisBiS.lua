@@ -1804,13 +1804,12 @@ local function attachIlvlButton(parent)
 	b.text:SetAllPoints()
 	b.text:SetJustifyH("RIGHT")
 	b:SetScript("OnClick", function(self)
-		if self.onClick then self.onClick()
-		elseif self.itemName then openTrackMenu(self, self.itemName) end
+		if self.itemName then openTrackMenu(self, self.itemName) end
 	end)
 	b:SetScript("OnEnter", function(self)
-		if not (self.itemName or self.tip) then return end
+		if not self.itemName then return end
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:SetText(self.tip or "Click to set the item level you are chasing")
+		GameTooltip:SetText("Click to set the item level you are chasing")
 		GameTooltip:Show()
 	end)
 	b:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -1842,6 +1841,20 @@ local function acquireRow(content, index)
 		row.text:SetJustifyH("LEFT")
 		row.text:SetWordWrap(false)  -- a wrapped name overlaps the row beneath
 		row.ilvl = attachIlvlButton(row)
+		-- A real button for a Plan tab action. The item level target stays plain
+		-- text, because a target is a value and not a thing to do (Rob, 2026-09-22:
+		-- the Equip "button" read as "a little bit of text").
+		row.action = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+		row.action:SetSize(ILVL_WIDTH, ROW_HEIGHT - 2)
+		row.action:SetPoint("RIGHT", row, "RIGHT")
+		row.action:SetScript("OnClick", function(self) if self.onClick then self.onClick() end end)
+		row.action:SetScript("OnEnter", function(self)
+			if not self.tip then return end
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:SetText(self.tip)
+			GameTooltip:Show()
+		end)
+		row.action:SetScript("OnLeave", function() GameTooltip:Hide() end)
 		attachItemHover(row)
 		row:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -(index - 1) * ROW_HEIGHT)
 		row:SetPoint("RIGHT", content, "RIGHT")
@@ -2028,10 +2041,12 @@ renderList = function(lines)
 		-- named action (Equip, Search AH) on the Plan tab. One button, two jobs.
 		local action = line.button
 		row.ilvl.itemName = line.name
-		row.ilvl.onClick = action and action.onClick
-		row.ilvl.tip = action and action.tip
-		row.ilvl.text:SetText(line.name and gearLabel(line.name) or action and (WHITE .. action.label .. "|r") or "")
-		row.ilvl:SetShown(line.name ~= nil or action ~= nil)
+		row.ilvl.text:SetText(line.name and gearLabel(line.name) or "")
+		row.ilvl:SetShown(line.name ~= nil)
+		row.action.onClick = action and action.onClick
+		row.action.tip = action and action.tip
+		row.action:SetText(action and action.label or "")
+		row.action:SetShown(action ~= nil)
 		row:Show()
 	end
 	for i = #lines + 1, #rowPool do rowPool[i]:Hide() end
