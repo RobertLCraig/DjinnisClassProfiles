@@ -1261,6 +1261,11 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
 	-- slot's tooltip several times a second and this runs on every redraw.
 	if addPlanLine then addPlanLine(tooltip, tooltip:GetOwner()) end
 	if addBagLine then addBagLine(tooltip, link) end
+	-- One line per spec and content whose gear plan holds the item (card 0016).
+	-- The loot roll's icon tooltip is an item tooltip too, so this is the roll's line as well.
+	for _, text in ipairs(PlanTab.planLinesForLink(link, id) or {}) do
+		tooltip:AddLine(GREEN .. text .. "|r")
+	end
 end)
 
 -- Clearing on hide, not on the next hover, so a pane does not sit there showing
@@ -1327,9 +1332,16 @@ roll:SetScript("OnEvent", function(_, event, arg1, arg2, _, _, success)
 	end
 
 	local link = GetLootRollItemLink and GetLootRollItemLink(arg1)
-	if not link then return end
+	if not link or not canRead(link) then return end
 	local name = link:match("|h%[(.-)%]|h")
 	local entry = match(name)
+
+	-- The gear plan's answer first, one chat line naming each spec and content
+	-- that plans the item (card 0016). The roll frame's glow is markRollFrame.
+	local planned = PlanTab.planLinesForLink(link)
+	if planned and #planned > 0 then
+		print(GREEN .. "[BiS] PLAN|r " .. link .. " -> " .. table.concat(planned, "; "))
+	end
 
 	if entry then
 		local specs = table.concat(entry.specs, ", ")
@@ -1887,6 +1899,118 @@ local function armBagMarks()
 		end
 	end
 	rebuildBagWanted()
+end
+
+-- Plan lines on tooltips and the loot roll (card 0016) --------------------------
+--
+-- "Which druid specs want it", answered on the item itself: one line per spec
+-- and content whose gear plan holds the item, the current spec first. Matched
+-- by item id alone, not id and level as the slot marks are: a roll cannot
+-- choose the track, and the planned copy of that id is the answer either way.
+-- The line says the planned level when the hovered copy is below it, so a
+-- Champion copy of a Myth piece does not read as the piece itself. The loot
+-- roll frame's icon gets a glow, and its tooltip is GameTooltip:SetLootRollItem,
+-- an item tooltip, so the same lines land there through the one hook above.
+-- KeystoneLoot (card 0021) marks only what was sent to it and says "Favorite";
+-- these lines say which spec and which content, with no other addon loaded.
+
+PlanTab.CONTENT_WORD = { st = "raid", ["2t"] = "raid", mplus = "Mythic+" }
+
+-- { [itemId] = { { spec =, content =, ilvl = }, ... } } across every filled
+-- cell: one row per spec and content, in spec order, raid before Mythic+. The
+-- two raid cells collapse to one row at the higher planned level. Pure.
+function PlanTab.buildPlanIndex()
+	local index = {}
+	for _, spec in ipairs(SPEC_ORDER) do
+		for _, scenario in ipairs({ "st", "2t", "mplus" }) do
+			local plan = gearPlanFor(spec, scenario)
+			local content = PlanTab.CONTENT_WORD[scenario]
+			for _, entry in pairs(plan and plan.slots or {}) do
+				local rows = index[entry.id] or {}
+				index[entry.id] = rows
+				local seen
+				for _, row in ipairs(rows) do
+					if row.spec == spec and row.content == content then seen = row end
+				end
+				if seen then
+					if (entry.ilvl or 0) > (seen.ilvl or 0) then seen.ilvl = entry.ilvl end
+				else
+					rows[#rows + 1] = { spec = spec, content = content, ilvl = entry.ilvl }
+				end
+			end
+		end
+	end
+	return index
+end
+
+-- Built once: the plan is baked into the file and cannot change in a session.
+function PlanTab.planIndex()
+	if not PlanTab.PLAN_INDEX then PlanTab.PLAN_INDEX = PlanTab.buildPlanIndex() end
+	return PlanTab.PLAN_INDEX
+end
+
+-- The lines for one item, the current spec's first: "Feral raid: in plan",
+-- "Guardian Mythic+: in plan, owned". `ilvl` is the hovered copy's level when
+-- known; below the planned level the line reads "in plan at 723". Pure.
+function PlanTab.planLines(index, id, current, owned, ilvl)
+	local rows = index[id]
+	if not rows then return {} end
+	local lines, later = {}, {}
+	for _, row in ipairs(rows) do
+		local text = row.spec .. " " .. row.content .. ": in plan"
+		if ilvl and row.ilvl and ilvl < row.ilvl then text = text .. " at " .. row.ilvl end
+		if owned then text = text .. ", owned" end
+		local into = row.spec == current and lines or later
+		into[#into + 1] = text
+	end
+	for _, text in ipairs(later) do lines[#lines + 1] = text end
+	return lines
+end
+
+-- Worn, in the bags, or in the bank (the account bank too). GetItemCount
+-- does not count what is worn, so the slots are read first.
+function PlanTab.planOwned(id)
+	for _, slotID in pairs(PLAN_SLOT_INVENTORY) do
+		local link = GetInventoryItemLink("player", slotID)
+		if link and canRead(link) and tonumber(link:match("item:(%d+)")) == id then return true end
+	end
+	local ok, count = pcall(C_Item.GetItemCount, id, true, false, true, true)
+	-- canRead before `~= nil`: the comparison is the thing a secret throws on
+	return (ok and canRead(count) and count ~= nil and count > 0) or false
+end
+
+-- The lines for a hovered or rolled link: {} for an unplanned item, nil for a
+-- link or id that cannot be read. `id` is the tooltip's own when it has one.
+function PlanTab.planLinesForLink(link, id)
+	if not link or not canRead(link) then return nil end
+	if not canRead(id) then return nil end
+	id = id or tonumber(link:match("item:(%d+)"))
+	if not id then return nil end
+	local index = PlanTab.planIndex()
+	if not index[id] then return {} end
+	return PlanTab.planLines(index, id, playerSpec(), PlanTab.planOwned(id), itemLevelOf(link))
+end
+
+-- The roll frame: a glow on the item's icon when any plan holds it, so the
+-- roll can be read from across the screen and hovered for the specs.
+-- GroupLootFrame_OnShow is the global the template's OnShow script calls
+-- (Blizzard_UIPanels_Game/Mainline/GroupLootFrame.lua, read 2026-09-22); a
+-- post-hook on it runs after Blizzard has read the item, and touches none of
+-- the roll buttons. The glows live in a table here, never in a field on the
+-- frame, for the same taint reason as the bag glows.
+PlanTab.ROLL_GLOWS = {}
+function PlanTab.markRollFrame(frame)
+	local rollID = frame.rollID
+	if not (canRead(rollID) and rollID and frame.IconFrame) then return false end
+	local link = GetLootRollItemLink and GetLootRollItemLink(rollID)
+	local lines = PlanTab.planLinesForLink(link)
+	local show = lines ~= nil and #lines > 0
+	if show and not PlanTab.ROLL_GLOWS[frame] then PlanTab.ROLL_GLOWS[frame] = newBagGlow(frame.IconFrame) end
+	if PlanTab.ROLL_GLOWS[frame] then PlanTab.ROLL_GLOWS[frame]:SetShown(show) end
+	return show
+end
+if hooksecurefunc and GroupLootFrame_OnShow then
+	hooksecurefunc("GroupLootFrame_OnShow", function(frame) PlanTab.markRollFrame(frame) end)
 end
 
 -- rebuilt on every render, so the ticks follow you changing gear
@@ -5933,6 +6057,69 @@ local function selfTest()
 		check(choiceTest .. ", and the raid cell is untouched", db().planScenario.Feral, "st")
 		GetInstanceInfo, db().statContext, db().planScenario, PlanTab.refreshStrip = keptInstance, keptContext, keptScenario, keptStrip
 		rebuildBagWanted()  -- the picks above rebuilt the bag list on test pins; put it back on the real ones
+	end
+
+	-- Card 0016: plan lines per spec on tooltips and the loot roll. The index,
+	-- the lines and the ownership read are proven here; the glow on the roll
+	-- frame and the lines as drawn on a tooltip need a person.
+	do
+		local listTest = "tooltip lists each plan that has the item"
+		local headId = tonumber(GEAR_PLAN.Feral.st.slots.head:match("id=(%d+)"))
+		local headLink = "|Hitem:" .. headId .. "::::::::80:::::|h[x]|h"
+		local index = PlanTab.buildPlanIndex()
+		check(listTest .. ", the planned head is under Feral raid", index[headId] and (index[headId][1].spec .. " " .. index[headId][1].content), "Feral raid")
+		check(listTest .. ", with its planned level", index[headId] and index[headId][1].ilvl ~= nil, true)
+		-- both raid cells collapse to one raid row
+		local kept2t = GEAR_PLAN.Feral["2t"]
+		GEAR_PLAN.Feral["2t"] = GEAR_PLAN.Feral.st
+		local raidRows = 0
+		for _, row in ipairs(PlanTab.buildPlanIndex()[headId]) do
+			if row.spec == "Feral" and row.content == "raid" then raidRows = raidRows + 1 end
+		end
+		GEAR_PLAN.Feral["2t"] = kept2t
+		check(listTest .. ", one raid row for the two raid cells", raidRows, 1)
+		local fake = { [7] = {
+			{ spec = "Balance", content = "raid", ilvl = 700 },
+			{ spec = "Feral", content = "raid", ilvl = 700 },
+			{ spec = "Feral", content = "Mythic+", ilvl = 700 },
+		} }
+		check(listTest .. ", one line per plan", #PlanTab.planLines(fake, 7, "Feral", false), 3)
+		check(listTest .. ", the current spec first", PlanTab.planLines(fake, 7, "Feral", false)[1], "Feral raid: in plan")
+		check(listTest .. ", then the rest in spec order", PlanTab.planLines(fake, 7, "Feral", false)[3], "Balance raid: in plan")
+		check(listTest .. ", no current spec keeps spec order", PlanTab.planLines(fake, 7, nil, false)[1], "Balance raid: in plan")
+		check(listTest .. ", a lower copy says the planned level", PlanTab.planLines(fake, 7, "Balance", false, 650)[1], "Balance raid: in plan at 700")
+		check(listTest .. ", the planned copy does not", PlanTab.planLines(fake, 7, "Balance", false, 700)[1], "Balance raid: in plan")
+		check(listTest .. ", from a hovered link", (PlanTab.planLinesForLink(headLink) or {})[1], "Feral raid: in plan")
+		check(listTest .. ", the tooltip's own id wins over the link", (PlanTab.planLinesForLink("|Hitem:1::::::::80:::::|h[x]|h", headId) or {})[1], "Feral raid: in plan")
+
+		local ownedTest = "tooltip says a planned item is owned"
+		check(ownedTest .. ", pure", PlanTab.planLines(fake, 7, "Feral", true)[1], "Feral raid: in plan, owned")
+		check(ownedTest .. ", nothing worn or held is not owned", PlanTab.planOwned(headId), false)
+		local keptCount = C_Item.GetItemCount
+		C_Item.GetItemCount = function() return 1 end
+		check(ownedTest .. ", one in the bags or bank is", PlanTab.planOwned(headId), true)
+		C_Item.GetItemCount = keptCount
+		local keptWorn = GetInventoryItemLink
+		GetInventoryItemLink = function(_, slotID) return slotID == 1 and headLink or nil end
+		check(ownedTest .. ", worn counts as owned", PlanTab.planOwned(headId), true)
+		check(ownedTest .. ", and the hovered line says so", (PlanTab.planLinesForLink(headLink) or {})[1], "Feral raid: in plan, owned")
+		GetInventoryItemLink = keptWorn
+
+		local noneTest = "no plan line for an unplanned item"
+		check(noneTest .. ", pure", #PlanTab.planLines(fake, 1, "Feral", true), 0)
+		check(noneTest .. ", from a link", #(PlanTab.planLinesForLink("|Hitem:1::::::::80:::::|h[x]|h") or { 1 }), 0)
+		check(noneTest .. ", no link says nothing at all", PlanTab.planLinesForLink(nil), nil)
+		-- the roll frame: a pretend frame with the planned item glows, an unplanned one does not
+		local keptRoll = GetLootRollItemLink
+		GetLootRollItemLink = function(rollID) return rollID == 1 and headLink or "|Hitem:1::::::::80:::::|h[x]|h" end
+		local frame = { rollID = 1, IconFrame = CreateFrame("Button") }
+		check(listTest .. ", the roll frame with a planned item is marked", PlanTab.markRollFrame(frame), true)
+		check(listTest .. ", and keeps its glow", PlanTab.ROLL_GLOWS[frame] ~= nil, true)
+		frame.rollID = 2
+		check(noneTest .. ", the roll frame with an unplanned item is not marked", PlanTab.markRollFrame(frame), false)
+		check(noneTest .. ", a roll frame with no roll is not marked", PlanTab.markRollFrame({ IconFrame = frame.IconFrame }), false)
+		PlanTab.ROLL_GLOWS[frame] = nil
+		GetLootRollItemLink = keptRoll
 	end
 
 	-- a saved target must survive the round trip and show its item level
