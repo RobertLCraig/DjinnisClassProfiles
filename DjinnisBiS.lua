@@ -3099,6 +3099,82 @@ function PlanTab.searchAH(term)
 	return true
 end
 
+-- Auctionator (card 0025) ----------------------------------------------------
+--
+-- Through its public API only (Auctionator/Source/API/v1, read 2026-09-22):
+-- every call takes the caller's addon name first. ClassCodex edits
+-- Auctionator's saved lists by hand instead; that is not copied here.
+
+PlanTab.AUCTIONATOR_LIST = "DjinnisBiS plan"
+
+-- Auctionator's v1 API, or nil when it is not loaded. The global is asked,
+-- not IsAddOnLoaded: the table is what gets called.
+function PlanTab.auctionator()
+	local a = Auctionator
+	return a and a.API and a.API.v1 or nil
+end
+
+-- 123456 copper is "12g 34s". Copper is never shown; nothing here costs less than a silver.
+function PlanTab.gold(copper)
+	return ("%dg %02ds"):format(math.floor(copper / 10000), math.floor(copper % 10000 / 100))
+end
+
+-- Auctionator's price for one of a thing on the list, in copper, or nil: no
+-- Auctionator, nothing seen yet, or an enchant. An enchant's id is the
+-- enchant's, not the scroll's item id, so there is nothing to ask a price of.
+-- ponytail: price enchants when PlanTab.RANK carries the scroll item id.
+function PlanTab.priceOf(kind, id)
+	local api = PlanTab.auctionator()
+	if not api or kind ~= "gem" then return nil end
+	local ok, price = pcall(api.GetAuctionPriceByItemID, "DjinnisBiS", id)
+	return ok and type(price) == "number" and price or nil
+end
+
+-- shoppingLines with a price on the end of each line Auctionator can price.
+-- Returns the lines, the total in copper (nil without Auctionator) and how
+-- many lines had no price.
+function PlanTab.pricedLines(list, nameOf)
+	local lines = PlanTab.shoppingLines(list, nameOf)
+	if not PlanTab.auctionator() then return lines, nil, 0 end
+	local total, unpriced = 0, 0
+	for i, want in ipairs(list) do
+		local each = PlanTab.priceOf(want.kind, want.id)
+		if each then
+			total = total + each * want.count
+			lines[i] = lines[i] .. "   " .. GREY .. PlanTab.gold(each * want.count) .. "|r"
+		else
+			unpriced = unpriced + 1
+		end
+	end
+	return lines, total, unpriced
+end
+
+-- Makes or replaces the "DjinnisBiS plan" shopping list from the list's
+-- search terms (the same terms Search AH uses, the rank stripped). A thing
+-- with no term yet is left out and said. False, with the reason printed,
+-- when Auctionator is absent or its API refuses.
+function PlanTab.sendToAuctionator(list)
+	local api = PlanTab.auctionator()
+	if not api then
+		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Auctionator is not loaded.|r")
+		return false
+	end
+	local terms, skipped = {}, 0
+	for _, want in ipairs(list) do
+		local term = PlanTab.searchTerm(want.kind, want.id)
+		if term then terms[#terms + 1] = term else skipped = skipped + 1 end
+	end
+	local ok, err = pcall(api.CreateShoppingList, "DjinnisBiS", PlanTab.AUCTIONATOR_LIST, terms)
+	if not ok then
+		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Auctionator refused the list: " .. tostring(err) .. "|r")
+		return false
+	end
+	print(("%sDjinni's BiS|r %s%d item%s sent to Auctionator's \"%s\" list%s.|r"):format(GOLD, GREY, #terms,
+		#terms == 1 and "" or "s", PlanTab.AUCTIONATOR_LIST,
+		skipped > 0 and (", " .. skipped .. " with no name yet left out") or ""))
+	return true
+end
+
 -- A Blizzard equipment set for each plan (card 0012) -------------------------
 --
 -- Saved from what is WORN, because that is all C_EquipmentSet can save from
@@ -3373,14 +3449,24 @@ function PlanTab.lines(forSpec)
 	local list, unworn, better = PlanTab.shoppingList(plan, worn)
 	local function nameOf(kind, id) return PlanTab.rankName(kind, id) end
 	local function searchRows(items, colour)
-		for i, text in ipairs(PlanTab.shoppingLines(items, nameOf)) do
+		local texts, total, unpriced = PlanTab.pricedLines(items, nameOf)
+		for i, text in ipairs(texts) do
 			local term = items[i] and PlanTab.searchTerm(items[i].kind, items[i].id)
 			lines[#lines + 1] = { text = "   " .. colour .. text .. "|r",
 				button = term and { label = "Search AH", tip = "Search the auction house for \"" .. term .. "\". The house must be open.",
 					onClick = function() PlanTab.searchAH(term) end } or nil }
 		end
+		return total, unpriced
 	end
-	searchRows(list, #list == 0 and GREEN or WHITE)
+	local total, unpriced = searchRows(list, #list == 0 and GREEN or WHITE)
+	-- Only with Auctionator loaded (total is nil without it) and something to buy.
+	if total and #list > 0 then
+		lines[#lines + 1] = { text = ("   %sTotal %s%s|r"):format(GREY, PlanTab.gold(total),
+				unpriced > 0 and (", " .. unpriced .. " without an Auctionator price yet") or ""),
+			-- "Auctionator", not "Send to Auctionator": the action button is ILVL_WIDTH wide.
+			button = { label = "Auctionator", tip = ("Send to Auctionator: make or replace its \"%s\" shopping list with everything above."):format(PlanTab.AUCTIONATOR_LIST),
+				onClick = function() PlanTab.sendToAuctionator(list) end } }
+	end
 	if #better > 0 then
 		lines[#lines + 1] = { text = GREY .. "   Higher ranks exist, if you want to spend on them:|r" }
 		searchRows(better, GREY)
@@ -4515,6 +4601,70 @@ local function selfTest()
 	check(emptyTest, PlanTab.shoppingLines(PlanTab.shoppingList(shopPlan, {}), plainName)[1], "Nothing to buy")
 	check(emptyTest .. ", no plan", PlanTab.shoppingLines(PlanTab.shoppingList(nil, {}), plainName)[1], "Nothing to buy")
 	check(emptyTest .. ", one line only", #PlanTab.shoppingLines({}, plainName), 1)
+
+	-- Auctionator (card 0025): a pretend Auctionator.API.v1 that records the
+	-- list it was given and prices one gem. The global is put back after.
+	do
+		local wasAuctionator, wasPrint = Auctionator, print
+		local sent, said = nil, {}
+		-- Recorded AND passed on: a swallowed print hides this block's own FAIL
+		-- lines from offline-check.lua, which counts them off what was printed.
+		print = function(...) said[#said + 1] = table.concat({ ... }, " "); wasPrint(...) end
+		Auctionator = nil
+		local noneTest = "no auctionator parts without auctionator"
+		check(noneTest .. ", no api", PlanTab.auctionator(), nil)
+		check(noneTest .. ", no price", PlanTab.priceOf("gem", 50), nil)
+		check(noneTest .. ", no total", (select(2, PlanTab.pricedLines(shop, plainName))), nil)
+		check(noneTest .. ", the line is plain", PlanTab.pricedLines(shop, plainName)[2], "2x gem 50")
+		check(noneTest .. ", send refuses", PlanTab.sendToAuctionator(shop), false)
+		check(noneTest .. ", send says why", said[#said] and said[#said]:find("not loaded", 1, true) ~= nil, true)
+		Auctionator = { API = { v1 = {
+			CreateShoppingList = function(caller, name, terms) sent = { caller = caller, name = name, terms = terms } end,
+			-- 7967 is priced so the enchant guard is proven: that is a stranger's item id.
+			GetAuctionPriceByItemID = function(caller, id) return id == 50 and 123456 or id == 240908 and 50000 or id == 7967 and 1 or nil end,
+		} } }
+		local priceTest = "shopping list shows auctionator prices"
+		check(priceTest .. ", gold from copper", PlanTab.gold(123456), "12g 34s")
+		check(priceTest .. ", a gem is priced", PlanTab.priceOf("gem", 50), 123456)
+		check(priceTest .. ", an enchant is not, its id is not an item id", PlanTab.priceOf("enchant", 7967), nil)
+		local texts, total, unpriced = PlanTab.pricedLines(shop, plainName)
+		check(priceTest .. ", the line carries count times price", texts[2], "2x gem 50   " .. GREY .. "24g 69s|r")
+		check(priceTest .. ", an unpriced line is left plain", texts[1], "2x enchant 7967")
+		check(priceTest .. ", the total", total, 246912)
+		check(priceTest .. ", the unpriced are counted", unpriced, 2)
+		local sendTest = "shopping list sent to auctionator"
+		check(sendTest, PlanTab.sendToAuctionator(shop), true)
+		check(sendTest .. ", as this addon", sent and sent.caller, "DjinnisBiS")
+		check(sendTest .. ", named", sent and sent.name, "DjinnisBiS plan")
+		check(sendTest .. ", the search term, rank stripped", sent and sent.terms[1], "Eyes of the Eagle")
+		check(sendTest .. ", a thing with no name yet is left out", sent and #sent.terms, 1)
+		check(sendTest .. ", and said so", said[#said] and said[#said]:find("2 with no name yet left out", 1, true) ~= nil, true)
+		Auctionator.API.v1.CreateShoppingList = function() error("Contact the maintainer") end
+		check(sendTest .. ", a refusal is caught", PlanTab.sendToAuctionator(shop), false)
+		check(sendTest .. ", a refusal is shown", said[#said] and said[#said]:find("refused", 1, true) ~= nil, true)
+		-- The tab AS DRAWN with a wrong gem in the planned wrist: the total row
+		-- and its button with Auctionator, neither without.
+		local wasWornLink, wasLevel, wasBoss = GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, PlanTab.boss
+		GetInventoryItemLink = function(_, slotID) return slotID == 9 and "|Hitem:251135::240894::::|h[x]|h" or nil end
+		C_Item.GetDetailedItemLevelInfo = function() return 318 end
+		PlanTab.boss = "Nek'zali"
+		local function totalRow()
+			for _, line in ipairs(PlanTab.lines("Feral")) do
+				if line.text:find("Total", 1, true) then return line end
+			end
+		end
+		local withRow = totalRow()
+		check(priceTest .. ", drawn total", withRow and withRow.text:find("Total 5g 00s", 1, true) ~= nil, true)
+		check(sendTest .. ", drawn with its button", withRow and withRow.button and withRow.button.label, "Auctionator")
+		-- A lesser gem is nothing to buy, so no total and no button even with Auctionator.
+		GetInventoryItemLink = function(_, slotID) return slotID == 9 and "|Hitem:251135::240907::::|h[x]|h" or nil end
+		check(sendTest .. ", no total row with nothing to buy", totalRow(), nil)
+		GetInventoryItemLink = function(_, slotID) return slotID == 9 and "|Hitem:251135::240894::::|h[x]|h" or nil end
+		Auctionator = nil
+		check(noneTest .. ", no total row drawn", totalRow(), nil)
+		GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, PlanTab.boss = wasWornLink, wasLevel, wasBoss
+		Auctionator, print = wasAuctionator, wasPrint
+	end
 
 	-- The tab AS DRAWN (0007 review): the checks above prove the tables, and a
 	-- tab that drew mismatch in green, or no loadout at all, passed every one.
