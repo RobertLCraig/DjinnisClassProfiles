@@ -3029,6 +3029,90 @@ function PlanTab.searchAH(term)
 	return true
 end
 
+-- A Blizzard equipment set for each plan (card 0012) -------------------------
+--
+-- Saved from what is WORN, because that is all C_EquipmentSet can save from
+-- (Blizzard_APIDocumentationGenerated/EquipmentManagerDocumentation.lua), so
+-- it runs after Equip all lands, and from a Save set button when every slot
+-- already matches. Blizzard then does the remembering: the set is on the
+-- character sheet, in `/equipset`, and on every item tooltip.
+
+-- Names stay within 16 letters, the cap on Blizzard's own name box
+-- (Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.xml, IconSelectorEditBox
+-- letters="16"): "DBiS Guardian 2T" is exactly 16. A longer name that the
+-- server cut short would not be found again and would be created afresh on
+-- every Equip all. ST and 2T are raid cells, so "Raid" is not spelt out.
+PlanTab.SET_PREFIX = "DBiS "
+PlanTab.SET_SUFFIX = { st = "ST", ["2t"] = "2T", mplus = "M+" }
+function PlanTab.setName(spec, scenario)
+	return PlanTab.SET_PREFIX .. spec .. " " .. (PlanTab.SET_SUFFIX[scenario] or "?")
+end
+
+-- Only a set this addon named is ever saved over. Rob's own sets are not.
+function PlanTab.ownsSet(name)
+	return type(name) == "string" and name:sub(1, #PlanTab.SET_PREFIX) == PlanTab.SET_PREFIX
+end
+
+-- The labels of the planned slots not wearing the planned piece, sorted by
+-- slot. An enchant or gem short of the plan does not count: the item is on.
+function PlanTab.missingSlots(plan, wornBySlot)
+	local ids = {}
+	for slotID, mark in pairs(slotStates(plan, wornBySlot)) do
+		if mark.state == "change" then ids[#ids + 1] = slotID end
+	end
+	table.sort(ids)
+	for i, slotID in ipairs(ids) do ids[i] = PLAN_SLOT_LABEL[slotID] or tostring(slotID) end
+	return ids
+end
+
+-- Saves the worn gear as the plan's set, creating it or updating the one of
+-- that name. Returns true and the name, or false and why not. Pure apart
+-- from the C_EquipmentSet calls, so /bis test drives it with a stub.
+function PlanTab.saveSet(spec, scenario)
+	local api = C_EquipmentSet
+	if not (api and api.CreateEquipmentSet) then return false, "no equipment manager" end
+	if InCombatLockdown() then return false, "not in combat" end
+	if api.CanUseEquipmentSets and not api.CanUseEquipmentSets() then return false, "the equipment manager is off" end
+	local plan = gearPlanFor(spec, scenario)
+	if not plan then return false, "no plan for " .. spec .. " " .. (SCENARIO_LABEL[scenario] or "?") end
+	local worn = readWorn()
+	if not worn then return false, "your gear cannot be read right now" end
+	local missing = PlanTab.missingSlots(plan, worn)
+	if #missing > 0 then return false, "not worn: " .. table.concat(missing, ", ") end
+	local name = PlanTab.setName(spec, scenario)
+	local id = api.GetEquipmentSetID(name)
+	-- The id came from our own name, but the name it answers to is checked
+	-- back before anything is saved over it.
+	if id and not PlanTab.ownsSet((api.GetEquipmentSetInfo(id))) then return false, "set " .. id .. " is not ours" end
+	if not id and api.GetNumEquipmentSets and MAX_EQUIPMENT_SETS_PER_PLAYER
+		and api.GetNumEquipmentSets() >= MAX_EQUIPMENT_SETS_PER_PLAYER then
+		return false, "you already have " .. MAX_EQUIPMENT_SETS_PER_PLAYER .. " sets"
+	end
+	-- Shirt and tabard are cosmetic, and a set that holds them fights transmog.
+	-- 4 and 19 are INVSLOT_BODY and INVSLOT_TABARD (Blizzard_FrameXMLBase/Constants.lua).
+	api.ClearIgnoredSlotsForSave()
+	api.IgnoreSlotForSave(4)
+	api.IgnoreSlotForSave(19)
+	local icon
+	local si = C_SpecializationInfo
+	if si and si.GetSpecialization and si.GetSpecializationInfo then
+		local ok, _, _, _, fileID = pcall(si.GetSpecializationInfo, si.GetSpecialization())
+		icon = ok and fileID or nil
+	end
+	if id then api.SaveEquipmentSet(id, icon) else api.CreateEquipmentSet(name, icon) end
+	return true, name
+end
+
+-- saveSet, said in chat. Equip all calls it two seconds after the last
+-- pickup, because an equip is a server round trip and the slots read stale
+-- until it lands; the Save set button calls it at once.
+function PlanTab.saveSetAndSay(spec, scenario)
+	local ok, detail = PlanTab.saveSet(spec, scenario)
+	print(("%sDjinni's BiS|r %s%s|r"):format(GOLD, ok and WHITE or GREY,
+		ok and ("Saved as equipment set " .. detail) or ("No equipment set saved: " .. detail)))
+	return ok
+end
+
 local function itemName(id)
 	return id and C_Item.GetItemInfo(id) or ("item " .. tostring(id))
 end
@@ -3178,9 +3262,19 @@ function PlanTab.lines(forSpec)
 			button = { label = "Equip all", tip = "Equip every planned piece in your bags, and in the bank while it is open.",
 				onClick = function()
 					for _, slotID in ipairs(inBags) do PlanTab.equip(marks[slotID].entry, slotID) end
+					-- Not now: the pickups above are in flight, and the slots read
+					-- stale until the server answers (card 0012).
+					if C_Timer then C_Timer.After(2, function() PlanTab.saveSetAndSay(spec, picked.scenario) end) end
 				end } }
 	end
-	if #slotIDs == 0 then lines[#lines + 1] = { text = GREEN .. "   Every slot matches the plan.|r" } end
+	-- Every planned PIECE on, whatever its enchants and gems, is enough for a
+	-- set, and the button is how a set gets saved when Equip all's timer read
+	-- the slots too early, or when nothing was left to equip.
+	if #PlanTab.missingSlots(plan, worn) == 0 then
+		lines[#lines + 1] = { text = #slotIDs == 0 and (GREEN .. "   Every slot matches the plan.|r") or (GREY .. "   Every planned piece is on.|r"),
+			button = { label = "Save set", tip = ("Save what you are wearing as the equipment set \"%s\"."):format(PlanTab.setName(spec, picked.scenario)),
+				onClick = function() PlanTab.saveSetAndSay(spec, picked.scenario) end } }
+	end
 
 	lines[#lines + 1] = { text = "" }
 	lines[#lines + 1] = { text = GOLD .. "3. To buy|r" }
@@ -4115,6 +4209,118 @@ local function selfTest()
 	ClearCursor, CursorHasItem, PickupInventoryItem = wasClear, wasHas, wasEquip
 	C_PaperDollInfo, IsInventoryItemLocked = wasDoll, wasLocked
 	check("search button without the auction house open", PlanTab.searchAH("x"), false)
+
+	-- equipment sets (card 0012): a pretend equipment manager that records
+	-- every call, and a pretend body wearing the whole Feral 1 target plan
+	do
+		for _, spec in ipairs(SPEC_ORDER) do
+			for scenario in pairs(SCENARIO_LABEL) do
+				check("set name fits Blizzard's 16-letter name box, " .. spec .. " " .. scenario, #PlanTab.setName(spec, scenario) <= 16, true)
+				check("set name starts with the prefix, " .. spec .. " " .. scenario, PlanTab.ownsSet(PlanTab.setName(spec, scenario)), true)
+			end
+		end
+		check("a set Rob named is not ours", PlanTab.ownsSet("Tank"), false)
+		check("a set with no name is not ours", PlanTab.ownsSet(nil), false)
+
+		local plan = gearPlanFor("Feral", "st")
+		local entryBySlotID, ilvlById = {}, {}
+		for slot, entry in pairs(plan.slots) do
+			entryBySlotID[PLAN_SLOT_INVENTORY[slot]] = entry
+			ilvlById[entry.id] = entry.ilvl
+		end
+		local bare = nil  -- a slot id left empty, or nil for the whole plan on
+		local wasWornLink, wasLevel = GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo
+		GetInventoryItemLink = function(_, slotID)
+			local entry = slotID ~= bare and entryBySlotID[slotID]
+			return entry and ("|Hitem:%d::::::|h[x]|h"):format(entry.id) or nil
+		end
+		C_Item.GetDetailedItemLevelInfo = function(link) return ilvlById[tonumber(link:match("item:(%d+)"))] end
+
+		local calls, sets, ignored = {}, {}, {}
+		local wasSets, wasCombat, wasMax = C_EquipmentSet, InCombatLockdown, MAX_EQUIPMENT_SETS_PER_PLAYER
+		MAX_EQUIPMENT_SETS_PER_PLAYER = 10
+		local function log(name) return function(...) calls[#calls + 1] = { name, ... } end end
+		C_EquipmentSet = {
+			CanUseEquipmentSets = function() return true end,
+			ClearIgnoredSlotsForSave = function() wipe(ignored) end,
+			IgnoreSlotForSave = function(slot) ignored[#ignored + 1] = slot end,
+			GetEquipmentSetID = function(name) return sets[name] end,
+			GetEquipmentSetInfo = function(id) for name, i in pairs(sets) do if i == id then return name, 0, id end end end,
+			GetNumEquipmentSets = function() local n = 0 for _ in pairs(sets) do n = n + 1 end return n end,
+			CreateEquipmentSet = log("create"),
+			SaveEquipmentSet = log("save"),
+			DeleteEquipmentSet = log("delete"),
+			ModifyEquipmentSet = log("modify"),
+		}
+		local function saveCalls()
+			local names = {}
+			for _, c in ipairs(calls) do names[#names + 1] = c[1] end
+			return table.concat(names, ",")
+		end
+
+		local saveTest = "equip all saves the plan as an equipment set"
+		sets = { Tank = 1 }
+		local ok, detail = PlanTab.saveSet("Feral", "st")
+		check(saveTest, ok, true)
+		check(saveTest .. ", named for the plan", detail, "DBiS Feral ST")
+		check(saveTest .. ", created when no set of that name exists", saveCalls(), "create")
+		check(saveTest .. ", created under that name", calls[1] and calls[1][2], "DBiS Feral ST")
+		check("the set ignores shirt and tabard", table.concat(ignored, ","), "4,19")
+
+		wipe(calls)
+		sets = { Tank = 1, ["DBiS Feral ST"] = 2 }
+		ok = PlanTab.saveSet("Feral", "st")
+		check(saveTest .. ", updated when the set exists", ok and saveCalls(), "save")
+		check(saveTest .. ", updated into the set of that name", calls[1] and calls[1][2], 2)
+
+		local ownTest = "sets Rob made are never touched"
+		wipe(calls)
+		sets = { Tank = 1 }
+		local realID = C_EquipmentSet.GetEquipmentSetID
+		C_EquipmentSet.GetEquipmentSetID = function() return 1 end  -- the manager answers with Rob's set
+		ok, detail = PlanTab.saveSet("Feral", "st")
+		C_EquipmentSet.GetEquipmentSetID = realID
+		check(ownTest, ok, false)
+		check(ownTest .. ", says why", detail, "set 1 is not ours")
+		check(ownTest .. ", no call reached the manager", saveCalls(), "")
+
+		wipe(calls)
+		bare = 1  -- head off
+		ok, detail = PlanTab.saveSet("Feral", "st")
+		check("no set is saved from a half-worn plan", ok, false)
+		check("no set is saved from a half-worn plan, says which slot", detail, "not worn: Head")
+		check("no set is saved from a half-worn plan, no call reached the manager", saveCalls(), "")
+		bare = nil
+
+		wipe(calls)
+		InCombatLockdown = function() return true end
+		ok, detail = PlanTab.saveSet("Feral", "st")
+		InCombatLockdown = wasCombat
+		check("no set is saved in combat", ok, false)
+		check("no set is saved in combat, says why", detail, "not in combat")
+		check("no set is saved in combat, no call reached the manager", saveCalls(), "")
+
+		wipe(calls)
+		sets = { a = 1, b = 2, c = 3, d = 4, e = 5, f = 6, g = 7, h = 8, i = 9, j = 10 }
+		ok, detail = PlanTab.saveSet("Feral", "st")
+		check("no set is created past Blizzard's ten", ok, false)
+		check("no set is created past Blizzard's ten, no call reached the manager", saveCalls(), "")
+
+		-- the tab AS DRAWN with the whole plan on: it offers Save set
+		sets = {}
+		local realBoss4 = PlanTab.boss
+		PlanTab.boss = "Nek'zali"
+		local saveRow
+		for _, line in ipairs(PlanTab.lines("Feral")) do
+			if line.button and line.button.label == "Save set" then saveRow = line end
+		end
+		PlanTab.boss = realBoss4
+		check("drawn tab offers Save set when every planned piece is on", saveRow ~= nil, true)
+		check("drawn tab offers Save set when every planned piece is on, names the set", saveRow and saveRow.button.tip:find("DBiS Feral ST", 1, true) ~= nil, true)
+
+		C_EquipmentSet, MAX_EQUIPMENT_SETS_PER_PLAYER = wasSets, wasMax
+		GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo = wasWornLink, wasLevel
+	end
 
 	-- ranks: a lower rank of the right enchant or gem is "lesser", never wrong
 	do
