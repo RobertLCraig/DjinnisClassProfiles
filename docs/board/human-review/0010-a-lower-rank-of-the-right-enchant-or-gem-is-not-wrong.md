@@ -97,21 +97,16 @@ compare ids, and nothing told it which ids were the same thing at another rank.
   (2) Three mutations passed every check: `gemMatch` returning "lesser" when a gem is also
   missing, and deleting either drawn "Higher ranks exist" row. Each has a check now, the last two
   against the tab as drawn with the planned wrist worn at rank 3.
-  **Held:** every other guard goes red when broken (rankState, slotState's order, the lesser
-  split in shoppingList, the "Plan: fine." line, gemKey reading the table). `gemMatch` on nil
-  worn, an empty plan, an extra worn gem, a higher worn rank (ok) and two planned of one family
-  against one worn (one more wanted, state gem). The pool is removed from after the inner loop,
-  not during it. `planLineFor` for "lesser" reads `mark.worn.enchant` unguarded, and every mark
-  with that state comes from `slotStates`, which sets `worn` for it; a stale mark keeps its old
-  `worn`. `wantedFrom` takes "change" only, so the bag glows and 0005/0006 are unchanged. Search
-  AH for an enchant is Raidbots' `itemName`, the scroll the house sells, which Rob confirmed on
-  0008 step 5. The script: `--check` says "Already current" and exits 0, the file's line ending
-  is kept, the user agent gets 200, `pattern.sub` touches the markers and nothing else, and no
-  planned family collides with a "Perfect " gem from an older expansion. Locals alive at the end
-  of the main chunk: 190 of 200 under Lua 5.1.
-  **Security.** Weakest: the rank table trusts Raidbots' data at author time, so a wrong family
-  name there would make two different gems read as one; the script fails rather than writes
-  when a planned id is missing. Unchecked: every id that reaches `PlanTab.RANK` is a constant
-  from the plan or a number parsed out of a link that passed `canRead`, and the name fallback
-  in `gemKey` is behind `canRead` too, so no secret value reaches a table key or a comparison.
-  Leaks: nothing leaves the machine; the script's only network calls are two GETs to Raidbots.
+  **Held:** every other guard goes red when broken. `gemMatch` on nil worn, an empty plan, an
+  extra worn gem, a higher worn rank (ok), two planned of one family against one worn; the pool
+  is removed from after the inner loop. `planLineFor` for "lesser" reads `mark.worn.enchant`
+  unguarded, and every such mark comes from `slotStates`, which sets `worn`. `wantedFrom` takes
+  "change" only, so 0005 and 0006 are unchanged. Search AH for an enchant is Raidbots' `itemName`,
+  the scroll the house sells, confirmed on 0008 step 5. The script keeps the line ending, its user
+  agent gets 200, `--check` exits 0 when current, and only the marked block is rewritten. No
+  planned family collides with a "Perfect " gem from an old expansion. Locals: 190 of 200.
+  **Security.** Weakest: the table trusts Raidbots at author time, so a wrong family name there
+  would make two gems read as one; the script refuses to write when a planned id is missing.
+  Unchecked: every id reaching `PlanTab.RANK` is a plan constant or parsed from a link that
+  passed `canRead`, and `gemKey`'s name fallback is behind `canRead`, so no secret value reaches
+  a table key or a comparison. Leaks: nothing leaves the machine; two GETs to Raidbots, author only.

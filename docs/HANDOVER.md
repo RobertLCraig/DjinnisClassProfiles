@@ -6,8 +6,15 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.17.8, `/djbis` (and `/bis`), `Interface: 120100`. No remote.
-**2026-09-22, after everything below: card `0008` is in `done/`, confirmed by Rob in the game.**
+**Status:** v0.18.1, `/djbis` (and `/bis`), `Interface: 120100`. No remote.
+**2026-09-22, latest: card `0010` is built, reviewed and in `human-review/` at v0.18.1.** A lower
+rank of the planned enchant or gem is "lesser" now, a grey "rank" mark and "Plan: fine.", and the
+Plan tab lists the higher rank under "Higher ranks exist" instead of "To buy". The ranks come from
+a fourth generated block written by `update-plan-ranks.py` out of Raidbots. Its review turned the
+gem order round (quality first, then item level: Wowhead's stats say the rare at 278 beats the
+uncommon at 295) and added three checks against the tab as drawn. Four looks in the game are on
+the card. `todo/` holds `0009` and `0011`.
+**2026-09-22, earlier: card `0008` is in `done/`, confirmed by Rob in the game.**
 The Plan tab has buttons now: Talents opens the talent window and loads nothing, Equip puts the
 exact bag copy in the planned slot, Search AH runs the auction house's own search. Its review
 fixed three faults at 0.17.1: an unnamed enchant searched by item id, a refused equip left on
@@ -45,7 +52,7 @@ is now in `human-review/` for five looks in the game.
 **2026-09-21, last: card `0003` is now in `human-review/`, not `ai-review/` or `todo/`.** Its in-combat
 zero was fixed at 0.15.1, a second adversarial pass stopped a proc from emptying the rating cache
 mid-fight, and what is left is six looks only a game client can settle.
-_Last updated: 2026-09-22 (card 0008 done, buttons confirmed in the game, v0.17.2)_
+_Last updated: 2026-09-22 (card 0010 reviewed and in human-review, v0.18.1)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -97,6 +104,13 @@ than a task.
   header says where the winning combo really is, which is `input.txt` and not the `simbot.input`
   field that looks like it. `.\update-gear-plan.ps1 -SelfTest` runs its checks against
   `fixtures/gear-plan/`, trimmed copies of two real reports.
+- `update-plan-ranks.py` - **author tooling, never shipped.** Writes the fourth generated block,
+  `GENERATED PLAN RANKS`: every id in the family of every enchant and gem the gear plan asks for,
+  with its rank, from Raidbots' `enchantments.json` and `gems.json` (**it fetches**, with a curl
+  user agent because the default one gets 403). An enchant family is the scroll's item name and
+  its rank is `craftingQuality`; a gem family is the name without "Flawless " or "Perfect " and its
+  rank is its place ordered by quality then item level. Run it after `update-gear-plan.ps1` adds
+  an enchant or gem the table has never seen; `--check` exits 1 when it must be run.
 - `offline-check.lua` - **author tooling, never shipped.** Runs the addon's own `/bis test` outside
   the game, under plain Lua, by stubbing enough of Blizzard's API to load the file: `lua
   offline-check.lua`, exit code 0 for a pass. **It proves the data and the pure logic and it proves
@@ -211,16 +225,18 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this. The one buildable card is `0009` in `todo/`**, a Mythic+ plan beside
-the raid plan (as of 2026-09-22). Like the rest it carries `not_for_the_loop:` because Rob builds
-this addon by hand on msiraider. Whoever builds it adds to the `PlanTab` table rather than a new
-top-level local: the main chunk holds 191 of Lua's 200.
+**`docs/board/` owns this. Two buildable cards sit in `todo/`: `0009`**, a Mythic+ plan beside
+the raid plan, and **`0011`**, a Talents button that loads the loadout through Blizzard's own
+helper (as of 2026-09-22). Both carry `not_for_the_loop:` because Rob builds this addon by hand on
+msiraider. Whoever builds either adds to the `PlanTab` table rather than a new top-level local:
+the main chunk holds 190 of Lua's 200.
 
-Six cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006` and `0007`,
+Seven cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006`, `0007` and `0010`,
 all wanting a live client. **They are one trip**, and each card lists its own checks under
 `## What I need from you`. Open `/bis` for `0001` and `0002`; open the character sheet, hit a
 dummy and hover a ring for `0003` and `0005`; open Baganator for `0006`; open the Plan tab for
-`0007`. Its buttons (`0008`) are confirmed working; only the Equip all ring-order path is unseen.
+`0007`; hover the wrist with the rank 3 garnet in it for `0010`. The buttons (`0008`) are
+confirmed working; only the Equip all ring-order path is unseen.
 
 ## Blockers / open questions
 - **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's BiS*
@@ -264,6 +280,11 @@ dummy and hover a ring for `0003` and `0005`; open Baganator for `0006`; open th
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
+- **2026-09-22, later** Card `0010` reviewed, one fix and three checks, deployed at v0.18.1.
+  Worth carrying: a sort key that "reads right" is a claim until the data is checked, and here
+  Wowhead's tooltips said the opposite of the builder's reading; and a drawn row nobody asserts
+  on can be deleted without a check noticing, so the tab-as-drawn checks from the 0007 review are
+  the pattern for anything new on the Plan tab.
 - **2026-09-22** Card `0008` reviewed, three fixes, deployed at v0.17.1. Worth carrying: a check
   with nothing to act on cannot fail, and the equip checks were exactly that until `selfTest` got
   a pretend bag; `a and b or c` is wrong the moment `b` may be nil; and the slot-mark watcher does
