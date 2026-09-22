@@ -3875,7 +3875,11 @@ function PlanTab.lines(forSpec)
 		local colour = isPicked and LOADOUT_COLOUR[PlanTab.loadoutState(row.loadout, active, edited)] or GREY
 		local pulled
 		if pulls and row.id then
-			if plannedString[row.loadout] == nil then plannedString[row.loadout] = PlanTab.savedLoadoutString(row.loadout) or false end
+			-- The pull's string is Hindsight's own encoder's, which it checks
+			-- against C_Traits.GenerateImportString at login and after every
+			-- client build (Encode.lua, VerifyEncoder). Until it says the two
+			-- agree, no string is compared (0023 review): another spec still is.
+			if plannedString[row.loadout] == nil then plannedString[row.loadout] = HindsightDB.encoderOK == true and PlanTab.savedLoadoutString(row.loadout) or false end
 			pulled = PlanTab.pullSpec(pulls, row.id, spec, plannedString[row.loadout] or nil)
 		end
 		local best = row.id and PlanTab.bestLootSpec(PlanTab.POOL[row.id], planned, spec)
@@ -5441,8 +5445,14 @@ local function selfTest()
 		return table.concat(texts, "\n")
 	end
 	PlanTab.boss = "The Twin Fangs"
+	-- Without Hindsight (0023 review): in the game its real pulls put a red
+	-- "last pull" on the picked row and three checks below went red on a
+	-- feature that worked. The 0023 block draws with a pretend one.
+	local liveHindsightDB = HindsightDB
+	HindsightDB = nil
 	local wrong, right, unknown = drawn("DotC Raid ST *", false), drawn("WS Raid 2T *", false), drawn(nil)
 	local touched = drawn("WS Raid 2T *", true)
+	HindsightDB = liveHindsightDB
 	PlanTab.activeLoadoutName, PlanTab.boss = realActive, realBoss
 	check(editTest .. ", drawn after the name", touched:find("your loadout now: |r" .. WHITE .. "WS Raid 2T * (edited)|r", 1, true) ~= nil, true)
 	check(editTest .. ", drawn red on the same name", touched:find("|cffff2020WS Raid 2T *|r", 1, true) ~= nil, true)
@@ -5490,7 +5500,7 @@ local function selfTest()
 		check(noneTest .. ", schema 2", PlanTab.hindsightPulls(), nil)
 		HindsightDB, HindsightCharDB = { schema = 1 }, { pulls = "not a table" }
 		check(noneTest .. ", pulls not a table", PlanTab.hindsightPulls(), nil)
-		HindsightDB, HindsightCharDB = { schema = 1 }, { pulls = pulls }
+		HindsightDB, HindsightCharDB = { schema = 1, encoderOK = true }, { pulls = pulls }
 		check(pullTest .. ", schema 1 is read", PlanTab.hindsightPulls(), pulls)
 		-- as drawn: the planned string is stubbed, the game has no loadouts here
 		PlanTab.savedLoadoutString = function(name) return name == "WS Raid 2T *" and aString or nil end
@@ -5500,6 +5510,11 @@ local function selfTest()
 		local drawnOther = drawn("WS Raid Most Bosses", false)
 		HindsightDB = { schema = 2 }
 		local drawnNew = drawn("WS Raid 2T *", false)
+		-- Hindsight's encoder not yet verified against the game's: no string
+		-- compare, another spec still said (0023 review)
+		HindsightDB = { schema = 1 }
+		PlanTab.boss = "The Twin Fangs"
+		local drawnUnverified = drawn("WS Raid 2T *", false)
 		HindsightDB, HindsightCharDB, PlanTab.savedLoadoutString = wasDB, wasChar, wasString
 		PlanTab.activeLoadoutName, PlanTab.boss = realActive, realBoss
 		check(pullTest .. ", drawn red on the picked row", drawnPulls:find("> The Twin Fangs|r   " .. GREEN .. "WS Raid 2T *|r   " .. GREY .. "2 targets|r   |cffff2020last pull: other build, as Feral|r", 1, true) ~= nil, true)
@@ -5510,6 +5525,8 @@ local function selfTest()
 		check(sameTest2 .. ", no planned string, drawn", drawnPulls:find("Vashnik|r   " .. GREY .. "WS Raid Most Bosses|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
 		check(noneTest .. ", schema 2 draws no pull line", drawnNew:find("last pull", 1, true), nil)
 		check(noneTest .. ", not loaded draws no pull line", wrong:find("last pull", 1, true), nil)
+		check(sameTest2 .. ", encoder unverified, no string compare", drawnUnverified:find("last pull: other build, as Feral", 1, true), nil)
+		check(pullTest .. ", encoder unverified, other spec still said", drawnUnverified:find("last pull: other build, as Guardian", 1, true) ~= nil, true)
 	end
 
 	local openTest = "the strip opens the tab on a boss of its own scenario"
