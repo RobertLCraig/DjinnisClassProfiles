@@ -369,7 +369,7 @@ local STAT_TARGET = {
 -- the string the talent import box takes; nothing here applies it.
 --
 -- BEGIN GENERATED GEAR PLAN
-local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-21"
+local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-22"
 local GEAR_PLAN = {
 	Feral = {
 		["st"] = {
@@ -391,6 +391,28 @@ local GEAR_PLAN = {
 				finger2   = "id=251194,enchant_id=7966,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
 				trinket1  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
 				trinket2  = "id=270166,bonus_id=6652/13334/12843,ilevel=311", -- Vashnik's Sanguine Rancor
+				main_hand = "id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,ilevel=308", -- Abyssal Broodfiend's Bardiche
+			},
+		},
+		["mplus"] = {
+			report = "ttC3zNmZSvC7C2XQNSe6Bi", simmed = "2026-09-22", dps = 224577,
+			loadout = "WS M+",
+			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYBMbGeAzMYGziZmZmlxMPwMAAAAAAADAAAAAwsMziZZmlNwMDwCDGAAzMAYA",
+			slots = {
+				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
+				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
+				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
+				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
+				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
+				wrist     = "id=251135,gem_id=240908,bonus_id=12849/13440/6652/13695/13662/12699,ilevel=318", -- Fury-fletched Armlets
+				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
+				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
+				feet      = "id=272240,enchant_id=8018,bonus_id=6652/13662/12835,ilevel=298", -- Miststalker's Striders
+				finger1   = "id=272147,bonus_id=6652/13668/12838,enchant_id=7967,gem_id=240908,ilevel=308", -- Colubrine Band
+				finger2   = "id=268249,gem_id=240888,bonus_id=6652/13668/13333/12841/13696,enchant_id=7967,ilevel=305", -- Vile Alchemist's Band
+				trinket1  = "id=250228,bonus_id=13440/6652/12699/12843,ilevel=311", -- Resonant Bellowstone
+				trinket2  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
 				main_hand = "id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,ilevel=308", -- Abyssal Broodfiend's Bardiche
 			},
 		},
@@ -438,6 +460,10 @@ PlanTab.RANK = {
 		[240876] = { "Masterful Garnet", 2, 4 },
 		[240907] = { "Masterful Garnet", 3, 4 },
 		[240908] = { "Masterful Garnet", 4, 4 },
+		[240855] = { "Quick Peridot", 1, 4 },
+		[240856] = { "Quick Peridot", 2, 4 },
+		[240887] = { "Quick Peridot", 3, 4 },
+		[240888] = { "Quick Peridot", 4, 4 },
 		[240861] = { "Versatile Peridot", 1, 4 },
 		[240862] = { "Versatile Peridot", 2, 4 },
 		[240893] = { "Versatile Peridot", 3, 4 },
@@ -3944,7 +3970,7 @@ local function selfTest()
 		end
 		for scenario, cell in pairs(byScenario) do
 			local where = "gear plan block holds a slot table per spec and scenario: " .. spec .. " " .. scenario
-			check(where .. ", scenario is st or 2t", scenario == "st" or scenario == "2t", true)
+			check(where .. ", scenario is st, 2t or mplus", scenario == "st" or scenario == "2t" or scenario == "mplus", true)
 			check(where .. ", has a talent string", type(cell.talents) == "string" and cell.talents ~= "", true)
 			local plan = gearPlanFor(spec, scenario)
 			local count = 0
@@ -4079,21 +4105,29 @@ local function selfTest()
 	check(contentTest .. ", outside, the bags follow the raid plan", bagScenario == "st" and #bagWanted > 0, true)
 	GetInstanceInfo = function() return "Somewhere", "party" end
 	rebuildBagWanted()
-	check(contentTest .. ", in a dungeon the bags follow the Mythic+ plan, empty", bagScenario == "mplus" and #bagWanted == 0, true)
+	check(contentTest .. ", in a dungeon the bags follow the Mythic+ plan", bagScenario == "mplus" and #bagWanted > 0, true)
+	local keptMplusCell = GEAR_PLAN.Feral.mplus
+	GEAR_PLAN.Feral.mplus = nil
+	rebuildBagWanted()
+	check(contentTest .. ", in a dungeon with no Mythic+ cell the bags are empty, not the raid list", bagScenario == "mplus" and #bagWanted == 0, true)
+	GEAR_PLAN.Feral.mplus = keptMplusCell
 	GetInstanceInfo, db().statContext, db().planScenario = keptInstance, keptContext, keptScenario
 	rebuildBagWanted()
 	check(contentTest .. ", every scenario has a label", SCENARIO_LABEL.mplus ~= nil and SCENARIO_LABEL.st ~= nil, true)
 
+	-- The Feral cell is filled (a DungeonSlice Top Gear, 2026-09-22), so the
+	-- "no plan yet" wording is checked with the cell taken away for the moment.
 	local mplusTest = "missing mplus plan is said, not filled from raid"
-	check(mplusTest .. ", the cell is empty", gearPlanFor("Feral", "mplus"), nil)
+	check(mplusTest .. ", the Feral cell is filled", gearPlanFor("Feral", "mplus") ~= nil, true)
 	check(mplusTest .. ", the Plan tab has a Mythic+ row", PlanTab.bossFor(PlanTab.BOSSES.Feral, nil, "mplus"), "Mythic+, any key")
 	do
-		local realBoss3 = PlanTab.boss
-		PlanTab.boss = "Mythic+, any key"
+		local realBoss3, realCell = PlanTab.boss, GEAR_PLAN.Feral.mplus
+		PlanTab.boss, GEAR_PLAN.Feral.mplus = "Mythic+, any key", nil
+		check(mplusTest .. ", the cell is empty for the check", gearPlanFor("Feral", "mplus"), nil)
 		local text = {}
 		for i, line in ipairs(PlanTab.lines("Feral")) do text[i] = line.text end
 		text = table.concat(text, "\n")
-		PlanTab.boss = realBoss3
+		PlanTab.boss, GEAR_PLAN.Feral.mplus = realBoss3, realCell
 		check(mplusTest .. ", drawn", text:find("No Mythic+ gear plan yet", 1, true) ~= nil, true)
 		check(mplusTest .. ", says which fight style", text:find("DungeonSlice", 1, true) ~= nil, true)
 		check(mplusTest .. ", no raid gear listed", text:find("in the bank", 1, true) == nil and text:find("in your bags", 1, true) == nil, true)
