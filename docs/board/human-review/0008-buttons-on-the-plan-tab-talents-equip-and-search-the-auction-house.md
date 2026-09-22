@@ -5,6 +5,39 @@ needs: 0007
 ---
 # 0008 Buttons on the Plan tab: talents, equip, and search the auction house
 
+## What I need from you
+
+**Six looks in the game, on your Feral druid, out of combat.** It is v0.17.1 and already deployed.
+Have at least one planned piece sitting in your bags first, so step 2 has something to do.
+
+1. Type `/reload`, then `/bis`, then click "Plan". The "1. Talents" line has a **Talents** button
+   at its right end. Click it: the talent window opens on the class talents tab, and the loadout
+   you had picked is still the one picked. Nothing is changed for you.
+2. Under "2. Gear to change", a row whose item is in your bags ends "in your bags" and has an
+   **Equip** button. Click it: that copy (not a lower-level twin) goes into that slot, and the row
+   goes away on its own without you reopening the window. A bind-on-equip piece shows the game's
+   own "bind it?" box first; say yes and the same happens.
+3. With two or more in your bags, a grey line "N of these are in your bags" has **Equip all**.
+   Click it: every one goes on, and each ring lands on the finger the row named for it.
+4. Under "3. To buy", each row has **Search AH**. With the auction house closed, click one: one
+   grey line in chat says to open the auction house first, and nothing else happens.
+5. Go to an auctioneer, open the house on its Buy tab, open `/bis` Plan again, click Search AH:
+   the search box fills with the name without "(rank 2)" and the results list comes up.
+6. Click the "By Boss" tab: every item row still has its item level target on the right, none says
+   Equip or Search AH, and hovering that button still says "Click to set the item level".
+
+**Pass** is all of:
+- every step shows what it says
+- no red Lua error box
+- after step 2 and 3 nothing is left stuck to your mouse cursor
+
+**Fail** is any step that differs. Write the step number and what you saw in `## Comments`. If a
+ring went on the wrong finger in step 3, say which, and whether both planned rings were in your
+bags or one was already worn: that is the one path the checks outside the game cannot see.
+
+**Why it needs you:** the only place these buttons exist is inside the game, and no agent can run
+it. Everything checkable outside it has been checked and says nothing about what is on screen.
+
 ## Why
 
 The Plan tab (`0007`) tells Rob what to do and then leaves him to do it by hand: open the talent
@@ -52,20 +85,32 @@ How it came to be: `0007` was scoped to say, not to do, because applying a loado
 
 - **2026-09-22** WRITTEN AFTER THE WORK. Rob asked for the buttons in chat from a screenshot of
   the tab; the card was written with the code. Attack the code, not the boxes.
-- 2026-09-22 Claude: built at v0.17.0 and deployed. Offline check passes under Lua 5.4 and the
-  game's 5.1. **No frame seen in a client.** What was applied, and where from:
-  - Talents opens the window through `PlayerSpellsUtil.OpenToClassTalentsTab`
-    (`Blizzard_FrameXMLUtil/Mainline/PlayerSpellsUtil.lua:31`). Loading the loadout itself is the
-    fence above, and it is Rob's to lift; my answer is no, for `0002`'s reason.
-  - Equip uses `C_Container.PickupContainerItem` then `EquipCursorItem(slotID)` rather than
-    `C_Item.EquipItemByName`, because the plan matches item id AND item level and only the pickup
-    names one exact bag slot. Both are `AllowedWhenUntainted` in the generated docs, not deprecated.
-    A bind-on-equip piece will raise the game's own confirm box, which is right.
-  - Search AH drives `AuctionHouseFrame.SearchBar` the way a typed search does
-    (`Blizzard_AuctionHouseSearchBar.lua:194-207`). The house must be open; the addon is
-    load-on-demand and the frame does not exist before then. An enchant is searched by name
-    without its rank, so both ranks show.
-  - The tab redraws itself on an equip by riding `0005`'s watcher, which already registers
-    `PLAYER_EQUIPMENT_CHANGED`. No new event registration, so no new refusal to detect.
-  - A gem the client has not cached yet gets no Search AH button, because the search term would
-    be "item 240908". Reopening the tab after the cache fills fixes it.
+- 2026-09-22 Claude: built at v0.17.0 (`e311422`) and deployed; checks pass under Lua 5.4 and the
+  game's 5.1. **No frame seen in a client.** Equip picks the bag copy up and `EquipCursorItem`s it
+  rather than `EquipItemByName`, because only the pickup names one exact bag slot. Search AH drives
+  `AuctionHouseFrame.SearchBar` as a typed search does; the house must be open. A gem the client
+  has not cached gets no Search AH button until the tab is reopened.
+- 2026-09-22 Claude, adversarial review, a different session from the build. **Passed to
+  human-review with three fixes, `b0c6943`, v0.17.1, deployed. No frame was seen: the only surface
+  is a game client, no agent can run one, so nothing in-game is claimed.**
+  **Broke:** (1) The two equip checks could not fail: the harness has no bags, so `equip` returned
+  false with the combat guard deleted. They run against a pretend bag now, and deleting either
+  guard, the bag slot or the inventory slot goes red. (2) `searchTerm` was `a and b or c`, so an
+  enchant id missing from `ENCHANT_NAME` fell through to `C_Item.GetItemInfo(enchantId)`, an item
+  lookup by the wrong id. (3) A failed pickup or a refused equip left the item on the cursor, where
+  a click on the world is the destroy prompt; `equip` makes Blizzard's own two `CursorHasItem`
+  checks now. (4) The redraw rode `0005`'s watcher, which only exists once the character sheet has
+  been opened; it rides the bag-mark watcher now, alive from login.
+  **Held:** the rank strip and the house guard go red when broken. `PlanTab.entries` turns each
+  ring pair to match what is worn, so one wrong finger wants the other ring; Equip all runs in one
+  script and the game queues `PLAYER_EQUIPMENT_CHANGED` until it returns, so the loop finishes on
+  the state it was drawn from. Both rings in the bags at once is the one path unproven outside the
+  game (step 3). The shared button resets `onClick` and `tip` on every draw and By Boss rows carry
+  neither. All seven APIs are in `Blizzard_APIDocumentationGenerated` at 12.1.0, none deprecated,
+  none with a secret return; `SearchBar` is a plain frame and one click is one query, so the house's
+  own throttle applies. No `LoadConfig`, `CommitConfig` or any purchase call in the file. Locals:
+  191 of 200 under 5.1, unchanged by this card.
+  **Security.** Weakest: Equip trusts the plan's slot id, and a wrong one asks the game to put a
+  ring on a head, which it refuses and the cursor is cleared. Unchecked: the search term is our own
+  table or the client's item name, never player text. Leaks: nothing leaves the machine; a failure
+  prints one grey line or does nothing.
