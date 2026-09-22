@@ -84,6 +84,58 @@ What it gains: a whole addon's reminders turn on for four specs, and DjinnisBiS 
      favourite by hand in KeystoneLoot and click again: it comes back, because the plan still
      wants it, and the line still says 0 added, because the record never let go of it.
   5. Disable KeystoneLoot, `/reload`: the row is gone and nothing errors.
+- 2026-09-22 Claude (review, in a worktree off `fea30be`): attacked the four criteria, the three
+  functions and the row, against KeystoneLoot 2.18.0's installed source, not the card's account of
+  it. `modules\api.lua` confirmed: every method is a colon method on the global, `AddFavorite`
+  takes `(itemId, specId, tier, options)` with `{ bonusIds, gems, enchant, characterKey }`, refuses
+  with `false` for an item `Query:GetItemSource` cannot place in a dungeon, raid, catalyst or custom
+  list, for a spec its `ItemDatabase` does not list the item for, for a wrong slot under
+  `TIER_SLOT_RULE`, and before READY; `RemoveFavorite(itemId, specId, characterKey)` and
+  `IsFavorite` match the calls; `RegisterCallback("READY")` fires at once when already ready;
+  `GetCurrentCharacterKey()` is `realm-name-classId` from `string.format`, a fresh plain string,
+  so keying `DjinnisBiSDB.keystoneLoot` on it does not touch the secret-value trap, and the addon
+  registers no event and reads no unit here. `db()` is only reached from a click, after
+  ADDON_LOADED. Both offline checks exit 0 on 5.4 and 5.1; 177 top-level locals, unchanged.
+
+  One real finding, fixed in place. `Favorites:Add` at `modules\favorites.lua` line 412 replaces
+  the whole entry (tier, bonus ids, gems, enchant) for an item that is a favourite already. So a
+  favourite Rob made by hand for an item the plan also wants was overwritten to BiS with the plan's
+  gems, then recorded as this addon's, then removed by this addon the day the plan dropped it: the
+  second criterion's "never remove one it did not add" broken, and "Not this card" with it. Now the
+  send asks `IsFavorite` first, and an item that is a favourite already and not in the record is
+  left exactly as Rob made it, not recorded, and counted: the line ends ", N left as yours" when
+  N is above 0. Four checks cover it, and `sendToKeystoneLoot` returns `kept` fourth. A second,
+  trivial gap: the `api.AddFavorite` shape guard in `PlanTab.keystoneLoot()` had no check, so a
+  global without the method (an older KeystoneLoot) drew the button untested; one check added.
+
+  Mutation-tested in a temp copy, eight mutants, all red with exit 1: remove-everything (drop the
+  `not wanted[key]` guard), draw the row without the global, count a refusal as added, drop the
+  hand-made guard (the tier goes 2 to 3), change the report wording, drop the `AddFavorite` shape
+  guard, skip the READY wait, and stop forgetting on remove. 38 checks in the block now.
+
+  What held: only entries in `DjinnisBiSDB.keystoneLoot[charKey]` reach `RemoveFavorite`; a
+  hand-made favourite outside the plan is never touched; a refused item is not recorded; a thrown
+  error from any method is caught, said, and stops the send with nil; the row is drawn only when
+  the global has `AddFavorite`. Accepted as documented, not changed: a favourite Rob deleted by
+  hand that the plan still wants comes back on the next click, because it stays in the record.
+  Security: weakest point is the other addon's global, which any addon can replace, and every call
+  into it is pcalled and its answers are only ever a boolean, a string key and a number, so a
+  hostile `KeystoneLootAPI` gets one chat line and no error. Unchecked: nothing comes in from
+  outside the client; the only inputs are the generated plan and KeystoneLoot's answers. Leaks:
+  the failure line prints the error text KeystoneLoot threw and nothing else.
+
+  Verdict: pass with the one guard added, to `human-review/`. Nothing was run in a client; the
+  five looks above stand, plus one more:
+  6. Before the first click, favourite one planned Feral piece by hand in KeystoneLoot at "Must
+     have". Click: the line ends "1 left as yours", KeystoneLoot still shows it at Must have, and
+     it is absent from `DjinnisBiSDB.keystoneLoot` in the saved variables after a `/reload`.
+
+## What I need from you
+
+- The six looks in the game listed in the two comments above, in a client with KeystoneLoot 2.18.0
+  loaded. Look 6 is the new one and is the only way to see the overwrite guard work against the
+  real `Favorites:Add`.
+- Say whether ", N left as yours" is the wording you want for a favourite you made yourself.
 
   Left out: nothing KeystoneLoot's settings touch, and no favourite Rob made by hand is read or
   removed, both per "Not this card". The pending `READY` wait cannot be seen from a click after
