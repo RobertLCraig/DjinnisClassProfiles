@@ -6,14 +6,14 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.17.1, `Interface: 120100`. No remote.
-**2026-09-22, after everything below: card `0008` is built, reviewed and in `human-review/`.**
+**Status:** v0.17.2, `Interface: 120100`. No remote.
+**2026-09-22, after everything below: card `0008` is in `done/`, confirmed by Rob in the game.**
 The Plan tab has buttons now: Talents opens the talent window and loads nothing, Equip puts the
 exact bag copy in the planned slot, Search AH runs the auction house's own search. Its review
 fixed three faults at 0.17.1: an unnamed enchant searched by item id, a refused equip left on
-the cursor, and a redraw that only worked once the character sheet had been opened. It wants six
-looks in the game. **`todo/` holds one card, `0009`**, a Mythic+ plan beside the raid plan, written
-by Rob the same night; seven cards wait on one trip to a live client.
+the cursor, and a redraw that only worked once the character sheet had been opened. Rob then saw
+all three buttons work, and 0.17.2 made them look like buttons. **`todo/` holds one card, `0009`**, a Mythic+ plan beside the raid plan, written
+by Rob the same night; six cards wait on one trip to a live client.
 **2026-09-21: card `0007` is built, reviewed and in `human-review/`.** A
 fourth tab, Plan, names the talent loadout per boss, the slots to change and what to buy. Its review
 made the checks read the drawn tab and fixed three small faults at 0.16.1. It wants eight looks in
@@ -45,7 +45,7 @@ is now in `human-review/` for five looks in the game.
 **2026-09-21, last: card `0003` is now in `human-review/`, not `ai-review/` or `todo/`.** Its in-combat
 zero was fixed at 0.15.1, a second adversarial pass stopped a proc from emptying the rating cache
 mid-fight, and what is left is six looks only a game client can settle.
-_Last updated: 2026-09-22 (card 0008: Plan tab buttons, reviewed at 0.17.1)_
+_Last updated: 2026-09-22 (card 0008 done, buttons confirmed in the game, v0.17.2)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -216,12 +216,11 @@ the raid plan (as of 2026-09-22). Like the rest it carries `not_for_the_loop:` b
 this addon by hand on msiraider. Whoever builds it adds to the `PlanTab` table rather than a new
 top-level local: the main chunk holds 191 of Lua's 200.
 
-Seven cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006`, `0007` and `0008`,
+Six cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006` and `0007`,
 all wanting a live client. **They are one trip**, and each card lists its own checks under
 `## What I need from you`. Open `/bis` for `0001` and `0002`; open the character sheet, hit a
 dummy and hover a ring for `0003` and `0005`; open Baganator for `0006`; open the Plan tab for
-`0007`, then click its buttons for `0008` (one planned piece in the bags first, and a visit to an
-auctioneer for the Search AH step).
+`0007`. Its buttons (`0008`) are confirmed working; only the Equip all ring-order path is unseen.
 
 ## Blockers / open questions
 - **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's BiS*
