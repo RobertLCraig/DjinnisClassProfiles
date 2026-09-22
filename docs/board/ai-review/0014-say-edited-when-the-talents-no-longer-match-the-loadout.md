@@ -30,34 +30,45 @@ and the tab says all is well.
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] WHEN the active talents differ from the planned loadout's talent string, THE ADDON SHALL show the loadout name with "(edited)" after it. proves: `edited talents are marked`
+- [x] WHEN the active talents differ from the planned loadout's talent string, THE ADDON SHALL show the loadout name with "(edited)" after it. proves: `edited talents are marked`
 - [x] WHEN they match, THE ADDON SHALL show the name with nothing after it. proves: `matching talents are not marked`
 - [x] THE ADDON SHALL read the talent string only out of combat. proves: `talent string read out of combat only`
+- [x] WHEN the picked boss's plan cell has no `talents` string, THE ADDON SHALL mark nothing. proves: `a cell without talents marks nothing`
 <!-- AC:END -->
 
 ## Tasks
 
-- [x] Find where the planned string comes from: the saved loadout (`C_Traits.GenerateImportString`
-  on that config) or a string baked into the plan by `update-gear-plan.ps1`. Prefer the saved loadout.
-- [ ] Compare the tree choices, not the whole string, if the header differs between two strings of
-  the same build. Check this with two exports of one loadout.
+- [x] The planned string is the plan cell's own `talents` (`GEAR_PLAN`, baked by
+  `update-gear-plan.ps1` from the report's export), never the saved loadout: Blizzard's talent
+  frame writes a hand edit INTO the saved loadout on Apply (`Blizzard_ClassTalentsFrame.lua`
+  1134 to 1155, `SaveConfig(selectedConfig)`), so a compare against it can never see the edit
+  (Rob, 2026-09-22, Option A). `PlanTab.plannedTalents(spec, scenario)` hands it over.
+- [x] A string from another game build says nothing: the 152-bit header (version, spec, tree
+  hash) must agree before the node bits are compared, else the answer is nil, never "edited".
+  Whether a clean load ever produces a differing header is item 4 below.
 - [x] Redraw on `TRAIT_CONFIG_UPDATED`.
 - [x] Offline checks under the names above.
 
 ## What I need from you
 
-1. Load "DotC Raid ST *" through the talent window, open `/bis`, Plan tab. Line 1 should read
-   `your loadout now: DotC Raid ST *` with nothing after it, and Entombed Sentinels green.
-2. Move one talent point by hand and apply. Line 1 should now say `DotC Raid ST * (edited)`, the
-   picked boss row should go red, and the "Open talents and pick ..." line should appear, without
-   reopening the window (that is the `TRAIT_CONFIG_UPDATED` redraw).
-3. Load the loadout again. The mark should go.
-4. The one thing I could not settle offline: whether `GenerateImportString` on a SAVED config
-   returns the same string as on the active config after that loadout is loaded, header included.
-   If step 1 shows "(edited)" straight after a clean load, the header differs and the comparison
-   must start at the node bits. Blizzard's own UI never calls this function, so there was nothing
-   in `wow-ui-source` to read it off.
-5. Hit a dummy with the tab open: no error, and the mark holds whatever it said before the pull.
+1. Load "DotC Raid ST *" through the talent window, open `/bis`, Plan tab, pick Entombed
+   Sentinels. Line 1 should read `your loadout now: DotC Raid ST *` with nothing after it, and
+   the row green.
+2. Move one talent point by hand and Apply. Line 1 should now say `DotC Raid ST * (edited)`, the
+   picked boss row red, and the "Click Talents to load ..." line present, without reopening the
+   window (that is the `TRAIT_CONFIG_UPDATED` redraw). This is the case the saved-loadout
+   compare could not catch.
+3. Load the loadout clean again. The mark should go.
+4. If step 1 shows "(edited)" straight after a clean load, the plan's baked string and the
+   client's export differ past the header and the string in `GEAR_PLAN` needs re-baking from
+   this client; if it shows nothing after an edit, the headers differ and the guard is hiding
+   it. Say which. Blizzard's own UI never calls `GenerateImportString`, so there was nothing in
+   `wow-ui-source` to read it off.
+5. Pick Nek'zali (a 1 target boss on "WS Raid Most Bosses", which the `st` cell was not simmed
+   on) while on that loadout, clean. The row should be green with no mark: the cell's string is
+   not that loadout's plan and only the name is judged. This is the case Option A does not
+   cover until card `0028` gives every loadout its own cell.
+6. Hit a dummy with the tab open: no error, and the mark holds whatever it said before the pull.
 
 ## Comments
 
@@ -119,3 +130,21 @@ and the tab says all is well.
   Security, for the record: weakest point is a redraw per `TRAIT_CONFIG_UPDATED`, two cheap
   string reads, no loop; unchecked path none, both reads are pcalled and the event handler takes
   no payload; leaks nothing, the strings never leave the client and never print.
+- 2026-09-22 Claude (rebuilt on Option A): the compare now reads the plan cell's own `talents`
+  string. New `PlanTab.plannedTalents(spec, scenario)` returns the cell's string and, second, the
+  loadout it was simmed under, or nil when the cell has none; `0023` is to call it next, name and
+  signature kept. `PlanTab.talentsEdited(planned)` takes that string and reads only the active
+  config (one `GenerateImportString`, not two); `PlanTab.activeLoadoutName(spec, scenario)` looks
+  the cell up and passes it through, and its three callers (`lines`, `checkSetup`, the sidebar)
+  hand over the picked boss's scenario, `checkSetup`'s row's, and `planScenario` for the sidebar.
+  `talentStringsDiffer` answers nil when the first 25 characters (150 of the header's 152 bits)
+  disagree, so another build's string is never "edited". One guard the decision did not name and
+  the data forces: four `st` boss rows use "WS Raid Most Bosses" or "WS Raid Coiled Altar", and
+  the `st` cell was simmed on "DotC Raid ST *", so without it a clean load of "WS Raid Most
+  Bosses" on Nek'zali read as edited and went red. The cell's string judges only when the active
+  loadout is the one it was simmed under; otherwise the row is judged by name alone, as before
+  this card. `0028` removes the gap by giving every loadout its cell. Item 5 in-game is that case.
+  No new top-level local (177). Both `lua offline-check.lua` and Lua 5.1 exit 0. Four mutations in
+  a temp copy, all red: `plannedTalents` forced nil (3), the header guard removed (1), the
+  loadout-name guard removed (1), the compare forced false (3). Not seen in a client; the
+  `TRAIT_CONFIG_UPDATED` registration is still provable only there.
