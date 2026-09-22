@@ -1800,12 +1800,13 @@ local function attachIlvlButton(parent)
 	b.text:SetAllPoints()
 	b.text:SetJustifyH("RIGHT")
 	b:SetScript("OnClick", function(self)
-		if self.itemName then openTrackMenu(self, self.itemName) end
+		if self.onClick then self.onClick()
+		elseif self.itemName then openTrackMenu(self, self.itemName) end
 	end)
 	b:SetScript("OnEnter", function(self)
-		if not self.itemName then return end
+		if not (self.itemName or self.tip) then return end
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:SetText("Click to set the item level you are chasing")
+		GameTooltip:SetText(self.tip or "Click to set the item level you are chasing")
 		GameTooltip:Show()
 	end)
 	b:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -2019,9 +2020,14 @@ renderList = function(lines)
 		row.text:SetText(line.text)
 		row.link = line.link
 		row.onClick = line.onClick
+		-- The right-hand button is the item level target on the BiS tabs and a
+		-- named action (Equip, Search AH) on the Plan tab. One button, two jobs.
+		local action = line.button
 		row.ilvl.itemName = line.name
-		row.ilvl.text:SetText(line.name and gearLabel(line.name) or "")
-		row.ilvl:SetShown(line.name ~= nil)
+		row.ilvl.onClick = action and action.onClick
+		row.ilvl.tip = action and action.tip
+		row.ilvl.text:SetText(line.name and gearLabel(line.name) or action and (WHITE .. action.label .. "|r") or "")
+		row.ilvl:SetShown(line.name ~= nil or action ~= nil)
 		row:Show()
 	end
 	for i = #lines + 1, #rowPool do rowPool[i]:Hide() end
@@ -2792,14 +2798,61 @@ local MARK_LABEL = { change = "", enchant = "enchant", gem = "gem" }
 local LOCATION_WORD = { bags = "in your bags", bank = "in the bank", missing = "not owned" }
 local PLAN_STRIP_H = 44
 
+-- The bag and slot holding the planned piece, or nil.
 local function planItemInBags(entry)
-	if not (C_Container and C_Container.GetContainerItemLink) then return false end
+	if not (C_Container and C_Container.GetContainerItemLink) then return nil end
 	for bag = 0, NUM_TOTAL_EQUIPPED_BAG_SLOTS or 5 do
 		for slot = 1, C_Container.GetContainerNumSlots(bag) or 0 do
-			if planMatchesLink(entry, C_Container.GetContainerItemLink(bag, slot)) then return true end
+			if planMatchesLink(entry, C_Container.GetContainerItemLink(bag, slot)) then return bag, slot end
 		end
 	end
-	return false
+	return nil
+end
+
+-- The three buttons (Rob, 2026-09-22: "planner should have a button to change
+-- talents / gear / shop for gems and enchants on the AH").
+
+-- Opens the talent window. It does NOT load the loadout: C_ClassTalents.LoadConfig
+-- from addon code is the known route to action bars that freeze in combat
+-- (card 0002 found ClassCodex doing it). Rob clicks the loadout himself.
+function PlanTab.openTalents()
+	if PlayerSpellsUtil and PlayerSpellsUtil.OpenToClassTalentsTab then
+		PlayerSpellsUtil.OpenToClassTalentsTab()
+	end
+end
+
+-- Picks the exact bag copy up and drops it in the slot the plan chose, so a
+-- lower-track twin is never the one equipped and a ring lands on the planned
+-- finger. Out of combat only. Returns true when an equip was asked for.
+function PlanTab.equip(entry, slotID)
+	if InCombatLockdown() then return false end
+	local bag, slot = planItemInBags(entry)
+	if not bag then return false end
+	ClearCursor()
+	C_Container.PickupContainerItem(bag, slot)
+	EquipCursorItem(slotID)
+	return true
+end
+
+-- What to type into the auction house for a thing on the list. An enchant is
+-- sold as a scroll named after the enchant, so the rank is dropped. Nil when
+-- the name is not known yet, which is a gem the client has not cached.
+function PlanTab.searchTerm(kind, id)
+	local name = kind == "enchant" and PlanTab.ENCHANT_NAME[id] or C_Item.GetItemInfo(id)
+	return name and (name:gsub("%s*%(rank %d+%)$", "")) or nil
+end
+
+-- Runs the auction house's own search box, which is what a typed search does
+-- (Blizzard_AuctionHouseSearchBar.lua, StartSearch). Needs the house open.
+function PlanTab.searchAH(term)
+	local ah = AuctionHouseFrame
+	if not (ah and ah:IsShown() and ah.SearchBar) then
+		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Open the auction house first, then click Search AH.|r")
+		return false
+	end
+	ah.SearchBar:SetSearchText(term)
+	ah.SearchBar:StartSearch()
+	return true
 end
 
 local function itemName(id)
@@ -2877,7 +2930,9 @@ function PlanTab.lines(forSpec)
 	local lines = {
 		{ text = ("%sPick the boss you are about to pull. Everything below is for that boss.|r"):format(GREY) },
 		{ text = "" },
-		{ text = ("%s1. Talents|r   %syour loadout now: |r%s%s|r"):format(GOLD, GREY, WHITE, active or "not known") },
+		{ text = ("%s1. Talents|r   %syour loadout now: |r%s%s|r"):format(GOLD, GREY, WHITE, active or "not known"),
+			button = { label = "Talents", tip = "Open the talent window. Pick the loadout named below.",
+				onClick = PlanTab.openTalents } },
 	}
 	for _, row in ipairs(bosses) do
 		local isPicked = row == picked
@@ -2909,16 +2964,28 @@ function PlanTab.lines(forSpec)
 		return lines
 	end
 
-	local marks, slotIDs = slotStates(plan, worn), {}
+	local marks, slotIDs, inBags = slotStates(plan, worn), {}, {}
 	for slotID in pairs(marks) do slotIDs[#slotIDs + 1] = slotID end
 	table.sort(slotIDs)
 	for _, slotID in ipairs(slotIDs) do
-		local _, link = C_Item.GetItemInfo(marks[slotID].entry.id)
+		local mark = marks[slotID]
+		local _, link = C_Item.GetItemInfo(mark.entry.id)
+		local canEquip = mark.state == "change" and planItemInBags(mark.entry) ~= nil
+		if canEquip then inBags[#inBags + 1] = slotID end
 		lines[#lines + 1] = {
 			text = ("   %s%s:|r %s"):format(WHITE, PLAN_SLOT_LABEL[slotID] or "?",
-				(planLineFor(marks[slotID]):gsub("^Plan: ", ""))),
-			link = marks[slotID].state == "change" and link or nil,
+				(planLineFor(mark):gsub("^Plan: ", ""))),
+			link = mark.state == "change" and link or nil,
+			button = canEquip and { label = "Equip", tip = "Equip the copy in your bags into this slot.",
+				onClick = function() PlanTab.equip(mark.entry, slotID) end } or nil,
 		}
+	end
+	if #inBags > 0 then
+		lines[#lines + 1] = { text = ("   %s%d of these %s in your bags.|r"):format(GREY, #inBags, #inBags == 1 and "is" or "are"),
+			button = { label = "Equip all", tip = "Equip every planned piece that is in your bags.",
+				onClick = function()
+					for _, slotID in ipairs(inBags) do PlanTab.equip(marks[slotID].entry, slotID) end
+				end } }
 	end
 	if #slotIDs == 0 then lines[#lines + 1] = { text = GREEN .. "   Every slot matches the plan.|r" } end
 
@@ -2928,8 +2995,11 @@ function PlanTab.lines(forSpec)
 	local wanted = PlanTab.shoppingLines(list, function(kind, id)
 		return kind == "enchant" and PlanTab.enchantName(id) or itemName(id)
 	end)
-	for _, text in ipairs(wanted) do
-		lines[#lines + 1] = { text = "   " .. (#list == 0 and GREEN or WHITE) .. text .. "|r" }
+	for i, text in ipairs(wanted) do
+		local term = list[i] and PlanTab.searchTerm(list[i].kind, list[i].id)
+		lines[#lines + 1] = { text = "   " .. (#list == 0 and GREEN or WHITE) .. text .. "|r",
+			button = term and { label = "Search AH", tip = "Search the auction house for \"" .. term .. "\". The house must be open.",
+				onClick = function() PlanTab.searchAH(term) end } or nil }
 	end
 	if unworn > 0 then
 		lines[#lines + 1] = { text = ("%s   %d planned piece%s not worn yet, so %s enchants and gems are not counted.|r"):format(
@@ -2941,6 +3011,7 @@ end
 -- Returns the refresh function. `holder` is the character pane's frame and
 -- `below` is what the strip sits under.
 local function buildSlotMarks(holder, below)
+	local refreshWindow = refresh  -- the /bis window's; `refresh` below is the strip's own
 	local strip = CreateFrame("Frame", nil, holder, "BackdropTemplate")
 	strip:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -4)
 	strip:SetPoint("TOPRIGHT", below, "BOTTOMRIGHT", 0, -4)
@@ -3065,6 +3136,9 @@ local function buildSlotMarks(holder, below)
 	-- below and C:\Dev\WoWAddons\docs\DECISIONS.md.
 	local watcher = CreateFrame("Frame")
 	watcher:SetScript("OnEvent", function(_, event)
+		-- The Plan tab lists what to equip, so an equip redraws it (the Equip
+		-- button lands here through this event, not through a call of its own).
+		if window and window:IsShown() and activeTab == 4 and not InCombatLockdown() then refreshWindow() end
 		if event == "PLAYER_REGEN_ENABLED" and not dirty then return end
 		if CharacterFrame:IsShown() or dirty then refresh() end
 	end)
@@ -3700,6 +3774,18 @@ local function selfTest()
 	check(shopTest .. ", an unworn piece is set aside", unworn, 1)
 	local function plainName(kind, id) return kind .. " " .. id end
 	check(shopTest .. ", by name with a count", PlanTab.shoppingLines(shop, plainName)[1], "2x enchant 7967")
+
+	-- the three buttons (card 0008)
+	local termTest = "auction search term drops the enchant rank"
+	check(termTest .. ", enchant", PlanTab.searchTerm("enchant", 7967), "Eyes of the Eagle")
+	check(termTest .. ", enchant nobody named", PlanTab.searchTerm("enchant", 1), nil)
+	check(termTest .. ", gem not cached", PlanTab.searchTerm("gem", 240908), nil)
+	local wasInCombat = InCombatLockdown
+	InCombatLockdown = function() return true end
+	check("equip button does nothing in combat", PlanTab.equip(parsePlanLine("id=1,ilevel=300"), 11), false)
+	InCombatLockdown = wasInCombat
+	check("equip button does nothing when the piece is not in the bags", PlanTab.equip(parsePlanLine("id=1,ilevel=300"), 11), false)
+	check("search button without the auction house open", PlanTab.searchAH("x"), false)
 
 	local emptyTest = "empty shopping list says nothing to buy"
 	check(emptyTest, PlanTab.shoppingLines(PlanTab.shoppingList(shopPlan, {}), plainName)[1], "Nothing to buy")
