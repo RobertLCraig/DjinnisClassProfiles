@@ -54,7 +54,7 @@ than a task.
   itself current. It was called `update-trinket-tiers.ps1` until 2026-09-07.
 - `update-gear-plan.ps1` - **author tooling, never shipped.** Writes the third generated block,
   `GENERATED GEAR PLAN`, from finished Raidbots Top Gear reports: one report fills one cell, spec by
-  scenario (`st` one target, `2t` two), and cells it was not given are kept, because a report
+  scenario (`st` one target, `2t` two, `3t` three or more, `mplus` a dungeon fight style), and cells it was not given are kept, because a report
   expires after 30 days. **Unlike the ClassCodex script it fetches**, two files per report. Its
   header says where the winning combo really is, which is `input.txt` and not the `simbot.input`
   field that looks like it. `.\update-gear-plan.ps1 -SelfTest` runs its checks against

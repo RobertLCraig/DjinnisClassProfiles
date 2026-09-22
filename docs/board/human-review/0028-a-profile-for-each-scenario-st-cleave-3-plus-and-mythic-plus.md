@@ -40,7 +40,7 @@ string, so a 2-target boss has gear but no planned build, and there is no cell a
 - [x] WHEN a report simmed at three or more enemies is baked, THE SCRIPT SHALL fill the spec's `3t` cell with gear, stat targets, loadout and talents. proves: `a 3+ target report fills the 3t cell`
 - [x] WHEN the strip's scenario button is pressed in a raid, THE ADDON SHALL cycle 1 target, 2 targets, 3+ targets, 1 target. proves: `the scenario button reaches 3+ targets`
 - [x] WHEN a boss row names scenario `3t`, THE PLAN TAB SHALL draw that cell's gear and build for it. proves: `a 3t boss row draws the 3t cell`
-- [ ] WHEN a cell has no `talents` string, THE ADDON SHALL show no build for it and mark nothing edited. proves: `a cell without talents has no planned build`
+- [x] WHEN a cell has no `talents` string, THE ADDON SHALL show no build for it and mark nothing edited. proves: `a cell without talents has no planned build`
 <!-- AC:END -->
 
 ## Tasks
@@ -95,3 +95,30 @@ In a client, after `/reload`, two looks. Neither is proven offline; the frames a
   open here. Not touched: `PlanTab.talentsEdited`, `activeLoadoutName`, `loadoutState`. No
   version bump. The `a 3+ target report fills the 3t cell` proof is the PowerShell self-test,
   not a Lua block.
+- 2026-09-22 Claude (review, worktree branch): attacked against the merged code, not the ticks.
+  Every `"2t"` and `"mplus"` literal in `DjinnisBiS.lua` was read and sorted: the ones that
+  enumerate a scenario (`SCENARIO_LABEL`, `planScenario`, `nextScenario`, `CHOICES`,
+  `CHOICE_LABEL`, `CONTENT_WORD`, `SET_SUFFIX`, `buildPlanIndex`, the data check,
+  `keystoneLootWanted` and the set-name loop, which walk `SCENARIO_LABEL`) all know `3t`; the
+  rest (`statContext`, the stat pane's switch, `rowHere`, `sidebarRows`, the stat-target loop,
+  `offerSetup`, the boss-id check) are a raid-or-Mythic+ split where `3t` is raid and falls
+  through correctly. The bag glow, the equipment set names ("DBiS Guardian 3T" is 16), the
+  simc export (walks the spec's cells with `pairs`) and the Plan tab's four buttons (ends at
+  x=620 in a 900-wide window) need nothing. Script: `Get-BossLoadouts` run against the real
+  file answers Feral's ten names and an empty list for Balance and Resto, so a bake for a spec
+  with no rows warns, as its comment says; `Read-ExistingCells` keys on `\w+` so a `3t` cell
+  survives a re-run; a missing `enemyCount` clamps to 0 and throws rather than filing. All
+  three checks green before and after. The fourth criterion is now ticked end to end:
+  `plannedTalents` returns nil for a cell with no or an empty string (checks under the
+  `a cell without talents marks nothing` name), `activeLoadoutName` passes that nil to
+  `talentsEdited`, which returns nil without a read, `loadoutState` then judges by name and
+  `sidebarRows` marks "edited" only on a truthy `edited`. Found and fixed in place, comments
+  only: three that still said "three buttons" / "row of three" / "the 1 and 2 target rows",
+  and the HANDOVER's key-files line that named two scenarios. Security: the weakest point is
+  `Get-BossLoadouts` trusting the target file's `PlanTab.BOSSES` block by regex, which is the
+  author's own file at author time; the unchecked path is `enemyCount` from a Raidbots JSON
+  the author chose to fetch, cast to int and clamped, so a bad value throws and writes
+  nothing; nothing leaks, the script prints a loadout name Rob typed into Raidbots himself.
+  No UI could be looked at here (no client), so this goes to human-review for the two looks
+  already listed under "What I need from you", plus one more: the strip's 90-wide button with
+  "3+ targets" on it, which is one glyph wider than "2 targets" was.
