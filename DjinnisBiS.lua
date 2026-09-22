@@ -2426,6 +2426,7 @@ end
 -- Redraws the Plan tab if it is the one on screen. Called from the bag-mark
 -- watcher on an equip or a spec change, never in combat.
 function PlanTab.redraw()
+	pcall(PlanTab.updateSidebar)  -- the talent window's sidebar follows the same events (card 0019)
 	if window and window:IsShown() and activeTab == 4 and not InCombatLockdown() then refresh() end
 end
 
@@ -4842,12 +4843,185 @@ local function armRatingCache()
 	warm()
 end
 
+-- The plan's loadouts beside Blizzard's talent window (card 0019) -----------
+--
+-- The loadouts the plan wants for the current spec and content, one row
+-- each with the bosses it is planned for and an Apply button that goes
+-- through PlanTab.loadTalents (card 0011), so the choice sits where the
+-- change is made. The frame is parented to UIParent and only ANCHORED to
+-- PlayerSpellsFrame: never a child of it, never writing to it, hooked with
+-- post-hooks only. Talent Loadout Manager and ClassCodex both carry a
+-- ReduceTaint module for what happens when an addon reaches into that
+-- window; an anchor reads its edges and touches nothing. Blizzard_PlayerSpells
+-- is load-on-demand, so this is armed at its ADDON_LOADED, or at login when
+-- something loaded it first.
+PlanTab.SIDEBAR_W = 280
+PlanTab.SIDEBAR_ROW = PlanTab.SIZE.row + 6  -- two lines of normal text: the loadout, then its bosses
+PlanTab.SIDEBAR_RIVAL = "TalentLoadoutManager"  -- its own sidebar on the same window; two is clutter (the card)
+
+-- One row per loadout the content asks for, in the order the boss table
+-- names them, each with its bosses. `context` is statContext(): Raid takes
+-- the 1 and 2 target rows, Mythic+ the key row. `mark` is "active" when the
+-- talents are that loadout, "edited" when they were and a point has since
+-- moved (card 0014), nil otherwise. Pure, for /bis test.
+function PlanTab.sidebarRows(bosses, context, active, edited)
+	local rows, byName = {}, {}
+	for _, row in ipairs(bosses or {}) do
+		if (context == "mplus") == (row.scenario == "mplus") then
+			local out = byName[row.loadout]
+			if not out then
+				out = { loadout = row.loadout, bosses = {} }
+				if PlanTab.loadoutState(row.loadout, active, edited) == "match" then out.mark = "active"
+				elseif row.loadout == active and edited then out.mark = "edited" end
+				byName[row.loadout] = out
+				rows[#rows + 1] = out
+			end
+			out.bosses[#out.bosses + 1] = row.boss
+		end
+	end
+	return rows
+end
+
+-- The row's first line and whether it gets an Apply button: the active one
+-- is green, says so and is quiet (card 0020, rule 5); an edited one is amber
+-- and can be put back; any other is plain and can be loaded.
+function PlanTab.sidebarText(row)
+	if row.mark == "active" then return GREEN .. row.loadout .. "   active|r", false end
+	if row.mark == "edited" then return "|cffffb300" .. row.loadout .. "   edited|r", true end
+	return WHITE .. row.loadout .. "|r", true
+end
+
+-- "off" when the talent window is not on screen, "tab" when it is and the
+-- sidebar was closed (one small button to bring it back), "open" otherwise.
+-- A close is kept in the saved file until the player opens it again.
+function PlanTab.sidebarMode(talentShown, closed)
+	if not talentShown then return "off" end
+	return closed and "tab" or "open"
+end
+
+function PlanTab.setSidebarClosed(closed)
+	db().sidebarClosed = closed and true or nil
+	return PlanTab.updateSidebar()
+end
+
+function PlanTab.buildSidebar()
+	local f = CreateFrame("Frame", "DjinnisBiSTalentSidebar", UIParent, "BackdropTemplate")
+	f:SetWidth(PlanTab.SIDEBAR_W)
+	f:SetFrameStrata("HIGH")
+	f:SetBackdrop(PANE_BACKDROP)
+	f:SetBackdropColor(0.05, 0.05, 0.05, 0.85)
+	f:SetBackdropBorderColor(0.6, 0.6, 0.6, 1)
+	f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	f.title:SetPoint("TOPLEFT", 12, -10)
+	f.close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
+	f.close:SetPoint("TOPRIGHT", -2, -2)
+	f.close:SetScript("OnClick", function() PlanTab.setSidebarClosed(true) end)
+	f.rows = {}
+	-- The way back in once closed: one button where the sidebar was.
+	f.tab = CreateFrame("Button", "DjinnisBiSTalentSidebarTab", UIParent, "UIPanelButtonTemplate")
+	f.tab:SetSize(110, PlanTab.SIZE.button)
+	f.tab:SetFrameStrata("HIGH")
+	f.tab:SetText("BiS plan")
+	f.tab:SetScript("OnClick", function() PlanTab.setSidebarClosed(false) end)
+	PlanTab.sidebar = f
+	return f
+end
+
+function PlanTab.sidebarRow(i)
+	local f = PlanTab.sidebar
+	if f.rows[i] then return f.rows[i] end
+	local row = CreateFrame("Frame", nil, f)
+	row:SetSize(PlanTab.SIDEBAR_W - 16, PlanTab.SIDEBAR_ROW)
+	row:SetPoint("TOPLEFT", 8, -(32 + (i - 1) * PlanTab.SIDEBAR_ROW))
+	row.apply = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+	row.apply:SetSize(70, PlanTab.SIZE.button)
+	row.apply:SetPoint("RIGHT", -4, 0)
+	row.apply:SetText("Apply")
+	row.apply:SetScript("OnClick", function() PlanTab.loadTalents(row.loadout) end)
+	row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+	row.name:SetPoint("TOPLEFT", 4, -3)
+	row.name:SetPoint("RIGHT", row.apply, "LEFT", -6, 0)
+	row.name:SetJustifyH("LEFT")
+	row.name:SetWordWrap(false)
+	row.bosses = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+	row.bosses:SetPoint("TOPLEFT", row.name, "BOTTOMLEFT", 0, -2)
+	row.bosses:SetPoint("RIGHT", row.apply, "LEFT", -6, 0)
+	row.bosses:SetJustifyH("LEFT")
+	row.bosses:SetWordWrap(false)
+	f.rows[i] = row
+	return row
+end
+
+-- Beside the talent window's right edge, or its left when the screen has no
+-- room there, the same as the stat pane beside the character sheet. The
+-- point is to a frame, so a window the game re-lays out carries it along.
+function PlanTab.placeSidebar()
+	local f, anchor = PlanTab.sidebar, PlayerSpellsFrame
+	local flip = (anchor:GetRight() or 0) + PlanTab.SIDEBAR_W + 6 > (UIParent:GetRight() or 0)
+	for _, each in ipairs({ f, f.tab }) do
+		each:ClearAllPoints()
+		if flip then each:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -6, -30)
+		else each:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 6, -30) end
+	end
+end
+
+-- Answers what it did, for the checks. In combat nothing is built, moved or
+-- redrawn: the bag-mark watcher's PLAYER_REGEN_ENABLED redraw does it after.
+function PlanTab.updateSidebar()
+	if InCombatLockdown() then return "combat" end
+	local shown = PlayerSpellsFrame and PlayerSpellsFrame:IsShown() and true or false
+	local mode = PlanTab.sidebarMode(shown, db().sidebarClosed)
+	if mode == "off" and not PlanTab.sidebar then return mode end
+	local f = PlanTab.sidebar or PlanTab.buildSidebar()
+	f.tab:SetShown(mode == "tab")
+	f:SetShown(mode == "open")
+	if mode ~= "open" then return mode end
+	PlanTab.placeSidebar()
+	local spec = playerSpec()
+	local active, edited = PlanTab.activeLoadoutName()
+	local rows = PlanTab.sidebarRows(spec and PlanTab.BOSSES[spec], (statContext()), active, edited)
+	for i, r in ipairs(rows) do
+		local row = PlanTab.sidebarRow(i)
+		local text, apply = PlanTab.sidebarText(r)
+		row.loadout = r.loadout
+		row.name:SetText(text)
+		row.bosses:SetText(GREY .. table.concat(r.bosses, ", ") .. "|r")
+		row.apply:SetShown(apply)
+		row:Show()
+	end
+	for i = #rows + 1, #f.rows do f.rows[i]:Hide() end
+	f.title:SetText(#rows > 0 and ("Plan loadouts: " .. CONTEXT_LABEL[(statContext())])
+		or ("No boss plan for " .. (spec or "this spec") .. " yet"))
+	f:SetHeight(40 + math.max(#rows, 1) * PlanTab.SIDEBAR_ROW)
+	return mode
+end
+
+-- Once, after Blizzard_PlayerSpells has loaded. Post-hooks only, and the
+-- show is answered one frame later: Blizzard's own OnShow may still be
+-- resizing the window (it auto-minimises), and hook order is not ours.
+function PlanTab.armSidebar()
+	if PlanTab.sidebarArmed or not PlayerSpellsFrame then return false end
+	PlanTab.sidebarArmed = true
+	if C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded(PlanTab.SIDEBAR_RIVAL) then
+		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Talent Loadout Manager has its own sidebar on the talent window, so the plan's is left off.|r")
+		return false
+	end
+	local function update() pcall(PlanTab.updateSidebar) end
+	PlayerSpellsFrame:HookScript("OnShow", function() if C_Timer then C_Timer.After(0, update) else update() end end)
+	PlayerSpellsFrame:HookScript("OnHide", update)
+	PlayerSpellsFrame:HookScript("OnSizeChanged", function()
+		if PlanTab.sidebar and PlanTab.sidebar:IsShown() and not InCombatLockdown() then pcall(PlanTab.placeSidebar) end
+	end)
+	if PlayerSpellsFrame:IsShown() then update() end
+	return true
+end
+
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 -- Blizzard's own typo, RECIEVED. The journal streams loot in after the request,
 -- so a harvest that ran too early gets thrown away and retried on next open.
 loader:RegisterEvent("EJ_LOOT_DATA_RECIEVED")
-loader:SetScript("OnEvent", function(_, event)
+loader:SetScript("OnEvent", function(_, event, name)
 	if event == "PLAYER_LOGIN" then
 		buildBroker()
 		pcall(armCharacterPane)
@@ -4855,11 +5029,20 @@ loader:SetScript("OnEvent", function(_, event)
 		pcall(armRatingCache)
 		pcall(PlanTab.armSimc)  -- Simulationcraft loads after this addon (S after D) and is not load-on-demand, so it is here by login
 		pcall(PlanTab.armGroupPrompt)  -- the spec prompt when a group finder listing takes you (card 0024)
+		-- the talent window is load-on-demand: armed here only if something loaded it before login (card 0019)
+		if C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then pcall(PlanTab.armSidebar) end
+	elseif event == "ADDON_LOADED" then
+		if canRead(name) and name == "Blizzard_PlayerSpells" then pcall(PlanTab.armSidebar) end
 	else
 		harvested = false
 		PlanTab.poolsDone = false  -- the pools' next pass fills only the cells still nil (card 0022)
 	end
 end)
+-- After the handler, and verified: a refused registration is silent (DECISIONS.md).
+loader:RegisterEvent("ADDON_LOADED")
+if not loader:IsEventRegistered("ADDON_LOADED") then
+	print(GOLD .. "Djinni's BiS|r " .. GREY .. "could not register ADDON_LOADED, so the plan sidebar will not appear beside the talent window.|r")
+end
 
 -- /bis ---------------------------------------------------------------------
 
@@ -6485,6 +6668,52 @@ local function selfTest()
 		C_LFGList, C_EquipmentSet, ClassTalentHelper, PlayerSpellsUtil, InCombatLockdown, print, C_Timer = wasLFG, wasSets, wasHelper, wasUtil, wasCombat, wasPrint, wasTimer
 		C_SpecializationInfo.GetSpecializationInfo, C_SpecializationInfo.GetSpecialization, GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo = wasSpecInfo, wasSpec, wasWornLink, wasLevel
 		PlanTab.activeLoadoutName, PlanTab.loadTalents, PlanTab.pendingSetup = wasActive, wasLoad, wasPending
+	end
+
+	-- The talent window's sidebar (card 0019): the rows it lists, the mark on
+	-- the active loadout, the combat guard and the remembered close. The frame
+	-- beside the window needs a person; nothing here touches PlayerSpellsFrame.
+	do
+		local markTest = "sidebar marks the active loadout"
+		local raid = PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", "WS Raid 2T *", false)
+		local names = {}
+		for i, r in ipairs(raid) do names[i] = r.loadout .. (r.mark and ("=" .. r.mark) or "") end
+		check(markTest .. ", raid rows, one per loadout, the active one marked", table.concat(names, "; "),
+			"WS Raid Most Bosses; DotC Raid ST *; WS Raid 2T *=active; WS Raid Coiled Altar; DotC Raid Most Bosses *")
+		check(markTest .. ", each with its bosses", table.concat((raid[1] or { bosses = {} }).bosses, ", "), "Nek'zali, Vashnik, Ula'tek")
+		local keys = PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "mplus", "WS M+", false)
+		check(markTest .. ", Mythic+ lists the key loadout only", #keys == 1 and (keys[1].loadout .. "=" .. tostring(keys[1].mark)), "WS M+=active")
+		-- `or {}`: a list drawn short is one red line here, not a nil-index error that ends the test
+		check(markTest .. ", the key loadout is not active in a raid list", (PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", "WS M+", false)[3] or {}).mark, nil)
+		check(markTest .. ", edited is said, not active", (PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", "WS Raid 2T *", true)[3] or {}).mark, "edited")
+		check(markTest .. ", unknown marks nothing", (PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", nil)[3] or {}).mark, nil)
+		check(markTest .. ", no boss table, no rows", #PlanTab.sidebarRows(nil, "raid", nil), 0)
+		local none = { loadout = "" }
+		local text, apply = PlanTab.sidebarText(raid[3] or none)
+		check(markTest .. ", drawn green with the word", text, GREEN .. "WS Raid 2T *   active|r")
+		check(markTest .. ", the active row has no Apply", apply, false)
+		text, apply = PlanTab.sidebarText(raid[1] or none)
+		check(markTest .. ", drawn plain when not", text, WHITE .. "WS Raid Most Bosses|r")
+		check(markTest .. ", with an Apply", apply, true)
+		text, apply = PlanTab.sidebarText({ loadout = "WS Raid 2T *", mark = "edited" })
+		check(markTest .. ", edited is amber and can be put back", text:find("edited", 1, true) ~= nil and apply, true)
+
+		local combatTest = "sidebar not changed in combat"
+		local closedTest = "sidebar stays closed"
+		local wasCombat, wasSidebar, keptClosed = InCombatLockdown, PlanTab.sidebar, db().sidebarClosed
+		InCombatLockdown = function() return true end
+		PlanTab.sidebar = nil
+		check(combatTest .. ", nothing done", PlanTab.updateSidebar(), "combat")
+		check(combatTest .. ", nothing built", PlanTab.sidebar, nil)
+		-- the pin is written even in combat (the frame follows at PLAYER_REGEN_ENABLED)
+		check(closedTest .. ", closing is remembered", PlanTab.setSidebarClosed(true) == "combat" and db().sidebarClosed, true)
+		check(closedTest .. ", opening again forgets it", PlanTab.setSidebarClosed(false) == "combat" and db().sidebarClosed, nil)
+		InCombatLockdown, PlanTab.sidebar, db().sidebarClosed = wasCombat, wasSidebar, keptClosed
+		check(closedTest .. ", off when the window is not up", PlanTab.sidebarMode(false, false), "off")
+		check(closedTest .. ", off even when closed", PlanTab.sidebarMode(false, true), "off")
+		check(closedTest .. ", open with the window", PlanTab.sidebarMode(true, nil), "open")
+		check(closedTest .. ", closed leaves the way back in", PlanTab.sidebarMode(true, true), "tab")
+		check(closedTest .. ", the row fits two lines of normal text", PlanTab.SIDEBAR_ROW >= 32, true)
 	end
 
 	-- a saved target must survive the round trip and show its item level
