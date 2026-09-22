@@ -44,3 +44,9 @@ KeystoneLoot shows a card on entering a dungeon: the wanted items that drop ther
 ## Comments
 
 - 2026-09-22 Claude: written from Rob's "Option B" in a SecondBrain session. Ideation only.
+- 2026-09-22 Claude, later: **KeystoneLoot already does the dungeon half of this card**, and Rob has
+  it installed. It stays silent because Rob has no favourites (`Bloodfeather-Djinni-11` is empty in
+  `WTF\Account\DJINNWRAITH\SavedVariables\KeystoneLoot.lua`). Its public API,
+  `KeystoneLootAPI:AddFavorite(itemId, specId, tier, options)` (`modules\api.lua` line 536), can fill
+  it from the plan. Before building this card, decide: send the plan to KeystoneLoot and keep only
+  the raid half here, or drop the card.

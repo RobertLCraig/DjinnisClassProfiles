@@ -45,3 +45,7 @@ exists because attaching to that window can taint Blizzard's own loadout menu.
 
 - 2026-09-22 Claude: written from Rob's "Option B" in a SecondBrain session. Ideation only.
   **Uncertain:** whether anchoring to `PlayerSpellsFrame` taints in 12.1.
+- 2026-09-22 Claude, later: ClassCodex (installed, 1.3.1) does a stronger version. In the talent
+  window it glows the nodes a build would add (green), remove (red) or change (amber). ClassCodex
+  also carries a `ReduceTaint.lua` for this. Compare the two before building; the glow shows what
+  changes, while a list only shows names.
