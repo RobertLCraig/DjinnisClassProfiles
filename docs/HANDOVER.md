@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.17.5, `/djbis` (and `/bis`), `Interface: 120100`. No remote.
+**Status:** v0.17.6, `/djbis` (and `/bis`), `Interface: 120100`. No remote.
 **2026-09-22, after everything below: card `0008` is in `done/`, confirmed by Rob in the game.**
 The Plan tab has buttons now: Talents opens the talent window and loads nothing, Equip puts the
 exact bag copy in the planned slot, Search AH runs the auction house's own search. Its review
