@@ -3163,6 +3163,218 @@ function PlanTab.itemNames(ids)
 	return table.concat(names, ", ")
 end
 
+-- Loot spec card on entering the raid (card 0015) ---------------------------
+--
+-- With four specs the loot spec is the easiest thing to forget, and a planned
+-- Guardian trinket that drops while loot spec is Feral is lost for a week. On
+-- entering the raid the plan covers, a small card lists each spec with a
+-- planned drop somewhere in it, marks the loot spec, and offers a button for
+-- each other spec. Raid only: KeystoneLoot draws the same card for a Mythic
+-- dungeon from the favourites card 0021 sends it (its modules\keystone.lua
+-- returns unless instanceType is "party"), and the pools here are the raid's.
+
+-- The specs with a planned item somewhere in `pools` (encounter id -> spec ->
+-- set of item ids), in SPEC_ORDER, each with its planned ids sorted and
+-- counted once however many bosses drop them. Empty when nothing planned
+-- drops here, which is the "show no card" case.
+function PlanTab.lootCardWants(pools, planned)
+	local wants = {}
+	for _, spec in ipairs(SPEC_ORDER) do
+		local hits, ids = {}, {}
+		for _, pool in pairs(pools or {}) do
+			for id in pairs(pool[spec] or {}) do
+				if planned[spec] and planned[spec][id] then hits[id] = true end
+			end
+		end
+		for id in pairs(hits) do ids[#ids + 1] = id end
+		if #ids > 0 then
+			table.sort(ids)
+			wants[#wants + 1] = { spec = spec, ids = ids }
+		end
+	end
+	return wants
+end
+
+-- GetLootSpecialization's answer as a spec name: 0 means "follows the current
+-- spec" (PlayerScriptDocumentation.lua), so `current` is the answer then.
+function PlanTab.lootSpecName(lootSpecID, current)
+	if not lootSpecID or lootSpecID == 0 then return current end
+	return SPEC_BY_ID[lootSpecID]
+end
+
+-- The rows the card draws: `wants` with `current` set on the loot spec's row.
+function PlanTab.lootCardLines(wants, lootSpec)
+	local lines = {}
+	for i, want in ipairs(wants) do
+		lines[i] = { spec = want.spec, ids = want.ids, current = want.spec == lootSpec }
+	end
+	return lines
+end
+
+-- The Set loot spec button. Never in combat (the card's own rule): a plain
+-- number goes to SetLootSpecialization, out of combat only.
+function PlanTab.setLootSpec(spec)
+	if InCombatLockdown() then
+		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Loot spec not changed: you are in combat.|r")
+		return "combat"
+	end
+	local id
+	for specID, name in pairs(SPEC_BY_ID) do if name == spec then id = specID end end
+	if not (id and SetLootSpecialization) then return "missing" end
+	SetLootSpecialization(id)
+	return "set"
+end
+
+-- The journal's name for the raid the pools cover, read once, so the card
+-- can tell that raid from any other by GetInstanceInfo's name. Never while
+-- the journal is open, and the tier is put back, as harvestPools does.
+function PlanTab.raidName()
+	if PlanTab.RAID_NAME then return PlanTab.RAID_NAME end
+	if not (EJ_GetNumTiers and EJ_GetInstanceInfo) then return nil end
+	if EncounterJournal and EncounterJournal:IsShown() then return nil end
+	local keptTier = EJ_GetCurrentTier and EJ_GetCurrentTier()
+	local instanceID = PlanTab.raidInstanceID("Venomous Abyss")
+	if keptTier then EJ_SelectTier(keptTier) end
+	PlanTab.RAID_NAME = instanceID and EJ_GetInstanceInfo(instanceID) or nil
+	return PlanTab.RAID_NAME
+end
+
+-- The card's rows for where the player stands, or nil for no card: not a
+-- raid, not the raid the pools cover, or nothing planned drops here. The
+-- pools fill cell by cell (card 0022), so `lootCardPending` asks the loader
+-- to call again on the next EJ_LOOT_DATA_RECIEVED, a bounded number of times.
+function PlanTab.lootCardModel()
+	local where, instanceType = GetInstanceInfo()
+	if instanceType ~= "raid" then return nil end
+	pcall(PlanTab.harvestPools)
+	local raid = PlanTab.raidName()
+	if not (raid and canRead(where) and where == raid) then return nil end
+	if PlanTab.poolsDone then
+		PlanTab.lootCardPending = nil
+	else
+		PlanTab.lootCardPending = (PlanTab.lootCardPending or 8) - 1
+		if PlanTab.lootCardPending <= 0 then PlanTab.lootCardPending = nil end
+	end
+	local planned = {}
+	for _, s in ipairs(SPEC_ORDER) do planned[s] = PlanTab.plannedIds(s) end
+	local wants = PlanTab.lootCardWants(PlanTab.POOL, planned)
+	if #wants == 0 then return nil end
+	local current = playerSpec()
+	local lootSpec = PlanTab.lootSpecName(GetLootSpecialization and GetLootSpecialization() or 0, current)
+	return PlanTab.lootCardLines(wants, lootSpec), raid
+end
+
+PlanTab.LOOT_CARD_ICONS = 6  -- item buttons per row; the rest is "+N more"
+
+function PlanTab.buildLootCard()
+	local S = PlanTab.SIZE
+	local f = CreateFrame("Frame", "DjinnisBiSLootCard", UIParent, "BasicFrameTemplateWithInset")
+	f:SetWidth(24 + S.icon + 6 + 90 + PlanTab.LOOT_CARD_ICONS * (S.icon + 2) + 60 + 116)
+	f:SetPoint("TOP", UIParent, "TOP", 0, -140)
+	f:SetMovable(true)
+	f:EnableMouse(true)
+	f:SetFrameStrata("DIALOG")
+	f:RegisterForDrag("LeftButton")
+	f:SetScript("OnDragStart", f.StartMoving)
+	f:SetScript("OnDragStop", f.StopMovingOrSizing)
+	f:SetUserPlaced(true)
+	f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	f.title:SetPoint("TOP", f, "TOP", 0, -6)
+	f.rows = {}
+	return f
+end
+
+function PlanTab.lootCardRow(f, i)
+	local S = PlanTab.SIZE
+	local row = CreateFrame("Frame", nil, f)
+	row:SetHeight(S.cell)
+	row:SetPoint("TOPLEFT", f, "TOPLEFT", 12, -30 - (i - 1) * S.cell)
+	row:SetPoint("RIGHT", f, "RIGHT", -12, 0)
+	row.icon = row:CreateTexture(nil, "ARTWORK")
+	row.icon:SetSize(S.icon, S.icon)
+	row.icon:SetPoint("LEFT", row, "LEFT", 0, 0)
+	row.label = row:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	row.label:SetPoint("LEFT", row.icon, "RIGHT", 6, 0)
+	row.label:SetWidth(90)
+	row.label:SetJustifyH("LEFT")
+	row.items = {}
+	for j = 1, PlanTab.LOOT_CARD_ICONS do
+		local icon = PlanTab.newItemIcon(row)
+		icon:ClearAllPoints()
+		icon:SetPoint("LEFT", row.label, "RIGHT", (j - 1) * (S.icon + 2), 0)
+		icon:EnableMouse(true)  -- its own hover: the game tooltip for the planned item
+		attachItemHover(icon)
+		row.items[j] = icon
+	end
+	row.more = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	row.more:SetPoint("LEFT", row.items[PlanTab.LOOT_CARD_ICONS], "RIGHT", 4, 0)
+	row.button = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+	row.button:SetSize(110, S.button)
+	row.button:SetPoint("RIGHT", row, "RIGHT", 0, 0)
+	row.button:SetText("Set loot spec")
+	row.button:SetScript("OnClick", function() PlanTab.setLootSpec(row.spec) end)
+	return row
+end
+
+-- Draws the card for where the player stands, or hides it. Returns the rows
+-- drawn, or nil when there is no card, so the self-test can read the answer.
+function PlanTab.showLootCard()
+	local lines, raid = PlanTab.lootCardModel()
+	if not lines then
+		if PlanTab.lootCard then PlanTab.lootCard:Hide() end
+		return nil
+	end
+	local f = PlanTab.lootCard or PlanTab.buildLootCard()
+	PlanTab.lootCard = f
+	f.title:SetText("Loot spec for " .. raid)
+	for i, line in ipairs(lines) do
+		local row = f.rows[i] or PlanTab.lootCardRow(f, i)
+		f.rows[i] = row
+		row.spec = line.spec
+		local icon
+		for specID, name in pairs(SPEC_BY_ID) do
+			if name == line.spec and GetSpecializationInfoForSpecID then icon = select(4, GetSpecializationInfoForSpecID(specID)) end
+		end
+		row.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+		-- the row that is right is quiet and green; a row to do has its button (0020, rule 5)
+		row.label:SetText((line.current and GREEN or WHITE) .. line.spec .. (line.current and "\nloot spec" or "") .. "|r")
+		for j, item in ipairs(row.items) do
+			local id = line.ids[j]
+			if id then
+				PlanTab.setItemIcon(item, nil, id)
+				item.link = "item:" .. id
+				item:Show()
+			else
+				item:Hide()
+			end
+		end
+		local extra = #line.ids - PlanTab.LOOT_CARD_ICONS
+		row.more:SetText(extra > 0 and ("+" .. extra .. " more") or "")
+		if line.current then row.button:Hide() else row.button:Show() end
+		row:Show()
+	end
+	for i = #lines + 1, #f.rows do f.rows[i]:Hide() end
+	f:SetHeight(30 + #lines * PlanTab.SIZE.cell + 12)
+	f:Show()
+	return lines
+end
+
+-- Entering a raid draws the card; a loot spec change re-marks it. Each event
+-- registered one at a time and verified (docs/DECISIONS.md, 2026-08-21).
+function PlanTab.armLootCard()
+	local watcher = CreateFrame("Frame")
+	watcher:SetScript("OnEvent", function(_, event)
+		if event == "PLAYER_LOOT_SPEC_UPDATED" and not (PlanTab.lootCard and PlanTab.lootCard:IsShown()) then return end
+		pcall(PlanTab.showLootCard)
+	end)
+	for _, event in ipairs({ "PLAYER_ENTERING_WORLD", "PLAYER_LOOT_SPEC_UPDATED" }) do
+		watcher:RegisterEvent(event)
+		if not watcher:IsEventRegistered(event) then
+			print(GOLD .. "Djinni's BiS|r " .. GREY .. "could not register " .. event .. ", so the loot spec card will not show by itself.|r")
+		end
+	end
+end
+
 -- What the plan strip under the character sheet opens: the list behind its
 -- "N slots to fix".
 -- `scenario` is the one the strip is counting. The tab opens on a boss of that
@@ -5028,6 +5240,7 @@ loader:SetScript("OnEvent", function(_, event, name)
 		pcall(armBagMarks)
 		pcall(armRatingCache)
 		pcall(PlanTab.armSimc)  -- Simulationcraft loads after this addon (S after D) and is not load-on-demand, so it is here by login
+		pcall(PlanTab.armLootCard)  -- PLAYER_ENTERING_WORLD fires after PLAYER_LOGIN, so a login inside the raid still draws the card (card 0015)
 		pcall(PlanTab.armGroupPrompt)  -- the spec prompt when a group finder listing takes you (card 0024)
 		-- the talent window is load-on-demand: armed here only if something loaded it before login (card 0019)
 		if C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then pcall(PlanTab.armSidebar) end
@@ -5036,6 +5249,7 @@ loader:SetScript("OnEvent", function(_, event, name)
 	else
 		harvested = false
 		PlanTab.poolsDone = false  -- the pools' next pass fills only the cells still nil (card 0022)
+		if PlanTab.lootCardPending then pcall(PlanTab.showLootCard) end  -- the card asked for the cells still nil (card 0015)
 	end
 end)
 -- After the handler, and verified: a refused registration is silent (DECISIONS.md).
@@ -6714,6 +6928,75 @@ local function selfTest()
 		check(closedTest .. ", open with the window", PlanTab.sidebarMode(true, nil), "open")
 		check(closedTest .. ", closed leaves the way back in", PlanTab.sidebarMode(true, true), "tab")
 		check(closedTest .. ", the row fits two lines of normal text", PlanTab.SIDEBAR_ROW >= 32, true)
+	end
+
+	-- Card 0015: the loot spec card on entering the raid. Pure parts first,
+	-- then the card as drawn, with the world stubbed to the raid the pools
+	-- cover. The frame itself needs a person; these prove what it draws from.
+	do
+		local function set(...) local s = {} for _, id in ipairs({ ... }) do s[id] = true end return s end
+		local pools = {
+			[3470] = { Balance = set(), Feral = set(7, 8, 9), Guardian = set(7, 8), Resto = set() },
+			[3445] = { Balance = set(), Feral = set(7, 10), Guardian = set(11), Resto = set() },
+		}
+		local planned = { Balance = set(), Feral = set(7, 10, 99), Guardian = set(8), Resto = set() }
+		local listTest = "loot card lists planned drops per spec"
+		local wants = PlanTab.lootCardWants(pools, planned)
+		check(listTest .. ", two specs want something", #wants, 2)
+		check(listTest .. ", in spec order", wants[1].spec .. " " .. wants[2].spec, "Feral Guardian")
+		check(listTest .. ", an item on two bosses is listed once, sorted", table.concat(wants[1].ids, ","), "7,10")
+		check(listTest .. ", a planned item no boss drops is not listed", wants[1].ids[3], nil)
+		check(listTest .. ", Guardian's own item", table.concat(wants[2].ids, ","), "8")
+		check(listTest .. ", no pools is nothing", #PlanTab.lootCardWants(nil, planned), 0)
+		local markTest = "loot card marks the loot spec and offers the others"
+		check(markTest .. ", 0 follows the current spec", PlanTab.lootSpecName(0, "Feral"), "Feral")
+		check(markTest .. ", an id names its spec", PlanTab.lootSpecName(104, "Feral"), "Guardian")
+		check(markTest .. ", an unknown id names nothing", PlanTab.lootSpecName(999, "Feral"), nil)
+		local lines = PlanTab.lootCardLines(wants, "Guardian")
+		check(markTest .. ", the loot spec's row is marked", lines[2].current, true)
+		check(markTest .. ", the other row is not", lines[1].current, false)
+		-- as drawn: stand in the raid, with the pools above and Feral's real plan
+		local wasInstance, wasPool, wasName, wasDone, wasLoot = GetInstanceInfo, PlanTab.POOL, PlanTab.RAID_NAME, PlanTab.poolsDone, GetLootSpecialization
+		PlanTab.RAID_NAME, PlanTab.poolsDone = "The Venomous Abyss", true
+		GetLootSpecialization = function() return 104 end
+		local feralIds = PlanTab.plannedIds("Feral")
+		local one
+		for id in pairs(feralIds) do one = one or id end
+		PlanTab.POOL = { [3470] = { Balance = set(), Feral = set(one, 7), Guardian = set(7), Resto = set() } }
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		local drawn = PlanTab.showLootCard()
+		check(listTest .. ", drawn: one row, Feral, with the planned item", drawn and #drawn == 1 and drawn[1].spec == "Feral" and drawn[1].ids[1] == one, true)
+		check(markTest .. ", drawn: loot spec Guardian is not Feral's row", drawn and drawn[1].current, false)
+		GetLootSpecialization = function() return 0 end
+		drawn = PlanTab.showLootCard()
+		check(markTest .. ", drawn: loot spec 0 marks the current spec's row", drawn and drawn[1].current, true)
+		local noneTest = "no loot card when nothing planned drops"
+		PlanTab.POOL = { [3470] = { Balance = set(), Feral = set(7), Guardian = set(7), Resto = set() } }
+		check(noneTest .. ", nothing planned in the pools", PlanTab.showLootCard(), nil)
+		PlanTab.POOL = { [3470] = { Balance = set(), Feral = set(one), Guardian = set(), Resto = set() } }
+		GetInstanceInfo = function() return "Somewhere Else", "raid" end
+		check(noneTest .. ", another raid", PlanTab.showLootCard(), nil)
+		GetInstanceInfo = function() return "The Venomous Abyss", "party" end
+		check(noneTest .. ", a dungeon is KeystoneLoot's", PlanTab.showLootCard(), nil)
+		GetInstanceInfo = function() return "Nowhere", "none" end
+		check(noneTest .. ", outside", PlanTab.showLootCard(), nil)
+		GetInstanceInfo, PlanTab.POOL, PlanTab.RAID_NAME, PlanTab.poolsDone, GetLootSpecialization = wasInstance, wasPool, wasName, wasDone, wasLoot
+		-- the button: a plain number out of combat, nothing in combat
+		local combatTest = "loot spec not changed in combat"
+		local wasCombat, wasSet, wasPrint = InCombatLockdown, SetLootSpecialization, print
+		local setTo, said = nil, {}
+		-- recorded AND passed on: a swallowed print hides a FAIL line from offline-check.lua
+		print = function(...) said[#said + 1] = table.concat({ ... }, " "); wasPrint(...) end
+		SetLootSpecialization = function(id) setTo = id end
+		InCombatLockdown = function() return true end
+		check(combatTest, PlanTab.setLootSpec("Guardian"), "combat")
+		check(combatTest .. ", nothing set", setTo, nil)
+		check(combatTest .. ", and says why", said[#said] and said[#said]:find("in combat", 1, true) ~= nil, true)
+		InCombatLockdown = function() return false end
+		check(combatTest .. ", out of combat it sets", PlanTab.setLootSpec("Guardian"), "set")
+		check(combatTest .. ", to the spec's id", setTo, 104)
+		check(combatTest .. ", an unknown spec sets nothing", PlanTab.setLootSpec("Rogue"), "missing")
+		InCombatLockdown, SetLootSpecialization, print = wasCombat, wasSet, wasPrint
 	end
 
 	-- a saved target must survive the round trip and show its item level
