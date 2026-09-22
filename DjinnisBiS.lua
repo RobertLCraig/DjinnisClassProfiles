@@ -1378,10 +1378,19 @@ local function wornFromLink(link)
 	return { link = link, id = tonumber(id), enchant = tonumber(enchant), gems = gems }
 end
 
+-- A gem is matched by NAME when the client knows it, by id otherwise. Two ids
+-- share the name "Flawless Masterful Garnet" (240907 and 240908 on Raidbots'
+-- gem list, 2026-09-22); the sim asked for one and the auction house sold Rob
+-- the other, and the addon called it wrong for a day.
+function PlanTab.gemKey(id)
+	local name = C_Item.GetItemInfo(id)
+	return name and canRead(name) and name or tostring(id)
+end
+
 local function sameGems(planned, worn)
 	if #planned ~= #worn then return false end
 	local a, b = {}, {}
-	for i = 1, #planned do a[i], b[i] = planned[i], worn[i] end
+	for i = 1, #planned do a[i], b[i] = PlanTab.gemKey(planned[i]), PlanTab.gemKey(worn[i]) end
 	table.sort(a)
 	table.sort(b)
 	for i = 1, #a do
@@ -1469,10 +1478,14 @@ function PlanTab.shoppingList(plan, wornBySlot)
 			end
 			-- planned gems less the worn ones, one for one
 			local have = {}
-			for _, gem in ipairs(worn.gems or {}) do have[gem] = (have[gem] or 0) + 1 end
+			for _, gem in ipairs(worn.gems or {}) do
+				local key = PlanTab.gemKey(gem)
+				have[key] = (have[key] or 0) + 1
+			end
 			for _, gem in ipairs(entry.gems) do
-				if (have[gem] or 0) > 0 then
-					have[gem] = have[gem] - 1
+				local key = PlanTab.gemKey(gem)
+				if (have[key] or 0) > 0 then
+					have[key] = have[key] - 1
 				else
 					count.gem[gem] = (count.gem[gem] or 0) + 1
 				end
@@ -3916,6 +3929,20 @@ local function selfTest()
 	ClearCursor, CursorHasItem, PickupInventoryItem = wasClear, wasHas, wasEquip
 	C_PaperDollInfo, IsInventoryItemLocked = wasDoll, wasLocked
 	check("search button without the auction house open", PlanTab.searchAH("x"), false)
+
+	-- a gem of the same name at another id is the planned gem
+	do
+		local wasInfo = C_Item.GetItemInfo
+		C_Item.GetItemInfo = function(id) return (id == 240907 or id == 240908) and "Flawless Masterful Garnet" or nil end
+		local twin = parsePlanLine("id=7,gem_id=240908,ilevel=300")
+		check("a gem of the same name at another id counts as the planned gem",
+			slotState(twin, { id = 7, ilvl = 300, sockets = 1, gems = { 240907 } }), "ok")
+		check("a gem of the same name at another id is not on the shopping list",
+			#PlanTab.shoppingList({ slots = { wrist = twin } }, { wrist = { id = 7, ilvl = 300, gems = { 240907 } } }), 0)
+		check("a gem the client has not named still matches by id only",
+			slotState(twin, { id = 7, ilvl = 300, sockets = 1, gems = { 240875 } }), "gem")
+		C_Item.GetItemInfo = wasInfo
+	end
 
 	local emptyTest = "empty shopping list says nothing to buy"
 	check(emptyTest, PlanTab.shoppingLines(PlanTab.shoppingList(shopPlan, {}), plainName)[1], "Nothing to buy")
