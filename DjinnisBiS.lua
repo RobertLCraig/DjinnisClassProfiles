@@ -1589,9 +1589,24 @@ end
 
 -- "match", "mismatch", or "unknown" when the game would not say which loadout
 -- is active. Unknown is never drawn red: red means "go and change it".
-function PlanTab.loadoutState(planned, active)
+-- `edited` is true when the talents no longer match the named loadout (card
+-- 0014): the right name with a point moved by hand is still the wrong build.
+function PlanTab.loadoutState(planned, active, edited)
 	if not active or not planned then return "unknown" end
+	if edited then return "mismatch" end
 	return planned == active and "match" or "mismatch"
+end
+
+-- true when two talent import strings name different builds, false when the
+-- same, nil when either is missing or may not be read. Pure, for /bis test.
+-- ponytail: whole-string compare. The header (version, spec, tree hash) is the
+-- same for two configs of one spec; if a client ever differs there, compare
+-- from the node bits on instead, here and nowhere else.
+function PlanTab.talentStringsDiffer(active, saved)
+	if type(active) ~= "string" or type(saved) ~= "string" then return nil end
+	if active == "" or saved == "" then return nil end
+	if not (canRead(active) and canRead(saved)) then return nil end
+	return active ~= saved
 end
 
 local SCENARIO_LABEL = { st = "1 target", ["2t"] = "2 targets", mplus = "Mythic+" }
@@ -1791,6 +1806,7 @@ local function armBagMarks()
 		"PLAYER_REGEN_ENABLED",
 		"PLAYER_ENTERING_WORLD",  -- zoning into a key or a raid changes which plan the bags follow (card 0009)
 		"SOCKET_INFO_CLOSE",  -- a gem went in (or the socket window shut): the Plan tab's gem lines
+		"TRAIT_CONFIG_UPDATED",  -- a talent moved or a loadout loaded: the Plan tab's "(edited)" mark (card 0014)
 		defaultBags and "BAG_UPDATE_DELAYED" or nil,
 	}) do
 		watcher:RegisterEvent(event)
@@ -3069,9 +3085,29 @@ end
 -- calls C_ClassTalents.LoadConfig or CommitConfig is the known route to action
 -- bars that stop updating in combat (card 0002 found ClassCodex doing it).
 
--- The saved loadout picked in the talent window, by name, or nil.
--- ponytail: this is the last loadout SELECTED. Talents changed by hand after
--- that still read as that loadout. Compare the import string if it matters.
+-- Whether the talents in play still match the saved loadout the game says is
+-- selected (card 0014): the active config's import string against the saved
+-- config's, both from C_Traits.GenerateImportString. true when edited, false
+-- when they match, nil when the game will not say. Read out of combat only;
+-- in combat the last reading is held rather than blanked, per DECISIONS.md.
+function PlanTab.talentsEdited(savedConfigID)
+	if InCombatLockdown() then return PlanTab.lastEdited end
+	local edited = nil
+	if savedConfigID and C_ClassTalents.GetActiveConfigID and C_Traits.GenerateImportString then
+		local activeConfigID = C_ClassTalents.GetActiveConfigID()
+		if activeConfigID then
+			local okActive, active = pcall(C_Traits.GenerateImportString, activeConfigID)
+			local okSaved, saved = pcall(C_Traits.GenerateImportString, savedConfigID)
+			edited = PlanTab.talentStringsDiffer(okActive and active, okSaved and saved)
+		end
+	end
+	PlanTab.lastEdited = edited
+	return edited
+end
+
+-- The saved loadout picked in the talent window, by name, or nil, and then
+-- whether the talents have been edited away from it since (card 0014). The
+-- name alone is the last loadout SELECTED, which a hand edit does not change.
 function PlanTab.activeLoadoutName()
 	local spec = C_SpecializationInfo
 	if not (spec and spec.GetSpecialization and C_ClassTalents and C_Traits) then return nil end
@@ -3086,7 +3122,8 @@ function PlanTab.activeLoadoutName()
 	if not okConfig or not configID then return nil end
 	local okInfo, info = pcall(C_Traits.GetConfigInfo, configID)
 	local name = okInfo and info and info.name
-	return name and canRead(name) and name or nil
+	if not (name and canRead(name)) then return nil end
+	return name, PlanTab.talentsEdited(configID)
 end
 
 -- PlanTab.boss is the boss picked in the tab; the first one until a click.
@@ -3109,11 +3146,12 @@ function PlanTab.lines(forSpec)
 		if row.boss == PlanTab.boss then picked = row end
 	end
 
-	local active = PlanTab.activeLoadoutName()
+	local active, edited = PlanTab.activeLoadoutName()
 	local lines = {
 		{ text = ("%sPick the boss you are about to pull. Everything below is for that boss.|r"):format(GREY) },
 		{ text = "" },
-		{ text = ("%s1. Talents|r   %syour loadout now: |r%s%s|r"):format(GOLD, GREY, WHITE, active or "not known"),
+		{ text = ("%s1. Talents|r   %syour loadout now: |r%s%s%s|r"):format(GOLD, GREY, WHITE,
+				active or "not known", edited and " (edited)" or ""),
 			button = { label = "Talents", tip = "Open the talent window. Pick the loadout named below.",
 				onClick = PlanTab.openTalents } },
 	}
@@ -3121,7 +3159,7 @@ function PlanTab.lines(forSpec)
 		local isPicked = row == picked
 		-- Only the picked boss is judged. Red on every other row would be nine
 		-- warnings about fights nobody is standing in front of.
-		local colour = isPicked and LOADOUT_COLOUR[PlanTab.loadoutState(row.loadout, active)] or GREY
+		local colour = isPicked and LOADOUT_COLOUR[PlanTab.loadoutState(row.loadout, active, edited)] or GREY
 		lines[#lines + 1] = {
 			text = ("%s%s|r   %s%s|r   %s%s|r"):format(
 				isPicked and (WHITE .. "> ") or (GREY .. "   "), row.boss,
@@ -3129,7 +3167,7 @@ function PlanTab.lines(forSpec)
 			onClick = function() PlanTab.boss = row.boss; refresh() end,
 		}
 	end
-	if PlanTab.loadoutState(picked.loadout, active) == "mismatch" then
+	if PlanTab.loadoutState(picked.loadout, active, edited) == "mismatch" then
 		lines[#lines + 1] = { text = ("%sOpen talents and pick \"%s\" before %s.|r"):format(RED, picked.loadout, picked.boss) }
 	end
 
@@ -4019,6 +4057,44 @@ local function selfTest()
 	check(flagTest .. ", the same loadout", PlanTab.loadoutState("WS Raid 2T *", "WS Raid 2T *"), "match")
 	check(flagTest .. ", the game will not say", PlanTab.loadoutState("WS Raid 2T *", nil), "unknown")
 
+	-- card 0014: the right name with the talents moved by hand is the wrong build
+	local editTest = "edited talents are marked"
+	local sameTest = "matching talents are not marked"
+	local aString = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWAzGMmZwMmFmZmxYmZGAAAAAAgBAAAgZWmlZmZAALgZGgFmhBAAwMbYA"
+	local bString = aString:sub(1, -2) .. "B"
+	check(editTest .. ", strings differ", PlanTab.talentStringsDiffer(aString, bString), true)
+	check(sameTest .. ", strings equal", PlanTab.talentStringsDiffer(aString, aString), false)
+	check(editTest .. ", no active string", PlanTab.talentStringsDiffer(nil, aString), nil)
+	check(editTest .. ", no saved string", PlanTab.talentStringsDiffer(aString, false), nil)
+	check(editTest .. ", empty string", PlanTab.talentStringsDiffer("", aString), nil)
+	check(editTest .. ", same name still mismatches", PlanTab.loadoutState("WS Raid 2T *", "WS Raid 2T *", true), "mismatch")
+	check(sameTest .. ", same name matches", PlanTab.loadoutState("WS Raid 2T *", "WS Raid 2T *", false), "match")
+	check(editTest .. ", no loadout is still unknown", PlanTab.loadoutState("WS Raid 2T *", nil, true), "unknown")
+
+	-- The reader itself: the strings come from the game, so stub the two calls
+	-- and prove which config ids it asks for and what it does with them.
+	local combatTest = "talent string read out of combat only"
+	local wasActiveID, wasGenerate = C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString
+	local wasCombat, wasLast = InCombatLockdown, PlanTab.lastEdited
+	local strings = { [1] = aString, [2] = bString }
+	C_ClassTalents.GetActiveConfigID = function() return 1 end
+	C_Traits.GenerateImportString = function(id) return strings[id] end
+	InCombatLockdown = function() return false end
+	check(editTest .. ", read from the game", PlanTab.talentsEdited(2), true)
+	check(sameTest .. ", read from the game", PlanTab.talentsEdited(1), false)
+	check(editTest .. ", no saved loadout", PlanTab.talentsEdited(nil), nil)
+	local reads = 0
+	C_Traits.GenerateImportString = function(id) reads = reads + 1 return strings[id] end
+	PlanTab.talentsEdited(2)
+	InCombatLockdown = function() return true end
+	check(combatTest .. ", holds the last reading", PlanTab.talentsEdited(1), true)
+	check(combatTest .. ", reads nothing", reads, 2)
+	InCombatLockdown = function() return false end
+	check(combatTest .. ", reads again after", PlanTab.talentsEdited(1), false)
+	check(combatTest .. ", and it was a read", reads, 4)
+	C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString = wasActiveID, wasGenerate
+	InCombatLockdown, PlanTab.lastEdited = wasCombat, wasLast
+
 	local shopTest = "shopping list counts each missing enchant and gem once"
 	local shopPlan = { slots = {
 		finger1 = parsePlanLine("id=1,enchant_id=7967,gem_id=50,ilevel=300"),
@@ -4176,15 +4252,22 @@ local function selfTest()
 	-- tab that drew mismatch in green, or no loadout at all, passed every one.
 	-- A 2 target boss is picked so lines() stops before it reads gear or bags.
 	local realActive, realBoss = PlanTab.activeLoadoutName, PlanTab.boss
-	local function drawn(active)
-		PlanTab.activeLoadoutName = function() return active end
+	local function drawn(active, edited)
+		PlanTab.activeLoadoutName = function() return active, edited end
 		local texts = {}
 		for i, line in ipairs(PlanTab.lines("Feral")) do texts[i] = line.text end
 		return table.concat(texts, "\n")
 	end
 	PlanTab.boss = "The Twin Fangs"
-	local wrong, right, unknown = drawn("DotC Raid ST *"), drawn("WS Raid 2T *"), drawn(nil)
+	local wrong, right, unknown = drawn("DotC Raid ST *", false), drawn("WS Raid 2T *", false), drawn(nil)
+	local touched = drawn("WS Raid 2T *", true)
 	PlanTab.activeLoadoutName, PlanTab.boss = realActive, realBoss
+	check(editTest .. ", drawn after the name", touched:find("your loadout now: |r" .. WHITE .. "WS Raid 2T * (edited)|r", 1, true) ~= nil, true)
+	check(editTest .. ", drawn red on the same name", touched:find("|cffff2020WS Raid 2T *|r", 1, true) ~= nil, true)
+	check(editTest .. ", and told to reload it", touched:find("Open talents and pick \"WS Raid 2T *\"", 1, true) ~= nil, true)
+	check(sameTest .. ", drawn with nothing after", right:find("your loadout now: |r" .. WHITE .. "WS Raid 2T *|r", 1, true) ~= nil, true)
+	check(sameTest .. ", not marked", right:find("(edited)", 1, true), nil)
+	check(sameTest .. ", unknown is not marked", unknown:find("(edited)", 1, true), nil)
 	for _, row in ipairs(PlanTab.BOSSES.Feral) do
 		local colour = row.boss == "The Twin Fangs" and "|cffff2020" or GREY
 		check(bossTest .. ", drawn with loadout and scenario, " .. row.boss, wrong:find(
