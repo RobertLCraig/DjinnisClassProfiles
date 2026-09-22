@@ -5088,7 +5088,7 @@ function PlanTab.checkSetup()
 	if not here then PlanTab.popupPending = nil; PlanTab.hideSetup(); return "elsewhere" end
 	local spec = playerSpec()
 	local row = PlanTab.rowHere(spec and PlanTab.BOSSES[spec], here, PlanTab.lastKill)
-	if not row then PlanTab.hideSetup(); return "no plan" end
+	if not row then PlanTab.popupPending = nil; PlanTab.hideSetup(); return "no plan" end
 	if PlanTab.fenced() then PlanTab.popupPending = true; return "fenced" end
 	PlanTab.popupPending = nil
 	local active, edited = PlanTab.activeLoadoutName(spec, row.scenario)
@@ -5831,6 +5831,12 @@ local function selfTest()
 			print("|cffff0000FAIL|r " .. label .. ": expected " .. tostring(want) .. ", got " .. tostring(got))
 		end
 	end
+	-- In a client the checks read the real character. As Guardian, or with the
+	-- stat switch on Mythic+, twenty went red on 2026-09-22 for nothing wrong.
+	-- Feral and Raid for the whole run; both go back at the end.
+	local wasSpecForTest, keptContextForTest = C_SpecializationInfo, db().statContext
+	C_SpecializationInfo = { GetSpecialization = function() return 2 end, GetSpecializationInfo = function() return 103 end }
+	db().statContext = "raid"
 
 	-- matching, including the normalisation that lets a guide's odd casing win
 	check("Sash of the Forlorn Vessel", #match("Sash of the Forlorn Vessel").specs, 4)
@@ -6150,12 +6156,17 @@ local function selfTest()
 	check(locationTest .. ", count not known", planLocation(false, nil), "missing")
 
 	-- /bis test runs in the game too, so the player's own choice goes back after.
-	local keptScenario = db().planScenario
+	-- The content switch and the instance both beat the saved scenario, so in
+	-- a client with the switch on Mythic+ (or standing in a key) every read
+	-- answered mplus; both are pinned to Raid for the read.
+	local keptScenario, keptContext, wasInstanceInfo = db().planScenario, db().statContext, GetInstanceInfo
 	db().planScenario = { Feral = "2t", Balance = "not a scenario" }
+	db().statContext = "raid"
+	GetInstanceInfo = function() return "Nowhere", "none" end
 	check("saved scenario is read back", planScenario("Feral"), "2t")
 	check("saved scenario nobody offers falls back to st", planScenario("Balance"), "st")
 	check("saved scenario, none saved", planScenario("Resto"), "st")
-	db().planScenario = keptScenario
+	db().planScenario, db().statContext, GetInstanceInfo = keptScenario, keptContext, wasInstanceInfo
 
 	-- Mythic+ beside raid (card 0009). The content rule is statContext, shared
 	-- with the stat pane: where you stand first, then the switch.
@@ -6506,6 +6517,12 @@ local function selfTest()
 		local neck = GEAR_PLAN.Feral.st.slots.neck:match("id=(%d+)")
 		local ilvl = tonumber(GEAR_PLAN.Feral.st.slots.neck:match("ilevel=(%d+)"))
 		local wasLink, wasLevel = C_Container.GetContainerItemLink, C_Item.GetDetailedItemLevelInfo
+		-- In a client this read the real character: a worn planned neck, or the
+		-- switch on Mythic+, drew a tab with no Equip on it. Nothing worn, Raid.
+		local wasWorn, keptContext, wasInstanceInfo = GetInventoryItemLink, db().statContext, GetInstanceInfo
+		GetInventoryItemLink = function() return nil end
+		db().statContext = "raid"
+		GetInstanceInfo = function() return "Nowhere", "none" end
 		C_Container.GetContainerItemLink = function(bag, slot)
 			return bag == 0 and slot == 2 and ("|Hitem:%s::::::|h[Neck]|h"):format(neck) or nil
 		end
@@ -6519,6 +6536,7 @@ local function selfTest()
 		end
 		PlanTab.boss = realBoss2
 		C_Container.GetContainerItemLink, C_Item.GetDetailedItemLevelInfo = wasLink, wasLevel
+		GetInventoryItemLink, db().statContext, GetInstanceInfo = wasWorn, keptContext, wasInstanceInfo
 		check("drawn tab offers Equip for the one planned piece in the bags", equipRows, 1)
 		check("drawn tab offers Equip all when a planned piece is in the bags", equipAll, true)
 	end
@@ -7675,6 +7693,13 @@ local function selfTest()
 		-- the frame itself is reused, never rebuilt: in the game it is a named frame
 		local wasClosed, wasKill, wasPending = PlanTab.popupClosed, PlanTab.lastKill, PlanTab.popupPending
 		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.popupPending = nil, nil, nil
+		-- checkSetup reads the spec and the consumables itself: in a client as
+		-- Guardian every raid row was "no plan", and real auras read "missing"
+		-- where the stub's absent API reads "cannot check". Both pinned.
+		local wasSpecAPI, wasState, wasLater = C_SpecializationInfo, PlanTab.consumableState, PlanTab.later
+		C_SpecializationInfo = { GetSpecialization = function() return 2 end, GetSpecializationInfo = function() return 103 end }
+		PlanTab.consumableState = function() return "cannot check" end
+		PlanTab.later = function(_, fn) fn() end  -- the client's C_Timer would answer two seconds after the check read
 		GetInventoryItemLink = function(_, slotID)
 			local entry = slotID ~= bare and entryBySlotID[slotID]
 			if not entry then return nil end
@@ -7852,6 +7877,7 @@ local function selfTest()
 		PlanTab.activeLoadoutName, InCombatLockdown, C_Container = wasActive, wasCombat, wasContainer
 		C_ChallengeMode, C_InstanceEncounter = wasCM, wasIE
 		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.popupPending, PlanTab.buffsWanted = wasClosed, wasKill, wasPending, nil
+		C_SpecializationInfo, PlanTab.consumableState, PlanTab.later = wasSpecAPI, wasState, wasLater
 	end
 
 	-- Card 0017: the consumable lines on the same popup, a ready check or the
@@ -8107,6 +8133,7 @@ local function selfTest()
 	setGear("zzz not a real item", nil)
 	check("cleared ilvl label", gearLabel("zzz not a real item"):find("334", 1, true) ~= nil, false)
 
+	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")
 		or ("|cffff0000[BiS] " .. failed .. " check(s) failed|r"))
 end
