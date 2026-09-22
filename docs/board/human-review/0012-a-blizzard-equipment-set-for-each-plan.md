@@ -104,3 +104,61 @@ and `(INVSLOT_TABARD)`, then `GetEquipmentSetID(name)`, then `SaveEquipmentSet(i
   Left out: the Baganator question, because its source lives only under `C:\Games`, which this
   build does not read. Nothing here changes `0006`. The Equip all timer path has no offline
   check: `C_Timer` is a frame-side thing the stub does not have.
+- 2026-09-22 Claude, adversarial review in a worktree. Pass, with two checks added. What was
+  attacked: `PlanTab.saveSet`, `setName`, `ownsSet`, `missingSlots`, `saveSetAndSay`, the
+  Equip all timer and the Save set row in `PlanTab.lines`, all read whole. Every
+  `C_EquipmentSet` call was checked against `EquipmentManagerDocumentation.lua` on the local
+  `wow-ui-source`: `CanUseEquipmentSets`, `ClearIgnoredSlotsForSave`, `IgnoreSlotForSave`,
+  `GetEquipmentSetID`, `GetEquipmentSetInfo` (name is the first return, as the code reads it),
+  `GetNumEquipmentSets`, `CreateEquipmentSet` and `SaveEquipmentSet` all exist with those
+  arguments, none is marked secret-returning or protected, and `MAX_EQUIPMENT_SETS_PER_PLAYER`
+  is 10 in `Blizzard_FrameXMLBase/Constants.lua`. The pcall of `GetSpecializationInfo` takes
+  the fourth return, which the documentation names `icon`, a fileID, and Blizzard's own
+  `GearManagerPopupFrameMixin:OkayButton_OnClick` passes the same fileID to
+  `CreateEquipmentSet`, so the cstring in the documentation is not a worry. The spec is always
+  the player's own: production draws `PlanTab.lines()` with no argument, so the icon and the
+  name agree.
+  Eleven mutations in a temp copy, each run against the offline check: the five the builder
+  listed went red again, and so did the shirt ignore removed, the ten-set cap off by one, a
+  save into the wrong id, create-always-never-save. Two survived: the Save set button offered
+  on a half-worn plan (only the positive case was drawn) and `ClearIgnoredSlotsForSave`
+  skipped (the stub started with nothing ignored, so a stale tick could not show). Both were
+  gaps in the checks, not the code, and both are fixed in place: the stub now starts with Head
+  ticked on the paper doll before the first save, so "4,19" can only pass if the clear ran,
+  and the tab is drawn once more with Head off and must offer no Save set. Both mutations go
+  red on the new checks. Both `lua offline-check.lua` and Lua 5.1 exit 0. No new top-level
+  local.
+  Security. Weakest point: the name is the key. A set Rob names "DBiS Feral ST" himself is
+  taken as ours and saved over; the card's Not this card says exactly that, so it is the
+  design, and the read-back of the name before the save is the only guard. Unchecked path:
+  the two-second timer after Equip all runs `saveSet` afresh, which re-reads the worn gear and
+  every guard, so a spec or scenario change inside those two seconds saves the plan captured
+  at the click, never a mixed one; a refused equip leaves a slot off and the timer then says
+  "not worn: Slot" rather than saving. Leaks: the chat line for a set that is not ours prints
+  Blizzard's own set id, a small local number, and nothing else leaves the client.
+  Not verified here and cannot be: everything under "What a person must look at" in the
+  previous comment still stands, and one more: (7) with a slot ticked ignore on the paper doll
+  the tick may stay drawn after our save while the manager no longer ignores it, until a set
+  is selected in the pane, because `PaperDollFrame_ClearIgnoredSlots` is what clears the
+  drawing and we call only the API under it.
+
+## What I need from you
+
+Seven looks in the game, none of which an agent can take. Deploy with `.\bin\deploy.ps1 -Only DjinnisBiS`
+from the workspace root, then on the Feral druid:
+
+1. With a planned piece in the bags, open `/bis`, Plan tab, press Equip all. Two seconds later
+   the chat line should read "Saved as equipment set DBiS Feral ST". Open the character sheet's
+   equipment manager: the set is there with the Feral icon, and shirt and tabard are greyed out.
+2. Hover a planned item in the bag. The tooltip should say "Equipment Sets: DBiS Feral ST".
+3. Press Equip all again. The same set is updated, and no second set appears.
+4. If the chat line after a real full equip says "No equipment set saved: not worn: Finger" or
+   similar, the two seconds were too short: press Save set under the gear list and say so on
+   this card, so the timer can be lengthened or replaced with an event.
+5. If the set shows Blizzard's default icon instead of the Feral one, the fileID was refused
+   where the API says cstring; say so on this card.
+6. Wear a piece that is not the plan and open the Plan tab: the Save set button should be gone
+   and the gear row should list the slot.
+7. Tick a slot ignore on the paper doll, then press Save set. Note whether the tick stays drawn
+   afterwards; if it does, that is the cosmetic mismatch in comment (7) and is a small card of
+   its own.

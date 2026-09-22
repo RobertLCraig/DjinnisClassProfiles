@@ -4783,6 +4783,7 @@ local function selfTest()
 
 		local saveTest = "equip all saves the plan as an equipment set"
 		sets = { Tank = 1 }
+		ignored[1] = 1  -- a Head tick left on the paper doll: the save must clear it, or the set ignores Head
 		local ok, detail = PlanTab.saveSet("Feral", "st")
 		check(saveTest, ok, true)
 		check(saveTest .. ", named for the plan", detail, "DBiS Feral ST")
@@ -4840,6 +4841,15 @@ local function selfTest()
 		PlanTab.boss = realBoss4
 		check("drawn tab offers Save set when every planned piece is on", saveRow ~= nil, true)
 		check("drawn tab offers Save set when every planned piece is on, names the set", saveRow and saveRow.button.tip:find("DBiS Feral ST", 1, true) ~= nil, true)
+		-- and withholds it with a piece off: a set saved then would be the wrong gear
+		bare, saveRow = 1, nil
+		PlanTab.boss = "Nek'zali"
+		for _, line in ipairs(PlanTab.lines("Feral")) do
+			if line.button and line.button.label == "Save set" then saveRow = line end
+		end
+		PlanTab.boss = realBoss4
+		bare = nil
+		check("drawn tab withholds Save set when a planned piece is off", saveRow == nil, true)
 
 		C_EquipmentSet, MAX_EQUIPMENT_SETS_PER_PLAYER = wasSets, wasMax
 		GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo = wasWornLink, wasLevel
