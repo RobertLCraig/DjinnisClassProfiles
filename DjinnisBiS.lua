@@ -3738,21 +3738,10 @@ function PlanTab.savedLoadoutNames()
 	for _, id in ipairs(ids) do
 		local okInfo, info = pcall(C_Traits.GetConfigInfo, id)
 		local name = okInfo and info and info.name
-		-- name -> config id; a set to every caller but savedLoadoutString
+		-- name -> config id; every caller today reads it as a set
 		if name and canRead(name) then names[name] = id end
 	end
 	return names
-end
-
--- The talent import string of the saved loadout named `name`, or nil when
--- it is not saved, the game will not say, or in combat (card 0023).
-function PlanTab.savedLoadoutString(name)
-	if InCombatLockdown() then return nil end
-	local saved = PlanTab.savedLoadoutNames()
-	local id = saved and saved[name]
-	if not (id and C_Traits.GenerateImportString) then return nil end
-	local ok, str = pcall(C_Traits.GenerateImportString, id)
-	return ok and str or nil
 end
 
 -- Hindsight (1.8.9) saves the last pull on each boss with the spec and the
@@ -3770,9 +3759,11 @@ function PlanTab.hindsightPulls()
 end
 
 -- The spec key of the last saved pull on boss `id` when it used another build
--- than `planned`, the plan's import string for `spec`: another spec is another
--- build whether or not a string was saved, the same spec compares the strings.
--- nil when the pull matched, or nothing can be said. Pure, for /bis test.
+-- than `planned`, the plan cell's own import string for `spec` (Option A,
+-- PlanTab.plannedTalents): another spec is another build whether or not a
+-- string was saved, the same spec compares the strings. nil when the pull
+-- matched, or nothing can be said: no planned string, no readable pull
+-- string, or another game build's header. Pure, for /bis test.
 function PlanTab.pullSpec(pulls, id, spec, planned)
 	local pull = pulls and id and pulls[tostring(id)]
 	if type(pull) ~= "table" or type(pull.specKey) ~= "string" then return nil end
@@ -4621,9 +4612,8 @@ function PlanTab.lines(forSpec)
 			button = { label = "Talents", tip = ("Load \"%s\" through Blizzard's own talent helper, as its slash command would. Out of combat only."):format(picked.loadout),
 				onClick = function() PlanTab.loadTalents(picked.loadout) end } },
 	}
-	-- Hindsight's last pull per boss against the plan (card 0023). One import
-	-- string per loadout name, read once per draw and only with pulls to judge.
-	local pulls, plannedString = PlanTab.hindsightPulls(), {}
+	-- Hindsight's last pull per boss against the plan (card 0023).
+	local pulls = PlanTab.hindsightPulls()
 	-- The loot spec per boss (card 0022): the pools are read once a session,
 	-- and a row whose pool holds no planned item for any spec says nothing.
 	pcall(PlanTab.harvestPools)
@@ -4636,12 +4626,15 @@ function PlanTab.lines(forSpec)
 		local colour = isPicked and LOADOUT_COLOUR[PlanTab.loadoutState(row.loadout, active, edited)] or GREY
 		local pulled
 		if pulls and row.id then
+			-- The planned string is the row's plan cell's own (Option A), and
+			-- only when the row's loadout is the one the cell was simmed under,
+			-- the same guard as activeLoadoutName; else the build is not judged.
 			-- The pull's string is Hindsight's own encoder's, which it checks
 			-- against C_Traits.GenerateImportString at login and after every
 			-- client build (Encode.lua, VerifyEncoder). Until it says the two
 			-- agree, no string is compared (0023 review): another spec still is.
-			if plannedString[row.loadout] == nil then plannedString[row.loadout] = HindsightDB.encoderOK == true and PlanTab.savedLoadoutString(row.loadout) or false end
-			pulled = PlanTab.pullSpec(pulls, row.id, spec, plannedString[row.loadout] or nil)
+			local planned, plannedFor = PlanTab.plannedTalents(spec, row.scenario)
+			pulled = PlanTab.pullSpec(pulls, row.id, spec, HindsightDB.encoderOK == true and plannedFor == row.loadout and planned or nil)
 		end
 		local best = row.id and PlanTab.bestLootSpec(PlanTab.POOL[row.id], planned, spec)
 		if isPicked then pickedBest = best end
@@ -6975,26 +6968,35 @@ local function selfTest()
 
 	-- Hindsight's last pull against the plan (card 0023), on a pretend
 	-- HindsightCharDB in its 1.8.9 shape: keys are the encounter id as a string.
+	-- The planned string is the plan cell's own (Option A): aString is the
+	-- Feral st cell's, simmed on "DotC Raid ST *", so only Entombed Sentinels
+	-- and Sszorak are judged by string; a row on another loadout of the
+	-- scenario, or a cell without a string, is not judged. The saved loadout
+	-- is never read: GenerateImportString is counted across every draw.
 	do
 		local pullTest = "boss row says the last pull used a different build"
 		local sameTest2 = "no build line when the pull matched the plan"
 		local noneTest = "no error without hindsight or with a new layout"
-		local wasDB, wasChar, wasString = HindsightDB, HindsightCharDB, PlanTab.savedLoadoutString
+		local wasDB, wasChar, wasGen, reads = HindsightDB, HindsightCharDB, C_Traits.GenerateImportString, 0
 		local pulls = {
-			["3421"] = { specKey = "Druid:Feral", build = bString },      -- The Twin Fangs, other build
-			["3470"] = { specKey = "Druid:Feral", build = aString },      -- Nek'zali, the planned one
-			["3445"] = { specKey = "Druid:Guardian" },                     -- Entombed Sentinels, other spec, no string
-			["3455"] = { specKey = "Druid:Feral" },                        -- Vashnik, no string saved
-			["3420"] = { build = aString },                                -- Sszorak, no spec saved
+			["3445"] = { specKey = "Druid:Feral", build = bString },              -- Entombed Sentinels, other build on the cell's loadout
+			["3420"] = { specKey = "Druid:Feral", build = aString },              -- Sszorak, the planned one
+			["3421"] = { specKey = "Druid:Feral", build = bString },              -- The Twin Fangs, the 2t cell has no string
+			["3470"] = { specKey = "Druid:Feral", build = bString },              -- Nek'zali, the row's loadout is not the cell's
+			["3429"] = { specKey = "Druid:Feral", build = "X" .. bString:sub(2) }, -- The Coiled Altar, another game build's header
+			["3455"] = { specKey = "Druid:Guardian" },                             -- Vashnik, other spec, no string
+			["3497"] = { specKey = "Druid:Feral" },                                -- The Lost Explorers, no string saved
+			["3492"] = { build = aString },                                        -- Ula'tek, no spec saved
 		}
-		check(pullTest .. ", other build on the same spec", PlanTab.pullSpec(pulls, 3421, "Feral", aString), "Druid:Feral")
-		check(pullTest .. ", other spec without a string", PlanTab.pullSpec(pulls, 3445, "Feral", aString), "Druid:Guardian")
-		check(pullTest .. ", a number id finds the string key", PlanTab.pullSpec(pulls, 3421, "Feral", aString) ~= nil, true)
-		check(sameTest2 .. ", same string", PlanTab.pullSpec(pulls, 3470, "Feral", aString), nil)
-		check(sameTest2 .. ", no string saved", PlanTab.pullSpec(pulls, 3455, "Feral", aString), nil)
-		check(sameTest2 .. ", no spec saved", PlanTab.pullSpec(pulls, 3420, "Feral", aString), nil)
-		check(sameTest2 .. ", no planned string", PlanTab.pullSpec(pulls, 3421, "Feral", nil), nil)
-		check(sameTest2 .. ", no pull on the boss", PlanTab.pullSpec(pulls, 3492, "Feral", aString), nil)
+		check(pullTest .. ", other build on the same spec", PlanTab.pullSpec(pulls, 3445, "Feral", aString), "Druid:Feral")
+		check(pullTest .. ", other spec without a string", PlanTab.pullSpec(pulls, 3455, "Feral", aString), "Druid:Guardian")
+		check(pullTest .. ", a number id finds the string key", PlanTab.pullSpec(pulls, 3445, "Feral", aString) ~= nil, true)
+		check(sameTest2 .. ", same string", PlanTab.pullSpec(pulls, 3420, "Feral", aString), nil)
+		check(sameTest2 .. ", no string saved", PlanTab.pullSpec(pulls, 3497, "Feral", aString), nil)
+		check(sameTest2 .. ", no spec saved", PlanTab.pullSpec(pulls, 3492, "Feral", aString), nil)
+		check(sameTest2 .. ", no planned string", PlanTab.pullSpec(pulls, 3445, "Feral", nil), nil)
+		check(sameTest2 .. ", another game build's header", PlanTab.pullSpec(pulls, 3429, "Feral", aString), nil)
+		check(sameTest2 .. ", no pull on the boss", PlanTab.pullSpec(pulls, 3379, "Feral", aString), nil)
 		check(sameTest2 .. ", no id", PlanTab.pullSpec(pulls, nil, "Feral", aString), nil)
 		HindsightDB, HindsightCharDB = nil, nil
 		check(noneTest .. ", not loaded", PlanTab.hindsightPulls(), nil)
@@ -7004,27 +7006,39 @@ local function selfTest()
 		check(noneTest .. ", pulls not a table", PlanTab.hindsightPulls(), nil)
 		HindsightDB, HindsightCharDB = { schema = 1, encoderOK = true }, { pulls = pulls }
 		check(pullTest .. ", schema 1 is read", PlanTab.hindsightPulls(), pulls)
-		-- as drawn: the planned string is stubbed, the game has no loadouts here
-		PlanTab.savedLoadoutString = function(name) return name == "WS Raid 2T *" and aString or nil end
-		PlanTab.boss = "The Twin Fangs"
-		local drawnPulls = drawn("WS Raid 2T *", false)
-		PlanTab.boss = "Nek'zali"
+		-- as drawn: the planned string comes from GEAR_PLAN, nothing is stubbed
+		C_Traits.GenerateImportString = function() reads = reads + 1 end
+		PlanTab.boss = "Entombed Sentinels"
+		local drawnPulls = drawn("DotC Raid ST *", false)
+		PlanTab.boss = "Vashnik"
 		local drawnOther = drawn("WS Raid Most Bosses", false)
 		HindsightDB = { schema = 2 }
-		local drawnNew = drawn("WS Raid 2T *", false)
+		local drawnNew = drawn("DotC Raid ST *", false)
 		-- Hindsight's encoder not yet verified against the game's: no string
 		-- compare, another spec still said (0023 review)
 		HindsightDB = { schema = 1 }
-		PlanTab.boss = "The Twin Fangs"
-		local drawnUnverified = drawn("WS Raid 2T *", false)
-		HindsightDB, HindsightCharDB, PlanTab.savedLoadoutString = wasDB, wasChar, wasString
+		PlanTab.boss = "Entombed Sentinels"
+		local drawnUnverified = drawn("DotC Raid ST *", false)
+		-- the cell without a string: the st cell's taken away and put back
+		HindsightDB = { schema = 1, encoderOK = true }
+		local was = GEAR_PLAN.Feral.st.talents
+		GEAR_PLAN.Feral.st.talents = nil
+		local drawnNoCell = drawn("DotC Raid ST *", false)
+		GEAR_PLAN.Feral.st.talents = was
+		HindsightDB, HindsightCharDB, C_Traits.GenerateImportString = wasDB, wasChar, wasGen
 		PlanTab.activeLoadoutName, PlanTab.boss = realActive, realBoss
-		check(pullTest .. ", drawn red on the picked row", drawnPulls:find("> The Twin Fangs|r   " .. GREEN .. "WS Raid 2T *|r   " .. GREY .. "2 targets|r   |cffff2020last pull: other build, as Feral|r", 1, true) ~= nil, true)
-		check(pullTest .. ", drawn grey on another row", drawnPulls:find("Entombed Sentinels|r   " .. GREY .. "DotC Raid ST *|r   " .. GREY .. "1 target|r   " .. GREY .. "last pull: other build, as Guardian|r", 1, true) ~= nil, true)
-		check(pullTest .. ", grey when not picked", drawnOther:find("|cffff2020last pull", 1, true), nil)
+		check(pullTest .. ", drawn red on the picked row", drawnPulls:find("> Entombed Sentinels|r   " .. GREEN .. "DotC Raid ST *|r   " .. GREY .. "1 target|r   |cffff2020last pull: other build, as Feral|r", 1, true) ~= nil, true)
+		check(pullTest .. ", drawn grey on another row", drawnPulls:find("Vashnik|r   " .. GREY .. "WS Raid Most Bosses|r   " .. GREY .. "1 target|r   " .. GREY .. "last pull: other build, as Guardian|r", 1, true) ~= nil, true)
+		check(pullTest .. ", grey when not picked", drawnOther:find("|cffff2020last pull: other build, as Feral", 1, true), nil)
 		check(pullTest .. ", still said when not picked", drawnOther:find(GREY .. "last pull: other build, as Feral|r", 1, true) ~= nil, true)
-		check(sameTest2 .. ", drawn", drawnPulls:find("Nek'zali|r   " .. GREY .. "WS Raid Most Bosses|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
-		check(sameTest2 .. ", no planned string, drawn", drawnPulls:find("Vashnik|r   " .. GREY .. "WS Raid Most Bosses|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", drawn", drawnPulls:find("Sszorak|r   " .. GREY .. "DotC Raid ST *|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", no string saved, drawn", drawnPulls:find("The Lost Explorers|r   " .. GREY .. "WS Raid 2T *|r   " .. GREY .. "2 targets|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", the cell has no string, drawn", drawnPulls:find("The Twin Fangs|r   " .. GREY .. "WS Raid 2T *|r   " .. GREY .. "2 targets|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", the row's loadout is not the cell's, drawn", drawnPulls:find("Nek'zali|r   " .. GREY .. "WS Raid Most Bosses|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", another game build's header, drawn", drawnPulls:find("The Coiled Altar|r   " .. GREY .. "WS Raid Coiled Altar|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", the cell's string taken away, drawn", drawnNoCell:find("last pull: other build, as Feral", 1, true), nil)
+		check(pullTest .. ", the cell's string taken away, other spec still said", drawnNoCell:find("last pull: other build, as Guardian", 1, true) ~= nil, true)
+		check(sameTest2 .. ", the saved loadout is never read", reads, 0)
 		check(noneTest .. ", schema 2 draws no pull line", drawnNew:find("last pull", 1, true), nil)
 		check(noneTest .. ", not loaded draws no pull line", wrong:find("last pull", 1, true), nil)
 		check(sameTest2 .. ", encoder unverified, no string compare", drawnUnverified:find("last pull: other build, as Feral", 1, true), nil)
