@@ -95,13 +95,42 @@ print = function(...)
 	local parts = {}
 	for i = 1, select("#", ...) do parts[i] = tostring((select(i, ...))) end
 	local line = table.concat(parts, " ")
-	if line:find("FAIL") then failures = failures + 1 end
+	-- The summary counts too: a check that runs with print swapped out can
+	-- lose its FAIL line, and the addon's own "N check(s) failed" still shows
+	-- (0011 build, where five red checks read as a pass).
+	-- The red marker, not the bare word: the addon's own CONFIG_COMMIT_FAILED
+	-- chat line is not a failed check.
+	if line:find("|cffff0000FAIL|r", 1, true) or line:find("check(s) failed", 1, true) then failures = failures + 1 end
 	realPrint(line)
 end
 
 local here = arg and arg[0] and arg[0]:match("^(.*)[/\\][^/\\]*$") or "."
 dofile(here .. "/DjinnisBiS.lua")
 SlashCmdList.DJINNISBIS("test")
+
+-- Card 0011: no C_ClassTalents or C_Traits call that changes talents, anywhere
+-- in the file's code (comments may name them). Every such call in code must
+-- be on this list of readers; Blizzard's ClassTalentHelper is the only writer.
+do
+	local readers = {
+		["C_ClassTalents.GetActiveConfigID"] = true, ["C_ClassTalents.GetActiveHeroTalentSpec"] = true,
+		["C_ClassTalents.GetLastSelectedSavedConfigID"] = true, ["C_ClassTalents.GetStarterBuildActive"] = true,
+		["C_ClassTalents.GetConfigIDsBySpecID"] = true,
+		["C_Traits.GetConfigInfo"] = true, ["C_Traits.GetSubTreeInfo"] = true,
+		["C_Traits.GenerateImportString"] = true,  -- a read: the "(edited)" compare (card 0014)
+	}
+	local src = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
+	local seen = 0
+	for line in src:gmatch("[^\n]+") do
+		for call in line:gsub("%-%-.*$", ""):gmatch("C_[CT][%w_]*%.[%w_]+") do
+			seen = seen + 1
+			if (call:find("^C_ClassTalents%.") or call:find("^C_Traits%.")) and not readers[call] then
+				print("|cffff0000FAIL|r no talent-changing call in the file: " .. call)
+			end
+		end
+	end
+	if seen == 0 then print("|cffff0000FAIL|r no talent-changing call in the file: saw no C_ call at all, the scan is broken") end
+end
 
 realPrint(failures == 0 and "offline-check: no FAIL lines"
 	or ("offline-check: " .. failures .. " FAIL lines"))
