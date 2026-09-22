@@ -43,6 +43,8 @@ time, so an old report link may also stop opening.
 2. Open `/bis`, Plan tab, pick Nek'zali. Under "2. Gear to change" there is a line "Report simmed 2026-09-21, N days old". Hover it: a tooltip about the Raidbots report.
 3. The plan is from 2026-09-21, so after 2026-10-05 (or after the next client build) that line goes amber and the hover ends "Re-sim?". If you would rather see it sooner, set `PlanTab.STALE_DAYS` to 0 and `/reload`.
 4. Cycle the strip's 1 target / 2 targets button. The broker line should follow the switch (the 2 target cell is empty, so it reads plain "BiS" there).
+5. From the review: swap a piece while in combat (a training dummy will do), then leave combat. The line should hold its old number during combat and correct itself when combat ends, without a `/reload`. Same on a spec change: switch to Guardian and the line should drop to plain "BiS", back to Feral and the count returns.
+6. From the review: hover the "Report simmed" line, then move to an item row above it and back. The item tooltip and the plain-text tooltip should not stick to the wrong row (the rows are pooled and the hover reads whichever of link or tip the row carries).
 
 ## Comments
 
@@ -71,3 +73,40 @@ time, so an old report link may also stop opening.
   tab, which is what the card asked for. No per-boss date on the boss rows: one cell feeds the
   drawn section and the line sits under it. Not built: a "days until Raidbots drops the report"
   countdown; the 30-day figure is in the hover instead.
+- 2026-09-22 Claude (review): adversarial pass on `313629b`, in a worktree off `ba3951f`. Verdict:
+  pass with one trivial fix, to `human-review/` for the looks above.
+  Read: `brokerText`, `offPlanCount`, `updateBroker`, `rebuildBagWanted` and the bag-mark watcher's
+  event list, `buildBroker`, `attachItemHover` and `renderList` (the `tip` hover), `STALE_DAYS`,
+  `isoBuildDate`, `daysSince`, `planAge`, `ageLine`, the age line in `PlanTab.lines`, the strip's
+  own slot count, and the two stub lines in `offline-check.lua`. `GetBuildInfo`'s third return is
+  `buildDate`, a cstring, per `BuildDocumentation.lua` in the local wow-ui-source; the pattern
+  allows the double space a C `__DATE__` puts before a one-digit day. The broker counts the same
+  sixteen slots the strip counts (`PLAN_SLOT_INVENTORY` and `SLOT_BUTTONS` are one set), so
+  "N off plan" and "N slots to fix" cannot disagree. LibDataBroker's `__newindex` fires
+  `AttributeChanged` on `text =`, so a display picks the write up without being told.
+  Checks: `lua offline-check.lua` (5.4) and Lua 5.1 both exit 0 before and after the fix.
+  Mutations, eleven, in a temp copy, each proved red on its own named check: `offPlanCount` off by
+  one, `updateBroker` writing nil, `>` to `>=` on `STALE_DAYS`, the build clause dropped, the build
+  compare reversed, the age line not added to `lines`, always amber, the half-day rounding dropped,
+  a month mis-numbered in `MONTHS`, `count == 0` broken, and the `updateBroker()` call removed
+  from `rebuildBagWanted`.
+  What broke: that last one survived. The offline check called `PlanTab.updateBroker()` directly,
+  so the one thing the first criterion leans on in the game, that the events which redraw the
+  glows also write the line, had no check: delete the call and everything stayed green. Fixed in
+  place: the broker check now drives `rebuildBagWanted()` with the stub broker and reads what it
+  wrote, and calls it again after the stub is put back so `/bis test` in the game leaves the bag
+  list and the real line on the real gear. No new top-level local (177), no new `selfTest`
+  upvalue (`rebuildBagWanted` was already one). The mutation goes red now.
+  What held, noted for the reader: in combat, or when a worn link is secret, `rebuildBagWanted`
+  returns before `updateBroker`, so the line holds its last value rather than blanking, which is
+  the DECISIONS rule for a secret. Without LibDataBroker `PlanTab.broker` is nil and `updateBroker`
+  does nothing. A row carrying both `link` and `tip` shows the item; the age line has no link.
+  `simmed < build` is a string compare of two ISO dates, both plain strings from baked data and
+  `GetBuildInfo`, neither a secret candidate.
+  Security. Weakest point: none reachable; every input is baked plan data or a client build
+  string, matched by pattern before use, and the only output is a count on a broker any addon
+  can read. Unchecked path: `GetBuildInfo` is trusted but pattern-matched, and an unreadable date
+  never marks a plan old. Leaks: the line says how many slots differ and the tab says a date;
+  the report id is not in the broker text.
+  Not proved here, only in a client: that the line moves on the events, the tooltip on the row,
+  the amber on screen. Items 5 and 6 under "What I need from you" are the review's additions.

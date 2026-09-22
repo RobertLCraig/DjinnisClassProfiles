@@ -4825,12 +4825,15 @@ local function selfTest()
 		check(brokerTest .. ", and that is more than none", plan and expected > 0, plan and true or nil)
 		local realBroker = PlanTab.broker
 		PlanTab.broker = { text = "" }
-		PlanTab.updateBroker()
+		-- Through the rebuild the glow events run, not updateBroker itself: a
+		-- broker the events forget to write is the fault this guards (0026 review).
+		rebuildBagWanted()
 		local written = PlanTab.broker.text
 		-- the player's own spec here, not Feral: a Guardian running /bis test has no plan and must read "BiS"
 		local wanted = PlanTab.brokerText(PlanTab.offPlanCount())
 		PlanTab.broker = realBroker
 		GetInventoryItemLink = wasWornLink
+		rebuildBagWanted()  -- the bag list and the real broker line back on the real gear
 		check(brokerTest .. ", the broker line is written for the player", written, wanted)
 	end
 
