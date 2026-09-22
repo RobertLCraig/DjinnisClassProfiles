@@ -26,7 +26,7 @@ knows if it was the build or the play.
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] WHEN Hindsight has a saved pull for a planned boss and its build differs from the planned loadout, THE PLAN TAB SHALL say so on that boss's row, with the spec used. proves: `boss row says the last pull used a different build`
+- [x] WHEN Hindsight has a saved pull for a planned boss and its build differs from the planned loadout, THE PLAN TAB SHALL say so on that boss's row, with the spec used. proves: `boss row says the last pull used a different build`
 - [x] WHEN the build matched, THE ROW SHALL say nothing about it. proves: `no build line when the pull matched the plan`
 - [x] WHEN Hindsight is not loaded, or its saved layout is not the one known, THE ADDON SHALL show nothing and raise no error. proves: `no error without hindsight or with a new layout`
 <!-- AC:END -->
@@ -36,6 +36,9 @@ knows if it was the build or the play.
 - [x] Guard on `HindsightDB.schema == 1`; anything else means "unknown layout, show nothing".
 - [x] Read only. Never write to Hindsight's tables.
 - [x] Offline checks with a pretend `HindsightCharDB`.
+- [x] The planned string is the plan cell's own `talents` through `PlanTab.plannedTalents`, never
+  the saved loadout (Rob, 2026-09-22, Option A), and it judges only when the row's loadout is the
+  one the cell was simmed under, the same guard as `0014`.
 
 ## Comments
 
@@ -123,18 +126,46 @@ knows if it was the build or the play.
   talent reads are pcalled, Hindsight's tables are never written and a pull with a non-string
   `specKey` is skipped before `gsub`; leaks nothing, the strings never print and never leave the
   client.
+- 2026-09-22 Claude (rebuilt on Option A): the pull is now judged against the plan cell's own
+  `talents` string, never the saved loadout. The boss loop in `PlanTab.lines` calls
+  `PlanTab.plannedTalents(spec, row.scenario)` (card 0014, signature kept) and hands
+  `PlanTab.pullSpec` that string only when the loadout it was simmed under is the row's own
+  loadout, the guard 0014 wrote for `activeLoadoutName`; otherwise, or when the cell has no
+  string, the pull's string is not judged. Another spec is still said whatever the string, as
+  before: a Guardian pull is not a Feral plan and needs no string to say so. The `encoderOK`
+  guard from the review stays. `PlanTab.savedLoadoutString` is deleted, its only caller gone; the
+  in-combat gap the review named goes with it, since the cell's string is a table read.
+  `savedLoadoutNames` still maps name to config id (its comment no longer names the deleted
+  reader). `pullSpec`, `hindsightPulls`, `talentStringsDiffer` unchanged. No new top-level local
+  (177). What that means with today's data: only the two `st` rows on "DotC Raid ST *" (Entombed
+  Sentinels, Sszorak) are judged by string; the "WS Raid" rows and the 2 target rows are judged by
+  spec alone until `0028` gives each loadout its cell.
+  Checks retargeted, 30 under the three criterion names: the fixture pulls sit on the rows the
+  rule needs (other build on the cell's loadout, the matched one, the 2t cell without a string,
+  a row whose loadout is not the cell's, another game build's header, other spec, no string, no
+  spec), proved through `pullSpec` and as drawn with nothing stubbed but `activeLoadoutName`. New:
+  the three "says nothing" cases (cell without a string, both by the 2t cell and by taking the
+  `st` cell's string away and putting it back; pull without a readable string; header mismatch),
+  the loadout-name guard, and `C_Traits.GenerateImportString` counted at zero across every draw,
+  which is the proof the saved loadout is never read. Both `lua offline-check.lua` and Lua 5.1
+  exit 0. Two mutations in a temp copy, both red: the loadout-name guard removed (1 check, the
+  "row's loadout is not the cell's" draw), the planned string forced nil at the call site (2
+  checks, the red picked row and the grey unpicked one). Not seen in a client.
 
 ## What I need from you
 
-Whichever way 0014 goes, this card follows it. After the rebuild, with Hindsight loaded:
+With Hindsight loaded, as Feral:
 
-1. Open `/bis`, Plan tab, as Feral. Every raid row should end "last pull: other build, as
-   Guardian" (or Balance, Restoration), grey except the picked boss in red. Mythic+ says nothing.
-2. `/bis test` with Hindsight loaded: no red. This is the self-test fix above, and only the game
-   can show it with real pulls.
-3. Pull a planned boss as Feral on its planned loadout, untouched. The row should say nothing.
-   If it goes red, Hindsight's string and the game's differ and the compare has to move to the
-   node bits (0014 task 2).
-4. Move one point by hand, Apply, pull again. Today the row says nothing; after the rebuild it
-   should say "other build, as Feral". This is the criterion that failed.
-5. Disable Hindsight, open the tab: no pull lines, no error.
+1. Open `/bis`, Plan tab. On today's saved pulls (Guardian, Balance, Restoration, none Feral)
+   every raid row should end "last pull: other build, as Guardian" (or Balance, Restoration),
+   grey except the picked boss in red. Mythic+ says nothing.
+2. `/bis test` with Hindsight loaded: no red. Only the game can show this with real pulls.
+3. Pull Entombed Sentinels or Sszorak on "DotC Raid ST *", untouched. The row should say nothing.
+   If it goes red, Hindsight's string and the cell's baked string differ past the header and the
+   compare has to move to the node bits (0014 task 2), or the cell needs re-baking from this
+   client (0014 item 4).
+4. Move one point by hand, Apply, pull the same boss again. The row should now say "other build,
+   as Feral". This is the criterion the saved-loadout compare could not meet.
+5. Pull Nek'zali on "WS Raid Most Bosses", clean, then with a point moved. The row says nothing
+   either time: that loadout has no cell of its own until `0028`, so only the spec is judged.
+6. Disable Hindsight, open the tab: no pull lines, no error.
