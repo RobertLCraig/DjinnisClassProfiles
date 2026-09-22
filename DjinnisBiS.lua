@@ -471,17 +471,23 @@ end
 -- refreshed, change the names here to match.
 -- `scenario` picks the gear plan cell. There are only two, so a boss that is
 -- neither clean single target nor sustained two target takes `st`.
+-- `id` is the encounter id ENCOUNTER_START and ENCOUNTER_END carry (card 0027),
+-- copied by hand from BigWigs_TheVenomousAbyss's `mod:SetEncounterID(...)`
+-- lines on 2026-09-22. It is NOT the Encounter Journal id (Nek'zali is 3470
+-- here and 2888 in the journal). The events' name is the journal's long one,
+-- "Nek'zali the Soulcoiler", which is why the id is the thing to match on.
 PlanTab.BOSSES = {
 	Feral = {
-		{ boss = "Nek'zali",            scenario = "st", loadout = "WS Raid Most Bosses" },
-		{ boss = "Entombed Sentinels",  scenario = "st", loadout = "DotC Raid ST *" },
-		{ boss = "The Lost Explorers",  scenario = "2t", loadout = "WS Raid 2T *" },
-		{ boss = "Vashnik",             scenario = "st", loadout = "WS Raid Most Bosses" },
-		{ boss = "Sszorak",             scenario = "st", loadout = "DotC Raid ST *" },
-		{ boss = "The Twin Fangs",      scenario = "2t", loadout = "WS Raid 2T *" },
-		{ boss = "The Coiled Altar",    scenario = "st", loadout = "WS Raid Coiled Altar" },
-		{ boss = "Ula'tek",             scenario = "st", loadout = "WS Raid Most Bosses" },
-		{ boss = "Nymrissa Wavecaller", scenario = "st", loadout = "DotC Raid Most Bosses *" },
+		{ boss = "Nek'zali",            id = 3470, scenario = "st", loadout = "WS Raid Most Bosses" },
+		{ boss = "Entombed Sentinels",  id = 3445, scenario = "st", loadout = "DotC Raid ST *" },
+		{ boss = "The Lost Explorers",  id = 3497, scenario = "2t", loadout = "WS Raid 2T *" },
+		{ boss = "Vashnik",             id = 3455, scenario = "st", loadout = "WS Raid Most Bosses" },
+		{ boss = "Sszorak",             id = 3420, scenario = "st", loadout = "DotC Raid ST *" },
+		{ boss = "The Twin Fangs",      id = 3421, scenario = "2t", loadout = "WS Raid 2T *" },
+		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "WS Raid Coiled Altar" },
+		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "WS Raid Most Bosses" },
+		-- a lair boss, not a raid one: her id is from BigWigs_MidnightLairs
+		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "st", loadout = "DotC Raid Most Bosses *" },
 		-- One Mythic+ loadout, not one per dungeon (card 0009). "WS M+" simmed
 		-- 214,785 against "DotC M+" 207,837 on two targets, 2026-09-21; a
 		-- dungeon-style sim should settle it, and none has run yet.
@@ -2718,6 +2724,28 @@ function PlanTab.bossFor(bosses, pickedBoss, scenario)
 	return first or pickedBoss
 end
 
+-- The row for what ENCOUNTER_START or ENCOUNTER_END handed over (card 0027):
+-- by id first, because the events' name is the journal's long one ("Nek'zali
+-- the Soulcoiler") and a locale or a hotfix can change it; by name only when
+-- there is no id, exact after norm() or the event name starting with the row's.
+-- Both arrive from the game, so each is tested with canRead before it is
+-- compared: a secret one would throw (docs/DECISIONS.md, 2026-08-21).
+function PlanTab.bossRow(bosses, id, name)
+	if id ~= nil and canRead(id) then
+		for _, row in ipairs(bosses or {}) do
+			if row.id == id then return row end
+		end
+		return nil
+	end
+	if type(name) ~= "string" or not canRead(name) then return nil end
+	local want = norm(name)
+	for _, row in ipairs(bosses or {}) do
+		local have = norm(row.boss)
+		if want == have or want:find(have, 1, true) == 1 then return row end
+	end
+	return nil
+end
+
 function PlanTab.open(scenario)
 	PlanTab.boss = PlanTab.bossFor(PlanTab.BOSSES[playerSpec() or ""], PlanTab.boss, scenario)
 	window = window or buildWindow()
@@ -4285,6 +4313,48 @@ local function selfTest()
 	check(openTest .. ", moves a pick that does not", PlanTab.bossFor(PlanTab.BOSSES.Feral, "The Twin Fangs", "st"), "Nek'zali")
 	check(openTest .. ", no scenario leaves the pick alone", PlanTab.bossFor(PlanTab.BOSSES.Feral, "Vashnik", nil), "Vashnik")
 	check(openTest .. ", no boss table", PlanTab.bossFor(nil, nil, "st"), nil)
+
+	-- boss ids (card 0027). The reference is a second copy, on purpose: the
+	-- event names as ArchonTooltip's Localization.lua keys them by encounter id
+	-- (enUS), which agrees with BigWigs' SetEncounterID lines. A row whose id
+	-- points at a boss whose name does not start with the row's fails here.
+	local ENCOUNTER_NAMES = {
+		[3470] = "Nek'zali the Soulcoiler", [3445] = "Entombed Sentinels",
+		[3497] = "The Lost Explorers",      [3455] = "Vashnik the Malignant",
+		[3420] = "Sszorak",                 [3421] = "The Twin Fangs",
+		[3429] = "The Coiled Altar",        [3492] = "Ula'tek",
+		[3379] = "Nymrissa Wavecaller",
+	}
+	local idTest = "every boss row has a name and an id"
+	local seenID = {}
+	for _, row in ipairs(PlanTab.BOSSES.Feral) do
+		check(idTest .. ", a name, " .. tostring(row.boss), type(row.boss) == "string" and row.boss ~= "", true)
+		if row.scenario ~= "mplus" then  -- the Mythic+ row is a plan for any key, not a boss
+			check(idTest .. ", an id, " .. row.boss, type(row.id) == "number", true)
+			check(idTest .. ", an id used once, " .. row.boss, seenID[row.id], nil)
+			seenID[row.id] = row.boss
+		end
+	end
+	local agreeTest = "a name and id that disagree fail the check"
+	for _, row in ipairs(PlanTab.BOSSES.Feral) do
+		if row.id then
+			local eventName = ENCOUNTER_NAMES[row.id]
+			check(agreeTest .. ", id known, " .. row.boss, eventName ~= nil, true)
+			check(agreeTest .. ", " .. row.boss .. " is " .. tostring(eventName),
+				eventName and norm(eventName):find(norm(row.boss), 1, true), 1)
+		end
+	end
+	local rowTest = "boss lookup tries id then name"
+	local byID = PlanTab.bossRow(PlanTab.BOSSES.Feral, 3470, "Some Other Name")
+	check(rowTest .. ", id wins over a name that disagrees", byID and byID.boss, "Nek'zali")
+	check(rowTest .. ", an unknown id does not fall back to the name", PlanTab.bossRow(PlanTab.BOSSES.Feral, 1, "Nek'zali"), nil)
+	local byName = PlanTab.bossRow(PlanTab.BOSSES.Feral, nil, "Nek'zali the Soulcoiler")
+	check(rowTest .. ", no id, the event's long name", byName and byName.boss, "Nek'zali")
+	local exact = PlanTab.bossRow(PlanTab.BOSSES.Feral, nil, "the twin fangs")
+	check(rowTest .. ", no id, an exact name any case", exact and exact.boss, "The Twin Fangs")
+	check(rowTest .. ", no id and an unknown name", PlanTab.bossRow(PlanTab.BOSSES.Feral, nil, "Ragnaros"), nil)
+	check(rowTest .. ", nothing at all", PlanTab.bossRow(PlanTab.BOSSES.Feral, nil, nil), nil)
+	check(rowTest .. ", no boss table", PlanTab.bossRow(nil, 3470, "Nek'zali"), nil)
 
 	-- a saved target must survive the round trip and show its item level
 	setGear("zzz not a real item", "Myth", 6)
