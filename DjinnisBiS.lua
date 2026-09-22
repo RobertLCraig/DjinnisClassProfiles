@@ -5443,12 +5443,20 @@ function PlanTab.sidebarText(row)
 	return WHITE .. row.loadout .. "|r", true
 end
 
--- "off" when the talent window is not on screen, "tab" when it is and the
--- sidebar was closed (one small button to bring it back), "open" otherwise.
--- A close is kept in the saved file until the player opens it again.
-function PlanTab.sidebarMode(talentShown, closed)
-	if not talentShown then return "off" end
+-- "off" when the talent window is not on screen or the rival addon has its
+-- own sidebar there, "tab" when it is up and the sidebar was closed (one
+-- small button to bring it back), "open" otherwise. A close is kept in the
+-- saved file until the player opens it again. The rival is asked here, on
+-- every update, not only at arm time: PlanTab.redraw reaches updateSidebar
+-- from every equip, spec change and loadout landing whether or not the hooks
+-- were armed, and TLM can load after Blizzard_PlayerSpells (review, 0019).
+function PlanTab.sidebarMode(talentShown, closed, rival)
+	if rival or not talentShown then return "off" end
 	return closed and "tab" or "open"
+end
+
+function PlanTab.rivalLoaded()
+	return C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded(PlanTab.SIDEBAR_RIVAL) and true or false
 end
 
 function PlanTab.setSidebarClosed(closed)
@@ -5522,7 +5530,7 @@ end
 function PlanTab.updateSidebar()
 	if InCombatLockdown() then return "combat" end
 	local shown = PlayerSpellsFrame and PlayerSpellsFrame:IsShown() and true or false
-	local mode = PlanTab.sidebarMode(shown, db().sidebarClosed)
+	local mode = PlanTab.sidebarMode(shown, db().sidebarClosed, PlanTab.rivalLoaded())
 	if mode == "off" and not PlanTab.sidebar then return mode end
 	local f = PlanTab.sidebar or PlanTab.buildSidebar()
 	f.tab:SetShown(mode == "tab")
@@ -5554,7 +5562,7 @@ end
 function PlanTab.armSidebar()
 	if PlanTab.sidebarArmed or not PlayerSpellsFrame then return false end
 	PlanTab.sidebarArmed = true
-	if C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded(PlanTab.SIDEBAR_RIVAL) then
+	if PlanTab.rivalLoaded() then
 		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Talent Loadout Manager has its own sidebar on the talent window, so the plan's is left off.|r")
 		return false
 	end
@@ -7292,6 +7300,10 @@ local function selfTest()
 		check(closedTest .. ", off even when closed", PlanTab.sidebarMode(false, true), "off")
 		check(closedTest .. ", open with the window", PlanTab.sidebarMode(true, nil), "open")
 		check(closedTest .. ", closed leaves the way back in", PlanTab.sidebarMode(true, true), "tab")
+		-- the rival addon's sidebar wins on the redraw path too, not only at arm time (review)
+		check(closedTest .. ", off while Talent Loadout Manager is loaded", PlanTab.sidebarMode(true, nil, true), "off")
+		check(closedTest .. ", off while it is loaded even when closed", PlanTab.sidebarMode(true, true, true), "off")
+		check(closedTest .. ", the rival is asked, not assumed", PlanTab.rivalLoaded(), false)
 		check(closedTest .. ", the row fits two lines of normal text", PlanTab.SIDEBAR_ROW >= 32, true)
 	end
 
