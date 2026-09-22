@@ -111,3 +111,4 @@ How it came to be: `0007` was scoped to say, not to do, because applying a loado
   ring on a head, which it refuses and the cursor is cleared. Unchecked: the search term is our own
   table or the client's item name, never player text. Leaks: nothing leaves the machine; a failure
   prints one grey line or does nothing.
+- **2026-09-22** **Decided:** Rob, in the game at 0.17.1: step 1 confirmed, step 2 works, step 5 confirmed. Steps 3, 4 and 6 not reported and not asked for again. Rob's one note: the Equip button looked like "a little bit of text". Fixed at 0.17.2: Plan tab actions are now real buttons (`UIPanelButtonTemplate`); the item level target on the BiS tabs stays plain text. Card closed; if step 3 ever puts a ring on the wrong finger, open a new card.
