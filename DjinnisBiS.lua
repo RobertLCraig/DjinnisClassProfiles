@@ -1437,7 +1437,7 @@ local function slotStates(plan, wornBySlot)
 	for slot, entry in pairs(PlanTab.entries(plan, wornBySlot)) do
 		local state = slotState(entry, wornBySlot[slot])
 		if state ~= "ok" then
-			marks[PLAN_SLOT_INVENTORY[slot]] = { state = state, entry = entry }
+			marks[PLAN_SLOT_INVENTORY[slot]] = { state = state, entry = entry, worn = wornBySlot[slot] }
 		end
 	end
 	return marks
@@ -1685,6 +1685,7 @@ local function armBagMarks()
 		"PLAYER_EQUIPMENT_CHANGED",
 		"PLAYER_SPECIALIZATION_CHANGED",
 		"PLAYER_REGEN_ENABLED",
+		"SOCKET_INFO_CLOSE",  -- a gem went in (or the socket window shut): the Plan tab's gem lines
 		defaultBags and "BAG_UPDATE_DELAYED" or nil,
 	}) do
 		watcher:RegisterEvent(event)
@@ -2929,10 +2930,15 @@ local function planLineFor(mark)
 	if mark.state == "enchant" then
 		return "Plan: enchant with " .. PlanTab.enchantName(entry.enchant)
 	elseif mark.state == "gem" then
-		local names = {}
+		local names, have = {}, {}
 		for i, gem in ipairs(entry.gems) do names[i] = itemName(gem) end
-		return #names > 0 and ("Plan: wants " .. table.concat(names, ", "))
-			or "Plan: a socket is empty"
+		-- Say what is in the sockets now, with ids: a gem of the same name at a
+		-- different rank is a different id (Rob, 2026-09-22, a bought garnet that
+		-- still read as wanted).
+		for i, gem in ipairs(mark.worn and mark.worn.gems or {}) do have[i] = ("%s (%d)"):format(itemName(gem), gem) end
+		local line = #names > 0 and ("Plan: wants " .. table.concat(names, ", ")) or "Plan: a socket is empty"
+		if #entry.gems > 0 then line = line .. (" (%d)"):format(entry.gems[1]) end
+		return line .. (#have > 0 and (", has " .. table.concat(have, ", ")) or ", socket empty")
 	end
 	local inBank = C_Item.GetItemCount(entry.id, true, false, true, true) - C_Item.GetItemCount(entry.id)
 	return ("Plan: %s (%d), %s"):format(itemName(entry.id), entry.ilvl,
