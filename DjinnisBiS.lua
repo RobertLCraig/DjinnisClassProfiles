@@ -1648,15 +1648,31 @@ function PlanTab.loadoutState(planned, active, edited)
 end
 
 -- true when two talent import strings name different builds, false when the
--- same, nil when either is missing or may not be read. Pure, for /bis test.
--- ponytail: whole-string compare. The header (version, spec, tree hash) is the
--- same for two configs of one spec; if a client ever differs there, compare
--- from the node bits on instead, here and nowhere else.
-function PlanTab.talentStringsDiffer(active, saved)
-	if type(active) ~= "string" or type(saved) ~= "string" then return nil end
-	if active == "" or saved == "" then return nil end
-	if not (canRead(active) and canRead(saved)) then return nil end
-	return active ~= saved
+-- same, nil when either is missing, may not be read, or was exported by
+-- another game build: the header (8 bits version, 16 spec id, 128 tree hash,
+-- Blizzard_ClassTalentImportExport.lua) must agree before the node bits
+-- mean anything, so a string from an older client says nothing rather than
+-- "edited". Pure, for /bis test.
+-- ponytail: whole-string compare past the header. 25 base64 chars is 150 of
+-- the header's 152 bits, the last two share a char with the first node.
+function PlanTab.talentStringsDiffer(active, planned)
+	if type(active) ~= "string" or type(planned) ~= "string" then return nil end
+	if active == "" or planned == "" then return nil end
+	if not (canRead(active) and canRead(planned)) then return nil end
+	if active:sub(1, 25) ~= planned:sub(1, 25) then return nil end
+	return active ~= planned
+end
+
+-- The planned build for `spec` and `scenario`: the plan cell's own `talents`
+-- string, the export the Top Gear report was simmed on, and then the loadout
+-- name it was simmed under. nil when the cell has no string: no planned
+-- build, nothing to mark. Never the saved loadout: Blizzard writes a hand
+-- edit into that on Apply, so a compare against it cannot see the edit
+-- (Rob, 2026-09-22, Option A). Pure, for /bis test; card 0023 reads it too.
+function PlanTab.plannedTalents(spec, scenario)
+	local cell = GEAR_PLAN[spec] and GEAR_PLAN[spec][scenario]
+	if not cell or type(cell.talents) ~= "string" or cell.talents == "" then return nil end
+	return cell.talents, cell.loadout
 end
 
 local SCENARIO_LABEL = { st = "1 target", ["2t"] = "2 targets", mplus = "Mythic+" }
@@ -4398,20 +4414,20 @@ end
 -- route to action bars that stop updating in combat (card 0002 found
 -- ClassCodex doing it).
 
--- Whether the talents in play still match the saved loadout the game says is
--- selected (card 0014): the active config's import string against the saved
--- config's, both from C_Traits.GenerateImportString. true when edited, false
--- when they match, nil when the game will not say. Read out of combat only;
--- in combat the last reading is held rather than blanked, per DECISIONS.md.
-function PlanTab.talentsEdited(savedConfigID)
+-- Whether the talents in play differ from `planned`, a plan cell's own
+-- import string from PlanTab.plannedTalents (card 0014): the active config's
+-- string from C_Traits.GenerateImportString against it. true when edited,
+-- false when they match, nil with no planned build or when the game will not
+-- say. Read out of combat only; in combat the last reading is held rather
+-- than blanked, per DECISIONS.md.
+function PlanTab.talentsEdited(planned)
 	if InCombatLockdown() then return PlanTab.lastEdited end
 	local edited = nil
-	if savedConfigID and C_ClassTalents.GetActiveConfigID and C_Traits.GenerateImportString then
+	if planned and C_ClassTalents.GetActiveConfigID and C_Traits.GenerateImportString then
 		local activeConfigID = C_ClassTalents.GetActiveConfigID()
 		if activeConfigID then
-			local okActive, active = pcall(C_Traits.GenerateImportString, activeConfigID)
-			local okSaved, saved = pcall(C_Traits.GenerateImportString, savedConfigID)
-			edited = PlanTab.talentStringsDiffer(okActive and active, okSaved and saved)
+			local ok, active = pcall(C_Traits.GenerateImportString, activeConfigID)
+			edited = PlanTab.talentStringsDiffer(ok and active, planned)
 		end
 	end
 	PlanTab.lastEdited = edited
@@ -4419,9 +4435,12 @@ function PlanTab.talentsEdited(savedConfigID)
 end
 
 -- The saved loadout picked in the talent window, by name, or nil, and then
--- whether the talents have been edited away from it since (card 0014). The
--- name alone is the last loadout SELECTED, which a hand edit does not change.
-function PlanTab.activeLoadoutName()
+-- whether the talents have been edited away from the build planned for
+-- `forSpec` and `scenario` (card 0014). The name alone is the last loadout
+-- SELECTED, which a hand edit does not change. The cell's string is only the
+-- plan for the loadout it was simmed under: a boss row on another loadout of
+-- the same scenario has no planned build and is judged by name alone.
+function PlanTab.activeLoadoutName(forSpec, scenario)
 	local spec = C_SpecializationInfo
 	if not (spec and spec.GetSpecialization and C_ClassTalents and C_Traits) then return nil end
 	local ok, specID = pcall(spec.GetSpecializationInfo, spec.GetSpecialization())
@@ -4436,7 +4455,8 @@ function PlanTab.activeLoadoutName()
 	local okInfo, info = pcall(C_Traits.GetConfigInfo, configID)
 	local name = okInfo and info and info.name
 	if not (name and canRead(name)) then return nil end
-	return name, PlanTab.talentsEdited(configID)
+	local planned, plannedFor = PlanTab.plannedTalents(forSpec, scenario)
+	return name, PlanTab.talentsEdited(plannedFor == name and planned or nil)
 end
 
 -- The /simc export (card 0018). The Simulationcraft addon already writes every
@@ -4592,7 +4612,7 @@ function PlanTab.lines(forSpec)
 		if row.boss == PlanTab.boss then picked = row end
 	end
 
-	local active, edited = PlanTab.activeLoadoutName()
+	local active, edited = PlanTab.activeLoadoutName(spec, picked.scenario)
 	local lines = {
 		{ text = ("%sPick the boss you are about to pull. Everything below is for that boss.|r"):format(GREY) },
 		{ text = "" },
@@ -5068,7 +5088,7 @@ function PlanTab.checkSetup()
 	if not row then PlanTab.hideSetup(); return "no plan" end
 	if PlanTab.fenced() then PlanTab.popupPending = true; return "fenced" end
 	PlanTab.popupPending = nil
-	local active, edited = PlanTab.activeLoadoutName()
+	local active, edited = PlanTab.activeLoadoutName(spec, row.scenario)
 	local plan = gearPlanFor(spec, row.scenario)
 	-- Consumables only once a ready check or the keystone slot asked for them
 	-- (card 0017): nobody flasks at zone-in.
@@ -5709,7 +5729,7 @@ function PlanTab.updateSidebar()
 	if mode ~= "open" then return mode end
 	PlanTab.placeSidebar()
 	local spec = playerSpec()
-	local active, edited = PlanTab.activeLoadoutName()
+	local active, edited = PlanTab.activeLoadoutName(spec, planScenario(spec))
 	local rows = PlanTab.sidebarRows(spec and PlanTab.BOSSES[spec], (statContext()), active, edited)
 	for i, r in ipairs(rows) do
 		local row = PlanTab.sidebarRow(i)
@@ -6285,28 +6305,69 @@ local function selfTest()
 	check(editTest .. ", same name still mismatches", PlanTab.loadoutState("WS Raid 2T *", "WS Raid 2T *", true), "mismatch")
 	check(sameTest .. ", same name matches", PlanTab.loadoutState("WS Raid 2T *", "WS Raid 2T *", false), "match")
 	check(editTest .. ", no loadout is still unknown", PlanTab.loadoutState("WS Raid 2T *", nil, true), "unknown")
+	check(editTest .. ", another game build's string says nothing", PlanTab.talentStringsDiffer("X" .. aString:sub(2), aString), nil)
 
-	-- The reader itself: the strings come from the game, so stub the two calls
-	-- and prove which config ids it asks for and what it does with them.
+	-- The planned build is the cell's own string (Option A), never the saved
+	-- loadout: aString above IS the Feral st cell's, so the helper must hand
+	-- back that literal. A cell without one has no planned build.
+	local noPlanTest = "a cell without talents marks nothing"
+	do
+		local planned, plannedFor = PlanTab.plannedTalents("Feral", "st")
+		check(editTest .. ", the plan cell's own string", planned, aString)
+		check(editTest .. ", and the loadout it was simmed under", plannedFor, "DotC Raid ST *")
+		check(noPlanTest .. ", no such cell", PlanTab.plannedTalents("Feral", "nope"), nil)
+		local cell, was = GEAR_PLAN.Feral.st, GEAR_PLAN.Feral.st.talents
+		cell.talents = nil
+		check(noPlanTest .. ", the cell has none", PlanTab.plannedTalents("Feral", "st"), nil)
+		cell.talents = ""
+		check(noPlanTest .. ", the cell's is empty", PlanTab.plannedTalents("Feral", "st"), nil)
+		cell.talents = was
+	end
+
+	-- The reader itself: the active string comes from the game, so stub the
+	-- two calls and prove what it does against a planned string.
 	local combatTest = "talent string read out of combat only"
 	local wasActiveID, wasGenerate = C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString
 	local wasCombat, wasLast = InCombatLockdown, PlanTab.lastEdited
-	local strings = { [1] = aString, [2] = bString }
+	local reads, activeString = 0, bString
 	C_ClassTalents.GetActiveConfigID = function() return 1 end
-	C_Traits.GenerateImportString = function(id) return strings[id] end
+	C_Traits.GenerateImportString = function(id) reads = reads + 1 return id == 1 and activeString or nil end
 	InCombatLockdown = function() return false end
-	check(editTest .. ", read from the game", PlanTab.talentsEdited(2), true)
-	check(sameTest .. ", read from the game", PlanTab.talentsEdited(1), false)
-	check(editTest .. ", no saved loadout", PlanTab.talentsEdited(nil), nil)
-	local reads = 0
-	C_Traits.GenerateImportString = function(id) reads = reads + 1 return strings[id] end
-	PlanTab.talentsEdited(2)
+	check(editTest .. ", read from the game", PlanTab.talentsEdited(aString), true)
+	check(noPlanTest .. ", read from the game", PlanTab.talentsEdited(nil), nil)
+	check(noPlanTest .. ", and read nothing for it", reads, 1)
+	activeString = aString
+	check(sameTest .. ", read from the game", PlanTab.talentsEdited(aString), false)
+	C_ClassTalents.GetActiveConfigID = function() return nil end
+	check(editTest .. ", no active config is not edited", PlanTab.talentsEdited(bString), nil)
+	C_ClassTalents.GetActiveConfigID = function() return 1 end
+	activeString = bString
+	PlanTab.talentsEdited(aString)
+	reads = 0
 	InCombatLockdown = function() return true end
-	check(combatTest .. ", holds the last reading", PlanTab.talentsEdited(1), true)
-	check(combatTest .. ", reads nothing", reads, 2)
+	check(combatTest .. ", holds the last reading", PlanTab.talentsEdited(aString), true)
+	check(combatTest .. ", reads nothing", reads, 0)
 	InCombatLockdown = function() return false end
-	check(combatTest .. ", reads again after", PlanTab.talentsEdited(1), false)
-	check(combatTest .. ", and it was a read", reads, 4)
+	activeString = aString
+	check(combatTest .. ", reads again after", PlanTab.talentsEdited(aString), false)
+	check(combatTest .. ", and it was a read", reads, 1)
+	-- Through activeLoadoutName: the st cell was simmed on "DotC Raid ST *",
+	-- so on that loadout its string judges; on "WS Raid Most Bosses", also a
+	-- 1 target loadout, the cell is not the plan and only the name counts.
+	do
+		local wasStarter, wasSelected, wasInfo = C_ClassTalents.GetStarterBuildActive, C_ClassTalents.GetLastSelectedSavedConfigID, C_Traits.GetConfigInfo
+		local loadout = "DotC Raid ST *"
+		C_ClassTalents.GetStarterBuildActive = function() return false end
+		C_ClassTalents.GetLastSelectedSavedConfigID = function() return 7 end
+		C_Traits.GetConfigInfo = function() return { name = loadout } end
+		activeString = bString
+		local name, edited = PlanTab.activeLoadoutName("Feral", "st")
+		check(editTest .. ", named and edited on the cell's loadout", name .. "/" .. tostring(edited), "DotC Raid ST */true")
+		loadout = "WS Raid Most Bosses"
+		name, edited = PlanTab.activeLoadoutName("Feral", "st")
+		check(noPlanTest .. ", another loadout of the scenario", name .. "/" .. tostring(edited), "WS Raid Most Bosses/nil")
+		C_ClassTalents.GetStarterBuildActive, C_ClassTalents.GetLastSelectedSavedConfigID, C_Traits.GetConfigInfo = wasStarter, wasSelected, wasInfo
+	end
 	C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString = wasActiveID, wasGenerate
 	InCombatLockdown, PlanTab.lastEdited = wasCombat, wasLast
 
