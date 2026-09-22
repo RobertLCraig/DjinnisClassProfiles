@@ -4419,18 +4419,22 @@ end
 -- string from C_Traits.GenerateImportString against it. true when edited,
 -- false when they match, nil with no planned build or when the game will not
 -- say. Read out of combat only; in combat the last reading is held rather
--- than blanked, per DECISIONS.md.
+-- than blanked, per DECISIONS.md. Held per planned string: the sidebar and
+-- the Plan tab can ask about different cells, and a cell with no planned
+-- build is never answered with another cell's reading (0014 review).
+PlanTab.lastEdited = {}
 function PlanTab.talentsEdited(planned)
-	if InCombatLockdown() then return PlanTab.lastEdited end
+	if not planned then return nil end
+	if InCombatLockdown() then return PlanTab.lastEdited[planned] end
 	local edited = nil
-	if planned and C_ClassTalents.GetActiveConfigID and C_Traits.GenerateImportString then
+	if C_ClassTalents.GetActiveConfigID and C_Traits.GenerateImportString then
 		local activeConfigID = C_ClassTalents.GetActiveConfigID()
 		if activeConfigID then
 			local ok, active = pcall(C_Traits.GenerateImportString, activeConfigID)
 			edited = PlanTab.talentStringsDiffer(ok and active, planned)
 		end
 	end
-	PlanTab.lastEdited = edited
+	PlanTab.lastEdited[planned] = edited
 	return edited
 end
 
@@ -6329,6 +6333,7 @@ local function selfTest()
 	local combatTest = "talent string read out of combat only"
 	local wasActiveID, wasGenerate = C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString
 	local wasCombat, wasLast = InCombatLockdown, PlanTab.lastEdited
+	PlanTab.lastEdited = {}  -- a fresh held table, put back below
 	local reads, activeString = 0, bString
 	C_ClassTalents.GetActiveConfigID = function() return 1 end
 	C_Traits.GenerateImportString = function(id) reads = reads + 1 return id == 1 and activeString or nil end
@@ -6347,6 +6352,8 @@ local function selfTest()
 	InCombatLockdown = function() return true end
 	check(combatTest .. ", holds the last reading", PlanTab.talentsEdited(aString), true)
 	check(combatTest .. ", reads nothing", reads, 0)
+	check(noPlanTest .. ", in combat too, not the last reading", PlanTab.talentsEdited(nil), nil)
+	check(combatTest .. ", another cell's string is not the held one", PlanTab.talentsEdited(bString), nil)
 	InCombatLockdown = function() return false end
 	activeString = aString
 	check(combatTest .. ", reads again after", PlanTab.talentsEdited(aString), false)
