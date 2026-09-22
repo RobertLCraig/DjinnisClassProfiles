@@ -12,7 +12,8 @@ The Plan tab has buttons now: Talents opens the talent window and loads nothing,
 exact bag copy in the planned slot, Search AH runs the auction house's own search. Its review
 fixed three faults at 0.17.1: an unnamed enchant searched by item id, a refused equip left on
 the cursor, and a redraw that only worked once the character sheet had been opened. It wants six
-looks in the game. **`todo/` is still empty**, and seven cards wait on one trip to a live client.
+looks in the game. **`todo/` holds one card, `0009`**, a Mythic+ plan beside the raid plan, written
+by Rob the same night; seven cards wait on one trip to a live client.
 **2026-09-21: card `0007` is built, reviewed and in `human-review/`.** A
 fourth tab, Plan, names the talent loadout per boss, the slots to change and what to buy. Its review
 made the checks read the drawn tab and fixed three small faults at 0.16.1. It wants eight looks in
@@ -210,9 +211,10 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this. `todo/` is empty** (as of 2026-09-22). Whatever comes next starts as
-a card, carries `not_for_the_loop:` because Rob builds this addon by hand on msiraider, and adds
-to the `PlanTab` table rather than a new top-level local: the main chunk holds 191 of Lua's 200.
+**`docs/board/` owns this. The one buildable card is `0009` in `todo/`**, a Mythic+ plan beside
+the raid plan (as of 2026-09-22). Like the rest it carries `not_for_the_loop:` because Rob builds
+this addon by hand on msiraider. Whoever builds it adds to the `PlanTab` table rather than a new
+top-level local: the main chunk holds 191 of Lua's 200.
 
 Seven cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006`, `0007` and `0008`,
 all wanting a live client. **They are one trip**, and each card lists its own checks under
