@@ -171,3 +171,74 @@ a loot row (`Blizzard_EncounterJournal`) and copy its sizes rather than guessing
   from `DjinnisUIEnhancements/EditMode.lua` (an `EventRegistry` "EditMode.Enter" / "EditMode.Exit"
   overlay with `GetFrame`, `SetUnlocked`, `ApplyLayout`), copied in, which is a card of its own if
   Rob wants a `/bis` window that Edit Mode can place.
+- 2026-09-22 Claude (review, in a worktree, not the builder's session): **pass to human-review
+  with two trivial fixes made in place.** No client here, so the frames are a written claim and
+  the manual criterion stays open.
+  **Attacked.** Every template, mixin and font the build names, read in
+  `C:\Dev\WoWAddons\wow-ui-source` on `live`: `ButtonFrameTemplate` (SharedUIPanelTemplates.xml
+  684, `Inset` at -60 / 26, `CloseButton`, `PortraitFrameMixin` which carries `TitledPanelMixin`
+  so `SetTitle` is real), `SetPortraitToSpecIcon` (PortraitFrame.lua 73, class icon when no spec),
+  the `ItemButton` intrinsic (Blizzard_ItemButton/Shared, 37 square, `IconBorder` and
+  `IconOverlay` fixed 37 centred), `SetItemButtonQuality` on a nil quality (ColorManager returns
+  nil, the border is cleared, the overlay call falls back to Common; and the whole call is under
+  `pcall`), `MinimalSliderWithSteppersTemplate` (`Init` sets the value BEFORE it attaches
+  `OnValueChanged`, so the saved scale is not re-written on build; `RegisterCallback` invokes
+  `func(owner, value)`, which the `function(_, value)` signature matches), `GameFontHighlightLeft`
+  (FontStyles.xml 74), `UI-QuestTitleHighlight` (FriendsFrame.xml), and `UISpecialFrames`
+  (`CloseSpecialWindows` hides by global name, and the frame is named `DjinnisBiSFrame`, so
+  Escape closes it). `PLAYER_ENTERING_WORLD` reaches `PlanTab.redraw`, so an open Plan tab
+  re-greys its three buttons on zoning. `C_Item.GetItemQualityByID` is `AllowedWhenUntainted`,
+  no secret return; every read in the touched code is an item link or a plain number.
+  **Ran:** `lua offline-check.lua` (5.4) and Lua 5.1.5, both exit 0 before and after the fixes.
+  **Mutations,** each on a temp copy: the in-raid guard in `PlanTab.choices` broken (3 red), the
+  clamp in `PlanTab.scale` dropped (2 red), the in-dungeon guard in `pickScenario` dropped (2
+  red), a small font on the item level button (the scan, 1 red), the sizes set to 15 / 16 / 18 (3
+  red). Every `proves:` check can fail.
+  **Broke and fixed in place** (`DjinnisBiS.lua`, no new top-level local, 177 as before):
+  1. The item button was `SetSize(32, 32)`, but the intrinsic's `IconBorder` and `IconOverlay`
+     are fixed 37-pixel textures centred on the button, so every quality border overhung its icon
+     by 2.5 pixels a side. Blizzard resizes the border by hand (`LootHistory.lua:13`); here the
+     button is scaled instead, `icon:SetScale(PlanTab.SIZE.icon / 37)`, so border, overlay and
+     icon shrink as one piece. The rows and cells anchor to the scaled rect, nothing else moves.
+  2. The portrait was set once in `buildWindow`, so a spec change and a reopen showed the old
+     spec's icon. `refresh` now calls `window:SetPortraitToSpecIcon()` every time.
+  **Looked at and held:** slider `Init` order (no spurious save on first load); `Init` value on a
+  step (1.0 and every saved 5% step land on the 0.05 grid); the choice row inside an instance
+  (the chosen button is never one of the greyed ones, so `LockHighlight` and `SetEnabled(false)`
+  never meet on one button; `SetMotionScriptsWhileDisabled` keeps the reason tooltip);
+  `pickScenario` from the strip and from the tab write the same pin; the Inset re-anchor keeps
+  its BOTTOMRIGHT; the tab row, spec row and Import button do not overlap the title container or
+  the close button at 900 wide.
+  **Not fixed, noted:** the slider is a child of the frame it scales, so the thumb drifts under
+  the cursor while dragging (cosmetic, a person decides); the `%d` in the slider's label is fine
+  in the client's Lua 5.1 and would error on a float in 5.4, which never runs it.
+  **Security.** Weakest point: the SavedVariables file, editable by hand. `scale` is clamped and
+  a word reads as 1; `planScenario` only accepts `st` / `2t`; `statContext` only `raid` /
+  `mplus`. Unchecked path: none new; the tooltips and labels are the addon's own strings, no
+  player input reaches a format or a table key. Leaks on failure: the `pcall` on
+  `SetItemButtonQuality` swallows a bad link silently, so a row shows no border rather than an
+  error; nothing else is caught and nothing is printed.
+
+## What I need from you
+
+One screenshot each, in a live client, after `deploy.ps1 -Only DjinnisBiS`:
+1. `/reload`, `/bis`. A round portrait with your spec icon, a title bar, a close button, four
+   tab buttons and a "Size" slider bottom right. Drag the title bar. Escape closes it.
+2. Swap spec with the window closed, `/bis` again: the portrait shows the new spec.
+3. Slider to 120%: the window grows at once. `/reload`, `/bis`: still 120%. Say whether the
+   thumb drifting under the cursor while dragging is acceptable.
+4. By Boss tab: each item row has a square item button whose coloured quality border sits ON
+   the icon's edge, not outside it. Hover a row: it lights and the tooltip shows. Shift-click
+   links in chat. Click the item level: the menu opens.
+5. By Slot tab: same item buttons in both columns, nothing overlapping the row beneath.
+6. Stats tab: four bars, the Raid / Mythic+ button 24 high, nothing clipped at the top.
+7. Plan tab: three buttons above the list, the current one lit. Click `Raid - 2 targets`: it
+   lights, the list changes, the character sheet strip reads "2 targets". Click `Mythic+`: the
+   stat pane's header reads "Mythic+".
+8. Plan tab inside a dungeon: the two raid buttons are greyed and hovering one says why. In a
+   raid: Mythic+ is greyed with its reason. Zone in with the tab already open: it re-greys.
+9. Plan tab gear rows: item button with border, and Equip, Equip all, Save set, Search AH,
+   Auctionator and KeystoneLoot as 24-high buttons that fit their word.
+10. The character sheet strip, its button, and the framed stat pane: normal text, nothing
+    spilling out.
+Then the last criterion: does every tab read as a game window?

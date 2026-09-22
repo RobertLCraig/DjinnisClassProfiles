@@ -2035,7 +2035,11 @@ end
 -- click, so shift-click linking and the Plan tab's row click work as before.
 function PlanTab.newItemIcon(parent)
 	local icon = CreateFrame("ItemButton", nil, parent)
-	icon:SetSize(PlanTab.SIZE.icon, PlanTab.SIZE.icon)
+	-- Scaled, not resized: the intrinsic is 37 and its IconBorder and IconOverlay
+	-- are fixed 37-pixel textures centred on it, so a button resized to 32 keeps a
+	-- 37 border that overhangs the icon (Blizzard's LootHistory.lua resizes the
+	-- border by hand for the same reason). Scaling shrinks all of it as one piece.
+	icon:SetScale(PlanTab.SIZE.icon / 37)
 	icon:SetPoint("LEFT", parent, "LEFT", 1, 0)
 	icon:EnableMouse(false)
 	return icon
@@ -2216,6 +2220,7 @@ end
 
 refresh = function()
 	if not window then return end
+	window:SetPortraitToSpecIcon()  -- the spec can have changed since the window was built
 	pcall(harvestFromJournal)
 	pcall(resolveFromCache)
 	pcall(resolveFromSim)
