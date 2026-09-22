@@ -2790,6 +2790,7 @@ function PlanTab.harvestPools()
 	if PlanTab.poolsDone or not EJ_GetNumTiers or InCombatLockdown() then return end
 	-- never walk the journal under the player: every call below moves its selection
 	if EncounterJournal and EncounterJournal:IsShown() then return end
+	local keptTier = EJ_GetCurrentTier and EJ_GetCurrentTier()
 	local instanceID = PlanTab.raidInstanceID("Venomous Abyss")
 	if not instanceID then return end
 	EJ_SelectInstance(instanceID)
@@ -2834,6 +2835,15 @@ function PlanTab.harvestPools()
 
 	EJ_SetLootFilter(keptClass or 0, keptSpec or 0)
 	C_EncounterJournal.SetSlotFilter(slotFilter)
+	-- The journal's OnShow rebuilds its loot list from the client's selection
+	-- without reselecting the page it is on (Blizzard_EncounterJournal.lua:789),
+	-- so put its tier, instance and encounter back or a reopened boss page
+	-- lists another boss's loot until the next click.
+	if keptTier then EJ_SelectTier(keptTier) end
+	if EncounterJournal and EncounterJournal.instanceID then
+		EJ_SelectInstance(EncounterJournal.instanceID)
+		if EncounterJournal.encounterID then EJ_SelectEncounter(EncounterJournal.encounterID) end
+	end
 	PlanTab.poolsDone = not stale
 end
 
@@ -2852,12 +2862,17 @@ end
 -- item ids for the boss, `planned` is spec -> set of planned item ids.
 -- Returns { spec, hits = sorted id list, size } or nil when no spec has a hit.
 -- A tie goes to `current` when it is one of the tied, else to the first in
--- SPEC_ORDER, so the answer is the same on every draw.
+-- SPEC_ORDER, so the answer is the same on every draw. A pool missing any
+-- spec's cell is nil too: the journal answers cell by cell, and "Feral: 1 of
+-- 10" read before Guardian's "1 of 5" arrived would send you to the wrong spec.
 function PlanTab.bestLootSpec(pool, planned, current)
+	for _, spec in ipairs(SPEC_ORDER) do
+		if not (pool and pool[spec]) then return nil end
+	end
 	local best
 	for _, spec in ipairs(SPEC_ORDER) do
 		local size, hits = 0, {}
-		for id in pairs(pool and pool[spec] or {}) do
+		for id in pairs(pool[spec]) do
 			size = size + 1
 			if planned[spec] and planned[spec][id] then hits[#hits + 1] = id end
 		end
@@ -5624,30 +5639,35 @@ local function selfTest()
 		local function set(...) local s = {} for _, id in ipairs({ ... }) do s[id] = true end return s end
 		local bestTest = "plan tab names the best loot spec per boss"
 		local planned = { Feral = set(1, 2), Guardian = set(1, 2), Resto = set(3) }
-		local pool = { Feral = set(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), Guardian = set(1, 2, 3, 4, 5), Resto = set(3, 11) }
+		local pool = { Balance = set(12), Feral = set(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), Guardian = set(1, 2, 3, 4, 5), Resto = set(3, 11) }
 		local best = PlanTab.bestLootSpec(pool, planned, "Feral")
 		check(bestTest .. ", the smallest pool for its hits wins", best and best.spec, "Resto")
 		check(bestTest .. ", read as text", best and PlanTab.lootSpecText(best), "Resto: 1 of 2")
-		pool.Resto = nil
+		pool.Resto = set(11)
 		best = PlanTab.bestLootSpec(pool, planned, "Feral")
 		check(bestTest .. ", 2 of 5 beats 2 of 10 whatever spec you are", best and best.spec, "Guardian")
 		check(bestTest .. ", its planned items are named", best and table.concat(best.hits, ","), "1,2")
 		check(bestTest .. ", and its pool size", best and best.size, 5)
 		check(bestTest .. ", no pool read yet says nothing", PlanTab.bestLootSpec(nil, planned, "Feral"), nil)
+		-- review: a boss the journal has only half answered says nothing yet,
+		-- or Feral's 2 of 10 would show as best until Guardian's 2 of 5 lands
+		pool.Guardian = nil
+		check(bestTest .. ", a pool missing a spec's cell says nothing yet", PlanTab.bestLootSpec(pool, planned, "Feral"), nil)
+		pool.Guardian = set(1, 2, 3, 4, 5)
 		local head = GEAR_PLAN.Feral.st.slots.head:match("id=(%d+)")
 		check(bestTest .. ", the planned ids come from the gear plan", PlanTab.plannedIds("Feral")[tonumber(head)], true)
 		check(bestTest .. ", a spec with no plan has none", next(PlanTab.plannedIds("Resto")), nil)
 
 		local tieTest = "a tie goes to the current spec"
-		local tied = { Feral = set(1, 2), Guardian = set(1, 3) }
+		local tied = { Balance = set(), Feral = set(1, 2), Guardian = set(1, 3), Resto = set() }
 		local both = { Feral = set(1), Guardian = set(1) }
 		check(tieTest .. ", Guardian", PlanTab.bestLootSpec(tied, both, "Guardian").spec, "Guardian")
 		check(tieTest .. ", Feral", PlanTab.bestLootSpec(tied, both, "Feral").spec, "Feral")
 		check(tieTest .. ", neither: the first in spec order", PlanTab.bestLootSpec(tied, both, "Resto").spec, "Feral")
-		check(tieTest .. ", but a better chance still beats the current spec", PlanTab.bestLootSpec({ Feral = set(1, 2, 3), Guardian = set(1, 3) }, both, "Feral").spec, "Guardian")
+		check(tieTest .. ", but a better chance still beats the current spec", PlanTab.bestLootSpec({ Balance = set(), Feral = set(1, 2, 3), Guardian = set(1, 3), Resto = set() }, both, "Feral").spec, "Guardian")
 
 		local noneTest = "no loot spec line without a planned item"
-		check(noneTest .. ", pure", PlanTab.bestLootSpec({ Feral = set(7, 8) }, planned, "Feral"), nil)
+		check(noneTest .. ", pure", PlanTab.bestLootSpec({ Balance = set(), Feral = set(7, 8), Guardian = set(), Resto = set() }, planned, "Feral"), nil)
 		-- as drawn: Nek'zali's row carries the text with a planned item in the
 		-- pool and no such text without one, and the picked line names the item
 		local realBoss5, realPool = PlanTab.boss, PlanTab.POOL
@@ -5660,12 +5680,12 @@ local function selfTest()
 			end
 			return row, said
 		end
-		PlanTab.POOL = { [3470] = { Feral = set(tonumber(head), 7, 8, 9), Guardian = set(7, 8) } }
+		PlanTab.POOL = { [3470] = { Balance = set(), Feral = set(tonumber(head), 7, 8, 9), Guardian = set(7, 8), Resto = set() } }
 		local row, said = nekRow()
 		check(bestTest .. ", drawn on the boss row", row and row.text:find("loot spec |cffffffffFeral: 1 of 4", 1, true) ~= nil, true)
 		-- the item's id offline, its name in the game: either is an item named
 		check(bestTest .. ", drawn under the picked boss with the item", said and said.text:match("1 of its 4 drops is planned: %S") ~= nil, true)
-		PlanTab.POOL = { [3470] = { Feral = set(7, 8, 9), Guardian = set(7, 8) } }
+		PlanTab.POOL = { [3470] = { Balance = set(), Feral = set(7, 8, 9), Guardian = set(7, 8), Resto = set() } }
 		row, said = nekRow()
 		check(noneTest .. ", drawn: the row has no loot spec", row and row.text:find("loot spec", 1, true), nil)
 		check(noneTest .. ", drawn: no line under the picked boss", said, nil)
