@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.23.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Twenty-three cards sit in `human-review/` and every one waits on one trip to a live client. `todo/` holds only `0014` and `0023`, both waiting on Rob's planned-build call.
-_Last updated: 2026-09-22 (v0.23.0: fourteen cards built and reviewed by sub-agents in git worktrees; only the two decision-blocked cards remain)_
+**Status:** v0.24.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` and `ai-review/` are empty; twenty-six cards sit in `human-review/` and every one waits on one trip to a live client.
+_Last updated: 2026-09-22 (v0.24.0: 0014, 0023 and 0028 built on Option A; the board's build queue is empty)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -105,14 +105,13 @@ than a task.
   bundled libraries ship inside the addon, so they are part of the artefact.
 
 ## Current state
-**2026-09-22, traps from the sub-agent build (v0.20.0 to v0.23.0).**
+**2026-09-22, traps from the sub-agent build (v0.20.0 to v0.24.0).**
 - **Parallel builds conflict in three places only**: the tail of `selfTest` (every card appends its checks there), the loader's `PLAYER_LOGIN` arm list, and the Plan tab's boss rows in `PlanTab.lines`.
   All resolve by keeping both sides; a `do ... end` check block needs its own `end` when two land together. A review that lands after a builder branched from older code (0013 review vs 0017 build) needs a hand merge of the shared function, not both sides.
 - **A Raidbots paste must be the whole `/simc` export, checksum line included.** Trimming the bag list flips the page to Unverified Input. Card 0018 appends its block after the checksum for the same reason.
-- **The "planned build" question is open and blocks two cards.** `0014` and `0023` read the planned talent string from the saved loadout, which Blizzard overwrites with a hand edit on Apply, so the compare can never see an edit.
-  Both sit in `todo/` with the same finding; the fix must be one decision (compare against the plan's own `talents` string, or accept the saved loadout and say so).
+- **The `st` cell was simmed on "DotC Raid ST *" but four `st` boss rows load "WS Raid Most Bosses" or "WS Raid Coiled Altar".** So the cell's talents string judges a row only when the loadout in play is the cell's own; other rows are judged by name and never say edited. Card `0028`'s sims close that gap.
 - **The Feral Mythic+ cell is filled** (report `ttC3zNmZSvC7C2XQNSe6Bi`, DungeonSlice, loadout `WS M+`). Checks that need an empty cell take it away for the check and put it back; do not empty the block to test.
-- **Not proven anywhere but offline**: every card merged today (0011 to 0027 except 0014 and 0023). Each lists its looks under `## What I need from you`; none has been seen in a client. `/bis test` in a client is itself a look: several blocks swap globals such as `InCombatLockdown` and restore them, which may taint the session until `/reload`.
+- **Not proven anywhere but offline**: every card merged today (0011 to 0028). Each lists its looks under `## What I need from you`; none has been seen in a client. `/bis test` in a client is itself a look: several blocks swap globals such as `InCombatLockdown` and restore them, which may taint the session until `/reload`.
 - **One shared popup frame** (`DjinnisBiSPopup`, `PlanTab.popup`) serves 0013, 0017 and 0024. `PlanTab.hideSetup` takes down only 0013's own; a new card must not call `hidePopup` blind.
 - The main chunk holds 177 top-level locals of Lua's 200. Add to `PlanTab`, never a local.
 
@@ -203,12 +202,12 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this.** Nothing is buildable until Rob answers the planned-build question; then `0014` and `0023` are one small change each. Everything else is in `human-review/`.
+**`docs/board/` owns this.** Nothing is left to build. The next work is Rob's: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
 
-Twenty-three cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.23.0.
+Twenty-six cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.24.0.
 
 ## Blockers / open questions
-- **Rob's call, blocking `0014` and `0023`: what is the planned talent string?** The saved loadout (overwritten by Apply) or the plan cell's own string (only ST and Mythic+ cells carry one today).
+- **Rob's sims for `0028`**: which loadout each spec uses at 3+ targets, and a Top Gear run per spec per scenario. Nothing else on the board is blocked.
 - **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's BiS*
   appear in the minimap addon drawer, does the minimap button appear on the ring, and does hovering
   it show the summary tooltip.
@@ -250,7 +249,7 @@ Twenty-three cards in `human-review/` are one trip to a live client; each lists 
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
-- **2026-09-22, last** Fourteen cards built by sub-agents, each in its own git worktree (`.claude/worktrees/`), merged one branch at a time with both Lua checks after each merge, then reviewed the same way. `git log --format='%ad %s'` has the order.
+- **2026-09-22, last** Seventeen cards built by sub-agents, each in its own git worktree (`.claude/worktrees/`), merged one branch at a time with both Lua checks after each merge, then reviewed the same way. `git log --format='%ad %s'` has the order.
   Worth carrying: resume a rate-limited agent with a message rather than relaunching, its worktree keeps the edits; a builder started before a review lands needs a hand merge.
 - **2026-09-22, last** Card `0009` reviewed, four fixes and four checks, deployed at v0.19.1.
   Worth carrying: a button that cycles a list must be told which stops the place has removed, or
