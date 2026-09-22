@@ -4217,6 +4217,7 @@ function PlanTab.offerSetup(role, place, mplus)
 		spec = current, loadout = (PlanTab.activeLoadoutName()), worn = readWorn(),
 	})
 	if not steps then return nil end
+	steps.target = spec  -- the spec the whole setup is for; landing anywhere else abandons it
 	local lines = {
 		(PlanTab.ROLE_LABEL[role] or role) .. " for " .. place,
 		"Plan: " .. spec .. ", " .. (SCENARIO_LABEL[scenario] or scenario),
@@ -4264,7 +4265,8 @@ end
 function PlanTab.setupStep()
 	local steps = PlanTab.pendingSetup
 	if not steps then return "done" end
-	if InCombatLockdown() then return "waiting" end
+	if InCombatLockdown() then steps.waiting = true return "waiting" end
+	steps.waiting = nil
 	if steps.spec then
 		if playerSpec() ~= steps.spec then
 			local index = PlanTab.specIndexOf(steps.spec)
@@ -4301,18 +4303,25 @@ end
 -- The watcher's handler. A spec change lands a beat before the new spec's
 -- talents can take a loadout, so that step waits a second; a talent update
 -- only moves things on once the spec step is over, or it would ask for the
--- spec change twice.
+-- spec change twice. PLAYER_SPECIALIZATION_CHANGED fires for party members
+-- too (its payload is a unit; Blizzard's ClickBindingUI filters on "player"),
+-- so only ours counts, and ours landing on a spec other than the planned one
+-- means Rob chose otherwise: the setup is dropped ("abandoned") rather than
+-- asked for again. Combat ending resumes only a step that combat held, so a
+-- spec change the game refused is not re-asked after every pull.
 function PlanTab.onGroupEvent(event, id, status)
 	if event == "LFG_LIST_APPLICATION_STATUS_UPDATED" then return PlanTab.onAccepted(id, status) end
 	local steps = PlanTab.pendingSetup
 	if not steps then return nil end
 	if event == "PLAYER_SPECIALIZATION_CHANGED" then
+		if not (canRead(id) and id == "player") then return nil end
+		if playerSpec() ~= steps.target then PlanTab.pendingSetup = nil return "abandoned" end
 		-- ponytail: one second is a guess; if the loadout step says "commit in progress" in the game, lengthen it or wait for TRAIT_CONFIG_UPDATED instead
 		if C_Timer then C_Timer.After(1, PlanTab.setupStep) else return PlanTab.setupStep() end
 	elseif event == "TRAIT_CONFIG_UPDATED" then
 		if not steps.spec then return PlanTab.setupStep() end
 	elseif event == "PLAYER_REGEN_ENABLED" then
-		return PlanTab.setupStep()
+		if steps.waiting then return PlanTab.setupStep() end
 	end
 	return nil
 end
@@ -6854,13 +6863,24 @@ local function selfTest()
 		asked = nil
 		check(stepTest .. ", a talent update during the spec change asks nothing", PlanTab.onGroupEvent("TRAIT_CONFIG_UPDATED"), nil)
 		check(stepTest .. ", a talent update during the spec change asks nothing, really", asked, nil)
+		check(stepTest .. ", combat ending does not re-ask a spec change already asked", PlanTab.onGroupEvent("PLAYER_REGEN_ENABLED"), nil)
+		check(stepTest .. ", combat ending does not re-ask a spec change already asked, really", asked, nil)
+		check(stepTest .. ", a party member's spec change is not ours", PlanTab.onGroupEvent("PLAYER_SPECIALIZATION_CHANGED", "party1"), nil)
+		check(stepTest .. ", a party member's spec change is not ours, really", asked, nil)
 		current = 2
-		check(stepTest .. ", the spec landing loads the loadout", PlanTab.onGroupEvent("PLAYER_SPECIALIZATION_CHANGED"), "loadout")
+		check(stepTest .. ", the spec landing loads the loadout", PlanTab.onGroupEvent("PLAYER_SPECIALIZATION_CHANGED", "player"), "loadout")
 		check(stepTest .. ", the Feral Mythic+ loadout", loaded, "WS M+")
 		check(stepTest .. ", the loadout landing equips the set", PlanTab.onGroupEvent("TRAIT_CONFIG_UPDATED"), "set")
 		check(stepTest .. ", by its id", used, 5)
 		check(stepTest .. ", and nothing is pending after", PlanTab.pendingSetup, nil)
 		check(stepTest .. ", the next event does nothing", PlanTab.onGroupEvent("TRAIT_CONFIG_UPDATED"), nil)
+		-- landing on a spec other than the planned one is Rob choosing otherwise
+		PlanTab.pendingSetup = { spec = "Feral", loadout = "WS M+", set = "DBiS Feral M+", target = "Feral" }
+		current = 4
+		check(stepTest .. ", landing on another spec abandons the setup", PlanTab.onGroupEvent("PLAYER_SPECIALIZATION_CHANGED", "player"), "abandoned")
+		check(stepTest .. ", landing on another spec abandons the setup, nothing pending", PlanTab.pendingSetup, nil)
+		check(stepTest .. ", landing on another spec abandons the setup, nothing loaded", loaded, "WS M+")
+		current = 2
 		-- a set nobody saved is said, not equipped
 		used = nil
 		PlanTab.pendingSetup = { set = "DBiS Resto M+" }
