@@ -93,3 +93,58 @@ the dungeon and the role; neither changes the setup.
   dragged; and the shared frame with card 0013, built at the same time in another worktree: once
   both are merged the two prompts should be one frame, and `PlanTab.prompt(title, lines, buttons)`
   is the shape this side offers.
+- 2026-09-22 Claude, adversarial review in a worktree; no client, so the card goes to
+  `human-review/`, not `done/`. **Attacked:** every criterion's named check, run and then broken in a
+  temp copy; every Blizzard call in `onAccepted`, `setupStep`, `onGroupEvent` and `prompt` against
+  `wow-ui-source` (generated docs first, then `LFGList.lua`, `ClassTalentHelper.lua`,
+  `PlayerSpellsUtil.lua`); the three 12.1 traps. **Held:** the event payload is as documented
+  (`searchResultID`, `newStatus` cstring, `oldStatus`, `groupName` kstring, never read); the fifth
+  return of `GetApplicationInfo` is the role, exactly as `LFGListInviteDialog_Show` reads it, and it
+  is `pcall`'d and `canRead` before the table lookup; `GetSearchResultInfo` is marked
+  `SecretInChatMessagingLockdown` and `GetActivityInfoTable` `SecretArguments`, both are `pcall`'d and
+  `fullName` / `isMythicPlusActivity` go through `canRead` before any compare; the four events are
+  registered one at a time after `SetScript` and each verified; the spec index comes from
+  `GetSpecializationInfo` against `SPEC_BY_ID`, so no name reaches the helper; `UseEquipmentSet`
+  takes our own set id; nothing writes without the click. **Broke, and fixed here, one guard each,
+  checks added under `set up changes spec, then loadout, then set, out of combat`:** (1)
+  `PLAYER_SPECIALIZATION_CHANGED` carries a unit and fires for party members too (Blizzard's
+  `ClickBindingUI` filters on `"player"`, `EditModeManager` uses `RegisterUnitEvent`); a party
+  member's spec change during a pending setup re-asked our spec change a second later. Now only
+  `"player"` counts (mutation: 8 red). (2) A spec change the game refused, or one Rob answered by
+  going to a third spec by hand, left `pendingSetup` live for ever: `PLAYER_REGEN_ENABLED` re-asked
+  the spec change after every pull, and the next spec change hours later ran the rest. Now combat
+  ending resumes only a step combat held (`steps.waiting`; 5 red), and our spec landing anywhere but
+  `steps.target` drops the setup with `"abandoned"` (4 red). Both interpreters exit 0 after.
+  **Security.** Weakest: the click hands writes to `ClassTalentHelper`, whose two functions call
+  `C_ClassTalents.SwitchToSpecializationByIndex` and `SwitchToLoadoutByName`, both `HasRestrictions
+  = true` in `ClassTalentsDocumentation.lua`; whether an addon's call taints the spec frame is the
+  same open question as card 0011 and only look (3) below answers it. Unchecked: the event's
+  `searchResultID` reaches `GetApplicationInfo` and `GetSearchResultInfo` as given, but only inside
+  `pcall`, and every value out is `canRead` before use; the loadout and set names are the addon's own
+  constants. Leaks: the prompt shows the role and the activity's full name; a failure prints one grey
+  chat line naming a set the player has not saved; no id, no group name, no stack.
+  **Not proven here:** the frame's height, anchors and button row, the one-second wait, and the
+  helpers' taint. Listed below.
+
+## What I need from you
+
+Out of combat, on a druid, none of it seen in a client:
+
+1. Apply to a Mythic+ listing as Healer while Feral and get accepted: a small "Group joined" window
+   names Healer, the dungeon and "Plan: Resto, Mythic+", with Set up and Not now. Escape closes it;
+   it drags; the text does not run under the buttons.
+2. Set up: the spec changes, then (if a Resto Mythic+ cell exists) the loadout loads and the set
+   equips, one grey chat line for each set not saved. If Blizzard's frame says "commit in progress"
+   after the spec change, the one-second wait in `PlanTab.onGroupEvent` is short: say so here.
+3. Taint: after Set up, pull a target dummy and press every bar button for 30 seconds. An
+   `ADDON_ACTION_FORBIDDEN` or "blocked from an action only available to the Blizzard UI" at the
+   click means the `HasRestrictions` helpers are closed to addons and the prompt must open the
+   Specializations tab instead.
+4. Accepted as Damage while Feral with the Mythic+ loadout loaded and the set on: no window.
+5. The same with the raid loadout loaded: a window offering only the loadout.
+6. Set up, then change spec by hand to a third spec before the first lands: nothing more happens,
+   and later spec changes do nothing.
+7. Set up while in combat, then have a party member change spec before combat ends: nothing until
+   combat ends, then the spec change once.
+8. If the role reads as nil (nothing shows, nothing in chat), `GetApplicationInfo`'s fifth return has
+   moved; the read in `PlanTab.onAccepted` is the place.
