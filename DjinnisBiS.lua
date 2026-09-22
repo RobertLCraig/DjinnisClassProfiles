@@ -932,6 +932,7 @@ elseif issecretvalue then
 else
 	canRead = function() return true end
 end
+PlanTab.canRead = canRead  -- the consumable reads (card 0017) go through here so /bis test can hand them a secret
 
 -- Ratings move with every proc, so reading them mid-fight makes a bar that
 -- jitters and a comparison that means nothing. Read out of combat, serve the
@@ -4779,12 +4780,14 @@ end
 -- Pure. What differs between the plan for `row` and what is on: `loadout` is
 -- the loadout name in play when it is not the row's, `change` the slots
 -- wearing the wrong item, `fix` the slots wanting an enchant or a gem, and
--- `marks` the slot states behind them. A lower rank of the right thing is not
--- wrong (card 0010) and is not here. nil when nothing differs, or when there
--- is nothing to judge: no row, or no gear plan and no loadout in play.
-function PlanTab.wrongHere(row, active, edited, plan, worn)
+-- `marks` the slot states behind them, and `buffs` the consumables not on
+-- (card 0017: from buffsHere, only when the caller asked for them). A lower
+-- rank of the right thing is not wrong (card 0010) and is not here. nil when
+-- nothing differs, or when there is nothing to judge: no row, or no gear plan
+-- and no loadout in play.
+function PlanTab.wrongHere(row, active, edited, plan, worn, buffs)
 	if not row then return nil end
-	local wrong = { change = {}, fix = {}, marks = {} }
+	local wrong = { change = {}, fix = {}, marks = {}, buffs = buffs or {} }
 	if PlanTab.loadoutState(row.loadout, active, edited) == "mismatch" then
 		wrong.loadout = active .. (edited and " (edited)" or "")
 	end
@@ -4797,8 +4800,107 @@ function PlanTab.wrongHere(row, active, edited, plan, worn)
 		table.sort(wrong.change)
 		table.sort(wrong.fix)
 	end
-	if not wrong.loadout and #wrong.change == 0 and #wrong.fix == 0 then return nil end
+	if not wrong.loadout and #wrong.change == 0 and #wrong.fix == 0 and #wrong.buffs == 0 then return nil end
 	return wrong
+end
+
+-- Consumables (card 0017) ----------------------------------------------------
+--
+-- Aura ids from EnhanceQoL's ClassBuffReminder (EnhanceQoLClassBuffReminder/
+-- ClassBuffReminder.lua in the neonvoidx/wowbackup mirror, read 2026-09-22):
+-- its SHARED_FLASK_AURA_IDS ("TWW + Midnight") and runeTracking.auraIds, which
+-- has 1264426 Void-Touched, the rune the top player wore at Twin Fangs. Food
+-- is found the way it finds it, by the Well Fed icon (136000), because every
+-- food has its own aura. Oil is a temporary weapon enchant, not an aura:
+-- C_PaperDollInfo.GetTemporaryEnchantmentInfo (PaperDollInfoDocumentation.lua;
+-- GetWeaponEnchantInfo is Blizzard_Deprecated-only in 12.1). `search` is what
+-- a click types into the auction house.
+-- TODO Rob: name the season's food and oil for `search` (nothing local names
+-- them); a line with no `search` has no click.
+PlanTab.CONSUMABLES = {
+	{ label = "Flask", auras = { 432021, 431971, 431972, 431973, 431974, 1235057, 1235108, 1235110, 1235111 }, search = "Flask" },
+	{ label = "Food", icon = 136000 },
+	{ label = "Augment rune", auras = { 1295329, 1264426, 1234969, 1242347, 453250, 393438, 347901 }, search = "Augment Rune" },
+	{ label = "Weapon oil", weapon = 16 },  -- INVSLOT_MAINHAND
+}
+
+-- One aura on the player by spell id: the aura, nil for none, "secret" when
+-- 12.1 will not show it. The predicate before the read and issecretvalue
+-- after it, both (docs/DECISIONS.md, 2026-09-08). No API is "secret" too:
+-- nothing is ever called missing on a read that did not happen.
+function PlanTab.auraById(id)
+	local api = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID
+	if not api then return "secret" end
+	if C_Secrets and C_Secrets.ShouldSpellAuraBeSecret and C_Secrets.ShouldSpellAuraBeSecret(id) then return "secret" end
+	local aura = api(id)
+	if aura ~= nil and not PlanTab.canRead(aura) then return "secret" end
+	return aura
+end
+
+-- Whether any helpful aura on the player wears `icon`: "on", "missing" or
+-- "cannot check". Slot by slot as Blizzard's own aura code does (GetAuraSlots
+-- then GetAuraDataBySlot, UnitAuraDocumentation.lua), each slot asked of
+-- C_Secrets first; one secret slot with no match is "cannot check".
+function PlanTab.auraByIcon(icon)
+	local api, secrets = C_UnitAuras, C_Secrets
+	if not (api and api.GetAuraSlots and api.GetAuraDataBySlot) then return "cannot check" end
+	if secrets and secrets.ShouldAurasBeSecret and secrets.ShouldAurasBeSecret() then return "cannot check" end
+	local secret, token = false, nil
+	repeat
+		local slots = { api.GetAuraSlots("player", "HELPFUL", nil, token) }
+		token = table.remove(slots, 1)
+		for _, slot in ipairs(slots) do
+			if secrets and secrets.ShouldUnitAuraSlotBeSecret and secrets.ShouldUnitAuraSlotBeSecret("player", slot) then
+				secret = true
+			else
+				local aura = api.GetAuraDataBySlot("player", slot)
+				if aura ~= nil and (not PlanTab.canRead(aura) or not PlanTab.canRead(aura.icon)) then secret = true
+				elseif aura and aura.icon == icon then return "on" end
+			end
+		end
+	until not token
+	return secret and "cannot check" or "missing"
+end
+
+-- One consumable's state: "on", "missing" or "cannot check". A secret read is
+-- never "missing" (the card): it is not known to be absent.
+function PlanTab.consumableState(c)
+	if c.auras then
+		local secret = false
+		for _, id in ipairs(c.auras) do
+			local aura = PlanTab.auraById(id)
+			if aura == "secret" then secret = true elseif aura then return "on" end
+		end
+		return secret and "cannot check" or "missing"
+	elseif c.icon then
+		return PlanTab.auraByIcon(c.icon)
+	elseif c.weapon then
+		local api = C_PaperDollInfo and C_PaperDollInfo.GetTemporaryEnchantmentInfo
+		if not api then return "cannot check" end
+		local info = api(c.weapon)
+		if info ~= nil and not PlanTab.canRead(info) then return "cannot check" end
+		return info and "on" or "missing"
+	end
+	return "cannot check"  -- an entry with no id yet
+end
+
+-- The consumables not on, for wrongHere: { { label, state, search } }. `state`
+-- is the reader, consumableState unless a check hands in its own.
+function PlanTab.buffsHere(state)
+	state = state or PlanTab.consumableState
+	local out = {}
+	for _, c in ipairs(PlanTab.CONSUMABLES) do
+		local s = state(c)
+		if s ~= "on" then out[#out + 1] = { label = c.label, state = s, search = c.search } end
+	end
+	return out
+end
+
+-- A popup line's click: Search AH for `term`, or nil for no term.
+function PlanTab.searchClick(term)
+	if not term then return nil end
+	return { tip = ("Search the auction house for \"%s\". Needs it open."):format(term),
+		onClick = function() PlanTab.searchAH(term) end }
 end
 
 -- Pure. The row to set up for: in a key the Mythic+ row; in a raid the row
@@ -4846,31 +4948,63 @@ end
 -- One string for "the plan's answer for this place": the place, the boss and
 -- what differs. Once closed, the popup stays closed while this is the same.
 function PlanTab.setupKey(place, row, wrong)
+	local buffs = {}
+	for i, b in ipairs(wrong.buffs or {}) do buffs[i] = b.label .. ":" .. b.state end
 	return table.concat({ place or "?", row.boss, wrong.loadout or "",
-		table.concat(wrong.change, ","), table.concat(wrong.fix, ",") }, "|")
+		table.concat(wrong.change, ","), table.concat(wrong.fix, ","), table.concat(buffs, ",") }, "|")
 end
 
 -- The popup's title, lines and buttons for `wrong`, each button only when
 -- its part differs: Switch talents for the loadout, Equip all for a wrong
 -- item that is in the bags, Open Plan for what those two cannot do (an
 -- enchant, a gem, a piece not owned). Colour as everywhere: green right, amber
--- a small fix, red a wrong item.
+-- a small fix, red a wrong item. Fourth return: `clicks`, one per line where
+-- a click has a fix (card 0017): the talents line loads the loadout, a wrong
+-- item in the bags equips, one not owned opens the Plan, an enchant, a gem
+-- or a consumable searches the auction house. A consumable that cannot be
+-- checked is grey and says so; it is not a fix to click.
 function PlanTab.setupPopup(place, row, spec, wrong)
 	local RED, AMBER = "|cffff2020", "|cffffb300"
 	local title = ("%s: %s"):format(place or "Here", row.boss)
-	local lines, inBags = {}, {}
+	local lines, clicks, inBags = {}, {}, {}
 	if wrong.loadout then
 		lines[#lines + 1] = ("%sTalents|r   planned %s%s|r, now %s%s|r"):format(GOLD, GREEN, row.loadout, RED, wrong.loadout)
+		clicks[#lines] = { tip = "Switch talents to this loadout.",
+			onClick = function() PlanTab.loadTalents(row.loadout); PlanTab.recheckSoon() end }
 	else
 		lines[#lines + 1] = ("%sTalents|r   %s%s|r"):format(GOLD, GREEN, row.loadout)
 	end
 	for _, slotID in ipairs(wrong.change) do
 		local mark = wrong.marks[slotID]
-		if PlanTab.holding(mark.entry) then inBags[#inBags + 1] = slotID end
 		lines[#lines + 1] = ("%s%s|r   %s%s|r"):format(GOLD, PLAN_SLOT_LABEL[slotID] or "?", RED, (planLineFor(mark):gsub("^Plan: ", "")))
+		if PlanTab.holding(mark.entry) then
+			inBags[#inBags + 1] = slotID
+			clicks[#lines] = { tip = "Equip it from your bags.",
+				onClick = function() PlanTab.equip(mark.entry, slotID); PlanTab.recheckSoon() end }
+		else
+			clicks[#lines] = { tip = "Open the Plan tab on this boss.",
+				onClick = function() PlanTab.boss = row.boss; PlanTab.open(row.scenario) end }
+		end
 	end
 	for _, slotID in ipairs(wrong.fix) do
-		lines[#lines + 1] = ("%s%s|r   %s%s|r"):format(GOLD, PLAN_SLOT_LABEL[slotID] or "?", AMBER, (planLineFor(wrong.marks[slotID]):gsub("^Plan: ", "")))
+		local mark = wrong.marks[slotID]
+		lines[#lines + 1] = ("%s%s|r   %s%s|r"):format(GOLD, PLAN_SLOT_LABEL[slotID] or "?", AMBER, (planLineFor(mark):gsub("^Plan: ", "")))
+		local term
+		if mark.state == "enchant" then
+			term = PlanTab.searchTerm("enchant", mark.entry.enchant)
+		else
+			local _, missing = PlanTab.gemMatch(mark.entry.gems, mark.worn and mark.worn.gems)
+			term = missing[1] and PlanTab.searchTerm("gem", missing[1])
+		end
+		clicks[#lines] = PlanTab.searchClick(term)
+	end
+	for _, b in ipairs(wrong.buffs or {}) do
+		if b.state == "missing" then
+			lines[#lines + 1] = ("%s%s|r   %smissing|r"):format(GOLD, b.label, RED)
+			clicks[#lines] = PlanTab.searchClick(b.search)
+		else
+			lines[#lines + 1] = ("%s%s|r   %scannot check (12.1 hides this aura)|r"):format(GOLD, b.label, GREY)
+		end
 	end
 	local buttons = {}
 	if wrong.loadout then
@@ -4887,7 +5021,7 @@ function PlanTab.setupPopup(place, row, spec, wrong)
 		buttons[#buttons + 1] = { label = "Open Plan", tip = "Open the Plan tab on this boss.",
 			onClick = function() PlanTab.boss = row.boss; PlanTab.open(row.scenario) end }
 	end
-	return title, lines, buttons
+	return title, lines, buttons, clicks
 end
 
 -- Runs `fn` after `seconds` in the game; at once where there is no timer,
@@ -4918,14 +5052,17 @@ function PlanTab.checkSetup()
 	PlanTab.popupPending = nil
 	local active, edited = PlanTab.activeLoadoutName()
 	local plan = gearPlanFor(spec, row.scenario)
-	local wrong = PlanTab.wrongHere(row, active, edited, plan, plan and readWorn())
+	-- Consumables only once a ready check or the keystone slot asked for them
+	-- (card 0017): nobody flasks at zone-in.
+	local wrong = PlanTab.wrongHere(row, active, edited, plan, plan and readWorn(),
+		PlanTab.buffsWanted and PlanTab.buffsHere() or nil)
 	if not wrong then PlanTab.hidePopup(); return "matches" end
 	local place = (GetInstanceInfo())
 	if type(place) ~= "string" or not canRead(place) then place = nil end
 	local key = PlanTab.setupKey(place, row, wrong)
 	if key == PlanTab.popupClosed then return "closed" end
-	local title, lines, buttons = PlanTab.setupPopup(place, row, spec, wrong)
-	PlanTab.popup(title, lines, buttons, function() PlanTab.popupClosed = key end)
+	local title, lines, buttons, clicks = PlanTab.setupPopup(place, row, spec, wrong)
+	PlanTab.popup(title, lines, buttons, function() PlanTab.popupClosed = key end, clicks)
 	return "shown"
 end
 
@@ -4934,9 +5071,14 @@ end
 -- All of them are in Blizzard_APIDocumentationGenerated: ENCOUNTER_START and
 -- ENCOUNTER_END (EncounterInfo), READY_CHECK (PartyInfo), CHALLENGE_MODE_START
 -- (ChallengeModeInfo), PLAYER_ENTERING_WORLD (System), PLAYER_REGEN_ENABLED
--- (Unit) and ADDON_RESTRICTION_STATE_CHANGED (RestrictedActions).
+-- (Unit), ADDON_RESTRICTION_STATE_CHANGED (RestrictedActions) and
+-- CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN (ChallengeModeInfo, card 0017:
+-- the keystone slot opening is the last moment before a key to flask).
+-- READY_CHECK is SecretInChatMessagingLockdown; its initiatorName payload is
+-- never read.
 PlanTab.SETUP_EVENTS = { "PLAYER_ENTERING_WORLD", "READY_CHECK", "ENCOUNTER_START", "ENCOUNTER_END",
-	"CHALLENGE_MODE_START", "PLAYER_REGEN_ENABLED", "ADDON_RESTRICTION_STATE_CHANGED" }
+	"CHALLENGE_MODE_START", "PLAYER_REGEN_ENABLED", "ADDON_RESTRICTION_STATE_CHANGED",
+	"CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN" }
 
 -- One event, as the watcher handles it. Pure enough for /bis test: every read
 -- is behind checkSetup. `id`, `name` and `success` are ENCOUNTER_END's first,
@@ -4944,14 +5086,16 @@ PlanTab.SETUP_EVENTS = { "PLAYER_ENTERING_WORLD", "READY_CHECK", "ENCOUNTER_STAR
 -- compared, per DECISIONS.md, though the payload carries no secret flag.
 function PlanTab.onSetupEvent(event, id, name, _, _, success)
 	if event == "PLAYER_ENTERING_WORLD" then
-		PlanTab.lastKill = nil  -- a fresh zone-in starts at the first boss
+		PlanTab.lastKill, PlanTab.buffsWanted = nil, nil  -- a fresh zone-in starts at the first boss
 		PlanTab.later(2, PlanTab.checkSetup)  -- as EnhanceQoL does: the instance is not readable at once
-	elseif event == "READY_CHECK" then
+	elseif event == "READY_CHECK" or event == "CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN" then
+		PlanTab.buffsWanted = true  -- from here to the pull the consumables are on the list (card 0017)
 		return PlanTab.checkSetup()
 	elseif event == "ENCOUNTER_START" or event == "CHALLENGE_MODE_START" then
 		-- A fight or a key is not the time; if the popup was up, it comes back
 		-- after, and a running key is answered by the restriction event.
 		if PlanTab.popupModel then PlanTab.popupPending = true end
+		PlanTab.buffsWanted = nil
 		PlanTab.hidePopup()
 	elseif event == "ENCOUNTER_END" then
 		local spec = playerSpec()
@@ -5009,23 +5153,48 @@ function PlanTab.buildPopup()
 	return f
 end
 
-function PlanTab.popup(title, lines, buttons, onClose)
+-- A click and a tooltip on a popup button or line: `onClick` and `tip` are
+-- read off the frame at the time, so a redraw only has to set them.
+function PlanTab.clickable(frame)
+	frame:SetScript("OnClick", function(self) if self.onClick then self.onClick() end end)
+	frame:SetScript("OnEnter", function(self)
+		if not self.tip then return end
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetText(self.tip, nil, nil, nil, nil, true)
+		GameTooltip:Show()
+	end)
+	frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
+end
+
+-- `clicks` (card 0017) is optional: clicks[i] = { tip, onClick } makes line
+-- i click through to its fix; a line without one is plain text.
+function PlanTab.popup(title, lines, buttons, onClose, clicks)
 	local P = PlanTab.POPUP
 	local f = PlanTab.popupFrame or PlanTab.buildPopup()
-	PlanTab.popupModel = { title = title, lines = lines, buttons = buttons }
+	PlanTab.popupModel = { title = title, lines = lines, buttons = buttons, clicks = clicks }
 	f.title:SetText(title)
 	for i, text in ipairs(lines) do
-		local fs = f.lines[i]
-		if not fs then
-			fs = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-			fs:SetPoint("TOPLEFT", f, "TOPLEFT", P.pad, -(30 + (i - 1) * P.line))
-			fs:SetWidth(P.w - 2 * P.pad)
-			fs:SetJustifyH("LEFT")
-			fs:SetWordWrap(false)
-			f.lines[i] = fs
+		local row = f.lines[i]
+		if not row then
+			-- A button under each line, not a texture on the text, so a line
+			-- can be clicked; it still drags the window, as the rest of it does.
+			row = CreateFrame("Button", nil, f)
+			row:SetPoint("TOPLEFT", f, "TOPLEFT", P.pad, -(30 + (i - 1) * P.line))
+			row:SetSize(P.w - 2 * P.pad, P.line)
+			row:RegisterForDrag("LeftButton")
+			row:SetScript("OnDragStart", function() f:StartMoving() end)
+			row:SetScript("OnDragStop", function() f:StopMovingOrSizing() end)
+			PlanTab.clickable(row)
+			row.text = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+			row.text:SetAllPoints()
+			row.text:SetJustifyH("LEFT")
+			row.text:SetWordWrap(false)
+			f.lines[i] = row
 		end
-		fs:SetText(text)
-		fs:Show()
+		local click = clicks and clicks[i]
+		row.tip, row.onClick = click and click.tip, click and click.onClick
+		row.text:SetText(text)
+		row:Show()
 	end
 	for i = #lines + 1, #f.lines do f.lines[i]:Hide() end
 	for i, spec in ipairs(buttons) do
@@ -5034,14 +5203,7 @@ function PlanTab.popup(title, lines, buttons, onClose)
 			button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 			button:SetSize(P.button, PlanTab.SIZE.button)
 			button:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", P.pad + (i - 1) * (P.button + 6), 10)
-			button:SetScript("OnClick", function(self) if self.onClick then self.onClick() end end)
-			button:SetScript("OnEnter", function(self)
-				if not self.tip then return end
-				GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-				GameTooltip:SetText(self.tip, nil, nil, nil, nil, true)
-				GameTooltip:Show()
-			end)
-			button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+			PlanTab.clickable(button)
 			f.buttons[i] = button
 		end
 		button:SetText(spec.label)
@@ -7475,9 +7637,15 @@ local function selfTest()
 		check(waitTest .. ", and shows", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
 
 		local closedTest = "a closed popup stays closed here"
+		-- Card 0017: a ready check asks the consumables too, so the answer closed
+		-- here must already hold them; without an aura API in the stub each
+		-- reads "cannot check".
+		PlanTab.buffsWanted = true
+		PlanTab.checkSetup()
 		PlanTab.closePopup()
 		check(closedTest .. ", closed", PlanTab.popupModel, nil)
-		check(closedTest .. ", the answer is remembered", PlanTab.popupClosed, "The Venomous Abyss|Nek'zali|WS M+||")
+		check(closedTest .. ", the answer is remembered", PlanTab.popupClosed,
+			"The Venomous Abyss|Nek'zali|WS M+|||Flask:cannot check,Food:cannot check,Augment rune:cannot check,Weapon oil:cannot check")
 		check(closedTest .. ", the same answer is not shown again", PlanTab.checkSetup(), "closed")
 		check(closedTest .. ", nor on a ready check", PlanTab.onSetupEvent("READY_CHECK", "Someone", 30), "closed")
 		bare = 1
@@ -7504,7 +7672,190 @@ local function selfTest()
 		GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, GetInstanceInfo = wasWornLink, wasLevel, wasInstance
 		PlanTab.activeLoadoutName, InCombatLockdown, C_Container = wasActive, wasCombat, wasContainer
 		C_ChallengeMode, C_InstanceEncounter = wasCM, wasIE
-		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.popupPending = wasClosed, wasKill, wasPending
+		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.popupPending, PlanTab.buffsWanted = wasClosed, wasKill, wasPending, nil
+	end
+
+	-- Card 0017: the consumable lines on the same popup, a ready check or the
+	-- keystone slot asking for them, the secret-aura path, and the click on
+	-- each line. The game is stubbed the way the 0013 block stubs it; the
+	-- aura, secret and weapon-enchant APIs are stubbed here, and PlanTab.canRead
+	-- is what says a stub value is secret.
+	do
+		local plan = gearPlanFor("Feral", "st")
+		local entryBySlotID, ilvlById = {}, {}
+		for slot, entry in pairs(plan.slots) do
+			entryBySlotID[PLAN_SLOT_INVENTORY[slot]] = entry
+			ilvlById[entry.id] = entry.ilvl
+		end
+		local bare, wrongEnchant = nil, nil
+		local wasWornLink, wasLevel, wasInstance = GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, GetInstanceInfo
+		local wasActive, wasContainer = PlanTab.activeLoadoutName, C_Container
+		local wasSecrets, wasAuras, wasDoll, wasRead = C_Secrets, C_UnitAuras, C_PaperDollInfo, PlanTab.canRead
+		local wasClosed, wasKill, wasWanted = PlanTab.popupClosed, PlanTab.lastKill, PlanTab.buffsWanted
+		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.buffsWanted = nil, nil, nil
+		GetInventoryItemLink = function(_, slotID)
+			local entry = slotID ~= bare and entryBySlotID[slotID]
+			if not entry then return nil end
+			return ("|Hitem:%d:%s:%s:%s:::|h[x]|h"):format(entry.id,
+				slotID == wrongEnchant and 1 or entry.enchant or "", entry.gems[1] or "", entry.gems[2] or "")
+		end
+		C_Item.GetDetailedItemLevelInfo = function(link) return ilvlById[tonumber(link:match("item:(%d+)"))] end
+		C_Container = nil
+		local active = "WS Raid Most Bosses"
+		PlanTab.activeLoadoutName = function() return active, nil end
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		local nek = PlanTab.BOSSES.Feral[1]
+		local flask, food, oilRow = PlanTab.CONSUMABLES[1], PlanTab.CONSUMABLES[2], PlanTab.CONSUMABLES[4]
+		local on, secretIds, slots, oil = {}, {}, {}, nil  -- the stubbed player: auras by id, ids the predicate hides, auras by slot, the weapon enchant
+		local secretAura = {}  -- the one value canRead refuses
+		C_Secrets = {
+			ShouldSpellAuraBeSecret = function(id) return secretIds[id] == true end,
+			ShouldAurasBeSecret = function() return false end,
+			ShouldUnitAuraSlotBeSecret = function() return false end,
+		}
+		C_UnitAuras = {
+			GetPlayerAuraBySpellID = function(id) return on[id] end,
+			GetAuraSlots = function() return nil, 1, 2 end,
+			GetAuraDataBySlot = function(_, slot) return slots[slot] end,
+		}
+		C_PaperDollInfo = { GetTemporaryEnchantmentInfo = function() return oil end }
+		PlanTab.canRead = function(v) return v ~= secretAura end
+		local function lineCount() return PlanTab.popupModel and #PlanTab.popupModel.lines or 0 end
+		local function line(i) return PlanTab.popupModel and PlanTab.popupModel.lines[i] or "" end
+
+		local secretTest = "a secret aura is not reported missing"
+		check(secretTest .. ", pure: no aura is missing", PlanTab.consumableState(flask), "missing")
+		on[1235057] = {}
+		check(secretTest .. ", pure: any one of the flask auras is on", PlanTab.consumableState(flask), "on")
+		on[1235057] = nil
+		secretIds[432021] = true
+		check(secretTest .. ", the predicate says secret: cannot check", PlanTab.consumableState(flask), "cannot check")
+		secretIds[432021] = nil
+		on[432021] = secretAura
+		check(secretTest .. ", the read came back secret: cannot check", PlanTab.consumableState(flask), "cannot check")
+		on[432021] = nil
+		C_UnitAuras.GetPlayerAuraBySpellID = nil
+		check(secretTest .. ", no aura API: cannot check", PlanTab.consumableState(flask), "cannot check")
+		C_UnitAuras.GetPlayerAuraBySpellID = function(id) return on[id] end
+		check(secretTest .. ", food: no Well Fed icon in any slot is missing", PlanTab.consumableState(food), "missing")
+		slots[1], slots[2] = { icon = 1 }, { icon = 136000 }
+		check(secretTest .. ", food: the icon in a slot is on", PlanTab.consumableState(food), "on")
+		slots[2] = secretAura
+		check(secretTest .. ", food: a secret slot with no match is cannot check", PlanTab.consumableState(food), "cannot check")
+		slots[2] = { icon = secretAura }
+		check(secretTest .. ", food: a secret icon is cannot check", PlanTab.consumableState(food), "cannot check")
+		slots[2] = { icon = 5 }
+		C_Secrets.ShouldUnitAuraSlotBeSecret = function(_, slot) return slot == 2 end
+		check(secretTest .. ", food: the slot predicate says secret: cannot check", PlanTab.consumableState(food), "cannot check")
+		C_Secrets.ShouldUnitAuraSlotBeSecret = function() return false end
+		C_Secrets.ShouldAurasBeSecret = function() return true end
+		check(secretTest .. ", food: all auras secret: cannot check", PlanTab.consumableState(food), "cannot check")
+		C_Secrets.ShouldAurasBeSecret = function() return false end
+		check(secretTest .. ", oil: no temporary enchant is missing", PlanTab.consumableState(oilRow), "missing")
+		oil = {}
+		check(secretTest .. ", oil: a temporary enchant is on", PlanTab.consumableState(oilRow), "on")
+		oil = secretAura
+		check(secretTest .. ", oil: a secret one is cannot check", PlanTab.consumableState(oilRow), "cannot check")
+		oil = nil
+		C_PaperDollInfo = nil
+		check(secretTest .. ", oil: no API is cannot check", PlanTab.consumableState(oilRow), "cannot check")
+		C_PaperDollInfo = { GetTemporaryEnchantmentInfo = function() return oil end }
+		check(secretTest .. ", an entry with no id is cannot check", PlanTab.consumableState({ label = "?" }), "cannot check")
+		local _, cannotLines = PlanTab.setupPopup("P", nek, "Feral", { change = {}, fix = {}, marks = {}, buffs = { { label = "Flask", state = "cannot check" } } })
+		check(secretTest .. ", the line says cannot check", cannotLines[2]:find("cannot check", 1, true) ~= nil, true)
+		check(secretTest .. ", and never missing", cannotLines[2]:find("missing", 1, true), nil)
+
+		local listTest = "checklist lists what is missing"
+		check(listTest .. ", pure: buffsHere is every consumable not on", (function()
+			local names = {}
+			for i, b in ipairs(PlanTab.buffsHere(function(c) return c.label == "Food" and "on" or "missing" end)) do names[i] = b.label .. ":" .. b.state end
+			return table.concat(names, ", ")
+		end)(), "Flask:missing, Augment rune:missing, Weapon oil:missing")
+		check(listTest .. ", pure: consumables alone are a difference", PlanTab.wrongHere(nek, active, nil, nil, nil, { { label = "Flask", state = "missing" } }) ~= nil, true)
+		check(listTest .. ", not before anything asked", PlanTab.checkSetup(), "matches")
+		check(listTest .. ", a ready check asks and shows", PlanTab.onSetupEvent("READY_CHECK", "Someone", 30), "shown")
+		check(listTest .. ", the talents line, then the four consumables", lineCount(), 5)
+		check(listTest .. ", a missing one is red", line(2), "|cffffd100Flask|r   |cffff2020missing|r")
+		check(listTest .. ", in the table's order", line(5):match("^|cffffd100Weapon oil|r") ~= nil, true)
+		active, wrongEnchant = "DotC Raid ST *", 1
+		PlanTab.checkSetup()
+		check(listTest .. ", with the loadout and an enchant it is all one list", lineCount(), 6)
+		check(listTest .. ", talents first", line(1):find("planned", 1, true) ~= nil, true)
+		check(listTest .. ", then the slot", line(2):match("^|cffffd100Head|r   |cffffb300") ~= nil, true)
+		check(listTest .. ", then the consumables", line(3):match("^|cffffd100Flask|r") ~= nil, true)
+		active, wrongEnchant = "WS Raid Most Bosses", nil
+		PlanTab.hidePopup()
+		PlanTab.buffsWanted = nil
+		check(listTest .. ", the keystone slot opening asks and shows", PlanTab.onSetupEvent("CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN"), "shown")
+		check(listTest .. ", and it stays asked until the pull", PlanTab.buffsWanted, true)
+		PlanTab.onSetupEvent("CHALLENGE_MODE_START", 1)
+		check(listTest .. ", a key starting drops it", PlanTab.buffsWanted, nil)
+		PlanTab.buffsWanted = true
+		PlanTab.onSetupEvent("ENCOUNTER_START", 3470, "Nek'zali the Soulcoiler")
+		check(listTest .. ", a pull drops it", PlanTab.buffsWanted, nil)
+		PlanTab.buffsWanted = true
+		PlanTab.onSetupEvent("PLAYER_ENTERING_WORLD")
+		check(listTest .. ", a zone-in drops it", PlanTab.buffsWanted, nil)
+		check(listTest .. ", the keystone event is one the watcher registers", (function()
+			for _, e in ipairs(PlanTab.SETUP_EVENTS) do if e == "CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN" then return true end end
+			return false
+		end)(), true)
+
+		local noneTest = "no checklist when nothing is missing"
+		on[1235057], on[1264426], slots[1], oil = {}, {}, { icon = 136000 }, {}
+		check(noneTest .. ", pure: buffsHere is empty", #PlanTab.buffsHere(), 0)
+		check(noneTest .. ", pure: nothing else differing is nothing", PlanTab.wrongHere(nek, active, nil, nil, nil, {}), nil)
+		PlanTab.buffsWanted = true
+		check(noneTest .. ", a ready check shows nothing", PlanTab.onSetupEvent("READY_CHECK", "Someone", 30), "matches")
+		check(noneTest .. ", and nothing is up", PlanTab.popupModel, nil)
+		on[1235057], on[1264426], slots[1], oil = nil, nil, nil, nil
+
+		local fixTest = "checklist lines link to their fix"
+		local wrongAll = { loadout = "X", change = {}, fix = {}, marks = {}, buffs = {
+			{ label = "Flask", state = "missing", search = "Flask" }, { label = "Food", state = "missing" },
+			{ label = "Augment rune", state = "cannot check" } } }
+		local _, _, _, clicks = PlanTab.setupPopup("P", nek, "Feral", wrongAll)
+		local function press(click) if click and click.onClick then click.onClick() end end  -- a missing click is a FAIL line, not an error
+		local loaded, wasLoad = nil, PlanTab.loadTalents
+		PlanTab.loadTalents = function(name) loaded = name return "loaded" end
+		press(clicks[1])
+		PlanTab.loadTalents = wasLoad
+		check(fixTest .. ", the talents line loads the row's loadout", loaded, "WS Raid Most Bosses")
+		local searched, wasSearch = nil, PlanTab.searchAH
+		PlanTab.searchAH = function(term) searched = term return true end
+		press(clicks[2])
+		check(fixTest .. ", a missing consumable searches the auction house", searched, "Flask")
+		check(fixTest .. ", one with no search term has no click", clicks[3], nil)
+		check(fixTest .. ", one that cannot be checked has no click", clicks[4], nil)
+		wrongEnchant = 1
+		local _, _, _, enchantClicks = PlanTab.setupPopup("P", nek, "Feral", PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn()))
+		press(enchantClicks[2])
+		check(fixTest .. ", an enchant searches for the enchant's name", searched, PlanTab.RANK.enchant[entryBySlotID[1].enchant][1])
+		PlanTab.searchAH = wasSearch
+		wrongEnchant, bare = nil, 1
+		local _, _, _, ownClicks = PlanTab.setupPopup("P", nek, "Feral", PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn()))
+		check(fixTest .. ", a wrong item not owned opens the Plan", ownClicks[2] and ownClicks[2].tip:find("Plan", 1, true) ~= nil, true)
+		C_Container = {
+			GetContainerNumSlots = function(bag) return bag == 0 and 1 or 0 end,
+			GetContainerItemLink = function(bag, slot) return bag == 0 and slot == 1 and ("|Hitem:%d::::::|h[x]|h"):format(entryBySlotID[1].id) or nil end,
+		}
+		local equipped, wasEquip = nil, PlanTab.equip
+		PlanTab.equip = function(_, slotID) equipped = slotID return true end
+		local _, _, _, bagClicks = PlanTab.setupPopup("P", nek, "Feral", PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn()))
+		press(bagClicks[2])
+		PlanTab.equip = wasEquip
+		check(fixTest .. ", a wrong item in the bags equips that slot", equipped, 1)
+		C_Container, bare = nil, nil
+		check(fixTest .. ", the popup holds each line's click", (function()
+			PlanTab.popup("T", { "a", "b" }, {}, nil, { [2] = { tip = "t", onClick = function() end } })
+			return PlanTab.popupModel.clicks[2].tip .. "/" .. tostring(PlanTab.popupModel.clicks[1])
+		end)(), "t/nil")
+		PlanTab.hidePopup()
+
+		GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, GetInstanceInfo = wasWornLink, wasLevel, wasInstance
+		PlanTab.activeLoadoutName, C_Container = wasActive, wasContainer
+		C_Secrets, C_UnitAuras, C_PaperDollInfo, PlanTab.canRead = wasSecrets, wasAuras, wasDoll, wasRead
+		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.buffsWanted = wasClosed, wasKill, wasWanted
 	end
 
 	-- a saved target must survive the round trip and show its item level
