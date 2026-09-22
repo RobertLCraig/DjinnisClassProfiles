@@ -110,3 +110,63 @@ exists because attaching to that window can taint Blizzard's own loadout menu.
   an ask, and which would mean drawing inside Blizzard's frame; a loadout row for a boss with no
   plan, since the boss table is the plan; Edit Mode placement, since the box is anchored to a
   window and not a HUD element.
+- 2026-09-22 Claude, adversarial review in a worktree: **one defect, fixed; to `human-review/`
+  because the frame, the anchor, the three post-hooks and the taint question can only be seen in
+  a client.** Reviewed against `f1cc2ef` as merged.
+  **Attacked.** Every Blizzard name the code touches, against `wow-ui-source`: `PlayerSpellsFrame`
+  (a `UIParent` child, `LoadOnDemand: 1`, shown through `RegisterUIPanel` so `OnShow`/`OnHide`
+  fire), `BackdropTemplate`, `UIPanelCloseButton`, `UIPanelButtonTemplate` (all in
+  `Blizzard_SharedXML`), `C_AddOns.IsAddOnLoaded`, `C_Timer.After`, `ADDON_LOADED`'s payload
+  (`addOnName` first, so `name` is right), and `C_Traits.GetConfigInfo`'s `name`, which carries no
+  secret marker in `SharedTraitsDocumentation.lua` and is guarded by `canRead` anyway. Nothing
+  used is under `Blizzard_Deprecated*`. Every string the sidebar compares, concatenates or keys on
+  is the addon's own (loadout names from `PlanTab.BOSSES`, spec from `SPEC_BY_ID`), so the
+  secret-value trap has no way in. The loader registers `ADDON_LOADED` after its handler and
+  verifies it, per DECISIONS. Top-level locals still 177. Then the three `proves:` tests, each
+  broken in a temp copy: rival guard removed, 2 red; the active mark never set, 4 red; the content
+  filter flipped, 8 red. Both checkers exit 0 on the fixed file.
+  **Broke.** The TLM opt-out only stopped the hooks. `PlanTab.redraw` calls `updateSidebar` on
+  every equip, spec change, zoning, combat end and loadout landing, and `updateSidebar` never
+  asked about TLM, so with TLM loaded and the talent window open the first such event (including
+  `TRAIT_CONFIG_UPDATED` from TLM's own Apply) built the very sidebar the card said to leave off.
+  Same hole if TLM loads after `Blizzard_PlayerSpells`, which it does when it depends on it.
+  **Fixed:** `sidebarMode` takes `rival` and answers "off" for it; `PlanTab.rivalLoaded()` is
+  asked on every update, not once at arm time. Three checks under `sidebar stays closed`.
+  **Held.** The combat guard is first in `updateSidebar` and `placeSidebar` is guarded on the
+  size hook. `sidebarRows` dedupes by name, so a loadout on three bosses is one row. The `edited`
+  mark cannot coincide with `active` because `loadoutState` says mismatch whenever `edited`. Mode
+  "off" with no sidebar built returns before `CreateFrame`, so a player who never opens the
+  talent window never gets the frame. `db()` is only read from hooks and clicks, all after
+  SavedVariables. `armSidebar` is idempotent, so the login fallback and the `ADDON_LOADED` route
+  cannot double-hook.
+  **Noted, not changed.** (1) `/bis test` in a client swaps the `InCombatLockdown` global and
+  puts it back; this card's checks do it too, following 0011, 0012, 0015 and 0024. A global
+  written from addon code stays tainted after the restore, and secure code reads that one
+  constantly, so an in-game `/bis test` may taint the session until `/reload`. House pattern,
+  one decision for Rob, not this card's. (2) `redraw` wraps `updateSidebar` in `pcall`, so a
+  sidebar fault stops the sidebar silently rather than the Plan tab; the Plan tab is the more
+  important of the two, but a silent stop is the "cannot be told from working" shape. (3) The
+  talent window closed in combat leaves the sidebar standing until `PLAYER_REGEN_ENABLED`; that
+  is what the third criterion asks for, and hiding a plain frame in combat would be allowed. (4)
+  `SIDEBAR_RIVAL = "TalentLoadoutManager"` is the CurseForge folder name from memory; TLM is not
+  installed here, so it could not be checked against a folder. (5) The `SIDEBAR_ROW >= 32` check
+  guards a constant; it fails only if someone shrinks `SIZE.row`.
+  **Security.** Weakest: the Apply button hands a name from the addon's own table to
+  `PlanTab.loadTalents`, card 0011's route through `ClassTalentHelper`; nothing a player types
+  reaches it. Unchecked: `DjinnisBiSDB.sidebarClosed` is read as truthy without a type check,
+  and any value only closes a sidebar, so there is nothing to gain by editing it. Leaks: one
+  grey chat line naming TLM when it is loaded, and nothing on failure, since `pcall` swallows.
+
+## What I need from you
+
+Out of combat, on Feral, after `/reload`; the game folder holds v0.21.0 and this branch is not
+deployed, so deploy it first. The seven looks in the build comment stand, and these are the
+review's additions:
+
+1. With Talent Loadout Manager **not** installed (it is not, today): press N, then equip any
+   item while the window is open. The box redraws and stays one box.
+2. If TLM is ever installed: press N, apply a loadout from TLM's own sidebar. **No** "Plan
+   loadouts" box appears beside it at any point, and one grey chat line at login says why.
+3. After `/bis test` in the client: pull a target dummy and press every action bar button for
+   30 seconds, then open and close the talent window. Any "blocked" message here is finding (1)
+   above, and belongs to every card that swaps `InCombatLockdown`, not to this one.
