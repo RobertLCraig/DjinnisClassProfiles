@@ -42,7 +42,7 @@ answers it.
 - [x] WHEN the asked-for loadout is the one already selected, THE ADDON SHALL not ask the helper, and SHALL open the talent window and say in chat that the build must be saved over it. proves: `talents button says so when that loadout is loaded already`
 - [x] WHEN the popup's loadout is the row's own name with the wrong build, THE ADDON SHALL label the button "Fix talents", not "Switch talents". proves: `the row's own loadout with the wrong build is not a switch, the button says Fix talents`
 - [x] WHEN that is the case, THE ADDON SHALL say on the line that the build is not the one simmed, instead of "planned X, now X (edited)". proves: `the row's own loadout with the wrong build is not a switch, the line says the build is not the one simmed`
-- [ ] WHEN Rob types `/djbis talents`, THE ADDON SHALL print the build in play and every planned build of the spec, each marked same, different or cannot compare.
+- [x] WHEN Rob types `/djbis talents`, THE ADDON SHALL print the build in play and every planned build of the spec, each marked same, different or cannot compare. proves: run in a client 2026-09-22, three lines, both cells marked `different`
 <!-- AC:END -->
 
 ## Tasks
@@ -61,11 +61,10 @@ answers it.
    the button should say **Fix talents**.
 2. Click it. The talent window should open and one gold chat line should say to import the planned
    build and save it over "WS M+". Nothing else should happen.
-3. `/djbis talents`. It prints the build in play, then each planned build with `same`,
-   `different` or `cannot compare`. **Send me those lines.** They decide card `0014` item 4: if
-   `WS M+` says `different`, the saved loadout drifted and re-importing fixes it for good; if the
-   two strings look identical to the eye and it still says `different`, the baked string needs
-   re-baking from this client and the mark was false.
+3. ~~`/djbis talents`~~ **Done, 2026-09-22.** Answered card `0014` item 4: the saved loadout has
+   really drifted. Same 25-character header and same first 58 characters as the plan's `WS M+`,
+   then divergent, 118 characters against 117. The mark is true and the baked string is fine.
+   Rob's own fix is to delete the saved `WS M+` and import the plan's string under that name.
 4. With a genuinely wrong loadout loaded (say "DotC Raid ST *" in a key), the popup should still
    say **Switch talents** and that button should still work.
 

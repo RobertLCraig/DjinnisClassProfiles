@@ -191,3 +191,10 @@ and the tab says all is well.
   none, the event payload is ignored, and the plan string is a literal in this file, so the
   table key is never a game value. Leaks: nothing, the strings never print and never leave the
   client. Not seen in a client: looks 1 to 7 above are Rob's.
+
+- 2026-09-22 Claude, item 4 answered in a client. `/djbis talents` on Feral in Altar of Fangs:
+  the build in play and the plan's `WS M+` share the same 25-character header and the first 58
+  characters, then diverge, and are 118 and 117 characters long. **The "(edited)" mark is true and
+  the compare is sound**: the saved loadout has drifted from the simmed build, the headers agree,
+  and no re-baking of the baked string is needed. Card `0029` carries the button that was offering
+  to fix it by loading the same drifted loadout back.
