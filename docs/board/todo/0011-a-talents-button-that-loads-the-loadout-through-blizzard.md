@@ -22,6 +22,15 @@ command, `SlashCmdList["TALENT_LOADOUT_BY_NAME"]`, which calls
 macro text is that slash command runs on Rob's own click, the same as if he had typed it. No addon
 code touches talents.
 
+**Simpler still, found the same day.** `C_ClassTalents.SwitchToLoadoutByName` does not load
+anything itself. It fires `CLASS_TALENTS_SWITCH_TO_LOADOUT_BY_NAME`, and Blizzard's own callback
+(`ClassTalentHelper.lua` lines 15-18) calls `PlayerSpellsFrame.TalentsFrame:LoadConfigByName`. The
+file's comment: "These utils require going through the Class Talent Frame to ensure the UI can
+manage and react to change flows correctly." Talent Loadout Manager (`BlizzardLoadoutChangerV2.lua`)
+and EnhanceQoL (`TalentReminder.lua`, its Switch button) both call `ClassTalentHelper.SwitchToLoadoutByIndex`
+straight from addon code in 12.x. So route 1 is a plain call to `ClassTalentHelper.SwitchToLoadoutByName`
+from the button, and the secure macro button is route 2, only if route 1 taints.
+
 What it costs, if it works: one click per boss instead of a window and a dropdown.
 
 ## Links
@@ -39,7 +48,7 @@ What it costs, if it works: one click per boss instead of a window and a dropdow
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] WHEN the Talents button is clicked out of combat and the planned loadout exists, THE ADDON SHALL load it through Blizzard's loadout slash command on a secure macro button. proves: manual
+- [ ] WHEN the Talents button is clicked out of combat and the planned loadout exists, THE ADDON SHALL load it through Blizzard's `ClassTalentHelper`, or through its slash command on a secure macro button if the direct call taints. proves: manual
 - [ ] WHEN the planned loadout name is not among the spec's saved loadouts, THE ADDON SHALL open the talent window as today and say in one line which name is missing. proves: `talents button falls back when the loadout is missing`
 - [ ] THE ADDON SHALL call no `C_ClassTalents` or `C_Traits` function that changes talents. proves: `no talent-changing call in the file`
 - [ ] WHEN the player is in combat, THE ADDON SHALL not change the button's macro text. proves: `the secure button is not changed in combat`
@@ -47,13 +56,14 @@ What it costs, if it works: one click per boss instead of a window and a dropdow
 
 ## Tasks
 
-- [ ] **Find the slash word first.** `SLASH_TALENT_LOADOUT_BY_NAME1` lives in Blizzard's global
-  strings, which are not in `C:\Dev\WoWAddons\wow-ui-source`. In the game: `/dump SLASH_TALENT_LOADOUT_BY_NAME1`.
-  If it does not exist, stop and write that on this card.
-- [ ] Type the command by hand once in the game with a loadout name. If it does not load the
-  loadout, stop and write that on this card.
-- [ ] A `SecureActionButtonTemplate` button, `type` = `macro`, `macrotext` = the command and the name.
-  Set the text only out of combat (`InCombatLockdown`).
+- [ ] **Route 1, test it first, by hand, in the game.** Out of combat:
+  `/run ClassTalentHelper.SwitchToLoadoutByName("DotC Raid ST *")`, then pull a target dummy and
+  press every action bar button for 30 seconds. If the loadout loads and no bar freezes and no
+  "blocked" message shows, build route 1: the button calls it, guarded by `InCombatLockdown`, and
+  the tab redraws on `TRAIT_CONFIG_UPDATED`. Say `CONFIG_COMMIT_FAILED` in one chat line.
+- [ ] **Route 2, only if route 1 taints.** Find the slash word: `/dump SLASH_TALENT_LOADOUT_BY_NAME1`
+  (it lives in Blizzard's global strings, not in `wow-ui-source`). A `SecureActionButtonTemplate`
+  button, `type` = `macro`, `macrotext` = the command and the name, set only out of combat.
 - [ ] Check the loadout name against `C_ClassTalents.GetConfigIDsBySpecID` and `C_Traits.GetConfigInfo`
   (read only) for the fallback.
 - [ ] Offline checks under the names above.
