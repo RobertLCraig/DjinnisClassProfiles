@@ -42,7 +42,69 @@ KeystoneLoot shows a card on entering a dungeon: the wanted items that drop ther
   icon is the fourth return). Loot spec from `GetLootSpecialization`; 0 means "current spec".
 - [x] Offline checks under the names above.
 
+## What I need from you
+
+There is no test client, so nothing below has run in one. Frames, anchors and events are the
+looks; the data and the pure logic are proven offline. Type `/reload` first.
+
+1. Enter the Venomous Abyss out of combat with the journal closed. A card titled "Loot spec for
+   The Venomous Abyss" appears near the top of the screen with a Feral row: the Feral icon, the
+   planned drops as item buttons with quality borders, and "+N more" if over six. Hover an item
+   button: the game tooltip. Today only Feral has a plan, so one row. If the card is empty or
+   missing, the pools were not in yet: open `/bis` Plan tab once and re-enter, and say so here,
+   because then the eight retries are not enough.
+2. With loot spec on Feral (or 0 following Feral), the Feral name is green with "loot spec" under
+   it and no button. Set loot spec to Guardian through the spec window: the row turns white and
+   gains a 24-high "Set loot spec" button. Click it: loot spec is Feral again and the row goes
+   green without a reload.
+3. Click Set loot spec while at a training dummy in combat: one grey chat line, "Loot spec not
+   changed: you are in combat", and the loot spec is as it was.
+4. Drag the card by its title bar and close it with its X. Change loot spec: it stays closed (the
+   loot spec event only redraws a card that is showing). `/reload` inside the raid brings it back,
+   where it was dragged to, because a reload is a `PLAYER_ENTERING_WORLD`; leaving the raid and
+   coming back does the same.
+5. Enter a Mythic dungeon and an old raid: no card from this addon in either (KeystoneLoot's own
+   card in the dungeon is its).
+6. Open the journal on a boss page after entering the raid: the tier, instance and boss page are
+   as you left them. (Only the pools' walk touches the journal now.)
+7. The title reads the journal's name for the raid, not the map's. If they differ, that is the
+   review's change working, not a fault.
+
 ## Comments
+
+- 2026-09-22 Claude (review, worktree `worktree-agent-a261f3540f74431be`): attacked the four
+  criteria and the code, every API against `wow-ui-source` on `live`. **Held:** `SetLootSpecialization`
+  and `GetSpecializationInfoForSpecID` are `AllowedWhenUntainted` and take plain numbers
+  (`PlayerScriptDocumentation.lua:1492`, `SpecializationSharedDocumentation.lua:35`);
+  `GetLootSpecialization` and `GetInstanceInfo` carry no secret flag (`InstanceDocumentation.lua:103`);
+  `PLAYER_LOOT_SPEC_UPDATED` is `LootDocumentation.lua:299`; the combat guard is the card's own
+  rule, not Blizzard's, and the docs put no combat restriction on the call, so a refusal to set is
+  ours and says so. Events are attached-then-registered-then-verified per DECISIONS. The three
+  builder mutants re-run red. **Broke, and fixed here, one defect in two halves:** (1) `raidName`
+  made a second journal walk of its own, selected the last tier and put the tier back but not the
+  instance and encounter, which `harvestPools`'s own comment says a reopened boss page needs, so
+  look 6 would have failed on a reload inside the raid. (2) The raid was told by
+  `GetInstanceInfo`'s name equalling `EJ_GetInstanceInfo`'s, a spelling match the handover's own
+  rule ("an id survives spelling and locale where a name does not") warns against. Both go the
+  way Blizzard's `EncounterJournal_OnShow` finds where you stand (`AdventureGuideUtil.lua:31`):
+  the map id, `GetInstanceInfo`'s eighth return, through
+  `C_EncounterJournal.GetInstanceForGameMap` (`EncounterJournalDocumentation.lua:74`,
+  `AllowedWhenUntainted`), compared to `PlanTab.RAID_ID`, which `harvestPools` now records with
+  `PlanTab.RAID_NAME` on the one walk it already makes. `raidName` is one line and `canRead` is
+  no longer needed on that path. Five checks added or changed: the raid is told by journal id
+  with the map named otherwise; another raid by map id; no card before the pools have named
+  the raid; no name until harvested; and asking for the name does not call `EJ_SelectTier`. Two
+  new mutants on temp copies, each exit 1: the id compare dropped (two checks red); a tier select
+  put back into `raidName` (one red). `lua offline-check.lua` and Lua 5.1.5 both exit 0, 177
+  top-level locals. Also corrected look 4: a `/reload` inside the raid fires
+  `PLAYER_ENTERING_WORLD`, so the card comes back; "stays closed" is true of a loot spec change.
+  **Security:** weakest point is the Set loot spec button, which is a plain click on an insecure
+  frame calling one Blizzard function with a number from a fixed table, so the worst a stranger
+  can do is press it. Unchecked path: the `PLAYER_LOOT_SPEC_UPDATED` redraw runs in combat too,
+  but it only calls `Show`/`Hide`/`SetText` on non-secure frames, and `harvestPools` refuses
+  combat. Leaks: nothing beyond the addon's own plan; no name from the game is concatenated or
+  keyed. **To human-review, not done:** the frame, its anchors and the two events cannot be
+  proven here; the looks above are the acceptance.
 
 - 2026-09-22 Claude: built, in a worktree, in `DjinnisBiS.lua` only, no version bump, not deployed,
   nothing seen in a client. **The dungeon half is not built, on purpose.** KeystoneLoot draws its
