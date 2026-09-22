@@ -1675,6 +1675,10 @@ local function armBagMarks()
 			if refreshBagGlows and not InCombatLockdown() then refreshBagGlows() end
 		else
 			rebuildBagWanted()
+			-- The Plan tab lists what to equip, so an equip redraws it. This
+			-- watcher exists from login; the slot-mark one only after the sheet
+			-- is first opened, which is why the redraw does not ride that one.
+			if PlanTab.redraw then PlanTab.redraw() end
 		end
 	end)
 	for _, event in ipairs({
@@ -2032,6 +2036,12 @@ renderList = function(lines)
 	end
 	for i = #lines + 1, #rowPool do rowPool[i]:Hide() end
 	window.content:SetSize(CONTENT_W, #lines * ROW_HEIGHT + 20)
+end
+
+-- Redraws the Plan tab if it is the one on screen. Called from the bag-mark
+-- watcher on an equip or a spec change, never in combat.
+function PlanTab.redraw()
+	if window and window:IsShown() and activeTab == 4 and not InCombatLockdown() then refresh() end
 end
 
 renderDoll = function()
@@ -2830,7 +2840,13 @@ function PlanTab.equip(entry, slotID)
 	if not bag then return false end
 	ClearCursor()
 	C_Container.PickupContainerItem(bag, slot)
+	-- A locked slot (a move still in flight) picks nothing up. Blizzard's
+	-- EquipmentManager_EquipContainerItem makes the same two checks.
+	if not CursorHasItem() then return false end
 	EquipCursorItem(slotID)
+	-- Refused? Never leave it on the cursor: a click on the world from there
+	-- is the destroy-item prompt.
+	if CursorHasItem() then ClearCursor() end
 	return true
 end
 
@@ -2838,7 +2854,10 @@ end
 -- sold as a scroll named after the enchant, so the rank is dropped. Nil when
 -- the name is not known yet, which is a gem the client has not cached.
 function PlanTab.searchTerm(kind, id)
-	local name = kind == "enchant" and PlanTab.ENCHANT_NAME[id] or C_Item.GetItemInfo(id)
+	-- Not `a and b or c`: an enchant id nobody named would fall through to an
+	-- ITEM lookup by the enchant's id and search the house for a stranger.
+	local name
+	if kind == "enchant" then name = PlanTab.ENCHANT_NAME[id] else name = C_Item.GetItemInfo(id) end
 	return name and (name:gsub("%s*%(rank %d+%)$", "")) or nil
 end
 
@@ -3011,7 +3030,6 @@ end
 -- Returns the refresh function. `holder` is the character pane's frame and
 -- `below` is what the strip sits under.
 local function buildSlotMarks(holder, below)
-	local refreshWindow = refresh  -- the /bis window's; `refresh` below is the strip's own
 	local strip = CreateFrame("Frame", nil, holder, "BackdropTemplate")
 	strip:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -4)
 	strip:SetPoint("TOPRIGHT", below, "BOTTOMRIGHT", 0, -4)
@@ -3136,9 +3154,6 @@ local function buildSlotMarks(holder, below)
 	-- below and C:\Dev\WoWAddons\docs\DECISIONS.md.
 	local watcher = CreateFrame("Frame")
 	watcher:SetScript("OnEvent", function(_, event)
-		-- The Plan tab lists what to equip, so an equip redraws it (the Equip
-		-- button lands here through this event, not through a call of its own).
-		if window and window:IsShown() and activeTab == 4 and not InCombatLockdown() then refreshWindow() end
 		if event == "PLAYER_REGEN_ENABLED" and not dirty then return end
 		if CharacterFrame:IsShown() or dirty then refresh() end
 	end)
@@ -3780,11 +3795,37 @@ local function selfTest()
 	check(termTest .. ", enchant", PlanTab.searchTerm("enchant", 7967), "Eyes of the Eagle")
 	check(termTest .. ", enchant nobody named", PlanTab.searchTerm("enchant", 1), nil)
 	check(termTest .. ", gem not cached", PlanTab.searchTerm("gem", 240908), nil)
-	local wasInCombat = InCombatLockdown
+	-- A pretend bag with the planned ring in bag 0 slot 2, and a cursor that
+	-- records what was picked up and where it went. Every global swapped here
+	-- is put back, so /bis test in the game touches nothing for longer than
+	-- these six lines. (0008 review: without the bag, "does nothing in combat"
+	-- passed with the combat guard deleted, because there was nothing to do.)
+	local ring = parsePlanLine("id=1,ilevel=300")
+	local wasInCombat, wasContainer, wasIlvl = InCombatLockdown, C_Container, C_Item.GetDetailedItemLevelInfo
+	local wasClear, wasHas, wasEquip = ClearCursor, CursorHasItem, EquipCursorItem
+	local held, picked, equippedTo
+	C_Container = {
+		GetContainerNumSlots = function(bag) return bag == 0 and 2 or 0 end,
+		GetContainerItemLink = function(bag, slot) return bag == 0 and slot == 2 and "|Hitem:1::::::|h[Ring]|h" or nil end,
+		PickupContainerItem = function(bag, slot) picked, held = { bag, slot }, true end,
+	}
+	C_Item.GetDetailedItemLevelInfo = function() return 300 end
+	ClearCursor = function() held = false end
+	CursorHasItem = function() return held == true end
+	EquipCursorItem = function(slotID) equippedTo, held = slotID, false end
 	InCombatLockdown = function() return true end
-	check("equip button does nothing in combat", PlanTab.equip(parsePlanLine("id=1,ilevel=300"), 11), false)
+	check("equip button does nothing in combat", PlanTab.equip(ring, 11), false)
+	check("equip button does nothing in combat, picks nothing up", picked, nil)
 	InCombatLockdown = wasInCombat
-	check("equip button does nothing when the piece is not in the bags", PlanTab.equip(parsePlanLine("id=1,ilevel=300"), 11), false)
+	check("equip button does nothing when the piece is not in the bags", PlanTab.equip(parsePlanLine("id=2,ilevel=300"), 11), false)
+	check("equip button does nothing when the piece is not in the bags, picks nothing up", picked, nil)
+	local equipTest = "equip button picks the exact bag copy up and equips it into the planned slot"
+	check(equipTest, PlanTab.equip(ring, 11), true)
+	check(equipTest .. ", that bag slot", picked and picked[1] .. "," .. picked[2], "0,2")
+	check(equipTest .. ", that inventory slot", equippedTo, 11)
+	check(equipTest .. ", nothing left on the cursor", held, false)
+	InCombatLockdown, C_Container, C_Item.GetDetailedItemLevelInfo = wasInCombat, wasContainer, wasIlvl
+	ClearCursor, CursorHasItem, EquipCursorItem = wasClear, wasHas, wasEquip
 	check("search button without the auction house open", PlanTab.searchAH("x"), false)
 
 	local emptyTest = "empty shopping list says nothing to buy"
