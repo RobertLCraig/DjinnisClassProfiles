@@ -3779,6 +3779,7 @@ end
 
 -- The Talents button. Answers what it did, for the checks: "combat" did
 -- nothing; "missing" opened the window and said which name is not saved;
+-- "same" is the loadout already loaded, which the helper cannot change;
 -- "loaded" asked Blizzard's helper; "no helper" opened the window as before.
 -- When the game will not list the loadouts the helper is still asked, and
 -- Blizzard's frame says ERR_TALENT_FAILED_INVALID_CONFIG itself if need be.
@@ -3789,6 +3790,17 @@ function PlanTab.loadTalents(name)
 		PlanTab.openTalents()
 		print(("%sDjinni's BiS|r %sno saved loadout named \"%s\" for this spec. Save one with that name.|r"):format(GOLD, GREY, name))
 		return "missing"
+	end
+	-- Already the selected loadout: Blizzard's Apply writes a hand edit into the
+	-- loadout it is applied to, so asking for that name again loads the same
+	-- build and nothing moves. The planned build cannot be reached by name from
+	-- here (Rob, 2026-09-22, on zone-in: "clicking switch talents doesnt appear
+	-- to do anything"). Open the window and say what does fix it.
+	if PlanTab.activeLoadoutName() == name then
+		PlanTab.openTalents()
+		print(("%sDjinni's BiS|r %s\"%s\" is loaded already, so there is nothing to switch to. Its build is no longer the one the plan was simmed on: import the planned build and save it over \"%s\".|r %s/djbis talents|r %sprints both.|r")
+			:format(GOLD, GREY, name, name, GOLD, GREY))
+		return "same"
 	end
 	if not (ClassTalentHelper and ClassTalentHelper.SwitchToLoadoutByName) then
 		PlanTab.openTalents()
@@ -4459,6 +4471,30 @@ function PlanTab.activeLoadoutName(forSpec, scenario)
 	return name, PlanTab.talentsEdited(plannedFor == name and planned or nil)
 end
 
+-- /djbis talents: the build in play beside every planned build of the spec,
+-- and whether each is the same string. The popup's "(edited)" mark is that one
+-- compare, so when a loadout is the right NAME and still reads edited, this
+-- says which it is: a loadout that drifted from the sim, or two strings that
+-- describe one build and do not match character for character.
+function PlanTab.sayTalents()
+	local spec = playerSpec()
+	local live
+	if C_ClassTalents and C_ClassTalents.GetActiveConfigID and C_Traits and C_Traits.GenerateImportString then
+		local id = C_ClassTalents.GetActiveConfigID()
+		local ok, string = pcall(C_Traits.GenerateImportString, id)
+		if ok and type(string) == "string" and canRead(string) then live = string end
+	end
+	print(GOLD .. "Djinni's BiS|r " .. GREY .. "the build in play:|r " .. (live or (GREY .. "not readable|r")))
+	for scenario, cell in pairs(GEAR_PLAN[spec] or {}) do
+		if type(cell.talents) == "string" and cell.talents ~= "" then
+			local differs = PlanTab.talentStringsDiffer(live, cell.talents)
+			local verdict = differs == nil and (GREY .. "cannot compare|r")
+				or (differs and ("|cffff2020different|r") or (GREEN .. "same|r"))
+			print(("%s%s|r %s(%s)|r %s: %s"):format(GOLD, cell.loadout or "?", GREY, scenario, verdict, cell.talents))
+		end
+	end
+end
+
 -- The /simc export (card 0018). The Simulationcraft addon already writes every
 -- saved loadout of the spec as "# Saved Loadout: NAME" then "# talents=...",
 -- so Raidbots sims them all from one paste. What it cannot say is which boss
@@ -4831,6 +4867,10 @@ function PlanTab.wrongHere(row, active, edited, plan, worn, buffs)
 	local wrong = { change = {}, fix = {}, marks = {}, buffs = buffs or {} }
 	if PlanTab.loadoutState(row.loadout, active, edited) == "mismatch" then
 		wrong.loadout = active .. (edited and " (edited)" or "")
+		-- The right loadout by name, the wrong build inside it: loading that name
+		-- again loads the same build, so the Talents button has nothing to do and
+		-- must not say it has (Rob, 2026-09-22). PlanTab.loadTalents says the rest.
+		wrong.drifted = (active == row.loadout) or nil
 	end
 	if plan and worn then
 		wrong.marks = slotStates(plan, worn)
@@ -5008,7 +5048,11 @@ function PlanTab.setupPopup(place, row, spec, wrong)
 	local RED, AMBER = "|cffff2020", "|cffffb300"
 	local title = ("%s: %s"):format(place or "Here", row.boss)
 	local lines, clicks, inBags = {}, {}, {}
-	if wrong.loadout then
+	if wrong.drifted then
+		lines[#lines + 1] = ("%sTalents|r   %s%s|r %sis loaded, but its build is not the one simmed|r"):format(GOLD, GREEN, row.loadout, RED)
+		clicks[#lines] = { tip = "Open the talent window and say how to put the planned build back.",
+			onClick = function() PlanTab.loadTalents(row.loadout); PlanTab.recheckSoon() end }
+	elseif wrong.loadout then
 		lines[#lines + 1] = ("%sTalents|r   planned %s%s|r, now %s%s|r"):format(GOLD, GREEN, row.loadout, RED, wrong.loadout)
 		clicks[#lines] = { tip = "Switch talents to this loadout.",
 			onClick = function() PlanTab.loadTalents(row.loadout); PlanTab.recheckSoon() end }
@@ -5049,8 +5093,10 @@ function PlanTab.setupPopup(place, row, spec, wrong)
 	end
 	local buttons = {}
 	if wrong.loadout then
-		buttons[#buttons + 1] = { label = "Switch talents",
-			tip = ("Load \"%s\" through Blizzard's own talent helper. Out of combat only."):format(row.loadout),
+		buttons[#buttons + 1] = { label = wrong.drifted and "Fix talents" or "Switch talents",
+			tip = wrong.drifted
+				and ("\"%s\" is loaded already, so nothing can be switched. This opens the talent window and says what to put back."):format(row.loadout)
+				or ("Load \"%s\" through Blizzard's own talent helper. Out of combat only."):format(row.loadout),
 			onClick = function() PlanTab.loadTalents(row.loadout); PlanTab.recheckSoon() end }
 	end
 	if #inBags > 0 then
@@ -6714,10 +6760,23 @@ local function selfTest()
 		check(loadTest, PlanTab.loadTalents("WS Raid 2T *"), "loaded")
 		check(loadTest .. ", by name", asked, "WS Raid 2T *")
 		check(loadTest .. ", without opening the window", opened, 1)
+		-- The loadout already loaded: the helper cannot change it, so the button
+		-- must say what will, rather than click and do nothing (Rob, 2026-09-22)
+		local sameTest = "talents button says so when that loadout is loaded already"
+		local wasActive = PlanTab.activeLoadoutName
+		PlanTab.activeLoadoutName = function() return "WS Raid 2T *" end
+		printed, asked = {}, nil
+		check(sameTest, PlanTab.loadTalents("WS Raid 2T *"), "same")
+		check(sameTest .. ", asks the helper for nothing", asked, nil)
+		check(sameTest .. ", opens the window", opened, 2)
+		check(sameTest .. ", says to save the planned build over it", printed[1] and printed[1]:find("save it over", 1, true) ~= nil, true)
+		check(sameTest .. ", in one line", #printed, 1)
+		PlanTab.activeLoadoutName = wasActive
 		local keys = {}
 		for k in pairs(touched) do keys[#keys + 1] = k end
 		table.sort(keys)
-		check("no talent-changing call in the file, the button reads only", table.concat(keys, ","), "GetConfigIDsBySpecID,GetConfigInfo")
+		check("no talent-changing call in the file, the button reads only", table.concat(keys, ","),
+			"GetConfigIDsBySpecID,GetConfigInfo,GetLastSelectedSavedConfigID,GetStarterBuildActive")
 		-- the two events: nothing said for a landing, one line for a refusal
 		printed = {}
 		PlanTab.onTalentEvent("TRAIT_CONFIG_UPDATED")
@@ -7778,6 +7837,15 @@ local function selfTest()
 		C_Container = nil
 		bare, wrongEnchant = nil, 1
 		check(buttonsTest .. ", an enchant: Open Plan", built(PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn())), "Open Plan")
+		-- The row's own loadout, edited: there is nothing to switch to, so the
+		-- popup must not offer a switch (Rob, 2026-09-22)
+		local driftTest = "the row's own loadout with the wrong build is not a switch"
+		local drifted = PlanTab.wrongHere(nek, "WS Raid Most Bosses", true, nil, nil)
+		check(driftTest .. ", pure: marked drifted", drifted.drifted, true)
+		check(driftTest .. ", another loadout is not", PlanTab.wrongHere(nek, "DotC Raid ST *", nil, nil, nil).drifted, nil)
+		check(driftTest .. ", the button says Fix talents", built(drifted), "Fix talents")
+		local _, driftLines = PlanTab.setupPopup("P", nek, "Feral", drifted)
+		check(driftTest .. ", the line says the build is not the one simmed", driftLines[1]:find("is not the one simmed", 1, true) ~= nil, true)
 		wrongEnchant = nil
 		-- the buttons do what the Plan tab's do
 		local loaded, wasLoad = nil, PlanTab.loadTalents
@@ -8148,5 +8216,6 @@ SlashCmdList.DJINNISBIS = function(msg)
 	if msg == "" then DjinnisBiS_Toggle()
 	elseif msg == "here" then bonusRollVerdict((GetInstanceInfo()))
 	elseif msg == "test" then selfTest()
+	elseif msg == "talents" then PlanTab.sayTalents()
 	else listBySource(msg) end
 end
