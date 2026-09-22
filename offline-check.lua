@@ -132,6 +132,26 @@ do
 	if seen == 0 then print("|cffff0000FAIL|r no talent-changing call in the file: saw no C_ call at all, the scan is broken") end
 end
 
+-- Card 0020: no `...Small` font on a value, a label or a button. A small font
+-- is allowed only for a line of help, and every such line carries the marker
+-- `-- small font:` with its reason, so a new one has to say why it is small.
+do
+	local src = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
+	local seen, lineNo = 0, 0
+	for line in src:gmatch("[^\n]*\n?") do
+		lineNo = lineNo + 1
+		local code = line:gsub("%-%-.*$", "")
+		local font = code:match("\"(GameFont%w-Small%w*)\"")
+		if font then
+			seen = seen + 1
+			if not line:find("-- small font:", 1, true) then
+				print("|cffff0000FAIL|r no small font on values, labels or buttons: " .. font .. " at line " .. lineNo)
+			end
+		end
+	end
+	if seen == 0 then print("|cffff0000FAIL|r no small font on values, labels or buttons: saw no font name at all, the scan is broken") end
+end
+
 realPrint(failures == 0 and "offline-check: no FAIL lines"
 	or ("offline-check: " .. failures .. " FAIL lines"))
 os.exit(failures == 0 and 0 or 1)
