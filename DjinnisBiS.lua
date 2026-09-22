@@ -3374,19 +3374,29 @@ function PlanTab.sendToKeystoneLoot()
 	d.keystoneLoot = d.keystoneLoot or {}
 	d.keystoneLoot[charKey] = d.keystoneLoot[charKey] or {}
 	local sent = d.keystoneLoot[charKey]
-	local wanted, added, removed, refused = PlanTab.keystoneLootWanted(), 0, 0, 0
+	local wanted, added, removed, refused, kept = PlanTab.keystoneLootWanted(), 0, 0, 0, 0
 	-- Every wanted item goes over every time, so a changed enchant or gem
-	-- lands; "added" counts only what this addon had not sent before.
+	-- lands; "added" counts only what this addon had not sent before. One
+	-- that is a favourite already and not in the record is Rob's own: its
+	-- AddFavorite would overwrite tier, gems and enchant (Favorites:Add
+	-- replaces the entry), and recording it would remove it later, so it is
+	-- left alone and counted (0021 review).
 	for key, want in pairs(wanted) do
 		local e = want.entry
-		local okAdd, did = call("AddFavorite", want.item, want.spec, tier,
-			{ bonusIds = e.bonus, gems = e.gems, enchant = e.enchant, characterKey = charKey })
-		if not okAdd then return nil end
-		if did then
-			if not sent[key] then added = added + 1 end
-			sent[key] = { item = want.item, spec = want.spec }
+		local okIs, isRobs = call("IsFavorite", want.item, want.spec, charKey)
+		if not okIs then return nil end
+		if isRobs and not sent[key] then
+			kept = kept + 1
 		else
-			refused = refused + 1
+			local okAdd, did = call("AddFavorite", want.item, want.spec, tier,
+				{ bonusIds = e.bonus, gems = e.gems, enchant = e.enchant, characterKey = charKey })
+			if not okAdd then return nil end
+			if did then
+				if not sent[key] then added = added + 1 end
+				sent[key] = { item = want.item, spec = want.spec }
+			else
+				refused = refused + 1
+			end
 		end
 	end
 	for key, was in pairs(sent) do
@@ -3397,9 +3407,10 @@ function PlanTab.sendToKeystoneLoot()
 			removed = removed + 1
 		end
 	end
-	say(("%d favourite%s added to KeystoneLoot, %d removed%s."):format(added, added == 1 and "" or "s", removed,
-		refused > 0 and (", " .. refused .. " refused as not in its item lists") or ""))
-	return added, removed, refused
+	say(("%d favourite%s added to KeystoneLoot, %d removed%s%s."):format(added, added == 1 and "" or "s", removed,
+		refused > 0 and (", " .. refused .. " refused as not in its item lists") or "",
+		kept > 0 and (", " .. kept .. " left as yours") or ""))
+	return added, removed, refused, kept
 end
 
 -- A Blizzard equipment set for each plan (card 0012) -------------------------
@@ -5219,6 +5230,8 @@ local function selfTest()
 		check(noneTest .. ", send refuses", PlanTab.sendToKeystoneLoot(), nil)
 		check(noneTest .. ", send says why", said[#said] and said[#said]:find("not loaded", 1, true) ~= nil, true)
 		check(noneTest .. ", no row drawn", klRow(), nil)
+		KeystoneLootAPI = {}  -- the global without the method: an older build (0021 review)
+		check(noneTest .. ", nor with a global that cannot add", PlanTab.keystoneLoot(), nil)
 		local ready, charKey = true, "Djinni-Bloodfeather"
 		KeystoneLootAPI = {
 			Tier = { BIS = 3 },
@@ -5231,6 +5244,7 @@ local function selfTest()
 				return true
 			end,
 			RemoveFavorite = function(_, itemId, specId, key) gone[#gone + 1] = { item = itemId, spec = specId, key = key } return true end,
+			IsFavorite = function(_, itemId, specId) return favs[specId .. ":" .. itemId] ~= nil end,
 		}
 		local wanted, count = PlanTab.keystoneLootWanted(), 0
 		for _ in pairs(wanted) do count = count + 1 end
@@ -5264,6 +5278,15 @@ local function selfTest()
 		check(removeTest .. ", and forgotten", db().keystoneLoot[charKey]["103:1"], nil)
 		check(removeTest .. ", the hand-made one is not", #gone, 1)
 		check(removeTest .. ", said", said[#said] and said[#said]:find("1 removed", 1, true) ~= nil, true)
+		-- One Rob made by hand that the plan also wants (0021 review): not in
+		-- the record, already a favourite at his tier. Left alone, not recorded.
+		db().keystoneLoot[charKey]["103:251135"] = nil
+		favs["103:251135"].tier = 2
+		local _, _, _, keptNow = PlanTab.sendToKeystoneLoot()
+		check(removeTest .. ", a hand-made one the plan wants is not overwritten", favs["103:251135"].tier, 2)
+		check(removeTest .. ", nor recorded", db().keystoneLoot[charKey]["103:251135"], nil)
+		check(removeTest .. ", and counted as yours", keptNow, 1)
+		check(removeTest .. ", and said", said[#said] and said[#said]:find("1 left as yours", 1, true) ~= nil, true)
 		local drawn = klRow()
 		check(sendTest .. ", drawn with its button", drawn and drawn.button.label, "KeystoneLoot")
 		check(sendTest .. ", the button has a hover", drawn and drawn.button.tip and drawn.button.tip:find("never touched", 1, true) ~= nil, true)
