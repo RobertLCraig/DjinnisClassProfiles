@@ -95,3 +95,65 @@ bags/bank" lines.
   Left out: a percentage upgrade and Pawn's weights, per "Not this card". No new event: the
   roll frame's own show is the trigger, and `START_LOOT_ROLL` was already registered. The
   "manual" criterion stays unticked until look 4.
+
+- 2026-09-22 Claude (review): adversarial pass on `b2cc37a`, in a worktree, nothing run in a
+  client. Two findings, both fixed in place in `DjinnisBiS.lua`; the card goes to human-review
+  because the manual criterion still needs a person.
+
+  **Attacked and held.** All three `proves:` names ran under Lua 5.4 and 5.1, exit 0 both. Three
+  mutants in temp copies, all red with exit 1: `return nil` for an unplanned id (turns "from a
+  link" red), `local into = later` (three ordering checks red), and the early return put back
+  in `markRollFrame` (the new "old glow is hidden" check red). Checked against
+  `wow-ui-source`: `GroupLootFrame_OnShow` is the template's `OnShow` global and its early
+  `GroupLootContainer_RemoveFrame` path still runs the post-hook, which now hides the glow;
+  the roll icon's `OnEnter` calls `GameTooltip:SetLootRollItem`, which
+  `TooltipDataHandler.lua:538` maps to `C_TooltipInfo.GetLootRollItem`, an item tooltip, so the
+  post-call fires; `C_Item.GetItemCount(itemInfo, includeBank, includeUses,
+  includeReagentBank, includeAccountBank)` matches the call's `(id, true, false, true, true)`.
+  `GetLootRollItemLink` is not in the generated docs; it is the legacy global Blizzard's own
+  icon `OnClick` uses. Secret values: the link, the tooltip's id, the roll id and the count
+  all pass `canRead` before any match, key or compare, and nothing keys a table on a
+  game-supplied string; the only table keyed on a game object is `ROLL_GLOWS[frame]`. Stale
+  index: `GEAR_PLAN` is never written at runtime, so a cache built once is right until
+  `/reload`, which is also the only way the client sees what `update-gear-plan.ps1` wrote; the
+  self-test's temporary `2t` swap calls `buildPlanIndex()` directly, not the cache. Taint: the
+  hook reads `frame.rollID` and adds a texture region to `IconFrame`; no field is written on
+  Blizzard's frame and no roll button is touched.
+
+  **Broke, fixed.** (1) The self-test read the real character. Four checks called the live
+  `GetInventoryItemLink`, `C_Item.GetItemCount` and `C_Item.GetDetailedItemLevelInfo`, so
+  `/bis test` in a client goes red for anyone who owns the planned head, and for everyone if a
+  bare `item:271528` link levels below the planned 321. Proved in a temp copy by stubbing the
+  three to owned and 300: four FAIL lines. The block now stubs all three for its whole length
+  and restores them; the same copy is green with the fix. (2) `markRollFrame` returned early
+  on a missing or unreadable roll id without hiding the glow it already held, so a pooled
+  frame's next roll could keep the last roll's glow. The show is now computed as false on that
+  path and the one `SetShown` always runs; one check added under the third `proves:` name.
+
+  **Security.** Weakest point: the tooltip post-call runs on every item tooltip redraw with
+  values the game supplied, and a throw there is a throw inside Blizzard's tooltip code; the
+  `canRead` guards on the link and the id are what stand between a secret and that. Unchecked
+  paths: none found; the chat line concatenates the link only after `canRead`. Leaks: nothing
+  leaves the client; the PLAN line is a local `print`, not a sent message.
+
+  Not a finding, for the look: a worn planned piece on the character sheet now carries the
+  slot mark's gold line and this card's green line, two lines saying nearly the same thing.
+  Decide whether that is fine after seeing it.
+
+## What I need from you
+
+Nothing here ran in a client. The five looks in the build comment stand, and two are sharper
+after this review:
+
+1. `/bis test` in the client, wearing or holding the planned Feral head (Enigmatic
+   Dreamwatcher's Somnolent Stare, 271528): the 0016 checks must still pass. Before the fix
+   they could not.
+2. Two group loot rolls close together, the first for a planned item and the second for an
+   unplanned one landing on the same roll frame: the glow must go out on the second. Then a
+   third roll on a frame whose item info is not yet cached (the frame flickers and vanishes):
+   no glow left behind and no error.
+3. Looks 1 to 4 from the build comment: the green line on any planned item's tooltip with
+   ", owned" and "at 321" behaving as written, the glow and the spec lines on the roll icon's
+   tooltip, the "[BiS] PLAN" chat line, and Need, Greed and Pass clicking with no taint error.
+4. The character sheet's worn head: say whether the gold slot line plus the green plan line
+   together read as one answer or as a duplicate.
