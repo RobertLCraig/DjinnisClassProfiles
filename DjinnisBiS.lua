@@ -1640,6 +1640,35 @@ local function readWorn()
 	return worn
 end
 
+-- The data broker line (card 0026): "BiS: 2 off plan" on any broker display,
+-- so nothing has to be opened to know. `count` nil is no plan or unreadable
+-- gear, and the text says nothing rather than "on plan".
+function PlanTab.brokerText(count)
+	if count == nil then return "BiS" end
+	if count == 0 then return "BiS: on plan" end
+	return ("BiS: %d off plan"):format(count)
+end
+
+-- How many worn slots differ from the plan for the current spec and content,
+-- or nil with no plan or a link that cannot be read. `forSpec` is for the
+-- self-test; the broker always asks about the player.
+function PlanTab.offPlanCount(forSpec)
+	local spec = forSpec or playerSpec()
+	local plan = spec and gearPlanFor(spec, planScenario(spec))
+	if not plan then return nil end
+	local worn = readWorn()
+	if not worn then return nil end
+	local count = 0
+	for _ in pairs(slotStates(plan, worn)) do count = count + 1 end
+	return count
+end
+
+-- Rides rebuildBagWanted, which the bag-mark watcher runs from login on every
+-- event that redraws the glows, so the line and the glows cannot disagree.
+function PlanTab.updateBroker()
+	if PlanTab.broker then PlanTab.broker.text = PlanTab.brokerText(PlanTab.offPlanCount()) end
+end
+
 -- Bag marks -------------------------------------------------------------------
 --
 -- A bag item is wanted when it is the planned piece for a slot that is wearing
@@ -1691,6 +1720,7 @@ local function rebuildBagWanted()
 	if plan and not worn then return end
 	bagWanted = plan and wantedFrom(plan, worn) or {}
 	if refreshBagGlows then refreshBagGlows() end
+	PlanTab.updateBroker()
 end
 
 local function wantedSlotForLink(link)
@@ -1924,9 +1954,9 @@ end
 
 local function attachItemHover(frame)
 	frame:SetScript("OnEnter", function(self)
-		if not self.link then return end
+		if not (self.link or self.tip) then return end
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:SetHyperlink(self.link)
+		if self.link then GameTooltip:SetHyperlink(self.link) else GameTooltip:SetText(self.tip) end
 		GameTooltip:Show()
 	end)
 	frame:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -2142,6 +2172,7 @@ renderList = function(lines)
 		local row = acquireRow(window.content, i)
 		row.text:SetText(line.text)
 		row.link = line.link
+		row.tip = line.tip  -- a plain-text hover for a row with no item, the plan's age (card 0026)
 		row.onClick = line.onClick
 		-- The right-hand button is the item level target on the BiS tabs and a
 		-- named action (Equip, Search AH) on the Plan tab. One button, two jobs.
@@ -2862,6 +2893,7 @@ local function buildBroker()
 		OnClick = function() DjinnisBiS_Toggle() end,
 		OnTooltipShow = summaryLines,
 	})
+	PlanTab.broker = broker  -- its text is kept by PlanTab.updateBroker (card 0026)
 
 	local icon = LibStub("LibDBIcon-1.0", true)
 	if icon and broker then
@@ -3091,6 +3123,53 @@ end
 
 -- PlanTab.boss is the boss picked in the tab; the first one until a click.
 -- `forSpec` is for /bis test only, which has to pass whatever spec runs it.
+-- How old the plan is (card 0026). A plan is baked in from one Raidbots report
+-- and goes stale: a patch, a drop, a new build. Raidbots also drops a report
+-- after about 30 days, so an old link may stop opening.
+PlanTab.STALE_DAYS = 14  -- Rob's first guess on the card; he sets it
+PlanTab.MONTHS = { Jan = 1, Feb = 2, Mar = 3, Apr = 4, May = 5, Jun = 6,
+	Jul = 7, Aug = 8, Sep = 9, Oct = 10, Nov = 11, Dec = 12 }
+
+-- "Sep 10 2026", the client build date GetBuildInfo prints, as "2026-09-10".
+-- Nil for anything else, and nil never marks a plan old.
+function PlanTab.isoBuildDate(built)
+	local mon, day, year = tostring(built or ""):match("^(%a%a%a) +(%d+) +(%d%d%d%d)$")
+	local m = mon and PlanTab.MONTHS[mon]
+	if not m then return nil end
+	return ("%04d-%02d-%02d"):format(tonumber(year), m, tonumber(day))
+end
+
+-- Whole days from an ISO date to `now` (a time()), or nil for a date that
+-- cannot be read. Rounded, so a report simmed this morning is 0 days old.
+function PlanTab.daysSince(iso, now)
+	local y, m, d = tostring(iso or ""):match("^(%d%d%d%d)-(%d%d)-(%d%d)$")
+	if not y then return nil end
+	local then_ = time({ year = tonumber(y), month = tonumber(m), day = tonumber(d), hour = 12 })
+	return math.floor((now - then_) / 86400 + 0.5)
+end
+
+-- days, old: `old` when the report is over STALE_DAYS old or was simmed
+-- before the game build the client is running, which is the last patch the
+-- addon can know about without a hand-kept date. Nil days for an unreadable date.
+function PlanTab.planAge(simmed, now, built)
+	local days = PlanTab.daysSince(simmed, now)
+	if not days then return nil, false end
+	local build = PlanTab.isoBuildDate(built)
+	return days, days > PlanTab.STALE_DAYS or (build ~= nil and simmed < build)
+end
+
+-- The Plan tab's line under the gear header: the report date and its age,
+-- amber with "re-sim?" in its hover when old.
+function PlanTab.ageLine(simmed, days, old)
+	local AMBER = "|cffffb300"
+	local age = days and ("%d day%s old"):format(days, days == 1 and "" or "s") or "age not known"
+	return {
+		text = ("   %sReport simmed %s, %s|r"):format(old and AMBER or GREY, tostring(simmed), age),
+		tip = old and ("Older than %d days, or older than this game build. Re-sim?"):format(PlanTab.STALE_DAYS)
+			or "The Raidbots Top Gear report this plan came from. Raidbots keeps a report about 30 days.",
+	}
+end
+
 function PlanTab.lines(forSpec)
 	local RED = "|cffff2020"
 	local LOADOUT_COLOUR = { match = GREEN, mismatch = RED, unknown = WHITE }
@@ -3137,6 +3216,12 @@ function PlanTab.lines(forSpec)
 	lines[#lines + 1] = { text = ("%s2. Gear to change|r   %s%s plan|r"):format(GOLD, GREY, SCENARIO_LABEL[picked.scenario]) }
 	local plan = gearPlanFor(spec, picked.scenario)
 	local worn = plan and readWorn()
+	if plan then
+		-- The report date and its age, before anything the report says, so a
+		-- stale plan is marked even when the gear cannot be read.
+		local days, old = PlanTab.planAge(plan.simmed, time(), (select(3, GetBuildInfo())))
+		lines[#lines + 1] = PlanTab.ageLine(plan.simmed, days, old)
+	end
 	if not plan then
 		-- Said, never filled from the raid plan: a key and a raid boss want
 		-- different gear, and a silent fallback reads like an answer.
@@ -4202,6 +4287,74 @@ local function selfTest()
 	check(openTest .. ", moves a pick that does not", PlanTab.bossFor(PlanTab.BOSSES.Feral, "The Twin Fangs", "st"), "Nek'zali")
 	check(openTest .. ", no scenario leaves the pick alone", PlanTab.bossFor(PlanTab.BOSSES.Feral, "Vashnik", nil), "Vashnik")
 	check(openTest .. ", no boss table", PlanTab.bossFor(nil, nil, "st"), nil)
+
+	-- the data broker line (card 0026)
+	local brokerTest = "data broker text counts slots off plan"
+	check(brokerTest .. ", on plan", PlanTab.brokerText(0), "BiS: on plan")
+	check(brokerTest .. ", one off", PlanTab.brokerText(1), "BiS: 1 off plan")
+	check(brokerTest .. ", two off", PlanTab.brokerText(2), "BiS: 2 off plan")
+	check(brokerTest .. ", no plan says nothing", PlanTab.brokerText(nil), "BiS")
+	do
+		-- The count the broker writes is the count the slot marks draw: the same
+		-- plan, the same slotStates. With nothing worn (the link read is
+		-- stubbed nil, and put back) every planned slot is off plan, and that
+		-- number is counted here by hand so a broker writing the wrong one shows.
+		local wasWornLink = GetInventoryItemLink
+		GetInventoryItemLink = function() return nil end
+		local plan = gearPlanFor("Feral", planScenario("Feral"))
+		local expected = 0
+		if plan then for _ in pairs(slotStates(plan, {})) do expected = expected + 1 end end
+		check(brokerTest .. ", every planned slot is off plan when nothing is worn", PlanTab.offPlanCount("Feral"), plan and expected or nil)
+		check(brokerTest .. ", and that is more than none", plan and expected > 0, plan and true or nil)
+		local realBroker = PlanTab.broker
+		PlanTab.broker = { text = "" }
+		PlanTab.updateBroker()
+		local written = PlanTab.broker.text
+		-- the player's own spec here, not Feral: a Guardian running /bis test has no plan and must read "BiS"
+		local wanted = PlanTab.brokerText(PlanTab.offPlanCount())
+		PlanTab.broker = realBroker
+		GetInventoryItemLink = wasWornLink
+		check(brokerTest .. ", the broker line is written for the player", written, wanted)
+	end
+
+	-- the plan's date and age (card 0026)
+	local ageTest = "plan tab shows the report date and age"
+	local noon = function(y, m, d, h) return time({ year = y, month = m, day = d, hour = h or 12 }) end
+	check(ageTest .. ", days since", PlanTab.daysSince("2026-09-01", noon(2026, 9, 10)), 9)
+	check(ageTest .. ", simmed this morning is 0 days", PlanTab.daysSince("2026-09-10", noon(2026, 9, 10, 8)), 0)
+	check(ageTest .. ", unreadable date", PlanTab.daysSince("last Tuesday", noon(2026, 9, 10)), nil)
+	check(ageTest .. ", build date read", PlanTab.isoBuildDate("Sep 10 2026"), "2026-09-10")
+	check(ageTest .. ", build date not read", PlanTab.isoBuildDate("12.1.0"), nil)
+	check(ageTest .. ", line names the date", PlanTab.ageLine("2026-09-01", 9, false).text:find("Report simmed 2026-09-01, 9 days old", 1, true) ~= nil, true)
+	check(ageTest .. ", one day", PlanTab.ageLine("2026-09-01", 1, false).text:find("1 day old", 1, true) ~= nil, true)
+	check(ageTest .. ", unknown age is said", PlanTab.ageLine("?", nil, false).text:find("age not known", 1, true) ~= nil, true)
+	do
+		-- as drawn: the line is under the gear header for the picked boss's cell
+		local realBoss4 = PlanTab.boss
+		PlanTab.boss = "Nek'zali"  -- 1 target, the one filled cell
+		local found
+		for _, line in ipairs(PlanTab.lines("Feral")) do
+			if line.text:find("Report simmed " .. GEAR_PLAN.Feral.st.simmed, 1, true) then found = line end
+		end
+		PlanTab.boss = realBoss4
+		check(ageTest .. ", drawn with the cell's date", found ~= nil, true)
+		check(ageTest .. ", drawn with an age", found and found.text:match("%d+ days? old") ~= nil, true)
+		check(ageTest .. ", drawn with a hover", found and found.tip ~= nil, true)
+	end
+	local oldTest = "an old plan is marked"
+	local function age(simmed, y, m, d, built) return PlanTab.planAge(simmed, noon(y, m, d), built) end
+	check(oldTest .. ", over 14 days", select(2, age("2026-09-01", 2026, 9, 20, "Aug 20 2026")), true)
+	check(oldTest .. ", 14 days exactly is not old", select(2, age("2026-09-01", 2026, 9, 15, "Aug 20 2026")), false)
+	check(oldTest .. ", before the game build", select(2, age("2026-09-01", 2026, 9, 4, "Sep 05 2026")), true)
+	check(oldTest .. ", fresh and after the build", select(2, age("2026-09-01", 2026, 9, 4, "Aug 20 2026")), false)
+	check(oldTest .. ", build date unreadable never marks", select(2, age("2026-09-01", 2026, 9, 4, "who knows")), false)
+	check(oldTest .. ", unreadable report date never marks", select(2, age("junk", 2026, 9, 4, "Sep 05 2026")), false)
+	check(oldTest .. ", days still counted", (age("2026-09-01", 2026, 9, 20, "Aug 20 2026")), 19)
+	local oldLine, freshLine = PlanTab.ageLine("2026-09-01", 19, true), PlanTab.ageLine("2026-09-01", 3, false)
+	check(oldTest .. ", drawn amber", oldLine.text:find("|cffffb300", 1, true) ~= nil, true)
+	check(oldTest .. ", re-sim in the hover", oldLine.tip:find("Re-sim?", 1, true) ~= nil, true)
+	check(oldTest .. ", fresh is not amber", freshLine.text:find("|cffffb300", 1, true), nil)
+	check(oldTest .. ", fresh does not say re-sim", freshLine.tip:find("Re-sim", 1, true), nil)
 
 	-- a saved target must survive the round trip and show its item level
 	setGear("zzz not a real item", "Myth", 6)
