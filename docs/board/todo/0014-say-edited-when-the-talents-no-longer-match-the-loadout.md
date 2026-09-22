@@ -30,7 +30,7 @@ and the tab says all is well.
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [x] WHEN the active talents differ from the planned loadout's talent string, THE ADDON SHALL show the loadout name with "(edited)" after it. proves: `edited talents are marked`
+- [ ] WHEN the active talents differ from the planned loadout's talent string, THE ADDON SHALL show the loadout name with "(edited)" after it. proves: `edited talents are marked`
 - [x] WHEN they match, THE ADDON SHALL show the name with nothing after it. proves: `matching talents are not marked`
 - [x] THE ADDON SHALL read the talent string only out of combat. proves: `talent string read out of combat only`
 <!-- AC:END -->
@@ -80,3 +80,42 @@ and the tab says all is well.
   saved loadout is, as the card prefers; a planned loadout that is not the selected one is
   already the name mismatch and needs no string. The header question is task 2 and item 4 above,
   and it is a look in the game, not something this checkout can answer. Not seen in a client.
+- 2026-09-22 Claude (review, bounced to todo): attacked the three criteria, the code at
+  `talentsEdited`, `talentStringsDiffer`, `loadoutState`, `activeLoadoutName`, `lines` and the
+  bag-mark watcher, and the three APIs against `SharedTraitsDocumentation.lua` and
+  `ClassTalentsDocumentation.lua` (all present, none secret-restricted, `TRAIT_CONFIG_UPDATED`
+  carries a configID and is not deprecated). Both offline checks exit 0, 177 top-level locals. Nine
+  mutations in a temp copy: seven went red (the edited branch, the combat guard, the "(edited)"
+  text, the compare forced false, the last reading not kept, the saved id read from the active id,
+  the empty-string guard). Two survived and are gaps, not faults: dropping `TRAIT_CONFIG_UPDATED`
+  from the watcher's list is caught by nothing offline (registration is only provable in the game,
+  same as 0011's two events), and the `canRead` guard in `talentStringsDiffer` cannot be exercised
+  because the harness has neither `canaccessvalue` nor `issecretvalue`, so `canRead` is captured as
+  always true. Neither is the reason for the bounce.
+
+  **What broke: the thing the compare reads is overwritten by the edit it is meant to catch.** The
+  code compares the active config's string against the LAST SELECTED SAVED config's. Blizzard's
+  own talent frame writes a hand edit into that loadout when Apply is clicked:
+  `Blizzard_PlayerSpells/ClassTalents/Blizzard_ClassTalentsFrame.lua` 1134 to 1155, `ApplyConfig`
+  calls `CommitConfig(self.LoadSystem:GetSelectionID())`, and the docs name that argument
+  `savedConfigID`; with no tree change pending it calls `C_ClassTalents.SaveConfig(selectedConfig)`
+  under the comment "Selected config is a loadout, save to that config". So after step 2 of the
+  in-game list (move a point, apply) the saved string equals the active one and "(edited)" cannot
+  show. The only state where they differ is a staged edit before Apply, which does nothing to the
+  fight. Criterion 1 is not met for the case the card's Why describes, so it is unticked. This
+  could not be settled by the offline checks because they stub both strings.
+
+  The fix is small and is Rob's call, which is why this is a bounce and not an edit: compare the
+  active string against the plan's own `talents` string for the picked boss's cell
+  (`GEAR_PLAN`, lines 378 and 400) instead of the saved loadout's. `update-gear-plan.ps1` 171 to
+  173 takes that string from the report's `rawString`, the export Rob pasted in from the game, so
+  its header is the game's; both plan strings share the same 31-character header. That is what
+  EnhanceQoL does (its own stored string, not the loadout), and it is the "string baked into the
+  plan" option task 1 turned down. It reads: not the simmed build. Task 1's "prefer the saved
+  loadout" should be flipped to say why. `activeLoadoutName` then needs no `talentsEdited`
+  argument, and the three `talentsEdited` checks want the plan string as their stub. Item 4 of the
+  in-game list still stands, header included.
+
+  Security, for the record: weakest point is a redraw per `TRAIT_CONFIG_UPDATED`, two cheap
+  string reads, no loop; unchecked path none, both reads are pcalled and the event handler takes
+  no payload; leaks nothing, the strings never leave the client and never print.
