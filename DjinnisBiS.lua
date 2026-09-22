@@ -1975,8 +1975,13 @@ end
 
 -- Window -------------------------------------------------------------------
 
-local ROW_HEIGHT = 15
-local ILVL_WIDTH = 70
+-- The sizes every tab draws with (card 0020). A list row and an item button
+-- are never under 32, a button never under 24: Rob read the old 15-pixel rows
+-- as "a semi interactive spreadsheet". On PlanTab so the self-test can read
+-- them without another upvalue.
+PlanTab.SIZE = { row = 34, cell = 36, icon = 32, button = 24, tab = 26 }
+local ROW_HEIGHT = PlanTab.SIZE.row
+local ILVL_WIDTH = 100  -- wide enough for "KeystoneLoot" on the action button
 local WINDOW_W = 900  -- two columns wide enough for the long tier set names
 local CONTENT_W = WINDOW_W - 50  -- window minus the insets and the scrollbar
 local rowPool = {}
@@ -1992,7 +1997,7 @@ local function attachIlvlButton(parent)
 	local b = CreateFrame("Button", nil, parent)
 	b:SetSize(ILVL_WIDTH, ROW_HEIGHT)
 	b:SetPoint("RIGHT", parent, "RIGHT")
-	b.text = b:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	b.text = b:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	b.text:SetAllPoints()
 	b.text:SetJustifyH("RIGHT")
 	b:SetScript("OnClick", function(self)
@@ -2022,11 +2027,39 @@ local function attachItemHover(frame)
 	end)
 end
 
+-- An item is an item button, not text with a tiny icon (card 0020, rule 2).
+-- Blizzard's ItemButton intrinsic (Blizzard_ItemButton/Shared/ItemButtonTemplate.xml)
+-- carries the icon, the quality border and the slot backdrop, and its
+-- SetItemButtonQuality colours the border the way every bag and vault does.
+-- The button takes no mouse: the row or cell under it owns the hover and the
+-- click, so shift-click linking and the Plan tab's row click work as before.
+function PlanTab.newItemIcon(parent)
+	local icon = CreateFrame("ItemButton", nil, parent)
+	icon:SetSize(PlanTab.SIZE.icon, PlanTab.SIZE.icon)
+	icon:SetPoint("LEFT", parent, "LEFT", 1, 0)
+	icon:EnableMouse(false)
+	return icon
+end
+
+-- `link` when there is one, else the item id: a cold cache has the id only.
+function PlanTab.setItemIcon(icon, link, id)
+	local key = link or id
+	local texture = key and select(5, C_Item.GetItemInfoInstant(key))
+	icon:SetItemButtonTexture(texture or "Interface\\Icons\\INV_Misc_QuestionMark")
+	local quality = key and C_Item.GetItemQualityByID and C_Item.GetItemQualityByID(key)
+	-- Blizzard's own call, under pcall: it asks half a dozen C_Item questions
+	-- of the link and a bad one is theirs to refuse, not ours to crash on.
+	pcall(icon.SetItemButtonQuality, icon, quality, key)
+end
+
 local function acquireRow(content, index)
 	local row = rowPool[index]
 	if not row then
 		row = CreateFrame("Button", nil, content)
 		row:SetHeight(ROW_HEIGHT)
+		-- The hover every Blizzard list row has (FriendsFrame.xml uses this file).
+		row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+		row.icon = PlanTab.newItemIcon(row)
 		row.text = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightLeft")
 		row.text:SetPoint("LEFT")
 		row.text:SetPoint("RIGHT", row, "RIGHT", -(ILVL_WIDTH + 4), 0)
@@ -2037,7 +2070,7 @@ local function acquireRow(content, index)
 		-- text, because a target is a value and not a thing to do (Rob, 2026-09-22:
 		-- the Equip "button" read as "a little bit of text").
 		row.action = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-		row.action:SetSize(ILVL_WIDTH, ROW_HEIGHT - 2)
+		row.action:SetSize(ILVL_WIDTH, PlanTab.SIZE.button)
 		row.action:SetPoint("RIGHT", row, "RIGHT")
 		row.action:SetScript("OnClick", function(self) if self.onClick then self.onClick() end end)
 		row.action:SetScript("OnEnter", function(self)
@@ -2057,7 +2090,7 @@ end
 
 -- Doll cells ---------------------------------------------------------------
 
-local CELL_ITEM, CELL_HEAD = 20, 16
+local CELL_ITEM, CELL_HEAD = PlanTab.SIZE.cell, 24
 local SIM_EXTRAS_SHOWN = 12
 local TIER_ROWS_SHOWN = 12
 local cellPool = {}
@@ -2066,12 +2099,9 @@ local function acquireCell(content, index)
 	local cell = cellPool[index]
 	if not cell then
 		cell = CreateFrame("Button", nil, content)
-		cell.icon = cell:CreateTexture(nil, "ARTWORK")
-		cell.icon:SetSize(16, 16)
-		cell.icon:SetPoint("LEFT")
-		cell.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)  -- trim the icon border
-		-- small font: the tier set names are long and the columns are narrow
-		cell.text = cell:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+		cell:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+		cell.icon = PlanTab.newItemIcon(cell)
+		cell.text = cell:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 		cell.text:SetJustifyH("LEFT")
 		cell.text:SetWordWrap(false)
 		cell.ilvl = attachIlvlButton(cell)
@@ -2099,7 +2129,7 @@ local function beginItemCell(cell)
 	cell.icon:Show()
 	cell.ilvl:Show()
 	cell.text:ClearAllPoints()
-	cell.text:SetPoint("LEFT", cell.icon, "RIGHT", 4, 0)
+	cell.text:SetPoint("LEFT", cell.icon, "RIGHT", 6, 0)
 	cell.text:SetPoint("RIGHT", cell.ilvl, "LEFT", -4, 0)
 end
 
@@ -2107,8 +2137,7 @@ local function setItemCell(cell, item)
 	local link = linkFor(item.name)
 	beginItemCell(cell)
 
-	local icon = link and select(5, C_Item.GetItemInfoInstant(link))
-	cell.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+	PlanTab.setItemIcon(cell.icon, link)
 	local id = itemIdFor(item.name)
 	local have = id and wornIds[id] and "|TInterface\\RaidFrame\\ReadyCheck-Ready:12|t" or ""
 	cell.text:SetText(have .. (link or WHITE .. item.name .. "|r") .. shortSite(item.site)
@@ -2122,8 +2151,7 @@ end
 local function setWearingCell(cell, worn)
 	beginItemCell(cell)
 
-	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(worn.link))
-		or "Interface\\Icons\\INV_Misc_QuestionMark")
+	PlanTab.setItemIcon(cell.icon, worn.link)
 	cell.text:SetText(GREY .. "on you |r" .. worn.link
 		.. tierText(tiersFor(activeSpec, worn.id, nameFromLink(worn.link))))
 	cell.link = worn.link
@@ -2139,8 +2167,7 @@ local function setSimCell(cell, id, info)
 
 	local _, link = C_Item.GetItemInfo(id)
 	if not link then C_Item.RequestLoadItemDataByID(id) end
-	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(id))
-		or "Interface\\Icons\\INV_Misc_QuestionMark")
+	PlanTab.setItemIcon(cell.icon, link, id)
 	cell.text:SetText((link or WHITE .. "item " .. id .. "|r")
 		.. tierText(tiersFor(activeSpec, id, nameFromLink(link))) .. gainText(info.gain))
 	cell.link = link
@@ -2156,8 +2183,7 @@ local function setTierCell(cell, id, tiers, worn)
 
 	local _, link = C_Item.GetItemInfo(id)
 	if not link then C_Item.RequestLoadItemDataByID(id) end
-	cell.icon:SetTexture(select(5, C_Item.GetItemInfoInstant(id))
-		or "Interface\\Icons\\INV_Misc_QuestionMark")
+	PlanTab.setItemIcon(cell.icon, link, id)
 	local have = worn and "|TInterface\\RaidFrame\\ReadyCheck-Ready:12|t" or ""
 	cell.text:SetText(have .. (link or WHITE .. "item " .. id .. "|r") .. tierText(tiers))
 	cell.link = link
@@ -2208,6 +2234,21 @@ refresh = function()
 	window.scroll:SetShown(activeTab ~= 3)
 	window.statPane:SetShown(activeTab == 3)
 
+	-- The content choice sits above the list on the Plan tab only, and the
+	-- list starts under it there.
+	local spec = playerSpec()
+	local states = activeTab == 4 and PlanTab.choices(spec and planScenario(spec), autoContext()) or {}
+	for i, button in ipairs(window.choices) do
+		local state = states[i]
+		button:SetShown(state ~= nil)
+		if state then
+			button:SetEnabled(state.enabled)
+			button.tip = state.tip
+			if state.lit then button:LockHighlight() else button:UnlockHighlight() end
+		end
+	end
+	window.scroll:SetPoint("TOPLEFT", window.Inset, "TOPLEFT", 8, activeTab == 4 and -(PlanTab.SIZE.button + 12) or -6)
+
 	if activeTab == 3 then
 		window.statPane:Update()
 		return
@@ -2230,6 +2271,13 @@ renderList = function(lines)
 		row.link = line.link
 		row.tip = line.tip  -- a plain-text hover for a row with no item, the plan's age (card 0026)
 		row.onClick = line.onClick
+		-- An item row gets its item button; the text steps right to make room.
+		-- Only a row that does something takes the mouse, so the hover highlight
+		-- marks the rows to click and leaves headings and blank lines quiet.
+		row.icon:SetShown(line.link ~= nil)
+		if line.link then PlanTab.setItemIcon(row.icon, line.link) end
+		row.text:SetPoint("LEFT", row, "LEFT", line.link and (PlanTab.SIZE.icon + 8) or 0, 0)
+		row:EnableMouse(line.link ~= nil or line.onClick ~= nil or line.tip ~= nil)
 		-- The right-hand button is the item level target on the BiS tabs and a
 		-- named action (Equip, Search AH) on the Plan tab. One button, two jobs.
 		local action = line.button
@@ -2421,11 +2469,11 @@ local function makeStatRow(parent, index, width)
 	row.bg:SetPoint("BOTTOMRIGHT", 3, 0)
 	row.bg:SetColorTexture(unpack(ROW_BG))
 
-	row.label = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	row.label = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	row.label:SetPoint("TOPLEFT", 2, -1)
 	row.label:SetJustifyH("LEFT")
 
-	row.value = row:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	row.value = row:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	row.value:SetPoint("TOPRIGHT", -2, -1)
 	row.value:SetJustifyH("RIGHT")
 
@@ -2581,10 +2629,10 @@ local function buildStatPane(parent, opts)
 	local top = opts.framed and (HEADER_H + 8) or 4
 
 	pane.context = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
-	pane.context:SetSize(80, 18)
+	pane.context:SetSize(90, PlanTab.SIZE.button)
 	pane.context:SetPoint("TOPRIGHT", -8, -(top))
 
-	pane.heading = pane:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+	pane.heading = pane:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 	pane.heading:SetPoint("TOPLEFT", 12, -(top + 4))
 	pane.heading:SetPoint("RIGHT", pane.context, "LEFT", -6, 0)
 	pane.heading:SetJustifyH("LEFT")
@@ -2600,14 +2648,14 @@ local function buildStatPane(parent, opts)
 	end)
 
 	pane.rows = CreateFrame("Frame", nil, pane)
-	pane.rows:SetPoint("TOPLEFT", 0, -(top + 24))
+	pane.rows:SetPoint("TOPLEFT", 0, -(top + 28))
 	pane.rows:SetSize(width, #STATS * BAR_ROW_H)
 	pane.bars = {}
 	for i, _ in ipairs(STATS) do
 		pane.bars[i] = makeStatRow(pane.rows, i, width)
 	end
 
-	pane.footer = pane:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
+	pane.footer = pane:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")  -- small font: help text under the bars
 	pane.footer:SetPoint("TOPLEFT", pane.rows, "BOTTOMLEFT", 12, -2)
 	pane.footer:SetPoint("RIGHT", pane, "RIGHT", -12, 0)
 	pane.footer:SetJustifyH("LEFT")
@@ -2616,7 +2664,7 @@ local function buildStatPane(parent, opts)
 	-- The fixed part of the height. The footer is added after it has text in
 	-- it, because a two-line note and a one-line note are different heights and
 	-- guessing at one of them is how text ends up outside the border.
-	pane.fixedHeight = top + 24 + #STATS * BAR_ROW_H + 10
+	pane.fixedHeight = top + 28 + #STATS * BAR_ROW_H + 10
 	pane:SetHeight(pane.fixedHeight + 14)
 
 	function pane:Resize()
@@ -2704,9 +2752,51 @@ setPreview = function(link)
 	end
 end
 
+-- The window's scale, saved per account (card 0020, rule 8): Rob's screen and
+-- eyes set the size, not the code. Clamped, because the saved file is editable
+-- by hand and a scale of 0 is a window nobody can find.
+PlanTab.SCALE_MIN, PlanTab.SCALE_MAX = 0.8, 1.4
+function PlanTab.scale(saved)
+	local s = tonumber(saved)
+	if not s then return 1 end
+	return math.max(PlanTab.SCALE_MIN, math.min(PlanTab.SCALE_MAX, s))
+end
+
+-- Writes the pin and resizes the window at once; the next open reads it back.
+-- Only ever called from the slider or a test, both long after ADDON_LOADED,
+-- so the saved table is real by then (DECISIONS 2026-09-02).
+function PlanTab.setScale(value)
+	local s = PlanTab.scale(value)
+	db().scale = s
+	if window then window:SetScale(s) end
+	return s
+end
+
+-- The Plan tab's content choice, drawn as three buttons with the chosen one
+-- lit (card 0020, rule 11): a button that goes round a list hides its choices.
+-- `chosen` is planScenario(spec) and `here` is autoContext(). Inside a raid or
+-- a dungeon the place decides, so the others are greyed with the reason in
+-- their tooltip. Pure, so the self-test can read every state.
+PlanTab.CHOICES = { "st", "2t", "mplus" }
+PlanTab.CHOICE_LABEL = { st = "Raid - 1 target", ["2t"] = "Raid - 2 targets", mplus = "Mythic+" }
+function PlanTab.choices(chosen, here)
+	local out = {}
+	for i, key in ipairs(PlanTab.CHOICES) do
+		local why
+		if here == "raid" and key == "mplus" then why = "You are in a raid, so the raid plan is in use."
+		elseif here == "mplus" and key ~= "mplus" then why = "You are in a dungeon, so the Mythic+ plan is in use." end
+		out[i] = { key = key, label = PlanTab.CHOICE_LABEL[key], lit = key == chosen, enabled = why == nil,
+			tip = why or ("Show the " .. PlanTab.CHOICE_LABEL[key] .. " plan: its loadout, gear and shopping list.") }
+	end
+	return out
+end
+
 local function buildWindow()
-	local f = CreateFrame("Frame", "DjinnisBiSFrame", UIParent, "BasicFrameTemplateWithInset")
-	f:SetSize(WINDOW_W, 560)
+	-- Blizzard's portrait window (card 0020, rule 6): the spec's icon in the
+	-- corner, the title bar, the close button, an inset for the content and a
+	-- bar along the bottom. Checked in Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.xml.
+	local f = CreateFrame("Frame", "DjinnisBiSFrame", UIParent, "ButtonFrameTemplate")
+	f:SetSize(WINDOW_W, 600)
 	f:SetPoint("CENTER")
 	f:SetMovable(true)
 	f:EnableMouse(true)
@@ -2714,45 +2804,69 @@ local function buildWindow()
 	f:SetScript("OnDragStart", f.StartMoving)
 	f:SetScript("OnDragStop", f.StopMovingOrSizing)
 	f:SetClampedToScreen(true)
+	f:SetTitle("Djinni's BiS  " .. GREY .. "The Venomous Abyss|r")
+	-- PortraitFrameMixin's own read of the spec icon, class icon when no spec.
+	f:SetPortraitToSpecIcon()
+	f:SetScale(PlanTab.scale(db().scale))
 
-	-- own title rather than the template's, which has moved between patches
-	local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	title:SetPoint("TOP", f, "TOP", 0, -6)
-	title:SetText("Djinni's BiS  " .. GREY .. "The Venomous Abyss|r")
-
-	-- Plain buttons rather than PanelTabButtonTemplate: the tab templates want
-	-- PanelTemplates_ bookkeeping and give nothing back for two tabs.
+	-- Plain buttons rather than TabSystemTemplate: the tab templates want
+	-- PanelTemplates_ bookkeeping and give nothing back for four tabs. They
+	-- start right of the 62-pixel portrait.
 	f.tabs = {}
 	local TAB_LABELS = { "By Boss", "By Slot", "Stats", "Plan" }
 	for i, label in ipairs(TAB_LABELS) do
 		local button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-		button:SetSize(110, 22)
-		button:SetPoint("TOPLEFT", f, "TOPLEFT", 12 + (i - 1) * 114, -28)
+		button:SetSize(110, PlanTab.SIZE.tab)
+		button:SetPoint("TOPLEFT", f, "TOPLEFT", 66 + (i - 1) * 114, -30)
 		button:SetText(label)
 		button:SetScript("OnClick", function() activeTab = i; refresh() end)
 		f.tabs[i] = button
 	end
 
 	local importButton = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-	importButton:SetSize(130, 22)
-	importButton:SetPoint("TOPRIGHT", f, "TOPRIGHT", -14, -28)
+	importButton:SetSize(130, PlanTab.SIZE.tab)
+	importButton:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, -58)
 	importButton:SetText("Import sim")
 	importButton:SetScript("OnClick", function() DjinnisBiS_ShowImport(activeSpec) end)
 
 	f.specs = {}
 	for i, spec in ipairs(SPEC_ORDER) do
 		local button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-		button:SetSize(104, 22)
-		button:SetPoint("TOPLEFT", f, "TOPLEFT", 12 + (i - 1) * 108, -54)
+		button:SetSize(104, PlanTab.SIZE.tab)
+		button:SetPoint("TOPLEFT", f, "TOPLEFT", 66 + (i - 1) * 108, -58)
 		button:SetText(spec)
 		button.spec = spec
 		button:SetScript("OnClick", function() activeSpec = spec; refresh() end)
 		f.specs[i] = button
 	end
 
+	-- The template's inset starts at -60; two rows of buttons need it lower.
+	f.Inset:SetPoint("TOPLEFT", f, "TOPLEFT", 4, -90)
+
+	-- The content choice at the top of the Plan tab: three buttons, lit,
+	-- greyed with a reason, never a button that goes round (rule 11).
+	f.choices = {}
+	for i, key in ipairs(PlanTab.CHOICES) do
+		local button = CreateFrame("Button", nil, f.Inset, "UIPanelButtonTemplate")
+		button:SetSize(150, PlanTab.SIZE.button)
+		button:SetPoint("TOPLEFT", f.Inset, "TOPLEFT", 8 + (i - 1) * 154, -6)
+		button:SetText(PlanTab.CHOICE_LABEL[key])
+		button.key = key
+		button:SetMotionScriptsWhileDisabled(true)  -- a greyed button still says why
+		button:SetScript("OnClick", function(self) PlanTab.pickScenario(self.key) end)
+		button:SetScript("OnEnter", function(self)
+			if not self.tip then return end
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:SetText(self.tip, nil, nil, nil, nil, true)
+			GameTooltip:Show()
+		end)
+		button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+		f.choices[i] = button
+	end
+
 	local scroll = CreateFrame("ScrollFrame", "DjinnisBiSScroll", f, "UIPanelScrollFrameTemplate")
-	scroll:SetPoint("TOPLEFT", 12, -80)
-	scroll:SetPoint("BOTTOMRIGHT", -34, 10)
+	scroll:SetPoint("TOPLEFT", f.Inset, "TOPLEFT", 8, -6)
+	scroll:SetPoint("BOTTOMRIGHT", f.Inset, "BOTTOMRIGHT", -26, 6)
 	f.scroll = scroll
 
 	local content = CreateFrame("Frame", nil, scroll)
@@ -2764,8 +2878,25 @@ local function buildWindow()
 	-- bars never need scrolling, and a scroll child that is sometimes 40 pixels
 	-- tall fights the scrollbar.
 	f.statPane = buildStatPane(f, { spec = function() return activeSpec end })
-	f.statPane:SetPoint("TOPLEFT", 12, -80)
+	f.statPane:SetPoint("TOPLEFT", f.Inset, "TOPLEFT", 8, -6)
 	f.statPane:Hide()
+
+	-- The scale slider, in the template's bottom bar (rule 8). Blizzard's
+	-- MinimalSliderWithSteppersTemplate: Init(value, min, max, steps, formatters),
+	-- Labels indexed by MinimalSliderWithSteppersMixin.Label, OnValueChanged
+	-- through its callback registry (Blizzard_SharedXML/Shared/Slider/MinimalSlider.lua).
+	local sizeLabel = f:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	sizeLabel:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -250, 7)
+	sizeLabel:SetText("Size")
+	local slider = CreateFrame("Frame", nil, f, "MinimalSliderWithSteppersTemplate")
+	slider:SetSize(200, 20)
+	slider:SetPoint("LEFT", sizeLabel, "RIGHT", 8, 0)
+	slider:Init(PlanTab.scale(db().scale), PlanTab.SCALE_MIN, PlanTab.SCALE_MAX, 12,
+		{ [MinimalSliderWithSteppersMixin.Label.Right] = function(v) return ("%d%%"):format(v * 100 + 0.5) end })
+	slider:RegisterCallback(MinimalSliderWithSteppersMixin.Event.OnValueChanged, function(_, value)
+		PlanTab.setScale(value)
+	end, f)
+	f.sizeSlider = slider
 
 	tinsert(UISpecialFrames, "DjinnisBiSFrame")  -- Escape closes it
 	-- A new frame is born shown, so without this the first /djbis after a
@@ -2976,7 +3107,7 @@ local function buildImportWindow()
 	title:SetPoint("TOP", f, "TOP", 0, -6)
 	title:SetText("Import a Raidbots Droptimizer")
 
-	local help = f:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	local help = f:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")  -- small font: help text under the title
 	help:SetPoint("TOPLEFT", f, "TOPLEFT", 14, -32)
 	help:SetPoint("RIGHT", f, "RIGHT", -14, 0)
 	help:SetJustifyH("LEFT")
@@ -2986,7 +3117,7 @@ local function buildImportWindow()
 	f.specs = {}
 	for i, spec in ipairs(SPEC_ORDER) do
 		local button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-		button:SetSize(126, 22)
+		button:SetSize(126, PlanTab.SIZE.tab)
 		button:SetPoint("TOPLEFT", f, "TOPLEFT", 14 + (i - 1) * 130, -62)
 		button:SetText(spec)
 		button.spec = spec
@@ -3012,7 +3143,7 @@ local function buildImportWindow()
 	box:SetScrollChild(edit)
 	f.edit = edit
 
-	f.status = f:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	f.status = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	f.status:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 14, 16)
 	f.status:SetPoint("RIGHT", f, "RIGHT", -150, 0)
 	f.status:SetJustifyH("LEFT")
@@ -4023,6 +4154,32 @@ function PlanTab.lines(forSpec)
 	return lines
 end
 
+-- Pins the content choice, from the strip's button or the Plan tab's row of
+-- three (card 0020). Picking Mythic+ pins the stat pane's switch to Mythic+;
+-- picking a raid scenario pins it to Raid, because the choice is one thing to
+-- press, not two. Inside an instance the place decides, and a click on the
+-- choice the place already made writes nothing. Then everything that reads the
+-- choice is redrawn: the sheet's marks, the bag glows, the stat panes, the tab.
+function PlanTab.pickScenario(next)
+	local spec = playerSpec()
+	if not spec or next == planScenario(spec) then return false end
+	local here = autoContext()
+	if here == "mplus" or (here == "raid" and next == "mplus") then return false end
+	local saved = db()
+	saved.statContext = next == "mplus" and "mplus" or "raid"
+	if next ~= "mplus" then
+		saved.planScenario = saved.planScenario or {}
+		saved.planScenario[spec] = next
+	end
+	if PlanTab.refreshStrip then PlanTab.refreshStrip() end
+	rebuildBagWanted()
+	for _, pane in ipairs(statPanes) do
+		if pane:IsShown() then pane:Update() end  -- the stat targets follow the same switch
+	end
+	PlanTab.redraw()
+	return true
+end
+
 -- Returns the refresh function. `holder` is the character pane's frame and
 -- `below` is what the strip sits under.
 local function buildSlotMarks(holder, below)
@@ -4035,10 +4192,10 @@ local function buildSlotMarks(holder, below)
 	strip:SetBackdropBorderColor(paneBorderColour())
 
 	strip.scenario = CreateFrame("Button", nil, strip, "UIPanelButtonTemplate")
-	strip.scenario:SetSize(80, 18)
+	strip.scenario:SetSize(90, PlanTab.SIZE.button)
 	strip.scenario:SetPoint("RIGHT", -8, 0)
 
-	strip.text = strip:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+	strip.text = strip:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 	strip.text:SetPoint("LEFT", 12, 0)
 	strip.text:SetPoint("RIGHT", strip.scenario, "LEFT", -6, 0)
 	strip.text:SetJustifyH("LEFT")
@@ -4055,7 +4212,7 @@ local function buildSlotMarks(holder, below)
 		glow.ring:SetAllPoints()
 		glow.ring:SetAtlas("bags-glow-white")
 		glow.ring:SetBlendMode("ADD")
-		glow.label = glow:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+		glow.label = glow:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")  -- small font: a one-word mark inside a 37-pixel slot
 		glow.label:SetPoint("BOTTOM", 0, 2)
 		glows[button] = glow
 
@@ -4128,22 +4285,11 @@ local function buildSlotMarks(holder, below)
 		PlanTab.open(spec and planScenario(spec))
 	end)
 
+	PlanTab.refreshStrip = refresh  -- so a pick from the Plan tab redraws the sheet too
 	strip.scenario:SetScript("OnClick", function()
 		local spec = playerSpec()
 		if not spec then return end
-		local saved = db()
-		local next = PlanTab.nextScenario(planScenario(spec), autoContext())
-		if next == planScenario(spec) then return end  -- nowhere to go, so write nothing
-		saved.statContext = next == "mplus" and "mplus" or "raid"
-		if next ~= "mplus" then
-			saved.planScenario = saved.planScenario or {}
-			saved.planScenario[spec] = next
-		end
-		refresh()
-		rebuildBagWanted()
-		for _, pane in ipairs(statPanes) do
-			if pane:IsShown() then pane:Update() end  -- the stat targets follow the same switch
-		end
+		PlanTab.pickScenario(PlanTab.nextScenario(planScenario(spec), autoContext()))
 	end)
 
 	addPlanLine = function(tooltip, owner)
@@ -5730,6 +5876,63 @@ local function selfTest()
 		check(noneTest .. ", drawn: the row has no loot spec", row and row.text:find("loot spec", 1, true), nil)
 		check(noneTest .. ", drawn: no line under the picked boss", said, nil)
 		PlanTab.boss, PlanTab.POOL = realBoss5, realPool
+	end
+
+	-- Card 0020: the sizes every tab draws with, the saved scale, and the
+	-- Plan tab's content choice. The frames themselves need a person; these
+	-- prove the numbers the frames are built from and the pure state behind
+	-- the three buttons.
+	local sizeTest = "rows and item buttons meet the minimum size"
+	check(sizeTest .. ", list row", PlanTab.SIZE.row >= 32, true)
+	check(sizeTest .. ", doll cell", PlanTab.SIZE.cell >= 32, true)
+	check(sizeTest .. ", item button", PlanTab.SIZE.icon >= 32, true)
+	check(sizeTest .. ", the cell holds its item button", PlanTab.SIZE.cell >= PlanTab.SIZE.icon, true)
+	local buttonTest = "buttons meet the minimum height"
+	check(buttonTest .. ", action and choice buttons", PlanTab.SIZE.button >= 24, true)
+	check(buttonTest .. ", tab and spec buttons", PlanTab.SIZE.tab >= 24, true)
+	do
+		local scaleTest = "window scale is saved"
+		local keptScale = db().scale
+		check(scaleTest .. ", nothing saved reads as 1", PlanTab.scale(nil), 1)
+		check(scaleTest .. ", a hand-edited word reads as 1", PlanTab.scale("big"), 1)
+		check(scaleTest .. ", too small is clamped", PlanTab.scale(0.1), PlanTab.SCALE_MIN)
+		check(scaleTest .. ", too big is clamped", PlanTab.scale(9), PlanTab.SCALE_MAX)
+		check(scaleTest .. ", set writes the pin", PlanTab.setScale(1.2), 1.2)
+		check(scaleTest .. ", and the pin reads back", PlanTab.scale(db().scale), 1.2)
+		db().scale = keptScale
+	end
+	do
+		local choiceTest = "plan tab shows every content choice"
+		local function summary(states)
+			local parts = {}
+			for i, s in ipairs(states) do parts[i] = s.key .. (s.lit and "*" or "") .. (s.enabled and "" or "-") end
+			return table.concat(parts, " ")
+		end
+		check(choiceTest .. ", outside: three, the chosen lit, all live", summary(PlanTab.choices("2t", nil)), "st 2t* mplus")
+		check(choiceTest .. ", outside on Mythic+", summary(PlanTab.choices("mplus", nil)), "st 2t mplus*")
+		check(choiceTest .. ", in a raid Mythic+ is greyed", summary(PlanTab.choices("st", "raid")), "st* 2t mplus-")
+		check(choiceTest .. ", in a raid the tooltip says why", PlanTab.choices("st", "raid")[3].tip:find("in a raid", 1, true) ~= nil, true)
+		check(choiceTest .. ", in a dungeon the raid pair is greyed", summary(PlanTab.choices("mplus", "mplus")), "st- 2t- mplus*")
+		check(choiceTest .. ", in a dungeon the tooltip says why", PlanTab.choices("mplus", "mplus")[1].tip:find("in a dungeon", 1, true) ~= nil, true)
+		check(choiceTest .. ", the labels name the content", PlanTab.choices("st", nil)[1].label .. " / " .. PlanTab.choices("st", nil)[3].label, "Raid - 1 target / Mythic+")
+		-- Picking writes the same pin the strip's button writes, and nothing
+		-- inside an instance that already decided.
+		local keptInstance, keptContext, keptScenario, keptStrip = GetInstanceInfo, db().statContext, db().planScenario, PlanTab.refreshStrip
+		PlanTab.refreshStrip = nil
+		db().statContext, db().planScenario = nil, nil
+		check(choiceTest .. ", pick 2 targets pins the raid cell", PlanTab.pickScenario("2t") and db().planScenario.Feral, "2t")
+		check(choiceTest .. ", and pins Raid", db().statContext, "raid")
+		check(choiceTest .. ", pick Mythic+ pins Mythic+", PlanTab.pickScenario("mplus") and db().statContext, "mplus")
+		check(choiceTest .. ", and leaves the raid cell as it was", db().planScenario.Feral, "2t")
+		check(choiceTest .. ", picking the current choice writes nothing", PlanTab.pickScenario("mplus"), false)
+		GetInstanceInfo = function() return "A Raid", "raid" end
+		check(choiceTest .. ", in a raid Mythic+ cannot be picked", PlanTab.pickScenario("mplus"), false)
+		check(choiceTest .. ", in a raid 1 target can", PlanTab.pickScenario("st") and db().planScenario.Feral, "st")
+		GetInstanceInfo = function() return "A Dungeon", "party" end
+		check(choiceTest .. ", in a dungeon nothing can be picked", PlanTab.pickScenario("2t"), false)
+		check(choiceTest .. ", and the raid cell is untouched", db().planScenario.Feral, "st")
+		GetInstanceInfo, db().statContext, db().planScenario, PlanTab.refreshStrip = keptInstance, keptContext, keptScenario, keptStrip
+		rebuildBagWanted()  -- the picks above rebuilt the bag list on test pins; put it back on the real ones
 	end
 
 	-- a saved target must survive the round trip and show its item level
