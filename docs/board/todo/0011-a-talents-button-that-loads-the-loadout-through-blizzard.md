@@ -56,7 +56,7 @@ What it costs, if it works: one click per boss instead of a window and a dropdow
 
 ## Tasks
 
-- [ ] **Route 1, test it first, by hand, in the game.** Out of combat:
+- [x] **Route 1, test it first, by hand, in the game.** Passed, Rob 2026-09-22 (see Comments). Out of combat:
   `/run ClassTalentHelper.SwitchToLoadoutByName("DotC Raid ST *")`, then pull a target dummy and
   press every action bar button for 30 seconds. If the loadout loads and no bar freezes and no
   "blocked" message shows, build route 1: the button calls it, guarded by `InCombatLockdown`, and
@@ -79,3 +79,7 @@ come from our own table, so refuse any such name rather than escape it.
 - 2026-09-22 Claude: written from Rob's "A" to the AskMrRobot ideas, in a SecondBrain session.
   Ideation only. Nothing is built. **Uncertain:** the slash word, and whether a secure macro button
   may run it with no taint. The first two tasks settle both before any code.
+- 2026-09-22 **Rob, in the game: route 1 works.** `/run ClassTalentHelper.SwitchToLoadoutByName("DotC Raid ST *")`
+  out of combat showed the talent-change cast bar and the unlearned spells in chat. Over a minute on
+  a target dummy afterwards, no errors. Build route 1; route 2 is not needed. Still unproven: the
+  same call from a button's OnClick rather than `/run`, which the build's own check in the game settles.
