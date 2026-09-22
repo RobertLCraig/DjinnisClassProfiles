@@ -69,6 +69,11 @@ and the tab says all is well.
    not that loadout's plan and only the name is judged. This is the case Option A does not
    cover until card `0028` gives every loadout its own cell.
 6. Hit a dummy with the tab open: no error, and the mark holds whatever it said before the pull.
+   Then, still in combat, click Nek'zali in the boss list: its row must NOT go red and line 1
+   must not say "(edited)", because that cell has no planned build for the loadout in play and
+   the held reading is per cell, not one for the tab (the 0014 review's fix).
+7. The `TRAIT_CONFIG_UPDATED` registration itself: no "could not register" line in chat at login.
+   Nothing offline can prove an event is registered.
 
 ## Comments
 
@@ -148,3 +153,41 @@ and the tab says all is well.
   a temp copy, all red: `plannedTalents` forced nil (3), the header guard removed (1), the
   loadout-name guard removed (1), the compare forced false (3). Not seen in a client; the
   `TRAIT_CONFIG_UPDATED` registration is still provable only there.
+- 2026-09-22 Claude (review, to human-review): attacked the four criteria and the code at
+  `plannedTalents`, `talentStringsDiffer`, `talentsEdited`, `activeLoadoutName` and its three
+  callers (`lines`, `checkSetup` through `wrongHere`, the sidebar through `sidebarRows`), plus
+  `loadoutState` and the bag-mark watcher. APIs checked against `Blizzard_APIDocumentationGenerated`:
+  `GenerateImportString`, `GetConfigInfo`, `GetLastSelectedSavedConfigID` are `AllowedWhenUntainted`
+  with no `SecretWhen` flag; `GetActiveConfigID` and `GetStarterBuildActive` are unflagged;
+  `TRAIT_CONFIG_UPDATED` and `CONFIG_COMMIT_FAILED` are in `SharedTraitsDocumentation.lua` with a
+  `configID` payload the handler ignores. None is under `Blizzard_Deprecated*`. The header claim
+  verified against `Blizzard_ClassTalentImportExport.lua` (8 + 16 + 128 = 152 bits) and
+  `ExportUtil.lua` (`BitsPerChar = 6`): 25 chars is 150 bits, so the guard misses the hash's last two
+  bits, which is the documented ceiling and not a fault. The watcher attaches `SetScript` first,
+  registers one event at a time and checks `IsEventRegistered`, per DECISIONS.md.
+
+  **What broke, fixed here:** `talentsEdited` held ONE last reading for the whole tab. In combat it
+  returned that reading for any caller, including `talentsEdited(nil)`, so a cell with no planned
+  build (criterion 4: Nek'zali on "WS Raid Most Bosses" while the last read was the st cell on
+  DotC) drew "(edited)" and went red mid-pull, and the sidebar and the Plan tab, which ask about
+  different cells, could hand each other's answer back. Fix: `if not planned then return nil end`
+  first, and the held reading is `PlanTab.lastEdited[planned]`, one per plan string. Two checks
+  added under the existing names (`a cell without talents marks nothing, in combat too` and
+  `talent string read out of combat only, another cell's string is not the held one`); both were
+  red on the unfixed code and are green now. Signatures of `plannedTalents` and
+  `talentStringsDiffer` untouched for 0023. No new top-level local (177).
+
+  Mutations in a temp copy against the fixed file: edited branch removed from `loadoutState` (4
+  red), header guard removed (1), loadout-name guard removed (1), compare forced false (8), held
+  reading not kept (1), planned-nil guard removed (the harness errors out with "table index is
+  nil", exit 1). Both `lua offline-check.lua` and Lua 5.1 exit 0.
+
+  Not for this card, noted: `PlanTab.lines` still calls `savedLoadoutString` for 0023's last-pull
+  compare, which is the saved-loadout read Option A ruled out; 0023 is being rebuilt on
+  `plannedTalents` in parallel and owns that line.
+
+  Security: weakest point is one `GenerateImportString` per redraw per `TRAIT_CONFIG_UPDATED`,
+  which fires once per commit, not per node; the read is pcalled and bounded. Unchecked path:
+  none, the event payload is ignored, and the plan string is a literal in this file, so the
+  table key is never a game value. Leaks: nothing, the strings never print and never leave the
+  client. Not seen in a client: looks 1 to 7 above are Rob's.
