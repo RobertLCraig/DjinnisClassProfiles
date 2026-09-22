@@ -495,8 +495,9 @@ end
 -- exist in the game to click. Dreamgrove's newer one-build-per-boss strings sim
 -- about 1.5% over these and have no loadout yet; when DjinnisDreamgrove is
 -- refreshed, change the names here to match.
--- `scenario` picks the gear plan cell. There are only two, so a boss that is
--- neither clean single target nor sustained two target takes `st`.
+-- `scenario` picks the gear plan cell: `st`, `2t`, `3t` (three or more) or
+-- `mplus`. A boss that is none of those cleanly takes `st`. No row says `3t`
+-- yet: that is a sim per spec, not a code change (card 0028).
 -- `id` is the encounter id ENCOUNTER_START and ENCOUNTER_END carry (card 0027),
 -- copied by hand from BigWigs_TheVenomousAbyss's `mod:SetEncounterID(...)`
 -- lines on 2026-09-22. It is NOT the Encounter Journal id (Nek'zali is 3470
@@ -1675,11 +1676,11 @@ function PlanTab.plannedTalents(spec, scenario)
 	return cell.talents, cell.loadout
 end
 
-local SCENARIO_LABEL = { st = "1 target", ["2t"] = "2 targets", mplus = "Mythic+" }
+local SCENARIO_LABEL = { st = "1 target", ["2t"] = "2 targets", ["3t"] = "3+ targets", mplus = "Mythic+" }
 
 -- The plan cell in use. In a key, or with the stat pane's switch on Mythic+,
 -- it is the Mythic+ cell; in a raid, or with the switch on Raid, it is the
--- saved 1 or 2 target raid cell. One switch drives the stat targets, the slot
+-- saved 1, 2 or 3+ target raid cell. One switch drives the stat targets, the slot
 -- glows, the bag glows and the Plan tab (card 0009).
 local function planScenario(spec)
 	if statContext() == "mplus" then return "mplus" end
@@ -1687,19 +1688,20 @@ local function planScenario(spec)
 	-- an unknown one would reach a format() as nil on every sheet open.
 	local saved = db().planScenario
 	local scenario = type(saved) == "table" and saved[spec]
-	return (scenario == "st" or scenario == "2t") and scenario or "st"
+	return (scenario == "st" or scenario == "2t" or scenario == "3t") and scenario or "st"
 end
 
--- The next stop on the strip's button: 1 target, 2 targets, Mythic+, round
--- again. Picking Mythic+ pins the content switch to Mythic+; picking a raid
+-- The next stop on the strip's button: 1 target, 2 targets, 3+ targets,
+-- Mythic+, round again. Picking Mythic+ pins the content switch to Mythic+; picking a raid
 -- scenario pins it to Raid, because the button is one thing to press, not two.
 -- `here` is autoContext(): in a raid the instance refuses Mythic+, so the
--- button goes 1, 2, 1 (without this it stuck on 2 targets for good); in a
+-- button goes 1, 2, 3+, 1 (without this it stuck on the last stop for good); in a
 -- dungeon there is nothing to cycle and the button stays put.
 function PlanTab.nextScenario(scenario, here)
 	if here == "mplus" then return "mplus" end
 	if scenario == "st" then return "2t" end
-	if scenario == "2t" and here ~= "raid" then return "mplus" end
+	if scenario == "2t" then return "3t" end
+	if scenario == "3t" and here ~= "raid" then return "mplus" end
 	return "st"
 end
 
@@ -1932,15 +1934,15 @@ end
 -- KeystoneLoot (card 0021) marks only what was sent to it and says "Favorite";
 -- these lines say which spec and which content, with no other addon loaded.
 
-PlanTab.CONTENT_WORD = { st = "raid", ["2t"] = "raid", mplus = "Mythic+" }
+PlanTab.CONTENT_WORD = { st = "raid", ["2t"] = "raid", ["3t"] = "raid", mplus = "Mythic+" }
 
 -- { [itemId] = { { spec =, content =, ilvl = }, ... } } across every filled
 -- cell: one row per spec and content, in spec order, raid before Mythic+. The
--- two raid cells collapse to one row at the higher planned level. Pure.
+-- raid cells collapse to one row at the higher planned level. Pure.
 function PlanTab.buildPlanIndex()
 	local index = {}
 	for _, spec in ipairs(SPEC_ORDER) do
-		for _, scenario in ipairs({ "st", "2t", "mplus" }) do
+		for _, scenario in ipairs(PlanTab.CHOICES) do
 			local plan = gearPlanFor(spec, scenario)
 			local content = PlanTab.CONTENT_WORD[scenario]
 			for _, entry in pairs(plan and plan.slots or {}) do
@@ -2923,13 +2925,13 @@ function PlanTab.setScale(value)
 	return s
 end
 
--- The Plan tab's content choice, drawn as three buttons with the chosen one
+-- The Plan tab's content choice, drawn as four buttons with the chosen one
 -- lit (card 0020, rule 11): a button that goes round a list hides its choices.
 -- `chosen` is planScenario(spec) and `here` is autoContext(). Inside a raid or
 -- a dungeon the place decides, so the others are greyed with the reason in
 -- their tooltip. Pure, so the self-test can read every state.
-PlanTab.CHOICES = { "st", "2t", "mplus" }
-PlanTab.CHOICE_LABEL = { st = "Raid - 1 target", ["2t"] = "Raid - 2 targets", mplus = "Mythic+" }
+PlanTab.CHOICES = { "st", "2t", "3t", "mplus" }
+PlanTab.CHOICE_LABEL = { st = "Raid - 1 target", ["2t"] = "Raid - 2 targets", ["3t"] = "Raid - 3+ targets", mplus = "Mythic+" }
 function PlanTab.choices(chosen, here)
 	local out = {}
 	for i, key in ipairs(PlanTab.CHOICES) do
@@ -4058,9 +4060,9 @@ end
 -- (Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.xml, IconSelectorEditBox
 -- letters="16"): "DBiS Guardian 2T" is exactly 16. A longer name that the
 -- server cut short would not be found again and would be created afresh on
--- every Equip all. ST and 2T are raid cells, so "Raid" is not spelt out.
+-- every Equip all. ST, 2T and 3T are raid cells, so "Raid" is not spelt out.
 PlanTab.SET_PREFIX = "DBiS "
-PlanTab.SET_SUFFIX = { st = "ST", ["2t"] = "2T", mplus = "M+" }
+PlanTab.SET_SUFFIX = { st = "ST", ["2t"] = "2T", ["3t"] = "3T", mplus = "M+" }
 function PlanTab.setName(spec, scenario)
 	return PlanTab.SET_PREFIX .. spec .. " " .. (PlanTab.SET_SUFFIX[scenario] or "?")
 end
@@ -6049,7 +6051,7 @@ local function selfTest()
 		end
 		for scenario, cell in pairs(byScenario) do
 			local where = "gear plan block holds a slot table per spec and scenario: " .. spec .. " " .. scenario
-			check(where .. ", scenario is st, 2t or mplus", scenario == "st" or scenario == "2t" or scenario == "mplus", true)
+			check(where .. ", scenario is st, 2t, 3t or mplus", SCENARIO_LABEL[scenario] ~= nil, true)
 			check(where .. ", has a talent string", type(cell.talents) == "string" and cell.talents ~= "", true)
 			local plan = gearPlanFor(spec, scenario)
 			local count = 0
@@ -6171,10 +6173,10 @@ local function selfTest()
 	check(contentTest .. ", outside, the switch on Mythic+", planScenario("Feral"), "mplus")
 	db().statContext = nil
 	check(contentTest .. ", outside, no switch, is raid", planScenario("Feral"), "2t")
-	check(contentTest .. ", the button goes 1, 2, Mythic+, round",
-		PlanTab.nextScenario("st") .. PlanTab.nextScenario("2t") .. PlanTab.nextScenario("mplus"), "2tmplusst")
-	check(contentTest .. ", in a raid the button goes 1, 2, 1",
-		PlanTab.nextScenario("st", "raid") .. PlanTab.nextScenario("2t", "raid"), "2tst")
+	check(contentTest .. ", the button goes 1, 2, 3+, Mythic+, round",
+		PlanTab.nextScenario("st") .. PlanTab.nextScenario("2t") .. PlanTab.nextScenario("3t") .. PlanTab.nextScenario("mplus"), "2t3tmplusst")
+	check(contentTest .. ", in a raid the button goes 1, 2, 3+, 1",
+		PlanTab.nextScenario("st", "raid") .. PlanTab.nextScenario("2t", "raid") .. PlanTab.nextScenario("3t", "raid"), "2t3tst")
 	check(contentTest .. ", in a dungeon the button stays on Mythic+", PlanTab.nextScenario("mplus", "mplus"), "mplus")
 	-- The bag list is rebuilt from the current content and nothing else: in a
 	-- dungeon with no Mythic+ cell it is empty, not the raid list.
@@ -7249,13 +7251,13 @@ local function selfTest()
 			for i, s in ipairs(states) do parts[i] = s.key .. (s.lit and "*" or "") .. (s.enabled and "" or "-") end
 			return table.concat(parts, " ")
 		end
-		check(choiceTest .. ", outside: three, the chosen lit, all live", summary(PlanTab.choices("2t", nil)), "st 2t* mplus")
-		check(choiceTest .. ", outside on Mythic+", summary(PlanTab.choices("mplus", nil)), "st 2t mplus*")
-		check(choiceTest .. ", in a raid Mythic+ is greyed", summary(PlanTab.choices("st", "raid")), "st* 2t mplus-")
-		check(choiceTest .. ", in a raid the tooltip says why", PlanTab.choices("st", "raid")[3].tip:find("in a raid", 1, true) ~= nil, true)
-		check(choiceTest .. ", in a dungeon the raid pair is greyed", summary(PlanTab.choices("mplus", "mplus")), "st- 2t- mplus*")
+		check(choiceTest .. ", outside: four, the chosen lit, all live", summary(PlanTab.choices("2t", nil)), "st 2t* 3t mplus")
+		check(choiceTest .. ", outside on Mythic+", summary(PlanTab.choices("mplus", nil)), "st 2t 3t mplus*")
+		check(choiceTest .. ", in a raid Mythic+ is greyed", summary(PlanTab.choices("st", "raid")), "st* 2t 3t mplus-")
+		check(choiceTest .. ", in a raid the tooltip says why", PlanTab.choices("st", "raid")[4].tip:find("in a raid", 1, true) ~= nil, true)
+		check(choiceTest .. ", in a dungeon the raid three are greyed", summary(PlanTab.choices("mplus", "mplus")), "st- 2t- 3t- mplus*")
 		check(choiceTest .. ", in a dungeon the tooltip says why", PlanTab.choices("mplus", "mplus")[1].tip:find("in a dungeon", 1, true) ~= nil, true)
-		check(choiceTest .. ", the labels name the content", PlanTab.choices("st", nil)[1].label .. " / " .. PlanTab.choices("st", nil)[3].label, "Raid - 1 target / Mythic+")
+		check(choiceTest .. ", the labels name the content", PlanTab.choices("st", nil)[1].label .. " / " .. PlanTab.choices("st", nil)[3].label .. " / " .. PlanTab.choices("st", nil)[4].label, "Raid - 1 target / Raid - 3+ targets / Mythic+")
 		-- Picking writes the same pin the strip's button writes, and nothing
 		-- inside an instance that already decided.
 		local keptInstance, keptContext, keptScenario, keptStrip = GetInstanceInfo, db().statContext, db().planScenario, PlanTab.refreshStrip
@@ -7301,7 +7303,7 @@ local function selfTest()
 			if row.spec == "Feral" and row.content == "raid" then raidRows = raidRows + 1 end
 		end
 		GEAR_PLAN.Feral["2t"] = kept2t
-		check(listTest .. ", one raid row for the two raid cells", raidRows, 1)
+		check(listTest .. ", one raid row for the raid cells", raidRows, 1)
 		local fake = { [7] = {
 			{ spec = "Balance", content = "raid", ilvl = 700 },
 			{ spec = "Feral", content = "raid", ilvl = 700 },
@@ -8003,6 +8005,70 @@ local function selfTest()
 		PlanTab.activeLoadoutName, C_Container = wasActive, wasContainer
 		C_Secrets, C_UnitAuras, C_PaperDollInfo, PlanTab.canRead = wasSecrets, wasAuras, wasDoll, wasRead
 		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.buffsWanted = wasClosed, wasKill, wasWanted
+	end
+
+	-- card 0028: a `3t` scenario beside st, 2t and mplus. No cell is baked for
+	-- it yet, so every check here puts a cell in and takes it out again.
+	do
+		local reachTest = "the scenario button reaches 3+ targets"
+		local keptInstance, keptContext, keptScenario, keptStrip = GetInstanceInfo, db().statContext, db().planScenario, PlanTab.refreshStrip
+		PlanTab.refreshStrip = nil
+		GetInstanceInfo = function() return "Nowhere", "none" end
+		db().statContext, db().planScenario = nil, { Feral = "2t" }
+		check(reachTest .. ", outside, the button goes from 2 to 3+", PlanTab.nextScenario(planScenario("Feral"), nil), "3t")
+		check(reachTest .. ", picking 3+ pins it", PlanTab.pickScenario("3t") and db().planScenario.Feral, "3t")
+		check(reachTest .. ", and the plan reads it back", planScenario("Feral"), "3t")
+		check(reachTest .. ", 3+ pins the stat targets to raid", db().statContext, "raid")
+		check(reachTest .. ", the strip has a label for it", SCENARIO_LABEL[planScenario("Feral")], "3+ targets")
+		check(reachTest .. ", the bags follow it and are empty with no cell, not the 1 target list", bagScenario == "3t" and #bagWanted == 0, true)
+		check(reachTest .. ", then Mythic+", PlanTab.nextScenario("3t", nil), "mplus")
+		GetInstanceInfo = function() return "Somewhere", "raid" end
+		check(reachTest .. ", in a raid, 2 to 3+", PlanTab.nextScenario("2t", "raid"), "3t")
+		check(reachTest .. ", in a raid, 3+ round to 1", PlanTab.nextScenario("3t", "raid"), "st")
+		check(reachTest .. ", in a raid 3+ can be picked", PlanTab.pickScenario("st") and PlanTab.pickScenario("3t") and db().planScenario.Feral, "3t")
+		check(reachTest .. ", a set name for it fits", PlanTab.setName("Feral", "3t"), "DBiS Feral 3T")
+		GetInstanceInfo, db().statContext, db().planScenario, PlanTab.refreshStrip = keptInstance, keptContext, keptScenario, keptStrip
+		rebuildBagWanted()
+	end
+	do
+		local rowTest = "a 3t boss row draws the 3t cell"
+		local bosses, keptBoss = PlanTab.BOSSES.Feral, PlanTab.boss
+		local row = { boss = "Self-test 3+ boss", id = 9999, scenario = "3t", loadout = "WS Raid Most Bosses" }
+		bosses[#bosses + 1] = row
+		PlanTab.boss = row.boss
+		check(rowTest .. ", the tab opens on the 3+ row for 3+", PlanTab.bossFor(bosses, nil, "3t"), row.boss)
+		check(rowTest .. ", the row is a raid row for the popup", PlanTab.rowHere(bosses, "raid", 3379), row)
+		check(rowTest .. ", and sits under its loadout in the raid sidebar", (function()
+			for _, out in ipairs(PlanTab.sidebarRows(bosses, "raid", nil, nil)) do
+				if out.loadout == row.loadout then return out.bosses[#out.bosses] end
+			end
+		end)(), row.boss)
+		local function drawn()
+			local text = {}
+			for i, line in ipairs(PlanTab.lines("Feral")) do text[i] = line.text end
+			return table.concat(text, "\n")
+		end
+		check(rowTest .. ", no cell: says so, on 3+ targets", drawn():find("No 3+ targets gear plan yet. Run a Raidbots Top Gear sim on 3+ targets", 1, true) ~= nil, true)
+		GEAR_PLAN.Feral["3t"] = { report = "selfTest3t", simmed = GEAR_PLAN.Feral.st.simmed, dps = 1, loadout = row.loadout, talents = "AAA", slots = GEAR_PLAN.Feral.st.slots }
+		local text = drawn()
+		check(rowTest .. ", with a cell: the 3+ targets plan", text:find("3+ targets plan", 1, true) ~= nil and text:find("No 3+ targets", 1, true) == nil, true)
+		check(rowTest .. ", the cell is the 3t one", (gearPlanFor("Feral", "3t") or {}).report, "selfTest3t")
+		check(rowTest .. ", it is one raid content for the item list", PlanTab.CONTENT_WORD["3t"], "raid")
+		GEAR_PLAN.Feral["3t"], bosses[#bosses], PlanTab.boss = nil, nil, keptBoss
+		check(rowTest .. ", the cell is gone again", gearPlanFor("Feral", "3t"), nil)
+	end
+	do
+		local bareTest = "a cell without talents has no planned build"
+		local wasIDs, wasPrint, kept = C_ClassTalents.GetConfigIDsBySpecID, print, GEAR_PLAN.Feral.mplus.talents
+		C_ClassTalents.GetConfigIDsBySpecID = function() return {} end
+		print = function() end  -- the export says what it left out; not a check
+		local marker = "# Saved Loadout: WS M+ (DBiS plan)\n# talents="
+		check(bareTest .. ", with a string the export carries it", PlanTab.simcAppend("# Checksum: x"):find(marker .. kept, 1, true) ~= nil, true)
+		GEAR_PLAN.Feral.mplus.talents = nil
+		check(bareTest .. ", without one it hands over nothing", gearPlanFor("Feral", "mplus").talents, nil)
+		check(bareTest .. ", and still has its gear", gearPlanFor("Feral", "mplus").slots.head ~= nil, true)
+		check(bareTest .. ", the export carries no string for it", PlanTab.simcAppend("# Checksum: x"):find(marker, 1, true), nil)
+		GEAR_PLAN.Feral.mplus.talents, C_ClassTalents.GetConfigIDsBySpecID, print = kept, wasIDs, wasPrint
 	end
 
 	-- a saved target must survive the round trip and show its item level

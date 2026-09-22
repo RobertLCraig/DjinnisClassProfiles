@@ -9,7 +9,11 @@
     a sim result has to be baked in at author time.
 
     Each report fills ONE cell of the plan, spec by scenario. The spec is read
-    off the report and the scenario off its enemy count: 1 is `st`, 2 is `2t`.
+    off the report and the scenario off its enemy count: 1 is `st`, 2 is `2t`,
+    3 or more is `3t`; a dungeon fight style is `mplus` whatever the count.
+    It prints the loadout each report was simmed on and warns when that name
+    is not one the addon's BOSSES rows use for the spec, because a report
+    simmed on the wrong loadout bakes the wrong build without any other sign.
     Cells the given reports do not fill are kept exactly as they are, because a
     Raidbots report expires after 30 days and a cell that could only be rebuilt
     by fetching its report again would quietly vanish a month later.
@@ -72,11 +76,11 @@ $SPECS = [ordered]@{
 }
 # A plain hashtable on purpose: indexing an [ordered] one with an int is BY POSITION,
 # so [1] answered '2t'. The self-test caught it.
-$SCENARIOS = @{ 1 = 'st'; 2 = '2t' }
+$SCENARIOS = @{ 1 = 'st'; 2 = '2t'; 3 = '3t' }  # 3 is three or more; Read-Plan clamps
 # A dungeon fight style (Raidbots' DungeonSlice or DungeonRoute, read off
 # simbot.fightStyle) files as mplus whatever its enemy count says: a key is
 # its own content, not a raid boss with more adds. Card 0009.
-$SCENARIO_ORDER = @('st', '2t', 'mplus')
+$SCENARIO_ORDER = @('st', '2t', '3t', 'mplus')
 $SLOTS = @('head', 'neck', 'shoulder', 'back', 'chest', 'wrist', 'hands', 'waist', 'legs', 'feet',
     'finger1', 'finger2', 'trinket1', 'trinket2', 'main_hand', 'off_hand')
 # The only parts of a simc gear line the addon reads. Everything else on the
@@ -127,8 +131,8 @@ function Read-Plan {
     $player = $data.sim.players[0]
     $spec = $SPECS[[string]$player.specialization]
     if (-not $spec) { throw "Report ${Id}: cannot place spec '$($player.specialization)'. Nothing written." }
-    $scenario = if ([string]$data.simbot.fightStyle -match '^Dungeon') { 'mplus' } else { $SCENARIOS[[int]$data.simbot.enemyCount] }
-    if (-not $scenario) { throw "Report ${Id}: fight style '$($data.simbot.fightStyle)' with $($data.simbot.enemyCount) enemies is neither st (1), 2t (2) nor a dungeon style. Nothing written." }
+    $scenario = if ([string]$data.simbot.fightStyle -match '^Dungeon') { 'mplus' } else { $SCENARIOS[[Math]::Min([int]$data.simbot.enemyCount, 3)] }
+    if (-not $scenario) { throw "Report ${Id}: fight style '$($data.simbot.fightStyle)' with $($data.simbot.enemyCount) enemies is neither st (1), 2t (2), 3t (3 or more) nor a dungeon style. Nothing written." }
 
     # the winner, with the base actor in the running as Combo 1
     $winner = 'Combo 1'
@@ -190,7 +194,17 @@ function Read-Plan {
     $lines.Add("`t`t`t},")
     $lines.Add("`t`t},")
 
-    return @{ Spec = $spec; Scenario = $scenario; Lines = $lines; Winner = $winner; Dps = $dps }
+    return @{ Spec = $spec; Scenario = $scenario; Lines = $lines; Winner = $winner; Dps = $dps; Loadout = $loadoutName }
+}
+
+function Get-BossLoadouts {
+    <#  The loadout names the addon's PlanTab.BOSSES rows use for one spec,
+        read off the target file, so a report simmed on some other loadout is
+        called out before it is baked. Empty when the spec has no rows.  #>
+    param([string]$Lua, [string]$Spec)
+    $m = [regex]::Match($Lua, "(?s)PlanTab\.BOSSES = \{.*?\n\t$Spec = \{(.*?)\n\t\}")
+    if (-not $m.Success) { return @() }
+    return @([regex]::Matches($m.Groups[1].Value, 'loadout = "([^"]*)"') | ForEach-Object { $_.Groups[1].Value })
 }
 
 function Read-ExistingCells {
@@ -227,7 +241,10 @@ function Update-GearPlan {
         $id = Get-ReportId $text
         $plan = Read-Plan -Id $id -From $From
         $key = "$($plan.Spec)/$($plan.Scenario)"
-        Write-Host ("  {0}  fills {1,-8} {2,-3} with {3} at {4:n0} dps" -f $id, $plan.Spec, $plan.Scenario, $plan.Winner, $plan.Dps)
+        Write-Host ("  {0}  fills {1,-8} {2,-5} with {3} at {4:n0} dps, simmed on loadout ""{5}""" -f $id, $plan.Spec, $plan.Scenario, $plan.Winner, $plan.Dps, $plan.Loadout)
+        if ((Get-BossLoadouts -Lua $lua -Spec $plan.Spec) -notcontains $plan.Loadout) {
+            Write-Warning "Report ${id}: loadout ""$($plan.Loadout)"" is not one PlanTab.BOSSES names for $($plan.Spec), so no boss row will use this build. Re-sim on the row's loadout, or add a row."
+        }
 
         $before = @{}
         if ($cells.ContainsKey($key)) { foreach ($l in $cells[$key]) { if ($l -match '^\t{4}(\w+)\s+= (.+)$') { $before[$Matches[1]] = $Matches[2] } } }
@@ -285,7 +302,7 @@ if ($SelfTest) {
     }
     try {
         [System.IO.File]::WriteAllText($tmp, $empty)
-        $wrote = Update-GearPlan -Report $topGear -Target $tmp -From $fx 6>$null
+        $wrote = Update-GearPlan -Report $topGear -Target $tmp -From $fx 6>$null 3>$null
         $lua = [System.IO.File]::ReadAllText($tmp)
         Test-That 'gear plan block holds a slot table per spec and scenario' (
             $wrote -and $lua -match '(?s)\tFeral = \{\n\t\t\["st"\] = \{.*?slots = \{' -and
@@ -301,15 +318,48 @@ if ($SelfTest) {
         # an older date stamp, or a same-day re-run proves nothing about the date being ignored
         $lua = $lua -replace 'written \d{4}-\d{2}-\d{2}', 'written 2000-01-01'
         [System.IO.File]::WriteAllText($tmp, $lua)
-        $wrote = Update-GearPlan -Report $topGear -Target $tmp -From $fx 6>$null
+        $wrote = Update-GearPlan -Report $topGear -Target $tmp -From $fx 6>$null 3>$null
         Test-That 'generator is idempotent' ((-not $wrote) -and [System.IO.File]::ReadAllText($tmp) -eq $lua)
 
         # the same report with simbot.fightStyle set to DungeonSlice, made by hand
-        $wrote = Update-GearPlan -Report 'dungeonSliceSelfTest0000' -Target $tmp -From $fx 6>$null
+        $wrote = Update-GearPlan -Report 'dungeonSliceSelfTest0000' -Target $tmp -From $fx 6>$null 3>$null
         $lua = [System.IO.File]::ReadAllText($tmp)
         Test-That 'generator files a report under raid or mplus by fight style' (
             $wrote -and $lua -match '(?s)\tFeral = \{\n\t\t\["st"\] = \{.*?\n\t\t\["mplus"\] = \{.*?report = "dungeonSliceSelfTest0000"' -and
             ($lua -split '\["st"\]').Count -eq 2)
+
+        # the same report at three enemies, and at seven, made here rather than
+        # kept as two more 8 KB fixtures: both file as 3t, between 2t and mplus
+        $fx3 = Join-Path ([System.IO.Path]::GetTempPath()) "gear-plan-selftest-$PID"
+        New-Item -ItemType Directory -Force $fx3 | Out-Null
+        $base = [System.IO.File]::ReadAllText((Join-Path $fx "$topGear.json"))
+        foreach ($n in 3, 7) {
+            [System.IO.File]::WriteAllText((Join-Path $fx3 "enemies${n}SelfTest0000000.json"), ($base -replace '"enemyCount": 1', "`"enemyCount`": $n"))
+            Copy-Item (Join-Path $fx "$topGear.input.txt") (Join-Path $fx3 "enemies${n}SelfTest0000000.input.txt")
+        }
+        $wrote = Update-GearPlan -Report 'enemies3SelfTest0000000' -Target $tmp -From $fx3 6>$null 3>$null
+        $lua = [System.IO.File]::ReadAllText($tmp)
+        $wrote7 = Update-GearPlan -Report 'enemies7SelfTest0000000' -Target $tmp -From $fx3 6>$null 3>$null
+        $lua7 = [System.IO.File]::ReadAllText($tmp)
+        Test-That 'a 3+ target report fills the 3t cell' (
+            $wrote -and $lua -match '(?s)\tFeral = \{\n\t\t\["st"\] = \{.*?\n\t\t\["3t"\] = \{\n\t\t\treport = "enemies3SelfTest0000000".*?\n\t\t\["mplus"\] = \{' -and
+            $lua -match '(?s)\["3t"\] = \{.*?loadout = "DotC Raid ST \*",\n\t\t\ttalents = "[A-Za-z0-9+/]+",\n\t\t\tslots = \{' -and
+            ($lua -split '\["3t"\]').Count -eq 2 -and
+            $wrote7 -and $lua7 -match '\["3t"\] = \{\n\t\t\treport = "enemies7SelfTest0000000"' -and ($lua7 -split '\["3t"\]').Count -eq 2)
+
+        # the loadout each report was simmed on is printed, and one no boss row
+        # names is warned about: a temp target with a BOSSES block that names
+        # the fixture's loadout for Feral is quiet, one that does not is not
+        $bosses = "PlanTab.BOSSES = {`n`tFeral = {`n`t`t{ boss = `"X`", scenario = `"st`", loadout = `"DotC Raid ST *`" },`n`t},`n}`n"
+        [System.IO.File]::WriteAllText($tmp, $empty + $bosses)
+        $said = Update-GearPlan -Report $topGear -Target $tmp -From $fx -DryRun 6>&1 3>&1
+        $quiet = @($said | Where-Object { $_ -is [System.Management.Automation.WarningRecord] })
+        [System.IO.File]::WriteAllText($tmp, $empty + ($bosses -replace 'DotC Raid ST', 'Some Other'))
+        $said2 = Update-GearPlan -Report $topGear -Target $tmp -From $fx -DryRun 6>&1 3>&1
+        $loud = @($said2 | Where-Object { $_ -is [System.Management.Automation.WarningRecord] })
+        Test-That 'generator prints the loadout it baked and warns when no boss row names it' (
+            ($said | Where-Object { "$_" -match 'fills Feral\s+st\s+with Combo 145 .*simmed on loadout "DotC Raid ST \*"' }) -and
+            $quiet.Count -eq 0 -and $loud.Count -eq 1 -and "$($loud[0])" -match '"DotC Raid ST \*" is not one PlanTab\.BOSSES names for Feral')
 
         Test-That 'generator accepts a report url or a bare id' (
             (Get-ReportId $topGear) -eq $topGear -and
@@ -319,12 +369,15 @@ if ($SelfTest) {
         [System.IO.File]::WriteAllText($tmp, $empty)
         $message = ''
         # the good report first, so this also proves a bad one stops the whole run
-        try { Update-GearPlan -Report $topGear, $advanced -Target $tmp -From $fx 6>$null | Out-Null } catch { $message = "$_" }
+        try { Update-GearPlan -Report $topGear, $advanced -Target $tmp -From $fx 6>$null 3>$null | Out-Null } catch { $message = "$_" }
         Test-That 'generator refuses a report it cannot place' (
             $message -match $advanced -and $message -match 'not a Top Gear' -and
             [System.IO.File]::ReadAllText($tmp) -eq $empty)
     }
-    finally { Remove-Item $tmp -ErrorAction SilentlyContinue }
+    finally {
+        Remove-Item $tmp -ErrorAction SilentlyContinue
+        if ($fx3 -and (Test-Path $fx3)) { [System.IO.Directory]::Delete($fx3, $true) }
+    }
 
     Write-Host $(if ($failed) { "update-gear-plan: $failed FAIL" } else { 'update-gear-plan: self-test passed' })
     exit $(if ($failed) { 1 } else { 0 })
