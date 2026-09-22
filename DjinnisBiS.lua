@@ -3889,7 +3889,11 @@ local function selfTest()
 		or ("|cffff0000[BiS] " .. failed .. " check(s) failed|r"))
 end
 
-SLASH_DJINNISBIS1 = "/bis"
+-- /djbis first: /bis was not always ours, another addon can claim it and
+-- whichever registers last wins (Rob, 2026-09-22). /bis stays as a second
+-- name for the times nobody else takes it.
+SLASH_DJINNISBIS1 = "/djbis"
+SLASH_DJINNISBIS2 = "/bis"
 SlashCmdList.DJINNISBIS = function(msg)
 	msg = msg:match("^%s*(.-)%s*$")
 	if msg == "" then DjinnisBiS_Toggle()
