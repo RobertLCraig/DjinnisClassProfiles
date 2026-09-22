@@ -12,7 +12,11 @@ this table. It fetches Raidbots' public data files.
 
 An enchant family is the scroll's item name and its rank is craftingQuality.
 A gem family is the name without its quality prefix ("Flawless ", "Perfect ")
-and its rank is its place in the family ordered by item level, then quality.
+and its rank is its place in the family ordered by quality, then item level.
+Quality is the major key because the stats say so (Wowhead tooltips,
+2026-09-22): Flawless Masterful Garnet 278 gives 14 crit / 6 mastery and plain
+Masterful Garnet 295 gives 12 / 5, so the rare at the lower item level is the
+better gem. Blizzard's own enchant ids run the same way (8150 to 8153).
 """
 import json
 import re
@@ -64,7 +68,7 @@ def gem_rows(data, wanted):
     rows = []
     for fam in sorted(families):
         members = sorted((g for g in data if GEM_PREFIX.sub("", g["name"]) == fam),
-                         key=lambda g: (g.get("itemLevel") or 0, g.get("quality") or 0))
+                         key=lambda g: (g.get("quality") or 0, g.get("itemLevel") or 0))
         for rank, g in enumerate(members, 1):
             rows.append((g["id"], fam, rank, len(members)))
     return rows

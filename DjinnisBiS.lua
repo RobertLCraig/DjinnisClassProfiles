@@ -434,12 +434,12 @@ PlanTab.RANK = {
 		[240982] = { "Indecipherable Eversong Diamond", 1, 2 },
 		[240983] = { "Indecipherable Eversong Diamond", 2, 2 },
 		[240875] = { "Masterful Garnet", 1, 4 },
-		[240907] = { "Masterful Garnet", 2, 4 },
-		[240876] = { "Masterful Garnet", 3, 4 },
+		[240876] = { "Masterful Garnet", 2, 4 },
+		[240907] = { "Masterful Garnet", 3, 4 },
 		[240908] = { "Masterful Garnet", 4, 4 },
 		[240861] = { "Versatile Peridot", 1, 4 },
-		[240893] = { "Versatile Peridot", 2, 4 },
-		[240862] = { "Versatile Peridot", 3, 4 },
+		[240862] = { "Versatile Peridot", 2, 4 },
+		[240893] = { "Versatile Peridot", 3, 4 },
 		[240894] = { "Versatile Peridot", 4, 4 },
 	},
 }
@@ -4028,12 +4028,35 @@ local function selfTest()
 		check(rankTest .. ", nothing to buy", #buy, 0)
 		check(rankTest .. ", two upgrades offered", #upgrades, 2)
 		check(rankTest .. ", the upgrade is the planned rank", upgrades[2].id, 240908)
-		check(rankTest .. ", named with its rank", PlanTab.rankName("gem", 240907), "Masterful Garnet (rank 2 of 4)")
+		-- Rank 3, not 2: the rare at 278 outstats the uncommon at 295 (0010 review).
+		check(rankTest .. ", named with its rank", PlanTab.rankName("gem", 240907), "Masterful Garnet (rank 3 of 4)")
+		check(rankTest .. ", the rare at a lower item level outranks the uncommon above it", PlanTab.rankState("gem", 240876, 240907), "ok")
 		check(rankTest .. ", search term is the family", PlanTab.searchTerm("gem", 240907), "Masterful Garnet")
 		local worn = { id = 7, ilvl = 300, enchant = 7966, gems = { 240907 } }
 		check(rankTest .. ", the line says fine", planLineFor({ state = "lesser", entry = twin, worn = worn }):find("^Plan: fine%.") ~= nil, true)
 		check("two planned gems of one family, one worn, wants one more",
 			#select(2, PlanTab.gemMatch({ 240908, 240908 }, { 240907 })), 1)
+		-- A missing gem beside a lesser one is "gem": swapping that order passed
+		-- every check above (0010 review).
+		check("two planned gems of one family, one worn, wants one more, and reads gem not lesser",
+			(PlanTab.gemMatch({ 240908, 240908 }, { 240907 })), "gem")
+		-- The tab AS DRAWN with the planned wrist worn at a lower gem rank: the
+		-- planned rank sits under "Higher ranks exist" with Search AH, and "To
+		-- buy" says nothing. Deleting either drawn row passed every check above.
+		local wasWornLink, wasLevel, wasBoss = GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, PlanTab.boss
+		GetInventoryItemLink = function(_, slotID) return slotID == 9 and "|Hitem:251135::240907::::|h[x]|h" or nil end
+		C_Item.GetDetailedItemLevelInfo = function() return 318 end
+		PlanTab.boss = "Nek'zali"
+		local rows, header, upgrade = PlanTab.lines("Feral"), nil, nil
+		for i, line in ipairs(rows) do
+			if line.text:find("Higher ranks exist", 1, true) then header, upgrade = i, rows[i + 1] end
+		end
+		GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, PlanTab.boss = wasWornLink, wasLevel, wasBoss
+		check(rankTest .. ", drawn under Higher ranks exist", header ~= nil, true)
+		check(rankTest .. ", drawn as the planned rank", upgrade and upgrade.text:find("1x Masterful Garnet (rank 4 of 4)", 1, true) ~= nil, true)
+		check(rankTest .. ", drawn with Search AH", upgrade and upgrade.button and upgrade.button.label, "Search AH")
+		check(rankTest .. ", drawn with nothing to buy", header and rows[header - 1].text:find("Nothing to buy", 1, true) ~= nil, true)
+		check(rankTest .. ", drawn wrist line says fine", table.concat((function() local t = {} for i, l in ipairs(rows) do t[i] = l.text end return t end)(), "\n"):find("Wrist:|r fine.", 1, true) ~= nil, true)
 	end
 
 	local emptyTest = "empty shopping list says nothing to buy"
