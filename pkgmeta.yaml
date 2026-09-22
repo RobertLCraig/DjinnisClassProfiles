@@ -44,6 +44,8 @@ ignore:
   # reports its -SelfTest runs against.
   - update-gear-plan.ps1
   - fixtures
+  # Names and ranks every enchant and gem the plan asks for, from Raidbots.
+  - update-plan-ranks.py
   - offline-check.lua
   - releases
   # A SavedVariables file, if one is ever copied into the repo to reproduce a bug

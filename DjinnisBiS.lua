@@ -397,26 +397,70 @@ local GEAR_PLAN = {
 }
 -- END GENERATED GEAR PLAN
 
--- HAND-KEPT, and outside the markers on purpose: update-gear-plan.ps1 rewrites
+-- Outside the gear plan markers on purpose: update-gear-plan.ps1 rewrites
 -- everything between them from Raidbots reports, and neither table below is in
 -- a report.
---
--- The game has no call that turns an enchant id into a name. These are the ids
--- the plan above uses, named from raidbots.com/static/data/live/enchantments.json
--- on 2026-09-21. An id missing here prints as "enchant 1234", which is the cue
--- to add it.
 local PlanTab = {}  -- one name for the whole Plan tab: this file sits at Lua's 200-local limit
-PlanTab.ENCHANT_NAME = {
-	[7961] = "Empowered Hex of Leeching (rank 2)",
-	[7966] = "Eyes of the Eagle (rank 1)",
-	[7967] = "Eyes of the Eagle (rank 2)",
-	[7973] = "Akil'zon's Swiftness (rank 2)",
-	[7982] = "Berserker's Rage (rank 1)",
-	[7987] = "Mark of the Worldsoul (rank 2)",
-	[7991] = "Empowered Blessing of Speed (rank 2)",
-	[8018] = "Farstrider's Hunt (rank 1)",
-	[8159] = "Forest Hunter's Armor Kit (rank 2)",
+
+-- GENERATED, do not hand-edit. Rewritten by update-plan-ranks.py from Raidbots'
+-- public enchant and gem lists: every id in the family of every enchant and
+-- gem the plan asks for, as { family name, rank, ranks in the family }.
+--
+-- Why a family and a rank rather than a name: the game has no call from an
+-- enchant id to a name, two gem ids share the name "Flawless Masterful Garnet",
+-- and a lower rank of the right thing is not WRONG, only not as good as it
+-- could be. Rob may well choose a cheaper rank on gear he expects to replace
+-- (2026-09-22), so a lower rank is "lesser", never "enchant" or "gem".
+-- BEGIN GENERATED PLAN RANKS
+PlanTab.RANK_SOURCE = "Raidbots enchantments.json and gems.json, read 2026-09-22"
+PlanTab.RANK = {
+	enchant = {
+		[7972] = { "Akil'zon's Swiftness", 1, 2 },
+		[7973] = { "Akil'zon's Swiftness", 2, 2 },
+		[7982] = { "Berserker's Rage", 1, 2 },
+		[7983] = { "Berserker's Rage", 2, 2 },
+		[7990] = { "Empowered Blessing of Speed", 1, 2 },
+		[7991] = { "Empowered Blessing of Speed", 2, 2 },
+		[7966] = { "Eyes of the Eagle", 1, 2 },
+		[7967] = { "Eyes of the Eagle", 2, 2 },
+		[8018] = { "Farstrider's Hunt", 1, 2 },
+		[8019] = { "Farstrider's Hunt", 2, 2 },
+		[8158] = { "Forest Hunter's Armor Kit", 1, 2 },
+		[8159] = { "Forest Hunter's Armor Kit", 2, 2 },
+		[7986] = { "Mark of the Worldsoul", 1, 2 },
+		[7987] = { "Mark of the Worldsoul", 2, 2 },
+	},
+	gem = {
+		[240982] = { "Indecipherable Eversong Diamond", 1, 2 },
+		[240983] = { "Indecipherable Eversong Diamond", 2, 2 },
+		[240875] = { "Masterful Garnet", 1, 4 },
+		[240907] = { "Masterful Garnet", 2, 4 },
+		[240876] = { "Masterful Garnet", 3, 4 },
+		[240908] = { "Masterful Garnet", 4, 4 },
+		[240861] = { "Versatile Peridot", 1, 4 },
+		[240893] = { "Versatile Peridot", 2, 4 },
+		[240862] = { "Versatile Peridot", 3, 4 },
+		[240894] = { "Versatile Peridot", 4, 4 },
+	},
 }
+-- END GENERATED PLAN RANKS
+
+-- "Eyes of the Eagle (rank 1 of 2)", or "enchant 1234" for an id the table
+-- has never seen, which is the cue to run update-plan-ranks.py.
+function PlanTab.rankName(kind, id)
+	local row = PlanTab.RANK[kind][id]
+	if not row then return (kind == "enchant" and "enchant " or "gem ") .. tostring(id) end
+	return ("%s (rank %d of %d)"):format(row[1], row[2], row[3])
+end
+
+-- "lesser" when `worn` is a lower rank of `planned`'s family, "ok" when it is
+-- the same or a higher rank, "wrong" otherwise or when either id is unknown.
+function PlanTab.rankState(kind, planned, worn)
+	if planned == worn then return "ok" end
+	local p, w = PlanTab.RANK[kind][planned], PlanTab.RANK[kind][worn]
+	if not (p and w) or p[1] ~= w[1] then return "wrong" end
+	return w[2] < p[2] and "lesser" or "ok"
+end
 
 -- Which saved loadout and which gear scenario go with which boss. The hero tree
 -- per boss is Dreamgrove's Feral compendium as updated 2026-09-18. The NAMES are
@@ -1383,20 +1427,38 @@ end
 -- gem list, 2026-09-22); the sim asked for one and the auction house sold Rob
 -- the other, and the addon called it wrong for a day.
 function PlanTab.gemKey(id)
+	local row = PlanTab.RANK.gem[id]
+	if row then return row[1] end
 	local name = C_Item.GetItemInfo(id)
 	return name and canRead(name) and name or tostring(id)
 end
 
-local function sameGems(planned, worn)
-	if #planned ~= #worn then return false end
-	local a, b = {}, {}
-	for i = 1, #planned do a[i], b[i] = PlanTab.gemKey(planned[i]), PlanTab.gemKey(worn[i]) end
-	table.sort(a)
-	table.sort(b)
-	for i = 1, #a do
-		if a[i] ~= b[i] then return false end
+-- Planned gems against worn ones. Each planned gem takes the worn gem of its
+-- family with the highest rank; the result is "gem" when a planned gem has no
+-- family match, "lesser" when every planned gem is matched but one is by a
+-- lower rank, "ok" otherwise. Also returns the unmatched planned gems and the
+-- { planned, worn } pairs that are lesser, for the shopping list and the lines.
+function PlanTab.gemMatch(planned, worn)
+	local pool = {}
+	for _, gem in ipairs(worn or {}) do pool[#pool + 1] = gem end
+	local missing, lesser = {}, {}
+	for _, want in ipairs(planned) do
+		local best, at = nil, nil
+		for i, have in ipairs(pool) do
+			if PlanTab.gemKey(have) == PlanTab.gemKey(want) then
+				local rank = PlanTab.RANK.gem[have] and PlanTab.RANK.gem[have][2] or 0
+				if not best or rank > best then best, at = rank, i end
+			end
+		end
+		if not at then
+			missing[#missing + 1] = want
+		else
+			local have = table.remove(pool, at)
+			if PlanTab.rankState("gem", want, have) == "lesser" then lesser[#lesser + 1] = { want, have } end
+		end
 	end
-	return true
+	local state = #missing > 0 and "gem" or #lesser > 0 and "lesser" or "ok"
+	return state, missing, lesser
 end
 
 -- `worn` is wornFromLink's table plus `ilvl` and `sockets`, or nil for a bare
@@ -1405,13 +1467,17 @@ end
 local function slotState(entry, worn)
 	if not entry then return "ok" end
 	if not worn or not planMatches(entry, worn.id, worn.ilvl) then return "change" end
-	if entry.enchant and worn.enchant ~= entry.enchant then return "enchant" end
+	-- "lesser" is a lower rank of the right enchant or gem: not wrong, and
+	-- reported after anything that is.
+	local enchant = entry.enchant and PlanTab.rankState("enchant", entry.enchant, worn.enchant) or "ok"
+	if enchant == "wrong" then return "enchant" end
 	local gems = worn.gems or {}
 	if (worn.sockets or 0) > #gems then return "gem" end
 	-- A gem the plan never listed is no worse than none, so only a planned gem
 	-- can be the wrong one.
-	if #entry.gems > 0 and not sameGems(entry.gems, gems) then return "gem" end
-	return "ok"
+	local gem = PlanTab.gemMatch(entry.gems, gems)
+	if gem == "gem" then return "gem" end
+	return (enchant == "lesser" or gem == "lesser") and "lesser" or "ok"
 end
 
 -- Which planned ring goes with which finger: whichever way round matches more
@@ -1466,41 +1532,38 @@ end
 -- ponytail: a planned piece that is not worn is not counted at all, because the
 -- copy in the bags may already carry its enchant and gem. Read the bag copy's
 -- link through wornFromLink if the list needs to be complete before equipping.
+-- Third return: the upgrades, the same shape, for a lower rank of the right
+-- enchant or gem that is on. Those are never "to buy"; Rob may have chosen
+-- the cheaper rank on purpose.
 function PlanTab.shoppingList(plan, wornBySlot)
-	local count, unworn = { enchant = {}, gem = {} }, 0
+	local count, better, unworn = { enchant = {}, gem = {} }, { enchant = {}, gem = {} }, 0
 	for slot, entry in pairs(plan and PlanTab.entries(plan, wornBySlot) or {}) do
 		local worn = wornBySlot[slot]
 		if not worn or not planMatches(entry, worn.id, worn.ilvl) then
 			unworn = unworn + 1
 		else
-			if entry.enchant and worn.enchant ~= entry.enchant then
-				count.enchant[entry.enchant] = (count.enchant[entry.enchant] or 0) + 1
+			if entry.enchant then
+				local state = PlanTab.rankState("enchant", entry.enchant, worn.enchant)
+				local into = state == "wrong" and count or state == "lesser" and better
+				if into then into.enchant[entry.enchant] = (into.enchant[entry.enchant] or 0) + 1 end
 			end
-			-- planned gems less the worn ones, one for one
-			local have = {}
-			for _, gem in ipairs(worn.gems or {}) do
-				local key = PlanTab.gemKey(gem)
-				have[key] = (have[key] or 0) + 1
-			end
-			for _, gem in ipairs(entry.gems) do
-				local key = PlanTab.gemKey(gem)
-				if (have[key] or 0) > 0 then
-					have[key] = have[key] - 1
-				else
-					count.gem[gem] = (count.gem[gem] or 0) + 1
-				end
-			end
+			local _, missing, lesser = PlanTab.gemMatch(entry.gems, worn.gems)
+			for _, gem in ipairs(missing) do count.gem[gem] = (count.gem[gem] or 0) + 1 end
+			for _, pair in ipairs(lesser) do better.gem[pair[1]] = (better.gem[pair[1]] or 0) + 1 end
 		end
 	end
-	local list = {}
-	for kind, byId in pairs(count) do
-		for id, n in pairs(byId) do list[#list + 1] = { kind = kind, id = id, count = n } end
+	local function flat(byKind)
+		local list = {}
+		for kind, byId in pairs(byKind) do
+			for id, n in pairs(byId) do list[#list + 1] = { kind = kind, id = id, count = n } end
+		end
+		table.sort(list, function(a, b)
+			if a.kind ~= b.kind then return a.kind < b.kind end  -- "enchant" sorts first
+			return a.id < b.id
+		end)
+		return list
 	end
-	table.sort(list, function(a, b)
-		if a.kind ~= b.kind then return a.kind < b.kind end  -- "enchant" sorts first
-		return a.id < b.id
-	end)
-	return list, unworn
+	return flat(count), unworn, flat(better)
 end
 
 -- `nameOf(kind, id)` is handed in so /bis test can run this with no item cache.
@@ -2835,8 +2898,10 @@ local SLOT_BUTTONS = {
 	[15] = "CharacterBackSlot", [16] = "CharacterMainHandSlot",
 	[17] = "CharacterSecondaryHandSlot",
 }
-local MARK_COLOUR = { change = { 1, 0.15, 0.15 }, enchant = { 1, 0.7, 0 }, gem = { 1, 0.7, 0 } }
-local MARK_LABEL = { change = "", enchant = "enchant", gem = "gem" }
+-- "lesser" is a quiet grey: a lower rank of the right thing is fine, and Rob
+-- said so (2026-09-22). It is there to be seen, not to nag.
+local MARK_COLOUR = { change = { 1, 0.15, 0.15 }, enchant = { 1, 0.7, 0 }, gem = { 1, 0.7, 0 }, lesser = { 0.6, 0.6, 0.6 } }
+local MARK_LABEL = { change = "", enchant = "enchant", gem = "gem", lesser = "rank" }
 local LOCATION_WORD = { bags = "in your bags", bank = "in the bank", missing = "not owned" }
 local PLAN_STRIP_H = 44
 
@@ -2911,9 +2976,11 @@ end
 function PlanTab.searchTerm(kind, id)
 	-- Not `a and b or c`: an enchant id nobody named would fall through to an
 	-- ITEM lookup by the enchant's id and search the house for a stranger.
-	local name
-	if kind == "enchant" then name = PlanTab.ENCHANT_NAME[id] else name = C_Item.GetItemInfo(id) end
-	return name and (name:gsub("%s*%(rank %d+%)$", "")) or nil
+	local row = PlanTab.RANK[kind][id]
+	if row then return row[1] end
+	if kind == "enchant" then return nil end
+	local name = C_Item.GetItemInfo(id)
+	return name and canRead(name) and name or nil
 end
 
 -- Runs the auction house's own search box, which is what a typed search does
@@ -2934,7 +3001,7 @@ local function itemName(id)
 end
 
 function PlanTab.enchantName(id)
-	return PlanTab.ENCHANT_NAME[id] or ("enchant " .. tostring(id))
+	return PlanTab.rankName("enchant", id)
 end
 
 -- One line saying what the plan wants in this slot and where that is.
@@ -2943,15 +3010,19 @@ local function planLineFor(mark)
 	if mark.state == "enchant" then
 		return "Plan: enchant with " .. PlanTab.enchantName(entry.enchant)
 	elseif mark.state == "gem" then
-		local names, have = {}, {}
-		for i, gem in ipairs(entry.gems) do names[i] = itemName(gem) end
-		-- Say what is in the sockets now, with ids: a gem of the same name at a
-		-- different rank is a different id (Rob, 2026-09-22, a bought garnet that
-		-- still read as wanted).
-		for i, gem in ipairs(mark.worn and mark.worn.gems or {}) do have[i] = ("%s (%d)"):format(itemName(gem), gem) end
-		local line = #names > 0 and ("Plan: wants " .. table.concat(names, ", ")) or "Plan: a socket is empty"
-		if #entry.gems > 0 then line = line .. (" (%d)"):format(entry.gems[1]) end
-		return line .. (#have > 0 and (", has " .. table.concat(have, ", ")) or ", socket empty")
+		local _, missing = PlanTab.gemMatch(entry.gems, mark.worn and mark.worn.gems)
+		local names = {}
+		for i, gem in ipairs(missing) do names[i] = PlanTab.rankName("gem", gem) end
+		return #names > 0 and ("Plan: wants " .. table.concat(names, ", ")) or "Plan: a socket is empty"
+	elseif mark.state == "lesser" then
+		-- Not wrong. Rob may have picked the cheaper rank on purpose (2026-09-22).
+		local parts = {}
+		if entry.enchant and PlanTab.rankState("enchant", entry.enchant, mark.worn.enchant) == "lesser" then
+			parts[#parts + 1] = PlanTab.rankName("enchant", mark.worn.enchant)
+		end
+		local _, _, lesser = PlanTab.gemMatch(entry.gems, mark.worn.gems)
+		for _, pair in ipairs(lesser) do parts[#parts + 1] = PlanTab.rankName("gem", pair[2]) end
+		return "Plan: fine. " .. table.concat(parts, ", ") .. " is on; a higher rank exists"
 	end
 	local inBank = C_Item.GetItemCount(entry.id, true, false, true, true) - C_Item.GetItemCount(entry.id)
 	return ("Plan: %s (%d), %s"):format(itemName(entry.id), entry.ilvl,
@@ -3077,15 +3148,20 @@ function PlanTab.lines(forSpec)
 
 	lines[#lines + 1] = { text = "" }
 	lines[#lines + 1] = { text = GOLD .. "3. To buy|r" }
-	local list, unworn = PlanTab.shoppingList(plan, worn)
-	local wanted = PlanTab.shoppingLines(list, function(kind, id)
-		return kind == "enchant" and PlanTab.enchantName(id) or itemName(id)
-	end)
-	for i, text in ipairs(wanted) do
-		local term = list[i] and PlanTab.searchTerm(list[i].kind, list[i].id)
-		lines[#lines + 1] = { text = "   " .. (#list == 0 and GREEN or WHITE) .. text .. "|r",
-			button = term and { label = "Search AH", tip = "Search the auction house for \"" .. term .. "\". The house must be open.",
-				onClick = function() PlanTab.searchAH(term) end } or nil }
+	local list, unworn, better = PlanTab.shoppingList(plan, worn)
+	local function nameOf(kind, id) return PlanTab.rankName(kind, id) end
+	local function searchRows(items, colour)
+		for i, text in ipairs(PlanTab.shoppingLines(items, nameOf)) do
+			local term = items[i] and PlanTab.searchTerm(items[i].kind, items[i].id)
+			lines[#lines + 1] = { text = "   " .. colour .. text .. "|r",
+				button = term and { label = "Search AH", tip = "Search the auction house for \"" .. term .. "\". The house must be open.",
+					onClick = function() PlanTab.searchAH(term) end } or nil }
+		end
+	end
+	searchRows(list, #list == 0 and GREEN or WHITE)
+	if #better > 0 then
+		lines[#lines + 1] = { text = GREY .. "   Higher ranks exist, if you want to spend on them:|r" }
+		searchRows(better, GREY)
 	end
 	if unworn > 0 then
 		lines[#lines + 1] = { text = ("%s   %d planned piece%s not worn yet, so %s enchants and gems are not counted.|r"):format(
@@ -3739,7 +3815,9 @@ local function selfTest()
 	check(enchantTest .. ", none",
 		slotState(full, wornAs("|Hitem:251093::240894::::|h[x]|h", 276, 1)), "enchant")
 	check(enchantTest .. ", another",
-		slotState(full, wornAs("|Hitem:251093:7966:240894::::|h[x]|h", 276, 1)), "enchant")
+		slotState(full, wornAs("|Hitem:251093:7973:240894::::|h[x]|h", 276, 1)), "enchant")
+	check(enchantTest .. ", a lower rank of it is lesser, not enchant",
+		slotState(full, wornAs("|Hitem:251093:7966:240894::::|h[x]|h", 276, 1)), "lesser")
 	check(enchantTest .. ", the plan wants none",
 		slotState(parsePlanLine("id=251093,ilevel=276"), wornAs("|Hitem:251093:7966:::::|h[x]|h", 276, 0)), "ok")
 	local gemTest = "slot state is gem when a socket differs"
@@ -3749,8 +3827,8 @@ local function selfTest()
 		slotState(full, wornAs("|Hitem:251093:7967:240908::::|h[x]|h", 276, 1)), "gem")
 	check(gemTest .. ", an unplanned empty socket",
 		slotState(parsePlanLine("id=251093,ilevel=276"), wornAs("|Hitem:251093::::::|h[x]|h", 276, 1)), "gem")
-	-- Neither list is in order, so dropping either sort turns this red.
-	check(gemTest .. ", same gems in another order", sameGems({ 2, 1, 3 }, { 3, 1, 2 }), true)
+	-- Neither list is in order, so a match that walked them side by side turns this red.
+	check(gemTest .. ", same gems in another order", (PlanTab.gemMatch({ 2, 1, 3 }, { 3, 1, 2 })), "ok")
 
 	local locationTest = "planned item location resolves to bags bank or missing"
 	check(locationTest .. ", bags", planLocation(true, 0), "bags")
@@ -3861,7 +3939,7 @@ local function selfTest()
 	local termTest = "auction search term drops the enchant rank"
 	check(termTest .. ", enchant", PlanTab.searchTerm("enchant", 7967), "Eyes of the Eagle")
 	check(termTest .. ", enchant nobody named", PlanTab.searchTerm("enchant", 1), nil)
-	check(termTest .. ", gem not cached", PlanTab.searchTerm("gem", 240908), nil)
+	check(termTest .. ", gem not in the table and not cached", PlanTab.searchTerm("gem", 1), nil)
 	-- A pretend bag with the planned ring in bag 0 slot 2, and a cursor that
 	-- records what was picked up and where it went. Every global swapped here
 	-- is put back, so /bis test in the game touches nothing for longer than
@@ -3930,18 +4008,32 @@ local function selfTest()
 	C_PaperDollInfo, IsInventoryItemLocked = wasDoll, wasLocked
 	check("search button without the auction house open", PlanTab.searchAH("x"), false)
 
-	-- a gem of the same name at another id is the planned gem
+	-- ranks: a lower rank of the right enchant or gem is "lesser", never wrong
 	do
-		local wasInfo = C_Item.GetItemInfo
-		C_Item.GetItemInfo = function(id) return (id == 240907 or id == 240908) and "Flawless Masterful Garnet" or nil end
-		local twin = parsePlanLine("id=7,gem_id=240908,ilevel=300")
-		check("a gem of the same name at another id counts as the planned gem",
-			slotState(twin, { id = 7, ilvl = 300, sockets = 1, gems = { 240907 } }), "ok")
-		check("a gem of the same name at another id is not on the shopping list",
-			#PlanTab.shoppingList({ slots = { wrist = twin } }, { wrist = { id = 7, ilvl = 300, gems = { 240907 } } }), 0)
-		check("a gem the client has not named still matches by id only",
-			slotState(twin, { id = 7, ilvl = 300, sockets = 1, gems = { 240875 } }), "gem")
-		C_Item.GetItemInfo = wasInfo
+		local rankTest = "a lower rank of the planned gem or enchant is lesser, not wrong"
+		check(rankTest .. ", gem rank 2 of 4 for rank 4", PlanTab.rankState("gem", 240908, 240907), "lesser")
+		check(rankTest .. ", gem rank 4 for rank 2 is fine", PlanTab.rankState("gem", 240907, 240908), "ok")
+		check(rankTest .. ", the same gem", PlanTab.rankState("gem", 240908, 240908), "ok")
+		check(rankTest .. ", another family", PlanTab.rankState("gem", 240908, 240894), "wrong")
+		check(rankTest .. ", an id the table never saw", PlanTab.rankState("gem", 240908, 1), "wrong")
+		check(rankTest .. ", enchant rank 1 for rank 2", PlanTab.rankState("enchant", 7967, 7966), "lesser")
+		check(rankTest .. ", no enchant at all", PlanTab.rankState("enchant", 7967, nil), "wrong")
+		local twin = parsePlanLine("id=7,enchant_id=7967,gem_id=240908,ilevel=300")
+		check(rankTest .. ", the slot reads lesser",
+			slotState(twin, { id = 7, ilvl = 300, sockets = 1, enchant = 7966, gems = { 240907 } }), "lesser")
+		check(rankTest .. ", a wrong gem beats a lesser enchant",
+			slotState(twin, { id = 7, ilvl = 300, sockets = 1, enchant = 7966, gems = { 240894 } }), "gem")
+		local buy, _, upgrades = PlanTab.shoppingList({ slots = { wrist = twin } },
+			{ wrist = { id = 7, ilvl = 300, enchant = 7966, gems = { 240907 } } })
+		check(rankTest .. ", nothing to buy", #buy, 0)
+		check(rankTest .. ", two upgrades offered", #upgrades, 2)
+		check(rankTest .. ", the upgrade is the planned rank", upgrades[2].id, 240908)
+		check(rankTest .. ", named with its rank", PlanTab.rankName("gem", 240907), "Masterful Garnet (rank 2 of 4)")
+		check(rankTest .. ", search term is the family", PlanTab.searchTerm("gem", 240907), "Masterful Garnet")
+		local worn = { id = 7, ilvl = 300, enchant = 7966, gems = { 240907 } }
+		check(rankTest .. ", the line says fine", planLineFor({ state = "lesser", entry = twin, worn = worn }):find("^Plan: fine%.") ~= nil, true)
+		check("two planned gems of one family, one worn, wants one more",
+			#select(2, PlanTab.gemMatch({ 240908, 240908 }, { 240907 })), 1)
 	end
 
 	local emptyTest = "empty shopping list says nothing to buy"
