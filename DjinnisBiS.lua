@@ -3468,16 +3468,10 @@ function PlanTab.simcLines(spec, bosses, saved, cells)
 	return lines, missing
 end
 
--- Where the block goes: after the last "# talents=" line, so it sits with the
--- SimC addon's own loadouts, else after the live "talents=" line, else the end.
-function PlanTab.simcInsert(profile, block)
-	local at  -- index of the last character of the line the block follows
-	for e in profile:gmatch("\n# talents=[^\n]*()") do at = e - 1 end
-	if not at then at = select(2, profile:find("\ntalents=[^\n]*")) end
-	if not at then return profile .. "\n" .. block .. "\n" end
-	return profile:sub(1, at) .. "\n" .. block .. profile:sub(at + 1)
-end
-
+-- Where the block goes: after the addon's own "# Checksum:" line, never before
+-- it. The SimC addon checksums its whole text (adler32, core.lua) and Raidbots
+-- reads a mismatch as a tampered paste (simc-addon issue 47); loadout addons
+-- append after the line for that reason, and Raidbots reads them there.
 function PlanTab.simcAppend(profile)
 	local spec = playerSpec()
 	local bosses = spec and PlanTab.BOSSES[spec]
@@ -3501,14 +3495,18 @@ function PlanTab.simcAppend(profile)
 		print(GOLD .. "Djinni's BiS|r " .. GREY .. "not saved in the game, so left out of the /simc export: |r"
 			.. table.concat(missing, ", "))
 	end
-	return PlanTab.simcInsert(profile, table.concat(lines, "\n"))
+	return profile .. "\n" .. table.concat(lines, "\n") .. "\n"
 end
 
 -- Wrap the Simulationcraft addon's profile builder, once, and only when it is
 -- loaded. A plain wrapper, not hooksecurefunc: the block has to go into the
--- returned string. Nothing of Blizzard's is touched.
+-- returned string. Nothing of Blizzard's is touched. The addon's table is a
+-- file local (core.lua line 4, `local _, Simulationcraft = ...`), never a
+-- global, so the Ace registry is the only way to it; `SimulationcraftAPI` is
+-- a global but holds a copy of the function, and /simc does not call that.
 function PlanTab.armSimc()
-	local simc = _G.Simulationcraft
+	local ace = LibStub and LibStub("AceAddon-3.0", true)
+	local simc = ace and ace:GetAddon("Simulationcraft", true)
 	if type(simc) ~= "table" or type(simc.GetSimcProfile) ~= "function" or simc.DjinnisBiSWrapped then return false end
 	local build = simc.GetSimcProfile
 	simc.GetSimcProfile = function(self, ...)
@@ -4603,28 +4601,27 @@ local function selfTest()
 	local stand = 0
 	for _, line in ipairs(lines) do if line:find("^# Saved Loadout") then stand = stand + 1 end end
 	check(missTest .. ", nothing saved and no plan string adds no loadout", stand, 0)
-	local insTest = "simc block sits with the addon's own loadouts"
-	local profile = "# head\ntalents=LIVE\n\n# Saved Loadout: A\n# talents=AAA\n# Saved Loadout: B\n# talents=BBB\n\nhead=x\n"
-	check(insTest .. ", after the last saved one", PlanTab.simcInsert(profile, "# X"),
-		"# head\ntalents=LIVE\n\n# Saved Loadout: A\n# talents=AAA\n# Saved Loadout: B\n# talents=BBB\n# X\n\nhead=x\n")
-	check(insTest .. ", after the live talents when none are saved", PlanTab.simcInsert("# head\ntalents=LIVE\n\nhead=x\n", "# X"),
-		"# head\ntalents=LIVE\n# X\n\nhead=x\n")
-	check(insTest .. ", at the end when there are no talents", PlanTab.simcInsert("# head\nhead=x", "# X"), "# head\nhead=x\n# X\n")
 	local hookTest = "no error without the simc addon"
-	local wasSimc, wasIDs, wasInfo = _G.Simulationcraft, C_ClassTalents.GetConfigIDsBySpecID, C_Traits.GetConfigInfo
-	_G.Simulationcraft = nil
+	local wasStub, wasIDs, wasInfo = LibStub, C_ClassTalents.GetConfigIDsBySpecID, C_Traits.GetConfigInfo
+	LibStub = nil
 	local okArm, armed = pcall(PlanTab.armSimc)
 	check(hookTest .. ", no error", okArm, true)
 	check(hookTest .. ", nothing armed", armed, false)
+	LibStub = function() return { GetAddon = function() return nil end } end
+	check(hookTest .. ", nothing armed when Ace has no such addon", PlanTab.armSimc(), false)
+	-- The shape of the real thing: the addon's table is only in the Ace registry
+	-- (core.lua line 4), its text ends on the checksum line with no newline after.
+	local profile = "# head\ntalents=LIVE\n\n# Saved Loadout: A\n# talents=AAA\n# Saved Loadout: B\n# talents=BBB\n\nhead=x\n\n# Checksum: ab12"
 	local fake = { GetSimcProfile = function(self, a) return self.text .. tostring(a), nil end, text = profile }
-	_G.Simulationcraft = fake
+	LibStub = function(lib) return lib == "AceAddon-3.0" and { GetAddon = function(_, name) return name == "Simulationcraft" and fake or nil end } or nil end
 	C_ClassTalents.GetConfigIDsBySpecID = function() return { 1, 2 } end
 	C_Traits.GetConfigInfo = function(id) return { name = ({ "WS Raid Most Bosses", "DotC Raid ST *" })[id] } end
-	check(hookTest .. ", armed when present", PlanTab.armSimc(), true)
+	check(hookTest .. ", armed through the Ace registry, not a global", PlanTab.armSimc(), true)
 	check(hookTest .. ", armed once", PlanTab.armSimc(), false)
 	local out, err = fake:GetSimcProfile("!")
-	check(hookTest .. ", the addon's own text survives", out:find("# Saved Loadout: B\n# talents=BBB\n# Djinni's BiS plan (Feral)", 1, true) ~= nil, true)
-	check(hookTest .. ", the arguments reach the addon", out:sub(-1), "!")
+	check(hookTest .. ", the addon's own text survives, checksum last", out:sub(1, #profile + 1), profile .. "!")
+	check(hookTest .. ", the block follows the checksum line", out:find("# Checksum: ab12!\n# Djinni's BiS plan (Feral)", 1, true) ~= nil, true)
+	check(hookTest .. ", the arguments reach the addon", out:find("!", 1, true), #profile + 1)
 	check(hookTest .. ", saved names are read from the game", out:find("Saved Loadout: WS Raid Most Bosses (DBiS", 1, true), nil)
 	check(hookTest .. ", the plan's string for an unsaved one", out:find("# Saved Loadout: WS M+ (DBiS plan)\n# talents=" .. GEAR_PLAN.Feral.mplus.talents, 1, true) ~= nil, true)
 	check(hookTest .. ", no error back", err, nil)
@@ -4634,7 +4631,7 @@ local function selfTest()
 	out, err = fake:GetSimcProfile()
 	check(hookTest .. ", an error from the addon passes through", err, "boom")
 	check(hookTest .. ", with no profile", out, nil)
-	_G.Simulationcraft, C_ClassTalents.GetConfigIDsBySpecID, C_Traits.GetConfigInfo = wasSimc, wasIDs, wasInfo
+	LibStub, C_ClassTalents.GetConfigIDsBySpecID, C_Traits.GetConfigInfo = wasStub, wasIDs, wasInfo
 
 	local shopTest = "shopping list counts each missing enchant and gem once"
 	local shopPlan = { slots = {
