@@ -3059,6 +3059,10 @@ function PlanTab.harvestPools()
 	local instanceID = PlanTab.raidInstanceID("Venomous Abyss")
 	if not instanceID then return end
 	EJ_SelectInstance(instanceID)
+	-- the raid's journal id and name, for the loot spec card (0015): read on
+	-- this walk so the card never makes one of its own
+	PlanTab.RAID_ID = instanceID
+	PlanTab.RAID_NAME = EJ_GetInstanceInfo and EJ_GetInstanceInfo() or nil
 
 	local classID = select(3, UnitClass("player"))
 	local keptClass, keptSpec = EJ_GetLootFilter()
@@ -3229,17 +3233,12 @@ function PlanTab.setLootSpec(spec)
 	return "set"
 end
 
--- The journal's name for the raid the pools cover, read once, so the card
--- can tell that raid from any other by GetInstanceInfo's name. Never while
--- the journal is open, and the tier is put back, as harvestPools does.
+-- The journal's name for the raid the pools cover, for the card's title.
+-- harvestPools records it (with the journal id, PlanTab.RAID_ID) on the one
+-- walk it already makes, so nothing here selects a tier: the 0015 review
+-- found a second walk that put the tier back but not the instance and
+-- encounter, which harvestPools's own comment says a reopened journal needs.
 function PlanTab.raidName()
-	if PlanTab.RAID_NAME then return PlanTab.RAID_NAME end
-	if not (EJ_GetNumTiers and EJ_GetInstanceInfo) then return nil end
-	if EncounterJournal and EncounterJournal:IsShown() then return nil end
-	local keptTier = EJ_GetCurrentTier and EJ_GetCurrentTier()
-	local instanceID = PlanTab.raidInstanceID("Venomous Abyss")
-	if keptTier then EJ_SelectTier(keptTier) end
-	PlanTab.RAID_NAME = instanceID and EJ_GetInstanceInfo(instanceID) or nil
 	return PlanTab.RAID_NAME
 end
 
@@ -3248,11 +3247,18 @@ end
 -- pools fill cell by cell (card 0022), so `lootCardPending` asks the loader
 -- to call again on the next EJ_LOOT_DATA_RECIEVED, a bounded number of times.
 function PlanTab.lootCardModel()
-	local where, instanceType = GetInstanceInfo()
+	local _, instanceType, _, _, _, _, _, mapID = GetInstanceInfo()
 	if instanceType ~= "raid" then return nil end
 	pcall(PlanTab.harvestPools)
-	local raid = PlanTab.raidName()
-	if not (raid and canRead(where) and where == raid) then return nil end
+	-- The raid is told by journal id, the way the journal's own OnShow finds
+	-- where you stand (AdventureGuideUtil.GetCurrentJournalInstance): the map
+	-- id from GetInstanceInfo through C_EncounterJournal.GetInstanceForGameMap,
+	-- plain numbers both. A name compare was the 0015 build's way and needed
+	-- the map's name to spell the journal's exactly.
+	local api = C_EncounterJournal and C_EncounterJournal.GetInstanceForGameMap
+	local here = api and mapID and api(mapID)
+	if not (PlanTab.RAID_ID and here == PlanTab.RAID_ID) then return nil end
+	local raid = PlanTab.raidName() or "the raid"
 	if PlanTab.poolsDone then
 		PlanTab.lootCardPending = nil
 	else
@@ -7295,31 +7301,48 @@ local function selfTest()
 		check(markTest .. ", the loot spec's row is marked", lines[2].current, true)
 		check(markTest .. ", the other row is not", lines[1].current, false)
 		-- as drawn: stand in the raid, with the pools above and Feral's real plan
-		local wasInstance, wasPool, wasName, wasDone, wasLoot = GetInstanceInfo, PlanTab.POOL, PlanTab.RAID_NAME, PlanTab.poolsDone, GetLootSpecialization
-		PlanTab.RAID_NAME, PlanTab.poolsDone = "The Venomous Abyss", true
+		-- where you stand is a map id (GetInstanceInfo's eighth return) that the
+		-- journal turns into its instance id; the map's name is not consulted
+		local wasInstance, wasPool, wasName, wasID, wasDone, wasLoot, wasMap = GetInstanceInfo, PlanTab.POOL, PlanTab.RAID_NAME, PlanTab.RAID_ID, PlanTab.poolsDone, GetLootSpecialization, C_EncounterJournal.GetInstanceForGameMap
+		PlanTab.RAID_NAME, PlanTab.RAID_ID, PlanTab.poolsDone = "The Venomous Abyss", 1300, true
+		C_EncounterJournal.GetInstanceForGameMap = function(mapID) return ({ [2800] = 1300, [2801] = 1301 })[mapID] end
 		GetLootSpecialization = function() return 104 end
 		local feralIds = PlanTab.plannedIds("Feral")
 		local one
 		for id in pairs(feralIds) do one = one or id end
 		PlanTab.POOL = { [3470] = { Balance = set(), Feral = set(one, 7), Guardian = set(7), Resto = set() } }
-		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 16, "Mythic", 20, 0, false, 2800 end
 		local drawn = PlanTab.showLootCard()
 		check(listTest .. ", drawn: one row, Feral, with the planned item", drawn and #drawn == 1 and drawn[1].spec == "Feral" and drawn[1].ids[1] == one, true)
 		check(markTest .. ", drawn: loot spec Guardian is not Feral's row", drawn and drawn[1].current, false)
 		GetLootSpecialization = function() return 0 end
 		drawn = PlanTab.showLootCard()
 		check(markTest .. ", drawn: loot spec 0 marks the current spec's row", drawn and drawn[1].current, true)
+		GetInstanceInfo = function() return "A Map Named Otherwise", "raid", 16, "Mythic", 20, 0, false, 2800 end
+		drawn = PlanTab.showLootCard()
+		check(listTest .. ", drawn: the raid is told by journal id, not by the map's name", drawn and #drawn, 1)
 		local noneTest = "no loot card when nothing planned drops"
 		PlanTab.POOL = { [3470] = { Balance = set(), Feral = set(7), Guardian = set(7), Resto = set() } }
 		check(noneTest .. ", nothing planned in the pools", PlanTab.showLootCard(), nil)
 		PlanTab.POOL = { [3470] = { Balance = set(), Feral = set(one), Guardian = set(), Resto = set() } }
-		GetInstanceInfo = function() return "Somewhere Else", "raid" end
-		check(noneTest .. ", another raid", PlanTab.showLootCard(), nil)
-		GetInstanceInfo = function() return "The Venomous Abyss", "party" end
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 16, "Mythic", 20, 0, false, 2801 end
+		check(noneTest .. ", another raid, whatever its map is called", PlanTab.showLootCard(), nil)
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 16, "Mythic", 20, 0, false, 2800 end
+		PlanTab.RAID_ID = nil
+		check(noneTest .. ", the pools have not named the raid yet", PlanTab.showLootCard(), nil)
+		PlanTab.RAID_ID = 1300
+		GetInstanceInfo = function() return "The Venomous Abyss", "party", 23, "Mythic", 5, 0, false, 2800 end
 		check(noneTest .. ", a dungeon is KeystoneLoot's", PlanTab.showLootCard(), nil)
 		GetInstanceInfo = function() return "Nowhere", "none" end
 		check(noneTest .. ", outside", PlanTab.showLootCard(), nil)
-		GetInstanceInfo, PlanTab.POOL, PlanTab.RAID_NAME, PlanTab.poolsDone, GetLootSpecialization = wasInstance, wasPool, wasName, wasDone, wasLoot
+		-- the name is the harvest's, never a second journal walk (the 0015 review)
+		local wasSelect, walked = EJ_SelectTier, false
+		EJ_SelectTier = function() walked = true end
+		PlanTab.RAID_NAME = nil
+		check(listTest .. ", no name until the pools are harvested", PlanTab.raidName(), nil)
+		check(listTest .. ", and asking does not walk the journal", walked, false)
+		EJ_SelectTier = wasSelect
+		GetInstanceInfo, PlanTab.POOL, PlanTab.RAID_NAME, PlanTab.RAID_ID, PlanTab.poolsDone, GetLootSpecialization, C_EncounterJournal.GetInstanceForGameMap = wasInstance, wasPool, wasName, wasID, wasDone, wasLoot, wasMap
 		-- the button: a plain number out of combat, nothing in combat
 		local combatTest = "loot spec not changed in combat"
 		local wasCombat, wasSet, wasPrint = InCombatLockdown, SetLootSpecialization, print
