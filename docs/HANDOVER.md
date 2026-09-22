@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.24.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` and `ai-review/` are empty; twenty-six cards sit in `human-review/` and every one waits on one trip to a live client.
-_Last updated: 2026-09-22 (v0.24.0: 0014, 0023 and 0028 built on Option A; the board's build queue is empty)_
+**Status:** v0.24.1, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` and `ai-review/` are empty; twenty-six cards sit in `human-review/` and every one waits on one trip to a live client.
+_Last updated: 2026-09-22 (v0.24.1: 0014, 0023 and 0028 built on Option A; the board's build queue is empty)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -105,7 +105,7 @@ than a task.
   bundled libraries ship inside the addon, so they are part of the artefact.
 
 ## Current state
-**2026-09-22, traps from the sub-agent build (v0.20.0 to v0.24.0).**
+**2026-09-22, traps from the sub-agent build (v0.20.0 to v0.24.1).**
 - **Parallel builds conflict in three places only**: the tail of `selfTest` (every card appends its checks there), the loader's `PLAYER_LOGIN` arm list, and the Plan tab's boss rows in `PlanTab.lines`.
   All resolve by keeping both sides; a `do ... end` check block needs its own `end` when two land together. A review that lands after a builder branched from older code (0013 review vs 0017 build) needs a hand merge of the shared function, not both sides.
 - **A Raidbots paste must be the whole `/simc` export, checksum line included.** Trimming the bag list flips the page to Unverified Input. Card 0018 appends its block after the checksum for the same reason.
@@ -204,7 +204,7 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Nothing is left to build. The next work is Rob's: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
 
-Twenty-six cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.24.0.
+Twenty-six cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.24.1.
 
 ## Blockers / open questions
 - **Rob's sims for `0028`**: which loadout each spec uses at 3+ targets, and a Top Gear run per spec per scenario. Nothing else on the board is blocked.
