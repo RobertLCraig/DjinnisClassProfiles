@@ -4,6 +4,36 @@ needs: 0009, 0011
 ---
 # 0013 A "wrong setup here" popup before the pull
 
+## What I need from you
+
+One trip into The Venomous Abyss as Feral, out of combat, with the build deployed. Nothing here
+can be settled from the repository: every frame, anchor and event is unproven until a client
+draws it. Report each as seen or not.
+
+1. Load a loadout that is not "WS Raid Most Bosses", walk in. Two seconds after the loading
+   screen: a small window titled "The Venomous Abyss: Nek'zali", a Talents line green and red, a
+   Switch talents button. Click it: the talent cast bar, then the window goes by itself.
+2. With a planned piece in the bags and its slot wearing something else: a red slot line and an
+   Equip all button. Click it: the piece goes on, the window goes.
+3. Close it with the X, start a ready check: no window. Load a third loadout, ready check: the
+   window is back.
+4. Close it with the X, leave the instance, walk back in with the same wrong loadout: the window
+   is back (a closed answer lasts one visit; fixed in review).
+5. Pull Nek'zali with the wrong loadout: the window is gone during the fight and back two seconds
+   after a wipe; after a kill it names Entombed Sentinels ("DotC Raid ST *"), or does not show if
+   that loadout is loaded.
+6. Start a key: no window during it.
+7. Drag the window; Escape closes it. The title sits clear of the template's own title bar and
+   the first line clear of the inset edge (the frame is `BasicFrameTemplateWithInset`, lines
+   start 30 px down; unseen).
+8. Log in (not `/reload`) standing inside the raid with the wrong loadout. If no window comes
+   after two seconds, the talent configs were not loaded yet at that moment
+   (`activeLoadoutName` answers nil, which is "unknown", not "wrong"); the ready check will
+   still catch it. Say which happened.
+9. At login, any grey line saying `could not register` names an event 12.1 refuses this addon.
+10. `/djbis test` in the game: if any `popup` check goes red, the stubbed reads differ from the
+    real ones; say which line.
+
 ## Why
 
 Rob plays four specs. The plan knows what each place wants: a loadout per boss (`0007`), gear and
@@ -134,3 +164,41 @@ unless the order of bosses is not fixed.
   here. The bag glow and the Plan tab are untouched beyond Equip all moving into `equipAll`.
   **Edit Mode:** a popup that shows itself is not a HUD element and is not registered; it is
   movable by drag and clamped to the screen.
+- 2026-09-22 Claude, adversarial review in a worktree. **Attacked.** Every Blizzard call against
+  `wow-ui-source` `Blizzard_APIDocumentationGenerated`: `C_RestrictedActions.IsAddOnRestrictionActive`
+  and `ADDON_RESTRICTION_STATE_CHANGED` (`RestrictedActionsDocumentation.lua`, the "always false
+  during dispatch" note is real and the two-second retry is the right answer to it),
+  `Enum.AddOnRestrictionType` Encounter 1 and ChallengeMode 2 (`RestrictedActionsConstantsDocumentation.lua`),
+  `ENCOUNTER_START` and `ENCOUNTER_END` payloads (`EncounterInfoDocumentation.lua`: id, name,
+  difficulty, size, success, and the code's `(event, id, name, _, _, success)` matches),
+  `READY_CHECK` (`PartyInfoDocumentation.lua`, flagged `SecretInChatMessagingLockdown`; its
+  payload is never touched, so nothing to guard), `CHALLENGE_MODE_START` and
+  `C_ChallengeMode.IsChallengeModeActive`, `C_InstanceEncounter.IsEncounterInProgress`,
+  `GetInstanceInfo` (`InstanceDocumentation.lua`), `InCombatLockdown`. None is deprecated. No
+  `C_Secrets.Should*BeSecret` predicate exists for any of these reads (`SecretPredicateAPIDocumentation.lua`
+  lists 26, all unit, aura, cooldown and totem), so `canRead` after the read is the whole guard
+  and it is on every game string and number that is compared: the instance name, the loadout
+  name, `ENCOUNTER_END`'s id, name and success, every worn link. Escape and the X both reach
+  `frame:Hide()` (`UIParentPanelManager.lua` `CloseSpecialWindows`, `UIPanelCloseButtonDefaultAnchors`),
+  so `OnHide` runs `onClose` on both and `hidePopup` clears it first; checked, not assumed.
+  The fence at the wrong moment: `PLAYER_ENTERING_WORLD` and `ENCOUNTER_END` both wait two
+  seconds and `checkSetup` re-asks `fenced()` itself, `READY_CHECK` asks at once, which is right
+  because nothing is dispatching. Each of the 61 checks' names was matched to a criterion; the
+  builder's three mutations were read, and two more were run here (below). **Held:** the five
+  criteria as written, the 200-local and 60-upvalue limits (no new top-level local, nothing new
+  captured by `selfTest`), `PlanTab.wrongHere` and `PlanTab.popup` signatures untouched for
+  `0017`. **Broke, fixed in place, each red on its own check before green:** (1) a closed answer
+  outlived the visit: leave the raid, come back the next night with the same wrong loadout, no
+  popup, which is the exact case in `## Why`; `PLAYER_ENTERING_WORLD` now forgets
+  `popupClosed` with `lastKill` (check "a fresh zone-in forgets the closed answer"). (2)
+  `checkSetup`'s "elsewhere", "no plan" and "matches" hid whatever was on the shared frame,
+  so a ready check in a city would have taken down `0024`'s spec prompt or `0017`'s list;
+  `PlanTab.hideSetup` hides only a popup this card put up (`popupModel.setup`; check "another
+  card's popup on the shared frame is left up"). Both checkers exit 0 under 5.4 and 5.1.
+  **Not fixed, said:** a login inside the raid may read no loadout name two seconds in and show
+  nothing until the ready check (look 8); `rowHere`'s Nymrissa-after-Ula'tek is the builder's
+  marked ponytail. **Security:** weakest point is the frame's `OnHide` running a closure the
+  addon set, which only records a string; unchecked path is none, every event payload is behind
+  `canRead` before a compare; it leaks nothing, nothing leaves the client. **Browser:** none, this
+  is a game frame, and the ten looks above are what a client must answer, so the card goes to
+  `human-review/`, not `done/`.
