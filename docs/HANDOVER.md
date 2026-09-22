@@ -79,6 +79,10 @@ than a task.
 - `CHANGELOG.md`, `RELEASE_NOTES.md` - `RELEASE_NOTES.md` is what the first release will say.
 
 ## Decisions locked
+- **The planned build is the plan cell's own `talents` string, never the saved loadout** (Rob,
+  2026-09-22, Option A). Blizzard writes a hand edit into the saved loadout on Apply, so a
+  compare against it can never see an edit. A cell without a `talents` string has no planned
+  build and says nothing. Every scenario gets its own cell and string; see card `0028`.
 - **Trinket tiers come from ClassCodex's shipped data files, not from the sites** (2026-09-02).
   A WoW addon cannot make a network request: there is no HTTP call anywhere in Blizzard's API
   surface, checked against `wow-ui-source`. So tier data is baked in at author time by
