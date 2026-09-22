@@ -3257,6 +3257,11 @@ function PlanTab.sendToAuctionator(list)
 		local term = PlanTab.searchTerm(want.kind, want.id)
 		if term then terms[#terms + 1] = term else skipped = skipped + 1 end
 	end
+	-- Nothing named yet would replace the last good list with an empty one (0025 review).
+	if #terms == 0 then
+		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Nothing on the list has a name yet; the Auctionator list is left as it was.|r")
+		return false
+	end
 	local ok, err = pcall(api.CreateShoppingList, "DjinnisBiS", PlanTab.AUCTIONATOR_LIST, terms)
 	if not ok then
 		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Auctionator refused the list: " .. tostring(err) .. "|r")
@@ -4981,12 +4986,18 @@ local function selfTest()
 		Auctionator = { API = { v1 = {
 			CreateShoppingList = function(caller, name, terms) sent = { caller = caller, name = name, terms = terms } end,
 			-- 7967 is priced so the enchant guard is proven: that is a stranger's item id.
-			GetAuctionPriceByItemID = function(caller, id) return id == 50 and 123456 or id == 240908 and 50000 or id == 7967 and 1 or nil end,
+			-- 98 answers a string and 99 throws: neither may reach the total (0025 review).
+			GetAuctionPriceByItemID = function(caller, id)
+				if id == 99 then error("Contact the maintainer") end
+				return id == 50 and 123456 or id == 240908 and 50000 or id == 7967 and 1 or id == 98 and "12g" or nil
+			end,
 		} } }
 		local priceTest = "shopping list shows auctionator prices"
 		check(priceTest .. ", gold from copper", PlanTab.gold(123456), "12g 34s")
 		check(priceTest .. ", a gem is priced", PlanTab.priceOf("gem", 50), 123456)
 		check(priceTest .. ", an enchant is not, its id is not an item id", PlanTab.priceOf("enchant", 7967), nil)
+		check(priceTest .. ", a price that is not a number is no price", PlanTab.priceOf("gem", 98), nil)
+		check(priceTest .. ", a throw from Auctionator is no price", PlanTab.priceOf("gem", 99), nil)
 		local texts, total, unpriced = PlanTab.pricedLines(shop, plainName)
 		check(priceTest .. ", the line carries count times price", texts[2], "2x gem 50   " .. GREY .. "24g 69s|r")
 		check(priceTest .. ", an unpriced line is left plain", texts[1], "2x enchant 7967")
@@ -4999,6 +5010,12 @@ local function selfTest()
 		check(sendTest .. ", the search term, rank stripped", sent and sent.terms[1], "Eyes of the Eagle")
 		check(sendTest .. ", a thing with no name yet is left out", sent and #sent.terms, 1)
 		check(sendTest .. ", and said so", said[#said] and said[#said]:find("2 with no name yet left out", 1, true) ~= nil, true)
+		-- Nothing named at all (an enchant id the rank table has never seen): the
+		-- last good list must not be replaced by an empty one (0025 review).
+		sent = nil
+		check(sendTest .. ", nothing named sends nothing", PlanTab.sendToAuctionator({ { kind = "enchant", id = 1, count = 1 } }), false)
+		check(sendTest .. ", nothing named leaves the list alone", sent, nil)
+		check(sendTest .. ", nothing named says so", said[#said] and said[#said]:find("left as it was", 1, true) ~= nil, true)
 		Auctionator.API.v1.CreateShoppingList = function() error("Contact the maintainer") end
 		check(sendTest .. ", a refusal is caught", PlanTab.sendToAuctionator(shop), false)
 		check(sendTest .. ", a refusal is shown", said[#said] and said[#said]:find("refused", 1, true) ~= nil, true)
