@@ -6,8 +6,14 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.16.1, `Interface: 120100`. No remote.
-**2026-09-21, after everything below: card `0007` is built, reviewed and in `human-review/`.** A
+**Status:** v0.17.1, `Interface: 120100`. No remote.
+**2026-09-22, after everything below: card `0008` is built, reviewed and in `human-review/`.**
+The Plan tab has buttons now: Talents opens the talent window and loads nothing, Equip puts the
+exact bag copy in the planned slot, Search AH runs the auction house's own search. Its review
+fixed three faults at 0.17.1: an unnamed enchant searched by item id, a refused equip left on
+the cursor, and a redraw that only worked once the character sheet had been opened. It wants six
+looks in the game. **`todo/` is still empty**, and seven cards wait on one trip to a live client.
+**2026-09-21: card `0007` is built, reviewed and in `human-review/`.** A
 fourth tab, Plan, names the talent loadout per boss, the slots to change and what to buy. Its review
 made the checks read the drawn tab and fixed three small faults at 0.16.1. It wants eight looks in
 the game. **`todo/` is now empty**, and six cards wait on one trip to a live client. The main chunk
@@ -38,7 +44,7 @@ is now in `human-review/` for five looks in the game.
 **2026-09-21, last: card `0003` is now in `human-review/`, not `ai-review/` or `todo/`.** Its in-combat
 zero was fixed at 0.15.1, a second adversarial pass stopped a proc from emptying the rating cache
 mid-fight, and what is left is six looks only a game client can settle.
-_Last updated: 2026-09-21 (card 0006: bag marks, deployed at 0.15.0)_
+_Last updated: 2026-09-22 (card 0008: Plan tab buttons, reviewed at 0.17.1)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -204,15 +210,16 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this. The one buildable card is `0007` in `todo/`**, the Plan tab with talents
-per boss and a shopping list (as of 2026-09-21). It carries `not_for_the_loop:` because Rob builds
-this addon by hand in a session on msiraider. It can reuse what `0005` and `0006` left in
-`DjinnisBiS.lua`: `readWorn`, `slotStates`, `wantedFrom`, `planLocation` and `planScenario`.
+**`docs/board/` owns this. `todo/` is empty** (as of 2026-09-22). Whatever comes next starts as
+a card, carries `not_for_the_loop:` because Rob builds this addon by hand on msiraider, and adds
+to the `PlanTab` table rather than a new top-level local: the main chunk holds 191 of Lua's 200.
 
-Five cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005` and `0006`, all wanting a live
-client. **They are one trip**, and each card lists its own checks under `## What I need from you`.
-Open `/bis` for `0001` and `0002`; open the character sheet, hit a dummy and hover a ring for
-`0003` and `0005`; open Baganator for `0006`.
+Seven cards sit in `human-review/`, `0001`, `0002`, `0003`, `0005`, `0006`, `0007` and `0008`,
+all wanting a live client. **They are one trip**, and each card lists its own checks under
+`## What I need from you`. Open `/bis` for `0001` and `0002`; open the character sheet, hit a
+dummy and hover a ring for `0003` and `0005`; open Baganator for `0006`; open the Plan tab for
+`0007`, then click its buttons for `0008` (one planned piece in the bags first, and a visit to an
+auctioneer for the Search AH step).
 
 ## Blockers / open questions
 - **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's BiS*
@@ -256,6 +263,11 @@ Open `/bis` for `0001` and `0002`; open the character sheet, hit a dummy and hov
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
+- **2026-09-22** Card `0008` reviewed, three fixes, deployed at v0.17.1. Worth carrying: a check
+  with nothing to act on cannot fail, and the equip checks were exactly that until `selfTest` got
+  a pretend bag; `a and b or c` is wrong the moment `b` may be nil; and the slot-mark watcher does
+  not exist until the character sheet is first opened, so anything that must run from login rides
+  the bag-mark watcher instead.
 - **2026-09-21, second session** Card `0005`. Slot marks, a scenario button and a plan strip under
   the stat pane, deployed at v0.14.0. Worth carrying: Chonky moves Blizzard's slot buttons rather
   than drawing its own, and an item link carries enchant and gem item ids in fields 2 to 6, so
