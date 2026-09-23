@@ -311,3 +311,60 @@ three the second review added.
   3. A spare this session made but the list had not shown yet is adopted by name on the next ask
      (`PlanTab.spareUnlisted`), so it is not called someone else's. The "taken" message now says the
      addon has no record of making it, which is true for spares from before 0.38.
+
+**2026-09-23** Fourth adversarial review of 046179c (v0.38.2). **Clean. Moved to human-review.**
+
+Earlier findings, each checked in the code and under mutation:
+- Third review, finding 1 (dropdown pick overridden): fixed. The wish keeps `selected`, and
+  `spareOnHide` drops it when that changed (`DjinnisBiS.lua:6541`). Check removed: 2 red. Wish saved
+  without `selected`: 8 red.
+- Third review, finding 2 (fixes with no check): all now red. Combat branch of `wearMadeSpare` 1,
+  "unlisted" made silent 1, `pendingID` without the name match 3, no `q.made` check 2, wish kept
+  after close 1.
+- Third review, smaller (false "taken" after "unlisted"): fixed by `spareUnlisted`. No adoption: 1
+  red. Not remembered: 1 red.
+- Second and first review fixes still hold: no clear in `loadTalents` 3, close in combat 1, delete
+  any listed "BiS:" 8, delete the worn spare 5, no "taken" guard 1, `spareBuild` id guard 3,
+  `importOne` window guard 1, no unfilled check 1, no two-slot reserve 5, no "BiS: " strip 1, no
+  "same" 1, no `pendingID` 1, no plain switch 5, finish never wears 9 and 10, id recorded after the
+  combat check 1.
+- Harness green under Lua 5.1 and 5.4. The game folder holds the same file as the repository.
+
+What I tried to break, and why none of it bounces:
+- A hand edit Applied in the open window keeps the same config id, so the waiting spare still goes
+  on at close. The third review named this. Nothing is lost: Apply writes the edit into that
+  loadout, and the chat line said closing would put the build on. A note only.
+- Starter Build picked in the dropdown. Blizzard records the starter id as last selected once the
+  commit lands (`Blizzard_ClassTalentsFrame.lua:386`, `:642-656`), so the wish should drop. Not
+  provable offline. Added to the in-game list below.
+- A wish saved while a switch through the helper is still committing keeps the old `selected`. The
+  commit then lands and the close drops the wish without a word. The player gets the build they
+  asked for first. Rare, and nothing is lost. A note only.
+- `spareUnlisted` is keyed by name, not by spec. An "unlisted" spare in one spec, then a spec change
+  and an old "BiS: X" of the same name there, adopts that one. It needs a list lag, a spec change
+  and a pre-0.38 spare in one session. A note: key it by spec if it is ever seen.
+- An "unlisted" spare followed by a different build is never recorded, so it is not deleted and
+  holds a slot. After a reload it reads "taken". Same rarity. A note.
+
+Still 0 red under mutation, not bounced:
+- The plain switch without `IsConfigPopulated` (`:6576`). The second review listed it. It is the
+  route the "unfilled" message sends the player back through. The guard is right by reading, and
+  without it an unfilled spare falls through to be deleted and made again. Worth one check later.
+- A delete that does not forget the id (`:6592`), and the adoption leaving its flag set (`:6563`).
+  Near equivalent.
+- `HookScript` and the half-second delay run only in a client. They belong to the in-game steps.
+
+Security:
+1. Weakest point: `DjinnisBiSCharDB.spares`, which the delete path trusts. Its entry now needs the
+   watched id to carry the spare's name, or the name in the list. The one looser route is
+   adoption by name through `spareUnlisted`, and that only for a name this session made.
+2. Unchecked: ids in `spares` are never pruned. Config ids are server ids, not known to be reused.
+   The wish at close checks spec and selected loadout, not a hand edit.
+3. Leaks: nothing leaves the client. Failures print the build name and the game's reason in chat.
+
+No agent can run the game client. A person owes What I need from you 1 to 6, the three the second
+review added, and:
+- double-click a grey row with the window open, pick Starter Build in the dropdown, close. Pass: the
+  spare is not made.
+- double-click a grey row with the window open, pick another loadout, close. Pass: that loadout
+  stays on.
