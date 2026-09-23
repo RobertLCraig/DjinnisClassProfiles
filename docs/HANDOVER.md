@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.39.3, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `ai-review/` is empty. `0029`, `0039` to `0046` passed review and sit in `human-review/`. `todo/` holds `0035` and `0038` (the action button taint error, waits on a taint log from Rob); `0036` and `0037` (Save bars buttons, named profiles) passed review and sit in `human-review/`; `0031` to `0034` passed review (0033 on its sixth pass, at v0.33.4) and sit in `human-review/`; forty-two cards sit in `human-review/` and every one waits on one trip to a live client.
-_Last updated: 2026-09-23 (v0.39.3: point at a Load bars button or an "own bars" row and the saved layout shows on your real bars, card 0046. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+**Status:** v0.39.3, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob; `0047` waits on his pick of Feral dungeon build.
+_Last updated: 2026-09-24 (v0.39.3. `0047` asks which Feral dungeon build takes Double-Clawed Rake. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -214,9 +214,9 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this.** Cards `0031` to `0034` are built (loadouts per character, the list's look, shared action bars, tree highlight). All four passed review and wait for a client. On `0033`, watch for a key prompt that returns every login while **Apply** does nothing (sixth review note). `0035`, retire DjinnisDreamgrove and DjinnisClassProfiles, stays in `todo/` until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
+**`docs/board/` owns this.** Trap on `0033`: a key prompt that returns every login while **Apply** does nothing. `0035` waits until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on `0028`, then `.\update-gear-plan.ps1 <ids>`.
 
-Forty-two cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.39.3 (deployed 2026-09-23). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
+Forty-three cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.39.3 (deployed 2026-09-23). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 
 ## Blockers / open questions
 - **Rob's sims for `0028`**: which loadout each spec uses at 3+ targets, and a Top Gear run per spec per scenario. Nothing else on the board is blocked.
