@@ -6783,15 +6783,24 @@ function PlanTab.readKeys()
 	return keys
 end
 
--- A key the game refused this session is not counted again, or the offer
--- would never say "already match" (0033 review).
+-- A key the game refused is not counted again, or the offer would never say
+-- "already match" (0033 review). Kept per character, across a /reload, or
+-- the same prompt came back at every login (fourth review); the session
+-- table only until the character's file exists.
 PlanTab.keysRefused = {}
+
+function PlanTab.refusedKeys()
+	local c = DjinnisBiSCharDB
+	if type(c) ~= "table" then return PlanTab.keysRefused end
+	if type(c.keysRefused) ~= "table" then c.keysRefused = {} end
+	return c.keysRefused
+end
 
 function PlanTab.keysDiffer(want)
 	local have, n = PlanTab.readKeys(), 0
 	-- key -> the action refused on it: only that pair is skipped, so another
 	-- layout's binding on the same key still counts (second review)
-	local refused = PlanTab.keysRefused
+	local refused = PlanTab.refusedKeys()
 	for key, action in pairs(have) do
 		if want[key] ~= action and not (want[key] and refused[key] == want[key]) then n = n + 1 end
 	end
@@ -6808,10 +6817,12 @@ function PlanTab.placeKeys(want)
 	end
 	for key, action in pairs(want) do
 		if have[key] ~= action then
-			if SetBinding(key, action) then changed = changed + 1
+			if SetBinding(key, action) then
+				changed = changed + 1
+				PlanTab.refusedKeys()[key] = nil  -- the addon behind it is here now
 			else
 				refused[#refused + 1] = ("key %s: will not bind to %s"):format(key, action)
-				PlanTab.keysRefused[key] = action
+				PlanTab.refusedKeys()[key] = action
 			end
 		end
 	end
@@ -6958,7 +6969,14 @@ function PlanTab.offerBars(asked)
 		("The %s layout would change %d slots and %d keys here."):format(key, n, k),
 		"Anything this character cannot place stays as it is.",
 	}, {
-		{ label = "Apply", onClick = function() PlanTab.applyBars(key) end },
+		-- The prompt can outlive the spec or build it was for (fourth review)
+		{ label = "Apply", onClick = function()
+			if PlanTab.barsKey(playerSpec(), (PlanTab.activeLoadoutName())) ~= key then
+				PlanTab.say("The spec or build changed since that offer. Type " .. GOLD .. "/djbis bars|r" .. GREY .. " for the layout that fits now.")
+				return
+			end
+			PlanTab.applyBars(key)
+		end },
 		{ label = "Not now" },
 	})
 	return "shown"
@@ -7293,6 +7311,7 @@ function PlanTab.barChecks(check)
 	check(applyTest .. ", a binding the game refuses is listed", table.concat(printed, "\n"):find("key F: will not bind to MYADDON_X", 1, true) ~= nil, true)
 	check(applyTest .. ", and the bindings are saved", saves > 0, true)
 	check(applyTest .. ", a refused key does not keep it from matching", PlanTab.offerBars(true), "same")
+	check(applyTest .. ", and that is kept across a /reload", DjinnisBiSCharDB and DjinnisBiSCharDB.keysRefused and DjinnisBiSCharDB.keysRefused.F, "MYADDON_X")
 	local otherWant = PlanTab.readKeys()
 	otherWant.F = "ACTIONBUTTON1"
 	check(applyTest .. ", but another action on that key still counts", PlanTab.keysDiffer(otherWant), 1)
@@ -7332,6 +7351,14 @@ function PlanTab.barChecks(check)
 	check(buildTest, PlanTab.barsKey("Feral", "Raid: Sszorak"), "Feral / Raid: Sszorak")
 	check(buildTest .. ", another build takes the spec's", PlanTab.barsKey("Feral", "Dungeon"), "Feral")
 	check(buildTest .. ", no layout, nothing", PlanTab.barsKey("Guardian", "Dungeon"), nil)
+	-- An offer's Apply after the build changed must not apply the old layout (fourth review).
+	local keptActive = PlanTab.activeLoadoutName
+	PlanTab.activeLoadoutName = function() return "Dungeon" end
+	bars[10], known[4242], shown = { type = "spell", id = 4242 }, true, nil
+	PlanTab.offerBars(true)
+	PlanTab.activeLoadoutName = keptActive
+	if shown then shown.buttons[1].onClick() end
+	check(buildTest .. ", a stale offer's Apply does nothing", shown ~= nil and bars[10] and bars[10].id, 4242)
 
 	local fenceTest = "the bars are not touched in combat or with the cursor full"
 	combat = true

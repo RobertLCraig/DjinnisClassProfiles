@@ -278,3 +278,65 @@ Verdict: BOUNCE on finding 1.
    `sameKeys` from the keep test turns it red.
 Also, off this card: `nodeKey` returns an integer, so its check passes under Lua 5.4 as well
 as 5.1. Both interpreters run the harness clean.
+
+**2026-09-23** Fourth review (agent). **BOUNCE.**
+
+What I attacked: `22c8418`, then the whole save, offer, apply, undo and key path again, on copies in
+`%TEMP%\rereview33b`. The real tree is green under Lua 5.1 and 5.4. I ran 9 mutations and 4 new
+scenarios, each added to `barChecks` on a copy:
+- S6: apply, a key unbound by hand, apply, undo.
+- S7: a layout with no keys, a `/reload` (a deep copy of `DjinnisBiSCharDB` and a cleared
+  `keysRefused`), a layout with keys, undo.
+- S8: a layout whose one extra key the game refuses, applied, then a `/reload`, then the login offer.
+- S9: the offer shown for Feral, the spec changed to Guardian, then **Apply**.
+
+What held:
+- The third review's finding 1 is fixed. Dropping the new `else` line (`DjinnisBiS.lua:6904`) turns
+  "the keys too after a layout that had none" red. Making it always overwrite `keysUndo` turns
+  "the keys too" red.
+- Finding 2 is fixed as claimed. Dropping `sameKeys` from the keep test turns "with a key bound by
+  hand in between" red. Two of its parts are still unguarded: `sameKeys` made one-way (`:6881`) and
+  the key-only refusal in the `have` loop (`:6796`) both leave the suite green. The shipped code is
+  right on both. S6 passes on the real code and goes red on the one-way `sameKeys`. It is worth
+  adding as a check.
+- Also red when broken: `sameBars` dropped from the keep test, an undo taken on every apply, and
+  `keysAfter` taken from before the apply. Clearing `barsAfter` in `undoBars` is still dead code, and
+  it is harmless.
+- S6 and S7 pass. The kept undo gets its keys back across a `/reload`, because `keysUndo` is filled
+  on the second apply from `nowKeys`, and the keys have not moved since the first apply.
+- Other orders, traced by hand: keys then no keys then undo; a hand change and then a keyless apply;
+  apply, undo, apply. Each puts back what the player had before the last apply that moved something.
+- `GetBinding` returns `action, category, key1, key2` (`Blizzard_Keybindings.lua:369`), and
+  `SaveBindings(GetCurrentBindingSet())` is what the key binding window does
+  (`Blizzard_Keybindings.lua:144`).
+
+What broke:
+1. **A prompt left open applies the wrong spec's layout** (`DjinnisBiS.lua:6961`). The prompt frame
+   stays up until a button or ESCAPE closes it, and its **Apply** captures `key` when it is shown.
+   Say Rob logs in and sees "The Feral layout would change 5 slots", then switches to Guardian and
+   clicks **Apply**. Feral's layout is written into Guardian's bars, and into the keys if the binding
+   set is per character. If Guardian has no layout, nothing says so. Undo recovers it. A build switch
+   inside Feral does the same with the wrong build's layout, though the queued re-offer follows up
+   there. S9 is red on the real code. **Fix:** in that `onClick`, first check
+   `if PlanTab.barsKey(playerSpec(), (PlanTab.activeLoadoutName())) ~= key then PlanTab.say("The spec
+   or build changed since this was offered. Type /djbis bars.") return end`. On the copy that turns
+   S9 green, and every other check stays green under both interpreters. Add S9 as a check.
+2. Minor: `keysRefused` (`:6788`) is lost on every `/reload`. So a character that lacks one addon's
+   binding gets the login prompt "would change 0 slots and 1 keys" on every login, and **Apply** does
+   nothing (S8). Addons can be turned on for one character and not another, so Rob could hit this.
+   **Fix:** keep it in `DjinnisBiSCharDB.keysRefused`, read at offer time, which is after
+   ADDON_LOADED.
+
+Security:
+1. Weakest point: unchanged. A hand-edited `DjinnisBiSDB.bars` with a small, non-empty key set
+   unbinds every other normal-context key in the binding set in use, and on the account set that
+   reaches every character. An undo on an older character can also write weeks-old keys back over
+   the account set. Both need the player's own files or clicks.
+2. Unchecked: saved key and action strings still reach `SetBinding` without validation. There is no
+   new entry point. The slash command only offers, and a write needs a click. Finding 1 is a stale
+   click, not a new way in.
+3. Leaks: nothing leaves the client. Chat lines name slots, keys and spells, locally.
+
+There is no browser surface. Acceptance is in-game only.
+
+Verdict: BOUNCE on finding 1.
