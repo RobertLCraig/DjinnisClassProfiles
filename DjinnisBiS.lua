@@ -6010,36 +6010,44 @@ function PlanTab.buildSidebar()
 	-- Shared/Scroll/ScrollBoxListView.lua allows a frame type for a template).
 	f.scroll = CreateFrame("Frame", nil, f, "WowScrollBoxList")
 	f.scroll:SetPoint("TOPLEFT", 6, -32)
-	f.scroll:SetPoint("BOTTOMRIGHT", -22, 20 + 2 * PlanTab.SIZE.button)
+	f.scroll:SetPoint("BOTTOMRIGHT", -22, 24 + 3 * PlanTab.SIZE.button)
 	-- Save the action bars and keys, to the build in play or for the whole
 	-- spec (card 0036). The same as /djbis bars save build and /djbis bars save.
 	local half = (PlanTab.SIDEBAR_W - 24) / 2
 	f.saveBuild = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 	f.saveBuild:SetSize(half, PlanTab.SIZE.button)
-	f.saveBuild:SetPoint("BOTTOMLEFT", 8, 12 + PlanTab.SIZE.button)
+	f.saveBuild:SetPoint("BOTTOMLEFT", 8, 16 + 2 * PlanTab.SIZE.button)
 	f.saveBuild:SetText("Save bars: build")
 	f.saveBuild:SetScript("OnClick", function() PlanTab.saveBars(true, true) end)
 	f.saveSpec = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 	f.saveSpec:SetSize(half, PlanTab.SIZE.button)
-	f.saveSpec:SetPoint("BOTTOMRIGHT", -8, 12 + PlanTab.SIZE.button)
+	f.saveSpec:SetPoint("BOTTOMRIGHT", -8, 16 + 2 * PlanTab.SIZE.button)
 	f.saveSpec:SetText("Save bars: spec")
 	f.saveSpec:SetScript("OnClick", function() PlanTab.saveBars(false, true) end)
 	-- and put them back (card 0044), the same as the offer's Apply
 	f.loadBuild = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 	f.loadBuild:SetSize(half, PlanTab.SIZE.button)
-	f.loadBuild:SetPoint("BOTTOMLEFT", 8, 8)
+	f.loadBuild:SetPoint("BOTTOMLEFT", 8, 12 + PlanTab.SIZE.button)
 	f.loadBuild:SetText("Load bars: build")
 	f.loadBuild:SetScript("OnClick", function() PlanTab.loadBars(true) end)
 	f.loadSpec = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 	f.loadSpec:SetSize(half, PlanTab.SIZE.button)
-	f.loadSpec:SetPoint("BOTTOMRIGHT", -8, 8)
+	f.loadSpec:SetPoint("BOTTOMRIGHT", -8, 12 + PlanTab.SIZE.button)
 	f.loadSpec:SetText("Load bars: spec")
 	f.loadSpec:SetScript("OnClick", function() PlanTab.loadBars(false) end)
+	-- /djbis bars undo as a button (card 0045); greyed while there is nothing to undo
+	f.undo = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	f.undo:SetHeight(PlanTab.SIZE.button)
+	f.undo:SetPoint("BOTTOMLEFT", 8, 8)
+	f.undo:SetPoint("BOTTOMRIGHT", -8, 8)
+	f.undo:SetText("Undo bars")
+	f.undo:SetScript("OnClick", function() PlanTab.undoBars() end)
 	local tips = {
 		[f.saveBuild] = { "Save bars to this build", "Your action bars and key bindings now, kept for the loadout you have selected. Switching to it on any character offers them." },
 		[f.saveSpec] = { "Save bars for the spec", "Your action bars and key bindings now, kept for every build of this spec that has none of its own, on every character." },
 		[f.loadBuild] = { "Load this build's bars", "Puts the action bars and key bindings saved for the loadout you have selected on this character." },
 		[f.loadSpec] = { "Load the spec's bars", "Puts the action bars and key bindings saved for this spec on this character." },
+		[f.undo] = { "Undo bars", "Puts back the action bars and key bindings this character had before the last load." },
 	}
 	for button, tip in pairs(tips) do
 		button:SetScript("OnEnter", function(self)
@@ -6203,6 +6211,7 @@ function PlanTab.updateSidebar()
 	f:SetShown(mode == "open")
 	if mode ~= "open" then return mode end
 	PlanTab.placeSidebar()
+	f.undo:SetEnabled(PlanTab.canUndoBars())
 	local spec = playerSpec()
 	local context = (statContext())
 	local active, edited = PlanTab.activeLoadoutName(spec)
@@ -7080,7 +7089,7 @@ function PlanTab.saveBars(forBuild, ask, expect)
 	local layout, n, k = PlanTab.captureBars()
 	barsDB()[key] = layout
 	PlanTab.say(("Saved %d action bar slots and %d key bindings as the %s layout."):format(n, k, key))
-	if PlanTab.sidebar and PlanTab.sidebar:IsShown() then pcall(PlanTab.updateSidebar) end  -- its "own bars" mark (card 0042)
+	PlanTab.barsChanged()  -- its "own bars" mark (card 0042)
 	return key
 end
 
@@ -7202,6 +7211,7 @@ function PlanTab.applyBars(key, from)
 	PlanTab.say(("Applied the %s layout: %d slots and %d keys changed, %d skipped. %s/djbis bars undo|r%s puts the old ones back.")
 		:format(key, placed, keys, #skipped, GOLD, GREY))
 	for _, line in ipairs(skipped) do print("  " .. line) end
+	PlanTab.barsChanged()
 	return "applied"
 end
 
@@ -7234,7 +7244,17 @@ function PlanTab.undoBars()
 	local placed, skipped = PlanTab.placeBars(undo)
 	local keys = keysUndo and PlanTab.placeKeys(keysUndo) or 0
 	PlanTab.say(("The bars and keys are back as they were: %d slots and %d keys changed, %d skipped."):format(placed, keys, #skipped))
+	PlanTab.barsChanged()
 	return "undone"
+end
+
+function PlanTab.canUndoBars()
+	return type(DjinnisBiSCharDB) == "table" and DjinnisBiSCharDB.barsUndo ~= nil
+end
+
+-- The list's Undo button and "own bars" marks follow a save, a load and an undo.
+function PlanTab.barsChanged()
+	if PlanTab.sidebar and PlanTab.sidebar:IsShown() then pcall(PlanTab.updateSidebar) end
 end
 
 -- On login, and when the build or spec changes: when the layout that fits now
@@ -7675,7 +7695,9 @@ function PlanTab.barChecks(check)
 	PlanTab.applyBars("Feral")  -- a second apply: the undo must still hold the character's own bars
 
 	local undoTest = "one undo puts the bars back"
+	check(undoTest .. ", the Undo button is on after an apply", PlanTab.canUndoBars(), true)  -- card 0045
 	check(undoTest, PlanTab.undoBars(), "undone")
+	check(undoTest .. ", and off after the undo", PlanTab.canUndoBars(), false)
 	check(undoTest .. ", Rake back in 7", bars[7] and bars[7].id, 1822)
 	check(undoTest .. ", slot 1 holds its item again", bars[1] and bars[1].id, 2)
 	check(undoTest .. ", only once", PlanTab.undoBars(), "none")
