@@ -6437,6 +6437,8 @@ PlanTab.RETIRED = {
 	-- for the spec in hand is never retired (PlanTab.tidy).
 	["Raid: Sszorak"] = true, ["Raid: Vashnik"] = true, ["Raid: Coiled Altar"] = true, ["Raid: Twin Fangs"] = true,
 	["Raid: Lost Explorers"] = true, ["Raid: Entombed Sentinels"] = true, ["Raid: Nek'Zali"] = true, ["Raid: Nymrissa"] = true,
+	-- Resto's, until its dungeon build became Archon's "Dungeon" (card 0047)
+	["Dungeon: heal only"] = true,
 }
 
 function PlanTab.say(text)

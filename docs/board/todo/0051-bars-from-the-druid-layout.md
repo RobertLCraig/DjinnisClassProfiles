@@ -22,6 +22,9 @@ every spec, so muscle memory carries across. Rob's own keys play the part of Bel
 - Rob's druid layouts are already saved per spec (`db().bars`, card `0033`). Keys are bound to
   buttons (`ACTIONBUTTON1` and so on), not to spells, so they carry over by themselves. Only the
   abilities on the buttons need translating.
+- **Prior work: `C:\Dev\WoWAddons\DjinnisClassProfiles`** saves and restores bar layouts as named
+  profiles per class. Read its handover before building, and reuse or retire it rather than
+  building a second copy (`php C:\Dev\ProgressBoard\artisan board:map wow`).
 
 ## What
 

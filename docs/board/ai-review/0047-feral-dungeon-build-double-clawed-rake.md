@@ -232,18 +232,33 @@ all the other specs too".
   embedded `exportCode`s were all Feral's (spec 103, and `totalParses` 2600, the first page's). So
   Rob copied each recommended build with Archon's Export button, at Mythic+ +7 to +21, all
   dungeons, and pasted the four strings.
-- Each string decodes to its own spec, with 34/34/13 points. Against the build each replaces:
-  - Balance, against `Elune's Chosen M+`: adds Astral Influence, Elune's Guidance, Fluid Form,
-    Lycara's Inspiration, Orbit Breaker and Sunseeker Mushroom. Drops Killer Instinct (2),
-    Meteorites, Perfectly-Honed Instincts, Stellar Amplification and Sundered Firmament.
-  - Feral, against the High Keys pin: Convoke and Hunger for Battle for Incarnation and Ashamane's
-    Guidance. Double-Clawed Rake stays.
-  - Guardian, against `Razeless`: Elune's Chosen in place of Druid of the Claw, and Matted Fur 2,
-    Fury of Nature 2, Perfectly-Honed Instincts, Moondust in the class and spec trees.
-  - Resto, against `M+ #HealersHeal`: Rake, Rip, Swipe, Grievous Wounds, Heart of the Wild, Wild
-    Charge, Innervate, and Thriving Vegetation 2. Drops Starfire, Starsurge, Astral Influence,
-    Killer Instinct, Lore of the Grove, Nurturing Dormancy, Perfectly-Honed Instincts, Tiger Dash
-    and Ursine Vigor.
+- Each string decodes to its own spec, with 34/34/13 points. Against the build each replaces
+  (corrected in v0.40.1: generated node by node, live hero tree only, not written by hand. "(2)" is
+  the rank. A talent in both lists changed rank, for example Matted Fur 1 to 2):
+  - Balance, against Dreamgrove's `Elune's Chosen M+`: hero tree Elune's Chosen.
+    - Takes: Astral Influence, Elune's Guidance, Fluid Form, Lycara's Inspiration, Orbit Breaker,
+      Sunseeker Mushroom.
+    - Leaves: Killer Instinct (2), Meteorites, Perfectly-Honed Instincts, Stellar Amplification,
+      Sundered Firmament.
+  - Feral, against Dreamgrove's `DOTC`: hero tree Druid of the Claw.
+    - Takes: Convoke the Spirits, Double-Clawed Rake, Hunger for Battle, Lycara's Inspiration,
+      Ursine Vigor.
+    - Leaves: Ashamane's Guidance, Forestwalk, Incarnation: Avatar of Ashamane, Innervate, Tireless
+      Energy.
+  - Guardian, against Dreamgrove's `Razeless`: hero tree Druid of the Claw to Elune's Chosen.
+    - Takes: Atmospheric Exposure, Bask in Moonlight, Elune's Chosen, Fury of Nature (2), Glistening
+      Fur, Lunar Calling, Lunar Insight, Lunation, Matted Fur (2), Moon Guardian, Moondust, Penumbral
+      Swell, Perfectly-Honed Instincts, Star Cascade, Stellar Command, The Eternal Moon, The Light
+      of Elune.
+    - Leaves: Aggravate Wounds, Bestial Strength, Claw Rampage, Dreadful Wound, Druid of the Claw,
+      Empowered Shapeshifting, Exacerbating Wounds, Fluid Form, Fount of Strength, Harnessed Rage,
+      Instincts of the Claw, Killing Blow, Killing Strikes, Limb from Limb, Matted Fur, Pack's
+      Endurance, Strike for the Heart, Twin Claw, Wildshape Mastery.
+  - Resto, against Dreamgrove's `M+ #HealersHeal`: hero tree Wildstalker.
+    - Takes: Forestwalk (2), Grievous Wounds, Heart of the Wild, Innervate, Rake, Rip, Swipe,
+      Thriving Vegetation (2), Wild Charge.
+    - Leaves: Astral Influence, Forestwalk, Killer Instinct, Lore of the Grove, Nurturing Dormancy,
+      Perfectly-Honed Instincts, Starfire, Starsurge, Thriving Vegetation, Tiger Dash, Ursine Vigor.
 - **Resto's "Dungeon: heal only" is renamed "Dungeon"**, because the new build weaves cat. Every
   spec's main dungeon build is now "Dungeon". Balance and Feral boss rows already use that name.
   Guardian and Resto have no boss rows. Rob's old "Dungeon: heal only" loadout will list under
@@ -352,6 +367,20 @@ Security:
 3. **Leaks:** nothing. Messages print a spec id, point counts or a loadout name. The strings are
    public.
 
+**2026-09-24** Builder, v0.40.1: the four findings.
+1. The v0.40.0 comment's "against" lists are replaced with generated ones. A script decodes each
+   pin and the Dreamgrove build it replaced, node by node, live hero tree only, by rank. Feral is
+   now against `DOTC`, the build it replaced, not the High Keys pin.
+2. The Feral `PIN` comment names all five swaps against `DOTC`.
+3. `PlanTab.RETIRED` holds "Dungeon: heal only", so `/djbis tidy` offers it. Step 3 below uses that.
+4. `block()` stops when a spec has no `Dungeon` row after `PICK` and `PIN`. On a `$TEMP` copy with
+   Resto's `PIN` entry removed, a write run exits 1 ("Resto has no "Dungeon" build") and the Lua is
+   byte-identical.
+- `update-builds.py --check` exits 0. `offline-check.lua`: "no FAIL lines" under Lua 5.1 and 5.4.
+  Deployed with `-WhatIf -Only DjinnisBiS` first: 2 files, 0.40.0 to 0.40.1.
+- The reviewer's notes for Rob (Feral's Convoke pick, the Resto split, Guardian "survive more" still
+  Druid of the Claw) are relayed to him. They are his calls, not findings.
+
 ## What I need from you, now
 
 For each spec, Balance, Feral, Guardian and Resto:
@@ -360,4 +389,5 @@ For each spec, Balance, Feral, Guardian and Resto:
    saved.
 2. `/djbis loadouts`, then **Reset to plan** (or Create) for `Dungeon`. Pass: the tree matches
    Archon's recommended +7 to +21 tree for that spec. Guardian's hero tree is Elune's Chosen.
-3. Resto: delete the old "Dungeon: heal only" loadout if you no longer want it.
+3. Resto: `/djbis tidy`. Pass: it lists "Dungeon: heal only" as old. `/djbis tidy yes` deletes it.
+   If it is the loadout you have selected, pick another first.

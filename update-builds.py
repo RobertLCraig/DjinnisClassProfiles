@@ -83,7 +83,9 @@ PIN = {
         "Dungeon": ("CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMLMYMLzsMzCzM2YZmlxMjxGGGgx22MDGz2AYCAAAwCzMzMYzwYMAAMzglBA", ARCHON),
     },
     "Feral": {
-        # replaced "DOTC": Double-Clawed Rake, not Tireless Energy (card 0047's why)
+        # replaced "DOTC", same hero tree. Double-Clawed Rake for Tireless Energy
+        # (card 0047's why), Lycara's Inspiration for Forestwalk, Ursine Vigor for
+        # Innervate, Convoke for Incarnation, Hunger for Battle for Ashamane's Guidance
         "Dungeon": ("CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", ARCHON),
     },
     "Guardian": {
@@ -185,6 +187,10 @@ def block(trees):
             if len(name) > 30 or '"' in name or any(name in n for n in PICK[spec].values()):
                 sys.exit(f"{spec} pinned {name!r}: over 30 letters, a quote, or already a PICK name.")
             lines.append(f'\t\t["{name}"] = "{code}", -- {source}')
+        # Every spec's boss rows or the M+ reminder load "Dungeon"; a lost PIN
+        # entry must not drop it without a word (0047 review).
+        if not any(line.startswith('\t\t["Dungeon"]') for line in lines[lines.index(f"\t{spec} = {{"):]):
+            sys.exit(f"{spec} has no \"Dungeon\" build. Put its PIN or PICK entry back.")
         lines.append("\t},")
     lines += ["}", END]
     return lines

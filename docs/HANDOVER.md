@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.40.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob. `0048` holds two calls before `0049` to `0051` (every class).
-_Last updated: 2026-09-24 (v0.40.0. Each spec's `Dungeon` build is pinned from Archon in `update-builds.py` PIN, not read from Dreamgrove: card `0047`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+**Status:** v0.40.1, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob. `0048` holds two calls before `0049` to `0051` (every class).
+_Last updated: 2026-09-24 (v0.40.1. Each spec's `Dungeon` build is pinned from Archon in `update-builds.py` PIN, not read from Dreamgrove: card `0047`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -216,7 +216,7 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Trap on `0033`: a key prompt that returns every login while **Apply** does nothing. `0035` waits until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on `0028`, then `.\update-gear-plan.ps1 <ids>`.
 
-Forty-three cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.40.0 (deployed 2026-09-24). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`.
+Forty-three cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.40.1 (deployed 2026-09-24). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`.
 
 Trap: every spec's `Dungeon` is pinned in PIN and never refreshes; Rob copies new strings with Archon's Export button (Mythic+, +7 to +21), card `0047`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 
