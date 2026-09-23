@@ -79,6 +79,12 @@ than a task.
 - `CHANGELOG.md`, `RELEASE_NOTES.md` - `RELEASE_NOTES.md` is what the first release will say.
 
 ## Decisions locked
+- **DjinnisDreamgrove merges into this addon, and builds are stored here but worn as Blizzard
+  loadouts** (Rob, 2026-09-23). The builds live in one account-wide list so every druid gets the
+  same ones; each character gets them as real loadouts through `ImportLoadout`; switching stays
+  on `ClassTalentHelper`. Writing talent nodes from addon code is the frozen-action-bar route
+  (`0002`), which is why TalentLoadoutsEx's way is out. Reasons in
+  `docs/research/talent-loadout-addons.md`; the work is cards `0030` to `0035`.
 - **The planned build is the plan cell's own `talents` string, never the saved loadout** (Rob,
   2026-09-22, Option A). Blizzard writes a hand edit into the saved loadout on Apply, so a
   compare against it can never see an edit. A cell without a `talents` string has no planned
@@ -202,7 +208,7 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this.** Nothing is left to build. The next work is Rob's: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
+**`docs/board/` owns this.** Next to build: cards `0030` to `0035` in `todo/`, in number order (Dreamgrove merge, loadouts per character, the list's look, shared action bars, tree highlight, retire the old addons). Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
 
 Twenty-six cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.25.0.
 

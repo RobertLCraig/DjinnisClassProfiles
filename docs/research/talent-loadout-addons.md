@@ -19,10 +19,18 @@ There are two ways to keep a list of builds, and every addon here picks one.
 | Shows in Blizzard's dropdown | Yes | No |
 | Who uses it | DjinnisDreamgrove, DjinnisBiS today | **TalentLoadoutsEx**, TalentLoadoutManager, ImprovedTalentLoadouts (which wears builds through one temporary Blizzard loadout of its own) |
 
-**The own-list way removes three problems this workspace keeps hitting.** No
-40-slot cap. No name to break when a loadout is renamed (DjinnisBiS's boss table
-names DjinnisDreamgrove's loadouts, so `/dg tidy` would orphan it). And no
-"edited" drift, because the check is by content: see the tick below.
+**Correction, same day: the own-list way of WEARING a build is the one that
+freezes action bars.** TalentLoadoutsEx, ImprovedTalentLoadouts and
+TalentLoadoutManager all write nodes and commit from addon code
+(`C_Traits.PurchaseRank`, `SetSelection`, `C_ClassTalents.CommitConfig`). Card
+`0002` found ClassCodex doing the same, and Rob's symptom with it was bars that
+stop updating in combat. DjinnisBiS locked the other way (cards `0008`, `0011`):
+switch only through Blizzard's `ClassTalentHelper`. So the answer is both
+columns: **store** builds in the addon's own account-wide list (no cap,
+shared across characters), **keep them as real Blizzard loadouts** on each
+character (`ImportLoadout`, which creates and does not commit), and **wear**
+them through Blizzard's route. The "edited" drift is then fixed by replacing
+the drifted Blizzard loadout from the stored string, not by writing nodes.
 
 ## TalentLoadoutsEx (Morizo, 3.14.14, 2,769 lines, Interface 120100)
 
@@ -82,7 +90,7 @@ config.
 (card 0019). Not a new addon, and not DjinnisDreamgrove, which becomes the data
 source only.
 
-1. **Own list, not Blizzard slots.** Wear a build the TalentLoadoutsEx way.
+1. **Own list for storage, Blizzard loadouts for wearing** (see the correction above). Never write nodes from addon code.
 2. **The TalentLoadoutsEx look**: boss portraits, folding groups, the green tick by content, the warning icon.
 3. **Groups by where you are**: one per raid boss, one for dungeons. Rows inside are the builds for that boss, per spec.
 4. **From ImprovedTalentLoadouts, only what Rob used.** Gear set per build is already in DjinnisBiS (card 0012). Action bars and layout are open questions.
@@ -90,10 +98,11 @@ source only.
 
 ## Settled by Rob
 
-- **The temporary loadout was a sticking point with ImprovedTalentLoadouts** (Rob, 2026-09-23). So a Djinni version does not wear builds through a Blizzard loadout it owns and rewrites. It writes into the active config, the TalentLoadoutsEx way.
+- **The temporary loadout was a sticking point with ImprovedTalentLoadouts** (Rob, 2026-09-23). So a Djinni version does not wear builds through one temporary loadout it keeps rewriting. Each build is its own named Blizzard loadout.
+- **Rob left TalentLoadoutsEx because it did not save action bars and did not work across characters** (Rob, 2026-09-23). He plays several characters of one class and wants talents and action bars the same on all of them. ImprovedTalentLoadouts did that better; `DjinnisClassProfiles` was his own attempt, now dormant.
+- **Home: DjinnisBiS, using Dreamgrove's builds, and DjinnisDreamgrove retires** (Rob, 2026-09-23). The plan is cards `0030` to `0035`.
 
 ## Could not settle
 
-- **Why Rob left TalentLoadoutsEx**, and whether the temporary loadout was the only problem with ImprovedTalentLoadouts. A Djinni version that repeats the reason is wasted work.
-- Which ImprovedTalentLoadouts features he used.
-- Whether writing nodes directly still works in 12.1 for every node type. TalentLoadoutsEx declares 120100 and its last change is recent, which is evidence, not proof.
+- Whether `C_ClassTalents.ImportLoadout` and `DeleteConfig` from addon code are clear of the frozen-bar fault. They create and remove saved configs and do not commit, and DjinnisDreamgrove ran `ImportLoadout` in Rob's client with no report of frozen bars. That is evidence, not proof.
+- Whether writing action bar slots from addon code (`PickupSpell`, `PlaceAction`, as MySlot and DjinnisClassProfiles do) out of combat is clear of it too.
