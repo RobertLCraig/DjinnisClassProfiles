@@ -87,3 +87,41 @@ above them on the smallest talent window.
     left, it undoes at once. When they changed since, it asks: "Undo anyway" or "Cancel". `/djbis
     bars undo` from chat is unchanged. Checks: `..., the button asks first after a hand change`, `...,
     and Cancel keeps the change`. Mutation: never ask 3 red.
+
+**2026-09-23** Second adversarial review of b5530b3 (v0.38.0). Bounced to todo: the fix is right
+in the code, and half of it is untested.
+
+Attacked, on a temp copy, the same under Lua 5.1 and the newer one:
+- never ask: 3 red. Always ask: 5 red.
+- **no key compare** (`DjinnisBiS.lua:7333`, drop `sameKeys`): **0 red**.
+- **"Undo anyway" does nothing** (its `onClick` removed): **0 red**.
+- the button back to `PlanTab.undoBars` (6061): 0 red. The harness frames keep no scripts, so this
+  is the game's to check, as the first review said.
+- `undoBarsAsk` without its combat fence: 0 red. `undoBars` fences again, so nothing is lost.
+- `promptBusy` ignored: 0 red. A second question would write over the open one.
+
+**Finding: a key change since the load, and the "Undo anyway" button, can both break with every
+check green.** The check at 7819 changes a bar slot only. Rebinding a key by hand is at least as
+common, and the fix promises to ask then too. The check at 7820 reads `buttons[2]` (Cancel) and
+never clicks `buttons[1]`, so an "Undo anyway" that does nothing passes, and the player could then
+never undo after any change. Fix: one check that changes a key only and expects "ask". One check
+that clicks `shown.buttons[1].onClick()` and expects the bars back and `canUndoBars()` false.
+
+No criterion carries `proves:`. Name the checks, and mark the grey state `proves: manual`.
+
+What held:
+- The first finding is fixed. With bars and keys as the last load left them, one click undoes.
+  After a hand change it asks, and Cancel changes nothing.
+- The same `sameBars` and `sameKeys` test `applyBars` uses decides it, against `barsAfter` and
+  `keysAfter`. An undo saved before `barsAfter` existed has none, so it asks. That is the safe side.
+- `/djbis bars undo` from chat is unchanged, which the card says.
+
+Security:
+1. Weakest point: the prompt's "Undo anyway". It is the one click that overwrites a character's
+   bars and keys, and nothing checks it.
+2. Unchecked: nothing from outside. The undo is this character's own saved bars, fenced for
+   combat, a full cursor and a vehicle bar at the moment of the undo.
+3. Leaks: nothing. It prints counts only.
+
+No client can be run by an agent. Once fixed, What I need from you 1 to 3 stand, plus: rebind one
+key after Load bars, click Undo bars. Pass: it asks first.
