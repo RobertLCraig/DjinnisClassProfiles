@@ -99,6 +99,7 @@ source only.
 ## Settled by Rob
 
 - **The temporary loadout was a sticking point with ImprovedTalentLoadouts** (Rob, 2026-09-23). So a Djinni version does not wear builds through one temporary loadout it keeps rewriting. Each build is its own named Blizzard loadout.
+- **Superseded in part the same day, after the 40-slot cap** (`MAX_COMBAT_TRAIT_CONFIGS`, all specs together). Rob: "no matter how much I dislike that solution, we need to do something similar." Builds keep their own loadout while slots last. The rest are worn through one spare, `BiS: <build>`, which is made again for each build and never written into (card `0040`).
 - **Rob left TalentLoadoutsEx because it did not save action bars and did not work across characters** (Rob, 2026-09-23). He plays several characters of one class and wants talents and action bars the same on all of them. ImprovedTalentLoadouts did that better; `DjinnisClassProfiles` was his own attempt, now dormant.
 - **Home: DjinnisBiS, using Dreamgrove's builds, and DjinnisDreamgrove retires** (Rob, 2026-09-23). The plan is cards `0030` to `0035`.
 

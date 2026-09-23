@@ -3932,6 +3932,8 @@ function PlanTab.loadTalents(name)
 	if InCombatLockdown() then return "combat" end
 	local saved = PlanTab.savedLoadoutNames()
 	if saved and not saved[name] then
+		local code = PlanTab.buildFor(playerSpec(), name)
+		if code then return PlanTab.wearSpare(name, code) end  -- card 0040
 		PlanTab.openTalents()
 		print(("%sDjinni's BiS|r %sno saved loadout named \"%s\" for this spec.|r %s/djbis loadouts|r %smakes the planned ones.|r"):format(GOLD, GREY, name, GOLD, GREY))
 		return "missing"
@@ -4621,6 +4623,7 @@ function PlanTab.activeLoadoutName(forSpec)
 	local okInfo, info = pcall(C_Traits.GetConfigInfo, configID)
 	local name = okInfo and info and info.name
 	if not (name and canRead(name)) then return nil end
+	name = PlanTab.spareBuild(name) or name  -- the spare wears a build for it (card 0040)
 	return name, PlanTab.talentsEdited(PlanTab.buildFor(forSpec, name))
 end
 
@@ -5862,7 +5865,10 @@ end
 -- strings (`live`), never by name. Where several names hold one string
 -- (Balance's single target build), the selected name wins, else the first.
 -- Pure, for /bis test.
-function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded, hereLoadout, problemOf)
+-- Card 0041: the player's own saved loadouts, any name no stored build has,
+-- under Your loadouts; `stringOf(id)` reads one for the tick and the hover.
+-- The spare loadout (card 0040) is never listed: its build's row stands for it.
+function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded, hereLoadout, problemOf, stringOf)
 	if type(folded) ~= "table" then folded = nil end  -- the saved file is editable by hand
 	local bosses = spec and PlanTab.BOSSES[spec]
 	local raid = PlanTab.sidebarRows(bosses, "raid", active, edited)
@@ -5883,16 +5889,26 @@ function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded,
 		local into = dungeon and keys or other
 		into[#into + 1] = r
 	end
+	local own = {}
+	local builds = spec and PlanTab.BUILDS[spec] or {}
+	for name, id in pairs(spec and saved or {}) do
+		if not builds[name] and not PlanTab.spareBuild(name) then
+			own[#own + 1] = { loadout = name, bosses = {}, icon = PlanTab.OWN_ICON, own = true, code = stringOf and stringOf(id) or nil }
+			if name == active then own[#own].mark = "active" end
+		end
+	end
+	table.sort(own, function(a, b) return a.loadout < b.loadout end)
 	local groups = { { key = "raid", label = "Raid", icon = PlanTab.RAID_ICON, rows = raid },
 		{ key = "mplus", label = "Mythic+", icon = PlanTab.MPLUS_ICON, rows = keys },
-		{ key = "other", label = "Other builds", icon = PlanTab.RAID_ICON, rows = other } }
+		{ key = "other", label = "Other builds", icon = PlanTab.RAID_ICON, rows = other },
+		{ key = "own", label = "Your loadouts", icon = PlanTab.OWN_ICON, rows = own } }
 	if context == "mplus" then groups[1], groups[2] = groups[2], groups[1] end
 	local ticked
 	for _, g in ipairs(groups) do
 		for _, r in ipairs(g.rows) do
-			local build = PlanTab.buildFor(spec, r.loadout)
+			local build = r.code or PlanTab.buildFor(spec, r.loadout)
 			r.saved = saved == nil or saved[r.loadout] ~= nil  -- nil: the game would not say, so no grey
-			r.warn = build and problemOf and problemOf(build) or nil
+			r.warn = not r.own and build and problemOf and problemOf(build) or nil
 			if PlanTab.talentStringsDiffer(live, build) == false and (not ticked or (r.loadout == active and ticked.loadout ~= active)) then
 				ticked = r
 			end
@@ -6058,12 +6074,13 @@ function PlanTab.sidebarTip(row)
 	GameTooltip:AddLine(e.loadout, 1, 1, 1)
 	if #e.bosses > 0 then GameTooltip:AddLine(table.concat(e.bosses, ", "), 0.7, 0.7, 0.7, true) end
 	if e.tick then GameTooltip:AddLine("This is the build in play.", 0, 1, 0) end
-	if not e.saved then GameTooltip:AddLine("Not saved on this character. /djbis loadouts makes it.", 1, 0.7, 0, true) end
+	if not e.saved then GameTooltip:AddLine("No loadout of its own on this character. Double-click wears it through the spare loadout, \"" .. PlanTab.SPARE .. e.loadout .. "\".", 1, 0.7, 0, true) end
+	if e.own then GameTooltip:AddLine("Your own loadout. The plan has no build of this name.", 0.7, 0.7, 0.7, true) end
 	if e.warn then GameTooltip:AddLine(e.warn, 1, 0.3, 0.3, true) end
 	if not e.tick then GameTooltip:AddLine("On the tree: green it adds, red it drops, amber it changes.", 0.8, 0.8, 0.8, true) end
 	GameTooltip:AddLine("Double-click to switch to it.", 0, 1, 0)
 	GameTooltip:Show()
-	pcall(PlanTab.showTreeDiff, e.loadout)  -- card 0034
+	pcall(PlanTab.showTreeDiff, e.loadout, e.code)  -- card 0034
 end
 
 function PlanTab.sidebarTipOff()
@@ -6107,7 +6124,7 @@ function PlanTab.sidebarRow(row, e)
 	end
 	row.element = e
 	row.icon:SetTexture(e.icon)
-	row.icon:SetDesaturated(not e.group and not e.saved)
+	row.icon:SetDesaturated(not e.group and not e.saved and not e.mark)
 	row.stripe:SetShown(e.group ~= nil)
 	if e.group then
 		row.name:SetText("|cff66a3ff" .. e.label .. "|r")
@@ -6117,7 +6134,7 @@ function PlanTab.sidebarRow(row, e)
 		return
 	end
 	local text = PlanTab.sidebarText(e)
-	row.name:SetText(e.saved and text or (GREY .. e.loadout .. "   not saved|r"))
+	row.name:SetText((e.saved or e.mark) and text or (GREY .. e.loadout .. "   spare|r"))  -- worn through the spare, card 0040
 	row.bosses:SetText(GREY .. table.concat(e.bosses, ", ") .. "|r")
 	if e.warn then row.mark:SetTexture("Interface\\DialogFrame\\UI-Dialog-Icon-AlertNew")
 	elseif e.tick then row.mark:SetTexture("Interface\\Buttons\\UI-CheckBox-Check") end
@@ -6158,7 +6175,7 @@ function PlanTab.updateSidebar()
 	local active, edited = PlanTab.activeLoadoutName(spec)
 	local here = autoContext() == "raid" and PlanTab.rowHere(spec and PlanTab.BOSSES[spec], "raid", PlanTab.lastKill)
 	local list = PlanTab.sidebarList(spec, context, PlanTab.liveTalents(), active, edited, PlanTab.savedLoadoutNames(),
-		db().sidebarFolded, here and here.loadout, PlanTab.buildProblem)
+		db().sidebarFolded, here and here.loadout, PlanTab.buildProblem, PlanTab.loadoutString)
 	f.data:Flush()
 	for _, e in ipairs(list) do f.data:Insert(e) end
 	f.title:SetText(#list > 0 and ((spec or "") .. " builds") or ("No stored builds for " .. (spec or "this spec") .. " yet"))
@@ -6284,9 +6301,9 @@ function PlanTab.treeNow()
 end
 
 -- Hover on a build row.
-function PlanTab.showTreeDiff(name)
+function PlanTab.showTreeDiff(name, code)
 	local treeID = PlanTab.treeNow()
-	local want = PlanTab.decodeBuild(PlanTab.buildFor(playerSpec(), name), treeID)
+	local want = PlanTab.decodeBuild(code or PlanTab.buildFor(playerSpec(), name), treeID)
 	local have = PlanTab.decodeBuild(PlanTab.liveTalents(), treeID)
 	if not (want and have) then PlanTab.hideTreeDiff() return "unreadable" end
 	return PlanTab.paintTree(PlanTab.nodeDiff(have, want), treeID)
@@ -6414,13 +6431,69 @@ function PlanTab.freeLoadoutSlots()
 	return math.max(0, max - used)
 end
 
+-- The spare loadout (card 0040). A build with no loadout of its own is worn
+-- through one of this name. Rob, 2026-09-23, after the 40-slot cap: one
+-- sacrificial loadout, as ImprovedTalentLoadouts has, but never written into.
+-- It is made with ImportLoadout while the talent window is open, and
+-- Blizzard's own frame wears what is made (ClassTalentsFrameMixin's
+-- TRAIT_CONFIG_CREATED handler, SetSelectedSavedConfigID with autoApply).
+-- So no addon code loads or commits talents, as card 0011 requires.
+PlanTab.SPARE = "BiS: "
+PlanTab.OWN_ICON = "Interface\\Icons\\INV_Misc_Book_09"
+-- Deleting the selected loadout drops the character to the starter build, so
+-- the spare being worn stays until the next one is on: two slots at most.
+
+-- The build a spare loadout's name wears, or nil for any other name.
+function PlanTab.spareBuild(name)
+	if type(name) ~= "string" or name:sub(1, #PlanTab.SPARE) ~= PlanTab.SPARE then return nil end
+	return name:sub(#PlanTab.SPARE + 1)
+end
+
+-- Answers what it did, for the checks.
+function PlanTab.wearSpare(name, code)
+	if InCombatLockdown() then return "combat" end
+	if PlanTab.q then PlanTab.say("Still making loadouts. Wait for the count.") return "busy" end
+	if not PlanTab.talentWindowOpen() then PlanTab.openTalents() end
+	if not PlanTab.talentWindowOpen() then PlanTab.say("Open the talent window, then double-click the build again.") return "closed" end
+	local saved = PlanTab.savedLoadoutNames()
+	if not saved then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
+	local selected, deleted = PlanTab.selectedConfigID(), 0
+	if saved[PlanTab.SPARE .. name] and saved[PlanTab.SPARE .. name] == selected then
+		PlanTab.say(("\"%s\" is on already."):format(name))
+		return "same"
+	end
+	for n, id in pairs(saved) do
+		if PlanTab.spareBuild(n) and id ~= selected and C_ClassTalents.DeleteConfig(id) then deleted = deleted + 1 end
+	end
+	-- the list can lag a delete, so a slot just freed is counted here
+	local free = PlanTab.freeLoadoutSlots()
+	if free and free + deleted == 0 then
+		PlanTab.say(("No room for the spare loadout. All %d slots are used, over all your specs. Delete one you do not use."):format(Constants.TraitConsts.MAX_COMBAT_TRAIT_CONFIGS))
+		return "full"
+	end
+	local job, waited = { name = PlanTab.SPARE .. name, code = code, wear = true }, 0
+	-- a delete just now can leave the game unwilling for a moment
+	local function try()
+		local okNew, canNew = pcall(C_ClassTalents.CanCreateNewConfig)
+		if not (okNew and canNew) and waited < PlanTab.GIVE_UP then
+			waited = waited + PlanTab.POLL
+			return PlanTab.later(PlanTab.POLL, try)
+		end
+		local ok, err = PlanTab.importOne(job)
+		if not ok then print(("%sDjinni's BiS|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, name, GREY, tostring(err))) end
+	end
+	try()
+	return "wearing"
+end
+
 -- One build to one loadout. `job` is { name, code, replace = config id or nil }.
 -- A replace deletes the old loadout only once the string has parsed and the
 -- game says it can make one, so a bad string never costs the old loadout.
 -- Returns ok, the reason when not, and whether the string carries an older
 -- tree stamp (reported, not obeyed: DjinnisDreamgrove card 0001, v0.5.0).
 function PlanTab.importOne(job)
-	local why = PlanTab.talentWindowOpen() and "the talent window is open" or InCombatLockdown() and "in combat"
+	-- the spare (card 0040) wants the open window: that is what wears it
+	local why = not job.wear and PlanTab.talentWindowOpen() and "the talent window is open" or InCombatLockdown() and "in combat"
 	if why then return false, why end
 	if not ClassTalentImportExportMixin and C_AddOns and C_AddOns.LoadAddOn then pcall(C_AddOns.LoadAddOn, "Blizzard_PlayerSpells") end
 	local IE = ClassTalentImportExportMixin
@@ -6526,10 +6599,21 @@ end
 function PlanTab.createMissing()
 	local spec = playerSpec()
 	local builds = spec and PlanTab.BUILDS[spec] or {}
-	local missing = PlanTab.loadoutGaps(builds, PlanTab.savedLoadoutNames(), PlanTab.loadoutString)
+	local saved = PlanTab.savedLoadoutNames()
+	local missing = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString)
 	if not missing then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
+	-- two slots stay free for the spare (card 0040), less any spare there is
+	local free, keep = PlanTab.freeLoadoutSlots(), 2
+	for n in pairs(saved) do if PlanTab.spareBuild(n) then keep = keep - 1 end end
+	local room = free and math.max(0, free - math.max(0, keep))
 	local jobs = {}
-	for _, name in ipairs(missing) do jobs[#jobs + 1] = { name = name, code = builds[name] } end
+	for _, name in ipairs(missing) do
+		if room and #jobs >= room then
+			PlanTab.say(("Room for %d of %d. The rest are worn through the spare loadout: double-click one in the list beside the talent window."):format(room, #missing))
+			break
+		end
+		jobs[#jobs + 1] = { name = name, code = builds[name] }
+	end
 	return PlanTab.makeLoadouts(jobs)
 end
 
@@ -7355,6 +7439,36 @@ function PlanTab.loadoutChecks(check)
 	-- "Raid: Nek'Zali" is retired from Balance and live on Feral: kept here
 	check(tidyTest .. ", a name retired elsewhere and live here is kept", PlanTab.RETIRED["Raid: Nek'Zali"] and names[1], "Raid: Nek'Zali")
 
+	-- Card 0040. The harness answers spec 103 for each of four specs, so the
+	-- two loadouts left count as 8 used.
+	local wasConst = Constants
+	local spareTest = "Create keeps two slots for the spare loadout"
+	Constants, calls = { TraitConsts = { MAX_COMBAT_TRAIT_CONFIGS = 11 } }, {}
+	check(spareTest, PlanTab.createMissing(), "started")
+	check(spareTest .. ", so 3 free makes 1", #calls, 1)
+	check(spareTest .. ", and says where the rest went", table.concat(printed, "\n"):find("Room for 1 of 9", 1, true) ~= nil, true)
+	spareTest = "a build with no loadout of its own is worn through the spare"
+	local nextID = 20
+	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name nextID = nextID + 1 names[nextID] = name return true end
+	Constants.TraitConsts.MAX_COMBAT_TRAIT_CONFIGS, calls, windowOpen = 8, {}, true
+	check(spareTest .. ", no room says so", PlanTab.loadTalents("Raid: Twin Fangs"), "full")
+	check(spareTest .. ", and makes nothing", #calls, 0)
+	Constants = wasConst
+	check(spareTest, PlanTab.loadTalents("Raid: Twin Fangs"), "wearing")
+	check(spareTest .. ", made under the spare name with the window open", table.concat(calls, "|"), "import BiS: Raid: Twin Fangs")
+	selected = nextID
+	check(spareTest .. ", and read back as its build", (PlanTab.activeLoadoutName()), "Raid: Twin Fangs")
+	check(spareTest .. ", the one on already is left", PlanTab.loadTalents("Raid: Twin Fangs"), "same")
+	calls = {}
+	PlanTab.loadTalents("Raid: Vashnik")
+	check(spareTest .. ", the spare being worn is kept until the next is on", table.concat(calls, "|"), "import BiS: Raid: Vashnik")
+	selected, calls = nextID, {}
+	PlanTab.loadTalents("Raid: Lost Explorers")
+	check(spareTest .. ", then it goes", table.concat(calls, "|"), "delete BiS: Raid: Twin Fangs|import BiS: Raid: Lost Explorers")
+	for id = 21, nextID do names[id] = nil end
+	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name return true end
+	selected, windowOpen = 9, false
+
 	for _, write in ipairs({ "CommitConfig", "LoadConfig", "PurchaseRank", "SetSelection", "SetStarterBuildActive" }) do
 		check("no talent-wearing call when making loadouts: " .. write, touched[write], nil)
 	end
@@ -7678,6 +7792,20 @@ function PlanTab.sidebarChecks(check)
 	check(markTest .. ", the game would not say: no grey", PlanTab.sidebarList("Feral", "raid")[3].saved, true)
 	check(markTest .. ", the warning on the one build", list[#list].warn, "old tree")
 	check(markTest .. ", and only there", list[2].warn, nil)
+
+	-- card 0041: every Blizzard loadout of the spec is on the list
+	local ownTest = "the player's own loadouts are listed too"
+	local mine = PlanTab.movePoint(feral.Dungeon)
+	list = PlanTab.sidebarList("Feral", "raid", mine, "Rob's PvP", nil,
+		{ ["Raid: Nek'Zali"] = 1, ["Rob's PvP"] = 2, ["BiS: Raid: Vashnik"] = 3 }, nil, nil, nil,
+		function(id) return id == 2 and mine or nil end)
+	check(ownTest, names(list):find("; %[Your loadouts%]; Rob's PvP$") ~= nil, true)
+	check(ownTest .. ", never the spare", names(list):find("BiS: ", 1, true), nil)
+	check(ownTest .. ", ticked by its own string", ticked(list), "Rob's PvP")
+	check(ownTest .. ", and marked when selected", list[#list].mark, "active")
+	check(ownTest .. ", none when the game will not list them", names(PlanTab.sidebarList("Feral", "raid")):find("Your loadouts", 1, true), nil)
+	check(ownTest .. ", the spare's build is read from its name", PlanTab.spareBuild("BiS: Raid: Vashnik"), "Raid: Vashnik")
+	check(ownTest .. ", and no other name", PlanTab.spareBuild("Raid: Vashnik"), nil)
 end
 
 -- Card 0034's checks: which nodes a build would change, which nodes are
