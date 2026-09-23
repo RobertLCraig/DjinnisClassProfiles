@@ -5149,18 +5149,35 @@ end
 -- ponytail: table order is pull order. Nymrissa's row is a lair boss after
 -- Ula'tek's, so after the raid's last kill the popup names her once; a
 -- subzone table is the upgrade if that ever misleads.
-function PlanTab.rowHere(bosses, here, killedID)
+-- `done(id)`, when given, answers a boss already dead on this lockout, which
+-- is skipped too: a /reload or a zone-in forgets `killedID` (Rob, 2026-09-23,
+-- in front of Entombed Sentinels with Nek'zali down, was told Nek'zali).
+function PlanTab.rowHere(bosses, here, killedID, done)
 	local raid = {}
 	for _, row in ipairs(bosses or {}) do
 		if here == "mplus" and row.scenario == "mplus" then return row end
 		if row.scenario ~= "mplus" then raid[#raid + 1] = row end
 	end
 	if here ~= "raid" then return nil end
-	if killedID == nil then return raid[1] end
+	local start = 1
 	for i, row in ipairs(raid) do
-		if row.id == killedID then return raid[i + 1] end
+		if killedID ~= nil and row.id == killedID then start = i + 1 end
 	end
-	return raid[1]
+	for i = start, #raid do
+		if not (done and done(raid[i].id)) then return raid[i] end
+	end
+	return nil
+end
+
+-- The game's own "defeated" mark, as the dungeon journal draws it
+-- (Blizzard_EncounterJournal.lua, EncounterJournalBossButton_UpdateDifficultyOverlay):
+-- the instance map, the ENCOUNTER_END id and the difficulty. False when unsure.
+function PlanTab.bossDone(id)
+	if not (id and C_RaidLocks and C_RaidLocks.IsEncounterComplete and GetInstanceInfo) then return false end
+	local _, _, difficultyID, _, _, _, _, mapID = GetInstanceInfo()
+	if not (mapID and canRead(mapID) and canRead(difficultyID)) then return false end
+	local ok, complete = pcall(C_RaidLocks.IsEncounterComplete, mapID, id, difficultyID)
+	return ok and canRead(complete) and complete == true
 end
 
 -- Why the popup may not show right now, or nil: "combat", "a key" or "a boss
@@ -5291,7 +5308,7 @@ function PlanTab.checkSetup()
 	local here = autoContext()
 	if not here then PlanTab.popupPending = nil; PlanTab.hideSetup(); return "elsewhere" end
 	local spec = playerSpec()
-	local row = PlanTab.rowHere(spec and PlanTab.BOSSES[spec], here, PlanTab.lastKill)
+	local row = PlanTab.rowHere(spec and PlanTab.BOSSES[spec], here, PlanTab.lastKill, PlanTab.bossDone)
 	if not row then PlanTab.popupPending = nil; PlanTab.hideSetup(); return "no plan" end
 	if PlanTab.fenced() then PlanTab.popupPending = true; return "fenced" end
 	PlanTab.popupPending = nil
@@ -6176,7 +6193,7 @@ function PlanTab.updateSidebar()
 	local spec = playerSpec()
 	local context = (statContext())
 	local active, edited = PlanTab.activeLoadoutName(spec)
-	local here = autoContext() == "raid" and PlanTab.rowHere(spec and PlanTab.BOSSES[spec], "raid", PlanTab.lastKill)
+	local here = autoContext() == "raid" and PlanTab.rowHere(spec and PlanTab.BOSSES[spec], "raid", PlanTab.lastKill, PlanTab.bossDone)
 	local list = PlanTab.sidebarList(spec, context, PlanTab.liveTalents(), active, edited, PlanTab.savedLoadoutNames(),
 		db().sidebarFolded, here and here.loadout, PlanTab.buildProblem, PlanTab.loadoutString)
 	f.data:Flush()
@@ -6598,6 +6615,15 @@ function PlanTab.finishLoadouts()
 	return q.made
 end
 
+-- How many loadouts Create may make, or nil when the game will not say. Two
+-- slots stay free for the spare (card 0040), less any spare there is.
+function PlanTab.loadoutRoom(saved)
+	local free, keep = PlanTab.freeLoadoutSlots(), 2
+	if not free then return nil end
+	for n in pairs(saved or {}) do if PlanTab.spareBuild(n) then keep = keep - 1 end end
+	return math.max(0, free - math.max(0, keep))
+end
+
 -- The planned builds for this spec that no loadout of their name holds.
 function PlanTab.createMissing()
 	local spec = playerSpec()
@@ -6605,10 +6631,7 @@ function PlanTab.createMissing()
 	local saved = PlanTab.savedLoadoutNames()
 	local missing = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString)
 	if not missing then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
-	-- two slots stay free for the spare (card 0040), less any spare there is
-	local free, keep = PlanTab.freeLoadoutSlots(), 2
-	for n in pairs(saved) do if PlanTab.spareBuild(n) then keep = keep - 1 end end
-	local room = free and math.max(0, free - math.max(0, keep))
+	local room = PlanTab.loadoutRoom(saved)
 	local jobs = {}
 	for _, name in ipairs(missing) do
 		if room and #jobs >= room then
@@ -6661,8 +6684,15 @@ function PlanTab.offerLoadouts(asked)
 		if asked then PlanTab.say("No stored builds for " .. (spec or "this spec") .. ".") end
 		return "no builds"
 	end
-	local missing, drifted = PlanTab.loadoutGaps(builds, PlanTab.savedLoadoutNames(), PlanTab.loadoutString)
+	local saved = PlanTab.savedLoadoutNames()
+	local missing, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString)
 	if not missing then return "unknown" end
+	-- no room: those builds are worn through the spare, so not offered (card 0040)
+	local room = PlanTab.loadoutRoom(saved)
+	if room == 0 and #missing > 0 then
+		if asked then PlanTab.say(("%d builds have no loadout of their own and no room for one. Double-click them in the list beside the talent window: they are worn through the spare."):format(#missing)) end
+		missing = {}
+	end
 	if #missing == 0 and #drifted == 0 then
 		if asked then PlanTab.say("Every planned " .. spec .. " build is saved, and each one matches the plan.") end
 		return "complete"
@@ -6673,7 +6703,8 @@ function PlanTab.offerLoadouts(asked)
 	if #missing > 0 then
 		lines[#lines + 1] = ("%d planned builds are not saved on this character:"):format(#missing)
 		for _, name in ipairs(missing) do lines[#lines + 1] = "  " .. WHITE .. name .. "|r" end
-		buttons[#buttons + 1] = { label = "Create " .. #missing, onClick = PlanTab.createMissing }
+		if room and room < #missing then lines[#lines + 1] = ("Room for %d. The rest are worn through the spare loadout."):format(room) end
+		buttons[#buttons + 1] = { label = "Create " .. math.min(#missing, room or #missing), onClick = PlanTab.createMissing }
 	end
 	if #drifted > 0 then
 		lines[#lines + 1] = ("%d saved loadouts no longer hold the planned build:"):format(#drifted)
@@ -7451,6 +7482,13 @@ function PlanTab.loadoutChecks(check)
 	check(spareTest, PlanTab.createMissing(), "started")
 	check(spareTest .. ", so 3 free makes 1", #calls, 1)
 	check(spareTest .. ", and says where the rest went", table.concat(printed, "\n"):find("Room for 1 of 9", 1, true) ~= nil, true)
+	shown = nil
+	PlanTab.offerLoadouts(true)
+	check(spareTest .. ", the offer asks for only as many as fit", shown and shown.buttons[1].label, "Create 1")
+	Constants.TraitConsts.MAX_COMBAT_TRAIT_CONFIGS, shown = 10, nil
+	PlanTab.offerLoadouts(true)
+	check(spareTest .. ", and offers no Create with no room", shown and shown.buttons[1].label:find("^Create") or nil, nil)
+	check(spareTest .. ", but says why", table.concat(printed, "\n"):find("no room for one", 1, true) ~= nil, true)
 	spareTest = "a build with no loadout of its own is worn through the spare"
 	local nextID = 20
 	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name nextID = nextID + 1 names[nextID] = name return true end
@@ -9865,6 +9903,14 @@ local function selfTest()
 		check(namesTest .. ", a dungeon is the Mythic+ row", PlanTab.rowHere(PlanTab.BOSSES.Feral, "mplus", 3470).scenario, "mplus")
 		check(namesTest .. ", elsewhere no row", PlanTab.rowHere(PlanTab.BOSSES.Feral, nil, nil), nil)
 		check(namesTest .. ", a spec with no plan no row", PlanTab.rowHere(nil, "raid", nil), nil)
+		-- a /reload forgets the kill; the lockout does not (Rob, 2026-09-23)
+		local dead = { [3470] = true }
+		local function done(id) return dead[id] == true end
+		check(namesTest .. ", a boss dead on the lockout is skipped", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil, done).boss, "Entombed Sentinels")
+		dead[3445], dead[3497] = true, true
+		check(namesTest .. ", and so is the next", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3470, done).boss, "Vashnik")
+		dead[3445] = nil
+		check(namesTest .. ", a boss left alive behind the last kill is not gone back to", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3497, done).boss, "Vashnik")
 		active = "DotC Raid ST *"
 		check(namesTest .. ", shown", PlanTab.checkSetup(), "shown")
 		check(namesTest .. ", the title is the place and the boss", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
