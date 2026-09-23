@@ -34,7 +34,7 @@ harness is clean on the real file under Lua 5.1 and 5.4. Mutations ran on a copy
 `$TEMP/rev-0041-45`.
 
 What held:
-- A nil spec cannot reach the concat at `DjinnisBiS.lua:5922`. With no spec every group is empty:
+- A nil spec cannot reach the concat at `DjinnisBiS.lua:5927`. With no spec every group is empty:
   `BOSSES[nil]` and `BUILDS[nil]` give no rows, and own rows read `spec and saved or {}`. So the
   loop body never runs.
 - The key is the same one `saveBars` writes (`:7069`) and `barsKey` reads: `playerSpec()` both
