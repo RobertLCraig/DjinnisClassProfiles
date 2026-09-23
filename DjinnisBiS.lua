@@ -1755,11 +1755,42 @@ end
 -- against a client's export, which carries the real hash (card 0031).
 -- Bits go in low first, six to a char (ExportUtil.lua): chars 1-4 are the
 -- version and spec, 5-25 and the low 2 bits of 26 the hash, the rest nodes.
--- ponytail: the node bits are compared as text, not decoded; two strings for
--- one build from two exporters would read "different". Decode with the mixin's
--- ReadLoadoutContent if that ever shows up in /djbis talents.
+-- THE NODES ARE DECODED, NOT COMPARED AS TEXT. Dreamgrove marks granted
+-- (free) talents as selected and a client's export through SimC does not, so
+-- one build read "drifted" from its own fresh import (0031 review). The
+-- format describes itself (Blizzard_ClassTalentImportExport.lua), so no tree
+-- is needed: only purchased nodes count, with their ranks and choice.
 PlanTab.B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 local B64 = PlanTab.B64
+-- "i:ranks:choice," for every purchased node, in node order; nil when a
+-- character is not base64. Trailing unselected nodes and padding add nothing.
+function PlanTab.nodeKey(code)
+	local pos, out = 152, {}
+	local function take(width)
+		local v = 0
+		for n = 0, width - 1 do
+			local ch = code:sub(math.floor(pos / 6) + 1, math.floor(pos / 6) + 1)
+			local c = ch ~= "" and B64:find(ch, 1, true)
+			if not c then return nil end
+			v = v + (math.floor((c - 1) / 2 ^ (pos % 6)) % 2) * 2 ^ n
+			pos = pos + 1
+		end
+		return v
+	end
+	local node = 0
+	while pos < #code * 6 do
+		node = node + 1
+		local selected = take(1)
+		if not selected then return nil end
+		if selected == 1 and take(1) == 1 then
+			local ranks = take(1) == 1 and take(6) or "m"
+			local choice = take(1) == 1 and take(2) or 0
+			if not (ranks and choice) then return nil end
+			out[#out + 1] = node .. ":" .. ranks .. ":" .. choice
+		end
+	end
+	return table.concat(out, ",")
+end
 function PlanTab.talentStringsDiffer(active, planned)
 	if type(active) ~= "string" or type(planned) ~= "string" then return nil end
 	if active == "" or planned == "" then return nil end
@@ -1769,7 +1800,9 @@ function PlanTab.talentStringsDiffer(active, planned)
 	local zero = ("A"):rep(21) .. "0"
 	local aHash, pHash = active:sub(5, 25) .. (a26 - 1) % 4, planned:sub(5, 25) .. (p26 - 1) % 4
 	if aHash ~= pHash and aHash ~= zero and pHash ~= zero then return nil end
-	return math.floor((a26 - 1) / 4) ~= math.floor((p26 - 1) / 4) or active:sub(27) ~= planned:sub(27)
+	local aNodes, pNodes = PlanTab.nodeKey(active), PlanTab.nodeKey(planned)
+	if not (aNodes and pNodes) then return nil end
+	return aNodes ~= pNodes
 end
 
 -- The planned build for `spec` and `scenario`: the plan cell's own `talents`
@@ -3844,14 +3877,18 @@ function PlanTab.savedLoadoutNames()
 	if not ok or not specID then return nil end
 	local okIDs, ids = pcall(C_ClassTalents.GetConfigIDsBySpecID, specID)
 	if not okIDs or type(ids) ~= "table" then return nil end
-	local names = {}
+	local names, twice = {}, {}
 	for _, id in ipairs(ids) do
 		local okInfo, info = pcall(C_Traits.GetConfigInfo, id)
 		local name = okInfo and info and info.name
-		-- name -> config id; every caller today reads it as a set
-		if name and canRead(name) then names[name] = id end
+		-- name -> config id; `twice` names held by more than one, which a
+		-- replace must not guess between (0031 review)
+		if name and canRead(name) then
+			if names[name] then twice[name] = true end
+			names[name] = id
+		end
 	end
-	return names
+	return names, twice
 end
 
 -- Hindsight (1.8.9) saves the last pull on each boss with the spec and the
@@ -6353,7 +6390,7 @@ function PlanTab.importOne(job)
 	end
 	if job.replace then
 		if not C_ClassTalents.DeleteConfig(job.replace) then return false, "the game would not delete the old one" end
-		job.replace = nil  -- gone: a retry only imports
+		job.replace, job.deleted = nil, true  -- gone: a retry only imports
 	end
 	local ok, err = C_ClassTalents.ImportLoadout(configID, entries, job.name, job.code)
 	if not ok and (not err or err == "") then err = ("the game refused without saying why (%d talents sent)"):format(#entries) end
@@ -6388,6 +6425,7 @@ function PlanTab.stepLoadouts()
 		if stale then q.stale = q.stale + 1 end
 	elseif q.final then
 		print(("%sDjinni's BiS|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, job.name, GREY, tostring(err)))
+		if job.deleted then PlanTab.say(("The old \"%s\" was deleted and not made again. %s/djbis loadouts|r%s offers to create it."):format(job.name, GOLD, GREY)) end
 	else
 		q.retry[#q.retry + 1] = job
 	end
@@ -6444,12 +6482,14 @@ end
 function PlanTab.resetDrifted()
 	local spec = playerSpec()
 	local builds = spec and PlanTab.BUILDS[spec] or {}
-	local saved = PlanTab.savedLoadoutNames()
+	local saved, twice = PlanTab.savedLoadoutNames()
 	local _, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString)
 	if not drifted then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
 	local selected, jobs = PlanTab.selectedConfigID(), {}
 	for _, name in ipairs(drifted) do
-		if saved[name] == selected then
+		if twice and twice[name] then
+			PlanTab.say(("Two loadouts are named \"%s\", so neither is replaced. Rename or delete one in the talent window."):format(name))
+		elseif saved[name] == selected then
 			PlanTab.say(("\"%s\" is the loadout you have selected, so it is not replaced yet. Deleting it would drop you to the starter build. Pick another loadout, then type %s/djbis loadouts|r%s."):format(name, GOLD, GREY))
 		else
 			jobs[#jobs + 1] = { name = name, code = builds[name], replace = saved[name] }
@@ -6505,7 +6545,8 @@ end
 -- /djbis tidy lists the old DjinnisDreamgrove names on this spec, and
 -- /djbis tidy yes deletes them. The selected one stays. Answers the count.
 function PlanTab.tidy(confirmed)
-	if InCombatLockdown() then PlanTab.say("Not in combat.") return 0 end
+	local why = PlanTab.loadoutFence()
+	if why then PlanTab.say(why) return 0 end
 	local saved = PlanTab.savedLoadoutNames()
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet.") return 0 end
 	local selected, doomed = PlanTab.selectedConfigID(), {}
@@ -6913,6 +6954,12 @@ end
 -- limit; everything here is reached through PlanTab. The game is stubbed
 -- per call, and every call name is recorded so the checks can say which
 -- ones ran and that no talent-wearing call is among them.
+-- For the checks: one talent bit flipped mid-string, a real edit. The last
+-- character is padding and trailing unselected nodes, so changing it is none.
+function PlanTab.movePoint(s)
+	return s:sub(1, 59) .. (s:sub(60, 60) == "A" and "B" or "A") .. s:sub(61)
+end
+
 function PlanTab.loadoutChecks(check)
 	local feral = PlanTab.BUILDS.Feral
 	local nek, sen = feral["Raid: Nek'Zali"], feral["Raid: Entombed Sentinels"]
@@ -6926,6 +6973,12 @@ function PlanTab.loadoutChecks(check)
 	missing, drifted = PlanTab.loadoutGaps(builds, { A = 1, B = 2 }, function() return nil end)
 	check(gapTest .. ", one that cannot be read is not drifted", #drifted, 0)
 	check(gapTest .. ", nothing said when the game will not list them", PlanTab.loadoutGaps(builds, nil, nil), nil)
+	-- The gear cell's "WS M+" is a client export of the loadout made from
+	-- Dreamgrove's "WS M+": same talents, but Dreamgrove marks five granted
+	-- nodes and the export does not. Compared as text, every fresh import drifted.
+	local dreamgrove = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAAEAMLzs0sMzyGYmBYhBDAgZGAMA"
+	check(gapTest .. ", a fresh import of a build is not drifted", PlanTab.talentStringsDiffer(GEAR_PLAN.Feral.mplus.talents, dreamgrove), false)
+	check(gapTest .. ", a string that is not base64 cannot be compared", PlanTab.talentStringsDiffer(nek, nek:sub(1, 40) .. "!"), nil)
 
 	local kept = { C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil, InCombatLockdown, PlayerSpellsFrame, print, PlanTab.prompt }
 	local calls, printed, shown, combat, windowOpen, canNew = {}, {}, nil, false, false, 0
@@ -7006,7 +7059,35 @@ function PlanTab.loadoutChecks(check)
 	check(resetTest .. ", and it says why", printed[#printed]:find("starter build", 1, true) ~= nil, true)
 	selected = 9
 
+	-- The card's promise: a string that will not parse, or parses to no talents,
+	-- never costs the old loadout (0031 review: moving the delete up passed).
+	local IE = ClassTalentImportExportMixin
+	local badTest = "a bad string never costs the old loadout"
+	IE.ReadLoadoutHeader = function() return false end
+	PlanTab.resetDrifted()
+	check(badTest .. ", one that will not parse", table.concat(calls, "|"), "")
+	IE.ReadLoadoutHeader = function() return true, 2, 103, {} end
+	IE.ConvertToImportLoadoutEntryInfo = function() return {} end
+	PlanTab.resetDrifted()
+	check(badTest .. ", one with no talents", table.concat(calls, "|"), "")
+	IE.ConvertToImportLoadoutEntryInfo = function() return { {} } end
+	api.ImportLoadout = function() return false, "no" end
+	PlanTab.resetDrifted()
+	check(badTest .. ", and a delete that was not made again is said", table.concat(printed, "\n"):find("was deleted and not made again", 1, true) ~= nil, true)
+	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name return true end
+	names[1], calls = "Raid: Nek'Zali", {}
+	names[5], strings[5] = "Raid: Nek'Zali", sen
+	check(resetTest .. ", never when two loadouts share the name", PlanTab.resetDrifted(), "nothing")
+	check(resetTest .. ", and nothing is deleted then", #calls, 0)
+	names[5], strings[5] = nil, nil
+
 	local tidyTest = "tidy removes only the old Dreamgrove names, and only on yes"
+	windowOpen = true
+	check(tidyTest .. ", not with the talent window open", PlanTab.tidy(true), 0)
+	windowOpen, selected = false, 3
+	check(tidyTest .. ", never the selected one", PlanTab.tidy(true), 0)
+	check(tidyTest .. ", nothing deleted by either", #calls, 0)
+	selected = 9
 	check(tidyTest .. ", lists one", PlanTab.tidy(false), 1)
 	check(tidyTest .. ", deletes nothing unasked", #calls, 0)
 	check(tidyTest .. ", deletes it on yes", PlanTab.tidy(true), 1)
@@ -7172,7 +7253,7 @@ function PlanTab.sidebarChecks(check)
 	local tickTest = "one tick, on the build in play"
 	check(tickTest, ticked(PlanTab.sidebarList("Feral", "raid", feral["Raid: Twin Fangs"])), "Raid: Twin Fangs")
 	check(tickTest .. ", by content: the name selected does not tick a moved build",
-		ticked(PlanTab.sidebarList("Feral", "raid", feral["Raid: Twin Fangs"]:sub(1, -2) .. "B", "Raid: Twin Fangs", true)), "")
+		ticked(PlanTab.sidebarList("Feral", "raid", PlanTab.movePoint(feral["Raid: Twin Fangs"]), "Raid: Twin Fangs", true)), "")
 	-- Balance is named by fight, one name per build (Rob, 2026-09-23)
 	check(tickTest .. ", a fight-named build", ticked(PlanTab.sidebarList("Balance", "raid", balance["Raid: Single Target"])), "Raid: Single Target")
 
@@ -7733,7 +7814,7 @@ local function selfTest()
 	local editTest = "edited talents are marked"
 	local sameTest = "matching talents are not marked"
 	local aString = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWAzGMmZwMmFmZmxYmZGAAAAAAgBAAAgZWmlZmZAALgZGgFmhBAAwMbYA"
-	local bString = aString:sub(1, -2) .. "B"
+	local bString = PlanTab.movePoint(aString)
 	check(editTest .. ", strings differ", PlanTab.talentStringsDiffer(aString, bString), true)
 	check(sameTest .. ", strings equal", PlanTab.talentStringsDiffer(aString, aString), false)
 	check(editTest .. ", no active string", PlanTab.talentStringsDiffer(nil, aString), nil)
@@ -7747,7 +7828,7 @@ local function selfTest()
 	local low = math.floor((PlanTab.B64:find(aString:sub(26, 26), 1, true) - 1) / 4) * 4 + 1  -- char 26 with its 2 hash bits cleared
 	local zeroed = aString:sub(1, 4) .. ("A"):rep(21) .. PlanTab.B64:sub(low, low) .. aString:sub(27)
 	check(sameTest .. ", a zero-filled hash is the same build", PlanTab.talentStringsDiffer(aString, zeroed), false)
-	check(editTest .. ", a zero-filled hash still sees a moved point", PlanTab.talentStringsDiffer(zeroed:sub(1, -2) .. "B", aString), true)
+	check(editTest .. ", a zero-filled hash still sees a moved point", PlanTab.talentStringsDiffer(PlanTab.movePoint(zeroed), aString), true)
 	check(editTest .. ", two real hashes that differ say nothing", PlanTab.talentStringsDiffer(aString:sub(1, 4) .. "B" .. aString:sub(6), aString), nil)
 
 	-- The planned build is the cell's own string (Option A), never the saved
