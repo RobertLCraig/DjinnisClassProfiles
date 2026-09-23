@@ -38,7 +38,7 @@ route cards `0002` and `0011` rule out.
 
 ## What I need from you
 
-1. `/reload` (v0.38.1). Open the talent window as Feral. Double-click `Raid: Vashnik` (grey,
+1. `/reload` (v0.38.2). Open the talent window as Feral. Double-click `Raid: Vashnik` (grey,
    `spare`). Pass: chat says to close the talent window. Close it. Pass: chat says "Making the
    spare loadout" and then "Putting on", and the talents change.
 2. Open the talent window. Pass: the tree is the full Vashnik build, and `BiS: Raid: Vashnik` is
@@ -301,3 +301,13 @@ Security:
 
 No client can be run by an agent. Once fixed, a person owes What I need from you 1 to 6, plus the
 three the second review added.
+- 2026-09-23 Claude, builder, v0.38.2. Third review fixed.
+  1. The waiting request keeps the selected loadout id. At close it is dropped if the player picked
+     another loadout in Blizzard's dropdown, as it already was for a new ask or a spec change.
+  2. Checks that can fail now cover: the combat branch of `wearMadeSpare` (1 red), the "does not
+     list it yet" message (1 red), the name match on the watched id (3 red: an unrelated loadout is
+     never recorded, so never deleted later), `q.made ~= 1` (2 red), and the request cleared at
+     close (1 red). The dropdown pick: 2 red.
+  3. A spare this session made but the list had not shown yet is adopted by name on the next ask
+     (`PlanTab.spareUnlisted`), so it is not called someone else's. The "taken" message now says the
+     addon has no record of making it, which is true for spares from before 0.38.

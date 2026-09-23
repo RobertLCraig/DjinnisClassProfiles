@@ -6529,12 +6529,16 @@ function PlanTab.spareBuild(name, id)
 	return name:sub(#PlanTab.SPARE + 1)
 end
 
+-- Spare names made this session whose id the game had not listed yet.
+PlanTab.spareUnlisted = {}
+
 -- With the talent window open the spare waits for it to close.
 function PlanTab.spareOnHide()
 	local w = PlanTab.spareWanted
 	if not w then return end
 	PlanTab.spareWanted = nil
-	if w.spec ~= playerSpec() then return end  -- the spec changed since the ask
+	-- the spec changed, or another loadout was picked in Blizzard's dropdown (third review)
+	if w.spec ~= playerSpec() or w.selected ~= PlanTab.selectedConfigID() then return end
 	if InCombatLockdown() then
 		PlanTab.say(("In combat, so \"%s\" was not put on. Double-click it again after the fight."):format(w.name))
 		return
@@ -6554,8 +6558,12 @@ function PlanTab.wearSpare(name, code)
 	-- a "BiS: X" this character did not record (the player's, or made by
 	-- v0.36.0 to v0.37.1): a second of that name would make the switch by
 	-- name a guess, so it is left to the player (second 0040 review)
+	-- one this session made that the list had not shown yet is ours after all
+	if worn and not mine[worn] and PlanTab.spareUnlisted[PlanTab.SPARE .. name] then
+		mine[worn], PlanTab.spareUnlisted[PlanTab.SPARE .. name] = true, nil
+	end
 	if worn and not mine[worn] then
-		PlanTab.say(("A loadout called \"%s%s\" is there already, and this addon did not make it. Delete or rename it in the talent window, then try again."):format(PlanTab.SPARE, name))
+		PlanTab.say(("A loadout called \"%s%s\" is there already, and this addon has no record of making it (versions before 0.38 kept none). Delete or rename it in the talent window, then try again."):format(PlanTab.SPARE, name))
 		return "taken"
 	end
 	if worn and worn == selected then
@@ -6572,7 +6580,7 @@ function PlanTab.wearSpare(name, code)
 		end
 	end
 	if PlanTab.talentWindowOpen() then
-		PlanTab.spareWanted = { name = name, code = code, spec = playerSpec() }
+		PlanTab.spareWanted = { name = name, code = code, spec = playerSpec(), selected = PlanTab.selectedConfigID() }
 		if not PlanTab.spareHooked and PlayerSpellsFrame and PlayerSpellsFrame.HookScript then
 			PlanTab.spareHooked = true
 			PlayerSpellsFrame:HookScript("OnHide", PlanTab.spareOnHide)
@@ -6659,6 +6667,7 @@ function PlanTab.wearMadeSpare(q)
 	local okInfo, info = pcall(C_Traits.GetConfigInfo, id or 0)
 	if not (id and okInfo and info and info.name == name) then id = (PlanTab.savedLoadoutNames() or {})[name] end
 	if not id then
+		PlanTab.spareUnlisted[name] = true  -- the next ask adopts it by name (third review)
 		PlanTab.say(("\"%s\" was made but the game does not list it yet. Double-click the build again in a moment."):format(q.wear))
 		return "unlisted"
 	end
@@ -7716,7 +7725,7 @@ function PlanTab.loadoutChecks(check)
 	PlanTab.spareWanted = { name = "Raid: Coiled Altar", code = nek, spec = "Balance" }
 	PlanTab.spareOnHide()
 	check(spareTest .. ", and so does a spec change", #calls, 0)
-	PlanTab.spareWanted, combat = { name = "Raid: Coiled Altar", code = nek, spec = "Feral" }, true
+	PlanTab.spareWanted, combat = { name = "Raid: Coiled Altar", code = nek, spec = "Feral", selected = PlanTab.selectedConfigID() }, true
 	PlanTab.spareOnHide()
 	combat = false
 	check(spareTest .. ", a window shut in combat says so and makes nothing", #calls .. "/" .. tostring(printed[#printed]:find("In combat", 1, true) ~= nil), "0/true")
@@ -7735,6 +7744,24 @@ function PlanTab.loadoutChecks(check)
 	check(spareTest .. ", found by the config the queue watched when the list lags", PlanTab.spareIDs()[40] and switched[#switched], "BiS: Raid: Ula'tek")
 	api.GetConfigIDsBySpecID, Enum.TraitConfigType, names[40] = keptIDs, keptEnum, nil
 	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name nextID = nextID + 1 names[nextID] = name return true end
+	-- third 0040 review
+	windowOpen, selected = true, nextID
+	PlanTab.loadTalents("Raid: Coiled Altar")
+	selected, windowOpen, calls = 1, false, {}  -- the player picks Nek'Zali in Blizzard's dropdown, then closes
+	PlanTab.spareOnHide()
+	check(spareTest .. ", a loadout picked in Blizzard's dropdown wins over the waiting one", #calls, 0)
+	check(spareTest .. ", and the wish is gone after the close", PlanTab.spareWanted, nil)
+	names[41], switched = "BiS: Raid: Nymrissa", {}
+	check(spareTest .. ", a spare that did not make it is not worn", PlanTab.wearMadeSpare({ wear = "Raid: Nymrissa", made = 0, pendingID = 41 }), "failed")
+	combat = true
+	check(spareTest .. ", a spare made in combat is kept and not worn", PlanTab.wearMadeSpare({ wear = "Raid: Nymrissa", made = 1, pendingID = 41 }) .. "/" .. #switched .. "/" .. tostring(PlanTab.spareIDs()[41]), "combat/0/true")
+	combat = false
+	-- the watched id must hold the spare's name, or an unrelated loadout would be recorded (and later deleted)
+	check(spareTest .. ", a watched id with another name is not recorded", PlanTab.wearMadeSpare({ wear = "Raid: Twin Fangs", made = 1, pendingID = 1 }) .. "/" .. tostring(PlanTab.spareIDs()[1]), "unlisted/nil")
+	check(spareTest .. ", and it says so", printed[#printed]:find("does not list it yet", 1, true) ~= nil, true)
+	names[42] = "BiS: Raid: Twin Fangs"  -- the list catches up
+	check(spareTest .. ", the next ask adopts it rather than calling it someone else's", PlanTab.loadTalents("Raid: Twin Fangs"), "worn")
+	names[41], names[42] = nil, nil
 	-- the queue gave up waiting and the server has not filled it: never worn half made
 	api.IsConfigPopulated, switched = function() return false end, {}
 	check(spareTest .. ", an unfilled spare is not worn", PlanTab.wearMadeSpare({ wear = "Raid: Sszorak", made = 1 }) .. "/" .. #switched, "unfilled/0")
