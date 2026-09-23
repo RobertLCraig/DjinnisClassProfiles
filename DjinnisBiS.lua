@@ -369,7 +369,7 @@ local STAT_TARGET = {
 -- the string the talent import box takes; nothing here applies it.
 --
 -- BEGIN GENERATED GEAR PLAN
-local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-22"
+local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-23"
 local GEAR_PLAN = {
 	Feral = {
 		["st"] = {
@@ -391,6 +391,28 @@ local GEAR_PLAN = {
 				finger2   = "id=251194,enchant_id=7966,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
 				trinket1  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
 				trinket2  = "id=270166,bonus_id=6652/13334/12843,ilevel=311", -- Vashnik's Sanguine Rancor
+				main_hand = "id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,ilevel=308", -- Abyssal Broodfiend's Bardiche
+			},
+		},
+		["3t"] = {
+			report = "r4XdLNcxvUod46NbgqQrMP", simmed = "2026-09-22", dps = 300916,
+			loadout = "WS Raid 3T",
+			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAAEAMLzs0sMzyGYmBYhBDAgZGAMA",
+			slots = {
+				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
+				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
+				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
+				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
+				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
+				wrist     = "id=268240,bonus_id=6652/13696/13662/13333/12838,ilevel=308", -- Restless Spirit Shackles
+				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
+				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
+				feet      = "id=272240,enchant_id=8018,bonus_id=6652/13662/12835,ilevel=298", -- Miststalker's Striders
+				finger1   = "id=251194,enchant_id=7966,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
+				finger2   = "id=268249,gem_id=240888,bonus_id=6652/13668/13333/12841/13696,ilevel=305", -- Vile Alchemist's Band
+				trinket1  = "id=270166,bonus_id=6652/13334/12843,ilevel=311", -- Vashnik's Sanguine Rancor
+				trinket2  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
 				main_hand = "id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,ilevel=308", -- Abyssal Broodfiend's Bardiche
 			},
 		},
@@ -1249,9 +1271,13 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
 	end
 
 	local entry = match(name)
+	-- The guide list and the simmed gear plan are two sources. "Not BiS" from
+	-- the guide beside "in plan" from the sim reads as a contradiction, so the
+	-- guide only says no when the plan says nothing either.
+	local planLines = PlanTab.planLinesForLink(link, id) or {}
 	if entry then
 		tooltip:AddLine(GREEN .. "BiS: " .. table.concat(entry.specs, ", ") .. "|r")
-	else
+	elseif #planLines == 0 then
 		tooltip:AddLine(GREY .. "Not BiS" .. "|r")
 	end
 
@@ -1265,7 +1291,7 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
 	if addBagLine then addBagLine(tooltip, link) end
 	-- One line per spec and content whose gear plan holds the item (card 0016).
 	-- The loot roll's icon tooltip is an item tooltip too, so this is the roll's line as well.
-	for _, text in ipairs(PlanTab.planLinesForLink(link, id) or {}) do
+	for _, text in ipairs(planLines) do
 		tooltip:AddLine(GREEN .. text .. "|r")
 	end
 end)
@@ -8131,8 +8157,10 @@ local function selfTest()
 		PlanTab.popupClosed, PlanTab.lastKill, PlanTab.buffsWanted = wasClosed, wasKill, wasWanted
 	end
 
-	-- card 0028: a `3t` scenario beside st, 2t and mplus. No cell is baked for
-	-- it yet, so every check here puts a cell in and takes it out again.
+	-- card 0028: a `3t` scenario beside st, 2t and mplus. These checks need the
+	-- cell absent, so the baked one (if any) is taken away and put back.
+	local kept3t = GEAR_PLAN.Feral["3t"]
+	GEAR_PLAN.Feral["3t"] = nil
 	do
 		local reachTest = "the scenario button reaches 3+ targets"
 		local keptInstance, keptContext, keptScenario, keptStrip = GetInstanceInfo, db().statContext, db().planScenario, PlanTab.refreshStrip
@@ -8178,8 +8206,8 @@ local function selfTest()
 		check(rowTest .. ", with a cell: the 3+ targets plan", text:find("3+ targets plan", 1, true) ~= nil and text:find("No 3+ targets", 1, true) == nil, true)
 		check(rowTest .. ", the cell is the 3t one", (gearPlanFor("Feral", "3t") or {}).report, "selfTest3t")
 		check(rowTest .. ", it is one raid content for the item list", PlanTab.CONTENT_WORD["3t"], "raid")
-		GEAR_PLAN.Feral["3t"], bosses[#bosses], PlanTab.boss = nil, nil, keptBoss
-		check(rowTest .. ", the cell is gone again", gearPlanFor("Feral", "3t"), nil)
+		GEAR_PLAN.Feral["3t"], bosses[#bosses], PlanTab.boss = kept3t, nil, keptBoss
+		check(rowTest .. ", the baked cell is back as it was", GEAR_PLAN.Feral["3t"], kept3t)
 	end
 	do
 		local bareTest = "a cell without talents has no planned build"

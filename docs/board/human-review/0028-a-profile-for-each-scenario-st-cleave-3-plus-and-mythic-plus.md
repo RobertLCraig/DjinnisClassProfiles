@@ -122,3 +122,5 @@ In a client, after `/reload`, two looks. Neither is proven offline; the frames a
   No UI could be looked at here (no client), so this goes to human-review for the two looks
   already listed under "What I need from you", plus one more: the strip's 90-wide button with
   "3+ targets" on it, which is one glyph wider than "2 targets" was.
+
+- 2026-09-23 Claude: Feral `3t` cell baked from report `r4XdLNcxvUod46NbgqQrMP` (Patchwerk, 3 bosses, 5 min). Two Dreamgrove builds were simmed; Wildstalker won at 300,916 dps against Druid of the Claw at 277,227. Loadout name `WS Raid 3T`. No boss row is `3t` yet: Rob picks which. The bake script now splices the game's talent header onto a website build (`Repair-TalentHeader`), since a blank header would make the addon's edited-compare refuse it.

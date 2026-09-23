@@ -116,6 +116,21 @@ function Get-ReportFiles {
     catch { throw "Report ${Id}: could not fetch it from Raidbots ($($_.Exception.Message)). Reports expire after 30 days." }
 }
 
+function Repair-TalentHeader {
+    <#  A build pasted from a website (Dreamgrove, Wowhead) carries a blank
+        header: version, spec and tree hash all zero, 25 characters of the
+        string. The game imports it, but the addon's "(edited)" compare
+        (card 0014) refuses a string whose header is not the game's own. So the
+        header of any in-game loadout in the same report is spliced on. The
+        26th character holds the header's last two bits and is 'A' either
+        way, which is what makes a 25-character swap exact.  #>
+    param([string]$Talents, $Loadouts)
+    if ($Talents -notmatch '^CcG[A]{22}') { return $Talents }
+    $game = @($Loadouts | Where-Object { [string]$_.rawString -match '^CcG(?![A]{22})[A-Za-z0-9+/]{22}A' } | Select-Object -First 1)
+    if (-not $game) { Write-Warning "Talent string has a blank header and no in-game loadout in the report to take one from; the addon will not compare it."; return $Talents }
+    return ([string]$game[0].rawString).Substring(0, 25) + $Talents.Substring(25)
+}
+
 function Read-Plan {
     <#  One report in, one plan cell out: @{ Spec; Scenario; Lines }, where
         Lines is the rendered Lua for that cell. Throws, naming the report,
@@ -175,6 +190,7 @@ function Read-Plan {
     $loadout = $data.simbot.meta.rawFormData.optimize.talentLoadouts | Where-Object { $_.string -eq $talents } | Select-Object -First 1
     $loadoutName = if ($loadout) { [string]$loadout.name } else { '' }
     if ($loadout -and $loadout.rawString -match '^[A-Za-z0-9+/]+$') { $talents = $loadout.rawString }
+    $talents = Repair-TalentHeader $talents $data.simbot.meta.rawFormData.optimize.talentLoadouts
     $loadoutName = ($loadoutName -replace '[\\"\r\n]', '').Trim()
 
     $simmed = [DateTimeOffset]::FromUnixTimeMilliseconds([long]$data.simbot.date).ToString('yyyy-MM-dd')
@@ -360,6 +376,13 @@ if ($SelfTest) {
         Test-That 'generator prints the loadout it baked and warns when no boss row names it' (
             ($said | Where-Object { "$_" -match 'fills Feral\s+st\s+with Combo 145 .*simmed on loadout "DotC Raid ST \*"' }) -and
             $quiet.Count -eq 0 -and $loud.Count -eq 1 -and "$($loud[0])" -match '"DotC Raid ST \*" is not one PlanTab\.BOSSES names for Feral')
+
+        $blank = 'CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYW'
+        $gameL = @(@{ name = 'WS Raid ST'; rawString = 'CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAwYMjxYmZMmtFWGbzMzYmZAAAAYBMbwYmBzYWYmZ' })
+        Test-That 'a blank talent header takes the game''s from an in-game loadout' (
+            (Repair-TalentHeader $blank $gameL) -eq ('CcGADBD3hSPCL9Y9gz68WcKvM' + $blank.Substring(25)) -and
+            (Repair-TalentHeader $gameL[0].rawString $gameL) -eq $gameL[0].rawString -and
+            (Repair-TalentHeader $blank @() 3>$null) -eq $blank)
 
         Test-That 'generator accepts a report url or a bare id' (
             (Get-ReportId $topGear) -eq $topGear -and
