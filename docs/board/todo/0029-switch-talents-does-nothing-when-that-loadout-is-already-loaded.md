@@ -149,3 +149,43 @@ answers it.
   2. Criterion 1 reworded to the current behaviour.
   3. Steps rewritten for `Dungeon` at v0.38.0, with the added Talents button step (2a).
   Also: the comment above `loadTalents` no longer says the file writes nothing to `C_ClassTalents`.
+
+- 2026-09-23 Claude, second adversarial review of b5530b3 (v0.38.0). **Bounced to todo, one
+  finding.** The three first-review findings are fixed in the code and on the card.
+
+  **Attacked.** Both harnesses print "no FAIL lines". Mutations on a temp copy, same under both:
+  - no unmoved guard (`DjinnisBiS.lua:3953`): 4 red.
+  - `selectedIt` always true (3952): 1 red.
+  - the unmoved branch opens the window: 1 red.
+  - `activeLoadoutName()` called without the spec (3951): **0 red**.
+
+  **Broke: the drift line can vanish and every check stays green.** `edited` comes from
+  `PlanTab.activeLoadoutName(playerSpec())` at 3951. Without the spec, `buildFor(nil, name)` finds
+  nothing, `edited` is never true, and the popup's Fix talents says "is on already" for a build that
+  moved. That is criterion 1's main case going wrong. The checks cannot see it: they replace
+  `activeLoadoutName` with a stub that ignores its argument (9063, and again before 9073). Fix:
+  make the stub answer `edited` only when it is passed the harness's spec, for example
+  `function(spec) return "Raid: Twin Fangs", spec == "Feral" end`, or check the argument it got.
+
+  **What held.**
+  - An unmoved loadout says "is on already" and opens nothing. A moved one opens the window and
+    points at Reset to plan.
+  - With the spare wearing a build that also has its own loadout, `selectedIt` is false and the
+    helper switches to the build's own loadout.
+  - Criterion 1's wording and the What I need from you steps match v0.38.0.
+
+  **Noted, not a finding.** Two loadouts with the same name as the build: `saved[name]` holds one
+  id (`savedLoadoutNames`, 3890). If the other one is selected, `selectedIt` is false, the helper
+  is asked, and Blizzard loads the first one by that name (`ClassTalentHelper.lua`,
+  "Loads the first one found"). That can be the dead click this card fixed. `resetDrifted`
+  already refuses a name used twice, so this needs a player to make that duplicate.
+
+  **Security.**
+  1. Weakest point: the `edited` answer. If it is wrong, the player is told a moved build is fine.
+     No write follows: "on" only prints.
+  2. Unchecked: nothing comes from outside. Names are from plan data or a loadout name that passed
+     `canRead`.
+  3. Leaks: nothing leaves the client. One chat line to the player only.
+
+  **Not checked in a client.** No agent can run the game. The What I need from you steps (1, 2, 2a
+  and 4) still stand once the check above is fixed.
