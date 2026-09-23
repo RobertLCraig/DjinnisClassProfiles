@@ -25,4 +25,13 @@ druid layout). Two answers shape them.
 
 ## Acceptance
 
-- [ ] Rob answers 1 and 2.
+- [x] Rob answers 1 and 2.
+
+## Comments
+
+**2026-09-24** **Decided:** 1 A, the druid spec of the same role. 2 A, gear plans later. Rob, on 1:
+"Although Resto is arguably my least well developed actionbar setup. and I have done a LOT of work
+on my action bars for Feral, that has not yet been reflected on the other specs yet."
+
+**2026-09-24** Builder: carried into `0051` (the role map, and Feral's work reaching the other
+druid specs first) and `0049` (gear stays druid-only). Nothing is left to build on this card.

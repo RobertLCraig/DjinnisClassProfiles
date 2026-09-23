@@ -13,7 +13,8 @@ Rob, 2026-09-24, for all classes. Dreamgrove covers druids only.
   desktop app (`%LOCALAPPDATA%\Programs\Archon App`) is archon.gg inside an Overwolf window. Its
   cache holds no build strings. Reading it without a person would mean reusing its human-check
   cookie, which we do not do. Rob can still copy a string with Archon's Export button, as he did
-  for card `0047`.
+  for card `0047`. A Playwright browser on 2026-09-24 got archon.gg's "Just a moment..." check
+  (HTTP 403) and stopped there. Rob's own Edge cannot be driven by an agent.
 - **wowvalor.app can be read.** `curl --compressed` with a browser user agent works for any class
   and spec, for example `https://wowvalor.app/en/stats/warrior/arms/m+`. It is the top 50
   characters per spec, so keys of about +20 and up. The page holds per-talent counts and at least

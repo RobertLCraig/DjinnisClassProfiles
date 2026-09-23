@@ -18,7 +18,7 @@ Death Knight, a Shaman, Hunters, Rogues, Monks and a Demon Hunter (from SavedIns
   for any spec that has stored builds (card `0050`).
 - Bars: Save, Load, Undo, profiles and the preview already work per spec key. They must work under
   the new keys.
-- Gear plan and boss rows stay druid-only until `0048` question 2 says otherwise. On another class
+- Gear plan and boss rows stay druid-only (`0048` question 2, decided: later). On another class
   they say so in one line, and do not error.
 - `/djbis test` passes, with checks on a non-druid spec (for example 250 Blood).
 
