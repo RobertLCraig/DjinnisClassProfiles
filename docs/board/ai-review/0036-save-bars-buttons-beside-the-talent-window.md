@@ -97,3 +97,8 @@ Security:
 There is no browser surface. Acceptance can only be checked in a client.
 
 Verdict: BOUNCE, to todo, with the finding above.
+
+**2026-09-23** Builder, v0.35.0, commit `2ae2239`. Fixed as proposed: with a layout to replace and
+another question up, the button says "Answer the open question first" and changes nothing. New
+check with `promptBusy` stubbed true; it goes red without the line. Card `0037` (named profiles)
+was built in the same version.
