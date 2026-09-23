@@ -6170,6 +6170,13 @@ end
 -- click. "Not now" holds for this spec until the next /reload. Answers what
 -- it did, for the checks.
 PlanTab.offerDismissed = {}
+
+-- The prompt is one frame for three questions (0024's spec, 0031's loadouts,
+-- 0033's bars): a second one waits rather than write over the first.
+function PlanTab.promptBusy()
+	return PlanTab.promptFrame and PlanTab.promptFrame:IsShown() and true or false
+end
+
 function PlanTab.offerLoadouts(asked)
 	if InCombatLockdown() then return "combat" end
 	local spec = playerSpec()
@@ -6185,6 +6192,7 @@ function PlanTab.offerLoadouts(asked)
 		return "complete"
 	end
 	if not asked and PlanTab.offerDismissed[spec] then return "dismissed" end
+	if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerLoadouts(asked) end) return "busy" end
 	local lines, buttons = {}, {}
 	if #missing > 0 then
 		lines[#lines + 1] = ("%d planned builds are not saved on this character:"):format(#missing)
@@ -6240,6 +6248,9 @@ function PlanTab.onLoadoutEvent(event, arg)
 		end
 	elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
 		if canRead(arg) and arg == "player" then PlanTab.later(2, PlanTab.offerLoadouts) end
+	elseif event == "TRAIT_CONFIG_UPDATED" then
+		-- a build or a spec landed: its bars, if it has others (card 0033)
+		PlanTab.later(1, PlanTab.offerBars)
 	end
 end
 
@@ -6250,14 +6261,255 @@ end
 function PlanTab.armLoadouts()
 	local watcher = CreateFrame("Frame")
 	watcher:SetScript("OnEvent", function(_, ...) PlanTab.onLoadoutEvent(...) end)
-	for _, event in ipairs({ "TRAIT_CONFIG_CREATED", "PLAYER_SPECIALIZATION_CHANGED" }) do
+	local refused = {
+		TRAIT_CONFIG_CREATED = "making loadouts waits longer between each.",
+		PLAYER_SPECIALIZATION_CHANGED = "a spec change does not offer the missing builds. Type /djbis loadouts.",
+		TRAIT_CONFIG_UPDATED = "a build change does not offer its action bars. Type /djbis bars.",
+	}
+	for _, event in ipairs({ "TRAIT_CONFIG_CREATED", "PLAYER_SPECIALIZATION_CHANGED", "TRAIT_CONFIG_UPDATED" }) do
 		watcher:RegisterEvent(event)
-		if not watcher:IsEventRegistered(event) then
-			PlanTab.say("Could not register " .. event .. ", so " .. (event == "TRAIT_CONFIG_CREATED"
-				and "making loadouts waits longer between each." or "a spec change does not offer the missing builds. Type /djbis loadouts."))
-		end
+		if not watcher:IsEventRegistered(event) then PlanTab.say("Could not register " .. event .. ", so " .. refused[event]) end
 	end
 	PlanTab.later(5, PlanTab.offerLoadouts)
+	PlanTab.later(8, PlanTab.offerBars)
+end
+
+-- Action bars the same on every character of the spec (card 0033) ----------
+--
+-- One saved layout per spec, account-wide, and optionally one per build (Rob,
+-- 2026-09-23: per spec by default, per build as an option). Save on one
+-- druid, apply on another. The slot engine is DjinnisClassProfiles'
+-- ActionBarProfiles.lua cut down to its core, which is MySlot's way: pick the
+-- action up onto the cursor and place it. Every call is still in 12.1 and
+-- used by Blizzard's own action buttons (Blizzard_ActionBar/Shared/
+-- ActionButton.lua); none is secret-flagged, and each read is canRead-checked
+-- anyway (DECISIONS.md). Out of combat only, and only on a click. A spell
+-- this character does not know is skipped and listed, and whatever sits in
+-- its slot is left alone. The layout before each apply is kept per character
+-- for one undo.
+
+PlanTab.BAR_SLOTS = 180  -- 1-72 the visible bars, 73-120 the druid form pages, the rest bars 6-8 and the extras
+
+local function trimmed(text)
+	return type(text) == "string" and canRead(text) and text:match("^%s*(.-)%s*$") or nil
+end
+
+-- What sits in one slot, as { type, id } or { type = "macro", name, index }.
+function PlanTab.readSlot(slot)
+	if not C_ActionBar.HasAction(slot) then return nil end
+	local kind, id = GetActionInfo(slot)
+	if not (canRead(kind) and canRead(id)) or not kind then return nil end
+	if kind == "macro" then return { type = kind, name = trimmed(C_ActionBar.GetActionText(slot)), index = id } end
+	return { type = kind, id = id }
+end
+
+function PlanTab.readBars()
+	local slots = {}
+	for slot = 1, PlanTab.BAR_SLOTS do slots[slot] = PlanTab.readSlot(slot) end
+	return slots
+end
+
+local function sameAction(a, b)
+	if not (a and b) then return a == b end  -- two empty slots are the same
+	if a.type ~= b.type then return false end
+	if a.type == "macro" then return a.name == b.name end
+	return a.id == b.id
+end
+
+-- By name, the index only a hint: an index moves whenever a macro is added.
+local function findMacro(name, index)
+	if not name then return nil end
+	if index and trimmed(GetMacroInfo(index)) == name then return index end
+	local account, character = GetNumMacros()
+	for i = 1, account + character do
+		if trimmed(GetMacroInfo(i)) == name then return i end
+	end
+	return nil
+end
+
+local function findFlyout(id)
+	local lines = C_SpellBook.GetNumSpellBookSkillLines()
+	for line = 1, lines do
+		local info = C_SpellBook.GetSpellBookSkillLineInfo(line)
+		for i = 1, info and info.numSpellBookItems or 0 do
+			local kind, actionID = C_SpellBook.GetSpellBookItemType(info.itemIndexOffset + i, Enum.SpellBookSpellBank.Player)
+			if kind == Enum.SpellBookItemType.Flyout and actionID == id then return info.itemIndexOffset + i end
+		end
+	end
+	return nil
+end
+
+-- Puts one action on the cursor, or answers why not.
+local function pickUp(action)
+	if action.type == "spell" then C_Spell.PickupSpell(action.id)
+	elseif action.type == "macro" then
+		local index = findMacro(action.name, action.index)
+		if not index then return "no macro named " .. tostring(action.name) end
+		PickupMacro(index)
+	elseif action.type == "item" then C_Item.PickupItem(action.id)
+	elseif action.type == "flyout" then
+		local book = findFlyout(action.id)
+		if not book then return "flyout " .. action.id .. " is not in the spellbook" end
+		C_SpellBook.PickupSpellBookItem(book, Enum.SpellBookSpellBank.Player)
+	elseif action.type == "summonpet" then C_PetJournal.PickupPet(action.id)
+	else return "cannot place a " .. tostring(action.type) end
+	if GetCursorInfo() then return nil end
+	ClearCursor()
+	if action.type == "spell" then return "not known: " .. (C_Spell.GetSpellName(action.id) or ("spell " .. action.id)) end
+	return "not owned: " .. action.type .. " " .. tostring(action.id)
+end
+
+-- Makes this character's bars `layout`: each slot that differs is cleared and
+-- refilled, an empty one in the layout is cleared, and one whose action cannot
+-- be picked up here keeps what it has. Returns placed, and the skip lines.
+function PlanTab.placeBars(layout)
+	local placed, skipped = 0, {}
+	for slot = 1, PlanTab.BAR_SLOTS do
+		local want, have = layout[slot], PlanTab.readSlot(slot)
+		if not sameAction(want, have) then
+			if not want then
+				PickupAction(slot)
+				ClearCursor()
+			else
+				local why = pickUp(want)
+				if why then
+					skipped[#skipped + 1] = ("slot %d: %s"):format(slot, why)
+				else
+					PlaceAction(slot)  -- a swap: the old action comes onto the cursor
+					ClearCursor()
+					placed = placed + 1
+				end
+			end
+		end
+	end
+	return placed, skipped
+end
+
+-- How many slots applying `layout` would change here, not counting what this
+-- character cannot place. 0 means nothing to offer.
+function PlanTab.barsDiffer(layout)
+	local n = 0
+	for slot = 1, PlanTab.BAR_SLOTS do
+		local want, have = layout[slot], PlanTab.readSlot(slot)
+		if not sameAction(want, have) then
+			if not want then n = n + 1
+			elseif not pickUp(want) then ClearCursor() n = n + 1 end
+		end
+	end
+	return n
+end
+
+local function barsDB()
+	local d = db()
+	d.bars = d.bars or {}  -- spec -> { slots, saved = date }; spec .. " / " .. build -> the same
+	return d.bars
+end
+
+-- The key of the layout that fits now: the build's own when it has one, else
+-- the spec's, else nil. Also the label for the prompt.
+function PlanTab.barsKey(spec, build)
+	local bars = barsDB()
+	if spec and build and bars[spec .. " / " .. build] then return spec .. " / " .. build end
+	if spec and bars[spec] then return spec end
+	return nil
+end
+
+-- Every pick up clears the cursor after, so something the player is holding
+-- would be dropped: that is a fence too.
+function PlanTab.barsFence()
+	if InCombatLockdown() then return "Not in combat. Try again after the fight." end
+	if GetCursorInfo() then return "Put down what is on the cursor first." end
+	if C_ActionBar.HasVehicleActionBar() or C_ActionBar.HasOverrideActionBar() then
+		return "Not while a vehicle or override bar is up."
+	end
+	return nil
+end
+
+-- /djbis bars save [build]. Answers the key saved, or nil.
+function PlanTab.saveBars(forBuild)
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return nil end
+	local spec = playerSpec()
+	if not spec then PlanTab.say("Action bar layouts are for druids.") return nil end
+	local key = spec
+	if forBuild then
+		local build = PlanTab.activeLoadoutName()
+		if not build then PlanTab.say("No saved loadout is selected, so there is no build to save the bars for.") return nil end
+		key = spec .. " / " .. build
+	end
+	local slots, n = PlanTab.readBars(), 0
+	for _ in pairs(slots) do n = n + 1 end
+	barsDB()[key] = { slots = slots, saved = date and date("%Y-%m-%d") or nil }
+	PlanTab.say(("Saved %d action bar slots as the %s layout."):format(n, key))
+	return key
+end
+
+-- Applies a saved layout. The layout it replaces is kept for /djbis bars undo.
+function PlanTab.applyBars(key)
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return "fenced" end
+	local layout = key and barsDB()[key]
+	if not layout then PlanTab.say("No saved layout called " .. tostring(key) .. ".") return "none" end
+	DjinnisBiSCharDB = DjinnisBiSCharDB or {}
+	DjinnisBiSCharDB.barsUndo = PlanTab.readBars()
+	local placed, skipped = PlanTab.placeBars(layout.slots)
+	PlanTab.barsSeen = key
+	PlanTab.say(("Applied the %s layout: %d slots changed, %d skipped. %s/djbis bars undo|r%s puts the old bars back.")
+		:format(key, placed, #skipped, GOLD, GREY))
+	for _, line in ipairs(skipped) do print("  " .. line) end
+	return "applied"
+end
+
+function PlanTab.undoBars()
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return "fenced" end
+	local undo = DjinnisBiSCharDB and DjinnisBiSCharDB.barsUndo
+	if not undo then PlanTab.say("Nothing to undo on this character.") return "none" end
+	DjinnisBiSCharDB.barsUndo = nil
+	local placed, skipped = PlanTab.placeBars(undo)
+	PlanTab.say(("The bars are back as they were: %d slots changed, %d skipped."):format(placed, #skipped))
+	return "undone"
+end
+
+-- On login, and when the build or spec changes: when the layout that fits now
+-- is not the one last offered and would change something, offer it. Asked
+-- (/djbis bars), it offers even when it was offered before. Waits while the
+-- prompt is busy with another question. Answers what it did, for the checks.
+function PlanTab.offerBars(asked)
+	local why = PlanTab.barsFence()
+	if why then
+		if asked then PlanTab.say(why) end
+		return "fenced"
+	end
+	local spec = playerSpec()
+	local key = PlanTab.barsKey(spec, (PlanTab.activeLoadoutName()))
+	if not key then
+		if asked then PlanTab.say("No saved layout for " .. (spec or "this spec") .. ". Type " .. GOLD .. "/djbis bars save|r" .. GREY .. " on the character whose bars are right.") end
+		return "none"
+	end
+	if not asked and key == PlanTab.barsSeen then return "seen" end
+	if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerBars(asked) end) return "busy" end
+	PlanTab.barsSeen = key
+	local n = PlanTab.barsDiffer(barsDB()[key].slots)
+	if n == 0 then
+		if asked then PlanTab.say("The bars already match the " .. key .. " layout.") end
+		return "same"
+	end
+	PlanTab.prompt("Djinni's BiS: action bars", {
+		("The %s layout would change %d slots here."):format(key, n),
+		"Anything this character cannot place stays as it is.",
+	}, {
+		{ label = "Apply", onClick = function() PlanTab.applyBars(key) end },
+		{ label = "Not now" },
+	})
+	return "shown"
+end
+
+function PlanTab.barsCommand(rest)
+	if rest == "save" then PlanTab.saveBars(false)
+	elseif rest == "save build" then PlanTab.saveBars(true)
+	elseif rest == "undo" then PlanTab.undoBars()
+	else PlanTab.offerBars(true) end
 end
 
 local loader = CreateFrame("Frame")
@@ -6424,6 +6676,92 @@ function PlanTab.loadoutChecks(check)
 	C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil = kept[1], kept[2], kept[3], kept[4], kept[5]
 	InCombatLockdown, PlayerSpellsFrame, print, PlanTab.prompt = kept[6], kept[7], kept[8], kept[9]
 	PlanTab.offerDismissed, PlanTab.q = {}, nil
+end
+
+-- Card 0033's checks, against a model of the bars and the cursor: two druids
+-- who know different spells, one macro each. Same reason to sit outside
+-- selfTest as loadoutChecks.
+function PlanTab.barChecks(check)
+	local kept = { C_ActionBar, GetActionInfo, PickupAction, PlaceAction, GetCursorInfo, ClearCursor, C_Spell, C_Item,
+		PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print, PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB }
+	local keptBars = db().bars
+	local bars, cursor, known, macros, printed, shown, combat = {}, nil, {}, {}, {}, nil, false
+	C_ActionBar = {
+		HasAction = function(slot) return bars[slot] ~= nil end,
+		GetActionText = function(slot) return bars[slot] and bars[slot].name end,
+		HasVehicleActionBar = function() return false end,
+		HasOverrideActionBar = function() return false end,
+	}
+	GetActionInfo = function(slot) local a = bars[slot] if a then return a.type, a.id or a.index end end
+	PickupAction = function(slot) cursor, bars[slot] = bars[slot], nil end
+	PlaceAction = function(slot) bars[slot], cursor = cursor, bars[slot] end
+	GetCursorInfo = function() return cursor and cursor.type end
+	ClearCursor = function() cursor = nil end
+	C_Spell = { PickupSpell = function(id) if known[id] then cursor = { type = "spell", id = id } end end, GetSpellName = function(id) return "Spell" .. id end }
+	C_Item = { PickupItem = function(id) cursor = { type = "item", id = id } end }
+	GetNumMacros = function() return #macros, 0 end
+	GetMacroInfo = function(i) return macros[i] end
+	PickupMacro = function(i) cursor = { type = "macro", name = macros[i], index = i } end
+	InCombatLockdown = function() return combat end
+	print = function(...)
+		local line = tostring((...))
+		if line:find("|cffff0000FAIL|r", 1, true) then kept[13](...) else printed[#printed + 1] = line end
+	end
+	PlanTab.prompt = function(_, lines, buttons) shown = { lines = lines, buttons = buttons } end
+	PlanTab.activeLoadoutName = function() return "Raid: Sszorak" end
+	db().bars, PlanTab.barsSeen, DjinnisBiSCharDB = {}, nil, nil
+
+	-- the first druid: Shred in 1, Rake in 2, a macro in 3, a racial in 4
+	known = { [5221] = true, [1822] = true, [58984] = true }
+	macros = { "Prowl it" }
+	bars = { { type = "spell", id = 5221 }, { type = "spell", id = 1822 }, { type = "macro", name = "Prowl it", index = 1 }, { type = "spell", id = 58984 } }
+	local saveTest = "a layout saved on one druid"
+	check(saveTest, PlanTab.saveBars(false), "Feral")
+	check(saveTest .. ", holds the macro by name", db().bars.Feral.slots[3].name, "Prowl it")
+
+	-- the second: another racial, the macro at another index, Rake in 7, something in 5
+	known = { [5221] = true, [1822] = true, [20549] = true }
+	macros = { "Other", "Prowl it" }
+	bars = { [4] = { type = "spell", id = 20549 }, [5] = { type = "item", id = 1 }, [7] = { type = "spell", id = 1822 } }
+	local applyTest = "applied on another druid"
+	check(applyTest .. ", is offered", PlanTab.offerBars(), "shown")
+	check(applyTest .. ", nothing moves before the click", bars[1], nil)
+	check(applyTest .. ", counts what it would change", shown and shown.lines[1]:find("change 5 slots", 1, true) ~= nil, true)
+	shown.buttons[1].onClick()
+	check(applyTest .. ", the same spell in the same slot", bars[1] and bars[1].id, 5221)
+	check(applyTest .. ", Rake moved to 2", bars[2] and bars[2].id, 1822)
+	check(applyTest .. ", Rake gone from 7", bars[7], nil)
+	check(applyTest .. ", the macro found by name", bars[3] and bars[3].index, 2)
+	check(applyTest .. ", the racial it does not know is left alone", bars[4] and bars[4].id, 20549)
+	check(applyTest .. ", an empty slot in the layout is emptied", bars[5], nil)
+	check(applyTest .. ", the skip is listed", table.concat(printed, "\n"):find("slot 4: not known: Spell58984", 1, true) ~= nil, true)
+	check(applyTest .. ", the cursor is empty after", cursor, nil)
+	check(applyTest .. ", not offered again for the same layout", PlanTab.offerBars(), "seen")
+
+	local undoTest = "one undo puts the bars back"
+	check(undoTest, PlanTab.undoBars(), "undone")
+	check(undoTest .. ", Rake back in 7", bars[7] and bars[7].id, 1822)
+	check(undoTest .. ", slot 1 empty again", bars[1], nil)
+	check(undoTest .. ", only once", PlanTab.undoBars(), "none")
+
+	local buildTest = "a build with its own layout is offered that one"
+	check(buildTest .. ", saved for the build", PlanTab.saveBars(true), "Feral / Raid: Sszorak")
+	check(buildTest, PlanTab.barsKey("Feral", "Raid: Sszorak"), "Feral / Raid: Sszorak")
+	check(buildTest .. ", another build takes the spec's", PlanTab.barsKey("Feral", "Dungeon"), "Feral")
+	check(buildTest .. ", no layout, nothing", PlanTab.barsKey("Guardian", "Dungeon"), nil)
+
+	local fenceTest = "the bars are not touched in combat or with the cursor full"
+	combat = true
+	check(fenceTest .. ", combat", PlanTab.applyBars("Feral"), "fenced")
+	combat, cursor = false, { type = "item", id = 9 }
+	check(fenceTest .. ", the cursor", PlanTab.applyBars("Feral"), "fenced")
+	check(fenceTest .. ", what was held is still held", cursor and cursor.id, 9)
+
+	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
+	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]
+	PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print = kept[9], kept[10], kept[11], kept[12], kept[13]
+	PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB = kept[14], kept[15], kept[16]
+	db().bars, PlanTab.barsSeen = keptBars, nil
 end
 
 -- one runnable check: /bis test
@@ -8788,6 +9126,7 @@ local function selfTest()
 	check("cleared ilvl label", gearLabel("zzz not a real item"):find("334", 1, true) ~= nil, false)
 
 	PlanTab.loadoutChecks(check)  -- card 0031
+	PlanTab.barChecks(check)  -- card 0033
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")
@@ -8807,5 +9146,6 @@ SlashCmdList.DJINNISBIS = function(msg)
 	elseif msg == "talents" then PlanTab.sayTalents()
 	elseif msg == "loadouts" then PlanTab.offerLoadouts(true)
 	elseif msg == "tidy" or msg == "tidy yes" then PlanTab.tidy(msg == "tidy yes")
+	elseif msg == "bars" or msg:find("^bars ") then PlanTab.barsCommand(msg:sub(6))
 	else listBySource(msg) end
 end
