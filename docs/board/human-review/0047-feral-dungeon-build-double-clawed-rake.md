@@ -37,3 +37,20 @@ Pick one. This is a preference: both are sound by the guide.
 ## Acceptance
 
 - [ ] Rob picks 1 or 2.
+
+## Comments
+
+**2026-09-24** What players run. Archon is behind a human check, so Rob pasted its page and a
+screenshot: Feral, Mythic+, High Keys, all dungeons. That is the top 5% of keys over 14 days,
+2,600 parses, +20 and +21. It is not +12 to +18. I decoded the page's `exportCode` strings with
+`update-builds.py`'s reader and the Raidbots tree:
+- Druid of the Claw 98.5%, Wildstalker 1.4%.
+- **Every build on the page takes Double-Clawed Rake. None takes Tireless Energy.**
+- The recommended build (39.5%) is Dreamgrove's `DOTC` with one change: Double-Clawed Rake in place
+  of Tireless Energy. So option 2 needs no hand-moved points. It is Archon's string as it stands.
+- Alt #1 (28.4%): Convoke and Hunger for Battle, in place of Incarnation and Ashamane's Guidance.
+- wowvalor.app, top 50 Feral players: Double-Clawed Rake 94%, Tireless Energy 6%.
+
+That makes option 1 (Wildstalker) the 1.4% choice, and moves the recommendation to **option 2**.
+Its cost is now smaller: `update-builds.py` would keep Archon's string pinned, since Archon cannot
+be fetched unattended. The points check still fails loudly when a tree change breaks it.
