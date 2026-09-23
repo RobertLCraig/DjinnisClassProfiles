@@ -5770,8 +5770,22 @@ end
 -- window; an anchor reads its edges and touches nothing. Blizzard_PlayerSpells
 -- is load-on-demand, so this is armed at its ADDON_LOADED, or at login when
 -- something loaded it first.
+--
+-- Card 0032 gave it TalentLoadoutsEx's look (research/TalentLoadoutsEx,
+-- modules/list.lua and frames/list.xml): Blizzard's own ScrollBox, a 36 px
+-- icon per row, groups that fold, a green tick on the row whose build is the
+-- tree right now, a warning mark on a string this client cannot read, and
+-- double-click to switch. Still only anchored, still post-hooks only.
 PlanTab.SIDEBAR_W = 280
-PlanTab.SIDEBAR_ROW = PlanTab.SIZE.row + 6  -- two lines of normal text: the loadout, then its bosses
+PlanTab.SIDEBAR_ROW = 44  -- a 36 px icon, and two lines of normal text beside it: the loadout, then its bosses
+-- Season 2 encounter icons, from TalentLoadoutsEx 3.14.14 modules/preset.lua,
+-- which took them from PeaversTalentsData. Not seen in a client yet.
+PlanTab.BOSS_ICON = {
+	["Nek'zali"] = 7966621, ["Entombed Sentinels"] = 7966620, ["The Lost Explorers"] = 7966622,
+	["Vashnik"] = 7966618, ["Sszorak"] = 7966619, ["The Twin Fangs"] = 7966623,
+	["The Coiled Altar"] = 7966625, ["Ula'tek"] = 7966624, ["Nymrissa Wavecaller"] = 3012069,
+}
+PlanTab.RAID_ICON, PlanTab.MPLUS_ICON = 8039569, 4352494
 PlanTab.SIDEBAR_RIVAL = "TalentLoadoutManager"  -- its own sidebar on the same window; two is clutter (the card)
 
 -- One row per loadout the content asks for, in the order the boss table
@@ -5804,6 +5818,88 @@ function PlanTab.sidebarText(row)
 	if row.mark == "active" then return GREEN .. row.loadout .. "   active|r", false end
 	if row.mark == "edited" then return "|cffffb300" .. row.loadout .. "   edited|r", true end
 	return WHITE .. row.loadout .. "|r", true
+end
+
+-- The whole list as the ScrollBox draws it, top to bottom (card 0032): a
+-- header per group, then its rows unless `folded[group]`. Groups are Raid,
+-- Mythic+ and Other builds (a stored build no boss row names: Guardian's and
+-- Resto's raid builds today); Mythic+ goes first in a key. In the Raid group
+-- the boss here, `hereLoadout`, comes first. Each row carries its icon, `saved`
+-- when this character has a loadout of the name, `warn` from `problemOf(build)`,
+-- and `tick` on exactly one row: the build in play, found by comparing the
+-- strings (`live`), never by name. Where several names hold one string
+-- (Balance's single target build), the selected name wins, else the first.
+-- Pure, for /bis test.
+function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded, hereLoadout, problemOf)
+	local bosses = spec and PlanTab.BOSSES[spec]
+	local raid = PlanTab.sidebarRows(bosses, "raid", active, edited)
+	local keys = PlanTab.sidebarRows(bosses, "mplus", active, edited)
+	local other, listed = {}, {}
+	for i, r in ipairs(raid) do
+		if r.loadout == hereLoadout then table.insert(raid, 1, table.remove(raid, i)) break end
+	end
+	for _, r in ipairs(raid) do listed[r.loadout], r.icon = true, PlanTab.BOSS_ICON[r.bosses[1]] or PlanTab.RAID_ICON end
+	for _, r in ipairs(keys) do listed[r.loadout], r.icon = true, PlanTab.MPLUS_ICON end
+	local names = {}
+	for name in pairs(spec and PlanTab.BUILDS[spec] or {}) do if not listed[name] then names[#names + 1] = name end end
+	table.sort(names)
+	for _, name in ipairs(names) do
+		local dungeon = name:find("^Dungeon") ~= nil
+		local r = { loadout = name, bosses = {}, icon = dungeon and PlanTab.MPLUS_ICON or PlanTab.RAID_ICON }
+		if PlanTab.loadoutState(name, active, edited) == "match" then r.mark = "active" elseif name == active and edited then r.mark = "edited" end
+		local into = dungeon and keys or other
+		into[#into + 1] = r
+	end
+	local groups = { { key = "raid", label = "Raid", icon = PlanTab.RAID_ICON, rows = raid },
+		{ key = "mplus", label = "Mythic+", icon = PlanTab.MPLUS_ICON, rows = keys },
+		{ key = "other", label = "Other builds", icon = PlanTab.RAID_ICON, rows = other } }
+	if context == "mplus" then groups[1], groups[2] = groups[2], groups[1] end
+	local ticked
+	for _, g in ipairs(groups) do
+		for _, r in ipairs(g.rows) do
+			local build = PlanTab.buildFor(spec, r.loadout)
+			r.saved = saved == nil or saved[r.loadout] ~= nil  -- nil: the game would not say, so no grey
+			r.warn = build and problemOf and problemOf(build) or nil
+			if PlanTab.talentStringsDiffer(live, build) == false and (not ticked or (r.loadout == active and ticked.loadout ~= active)) then
+				ticked = r
+			end
+		end
+	end
+	if ticked then ticked.tick = true end
+	local list = {}
+	for _, g in ipairs(groups) do
+		if #g.rows > 0 then
+			list[#list + 1] = { group = g.key, label = g.label, icon = g.icon, count = #g.rows, folded = folded and folded[g.key] or nil }
+			if not (folded and folded[g.key]) then
+				for _, r in ipairs(g.rows) do list[#list + 1] = r end
+			end
+		end
+	end
+	return list
+end
+
+-- The talents in play as an import string, or nil.
+function PlanTab.liveTalents()
+	if not (C_ClassTalents and C_ClassTalents.GetActiveConfigID and C_Traits and C_Traits.GenerateImportString) then return nil end
+	local ok, text = pcall(C_Traits.GenerateImportString, C_ClassTalents.GetActiveConfigID())
+	if ok and type(text) == "string" and canRead(text) then return text end
+	return nil
+end
+
+-- Why this client cannot read a stored build, in Blizzard's own words, or nil.
+-- TalentLoadoutsEx's validator.lua, which is Blizzard's import checks in order.
+function PlanTab.buildProblem(code)
+	local IE = ClassTalentImportExportMixin
+	if not (IE and ExportUtil and PlayerUtil) then return nil end
+	local ok, valid, version, specID, hash = pcall(IE.ReadLoadoutHeader, IE, ExportUtil.MakeImportDataStream(code))
+	if not (ok and valid) then return LOADOUT_ERROR_BAD_STRING or "This string will not parse." end
+	if version ~= C_Traits.GetLoadoutSerializationVersion() then return LOADOUT_ERROR_SERIALIZATION_VERSION_MISMATCH or "From another game version." end
+	if specID ~= PlayerUtil.GetCurrentSpecID() then return LOADOUT_ERROR_WRONG_SPEC or "For another spec." end
+	local treeID = C_ClassTalents.GetTraitTreeForSpec(specID)
+	if treeID and not IE.IsHashEmpty(IE, hash) and not IE.HashEquals(IE, hash, C_Traits.GetTreeHash(treeID)) then
+		return LOADOUT_ERROR_TREE_CHANGED or "Exported against an older talent tree."
+	end
+	return nil
 end
 
 -- "off" when the talent window is not on screen or the rival addon has its
@@ -5839,7 +5935,27 @@ function PlanTab.buildSidebar()
 	f.close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
 	f.close:SetPoint("TOPRIGHT", -2, -2)
 	f.close:SetScript("OnClick", function() PlanTab.setSidebarClosed(true) end)
-	f.rows = {}
+	-- Blizzard's list: ScrollBox, its scroll bar, one view, one data provider.
+	-- Rows are plain buttons made by PlanTab.sidebarRow (Blizzard_SharedXML/
+	-- Shared/Scroll/ScrollBoxListView.lua allows a frame type for a template).
+	f.scroll = CreateFrame("Frame", nil, f, "WowScrollBoxList")
+	f.scroll:SetPoint("TOPLEFT", 6, -32)
+	f.scroll:SetPoint("BOTTOMRIGHT", -22, 8)
+	f.bar = CreateFrame("EventFrame", nil, f, "MinimalScrollBar")
+	f.bar:SetPoint("TOPLEFT", f.scroll, "TOPRIGHT", 6, 0)
+	f.bar:SetPoint("BOTTOMLEFT", f.scroll, "BOTTOMRIGHT", 6, 0)
+	local view = CreateScrollBoxListLinearView(0, 0, 0, 0, 2)
+	view:SetElementExtent(PlanTab.SIDEBAR_ROW)
+	view:SetElementInitializer("Button", PlanTab.sidebarRow)
+	ScrollUtil.InitScrollBoxListWithScrollBar(f.scroll, f.bar, view)
+	f.data = CreateDataProvider()
+	f.scroll:SetDataProvider(f.data)
+	-- Hidden in combat (the card): nothing on it may be clicked then anyway.
+	f:SetScript("OnEvent", function(self) self:Hide() self.tab:Hide() end)
+	f:RegisterEvent("PLAYER_REGEN_DISABLED")
+	if not f:IsEventRegistered("PLAYER_REGEN_DISABLED") then
+		PlanTab.say("Could not register PLAYER_REGEN_DISABLED, so the plan list stays up in combat. Its clicks still do nothing there.")
+	end
 	-- The way back in once closed: one button where the sidebar was.
 	f.tab = CreateFrame("Button", "DjinnisBiSTalentSidebarTab", UIParent, "UIPanelButtonTemplate")
 	f.tab:SetSize(110, PlanTab.SIZE.button)
@@ -5850,29 +5966,87 @@ function PlanTab.buildSidebar()
 	return f
 end
 
-function PlanTab.sidebarRow(i)
-	local f = PlanTab.sidebar
-	if f.rows[i] then return f.rows[i] end
-	local row = CreateFrame("Frame", nil, f)
-	row:SetSize(PlanTab.SIDEBAR_W - 16, PlanTab.SIDEBAR_ROW)
-	row:SetPoint("TOPLEFT", 8, -(32 + (i - 1) * PlanTab.SIDEBAR_ROW))
-	row.apply = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
-	row.apply:SetSize(70, PlanTab.SIZE.button)
-	row.apply:SetPoint("RIGHT", -4, 0)
-	row.apply:SetText("Apply")
-	row.apply:SetScript("OnClick", function() PlanTab.loadTalents(row.loadout) end)
-	row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-	row.name:SetPoint("TOPLEFT", 4, -3)
-	row.name:SetPoint("RIGHT", row.apply, "LEFT", -6, 0)
-	row.name:SetJustifyH("LEFT")
-	row.name:SetWordWrap(false)
-	row.bosses = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-	row.bosses:SetPoint("TOPLEFT", row.name, "BOTTOMLEFT", 0, -2)
-	row.bosses:SetPoint("RIGHT", row.apply, "LEFT", -6, 0)
-	row.bosses:SetJustifyH("LEFT")
-	row.bosses:SetWordWrap(false)
-	f.rows[i] = row
-	return row
+-- One click on a header folds it; a double-click on a build switches to it
+-- through PlanTab.loadTalents, and nothing else here writes (the card).
+local function sidebarClick(row)
+	local e = row.element
+	if not (e and e.group) or InCombatLockdown() then return end
+	local d = db()
+	d.sidebarFolded = d.sidebarFolded or {}
+	d.sidebarFolded[e.group] = not d.sidebarFolded[e.group] or nil
+	PlanTab.updateSidebar()
+end
+
+local function sidebarTip(row)
+	local e = row.element
+	if not e or e.group then return end
+	GameTooltip:SetOwner(row, "ANCHOR_NONE")
+	GameTooltip:SetPoint("RIGHT", row, "LEFT", -4, 0)
+	GameTooltip:AddLine(e.loadout, 1, 1, 1)
+	if #e.bosses > 0 then GameTooltip:AddLine(table.concat(e.bosses, ", "), 0.7, 0.7, 0.7, true) end
+	if e.tick then GameTooltip:AddLine("This is the build in play.", 0, 1, 0) end
+	if not e.saved then GameTooltip:AddLine("Not saved on this character. /djbis loadouts makes it.", 1, 0.7, 0, true) end
+	if e.warn then GameTooltip:AddLine(e.warn, 1, 0.3, 0.3, true) end
+	GameTooltip:AddLine("Double-click to switch to it.", 0, 1, 0)
+	GameTooltip:Show()
+	if PlanTab.showTreeDiff then pcall(PlanTab.showTreeDiff, e.loadout) end  -- card 0034
+end
+
+local function sidebarTipOff()
+	GameTooltip:Hide()
+	if PlanTab.hideTreeDiff then pcall(PlanTab.hideTreeDiff) end
+end
+
+-- The ScrollBox's initializer: builds a row the first time, then draws one
+-- element into it. Laid out after TalentLoadoutsEx's frames/list.xml.
+function PlanTab.sidebarRow(row, e)
+	if not row.icon then
+		row:SetHeight(PlanTab.SIDEBAR_ROW)
+		row.stripe = row:CreateTexture(nil, "BACKGROUND")
+		row.stripe:SetAllPoints()
+		row.stripe:SetColorTexture(0.5, 0.5, 1, 0.1)
+		row.icon = row:CreateTexture(nil, "ARTWORK")
+		row.icon:SetSize(36, 36)
+		row.icon:SetPoint("LEFT", 4, 0)
+		row.mark = row:CreateTexture(nil, "OVERLAY")
+		row.mark:SetSize(16, 16)
+		row.mark:SetPoint("RIGHT", -8, 0)
+		row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+		row.name:SetPoint("TOPLEFT", row.icon, "TOPRIGHT", 6, -2)
+		row.name:SetPoint("RIGHT", row.mark, "LEFT", -4, 0)
+		row.name:SetJustifyH("LEFT")
+		row.name:SetWordWrap(false)
+		row.bosses = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+		row.bosses:SetPoint("TOPLEFT", row.name, "BOTTOMLEFT", 0, -3)
+		row.bosses:SetPoint("RIGHT", row.mark, "LEFT", -4, 0)
+		row.bosses:SetJustifyH("LEFT")
+		row.bosses:SetWordWrap(false)
+		row:SetHighlightTexture("Interface\\FriendsFrame\\UI-FriendsFrame-HighlightBar-Blue", "ADD")
+		row:GetHighlightTexture():SetAlpha(0.4)
+		row:SetScript("OnClick", sidebarClick)
+		row:SetScript("OnDoubleClick", function(self)
+			if self.element and self.element.loadout then PlanTab.loadTalents(self.element.loadout) end
+		end)
+		row:SetScript("OnEnter", sidebarTip)
+		row:SetScript("OnLeave", sidebarTipOff)
+	end
+	row.element = e
+	row.icon:SetTexture(e.icon)
+	row.icon:SetDesaturated(not e.group and not e.saved)
+	row.stripe:SetShown(e.group ~= nil)
+	if e.group then
+		row.name:SetText("|cff66a3ff" .. e.label .. "|r")
+		row.bosses:SetText(GREY .. e.count .. (e.count == 1 and " build" or " builds") .. "|r")
+		row.mark:SetTexture(e.folded and "Interface\\Buttons\\UI-PlusButton-Up" or "Interface\\Buttons\\UI-MinusButton-Up")
+		row.mark:Show()
+		return
+	end
+	local text = PlanTab.sidebarText(e)
+	row.name:SetText(e.saved and text or (GREY .. e.loadout .. "   not saved|r"))
+	row.bosses:SetText(GREY .. table.concat(e.bosses, ", ") .. "|r")
+	if e.warn then row.mark:SetTexture("Interface\\DialogFrame\\UI-Dialog-Icon-AlertNew")
+	elseif e.tick then row.mark:SetTexture("Interface\\Buttons\\UI-CheckBox-Check") end
+	row.mark:SetShown(e.warn ~= nil or e.tick == true)
 end
 
 -- Beside the talent window's right edge, or its left when the screen has no
@@ -5886,12 +6060,16 @@ function PlanTab.placeSidebar()
 		if flip then each:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -6, -30)
 		else each:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 6, -30) end
 	end
+	f:SetHeight(math.max(200, (anchor:GetHeight() or 540) - 40))  -- the window's height, so the list scrolls inside it
 end
 
 -- Answers what it did, for the checks. In combat nothing is built, moved or
 -- redrawn: the bag-mark watcher's PLAYER_REGEN_ENABLED redraw does it after.
 function PlanTab.updateSidebar()
-	if InCombatLockdown() then return "combat" end
+	if InCombatLockdown() then
+		if PlanTab.sidebar then PlanTab.sidebar:Hide() PlanTab.sidebar.tab:Hide() end
+		return "combat"
+	end
 	local shown = PlayerSpellsFrame and PlayerSpellsFrame:IsShown() and true or false
 	local mode = PlanTab.sidebarMode(shown, db().sidebarClosed, PlanTab.rivalLoaded())
 	if mode == "off" and not PlanTab.sidebar then return mode end
@@ -5901,21 +6079,14 @@ function PlanTab.updateSidebar()
 	if mode ~= "open" then return mode end
 	PlanTab.placeSidebar()
 	local spec = playerSpec()
-	local active, edited = PlanTab.activeLoadoutName(spec, planScenario(spec))
-	local rows = PlanTab.sidebarRows(spec and PlanTab.BOSSES[spec], (statContext()), active, edited)
-	for i, r in ipairs(rows) do
-		local row = PlanTab.sidebarRow(i)
-		local text, apply = PlanTab.sidebarText(r)
-		row.loadout = r.loadout
-		row.name:SetText(text)
-		row.bosses:SetText(GREY .. table.concat(r.bosses, ", ") .. "|r")
-		row.apply:SetShown(apply)
-		row:Show()
-	end
-	for i = #rows + 1, #f.rows do f.rows[i]:Hide() end
-	f.title:SetText(#rows > 0 and ("Plan loadouts: " .. CONTEXT_LABEL[(statContext())])
-		or ("No boss plan for " .. (spec or "this spec") .. " yet"))
-	f:SetHeight(40 + math.max(#rows, 1) * PlanTab.SIDEBAR_ROW)
+	local context = (statContext())
+	local active, edited = PlanTab.activeLoadoutName(spec)
+	local here = autoContext() == "raid" and PlanTab.rowHere(spec and PlanTab.BOSSES[spec], "raid", PlanTab.lastKill)
+	local list = PlanTab.sidebarList(spec, context, PlanTab.liveTalents(), active, edited, PlanTab.savedLoadoutNames(),
+		db().sidebarFolded, here and here.loadout, PlanTab.buildProblem)
+	f.data:Flush()
+	for _, e in ipairs(list) do f.data:Insert(e) end
+	f.title:SetText(#list > 0 and ((spec or "") .. " builds") or ("No stored builds for " .. (spec or "this spec") .. " yet"))
 	return mode
 end
 
@@ -6762,6 +6933,50 @@ function PlanTab.barChecks(check)
 	PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print = kept[9], kept[10], kept[11], kept[12], kept[13]
 	PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB = kept[14], kept[15], kept[16]
 	db().bars, PlanTab.barsSeen = keptBars, nil
+end
+
+-- Card 0032's checks: what the list beside the talent window holds. The
+-- frame needs a person; the list it draws does not.
+function PlanTab.sidebarChecks(check)
+	local balance, feral = PlanTab.BUILDS.Balance, PlanTab.BUILDS.Feral
+	local function names(list)
+		local out = {}
+		for _, e in ipairs(list) do out[#out + 1] = e.group and ("[" .. e.label .. "]") or e.loadout end
+		return table.concat(out, "; ")
+	end
+	local function ticked(list)
+		local out = {}
+		for _, e in ipairs(list) do if e.tick then out[#out + 1] = e.loadout end end
+		return table.concat(out, "; ")
+	end
+	local listTest = "the list beside the talent window"
+	local list = PlanTab.sidebarList("Feral", "raid", nil, nil, nil, nil, nil, nil, nil)
+	check(listTest .. ", raid first, then Mythic+", names(list):find("^%[Raid%]; Raid: Nek'Zali;") ~= nil and names(list):find("; %[Mythic%+%]; Dungeon$") ~= nil, true)
+	check(listTest .. ", a boss row has its portrait", list[2].icon, PlanTab.BOSS_ICON["Nek'zali"])
+	check(listTest .. ", a dungeon row the Mythic+ icon", list[#list].icon, PlanTab.MPLUS_ICON)
+	check(listTest .. ", Mythic+ first in a key", PlanTab.sidebarList("Feral", "mplus")[1].label, "Mythic+")
+	check(listTest .. ", the boss here comes first", PlanTab.sidebarList("Feral", "raid", nil, nil, nil, nil, nil, "Raid: Sszorak")[2].loadout, "Raid: Sszorak")
+	local folded = PlanTab.sidebarList("Feral", "raid", nil, nil, nil, nil, { raid = true })
+	check(listTest .. ", a folded group keeps its header and drops its rows", names(folded), "[Raid]; [Mythic+]; Dungeon")
+	check(listTest .. ", and says how many it holds", folded[1].count, 9)
+	check(listTest .. ", Guardian's builds with no boss row sit under Other builds",
+		names(PlanTab.sidebarList("Guardian", "raid")), "[Mythic+]; Dungeon; Dungeon: survive more; [Other builds]; Raid: Druid of the Claw; Raid: Elune's Chosen")
+
+	local tickTest = "one tick, on the build in play"
+	check(tickTest, ticked(PlanTab.sidebarList("Feral", "raid", feral["Raid: Twin Fangs"])), "Raid: Twin Fangs")
+	check(tickTest .. ", by content: the name selected does not tick a moved build",
+		ticked(PlanTab.sidebarList("Feral", "raid", feral["Raid: Twin Fangs"]:sub(1, -2) .. "B", "Raid: Twin Fangs", true)), "")
+	-- Balance's single target build is stored under three boss names
+	check(tickTest .. ", three names with one build tick the first", ticked(PlanTab.sidebarList("Balance", "raid", balance["Raid: Vashnik"])), "Raid: Vashnik")
+	check(tickTest .. ", or the one selected", ticked(PlanTab.sidebarList("Balance", "raid", balance["Raid: Vashnik"], "Raid: Coiled Altar")), "Raid: Coiled Altar")
+
+	local markTest = "a row says when it is not saved, and when it cannot be read"
+	list = PlanTab.sidebarList("Feral", "raid", nil, nil, nil, { ["Raid: Nek'Zali"] = 1 }, nil, nil, function(code) return code == feral.Dungeon and "old tree" or nil end)
+	check(markTest .. ", saved", list[2].saved, true)
+	check(markTest .. ", not saved", list[3].saved, false)
+	check(markTest .. ", the game would not say: no grey", PlanTab.sidebarList("Feral", "raid")[3].saved, true)
+	check(markTest .. ", the warning on the one build", list[#list].warn, "old tree")
+	check(markTest .. ", and only there", list[2].warn, nil)
 end
 
 -- one runnable check: /bis test
@@ -9127,6 +9342,7 @@ local function selfTest()
 
 	PlanTab.loadoutChecks(check)  -- card 0031
 	PlanTab.barChecks(check)  -- card 0033
+	PlanTab.sidebarChecks(check)  -- card 0032
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")
