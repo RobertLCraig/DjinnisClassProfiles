@@ -519,14 +519,9 @@ end
 PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, read 2026-09-23"
 PlanTab.BUILDS = {
 	Balance = {
-		["Raid: Sszorak"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
-		["Raid: Vashnik"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
-		["Raid: Coiled Altar"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
-		["Raid: Twin Fangs"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA", -- Elune's Chosen - Cleave
-		["Raid: Lost Explorers"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA", -- Elune's Chosen - Cleave
-		["Raid: Entombed Sentinels"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA", -- Elune's Chosen - Cleave
-		["Raid: Nek'Zali"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWGbzYGbsMjxMzMzCGGgBYZbshpZmlRAAAA2MzMzMYzAjZAMzAADA", -- Keeper of the Grove - Cleave
-		["Raid: Nymrissa"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWGbzYGbsMjxMzMzCGGgBYZbshpZmlRAAAA2MzMzMYzAjZAMzAADA", -- Keeper of the Grove - Cleave
+		["Raid: Single Target"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
+		["Raid: Cleave"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA", -- Elune's Chosen - Cleave
+		["Raid: Nek'Zali, Nymrissa"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWGbzYGbsMjxMzMzCGGgBYZbshpZmlRAAAA2MzMzMYzAjZAMzAADA", -- Keeper of the Grove - Cleave
 		["Dungeon"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZswyMLjxMjNMAYstNzgxsNCMBAAAYhZmZGsZMjxAAwMDWGA", -- Elune's Chosen M+
 	},
 	Feral = {
@@ -603,17 +598,17 @@ PlanTab.BOSSES = {
 	-- The scenario is the build's own: Dreamgrove's single target or cleave.
 	-- Balance has no gear plan yet, so it only labels the row.
 	Balance = {
-		{ boss = "Nek'zali",            id = 3470, scenario = "2t", loadout = "Raid: Nek'Zali" },
-		{ boss = "Entombed Sentinels",  id = 3445, scenario = "2t", loadout = "Raid: Entombed Sentinels" },
-		{ boss = "The Lost Explorers",  id = 3497, scenario = "2t", loadout = "Raid: Lost Explorers" },
-		{ boss = "Vashnik",             id = 3455, scenario = "st", loadout = "Raid: Vashnik" },
-		{ boss = "Sszorak",             id = 3420, scenario = "st", loadout = "Raid: Sszorak" },
-		{ boss = "The Twin Fangs",      id = 3421, scenario = "2t", loadout = "Raid: Twin Fangs" },
-		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "Raid: Coiled Altar" },
-		-- Ula'tek has no Balance build in the guide; the single target one is
-		-- the nearest. Uncertain, and Rob's to change.
-		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "Raid: Vashnik" },
-		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "2t", loadout = "Raid: Nymrissa" },
+		{ boss = "Nek'zali",            id = 3470, scenario = "2t", loadout = "Raid: Nek'Zali, Nymrissa" },
+		{ boss = "Entombed Sentinels",  id = 3445, scenario = "2t", loadout = "Raid: Cleave" },
+		{ boss = "The Lost Explorers",  id = 3497, scenario = "2t", loadout = "Raid: Cleave" },
+		{ boss = "Vashnik",             id = 3455, scenario = "st", loadout = "Raid: Single Target" },
+		{ boss = "Sszorak",             id = 3420, scenario = "st", loadout = "Raid: Single Target" },
+		{ boss = "The Twin Fangs",      id = 3421, scenario = "2t", loadout = "Raid: Cleave" },
+		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "Raid: Single Target" },
+		-- Ula'tek has no Balance build in the guide; single target is the
+		-- nearest. Uncertain, and Rob's to change.
+		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "Raid: Single Target" },
+		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "2t", loadout = "Raid: Nek'Zali, Nymrissa" },
 		{ boss = "Mythic+, any key",   scenario = "mplus", loadout = "Dungeon" },
 	},
 }
@@ -6262,6 +6257,11 @@ PlanTab.RETIRED = {
 	["M+ HealersHeal"] = true, ["M+ Cat DPS"] = true, ["M+ Caster DPS"] = true, ["DotC Raid ST *"] = true,
 	["WS Raid ST"] = true, ["DotC Raid 2T"] = true, ["WS Raid 2T *"] = true, ["DotC Raid Most Bosses *"] = true,
 	["WS Raid Most Bosses"] = true, ["WS Raid Coiled Altar"] = true, ["DotC M+"] = true, ["WS M+"] = true,
+	-- Balance's per-boss names, v0.26.0 to v0.30.0, before it was named by fight
+	-- (Rob, 2026-09-23). Several are still Feral's: a name that is a live build
+	-- for the spec in hand is never retired (PlanTab.tidy).
+	["Raid: Sszorak"] = true, ["Raid: Vashnik"] = true, ["Raid: Coiled Altar"] = true, ["Raid: Twin Fangs"] = true,
+	["Raid: Lost Explorers"] = true, ["Raid: Entombed Sentinels"] = true, ["Raid: Nek'Zali"] = true, ["Raid: Nymrissa"] = true,
 }
 
 function PlanTab.say(text)
@@ -6509,8 +6509,9 @@ function PlanTab.tidy(confirmed)
 	local saved = PlanTab.savedLoadoutNames()
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet.") return 0 end
 	local selected, doomed = PlanTab.selectedConfigID(), {}
+	local live = PlanTab.BUILDS[playerSpec() or ""] or {}
 	for name, id in pairs(saved) do
-		if PlanTab.RETIRED[name] then
+		if PlanTab.RETIRED[name] and not live[name] then
 			if id == selected then PlanTab.say(("\"%s\" is the loadout you have selected, so it stays. Pick another, then tidy again."):format(name))
 			else doomed[#doomed + 1] = name end
 		end
@@ -6961,6 +6962,8 @@ function PlanTab.loadoutChecks(check)
 	check(tidyTest .. ", deletes it on yes", PlanTab.tidy(true), 1)
 	check(tidyTest .. ", and only it", table.concat(calls, "|"), "delete WS M+")
 	check(tidyTest .. ", Rob's own is still there", names[4], "Rob's own")
+	-- "Raid: Nek'Zali" is retired from Balance and live on Feral: kept here
+	check(tidyTest .. ", a name retired elsewhere and live here is kept", PlanTab.RETIRED["Raid: Nek'Zali"] and names[1], "Raid: Nek'Zali")
 
 	for _, write in ipairs({ "CommitConfig", "LoadConfig", "PurchaseRank", "SetSelection", "SetStarterBuildActive" }) do
 		check("no talent-wearing call when making loadouts: " .. write, touched[write], nil)
@@ -7088,9 +7091,8 @@ function PlanTab.sidebarChecks(check)
 	check(tickTest, ticked(PlanTab.sidebarList("Feral", "raid", feral["Raid: Twin Fangs"])), "Raid: Twin Fangs")
 	check(tickTest .. ", by content: the name selected does not tick a moved build",
 		ticked(PlanTab.sidebarList("Feral", "raid", feral["Raid: Twin Fangs"]:sub(1, -2) .. "B", "Raid: Twin Fangs", true)), "")
-	-- Balance's single target build is stored under three boss names
-	check(tickTest .. ", three names with one build tick the first", ticked(PlanTab.sidebarList("Balance", "raid", balance["Raid: Vashnik"])), "Raid: Vashnik")
-	check(tickTest .. ", or the one selected", ticked(PlanTab.sidebarList("Balance", "raid", balance["Raid: Vashnik"], "Raid: Coiled Altar")), "Raid: Coiled Altar")
+	-- Balance is named by fight, one name per build (Rob, 2026-09-23)
+	check(tickTest .. ", a fight-named build", ticked(PlanTab.sidebarList("Balance", "raid", balance["Raid: Single Target"])), "Raid: Single Target")
 
 	local markTest = "a row says when it is not saved, and when it cannot be read"
 	list = PlanTab.sidebarList("Feral", "raid", nil, nil, nil, { ["Raid: Nek'Zali"] = 1 }, nil, nil, function(code) return code == feral.Dungeon and "old tree" or nil end)
@@ -8910,9 +8912,9 @@ local function selfTest()
 		check(markTest .. ", raid rows, one per loadout, the active one marked", table.concat(names, "; "),
 			"Raid: Nek'Zali; Raid: Entombed Sentinels; Raid: Lost Explorers; Raid: Vashnik; Raid: Sszorak; Raid: Twin Fangs=active; Raid: Coiled Altar; Raid: Ula'tek; Raid: Nymrissa")
 		check(markTest .. ", each with its bosses", table.concat((raid[1] or { bosses = {} }).bosses, ", "), "Nek'zali")
-		-- Balance's Ula'tek borrows Vashnik's build: one row, both bosses
+		-- Balance's single target build serves four bosses: one row, all four
 		local balance = PlanTab.sidebarRows(PlanTab.BOSSES.Balance, "raid", nil, false)
-		check(markTest .. ", a shared build is one row with both bosses", table.concat((balance[4] or { bosses = {} }).bosses, ", "), "Vashnik, Ula'tek")
+		check(markTest .. ", a shared build is one row with its bosses", table.concat((balance[3] or { bosses = {} }).bosses, ", "), "Vashnik, Sszorak, The Coiled Altar, Ula'tek")
 		local keys = PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "mplus", "Dungeon", false)
 		check(markTest .. ", Mythic+ lists the key loadout only", #keys == 1 and (keys[1].loadout .. "=" .. tostring(keys[1].mark)), "Dungeon=active")
 		-- `or {}`: a list drawn short is one red line here, not a nil-index error that ends the test

@@ -33,10 +33,13 @@ PAGE = {"Balance": "balance", "Feral": "feral", "Guardian": "guardian", "Resto":
 # 30 letters. These are the names DjinnisDreamgrove 0.7.0 imported, so a
 # loadout already made under one is the same loadout here.
 PICK = {
+    # Named for the fight, not the hero tree (Rob, 2026-09-23: "Raid: Single
+    # Target, Raid: Cleave, Raid: AoE ... means much more"). The guide's own
+    # comments say which bosses each is for; the boss rows carry that.
     "Balance": {
-        "Elune's Chosen - Single Target": ["Raid: Sszorak", "Raid: Vashnik", "Raid: Coiled Altar"],
-        "Elune's Chosen - Cleave": ["Raid: Twin Fangs", "Raid: Lost Explorers", "Raid: Entombed Sentinels"],
-        "Keeper of the Grove - Cleave": ["Raid: Nek'Zali", "Raid: Nymrissa"],
+        "Elune's Chosen - Single Target": ["Raid: Single Target"],
+        "Elune's Chosen - Cleave": ["Raid: Cleave"],
+        "Keeper of the Grove - Cleave": ["Raid: Nek'Zali, Nymrissa"],
         "Elune's Chosen M+": ["Dungeon"],
     },
     "Feral": {
