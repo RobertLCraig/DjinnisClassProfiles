@@ -7342,9 +7342,8 @@ function PlanTab.applyBars(key, from)
 	return "applied"
 end
 
--- The Load bars buttons (card 0044): the build's own layout, or the spec's.
--- No question first: /djbis bars undo puts the old bars back.
--- The key they load, or nil and why. Also the key their hover shows (0046).
+-- The key the Load bars buttons load, or nil and why. Also the key their
+-- hover shows (0046).
 function PlanTab.loadKey(forBuild)
 	local spec = playerSpec()
 	if not spec then return nil, "Action bar layouts are for druids." end
@@ -7354,6 +7353,8 @@ function PlanTab.loadKey(forBuild)
 	return spec .. " / " .. build
 end
 
+-- The Load bars buttons (card 0044): the build's own layout, or the spec's.
+-- No question first: /djbis bars undo puts the old bars back.
 function PlanTab.loadBars(forBuild)
 	local key, why = PlanTab.loadKey(forBuild)
 	if not key then PlanTab.say(why) return "none" end
@@ -7486,11 +7487,11 @@ function PlanTab.showGhost(key)
 	PlanTab.hideGhost()
 	local layout = key and barsDB()[key]
 	if not layout or InCombatLockdown() then return 0 end
-	PlanTab.ghostKey = key
 	local plan = PlanTab.ghostPlan(layout.slots or {}, PlanTab.ghostButtons(), PlanTab.readBars())
 	local ui = PlanTab.ghostUI
 	local top = ui.top():GetEffectiveScale()
 	if not ui.canRead(top) then return 0 end
+	PlanTab.ghostKey = key  -- only once something can be drawn: the tooltip says it shows
 	for i, p in ipairs(plan) do
 		local g = PlanTab.ghosts[i]
 		if not g then
@@ -8226,6 +8227,7 @@ function PlanTab.barChecks(check)
 	-- shown place further right; Bar3 off the bar; Bar4 its visibility a
 	-- secret; Bar5 shown, its scale a secret; Bar12 the last on a bar.
 	local keptUI, keptGhosts = PlanTab.ghostUI, PlanTab.ghosts
+	local keptPool = #keptGhosts
 	local ok, err = pcall(function()
 		local secret = {}
 		local function fake(visible, x, scale)
@@ -8273,12 +8275,15 @@ function PlanTab.barChecks(check)
 		PlanTab.barsChanged()
 		check(ghostTest .. ", redrawn after a load, and a place gone is hidden", tostring(drawn[1].shown) .. "/" .. tostring(drawn[2].shown), "true/false")
 		topScale = secret
-		check(ghostTest .. ", nothing when UIParent's scale is a secret", PlanTab.showGhost("Feral") .. "/" .. tostring(drawn[1].shown), "0/false")
+		check(ghostTest .. ", nothing when UIParent's scale is a secret", PlanTab.showGhost("Feral") .. "/" .. tostring(drawn[1].shown) .. "/" .. tostring(PlanTab.ghostKey), "0/false/nil")
 		PlanTab.hideGhost()
 	end)
 	PlanTab.ghostUI, PlanTab.ghosts = keptUI, keptGhosts
+	PlanTab.hideGhost()  -- a throw mid-block must not leave a key for the next save or load to draw
 	check(ghostTest .. ", its checks ran to the end", ok and "yes" or tostring(err), "yes")
 	check(ghostTest .. ", and the real frame calls are back", PlanTab.ghostUI.canRead == canRead and PlanTab.ghostUI.make == keptUI.make, true)
+	check(ghostTest .. ", the real frames too, none added", tostring(PlanTab.ghosts == keptGhosts) .. "/" .. #PlanTab.ghosts, "true/" .. keptPool)
+	check(ghostTest .. ", and no preview left up", PlanTab.ghostKey, nil)
 
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]

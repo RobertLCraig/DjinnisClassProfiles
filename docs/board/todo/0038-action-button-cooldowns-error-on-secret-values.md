@@ -30,7 +30,7 @@ bar.
   - card `0033`'s `PickupAction` and `PlaceAction`, but only from now on.
   - `/djbis test` in the client. `PlanTab.barChecks` writes over the Blizzard globals
     `C_ActionBar`, `GetActionInfo`, `PickupAction`, `PlaceAction`, `C_Spell`, `C_Item` and
-    `InCombatLockdown`, then puts them back. A global written by addon code stays tainted until
+    `InCombatLockdown`, then puts them back. `sidebarChecks` does the same with `GameTooltip`. A global written by addon code stays tainted until
     `/reload`, and Blizzard's action buttons read these. The 0046 second review found this. Only a
     suspect if the error follows a `/djbis test`.
 - Card `0002` says "DjinnisBiS never touches talents, action bars or any secure frame". That was

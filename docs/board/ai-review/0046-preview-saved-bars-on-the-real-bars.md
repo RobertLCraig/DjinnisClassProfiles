@@ -312,3 +312,18 @@ What held, from the brief's questions:
 Security: **Weakest point:** `/djbis test` in a client. After a throw, a stale `ghostKey` could
 draw an unasked preview (finding 1). **Unchecked:** the pool restore (finding 2). **Leaks:**
 nothing. It is all local.
+
+**2026-09-23** Builder, v0.39.3. Both findings fixed, and two of the notes.
+1. `PlanTab.hideGhost()` runs straight after the restore. A check then confirms that `ghostKey`
+   is nil.
+2. A check confirms that `PlanTab.ghosts` is the kept pool, at its kept size.
+- Note fixed: `showGhost` sets `ghostKey` only after the UIParent scale guard. So a secret scale
+  no longer makes the tooltip say "Your bars show it now". The secret-scale check now reads the
+  key as well.
+- Note fixed: the `loadBars` comment is back above `loadBars`.
+
+Mutations, all red: pool not restored, no pool swap, a throw with no hide after it, and the key set
+before the scale guard.
+
+Left as noted: the fake `SetPoint` ignores the anchor frame (criterion 3 is manual). The slot
+`canRead` has no check. The older `GameTooltip` swap in `sidebarChecks` is now on card `0038`.
