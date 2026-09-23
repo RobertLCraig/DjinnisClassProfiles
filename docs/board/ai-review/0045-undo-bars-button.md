@@ -25,7 +25,7 @@ Rob, 2026-09-23, after the Load bars buttons: "an undo button sounds eminently u
 
 ## Acceptance
 
-- [ ] WHEN a load can be undone, THE BUTTON SHALL be on, and undo it; otherwise it SHALL be greyed.
+- [ ] WHEN a load can be undone, THE BUTTON SHALL be on, and undo it; otherwise it SHALL be greyed. WHEN the bars or keys changed by hand since the load, IT SHALL ask first. proves: `..., the Undo button is on after an apply`, `..., and off after the undo`, `..., the button asks first after a hand change`, `..., a key changed by hand asks first too`, `..., and Undo anyway undoes`
 
 ## Comments
 
@@ -125,3 +125,5 @@ Security:
 
 No client can be run by an agent. Once fixed, What I need from you 1 to 3 stand, plus: rebind one
 key after Load bars, click Undo bars. Pass: it asks first.
+- 2026-09-23 Claude, builder, v0.38.1. Fixed: a key changed by hand asks too (dropping the key
+  compare: 2 red), and "Undo anyway" is checked to be `undoBars` (a no-op: 1 red). `proves:` added.

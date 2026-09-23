@@ -56,7 +56,7 @@ answers it.
 
 ## What I need from you
 
-1. `/reload` (the game folder holds v0.38.0). On Feral, select `Dungeon`, move one talent and
+1. `/reload` (the game folder holds v0.38.1). On Feral, select `Dungeon`, move one talent and
    click Apply, then walk into a dungeon. The talents line should read `Dungeon is loaded, but its
    build is not the one simmed` and the button should say **Fix talents**.
 2. Click it. The talent window should open and one gold chat line should point at
@@ -189,3 +189,5 @@ answers it.
 
   **Not checked in a client.** No agent can run the game. The What I need from you steps (1, 2, 2a
   and 4) still stand once the check above is fixed.
+- 2026-09-23 Claude, builder, v0.38.1. Fixed: the checks' stubs now answer `edited` from the spec
+  argument, so dropping `playerSpec()` from the call goes red (5 red).

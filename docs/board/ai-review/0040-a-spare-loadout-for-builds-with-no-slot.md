@@ -38,7 +38,7 @@ route cards `0002` and `0011` rule out.
 
 ## What I need from you
 
-1. `/reload` (v0.38.0). Open the talent window as Feral. Double-click `Raid: Vashnik` (grey,
+1. `/reload` (v0.38.1). Open the talent window as Feral. Double-click `Raid: Vashnik` (grey,
    `spare`). Pass: chat says to close the talent window. Close it. Pass: chat says "Making the
    spare loadout" and then "Putting on", and the talents change.
 2. Open the talent window. Pass: the tree is the full Vashnik build, and `BiS: Raid: Vashnik` is
@@ -52,9 +52,9 @@ route cards `0002` and `0011` rule out.
 
 ## Acceptance
 
-- [ ] WHEN a build with no loadout is double-clicked, THE GAME SHALL wear it through `BiS: <build>`, with the full tree.
-- [ ] WHEN the next spare build is worn, THE ADDON SHALL delete the previous spare and never the one worn.
-- [ ] Action bars still update in combat after a spare wear.
+- [ ] WHEN a build with no loadout is double-clicked, THE GAME SHALL wear it through `BiS: <build>`, with the full tree. proves: `... is worn through the spare, made once the window is shut`, `..., then worn through Blizzard's helper`, `..., an unfilled spare is not worn`, and the in-game steps
+- [ ] WHEN the next spare build is worn, THE ADDON SHALL delete the previous spare and never the one worn, and never a loadout it did not make. proves: `..., then the one not worn goes`, `..., a player's own "BiS: " loadout is never deleted`, `..., a "BiS: X" it did not make is not doubled`
+- [ ] Action bars still update in combat after a spare wear. proves: manual, step 6
 
 ## Comments
 
@@ -232,3 +232,15 @@ No client can be run by an agent. Once fixed, a person owes What I need from you
 - double-click a grey row, then a real loadout, then close. Pass: the real loadout stays on.
 - after step 1, no red "invalid config" message and the talents really change.
 - with an old v0.36 "BiS: X" in the dropdown, wear X. Pass: no second "BiS: X".
+- 2026-09-23 Claude, builder, v0.38.1. All three defects and both smaller points fixed.
+  1. `loadTalents` clears a waiting wish on any new ask. The wish keeps its spec, and `spareOnHide`
+     drops it after a spec change. A window shut in combat says so and makes nothing.
+  2. A "BiS: X" this character did not record is never doubled: `wearSpare` answers `"taken"` and
+     asks the player to delete or rename it. That covers spares left by v0.36.0 to v0.37.1.
+  3. `wearMadeSpare` takes the id from `q.pendingID` when its name matches, else from the list. If
+     neither has it, it says so ("unlisted"). In combat it records the spare and says to try again.
+  New checks for each, plus: `importOne` refuses with the window open, and a player's "BiS: M+"
+  selected reads as "BiS: M+". Mutations, each red (a crash counts): no clearing on a new ask 3,
+  no spec check 2, no "taken" guard 1, no `pendingID` 1, no id guard in `spareBuild` 3, no window
+  guard in `importOne` 1, no combat checks 6. Not covered: the `HookScript` line (harness frames
+  keep no scripts) and the half-second delay.

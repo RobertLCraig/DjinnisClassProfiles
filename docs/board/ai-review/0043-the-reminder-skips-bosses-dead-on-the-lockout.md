@@ -35,8 +35,8 @@ The cause: `PlanTab.rowHere` knew only the kill it saw in this session (`PlanTab
 
 ## Acceptance
 
-- [ ] WHEN a boss is dead on this lockout, THE REMINDER SHALL name the next living boss, after a `/reload` too.
-- [ ] WHEN no slot is free, THE OFFER SHALL not ask to Create.
+- [ ] WHEN a boss is dead on this lockout, THE REMINDER SHALL name the next living boss, after a `/reload` too. proves: `..., the reminder names the next living boss`, `..., the list puts the next living boss first`, `..., the lockout is asked as the journal asks it`
+- [ ] WHEN no slot is free, THE OFFER SHALL not ask to Create. proves: `..., and offers no Create with no room`
 
 ## Comments
 
@@ -124,3 +124,6 @@ Security:
 3. Leaks: nothing leaves the client.
 
 No client can be run by an agent. What I need from you 1 and 2 still stand.
+- 2026-09-23 Claude, builder, v0.38.1. Fixed: checks now go through the callers. `checkSetup` names
+  Entombed Sentinels with Nek'zali dead, and the list's new `PlanTab.sidebarHere` puts its loadout
+  first. Pointing either caller back at `rowHere` alone: 1 red each. `proves:` added.

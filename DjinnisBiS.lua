@@ -3932,6 +3932,7 @@ end
 -- Blizzard's frame says ERR_TALENT_FAILED_INVALID_CONFIG itself if need be.
 function PlanTab.loadTalents(name)
 	if InCombatLockdown() then return "combat" end
+	PlanTab.spareWanted = nil  -- a new ask replaces a spare still waiting on the window (second 0040 review)
 	local saved = PlanTab.savedLoadoutNames()
 	if saved and not saved[name] then
 		local code = PlanTab.buildFor(playerSpec(), name)
@@ -6213,6 +6214,12 @@ function PlanTab.placeSidebar()
 	f:SetHeight(math.max(200, (anchor:GetHeight() or 540) - 40))  -- the window's height, so the list scrolls inside it
 end
 
+-- In a raid, the loadout of the next living boss, which the list puts first.
+function PlanTab.sidebarHere(spec)
+	local here = autoContext() == "raid" and PlanTab.bossHere(spec, "raid")
+	return here and here.loadout or nil
+end
+
 -- Answers what it did, for the checks. In combat nothing is built, moved or
 -- redrawn: the bag-mark watcher's PLAYER_REGEN_ENABLED redraw does it after.
 function PlanTab.updateSidebar()
@@ -6232,9 +6239,8 @@ function PlanTab.updateSidebar()
 	local spec = playerSpec()
 	local context = (statContext())
 	local active, edited = PlanTab.activeLoadoutName(spec)
-	local here = autoContext() == "raid" and PlanTab.bossHere(spec, "raid")
 	local list = PlanTab.sidebarList(spec, context, PlanTab.liveTalents(), active, edited, PlanTab.savedLoadoutNames(),
-		db().sidebarFolded, here and here.loadout, PlanTab.buildProblem, PlanTab.loadoutString)
+		db().sidebarFolded, PlanTab.sidebarHere(spec), PlanTab.buildProblem, PlanTab.loadoutString)
 	f.data:Flush()
 	for _, e in ipairs(list) do f.data:Insert(e) end
 	f.title:SetText(#list > 0 and ((spec or "") .. " builds") or ("No stored builds for " .. (spec or "this spec") .. " yet"))
@@ -6528,6 +6534,11 @@ function PlanTab.spareOnHide()
 	local w = PlanTab.spareWanted
 	if not w then return end
 	PlanTab.spareWanted = nil
+	if w.spec ~= playerSpec() then return end  -- the spec changed since the ask
+	if InCombatLockdown() then
+		PlanTab.say(("In combat, so \"%s\" was not put on. Double-click it again after the fight."):format(w.name))
+		return
+	end
 	-- a moment, so Blizzard's own OnHide has unregistered its events first
 	PlanTab.later(0.5, function() PlanTab.wearSpare(w.name, w.code) end)
 end
@@ -6540,7 +6551,14 @@ function PlanTab.wearSpare(name, code)
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
 	local selected, mine, deleted = PlanTab.selectedConfigID(), PlanTab.spareIDs(), 0
 	local worn = saved[PlanTab.SPARE .. name]
-	if worn and worn == selected and mine[worn] then
+	-- a "BiS: X" this character did not record (the player's, or made by
+	-- v0.36.0 to v0.37.1): a second of that name would make the switch by
+	-- name a guess, so it is left to the player (second 0040 review)
+	if worn and not mine[worn] then
+		PlanTab.say(("A loadout called \"%s%s\" is there already, and this addon did not make it. Delete or rename it in the talent window, then try again."):format(PlanTab.SPARE, name))
+		return "taken"
+	end
+	if worn and worn == selected then
 		PlanTab.say(("\"%s\" is on already."):format(name))
 		return "same"
 	end
@@ -6554,7 +6572,7 @@ function PlanTab.wearSpare(name, code)
 		end
 	end
 	if PlanTab.talentWindowOpen() then
-		PlanTab.spareWanted = { name = name, code = code }
+		PlanTab.spareWanted = { name = name, code = code, spec = playerSpec() }
 		if not PlanTab.spareHooked and PlayerSpellsFrame and PlayerSpellsFrame.HookScript then
 			PlanTab.spareHooked = true
 			PlayerSpellsFrame:HookScript("OnHide", PlanTab.spareOnHide)
@@ -6635,9 +6653,20 @@ end
 -- other switch. Answers what it did, for the checks.
 function PlanTab.wearMadeSpare(q)
 	local name = PlanTab.SPARE .. q.wear
-	local id = q.made == 1 and (PlanTab.savedLoadoutNames() or {})[name]
-	if not id then return "failed" end  -- stepLoadouts said why
+	if q.made ~= 1 then return "failed" end  -- stepLoadouts said why
+	-- the config the queue watched, else by name: the list can lag the import
+	local id = q.pendingID
+	local okInfo, info = pcall(C_Traits.GetConfigInfo, id or 0)
+	if not (id and okInfo and info and info.name == name) then id = (PlanTab.savedLoadoutNames() or {})[name] end
+	if not id then
+		PlanTab.say(("\"%s\" was made but the game does not list it yet. Double-click the build again in a moment."):format(q.wear))
+		return "unlisted"
+	end
 	PlanTab.spareIDs()[id] = true
+	if InCombatLockdown() then
+		PlanTab.say(("\"%s\" is ready. Double-click it again after the fight."):format(q.wear))
+		return "combat"
+	end
 	local okPop, populated = pcall(C_ClassTalents.IsConfigPopulated, id)
 	if not (okPop and populated) then
 		PlanTab.say(("\"%s\" is made but the server has not filled it in yet. Try again in a moment."):format(q.wear))
@@ -7670,6 +7699,42 @@ function PlanTab.loadoutChecks(check)
 	PlanTab.loadTalents("Raid: Sszorak")
 	check(spareTest .. ", a player's own \"BiS: \" loadout is never deleted", names[30], "BiS: M+")
 	check(spareTest .. ", only this addon's spare is", table.concat(calls, "|"), "delete BiS: Raid: Twin Fangs|import BiS: Raid: Sszorak")
+	-- second 0040 review
+	check(spareTest .. ", a player's \"BiS: \" loadout is not read as a build", (function() selected = 30 return (PlanTab.activeLoadoutName()) end)(), "BiS: M+")
+	selected = nextID
+	names[31], calls = "BiS: Raid: Coiled Altar", {}
+	check(spareTest .. ", a \"BiS: X\" it did not make is not doubled", PlanTab.loadTalents("Raid: Coiled Altar") .. "/" .. #calls, "taken/0")
+	names[31] = nil
+	windowOpen = true
+	check(spareTest .. ", no import while the window is open, whoever asks", (PlanTab.importOne({ name = "x", code = nek })), false)
+	PlanTab.loadTalents("Raid: Coiled Altar")
+	windowOpen = false
+	PlanTab.loadTalents("Raid: Nek'Zali")
+	calls = {}
+	PlanTab.spareOnHide()
+	check(spareTest .. ", a later ask replaces the one waiting on the window", #calls, 0)
+	PlanTab.spareWanted = { name = "Raid: Coiled Altar", code = nek, spec = "Balance" }
+	PlanTab.spareOnHide()
+	check(spareTest .. ", and so does a spec change", #calls, 0)
+	PlanTab.spareWanted, combat = { name = "Raid: Coiled Altar", code = nek, spec = "Feral" }, true
+	PlanTab.spareOnHide()
+	combat = false
+	check(spareTest .. ", a window shut in combat says so and makes nothing", #calls .. "/" .. tostring(printed[#printed]:find("In combat", 1, true) ~= nil), "0/true")
+	-- the saved list can lag the import: the config the queue watched is used
+	local keptIDs, keptEnum = api.GetConfigIDsBySpecID, Enum.TraitConfigType
+	Enum.TraitConfigType = { Combat = 1 }
+	api.GetConfigIDsBySpecID = function() local ids = {} for id in pairs(names) do if id ~= 40 then ids[#ids + 1] = id end end return ids end
+	api.ImportLoadout = function(_, _, name)
+		calls[#calls + 1] = "import " .. name
+		names[40] = name
+		PlanTab.onLoadoutEvent("TRAIT_CONFIG_CREATED", { ID = 40, type = 1 })
+		return true
+	end
+	switched = {}
+	PlanTab.loadTalents("Raid: Ula'tek")
+	check(spareTest .. ", found by the config the queue watched when the list lags", PlanTab.spareIDs()[40] and switched[#switched], "BiS: Raid: Ula'tek")
+	api.GetConfigIDsBySpecID, Enum.TraitConfigType, names[40] = keptIDs, keptEnum, nil
+	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name nextID = nextID + 1 names[nextID] = name return true end
 	-- the queue gave up waiting and the server has not filled it: never worn half made
 	api.IsConfigPopulated, switched = function() return false end, {}
 	check(spareTest .. ", an unfilled spare is not worn", PlanTab.wearMadeSpare({ wear = "Raid: Sszorak", made = 1 }) .. "/" .. #switched, "unfilled/0")
@@ -7818,7 +7883,12 @@ function PlanTab.barChecks(check)
 	bars[20], shown = { type = "spell", id = 31337 }, nil
 	check(undoTest .. ", the button asks first after a hand change", PlanTab.undoBarsAsk(), "ask")
 	check(undoTest .. ", and Cancel keeps the change", shown and shown.buttons[2].onClick == nil and bars[20] and bars[20].id, 31337)
+	check(undoTest .. ", and Undo anyway undoes", shown and shown.buttons[1].onClick == PlanTab.undoBars, true)
 	bars[20] = keptSlot
+	-- second review: a key changed by hand counts too
+	bound.Z, shown = "ACTIONBUTTON1", nil
+	check(undoTest .. ", a key changed by hand asks first too", PlanTab.undoBarsAsk(), "ask")
+	bound.Z = nil
 	check(undoTest, PlanTab.undoBarsAsk(), "undone")
 	check(undoTest .. ", and off after the undo", PlanTab.canUndoBars(), false)
 	check(undoTest .. ", Rake back in 7", bars[7] and bars[7].id, 1822)
@@ -9060,7 +9130,8 @@ local function selfTest()
 		-- must say what will, rather than click and do nothing (Rob, 2026-09-22)
 		local sameTest = "talents button says so when that loadout is loaded already"
 		local wasActive = PlanTab.activeLoadoutName
-		PlanTab.activeLoadoutName = function() return "Raid: Twin Fangs", true end  -- selected, and its build moved
+		-- the spec must be passed: without it activeLoadoutName cannot judge the build (second review)
+		PlanTab.activeLoadoutName = function(spec) return "Raid: Twin Fangs", spec ~= nil end  -- selected, and its build moved
 		reads.GetLastSelectedSavedConfigID = function() return 1 end
 		printed, asked = {}, nil
 		check(sameTest, PlanTab.loadTalents("Raid: Twin Fangs"), "same")
@@ -9069,7 +9140,7 @@ local function selfTest()
 		check(sameTest .. ", points at Reset to plan", printed[1] and printed[1]:find("Reset to plan", 1, true) ~= nil, true)
 		check(sameTest .. ", in one line", #printed, 1)
 		-- 0029 review: a build that did not move is simply on, and said so
-		PlanTab.activeLoadoutName, printed = function() return "Raid: Twin Fangs", false end, {}
+		PlanTab.activeLoadoutName, printed = function(spec) return "Raid: Twin Fangs", spec == nil end, {}
 		check(sameTest .. ", unmoved it is on already", PlanTab.loadTalents("Raid: Twin Fangs"), "on")
 		check(sameTest .. ", and says nothing of Reset", printed[1] and printed[1]:find("Reset", 1, true), nil)
 		check(sameTest .. ", nor opens the window", opened, 2)
@@ -10121,6 +10192,12 @@ local function selfTest()
 		check(namesTest .. ", the lockout is asked as the journal asks it", (PlanTab.bossDone(3445) and "dead " or "") .. tostring(lockAsk), "2939/3445/15")
 		check(namesTest .. ", a boss dead on it reads dead", PlanTab.bossDone(3470), true)
 		check(namesTest .. ", the reminder's and the list's row skips it", PlanTab.bossHere("Feral", "raid").boss, "Entombed Sentinels")
+		-- second review: through the callers themselves, not only the helper
+		active = "DotC Raid ST *"
+		check(namesTest .. ", the reminder names the next living boss", PlanTab.checkSetup() == "shown" and PlanTab.popupModel.title, "The Venomous Abyss: Entombed Sentinels")
+		PlanTab.hidePopup()
+		active = "Raid: Nek'Zali"
+		check(namesTest .. ", the list puts the next living boss first", PlanTab.sidebarHere("Feral"), "Raid: Entombed Sentinels")
 		C_RaidLocks, GetInstanceInfo, PlanTab.lastKill = wasLocks, wasInstance, wasKilled
 		active = "DotC Raid ST *"
 		check(namesTest .. ", shown", PlanTab.checkSetup(), "shown")
