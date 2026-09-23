@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.31.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds card `0035` only; `0031` to `0034` are built and in `ai-review/`; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
-_Last updated: 2026-09-23 (v0.31.0: Balance builds named by fight, `Raid: Single Target`, `Raid: Cleave`, `Raid: Nek'Zali, Nymrissa`; a build for one boss keeps `Raid: <boss>` (Rob); v0.30.0: hover a build to see on the tree what it changes, card 0034; v0.29.0: the talent window list looks like TalentLoadoutsEx, card 0032; v0.28.0: action bar layouts per spec and per build, `/djbis bars`, card 0033; v0.27.0: the planned builds become real loadouts, `/djbis loadouts` and `/djbis tidy`, card 0031)_
+**Status:** v0.32.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds card `0035` only; `0031` to `0034` are built and in `ai-review/`; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
+_Last updated: 2026-09-23 (v0.32.0: key bindings go with the action bars, card 0033; v0.31.0: Balance builds named by fight, `Raid: Single Target`, `Raid: Cleave`, `Raid: Nek'Zali, Nymrissa`; a build for one boss keeps `Raid: <boss>` (Rob); v0.30.0: hover a build to see on the tree what it changes, card 0034; v0.29.0: the talent window list looks like TalentLoadoutsEx, card 0032; v0.28.0: action bar layouts per spec and per build, `/djbis bars`, card 0033; v0.27.0: the planned builds become real loadouts, `/djbis loadouts` and `/djbis tidy`, card 0031)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the

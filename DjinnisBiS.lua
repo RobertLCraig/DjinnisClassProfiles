@@ -6792,7 +6792,7 @@ function PlanTab.applyBars(key)
 	DjinnisBiSCharDB.keysUndo = layout.keys and PlanTab.readKeys() or nil
 	local placed, skipped = PlanTab.placeBars(layout.slots)
 	local keys, refused = 0, {}
-	if layout.keys then keys, refused = PlanTab.placeKeys(layout.keys) end  -- a layout saved before v0.31.0 has none
+	if layout.keys then keys, refused = PlanTab.placeKeys(layout.keys) end  -- a layout saved before v0.32.0 has none
 	for _, line in ipairs(refused) do skipped[#skipped + 1] = line end
 	PlanTab.barsSeen = key
 	PlanTab.say(("Applied the %s layout: %d slots and %d keys changed, %d skipped. %s/djbis bars undo|r%s puts the old ones back.")
