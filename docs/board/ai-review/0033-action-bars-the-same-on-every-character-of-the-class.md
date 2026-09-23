@@ -23,7 +23,7 @@ attempt and went dormant: "couldn't get it working properly the way I wanted".
 
 ## Open, and Rob's to say
 
-- Keybindings too? `DjinnisClassProfiles/KeybindingProfiles.lua` exists.
+- ~~Keybindings too?~~ **Yes** (Rob, 2026-09-23). Built at v0.31.0, below.
 
 ## Built, v0.28.0, 2026-09-23
 
@@ -51,7 +51,24 @@ attempt and went dormant: "couldn't get it working properly the way I wanted".
   druids. It caught one real fault before any client did: two empty slots did not count as the
   same, so every empty slot read as a change.
 
-**Keybindings are not done.** That is still Rob's question below.
+## Key bindings, v0.31.0, 2026-09-23
+
+- A layout now holds the key bindings too, as key -> action, and save, apply, undo and the offer
+  all carry them. The core is `DjinnisClassProfiles/KeybindingProfiles.lua`, cut down.
+- Apply unbinds a key the layout does not name, binds a key it names to its action, and leaves the
+  rest. A binding the game refuses (another addon's action this character lacks) is listed with
+  the skipped slots. Then `SaveBindings(GetCurrentBindingSet())`, which writes to the set in use,
+  account or character, as Blizzard's key binding window does.
+- **If your bindings are account-wide, they are the same on every character already**, and the
+  offer counts 0 keys.
+- The binding calls are not in `Blizzard_APIDocumentationGenerated`; Blizzard's key binding window
+  uses all of them. Each read goes through `canRead`.
+- A layout saved before v0.31.0 has no keys and leaves them alone. Save it again to add them.
+- `/bis test`: 7 more checks in `PlanTab.barChecks`, with a model of the binding table. Breaking the
+  unbind step made 2 of them fail, so they run.
+
+**Extra step for step 3 below:** after **Apply**, press a few keys. Pass: they fire the same
+buttons as on the first druid.
 
 ## What I need from you
 

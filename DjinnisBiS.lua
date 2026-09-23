@@ -6693,6 +6693,47 @@ function PlanTab.barsDiffer(layout)
 	return n
 end
 
+-- Key bindings go with the bars (Rob, 2026-09-23, card 0033's open question).
+-- DjinnisClassProfiles' KeybindingProfiles.lua, cut down. None of these calls
+-- is in Blizzard_APIDocumentationGenerated, but Blizzard's own key binding
+-- window uses every one. Held as key -> action. A key the layout does not name
+-- is unbound; one it names is bound to its action; the rest are left alone.
+-- SaveBindings writes to the set in use, account or character, as the key
+-- binding window does.
+function PlanTab.readKeys()
+	local keys = {}
+	for i = 1, GetNumBindings() do
+		local action, _, key1, key2 = GetBinding(i)
+		if canRead(action) and action then
+			if canRead(key1) and key1 then keys[key1] = action end
+			if canRead(key2) and key2 then keys[key2] = action end
+		end
+	end
+	return keys
+end
+
+function PlanTab.keysDiffer(want)
+	local have, n = PlanTab.readKeys(), 0
+	for key, action in pairs(have) do if want[key] ~= action then n = n + 1 end end
+	for key, action in pairs(want) do if have[key] == nil then n = n + 1 end end
+	return n
+end
+
+-- Returns how many keys changed, and the keys the game would not bind.
+function PlanTab.placeKeys(want)
+	local have, changed, refused = PlanTab.readKeys(), 0, {}
+	for key in pairs(have) do
+		if want[key] == nil then SetBinding(key, nil) changed = changed + 1 end
+	end
+	for key, action in pairs(want) do
+		if have[key] ~= action then
+			if SetBinding(key, action) then changed = changed + 1 else refused[#refused + 1] = ("key %s: will not bind to %s"):format(key, action) end
+		end
+	end
+	SaveBindings(GetCurrentBindingSet())
+	return changed, refused
+end
+
 local function barsDB()
 	local d = db()
 	d.bars = d.bars or {}  -- spec -> { slots, saved = date }; spec .. " / " .. build -> the same
@@ -6733,8 +6774,10 @@ function PlanTab.saveBars(forBuild)
 	end
 	local slots, n = PlanTab.readBars(), 0
 	for _ in pairs(slots) do n = n + 1 end
-	barsDB()[key] = { slots = slots, saved = date and date("%Y-%m-%d") or nil }
-	PlanTab.say(("Saved %d action bar slots as the %s layout."):format(n, key))
+	local keys, k = PlanTab.readKeys(), 0
+	for _ in pairs(keys) do k = k + 1 end
+	barsDB()[key] = { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil }
+	PlanTab.say(("Saved %d action bar slots and %d key bindings as the %s layout."):format(n, k, key))
 	return key
 end
 
@@ -6746,10 +6789,14 @@ function PlanTab.applyBars(key)
 	if not layout then PlanTab.say("No saved layout called " .. tostring(key) .. ".") return "none" end
 	DjinnisBiSCharDB = DjinnisBiSCharDB or {}
 	DjinnisBiSCharDB.barsUndo = PlanTab.readBars()
+	DjinnisBiSCharDB.keysUndo = layout.keys and PlanTab.readKeys() or nil
 	local placed, skipped = PlanTab.placeBars(layout.slots)
+	local keys, refused = 0, {}
+	if layout.keys then keys, refused = PlanTab.placeKeys(layout.keys) end  -- a layout saved before v0.31.0 has none
+	for _, line in ipairs(refused) do skipped[#skipped + 1] = line end
 	PlanTab.barsSeen = key
-	PlanTab.say(("Applied the %s layout: %d slots changed, %d skipped. %s/djbis bars undo|r%s puts the old bars back.")
-		:format(key, placed, #skipped, GOLD, GREY))
+	PlanTab.say(("Applied the %s layout: %d slots and %d keys changed, %d skipped. %s/djbis bars undo|r%s puts the old ones back.")
+		:format(key, placed, keys, #skipped, GOLD, GREY))
 	for _, line in ipairs(skipped) do print("  " .. line) end
 	return "applied"
 end
@@ -6759,9 +6806,11 @@ function PlanTab.undoBars()
 	if why then PlanTab.say(why) return "fenced" end
 	local undo = DjinnisBiSCharDB and DjinnisBiSCharDB.barsUndo
 	if not undo then PlanTab.say("Nothing to undo on this character.") return "none" end
-	DjinnisBiSCharDB.barsUndo = nil
+	local keysUndo = DjinnisBiSCharDB.keysUndo
+	DjinnisBiSCharDB.barsUndo, DjinnisBiSCharDB.keysUndo = nil, nil
 	local placed, skipped = PlanTab.placeBars(undo)
-	PlanTab.say(("The bars are back as they were: %d slots changed, %d skipped."):format(placed, #skipped))
+	local keys = keysUndo and PlanTab.placeKeys(keysUndo) or 0
+	PlanTab.say(("The bars and keys are back as they were: %d slots and %d keys changed, %d skipped."):format(placed, keys, #skipped))
 	return "undone"
 end
 
@@ -6784,13 +6833,14 @@ function PlanTab.offerBars(asked)
 	if not asked and key == PlanTab.barsSeen then return "seen" end
 	if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerBars(asked) end) return "busy" end
 	PlanTab.barsSeen = key
-	local n = PlanTab.barsDiffer(barsDB()[key].slots)
-	if n == 0 then
-		if asked then PlanTab.say("The bars already match the " .. key .. " layout.") end
+	local layout = barsDB()[key]
+	local n, k = PlanTab.barsDiffer(layout.slots), layout.keys and PlanTab.keysDiffer(layout.keys) or 0
+	if n + k == 0 then
+		if asked then PlanTab.say("The bars and keys already match the " .. key .. " layout.") end
 		return "same"
 	end
 	PlanTab.prompt("Djinni's BiS: action bars", {
-		("The %s layout would change %d slots here."):format(key, n),
+		("The %s layout would change %d slots and %d keys here."):format(key, n, k),
 		"Anything this character cannot place stays as it is.",
 	}, {
 		{ label = "Apply", onClick = function() PlanTab.applyBars(key) end },
@@ -7006,6 +7056,26 @@ function PlanTab.barChecks(check)
 	PlanTab.prompt = function(_, lines, buttons) shown = { lines = lines, buttons = buttons } end
 	PlanTab.activeLoadoutName = function() return "Raid: Sszorak" end
 	db().bars, PlanTab.barsSeen, DjinnisBiSCharDB = {}, nil, nil
+	-- key bindings: key -> action, over a fixed list of actions; MYADDON_X is
+	-- an addon's binding the second druid does not have, so the game refuses it
+	local keptKeys = { GetNumBindings, GetBinding, SetBinding, SaveBindings, GetCurrentBindingSet }
+	local actions, bound, saves = { "MOVEFORWARD", "ACTIONBUTTON1", "ACTIONBUTTON2", "MYADDON_X" }, {}, 0
+	GetNumBindings = function() return #actions end
+	GetBinding = function(i)
+		local keys = {}
+		for key, action in pairs(bound) do if action == actions[i] then keys[#keys + 1] = key end end
+		table.sort(keys)
+		return actions[i], "cat", keys[1], keys[2]
+	end
+	SetBinding = function(key, action)
+		if action == "MYADDON_X" and not PlanTab.hasMyAddon then return false end
+		bound[key] = action
+		return true
+	end
+	SaveBindings = function() saves = saves + 1 end
+	GetCurrentBindingSet = function() return 2 end
+	PlanTab.hasMyAddon = true
+	bound = { W = "MOVEFORWARD", ["1"] = "ACTIONBUTTON1", Q = "ACTIONBUTTON2", F = "MYADDON_X" }
 
 	-- the first druid: Shred in 1, Rake in 2, a macro in 3, a racial in 4
 	known = { [5221] = true, [1822] = true, [58984] = true }
@@ -7015,14 +7085,19 @@ function PlanTab.barChecks(check)
 	check(saveTest, PlanTab.saveBars(false), "Feral")
 	check(saveTest .. ", holds the macro by name", db().bars.Feral.slots[3].name, "Prowl it")
 
-	-- the second: another racial, the macro at another index, Rake in 7, something in 5
+	check(saveTest .. ", with its keys", db().bars.Feral.keys.Q, "ACTIONBUTTON2")
+
+	-- the second: another racial, the macro at another index, Rake in 7, something in 5;
+	-- button 2 on E instead of Q, an extra key on R, and no MYADDON
+	PlanTab.hasMyAddon = nil
+	bound = { W = "MOVEFORWARD", ["1"] = "ACTIONBUTTON1", E = "ACTIONBUTTON2", R = "ACTIONBUTTON1" }
 	known = { [5221] = true, [1822] = true, [20549] = true }
 	macros = { "Other", "Prowl it" }
 	bars = { [4] = { type = "spell", id = 20549 }, [5] = { type = "item", id = 1 }, [7] = { type = "spell", id = 1822 } }
 	local applyTest = "applied on another druid"
 	check(applyTest .. ", is offered", PlanTab.offerBars(), "shown")
 	check(applyTest .. ", nothing moves before the click", bars[1], nil)
-	check(applyTest .. ", counts what it would change", shown and shown.lines[1]:find("change 5 slots", 1, true) ~= nil, true)
+	check(applyTest .. ", counts what it would change", shown and shown.lines[1]:find("change 5 slots and 4 keys", 1, true) ~= nil, true)
 	shown.buttons[1].onClick()
 	check(applyTest .. ", the same spell in the same slot", bars[1] and bars[1].id, 5221)
 	check(applyTest .. ", Rake moved to 2", bars[2] and bars[2].id, 1822)
@@ -7033,12 +7108,17 @@ function PlanTab.barChecks(check)
 	check(applyTest .. ", the skip is listed", table.concat(printed, "\n"):find("slot 4: not known: Spell58984", 1, true) ~= nil, true)
 	check(applyTest .. ", the cursor is empty after", cursor, nil)
 	check(applyTest .. ", not offered again for the same layout", PlanTab.offerBars(), "seen")
+	check(applyTest .. ", the key moved to Q", bound.Q, "ACTIONBUTTON2")
+	check(applyTest .. ", keys the layout does not name are unbound", tostring(bound.E) .. "/" .. tostring(bound.R), "nil/nil")
+	check(applyTest .. ", a binding the game refuses is listed", table.concat(printed, "\n"):find("key F: will not bind to MYADDON_X", 1, true) ~= nil, true)
+	check(applyTest .. ", and the bindings are saved", saves > 0, true)
 
 	local undoTest = "one undo puts the bars back"
 	check(undoTest, PlanTab.undoBars(), "undone")
 	check(undoTest .. ", Rake back in 7", bars[7] and bars[7].id, 1822)
 	check(undoTest .. ", slot 1 empty again", bars[1], nil)
 	check(undoTest .. ", only once", PlanTab.undoBars(), "none")
+	check(undoTest .. ", the keys too", (bound.E or "") .. "/" .. (bound.R or "") .. "/" .. tostring(bound.Q), "ACTIONBUTTON2/ACTIONBUTTON1/nil")
 
 	local buildTest = "a build with its own layout is offered that one"
 	check(buildTest .. ", saved for the build", PlanTab.saveBars(true), "Feral / Raid: Sszorak")
@@ -7057,6 +7137,8 @@ function PlanTab.barChecks(check)
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]
 	PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print = kept[9], kept[10], kept[11], kept[12], kept[13]
 	PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB = kept[14], kept[15], kept[16]
+	GetNumBindings, GetBinding, SetBinding, SaveBindings, GetCurrentBindingSet = keptKeys[1], keptKeys[2], keptKeys[3], keptKeys[4], keptKeys[5]
+	PlanTab.hasMyAddon = nil
 	db().bars, PlanTab.barsSeen = keptBars, nil
 end
 
