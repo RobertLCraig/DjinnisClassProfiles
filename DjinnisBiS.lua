@@ -5863,6 +5863,7 @@ end
 -- (Balance's single target build), the selected name wins, else the first.
 -- Pure, for /bis test.
 function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded, hereLoadout, problemOf)
+	if type(folded) ~= "table" then folded = nil end  -- the saved file is editable by hand
 	local bosses = spec and PlanTab.BOSSES[spec]
 	local raid = PlanTab.sidebarRows(bosses, "raid", active, edited)
 	local keys = PlanTab.sidebarRows(bosses, "mplus", active, edited)
@@ -6006,7 +6007,7 @@ function PlanTab.sidebarClick(row)
 	local e = row.element
 	if not (e and e.group) or InCombatLockdown() then return end
 	local d = db()
-	d.sidebarFolded = d.sidebarFolded or {}
+	if type(d.sidebarFolded) ~= "table" then d.sidebarFolded = {} end
 	d.sidebarFolded[e.group] = not d.sidebarFolded[e.group] or nil
 	PlanTab.updateSidebar()
 end
@@ -6068,6 +6069,7 @@ function PlanTab.sidebarRow(row, e)
 		row.bosses:SetWordWrap(false)
 		row:SetHighlightTexture("Interface\\FriendsFrame\\UI-FriendsFrame-HighlightBar-Blue", "ADD")
 		row:GetHighlightTexture():SetAlpha(0.4)
+		row:RegisterForClicks("LeftButtonUp")  -- as TalentLoadoutsEx's frames/list.xml, not left to a default
 		row:SetScript("OnClick", PlanTab.sidebarClick)
 		row:SetScript("OnDoubleClick", function(self)
 			if self.element and self.element.loadout then PlanTab.loadTalents(self.element.loadout) end
@@ -7262,6 +7264,18 @@ function PlanTab.sidebarChecks(check)
 		ticked(PlanTab.sidebarList("Feral", "raid", PlanTab.movePoint(feral["Raid: Twin Fangs"]), "Raid: Twin Fangs", true)), "")
 	-- Balance is named by fight, one name per build (Rob, 2026-09-23)
 	check(tickTest .. ", a fight-named build", ticked(PlanTab.sidebarList("Balance", "raid", balance["Raid: Single Target"])), "Raid: Single Target")
+	-- No two builds share a string today, so the tie-break never ran (0032
+	-- review). One is lent the other's string for these two checks.
+	local st, twin = "Raid: Single Target", nil
+	for name in pairs(balance) do if name ~= st and (not twin or name < twin) then twin = name end end
+	local keptTwin = balance[twin]
+	balance[twin] = balance[st]
+	check(tickTest .. ", two builds with one string: only one ticks", ticked(PlanTab.sidebarList("Balance", "raid", balance[st])):find(";", 1, true), nil)
+	-- both ways round, so whichever row comes first, one check needs the tie-break
+	check(tickTest .. ", and it is the one selected", ticked(PlanTab.sidebarList("Balance", "raid", balance[st], twin)), twin)
+	check(tickTest .. ", either one", ticked(PlanTab.sidebarList("Balance", "raid", balance[st], st)), st)
+	balance[twin] = keptTwin
+	check(tickTest .. ", a hand-edited fold setting is ignored", #PlanTab.sidebarList("Feral", "raid", nil, nil, nil, nil, true) > 3, true)
 
 	local markTest = "a row says when it is not saved, and when it cannot be read"
 	list = PlanTab.sidebarList("Feral", "raid", nil, nil, nil, { ["Raid: Nek'Zali"] = 1 }, nil, nil, function(code) return code == feral.Dungeon and "old tree" or nil end)
