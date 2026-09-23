@@ -216,7 +216,7 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Cards `0031` to `0034` are built (loadouts per character, the list's look, shared action bars, tree highlight) and wait in `ai-review/` for `/review-card`, then a client. `0035`, retire DjinnisDreamgrove and DjinnisClassProfiles, stays in `todo/` until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
 
-Twenty-seven cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.26.0. **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
+Twenty-seven cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.30.0 (deployed 2026-09-23). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 
 ## Blockers / open questions
 - **Rob's sims for `0028`**: which loadout each spec uses at 3+ targets, and a Top Gear run per spec per scenario. Nothing else on the board is blocked.
