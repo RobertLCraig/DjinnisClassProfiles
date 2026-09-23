@@ -17,15 +17,18 @@ attempt and went dormant: "couldn't get it working properly the way I wanted".
 - Apply only out of combat and only on a click. A spell this character does not know is skipped
   and listed, not guessed.
 
+- **Per spec by default, per build as an option** (Rob, 2026-09-23). A build may carry its own
+  layout; when it does, switching to that build offers to apply it. A build without one uses the
+  spec's layout. ImprovedTalentLoadouts tied bars to a loadout, which is the per-build half.
+
 ## Open, and Rob's to say
 
-- **One layout per spec, or one per build?** ImprovedTalentLoadouts tied bars to a loadout. This
-  card assumes per spec, because most builds in a spec share buttons, with per-build as a later card.
 - Keybindings too? `DjinnisClassProfiles/KeybindingProfiles.lua` exists.
 
 ## Acceptance
 
 - [ ] WHEN Rob saves on one druid and applies on another, THE ADDON SHALL place every spell both know in the same slot, and SHALL list what it skipped.
+- [ ] WHEN Rob switches to a build that has its own layout, THE ADDON SHALL offer that layout; WHEN it has none, THE ADDON SHALL use the spec's layout.
 - [ ] WHEN a layout is applied, THE ADDON SHALL keep the previous layout for one undo.
 - [ ] IN combat, THE ADDON SHALL refuse and say why.
 - [ ] In a client: after an apply, one pull on a dummy with no frozen button. Writing slots from addon code is how MySlot works, but it is not yet proven clear of the fault in `0002`.
