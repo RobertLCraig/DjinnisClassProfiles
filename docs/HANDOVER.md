@@ -23,7 +23,8 @@ reachable fast enough to use during a roll.
 druid-first?
 
 ## Canonical data shape
-`DjinnisBiSDB`, one account-wide SavedVariables table declared in the `.toc`. **Its shape lives in
+`DjinnisBiSDB`, one account-wide SavedVariables table declared in the `.toc`, and since v0.28.0
+`DjinnisBiSCharDB`, per character, which holds only the action bar undo (card 0033). **Its shape lives in
 `DjinnisBiS.lua` and nowhere else**; there is no `DATA-MODEL.md`, and that is a gap rather than a
 decision.
 
