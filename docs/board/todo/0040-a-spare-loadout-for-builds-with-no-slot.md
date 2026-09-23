@@ -244,3 +244,60 @@ No client can be run by an agent. Once fixed, a person owes What I need from you
   no spec check 2, no "taken" guard 1, no `pendingID` 1, no id guard in `spareBuild` 3, no window
   guard in `importOne` 1, no combat checks 6. Not covered: the `HookScript` line (harness frames
   keep no scripts) and the half-second delay.
+
+**2026-09-23** Third adversarial review of e1b2ecb (v0.38.1). **Bounced to todo: one defect, and
+three of the fixes have no check that can fail.**
+
+The second review's three defects are fixed in the code. A new ask through `loadTalents` or a spec
+change drops the waiting wish. An unrecorded "BiS: X" answers "taken" and nothing is made. The
+new id comes from `q.pendingID`.
+
+**Finding 1: a loadout picked in Blizzard's own dropdown is still overridden.** The wish is dropped
+only by `loadTalents` (`DjinnisBiS.lua:3935`) and a spec change (6537). With the talent window open,
+the natural way to choose a loadout is Blizzard's dropdown, which never reaches `loadTalents`. So:
+double-click a grey row, then pick another loadout in the dropdown, then close the window.
+`spareOnHide` (6533) makes and wears the spare over that choice, and deletes this character's
+other spare on the way (6583). Same for a hand edit Applied in the open window. Fix: keep
+`selected = PlanTab.selectedConfigID()` in the wish at 6575, and drop the wish in `spareOnHide` when
+it has changed. Add a check.
+
+**Finding 2: three fixes, each 0 red under mutation, both harnesses.**
+- `wearMadeSpare` without its combat check (6666): 0 red. The second review's "helper asked in
+  combat" is fixed but not checked.
+- the "unlisted" line made silent (6662): 0 red. That is the second review's finding 3 ("fails
+  silently"), and nothing checks it now says so.
+- `q.pendingID` taken without the name match (6660, `info.name == name` dropped): 0 red. That
+  match is the only thing stopping another Combat config created during the queue from being
+  recorded in `DjinnisBiSCharDB.spares`. Anything recorded there is deleted on the next spare wear
+  (6584). So it guards the delete path and needs a check.
+Two the second review listed are still 0 red: `wearMadeSpare` without `q.made ~= 1` (6656), and
+`spareOnHide` keeping the wish (6536).
+
+**Smaller, and it comes with finding 2's "unlisted" path.** "Unlisted" tells the player to
+double-click the build again. Once the list catches up, that double-click answers "taken" and
+says this addon did not make it (6557), which is false, and asks them to delete it. The spare made
+by v0.36.0 to v0.37.1 gets the same false line. One way to cover both: adopt an unrecorded
+"BiS: X" once, when its `loadoutString` equals the build's code. That is the second review's other
+option.
+
+What held:
+- Mutations red, both harnesses: no clear in `loadTalents` 3, no spec check 2, no close-in-combat
+  check 1, no "taken" guard 1, no `pendingID` 1, no `pendingID` from the event 1, wish without its
+  spec 8, `importOne` without the window guard 1, `spareBuild` without the id guard 3, "same"
+  branch gone 1, id recorded before the combat check moved away 6.
+- `stepLoadouts` clears `pendingID` before each import and not before `finishLoadouts`, so the id
+  that reaches `wearMadeSpare` is the last import's.
+- `wearMadeSpare` compares `info.name` without `canRead`. `TraitConfigInfo.name` is not marked
+  secret (`SharedTraitsDocumentation.lua:947`), so a note only.
+- The game folder holds v0.38.1, the same file as the repository.
+
+Security:
+1. Weakest point: `DjinnisBiSCharDB.spares`. Whatever id lands there is deleted later with no
+   question. Its one entry path now trusts a name match that no check covers (finding 2).
+2. Unchecked: the saved wish is acted on at the window's close with no check that the player did
+   not choose something else in Blizzard's own UI (finding 1). Ids in `spares` are still never
+   pruned.
+3. Leaks: nothing leaves the client. Failures print the build name and the game's reason.
+
+No client can be run by an agent. Once fixed, a person owes What I need from you 1 to 6, plus the
+three the second review added.
