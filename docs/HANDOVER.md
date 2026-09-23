@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.40.1, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob. `0048` holds two calls before `0049` to `0051` (every class).
+**Status:** v0.40.1, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob. Every class is next: `0049`, then `0050` and `0051`.
 _Last updated: 2026-09-24 (v0.40.1. Each spec's `Dungeon` build is pinned from Archon in `update-builds.py` PIN, not read from Dreamgrove: card `0047`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
