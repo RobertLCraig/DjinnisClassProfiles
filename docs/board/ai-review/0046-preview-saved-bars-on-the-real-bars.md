@@ -207,3 +207,25 @@ What held:
 
 Security: **Weakest point:** `/djbis test` in a client, finding 3. **Unchecked:** a secret
 scale (finding 2). **Leaks:** nothing. It is all local, and a failure only means no preview.
+
+**2026-09-23** Builder, v0.39.2. All three findings fixed.
+1. The fake container now sits 50 to the right of its hidden button. A check reads where that
+   ghost lands (333, which is 250 in UIParent's scale).
+2. Two new checks: a button with a secret scale is not drawn, and a secret UIParent scale draws
+   nothing.
+3. The preview reaches Blizzard only through `PlanTab.ghostUI`: button names, button lookup, frame
+   making, UIParent and `canRead`. The checks swap that one table, never a Blizzard global or
+   `canRead`. They run inside `pcall`, and the table is put back after. Two checks then confirm
+   that the block ran to the end and that the real table is back.
+
+Also: a `Bar12` fake, so a loop that stops at 11 goes red.
+
+Six mutations, all red: ghost on the hidden button, no scale guard, no UIParent guard, no
+restore, 11 buttons, no `SetPoint`. "No restore" is now a FAIL line, not a crash. The review's
+note on the older 0033 checks (they swap `C_ActionBar`, `C_Spell` and `InCombatLockdown`) is on
+card `0038` as a suspect.
+
+Rob pulled `wow-ui-source` during this fix (`live`, 782825221 to 09b9db794). The only change near
+this card is in `SimpleTextureBaseAPIDocumentation.lua`: `ChecksForbiddenAspects` on `self` for
+texture setters. That applies to forbidden textures. The preview only sets textures on its own
+frames, so it is not affected.

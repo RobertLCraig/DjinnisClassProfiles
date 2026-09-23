@@ -7447,23 +7447,34 @@ end
 -- Every shown action button and the slot it shows now, the form page too.
 -- The names are Blizzard's (Shared/ActionButtonUtil.lua); `action` is set by
 -- ActionBarActionButtonMixin:UpdateAction. Read only.
+-- Everything of Blizzard's the preview reaches, in one table, so the checks
+-- swap this table and never write a Blizzard global: a global written by
+-- addon code stays tainted until /reload (0046 second review, and card 0038).
+PlanTab.ghostUI = {
+	names = function() return ActionButtonUtil and ActionButtonUtil.ActionBarButtonNames or {} end,
+	button = function(name) return _G[name] end,
+	make = function() return CreateFrame("Frame", nil, UIParent) end,
+	top = function() return UIParent end,
+	canRead = canRead,
+}
+
 -- IsVisible and GetEffectiveScale may hand back a secret (SimpleFrameAPIDocumentation).
 local function shown(frame)
 	local v = frame:IsVisible()
-	return canRead(v) and v
+	return PlanTab.ghostUI.canRead(v) and v
 end
 
 function PlanTab.ghostButtons()
-	local out = {}
-	for _, prefix in ipairs(ActionButtonUtil and ActionButtonUtil.ActionBarButtonNames or {}) do
+	local ui, out = PlanTab.ghostUI, {}
+	for _, prefix in ipairs(ui.names()) do
 		for i = 1, 12 do
 			-- An empty button is hidden when the bar's "Always Show Buttons"
 			-- is off, but its container stays up while the bar has room for it
 			-- (ActionBarMixin:UpdateShownButtons): that slot a load may fill (0046 review).
-			local b = _G[prefix .. i]
+			local b = ui.button(prefix .. i)
 			local place = b and (shown(b) and b or b.container and shown(b.container) and b.container)
 			local slot = place and b.action
-			if canRead(slot) and type(slot) == "number" then out[#out + 1] = { frame = place, slot = slot } end
+			if ui.canRead(slot) and type(slot) == "number" then out[#out + 1] = { frame = place, slot = slot } end
 		end
 	end
 	return out
@@ -7477,12 +7488,13 @@ function PlanTab.showGhost(key)
 	if not layout or InCombatLockdown() then return 0 end
 	PlanTab.ghostKey = key
 	local plan = PlanTab.ghostPlan(layout.slots or {}, PlanTab.ghostButtons(), PlanTab.readBars())
-	local top = UIParent:GetEffectiveScale()
-	if not canRead(top) then return 0 end
+	local ui = PlanTab.ghostUI
+	local top = ui.top():GetEffectiveScale()
+	if not ui.canRead(top) then return 0 end
 	for i, p in ipairs(plan) do
 		local g = PlanTab.ghosts[i]
 		if not g then
-			g = CreateFrame("Frame", nil, UIParent)
+			g = ui.make()
 			g:SetFrameStrata("DIALOG")
 			g.edge = g:CreateTexture(nil, "BACKGROUND")
 			g.edge:SetAllPoints()
@@ -7493,10 +7505,10 @@ function PlanTab.showGhost(key)
 		end
 		local l, b, w, h = p.frame:GetRect()
 		local scale = p.frame:GetEffectiveScale()
-		if canRead(l) and l and canRead(scale) then
+		if ui.canRead(l) and l and ui.canRead(scale) then
 			local s = scale / top
 			g:ClearAllPoints()
-			g:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", l * s, b * s)
+			g:SetPoint("BOTTOMLEFT", ui.top(), "BOTTOMLEFT", l * s, b * s)
 			g:SetSize(w * s, h * s)
 			-- amber: a load changes this slot; an empty one it will clear
 			if p.changed then g.edge:SetColorTexture(1, 0.6, 0, 1) else g.edge:SetColorTexture(0, 0, 0, 0.8) end
@@ -8208,52 +8220,65 @@ function PlanTab.barChecks(check)
 	PlanTab.showGhost("Feral")
 	check(ghostTest .. ", nothing in combat", PlanTab.ghostKey, nil)
 	combat = false
-	-- the frame side (0046 review), on fakes that remember what was done to them:
-	-- TestBar1 shown, TestBar2 hidden and empty in a shown place, TestBar3 off
-	-- the bar, TestBar4 shown but its visibility a secret
-	local keptFrames = { ActionButtonUtil, CreateFrame, UIParent, canRead, PlanTab.ghosts }
-	local function fake(visible, x, scale)
-		return { IsVisible = function() return visible end, GetRect = function() return x, 10, 40, 40 end,
-			GetEffectiveScale = function() return scale or 1 end }
-	end
-	local secret = {}
-	canRead = function(v) return v ~= secret end
-	TestBar1, TestBar2, TestBar3, TestBar4 = fake(true, 100, 1.5), fake(false, 200), fake(false, 300), fake(secret, 400)
-	TestBar1.action, TestBar2.action, TestBar3.action, TestBar4.action = 1, 2, 3, 4
-	TestBar2.container, TestBar3.container = fake(true, 200), fake(false, 300)
-	ActionButtonUtil = { ActionBarButtonNames = { "TestBar" } }
-	local slotsOf = {}
-	for _, b in ipairs(PlanTab.ghostButtons()) do slotsOf[#slotsOf + 1] = b.slot end
-	check(ghostTest .. ", an empty hidden button in a shown place counts; off the bar or secret, not", table.concat(slotsOf, ","), "1,2")
-	local drawn = {}
-	CreateFrame = function()
-		local g = { shown = false }
-		function g:SetPoint(_, _, _, x, y) self.x, self.y = x, y end
-		function g:SetSize(w) self.w = w end
-		function g:Show() self.shown = true end
-		function g:Hide() self.shown = false end
-		function g:CreateTexture() return setmetatable({}, { __index = function() return function() end end }) end
-		setmetatable(g, { __index = function() return function() end end })
-		drawn[#drawn + 1] = g
-		return g
-	end
-	UIParent = { GetEffectiveScale = function() return 0.75 end }
-	PlanTab.ghosts = {}
-	db().bars = { Feral = { slots = { { type = "spell", id = 5221 } } } }
-	check(ghostTest .. ", draws one per place", PlanTab.showGhost("Feral"), 2)
-	check(ghostTest .. ", at the button, in UIParent's scale", ("%d,%d,%d"):format(drawn[1].x, drawn[1].y, drawn[1].w), "200,20,80")
-	PlanTab.sidebarTipOff()
-	check(ghostTest .. ", gone when the mouse leaves a row", tostring(drawn[1].shown) .. "/" .. tostring(PlanTab.ghostKey), "false/nil")
-	PlanTab.showGhost("Feral")
-	PlanTab.sidebarCombat({ Hide = function() end, tab = { Hide = function() end } })
-	check(ghostTest .. ", gone in combat", tostring(drawn[1].shown) .. "/" .. tostring(PlanTab.ghostKey), "false/nil")
-	PlanTab.showGhost("Feral")
-	TestBar2.container = fake(false, 200)
-	PlanTab.barsChanged()
-	check(ghostTest .. ", redrawn after a load, and a place gone is hidden", tostring(drawn[1].shown) .. "/" .. tostring(drawn[2].shown), "true/false")
-	PlanTab.hideGhost()
-	TestBar1, TestBar2, TestBar3, TestBar4 = nil, nil, nil, nil
-	ActionButtonUtil, CreateFrame, UIParent, canRead, PlanTab.ghosts = keptFrames[1], keptFrames[2], keptFrames[3], keptFrames[4], keptFrames[5]
+	-- The frame side (0046 reviews), on fakes that remember what was done to
+	-- them. Only PlanTab.ghostUI is swapped, never a Blizzard global, and it is
+	-- put back even when a check throws. Bar1 shown; Bar2 hidden and empty in a
+	-- shown place further right; Bar3 off the bar; Bar4 its visibility a
+	-- secret; Bar5 shown, its scale a secret; Bar12 the last on a bar.
+	local keptUI, keptGhosts = PlanTab.ghostUI, PlanTab.ghosts
+	local ok, err = pcall(function()
+		local secret = {}
+		local function fake(visible, x, scale)
+			return { IsVisible = function() return visible end, GetRect = function() return x, 10, 40, 40 end,
+				GetEffectiveScale = function() return scale or 1 end }
+		end
+		local buttons = { Bar1 = fake(true, 100, 1.5), Bar2 = fake(false, 200), Bar3 = fake(false, 300), Bar4 = fake(secret, 400), Bar5 = fake(true, 500, secret), Bar12 = fake(true, 600) }
+		for name, b in pairs(buttons) do b.action = tonumber(name:sub(4)) end
+		buttons.Bar2.container, buttons.Bar3.container = fake(true, 250), fake(false, 300)
+		local drawn, topScale = {}, 0.75
+		local function made()
+			local g = { shown = false }
+			function g:SetPoint(_, _, _, x, y) self.x, self.y = x, y end
+			function g:SetSize(w) self.w = w end
+			function g:Show() self.shown = true end
+			function g:Hide() self.shown = false end
+			function g:CreateTexture() return setmetatable({}, { __index = function() return function() end end }) end
+			setmetatable(g, { __index = function() return function() end end })
+			drawn[#drawn + 1] = g
+			return g
+		end
+		PlanTab.ghostUI = {
+			names = function() return { "Bar" } end,
+			button = function(name) return buttons[name] end,
+			make = made,
+			top = function() return { GetEffectiveScale = function() return topScale end } end,
+			canRead = function(v) return v ~= secret end,
+		}
+		PlanTab.ghosts = {}
+		local slotsOf = {}
+		for _, b in ipairs(PlanTab.ghostButtons()) do slotsOf[#slotsOf + 1] = b.slot end
+		check(ghostTest .. ", an empty hidden button in a shown place counts; off the bar or a secret visibility, not", table.concat(slotsOf, ","), "1,2,5,12")
+		db().bars = { Feral = { slots = { { type = "spell", id = 5221 } } } }
+		check(ghostTest .. ", draws one per place", PlanTab.showGhost("Feral"), 4)
+		check(ghostTest .. ", at the button, in UIParent's scale", ("%d,%d,%d"):format(drawn[1].x, drawn[1].y, drawn[1].w), "200,20,80")
+		check(ghostTest .. ", a hidden button's ghost sits on its place", math.floor(drawn[2].x), 333)
+		check(ghostTest .. ", not drawn where the scale is a secret", drawn[3].shown, false)
+		PlanTab.sidebarTipOff()
+		check(ghostTest .. ", gone when the mouse leaves a row", tostring(drawn[1].shown) .. "/" .. tostring(PlanTab.ghostKey), "false/nil")
+		PlanTab.showGhost("Feral")
+		PlanTab.sidebarCombat({ Hide = function() end, tab = { Hide = function() end } })
+		check(ghostTest .. ", gone in combat", tostring(drawn[1].shown) .. "/" .. tostring(PlanTab.ghostKey), "false/nil")
+		PlanTab.showGhost("Feral")
+		buttons.Bar2.container = fake(false, 250)
+		PlanTab.barsChanged()
+		check(ghostTest .. ", redrawn after a load, and a place gone is hidden", tostring(drawn[1].shown) .. "/" .. tostring(drawn[2].shown), "true/false")
+		topScale = secret
+		check(ghostTest .. ", nothing when UIParent's scale is a secret", PlanTab.showGhost("Feral") .. "/" .. tostring(drawn[1].shown), "0/false")
+		PlanTab.hideGhost()
+	end)
+	PlanTab.ghostUI, PlanTab.ghosts = keptUI, keptGhosts
+	check(ghostTest .. ", its checks ran to the end", ok and "yes" or tostring(err), "yes")
+	check(ghostTest .. ", and the real frame calls are back", PlanTab.ghostUI.canRead == canRead and PlanTab.ghostUI.make == keptUI.make, true)
 
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]
