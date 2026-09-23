@@ -147,3 +147,16 @@ ran 22 mutations on a copy in `%TEMP%\rev0031`.
 
 **Not verifiable here:** there is no browser surface. The UI runs only in a game client, which no
 agent can run. Criteria 1-5 are in-game checks.
+
+**2026-09-23** Builder, v0.33.0, commit `daf3506`. All four findings fixed.
+1. `talentStringsDiffer` now decodes the node bits (`PlanTab.nodeKey`) and compares purchased
+   nodes only, with ranks and choice. A granted node counts as unselected. The gear cell's
+   `WS M+` against Dreamgrove's `WS M+` is now `false`, and that is a check. This closes the
+   card's Open note. Old checks faked an edit by changing the last character, which is only
+   padding; they now flip a bit mid-string (`PlanTab.movePoint`).
+2. New Reset checks: a string that will not parse, and one with no talents. Both expect no
+   delete. Moving `DeleteConfig` up now turns 3 checks red.
+3. A delete that was not made again now says so and points at `/djbis loadouts`.
+4. `tidy` takes `loadoutFence` (combat, talent window, running queue). Checks cover its window
+   and selected guards. A name two loadouts share is never replaced, and the player is told.
+Breaking each fix on a copy turned the checks red (5 of 5).

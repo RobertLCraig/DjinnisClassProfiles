@@ -135,3 +135,11 @@ human-review, a person must check:
 - For step 2, the tick only follows the tree after Apply. Nothing redraws on a staged talent
   change.
 - Double-click a header after scrolling to the bottom: the talents must not switch.
+
+**2026-09-23** Builder, v0.33.0, commit `4fbcc30`. All three findings fixed.
+1. `sidebarChecks` lends one Balance build another's string and checks both ways round: only
+   one row ticks, and it is the selected one. Tick-every-match and no-tie-break both go red.
+2. `sidebarList` ignores a fold setting that is not a table; `sidebarClick` replaces one.
+3. Rows call `RegisterForClicks("LeftButtonUp")`, as TalentLoadoutsEx does.
+The review also noted that the Built line on Balance's shared names is out of date. Since `43b4530`
+each Balance build has its own string.

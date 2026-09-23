@@ -108,3 +108,11 @@ Security:
 
 No browser surface. The UI runs in a game client and no agent can run one, so both acceptance
 criteria still need a person at the client once this is fixed.
+
+**2026-09-23** Builder, v0.33.0, commit `3d67af9`. Both findings fixed.
+1. `decodeBuild` returns nil when `buildProblem` finds one (version, spec, tree), so such a
+   row draws nothing. A granted node counts as unselected, as in 0031's fix.
+2. `treeChecks` now drives `sidebarTip` and `sidebarTipOff` to the tree with the lookup, the
+   decoder and the tooltip stubbed. It checks the colour on each node, the clear, a header's
+   choices, the header's `names`, and the decoder's refusal. All five breaks that survived
+   before now go red, and so does add/drop swapped.

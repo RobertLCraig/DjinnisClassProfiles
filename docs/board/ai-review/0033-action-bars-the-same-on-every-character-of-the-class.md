@@ -152,3 +152,16 @@ clearing the cursor. `GetActionText`, `HasAction`, `PickupSpell`, `PickupItem` a
 can run, so these need a person: the form bars at 73-120, whether spell-override IDs keep a slot
 looking "changed", the grid flicker from up to 180 pick-ups in the automatic probe, and the
 frozen-button test.
+
+**2026-09-23** Builder, v0.33.0, commit `6d2fc63`. Both faults and all smaller issues fixed.
+1. `findMacro` searches 1 to account, then 121 onward for character macros
+   (`Constants.MacroConsts.MAX_ACCOUNT_MACROS`, 120 if absent).
+2. Keys are read only for actions in the normal context (`C_KeyBindings.GetBindingContextForAction`
+   0 or nil). `SetBinding` with no context writes that same context, so housing keys are never
+   touched.
+3. Slots 121-144 are never read or written (`PlanTab.barSlot`).
+4. The undo is kept from before the first apply since the last undo.
+5. A key the game refused this session is not counted again by the offer.
+6. An empty key set is never saved and never placed.
+New checks cover each one, plus ClearCursor after the swap, the vehicle fence and the busy-prompt
+wait. Breaking each fix on a copy turned the checks red (10 of 10).
