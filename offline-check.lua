@@ -118,6 +118,14 @@ do
 		["C_ClassTalents.GetConfigIDsBySpecID"] = true,
 		["C_Traits.GetConfigInfo"] = true, ["C_Traits.GetSubTreeInfo"] = true,
 		["C_Traits.GenerateImportString"] = true,  -- a read: the "(edited)" compare (card 0014)
+		["C_ClassTalents.CanCreateNewConfig"] = true, ["C_ClassTalents.IsConfigPopulated"] = true,
+		["C_ClassTalents.GetTraitTreeForSpec"] = true, ["C_Traits.GetLoadoutSerializationVersion"] = true,
+		["C_Traits.GetTreeHash"] = true,
+		-- Card 0031: these two make and delete SAVED loadouts, the same calls
+		-- Blizzard's import and delete dialogs make. Neither changes the talents
+		-- in play. CommitConfig, LoadConfig, PurchaseRank and SetSelection stay
+		-- off this list: those are the frozen-action-bar route (card 0002).
+		["C_ClassTalents.ImportLoadout"] = true, ["C_ClassTalents.DeleteConfig"] = true,
 	}
 	local src = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
 	local seen = 0

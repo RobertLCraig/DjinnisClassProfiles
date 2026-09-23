@@ -1754,14 +1754,27 @@ end
 -- Blizzard_ClassTalentImportExport.lua) must agree before the node bits
 -- mean anything, so a string from an older client says nothing rather than
 -- "edited". Pure, for /bis test.
--- ponytail: whole-string compare past the header. 25 base64 chars is 150 of
--- the header's 152 bits, the last two share a char with the first node.
+-- A ZERO-FILLED HASH AGREES WITH ANY. Blizzard's own spec says a third-party
+-- site may zero it to skip the check, and Dreamgrove's Balance and Feral
+-- strings do: compared whole, every one of them read "cannot compare"
+-- against a client's export, which carries the real hash (card 0031).
+-- Bits go in low first, six to a char (ExportUtil.lua): chars 1-4 are the
+-- version and spec, 5-25 and the low 2 bits of 26 the hash, the rest nodes.
+-- ponytail: the node bits are compared as text, not decoded; two strings for
+-- one build from two exporters would read "different". Decode with the mixin's
+-- ReadLoadoutContent if that ever shows up in /djbis talents.
+PlanTab.B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+local B64 = PlanTab.B64
 function PlanTab.talentStringsDiffer(active, planned)
 	if type(active) ~= "string" or type(planned) ~= "string" then return nil end
 	if active == "" or planned == "" then return nil end
 	if not (canRead(active) and canRead(planned)) then return nil end
-	if active:sub(1, 25) ~= planned:sub(1, 25) then return nil end
-	return active ~= planned
+	local a26, p26 = B64:find(active:sub(26, 26), 1, true), B64:find(planned:sub(26, 26), 1, true)
+	if not (a26 and p26) or active:sub(1, 4) ~= planned:sub(1, 4) then return nil end
+	local zero = ("A"):rep(21) .. "0"
+	local aHash, pHash = active:sub(5, 25) .. (a26 - 1) % 4, planned:sub(5, 25) .. (p26 - 1) % 4
+	if aHash ~= pHash and aHash ~= zero and pHash ~= zero then return nil end
+	return math.floor((a26 - 1) / 4) ~= math.floor((p26 - 1) / 4) or active:sub(27) ~= planned:sub(27)
 end
 
 -- The planned build for `spec` and `scenario`: the plan cell's own `talents`
@@ -3888,7 +3901,7 @@ function PlanTab.loadTalents(name)
 	local saved = PlanTab.savedLoadoutNames()
 	if saved and not saved[name] then
 		PlanTab.openTalents()
-		print(("%sDjinni's BiS|r %sno saved loadout named \"%s\" for this spec. Save one with that name.|r"):format(GOLD, GREY, name))
+		print(("%sDjinni's BiS|r %sno saved loadout named \"%s\" for this spec.|r %s/djbis loadouts|r %smakes the planned ones.|r"):format(GOLD, GREY, name, GOLD, GREY))
 		return "missing"
 	end
 	-- Already the selected loadout: Blizzard's Apply writes a hand edit into the
@@ -3898,8 +3911,10 @@ function PlanTab.loadTalents(name)
 	-- to do anything"). Open the window and say what does fix it.
 	if PlanTab.activeLoadoutName() == name then
 		PlanTab.openTalents()
-		print(("%sDjinni's BiS|r %s\"%s\" is loaded already, so there is nothing to switch to. Its build is no longer the one the plan was simmed on: import the planned build and save it over \"%s\".|r %s/djbis talents|r %sprints both.|r")
-			:format(GOLD, GREY, name, name, GOLD, GREY))
+		-- Card 0031 closes this: Reset to plan makes it again from the stored
+		-- string, once another loadout is selected.
+		print(("%sDjinni's BiS|r %s\"%s\" is loaded already, but its build is not the planned one. Pick another loadout, then|r %s/djbis loadouts|r %soffers Reset to plan.|r")
+			:format(GOLD, GREY, name, GOLD, GREY))
 		return "same"
 	end
 	if not (ClassTalentHelper and ClassTalentHelper.SwitchToLoadoutByName) then
@@ -4344,6 +4359,7 @@ function PlanTab.prompt(title, lines, buttons)
 	for i = #buttons + 1, #f.buttons do f.buttons[i]:Hide() end
 	-- ponytail: 18 a line is a guess for GameFontHighlight plus the spacing; measure with GetStringHeight if a line ever wraps
 	f:SetHeight(34 + #lines * 18 + 16 + PlanTab.SIZE.button + 12)
+	f:SetWidth(math.max(380, 26 + #buttons * 126))  -- card 0031's offer has three buttons
 	f:Show()
 	return f
 end
@@ -5923,6 +5939,327 @@ function PlanTab.armSidebar()
 	return true
 end
 
+-- The plan's builds as real loadouts on every character (card 0031) ---------
+--
+-- Rob plays several druids and wants the same talents on all of them. Each
+-- build in PlanTab.BUILDS becomes an ordinary Blizzard loadout of its name,
+-- made with C_ClassTalents.ImportLoadout, the call Blizzard's own import
+-- dialog makes; WEARING one still goes through ClassTalentHelper (card 0011).
+-- Nothing here calls CommitConfig, LoadConfig, PurchaseRank or SetSelection:
+-- that is the frozen-action-bar route (card 0002). The queue and every guard
+-- in it came over from DjinnisDreamgrove, whose card 0001 found each one in a
+-- live client on 2026-09-02:
+--   * an import is a server round trip, and only one may be in flight;
+--   * TRAIT_CONFIG_CREATED is not the finish line, IsConfigPopulated is;
+--   * an open talent window WEARS every loadout made (its OnShow registers
+--     TRAIT_CONFIG_CREATED and applies it), so nothing is made while it is up;
+--   * the tree comes from the spec, not the active config, which lags a switch;
+--   * an empty entry list is a loadout with no talents, refused in silence.
+-- The addon touches a name only if it is in PlanTab.BUILDS (make, replace) or
+-- PlanTab.RETIRED (delete, on request). Rob's own loadouts are never touched.
+
+-- The names DjinnisDreamgrove 0.6.0 imported, which 0.7.0 renamed. Deleted
+-- only by /djbis tidy yes, after /djbis tidy has listed them.
+PlanTab.RETIRED = {
+	["EC Raid ST"] = true, ["EC Raid Cleave"] = true, ["KotG Raid ST"] = true, ["KotG Raid Cleave"] = true,
+	["EC M+"] = true, ["KotG M+"] = true, ["DotC Raid"] = true, ["EC Raid Default"] = true,
+	["EC Raid 1m Convoke"] = true, ["EC Raid Incarn"] = true, ["M+ Razeless"] = true,
+	["M+ Razeless Sustain"] = true, ["M+ Raze"] = true, ["M+ Nopex w/ Raze"] = true, ["M+ Nopex"] = true,
+	["M+ Apex"] = true, ["Raid w/ Mana Return"] = true, ["Raid w/o Mana Return"] = true,
+	["M+ HealersHeal"] = true, ["M+ Cat DPS"] = true, ["M+ Caster DPS"] = true, ["DotC Raid ST *"] = true,
+	["WS Raid ST"] = true, ["DotC Raid 2T"] = true, ["WS Raid 2T *"] = true, ["DotC Raid Most Bosses *"] = true,
+	["WS Raid Most Bosses"] = true, ["WS Raid Coiled Altar"] = true, ["DotC M+"] = true, ["WS M+"] = true,
+}
+
+function PlanTab.say(text)
+	print(GOLD .. "Djinni's BiS|r " .. GREY .. text .. "|r")
+end
+
+-- Which planned builds have no saved loadout of their name, and which saved
+-- loadouts of a planned name no longer hold the planned build. `saved` is
+-- PlanTab.savedLoadoutNames() (name -> config id), `stringOf(id)` that
+-- loadout's export. One that cannot be compared is neither. nil when the game
+-- would not list the loadouts: "all missing" would be a lie. Pure, for /bis test.
+function PlanTab.loadoutGaps(builds, saved, stringOf)
+	if not saved then return nil end
+	local missing, drifted = {}, {}
+	for name, build in pairs(builds or {}) do
+		local id = saved[name]
+		if not id then missing[#missing + 1] = name
+		elseif PlanTab.talentStringsDiffer(stringOf(id), build) then drifted[#drifted + 1] = name end
+	end
+	table.sort(missing)
+	table.sort(drifted)
+	return missing, drifted
+end
+
+-- A saved loadout's own export. TalentLoadoutManager reads saved loadouts the
+-- same way (core/ImportExportV2.lua, TryExportBlizzardLoadoutToString).
+function PlanTab.loadoutString(id)
+	local ok, text = pcall(C_Traits.GenerateImportString, id)
+	if ok and type(text) == "string" and canRead(text) then return text end
+	return nil
+end
+
+-- The loadout the talent window has selected. Deleting that one drops the
+-- character to the starter build, so it is never replaced.
+function PlanTab.selectedConfigID()
+	local spec = C_SpecializationInfo
+	if not (spec and spec.GetSpecialization) then return nil end
+	local ok, specID = pcall(spec.GetSpecializationInfo, spec.GetSpecialization())
+	if not ok or not specID then return nil end
+	local okID, id = pcall(C_ClassTalents.GetLastSelectedSavedConfigID, specID)
+	return okID and id or nil
+end
+
+function PlanTab.talentWindowOpen()
+	local frame = PlayerSpellsFrame
+	if not (frame and frame:IsShown()) then return false end
+	return not frame.TalentsFrame or frame.TalentsFrame:IsShown() and true or false
+end
+
+-- Why no loadout can be made now, or nil.
+function PlanTab.loadoutFence()
+	if InCombatLockdown() then return "Not in combat. Try again after the fight." end
+	if PlanTab.talentWindowOpen() then
+		return "Close the talent window first. While it is open the game wears each new loadout instead of just saving it."
+	end
+	if PlanTab.q then return "Still making loadouts. Wait for the count." end
+	return nil
+end
+
+-- One build to one loadout. `job` is { name, code, replace = config id or nil }.
+-- A replace deletes the old loadout only once the string has parsed and the
+-- game says it can make one, so a bad string never costs the old loadout.
+-- Returns ok, the reason when not, and whether the string carries an older
+-- tree stamp (reported, not obeyed: DjinnisDreamgrove card 0001, v0.5.0).
+function PlanTab.importOne(job)
+	local why = PlanTab.talentWindowOpen() and "the talent window is open" or InCombatLockdown() and "in combat"
+	if why then return false, why end
+	if not ClassTalentImportExportMixin and C_AddOns and C_AddOns.LoadAddOn then pcall(C_AddOns.LoadAddOn, "Blizzard_PlayerSpells") end
+	local IE = ClassTalentImportExportMixin
+	if not (IE and ExportUtil and PlayerUtil) then return false, "Blizzard_PlayerSpells did not load" end
+	local stream = ExportUtil.MakeImportDataStream(job.code)
+	local valid, version, specID, treeHash = IE.ReadLoadoutHeader(IE, stream)
+	if not valid then return false, "the stored string will not parse" end
+	if version ~= C_Traits.GetLoadoutSerializationVersion() then return false, "the stored string is from another game version" end
+	local current = PlayerUtil.GetCurrentSpecID()
+	if specID ~= current then return false, "the build is for another spec" end
+	local configID = C_ClassTalents.GetActiveConfigID()
+	if not configID then return false, "no active talents yet. Open the talent window once, close it, and try again" end
+	local info = C_Traits.GetConfigInfo(configID)
+	local treeID = C_ClassTalents.GetTraitTreeForSpec(current) or (info and info.treeIDs and info.treeIDs[1])
+	if not treeID then return false, "no talent tree for this spec yet" end
+	local stale = not IE.IsHashEmpty(IE, treeHash) and not IE.HashEquals(IE, treeHash, C_Traits.GetTreeHash(treeID))
+	if not C_ClassTalents.CanCreateNewConfig() then
+		return false, "the game will not make a loadout now (one is still in flight, or all slots are full)"
+	end
+	local entries = IE.ConvertToImportLoadoutEntryInfo(IE, configID, treeID, IE.ReadLoadoutContent(IE, stream, treeID))
+	if #entries == 0 then
+		return false, "this spec's talent data is not loaded yet. Open the talent window once, close it, and try again"
+	end
+	if job.replace then
+		if not C_ClassTalents.DeleteConfig(job.replace) then return false, "the game would not delete the old one" end
+		job.replace = nil  -- gone: a retry only imports
+	end
+	local ok, err = C_ClassTalents.ImportLoadout(configID, entries, job.name, job.code)
+	if not ok and (not err or err == "") then err = ("the game refused without saying why (%d talents sent)"):format(#entries) end
+	return ok, err, stale
+end
+
+PlanTab.POLL, PlanTab.GIVE_UP = 0.5, 15
+
+-- Starts the queue. Answers what it did, for the checks.
+function PlanTab.makeLoadouts(jobs)
+	local why = PlanTab.loadoutFence()
+	if why then PlanTab.say(why) return "fenced" end
+	if #jobs == 0 then return "nothing" end
+	PlanTab.q = { jobs = jobs, total = #jobs, i = 0, made = 0, stale = 0, retry = {}, gen = 0 }
+	PlanTab.say(("Making %d loadout%s, one at a time. The server takes each in turn."):format(#jobs, #jobs == 1 and "" or "s"))
+	PlanTab.stepLoadouts()
+	return "started"
+end
+
+-- A first-pass failure is queued again quietly, because it is usually the
+-- server still busy; only a second failure is said.
+function PlanTab.stepLoadouts()
+	local q = PlanTab.q
+	if not q then return end
+	q.i = q.i + 1
+	local job = q.jobs[q.i]
+	if not job then return PlanTab.finishLoadouts() end
+	q.pendingID = nil
+	local ok, err, stale = PlanTab.importOne(job)
+	if ok then
+		q.made = q.made + 1
+		if stale then q.stale = q.stale + 1 end
+	elseif q.final then
+		print(("%sDjinni's BiS|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, job.name, GREY, tostring(err)))
+	else
+		q.retry[#q.retry + 1] = job
+	end
+	PlanTab.waitThenStep()
+end
+
+-- Every step waits, a failed one too. The event only names the config to
+-- watch (PlanTab.onLoadoutEvent); ready is that config populated and the game
+-- willing to make another (Blizzard_ClassTalentsFrame.lua:302).
+function PlanTab.waitThenStep()
+	local q = PlanTab.q
+	q.gen, q.waited = q.gen + 1, 0
+	local gen = q.gen
+	local function poll()
+		if PlanTab.q ~= q or q.gen ~= gen then return end
+		q.waited = q.waited + PlanTab.POLL
+		local okPop, populated = true, true
+		if q.pendingID then okPop, populated = pcall(C_ClassTalents.IsConfigPopulated, q.pendingID) end
+		local okNew, canNew = pcall(C_ClassTalents.CanCreateNewConfig)
+		if (okPop and populated and okNew and canNew) or q.waited >= PlanTab.GIVE_UP then PlanTab.stepLoadouts()
+		else PlanTab.later(PlanTab.POLL, poll) end
+	end
+	PlanTab.later(PlanTab.POLL, poll)
+end
+
+function PlanTab.finishLoadouts()
+	local q = PlanTab.q
+	if not q.final and #q.retry > 0 then
+		q.jobs, q.i, q.final, q.retry = q.retry, 0, true, {}
+		return PlanTab.stepLoadouts()
+	end
+	PlanTab.q = nil
+	PlanTab.say(("Made %d of %d. Open the talent window to see them."):format(q.made, q.total))
+	if q.stale > 0 then
+		PlanTab.say(("|cffffcc00%d of them were exported against an older talent tree.|r The game took them. Check one against the guide page before you rely on it."):format(q.stale))
+	end
+	if PlanTab.redraw then pcall(PlanTab.redraw) end
+	return q.made
+end
+
+-- The planned builds for this spec that no loadout of their name holds.
+function PlanTab.createMissing()
+	local spec = playerSpec()
+	local builds = spec and PlanTab.BUILDS[spec] or {}
+	local missing = PlanTab.loadoutGaps(builds, PlanTab.savedLoadoutNames(), PlanTab.loadoutString)
+	if not missing then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
+	local jobs = {}
+	for _, name in ipairs(missing) do jobs[#jobs + 1] = { name = name, code = builds[name] } end
+	return PlanTab.makeLoadouts(jobs)
+end
+
+-- "Reset to plan": a drifted loadout is deleted and made again from the stored
+-- string, never written into. The selected one is left, and said.
+function PlanTab.resetDrifted()
+	local spec = playerSpec()
+	local builds = spec and PlanTab.BUILDS[spec] or {}
+	local saved = PlanTab.savedLoadoutNames()
+	local _, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString)
+	if not drifted then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
+	local selected, jobs = PlanTab.selectedConfigID(), {}
+	for _, name in ipairs(drifted) do
+		if saved[name] == selected then
+			PlanTab.say(("\"%s\" is the loadout you have selected, so it is not replaced yet. Deleting it would drop you to the starter build. Pick another loadout, then type %s/djbis loadouts|r%s."):format(name, GOLD, GREY))
+		else
+			jobs[#jobs + 1] = { name = name, code = builds[name], replace = saved[name] }
+		end
+	end
+	return PlanTab.makeLoadouts(jobs)
+end
+
+-- On login, on a spec change and on /djbis loadouts: what this character is
+-- missing or has drifted, with one button per fix. Nothing is made without a
+-- click. "Not now" holds for this spec until the next /reload. Answers what
+-- it did, for the checks.
+PlanTab.offerDismissed = {}
+function PlanTab.offerLoadouts(asked)
+	if InCombatLockdown() then return "combat" end
+	local spec = playerSpec()
+	local builds = spec and PlanTab.BUILDS[spec]
+	if not builds then
+		if asked then PlanTab.say("No stored builds for " .. (spec or "this spec") .. ".") end
+		return "no builds"
+	end
+	local missing, drifted = PlanTab.loadoutGaps(builds, PlanTab.savedLoadoutNames(), PlanTab.loadoutString)
+	if not missing then return "unknown" end
+	if #missing == 0 and #drifted == 0 then
+		if asked then PlanTab.say("Every planned " .. spec .. " build is saved, and each one matches the plan.") end
+		return "complete"
+	end
+	if not asked and PlanTab.offerDismissed[spec] then return "dismissed" end
+	local lines, buttons = {}, {}
+	if #missing > 0 then
+		lines[#lines + 1] = ("%d planned builds are not saved on this character:"):format(#missing)
+		for _, name in ipairs(missing) do lines[#lines + 1] = "  " .. WHITE .. name .. "|r" end
+		buttons[#buttons + 1] = { label = "Create " .. #missing, onClick = PlanTab.createMissing }
+	end
+	if #drifted > 0 then
+		lines[#lines + 1] = ("%d saved loadouts no longer hold the planned build:"):format(#drifted)
+		for _, name in ipairs(drifted) do lines[#lines + 1] = "  |cffffb300" .. name .. "|r" end
+		buttons[#buttons + 1] = { label = "Reset to plan", onClick = PlanTab.resetDrifted }
+	end
+	buttons[#buttons + 1] = { label = "Not now", onClick = function() PlanTab.offerDismissed[spec] = true end }
+	PlanTab.prompt("Djinni's BiS: " .. spec .. " loadouts", lines, buttons)
+	return "shown"
+end
+
+-- /djbis tidy lists the old DjinnisDreamgrove names on this spec, and
+-- /djbis tidy yes deletes them. The selected one stays. Answers the count.
+function PlanTab.tidy(confirmed)
+	if InCombatLockdown() then PlanTab.say("Not in combat.") return 0 end
+	local saved = PlanTab.savedLoadoutNames()
+	if not saved then PlanTab.say("The game will not list this spec's loadouts yet.") return 0 end
+	local selected, doomed = PlanTab.selectedConfigID(), {}
+	for name, id in pairs(saved) do
+		if PlanTab.RETIRED[name] then
+			if id == selected then PlanTab.say(("\"%s\" is the loadout you have selected, so it stays. Pick another, then tidy again."):format(name))
+			else doomed[#doomed + 1] = name end
+		end
+	end
+	table.sort(doomed)
+	if #doomed == 0 then PlanTab.say("No old Dreamgrove loadouts on this spec.") return 0 end
+	if not confirmed then
+		PlanTab.say(("These %d old loadouts would be deleted. Your own loadouts are not touched:"):format(#doomed))
+		for _, name in ipairs(doomed) do print("  " .. name) end
+		PlanTab.say("Type " .. GOLD .. "/djbis tidy yes|r" .. GREY .. " to delete them.")
+		return #doomed
+	end
+	local gone = 0
+	for _, name in ipairs(doomed) do
+		if C_ClassTalents.DeleteConfig(saved[name]) then gone = gone + 1
+		else PlanTab.say(("Could not delete \"%s\"."):format(name)) end
+	end
+	PlanTab.say(("Deleted %d old loadouts."):format(gone))
+	return gone
+end
+
+-- TRAIT_CONFIG_CREATED names the config the queue waits on. A spec change
+-- (ours only: the event fires for party members too) offers again.
+function PlanTab.onLoadoutEvent(event, arg)
+	if event == "TRAIT_CONFIG_CREATED" then
+		if PlanTab.q and type(arg) == "table" and Enum.TraitConfigType and arg.type == Enum.TraitConfigType.Combat then
+			PlanTab.q.pendingID = arg.ID
+		end
+	elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
+		if canRead(arg) and arg == "player" then PlanTab.later(2, PlanTab.offerLoadouts) end
+	end
+end
+
+-- Handler first, then each event verified: a refused one is silent in 12.1
+-- (DECISIONS.md). Without TRAIT_CONFIG_CREATED the queue still waits, on
+-- CanCreateNewConfig alone. The login offer waits five seconds, because the
+-- talent configs are not listed at once.
+function PlanTab.armLoadouts()
+	local watcher = CreateFrame("Frame")
+	watcher:SetScript("OnEvent", function(_, ...) PlanTab.onLoadoutEvent(...) end)
+	for _, event in ipairs({ "TRAIT_CONFIG_CREATED", "PLAYER_SPECIALIZATION_CHANGED" }) do
+		watcher:RegisterEvent(event)
+		if not watcher:IsEventRegistered(event) then
+			PlanTab.say("Could not register " .. event .. ", so " .. (event == "TRAIT_CONFIG_CREATED"
+				and "making loadouts waits longer between each." or "a spec change does not offer the missing builds. Type /djbis loadouts."))
+		end
+	end
+	PlanTab.later(5, PlanTab.offerLoadouts)
+end
+
 local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 -- Blizzard's own typo, RECIEVED. The journal streams loot in after the request,
@@ -5938,6 +6275,7 @@ loader:SetScript("OnEvent", function(_, event, name)
 		pcall(PlanTab.armSetupWatch)  -- the wrong-setup popup's events (card 0013)
 		pcall(PlanTab.armLootCard)  -- PLAYER_ENTERING_WORLD fires after PLAYER_LOGIN, so a login inside the raid still draws the card (card 0015)
 		pcall(PlanTab.armGroupPrompt)  -- the spec prompt when a group finder listing takes you (card 0024)
+		pcall(PlanTab.armLoadouts)  -- the planned builds as loadouts on this character (card 0031)
 		-- the talent window is load-on-demand: armed here only if something loaded it before login (card 0019)
 		if C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then pcall(PlanTab.armSidebar) end
 	elseif event == "ADDON_LOADED" then
@@ -5973,6 +6311,119 @@ local function listBySource(filter)
 		print("  " .. name .. GREEN .. "  " .. table.concat(entry.specs, ", ") .. "|r"
 			.. GREY .. "  -- " .. entry.boss .. "|r")
 	end
+end
+
+-- Card 0031's checks. Outside selfTest, which sits at Lua 5.1's 60-upvalue
+-- limit; everything here is reached through PlanTab. The game is stubbed
+-- per call, and every call name is recorded so the checks can say which
+-- ones ran and that no talent-wearing call is among them.
+function PlanTab.loadoutChecks(check)
+	local feral = PlanTab.BUILDS.Feral
+	local nek, sen = feral["Raid: Nek'Zali"], feral["Raid: Entombed Sentinels"]
+	local builds = { A = nek, B = sen }
+	local gapTest = "the plan's missing and drifted loadouts"
+	local missing, drifted = PlanTab.loadoutGaps(builds, { A = 1, Other = 2 }, function() return sen end)
+	check(gapTest .. ", one missing", table.concat(missing, ","), "B")
+	check(gapTest .. ", one drifted", table.concat(drifted, ","), "A")
+	missing, drifted = PlanTab.loadoutGaps(builds, { A = 1, B = 2 }, function(id) return id == 1 and nek or sen end)
+	check(gapTest .. ", none when each holds its build", #missing + #drifted, 0)
+	missing, drifted = PlanTab.loadoutGaps(builds, { A = 1, B = 2 }, function() return nil end)
+	check(gapTest .. ", one that cannot be read is not drifted", #drifted, 0)
+	check(gapTest .. ", nothing said when the game will not list them", PlanTab.loadoutGaps(builds, nil, nil), nil)
+
+	local kept = { C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil, InCombatLockdown, PlayerSpellsFrame, print, PlanTab.prompt }
+	local calls, printed, shown, combat, windowOpen, canNew = {}, {}, nil, false, false, 0
+	local names = { [1] = "Raid: Nek'Zali", [3] = "WS M+", [4] = "Rob's own" }
+	local strings = { [1] = nek }
+	local selected = 9
+	local api = {
+		GetConfigIDsBySpecID = function() local ids = {} for id in pairs(names) do ids[#ids + 1] = id end return ids end,
+		GetConfigInfo = function(id) return names[id] and { name = names[id] } or { treeIDs = { 77 } } end,
+		GenerateImportString = function(id) return strings[id] end,
+		GetLastSelectedSavedConfigID = function() return selected end,
+		GetActiveConfigID = function() return 50 end,
+		GetTraitTreeForSpec = function() return 77 end,
+		GetLoadoutSerializationVersion = function() return 2 end,
+		GetTreeHash = function() return {} end,
+		CanCreateNewConfig = function() canNew = canNew - 1 return canNew < 0 end,
+		IsConfigPopulated = function() return true end,
+		DeleteConfig = function(id) calls[#calls + 1] = "delete " .. names[id] names[id] = nil return true end,
+		ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name return true end,
+	}
+	local touched = {}
+	local function watched() return setmetatable({}, { __index = function(_, k) touched[k] = true return api[k] or function() end end }) end
+	C_ClassTalents, C_Traits = watched(), watched()
+	ClassTalentImportExportMixin = {
+		ReadLoadoutHeader = function() return true, 2, 103, {} end,
+		IsHashEmpty = function() return true end,
+		HashEquals = function() return true end,
+		ReadLoadoutContent = function() return {} end,
+		ConvertToImportLoadoutEntryInfo = function() return { {} } end,
+	}
+	ExportUtil = { MakeImportDataStream = function() return {} end }
+	PlayerUtil = { GetCurrentSpecID = function() return 103 end }
+	InCombatLockdown = function() return combat end
+	PlayerSpellsFrame = { IsShown = function() return windowOpen end }
+	print = function(...)
+		local line = tostring((...))
+		if line:find("|cffff0000FAIL|r", 1, true) then kept[8](...) else printed[#printed + 1] = line end
+	end
+	PlanTab.prompt = function(_, lines, buttons) shown = { lines = lines, buttons = buttons } end
+
+	local offerTest = "the missing builds are offered, and made only on a click"
+	check(offerTest, PlanTab.offerLoadouts(), "shown")
+	check(offerTest .. ", nothing made by the offer", #calls, 0)
+	check(offerTest .. ", with a Create button", shown and shown.buttons[1].label, "Create 9")
+	check(offerTest .. ", and no Reset while nothing drifted", shown and shown.buttons[2].label, "Not now")
+	shown.buttons[2].onClick()
+	check(offerTest .. ", Not now holds for the spec", PlanTab.offerLoadouts(), "dismissed")
+	check(offerTest .. ", but asking still shows it", PlanTab.offerLoadouts(true), "shown")
+	PlanTab.offerDismissed = {}
+
+	local fenceTest = "no loadout is made in combat or with the talent window open"
+	combat = true
+	check(fenceTest .. ", combat", PlanTab.createMissing(), "fenced")
+	combat, windowOpen = false, true
+	check(fenceTest .. ", the window", PlanTab.createMissing(), "fenced")
+	check(fenceTest .. ", and nothing was called", #calls, 0)
+	check(fenceTest .. ", and it says why", printed[#printed]:find("Close the talent window", 1, true) ~= nil, true)
+	windowOpen = false
+
+	local makeTest = "Create makes every missing build, and nothing else"
+	canNew = 1  -- the first ask is refused: the server is busy, and the build is queued again quietly
+	check(makeTest, PlanTab.createMissing(), "started")
+	check(makeTest .. ", one import per missing build", #calls, 9)
+	check(makeTest .. ", never the one already saved", table.concat(calls, "|"):find("Nek'Zali", 1, true), nil)
+	check(makeTest .. ", the busy one came back on the second pass", calls[#calls] ~= nil and calls[1] ~= calls[#calls], true)
+	check(makeTest .. ", and says the count", table.concat(printed, "\n"):find("Made 9 of 9", 1, true) ~= nil, true)
+	check(makeTest .. ", the queue is empty after", PlanTab.q, nil)
+
+	local resetTest = "Reset to plan deletes a drifted loadout and makes it again"
+	calls, strings[1] = {}, sen
+	check(resetTest .. ", it is offered", PlanTab.offerLoadouts(true) and shown.buttons[2].label, "Reset to plan")
+	check(resetTest, PlanTab.resetDrifted(), "started")
+	check(resetTest .. ", delete then import, by name", table.concat(calls, "|"), "delete Raid: Nek'Zali|import Raid: Nek'Zali")
+	names[1], strings[1], calls = "Raid: Nek'Zali", sen, {}
+	selected = 1
+	check(resetTest .. ", the selected one waits", PlanTab.resetDrifted(), "nothing")
+	check(resetTest .. ", and nothing is deleted", #calls, 0)
+	check(resetTest .. ", and it says why", printed[#printed]:find("starter build", 1, true) ~= nil, true)
+	selected = 9
+
+	local tidyTest = "tidy removes only the old Dreamgrove names, and only on yes"
+	check(tidyTest .. ", lists one", PlanTab.tidy(false), 1)
+	check(tidyTest .. ", deletes nothing unasked", #calls, 0)
+	check(tidyTest .. ", deletes it on yes", PlanTab.tidy(true), 1)
+	check(tidyTest .. ", and only it", table.concat(calls, "|"), "delete WS M+")
+	check(tidyTest .. ", Rob's own is still there", names[4], "Rob's own")
+
+	for _, write in ipairs({ "CommitConfig", "LoadConfig", "PurchaseRank", "SetSelection", "SetStarterBuildActive" }) do
+		check("no talent-wearing call when making loadouts: " .. write, touched[write], nil)
+	end
+
+	C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil = kept[1], kept[2], kept[3], kept[4], kept[5]
+	InCombatLockdown, PlayerSpellsFrame, print, PlanTab.prompt = kept[6], kept[7], kept[8], kept[9]
+	PlanTab.offerDismissed, PlanTab.q = {}, nil
 end
 
 -- one runnable check: /bis test
@@ -6485,6 +6936,12 @@ local function selfTest()
 	check(sameTest .. ", same name matches", PlanTab.loadoutState("Raid: Twin Fangs", "Raid: Twin Fangs", false), "match")
 	check(editTest .. ", no loadout is still unknown", PlanTab.loadoutState("Raid: Twin Fangs", nil, true), "unknown")
 	check(editTest .. ", another game build's string says nothing", PlanTab.talentStringsDiffer("X" .. aString:sub(2), aString), nil)
+	-- card 0031: a site's zero-filled hash agrees with the client's real one
+	local low = math.floor((PlanTab.B64:find(aString:sub(26, 26), 1, true) - 1) / 4) * 4 + 1  -- char 26 with its 2 hash bits cleared
+	local zeroed = aString:sub(1, 4) .. ("A"):rep(21) .. PlanTab.B64:sub(low, low) .. aString:sub(27)
+	check(sameTest .. ", a zero-filled hash is the same build", PlanTab.talentStringsDiffer(aString, zeroed), false)
+	check(editTest .. ", a zero-filled hash still sees a moved point", PlanTab.talentStringsDiffer(zeroed:sub(1, -2) .. "B", aString), true)
+	check(editTest .. ", two real hashes that differ say nothing", PlanTab.talentStringsDiffer(aString:sub(1, 4) .. "B" .. aString:sub(6), aString), nil)
 
 	-- The planned build is the cell's own string (Option A), never the saved
 	-- loadout: aString above IS the Feral st cell's, so the helper must hand
@@ -6535,7 +6992,8 @@ local function selfTest()
 	check(combatTest .. ", and it was a read", reads, 1)
 	-- Through activeLoadoutName: the st cell was simmed on "DotC Raid ST *",
 	-- so on that loadout its string judges; on "Raid: Nek'Zali", also a
-	-- 1 target loadout, the cell is not the plan and only the name counts.
+	-- 1 target loadout, Dreamgrove's build judges, never the cell's. Its
+	-- zero-filled hash was "cannot compare" (nil) until card 0031.
 	do
 		local wasStarter, wasSelected, wasInfo = C_ClassTalents.GetStarterBuildActive, C_ClassTalents.GetLastSelectedSavedConfigID, C_Traits.GetConfigInfo
 		local loadout = "DotC Raid ST *"
@@ -6547,7 +7005,7 @@ local function selfTest()
 		check(editTest .. ", named and edited on the cell's loadout", name .. "/" .. tostring(edited), "DotC Raid ST */true")
 		loadout = "Raid: Nek'Zali"
 		name, edited = PlanTab.activeLoadoutName("Feral", "st")
-		check(noPlanTest .. ", another loadout of the scenario", name .. "/" .. tostring(edited), "Raid: Nek'Zali/nil")
+		check(noPlanTest .. ", another loadout of the scenario", name .. "/" .. tostring(edited), "Raid: Nek'Zali/true")
 		C_ClassTalents.GetStarterBuildActive, C_ClassTalents.GetLastSelectedSavedConfigID, C_Traits.GetConfigInfo = wasStarter, wasSelected, wasInfo
 	end
 	C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString = wasActiveID, wasGenerate
@@ -6888,7 +7346,7 @@ local function selfTest()
 		check(sameTest, PlanTab.loadTalents("Raid: Twin Fangs"), "same")
 		check(sameTest .. ", asks the helper for nothing", asked, nil)
 		check(sameTest .. ", opens the window", opened, 2)
-		check(sameTest .. ", says to save the planned build over it", printed[1] and printed[1]:find("save it over", 1, true) ~= nil, true)
+		check(sameTest .. ", points at Reset to plan", printed[1] and printed[1]:find("Reset to plan", 1, true) ~= nil, true)
 		check(sameTest .. ", in one line", #printed, 1)
 		PlanTab.activeLoadoutName = wasActive
 		local keys = {}
@@ -8329,6 +8787,8 @@ local function selfTest()
 	setGear("zzz not a real item", nil)
 	check("cleared ilvl label", gearLabel("zzz not a real item"):find("334", 1, true) ~= nil, false)
 
+	PlanTab.loadoutChecks(check)  -- card 0031
+
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")
 		or ("|cffff0000[BiS] " .. failed .. " check(s) failed|r"))
@@ -8345,5 +8805,7 @@ SlashCmdList.DJINNISBIS = function(msg)
 	elseif msg == "here" then bonusRollVerdict((GetInstanceInfo()))
 	elseif msg == "test" then selfTest()
 	elseif msg == "talents" then PlanTab.sayTalents()
+	elseif msg == "loadouts" then PlanTab.offerLoadouts(true)
+	elseif msg == "tidy" or msg == "tidy yes" then PlanTab.tidy(msg == "tidy yes")
 	else listBySource(msg) end
 end

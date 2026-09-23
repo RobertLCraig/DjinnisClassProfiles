@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.26.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds cards `0031` to `0035`; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
-_Last updated: 2026-09-23 (v0.26.0: Dreamgrove's builds baked in by `update-builds.py`, one per boss for Feral and Balance, card 0030)_
+**Status:** v0.27.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds cards `0032` to `0035`; `0031` is built and in `ai-review/`; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
+_Last updated: 2026-09-23 (v0.27.0: the planned builds become real loadouts, `/djbis loadouts` and `/djbis tidy`, card 0031)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
