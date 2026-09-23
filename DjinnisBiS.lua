@@ -6969,6 +6969,7 @@ function PlanTab.saveProfile(name)
 		PlanTab.say("Give the profile a name of 1 to 40 characters, without \"|\": /djbis bars save <name>.")
 		return nil
 	end
+	if name:lower() == "build" then PlanTab.say("\"build\" means this build's layout. Pick another profile name.") return nil end
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return nil end
 	local stored = PlanTab.findProfile(name)
@@ -7563,7 +7564,9 @@ function PlanTab.barChecks(check)
 	check(profileTest .. ", no empty name", PlanTab.saveProfile(" "), nil)
 	check(profileTest .. ", no name over 40 characters", PlanTab.saveProfile(("x"):rep(41)), nil)
 	check(profileTest .. ", no colour code in a name", PlanTab.saveProfile("a|cffff0000b"), nil)
+	check(profileTest .. ", never called \"build\" in any case", PlanTab.saveProfile("Build"), nil)
 	bars[11] = nil
+	DjinnisBiSCharDB.barsUndo = nil  -- so the undo below can only be the load's own
 	check(profileTest .. ", loads by name in any case", PlanTab.loadProfile("MAIN"), "applied")
 	check(profileTest .. ", onto the bars", bars[11] and bars[11].id, 5221)
 	check(profileTest .. ", and undo takes it off", PlanTab.undoBars() and bars[11], nil)

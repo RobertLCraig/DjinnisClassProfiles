@@ -14,8 +14,8 @@ a global profile". Card `0033` saves both, but only by slash command (`/djbis ba
 - Two buttons under the plan list beside the talent window (`0032`): **Save bars: build** and
   **Save bars: spec**. They run the same save as the two slash commands.
 - "Global profile" is read as the spec layout: account-wide, used on every character for every
-  build of the spec that has no layout of its own. A named profile loadable on any spec is not
-  built; say if that is what was meant.
+  build of the spec that has no layout of its own. Rob then asked for named profiles too; they
+  are card `0037`.
 - Replacing a saved layout asks first, because a button is easy to click by mistake and the spec
   layout reaches every character. A new layout saves at once.
 
@@ -102,3 +102,33 @@ Verdict: BOUNCE, to todo, with the finding above.
 another question up, the button says "Answer the open question first" and changes nothing. New
 check with `promptBusy` stubbed true; it goes red without the line. Card `0037` (named profiles)
 was built in the same version.
+
+### 2026-09-23, second adversarial review of 2ae2239
+
+What I attacked. I checked the bounced finding's fix, its placement, and its check. Mutations ran
+on copies in `$TEMP/review3637`. The harness is clean on the real code under Lua 5.1 and 5.4.
+
+What held:
+- `DjinnisBiS.lua:6918` is the line proposed in the last review. It sits after the stale `expect`
+  guard and before the prompt. It waits only when there is a layout to replace and a question is
+  up.
+- A new layout still saves at once while a question is up. That is right, because it asks
+  nothing and so takes no frame.
+- The Replace click passes `ask` as nil, so it never meets the guard. It does not get stuck on its
+  own prompt.
+- The check goes red without the fix. With the guard turned to `if false`, "with another question
+  up, it waits" fails with `ask/table`, which means the prompt was shown. The other seven checks are
+  unchanged.
+
+What broke: nothing.
+
+Security:
+1. Weakest point: an account-wide spec layout replaced by a mis-click. Replace asks first, and now
+   it waits instead of taking the frame from another question.
+2. Unchecked input: none. The key comes from `playerSpec()` and a loadout name that passed
+   `canRead`.
+3. What it leaks on failure: nothing. The player gets one chat line.
+
+There is no browser surface. The layout and tooltips can only be checked in a client.
+
+Verdict: CLEAN, human-review next.
