@@ -6391,7 +6391,27 @@ function PlanTab.loadoutFence()
 		return "Close the talent window first. While it is open the game wears each new loadout instead of just saving it."
 	end
 	if PlanTab.q then return "Still making loadouts. Wait for the count." end
+	if PlanTab.freeLoadoutSlots() == 0 then
+		return ("All %d loadout slots are used, over all your specs. Delete some you do not use, then try again."):format(Constants.TraitConsts.MAX_COMBAT_TRAIT_CONFIGS)
+	end
 	return nil
+end
+
+-- Loadout slots left for this character, or nil when the game will not say.
+-- The cap counts every spec's loadouts together (the dropdown's own error).
+function PlanTab.freeLoadoutSlots()
+	local spec = C_SpecializationInfo
+	local max = Constants and Constants.TraitConsts and Constants.TraitConsts.MAX_COMBAT_TRAIT_CONFIGS
+	if not (max and spec and spec.GetSpecializationInfo and C_ClassTalents and C_ClassTalents.GetConfigIDsBySpecID) then return nil end
+	local used = 0
+	for i = 1, 4 do
+		local ok, specID = pcall(spec.GetSpecializationInfo, i)
+		if not ok or not specID then break end
+		local okIDs, ids = pcall(C_ClassTalents.GetConfigIDsBySpecID, specID)
+		if not okIDs or type(ids) ~= "table" then return nil end
+		used = used + #ids
+	end
+	return math.max(0, max - used)
 end
 
 -- One build to one loadout. `job` is { name, code, replace = config id or nil }.
@@ -7265,6 +7285,17 @@ function PlanTab.loadoutChecks(check)
 	check(fenceTest .. ", and nothing was called", #calls, 0)
 	check(fenceTest .. ", and it says why", printed[#printed]:find("Close the talent window", 1, true) ~= nil, true)
 	windowOpen = false
+	-- 2026-09-23: Rob hit the 40-slot cap and the queue failed each build slowly
+	local wasConst, wasSpec = Constants, C_SpecializationInfo
+	Constants = { TraitConsts = { MAX_COMBAT_TRAIT_CONFIGS = 4 } }
+	C_SpecializationInfo = { GetSpecializationInfo = function(i) return i <= 2 and 100 + i or nil end }
+	check(fenceTest .. ", slots are counted over every spec", PlanTab.freeLoadoutSlots(), 0)
+	check(fenceTest .. ", all slots full", PlanTab.makeLoadouts({ { name = "WS M+", code = nek } }), "fenced")
+	check(fenceTest .. ", and it says so", printed[#printed]:find("All 4 loadout slots", 1, true) ~= nil, true)
+	Constants.TraitConsts.MAX_COMBAT_TRAIT_CONFIGS = 7
+	check(fenceTest .. ", a free slot is counted", PlanTab.freeLoadoutSlots(), 1)
+	check(fenceTest .. ", and nothing was called", #calls, 0)
+	Constants, C_SpecializationInfo = wasConst, wasSpec
 
 	local makeTest = "Create makes every missing build, and nothing else"
 	canNew = 1  -- the first ask is refused: the server is busy, and the build is queued again quietly
