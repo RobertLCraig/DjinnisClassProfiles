@@ -6631,7 +6631,12 @@ end
 -- its slot is left alone. The layout before each apply is kept per character
 -- for one undo.
 
-PlanTab.BAR_SLOTS = 180  -- 1-72 the visible bars, 73-120 the druid form pages, the rest bars 6-8 and the extras
+PlanTab.BAR_SLOTS = 180  -- 1-72 the visible bars, 73-120 the druid form pages, 145-180 bars 6-8
+-- 121-144 are the skyriding and vehicle pages, the game's and not a player's
+-- bars (0033 review): never read or written.
+function PlanTab.barSlot(slot)
+	return slot <= 120 or slot > 144
+end
 
 local function trimmed(text)
 	return type(text) == "string" and canRead(text) and text:match("^%s*(.-)%s*$") or nil
@@ -6648,7 +6653,7 @@ end
 
 function PlanTab.readBars()
 	local slots = {}
-	for slot = 1, PlanTab.BAR_SLOTS do slots[slot] = PlanTab.readSlot(slot) end
+	for slot = 1, PlanTab.BAR_SLOTS do if PlanTab.barSlot(slot) then slots[slot] = PlanTab.readSlot(slot) end end
 	return slots
 end
 
@@ -6663,8 +6668,14 @@ end
 local function findMacro(name, index)
 	if not name then return nil end
 	if index and trimmed(GetMacroInfo(index)) == name then return index end
+	-- Account macros from 1, character ones from 121 (Blizzard_MacroUI.lua's
+	-- macroBase): 1 to account + character missed every character macro.
 	local account, character = GetNumMacros()
-	for i = 1, account + character do
+	local base = Constants and Constants.MacroConsts and Constants.MacroConsts.MAX_ACCOUNT_MACROS or 120
+	for i = 1, account do
+		if trimmed(GetMacroInfo(i)) == name then return i end
+	end
+	for i = base + 1, base + character do
 		if trimmed(GetMacroInfo(i)) == name then return i end
 	end
 	return nil
@@ -6708,8 +6719,8 @@ end
 function PlanTab.placeBars(layout)
 	local placed, skipped = 0, {}
 	for slot = 1, PlanTab.BAR_SLOTS do
-		local want, have = layout[slot], PlanTab.readSlot(slot)
-		if not sameAction(want, have) then
+		local want, have = layout[slot], PlanTab.barSlot(slot) and PlanTab.readSlot(slot) or nil
+		if PlanTab.barSlot(slot) and not sameAction(want, have) then
 			if not want then
 				PickupAction(slot)
 				ClearCursor()
@@ -6733,8 +6744,8 @@ end
 function PlanTab.barsDiffer(layout)
 	local n = 0
 	for slot = 1, PlanTab.BAR_SLOTS do
-		local want, have = layout[slot], PlanTab.readSlot(slot)
-		if not sameAction(want, have) then
+		local want, have = layout[slot], PlanTab.barSlot(slot) and PlanTab.readSlot(slot) or nil
+		if PlanTab.barSlot(slot) and not sameAction(want, have) then
 			if not want then n = n + 1
 			elseif not pickUp(want) then ClearCursor() n = n + 1 end
 		end
@@ -6749,11 +6760,22 @@ end
 -- is unbound; one it names is bound to its action; the rest are left alone.
 -- SaveBindings writes to the set in use, account or character, as the key
 -- binding window does.
+-- Only the normal binding context: the housing editor's bindings have their
+-- own and may share a key with a combat one, so one table of key -> action
+-- would mix them (0033 review). SetBinding with no context writes the normal
+-- one, which is then the only one touched.
+function PlanTab.plainBinding(action)
+	local kb = C_KeyBindings and C_KeyBindings.GetBindingContextForAction
+	if not kb then return true end
+	local ok, context = pcall(kb, action)
+	return ok and canRead(context) and (context == nil or context == 0)
+end
+
 function PlanTab.readKeys()
 	local keys = {}
 	for i = 1, GetNumBindings() do
 		local action, _, key1, key2 = GetBinding(i)
-		if canRead(action) and action then
+		if canRead(action) and action and PlanTab.plainBinding(action) then
 			if canRead(key1) and key1 then keys[key1] = action end
 			if canRead(key2) and key2 then keys[key2] = action end
 		end
@@ -6761,22 +6783,31 @@ function PlanTab.readKeys()
 	return keys
 end
 
+-- A key the game refused this session is not counted again, or the offer
+-- would never say "already match" (0033 review).
+PlanTab.keysRefused = {}
+
 function PlanTab.keysDiffer(want)
 	local have, n = PlanTab.readKeys(), 0
-	for key, action in pairs(have) do if want[key] ~= action then n = n + 1 end end
-	for key, action in pairs(want) do if have[key] == nil then n = n + 1 end end
+	for key, action in pairs(have) do if want[key] ~= action and not PlanTab.keysRefused[key] then n = n + 1 end end
+	for key in pairs(want) do if have[key] == nil and not PlanTab.keysRefused[key] then n = n + 1 end end
 	return n
 end
 
 -- Returns how many keys changed, and the keys the game would not bind.
 function PlanTab.placeKeys(want)
+	if type(want) ~= "table" or next(want) == nil then return 0, {} end  -- empty would unbind every key
 	local have, changed, refused = PlanTab.readKeys(), 0, {}
 	for key in pairs(have) do
 		if want[key] == nil then SetBinding(key, nil) changed = changed + 1 end
 	end
 	for key, action in pairs(want) do
 		if have[key] ~= action then
-			if SetBinding(key, action) then changed = changed + 1 else refused[#refused + 1] = ("key %s: will not bind to %s"):format(key, action) end
+			if SetBinding(key, action) then changed = changed + 1
+			else
+				refused[#refused + 1] = ("key %s: will not bind to %s"):format(key, action)
+				PlanTab.keysRefused[key] = true
+			end
 		end
 	end
 	SaveBindings(GetCurrentBindingSet())
@@ -6825,6 +6856,9 @@ function PlanTab.saveBars(forBuild)
 	for _ in pairs(slots) do n = n + 1 end
 	local keys, k = PlanTab.readKeys(), 0
 	for _ in pairs(keys) do k = k + 1 end
+	-- No keys read is a failed read, not a wish to unbind every key, ESCAPE
+	-- and movement too (0033 review): the layout then leaves keys alone.
+	if k == 0 then keys = nil end
 	barsDB()[key] = { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil }
 	PlanTab.say(("Saved %d action bar slots and %d key bindings as the %s layout."):format(n, k, key))
 	return key
@@ -6837,11 +6871,14 @@ function PlanTab.applyBars(key)
 	local layout = key and barsDB()[key]
 	if not layout then PlanTab.say("No saved layout called " .. tostring(key) .. ".") return "none" end
 	DjinnisBiSCharDB = DjinnisBiSCharDB or {}
-	DjinnisBiSCharDB.barsUndo = PlanTab.readBars()
-	DjinnisBiSCharDB.keysUndo = layout.keys and PlanTab.readKeys() or nil
+	-- The undo is the bars from before the FIRST apply since the last undo: a
+	-- second apply must not write over the character's own (0033 review).
+	local withKeys = type(layout.keys) == "table" and next(layout.keys) ~= nil  -- none before v0.32.0; empty is never obeyed
+	DjinnisBiSCharDB.barsUndo = DjinnisBiSCharDB.barsUndo or PlanTab.readBars()
+	DjinnisBiSCharDB.keysUndo = DjinnisBiSCharDB.keysUndo or (withKeys and PlanTab.readKeys() or nil)
 	local placed, skipped = PlanTab.placeBars(layout.slots)
 	local keys, refused = 0, {}
-	if layout.keys then keys, refused = PlanTab.placeKeys(layout.keys) end  -- a layout saved before v0.32.0 has none
+	if withKeys then keys, refused = PlanTab.placeKeys(layout.keys) end
 	for _, line in ipairs(refused) do skipped[#skipped + 1] = line end
 	PlanTab.barsSeen = key
 	PlanTab.say(("Applied the %s layout: %d slots and %d keys changed, %d skipped. %s/djbis bars undo|r%s puts the old ones back.")
@@ -6883,7 +6920,7 @@ function PlanTab.offerBars(asked)
 	if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerBars(asked) end) return "busy" end
 	PlanTab.barsSeen = key
 	local layout = barsDB()[key]
-	local n, k = PlanTab.barsDiffer(layout.slots), layout.keys and PlanTab.keysDiffer(layout.keys) or 0
+	local n, k = PlanTab.barsDiffer(layout.slots), type(layout.keys) == "table" and next(layout.keys) and PlanTab.keysDiffer(layout.keys) or 0
 	if n + k == 0 then
 		if asked then PlanTab.say("The bars and keys already match the " .. key .. " layout.") end
 		return "same"
@@ -7121,10 +7158,11 @@ function PlanTab.barChecks(check)
 		PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print, PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB }
 	local keptBars = db().bars
 	local bars, cursor, known, macros, printed, shown, combat = {}, nil, {}, {}, {}, nil, false
+	local vehicle, held = false, 0  -- held: a pick up while the cursor still held a swapped-out action
 	C_ActionBar = {
 		HasAction = function(slot) return bars[slot] ~= nil end,
 		GetActionText = function(slot) return bars[slot] and bars[slot].name end,
-		HasVehicleActionBar = function() return false end,
+		HasVehicleActionBar = function() return vehicle end,
 		HasOverrideActionBar = function() return false end,
 	}
 	GetActionInfo = function(slot) local a = bars[slot] if a then return a.type, a.id or a.index end end
@@ -7132,11 +7170,17 @@ function PlanTab.barChecks(check)
 	PlaceAction = function(slot) bars[slot], cursor = cursor, bars[slot] end
 	GetCursorInfo = function() return cursor and cursor.type end
 	ClearCursor = function() cursor = nil end
-	C_Spell = { PickupSpell = function(id) if known[id] then cursor = { type = "spell", id = id } end end, GetSpellName = function(id) return "Spell" .. id end }
-	C_Item = { PickupItem = function(id) cursor = { type = "item", id = id } end }
-	GetNumMacros = function() return #macros, 0 end
+	local function pick(action) if cursor then held = held + 1 end cursor = action end
+	C_Spell = { PickupSpell = function(id) if known[id] then pick({ type = "spell", id = id }) end end, GetSpellName = function(id) return "Spell" .. id end }
+	C_Item = { PickupItem = function(id) pick({ type = "item", id = id }) end }
+	-- account macros from 1, character macros from 121, as in the game
+	GetNumMacros = function()
+		local a, c = 0, 0
+		for i in pairs(macros) do if i > 120 then c = c + 1 else a = a + 1 end end
+		return a, c
+	end
 	GetMacroInfo = function(i) return macros[i] end
-	PickupMacro = function(i) cursor = { type = "macro", name = macros[i], index = i } end
+	PickupMacro = function(i) pick({ type = "macro", name = macros[i], index = i }) end
 	InCombatLockdown = function() return combat end
 	print = function(...)
 		local line = tostring((...))
@@ -7147,8 +7191,11 @@ function PlanTab.barChecks(check)
 	db().bars, PlanTab.barsSeen, DjinnisBiSCharDB = {}, nil, nil
 	-- key bindings: key -> action, over a fixed list of actions; MYADDON_X is
 	-- an addon's binding the second druid does not have, so the game refuses it
-	local keptKeys = { GetNumBindings, GetBinding, SetBinding, SaveBindings, GetCurrentBindingSet }
-	local actions, bound, saves = { "MOVEFORWARD", "ACTIONBUTTON1", "ACTIONBUTTON2", "MYADDON_X" }, {}, 0
+	local keptKeys = { GetNumBindings, GetBinding, SetBinding, SaveBindings, GetCurrentBindingSet, C_KeyBindings, PlanTab.keysRefused }
+	local actions, bound, saves = { "MOVEFORWARD", "ACTIONBUTTON1", "ACTIONBUTTON2", "MYADDON_X", "HOUSING_X" }, {}, 0
+	-- HOUSING_X is in the housing editor's own binding context, not the normal one
+	C_KeyBindings = { GetBindingContextForAction = function(action) return action == "HOUSING_X" and 1 or 0 end }
+	PlanTab.keysRefused = {}
 	GetNumBindings = function() return #actions end
 	GetBinding = function(i)
 		local keys = {}
@@ -7170,28 +7217,40 @@ function PlanTab.barChecks(check)
 	known = { [5221] = true, [1822] = true, [58984] = true }
 	macros = { "Prowl it" }
 	bars = { { type = "spell", id = 5221 }, { type = "spell", id = 1822 }, { type = "macro", name = "Prowl it", index = 1 }, { type = "spell", id = 58984 } }
+	bars[121] = { type = "spell", id = 372608 }  -- the skyriding page: the game's, not a layout's
 	local saveTest = "a layout saved on one druid"
+	local keptBound = bound
+	bound = {}
+	check(saveTest .. ", with no key read, keys are left alone", PlanTab.saveBars(false) and db().bars.Feral.keys, nil)
+	bound = keptBound
+	check(saveTest .. ", and an empty key set unbinds nothing", PlanTab.placeKeys({}) .. "/" .. tostring(bound.W), "0/MOVEFORWARD")
 	check(saveTest, PlanTab.saveBars(false), "Feral")
 	check(saveTest .. ", holds the macro by name", db().bars.Feral.slots[3].name, "Prowl it")
+	check(saveTest .. ", never the skyriding page", db().bars.Feral.slots[121], nil)
 
 	check(saveTest .. ", with its keys", db().bars.Feral.keys.Q, "ACTIONBUTTON2")
 
 	-- the second: another racial, the macro at another index, Rake in 7, something in 5;
 	-- button 2 on E instead of Q, an extra key on R, and no MYADDON
 	PlanTab.hasMyAddon = nil
-	bound = { W = "MOVEFORWARD", ["1"] = "ACTIONBUTTON1", E = "ACTIONBUTTON2", R = "ACTIONBUTTON1" }
+	bound = { W = "MOVEFORWARD", ["1"] = "ACTIONBUTTON1", E = "ACTIONBUTTON2", R = "ACTIONBUTTON1", H = "HOUSING_X" }
 	known = { [5221] = true, [1822] = true, [20549] = true }
-	macros = { "Other", "Prowl it" }
+	macros = { "Other", [121] = "Prowl it" }  -- a character macro
 	bars = { [4] = { type = "spell", id = 20549 }, [5] = { type = "item", id = 1 }, [7] = { type = "spell", id = 1822 } }
+	bars[1] = { type = "item", id = 2 }  -- swapped out by Shred: must not stay on the cursor
+	bars[122] = { type = "spell", id = 999 }
 	local applyTest = "applied on another druid"
 	check(applyTest .. ", is offered", PlanTab.offerBars(), "shown")
-	check(applyTest .. ", nothing moves before the click", bars[1], nil)
+	check(applyTest .. ", nothing moves before the click", bars[1] and bars[1].id, 2)
 	check(applyTest .. ", counts what it would change", shown and shown.lines[1]:find("change 5 slots and 4 keys", 1, true) ~= nil, true)
 	shown.buttons[1].onClick()
 	check(applyTest .. ", the same spell in the same slot", bars[1] and bars[1].id, 5221)
 	check(applyTest .. ", Rake moved to 2", bars[2] and bars[2].id, 1822)
 	check(applyTest .. ", Rake gone from 7", bars[7], nil)
-	check(applyTest .. ", the macro found by name", bars[3] and bars[3].index, 2)
+	check(applyTest .. ", the macro found by name, among the character's own", bars[3] and bars[3].index, 121)
+	check(applyTest .. ", nothing picked up while the cursor held a swapped-out action", held, 0)
+	check(applyTest .. ", the skyriding page is not touched", bars[122] and bars[122].id, 999)
+	check(applyTest .. ", a housing editor key is not touched", bound.H, "HOUSING_X")
 	check(applyTest .. ", the racial it does not know is left alone", bars[4] and bars[4].id, 20549)
 	check(applyTest .. ", an empty slot in the layout is emptied", bars[5], nil)
 	check(applyTest .. ", the skip is listed", table.concat(printed, "\n"):find("slot 4: not known: Spell58984", 1, true) ~= nil, true)
@@ -7201,11 +7260,13 @@ function PlanTab.barChecks(check)
 	check(applyTest .. ", keys the layout does not name are unbound", tostring(bound.E) .. "/" .. tostring(bound.R), "nil/nil")
 	check(applyTest .. ", a binding the game refuses is listed", table.concat(printed, "\n"):find("key F: will not bind to MYADDON_X", 1, true) ~= nil, true)
 	check(applyTest .. ", and the bindings are saved", saves > 0, true)
+	check(applyTest .. ", a refused key does not keep it from matching", PlanTab.offerBars(true), "same")
+	PlanTab.applyBars("Feral")  -- a second apply: the undo must still hold the character's own bars
 
 	local undoTest = "one undo puts the bars back"
 	check(undoTest, PlanTab.undoBars(), "undone")
 	check(undoTest .. ", Rake back in 7", bars[7] and bars[7].id, 1822)
-	check(undoTest .. ", slot 1 empty again", bars[1], nil)
+	check(undoTest .. ", slot 1 holds its item again", bars[1] and bars[1].id, 2)
 	check(undoTest .. ", only once", PlanTab.undoBars(), "none")
 	check(undoTest .. ", the keys too", (bound.E or "") .. "/" .. (bound.R or "") .. "/" .. tostring(bound.Q), "ACTIONBUTTON2/ACTIONBUTTON1/nil")
 
@@ -7221,12 +7282,22 @@ function PlanTab.barChecks(check)
 	combat, cursor = false, { type = "item", id = 9 }
 	check(fenceTest .. ", the cursor", PlanTab.applyBars("Feral"), "fenced")
 	check(fenceTest .. ", what was held is still held", cursor and cursor.id, 9)
+	cursor, vehicle = nil, true
+	check(fenceTest .. ", a vehicle bar", PlanTab.applyBars("Feral"), "fenced")
+	vehicle = false
+	local keptBusy, keptLater = PlanTab.promptBusy, PlanTab.later
+	PlanTab.promptBusy, PlanTab.later = function() return true end, function() end
+	shown = nil
+	check("the bars offer waits while the prompt holds another question", PlanTab.offerBars(true), "busy")
+	check("the bars offer waits, and does not write over it", shown, nil)
+	PlanTab.promptBusy, PlanTab.later = keptBusy, keptLater
 
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]
 	PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print = kept[9], kept[10], kept[11], kept[12], kept[13]
 	PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB = kept[14], kept[15], kept[16]
 	GetNumBindings, GetBinding, SetBinding, SaveBindings, GetCurrentBindingSet = keptKeys[1], keptKeys[2], keptKeys[3], keptKeys[4], keptKeys[5]
+	C_KeyBindings, PlanTab.keysRefused = keptKeys[6], keptKeys[7]
 	PlanTab.hasMyAddon = nil
 	db().bars, PlanTab.barsSeen = keptBars, nil
 end
