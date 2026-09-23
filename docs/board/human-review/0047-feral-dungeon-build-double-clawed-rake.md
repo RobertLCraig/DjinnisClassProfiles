@@ -1,5 +1,21 @@
 # 0047 Each spec's dungeon build is the one players run (began with Feral's Double-Clawed Rake)
 
+## What I need from you
+
+For each spec, Balance, Feral, Guardian and Resto:
+1. `/reload`. Open the talent window. Pass: the `Dungeon` row shows as not matching its loadout,
+   because the stored build moved. On Resto, a character with no "Dungeon" loadout shows it as not
+   saved.
+2. `/djbis loadouts`, then **Reset to plan** (or Create) for `Dungeon`. Pass: the tree matches
+   Archon's recommended +7 to +21 tree for that spec. Guardian's hero tree is Elune's Chosen.
+3. Resto: `/djbis tidy`. Pass: it lists "Dungeon: heal only" as old. `/djbis tidy yes` deletes it.
+   If it is the loadout you have selected, pick another first.
+
+Fail: say which spec and which step in this card. A wrong tree means a new string from Archon's
+Export button, pasted into `update-builds.py` PIN.
+
+Why it needs you: only a live client can make and wear a loadout, and only you can open Archon.
+
 ## Why
 
 Rob, 2026-09-24: "recheck builds, the dungeon build for example doesnt seem to have double clawed
@@ -22,7 +38,7 @@ rake which seems like a no brainer to me".
   `Keeper of the Grove M+`; Guardian `Apex`, `EC Raid 1m Convoke`, `EC Raid Incarn`, `Nopex`,
   `Nopex w/ Raze`, `Raze`. Not raised: Rob did not ask for them.
 
-## What I need from you
+## The first choice (answered 2026-09-24: option 2, through Archon's string)
 
 Pick one. This is a preference: both are sound by the guide.
 
@@ -37,7 +53,7 @@ Pick one. This is a preference: both are sound by the guide.
 ## Acceptance
 
 - [x] Rob picks 1 or 2. (2, through Archon's string; see Comments.)
-- [ ] WHEN `update-builds.py` runs, EACH SPEC'S `Dungeon` BUILD SHALL be its pinned Archon string, and a pinned string that fails the points check SHALL stop the run. proves: `python update-builds.py --check` exits 0; the broken-string run above exits 1
+- [x] WHEN `update-builds.py` runs, EACH SPEC'S `Dungeon` BUILD SHALL be its pinned Archon string, and a pinned string that fails the points check SHALL stop the run. proves: `python update-builds.py --check` exits 0; the broken-string run above exits 1
 - [ ] Each spec's `Dungeon` loadout, reset to plan, matches Archon's recommended +7 to +21 tree. proves: manual
 
 ## Comments
@@ -381,13 +397,62 @@ Security:
 - The reviewer's notes for Rob (Feral's Convoke pick, the Resto split, Guardian "survive more" still
   Druid of the Claw) are relayed to him. They are his calls, not findings.
 
-## What I need from you, now
+**2026-09-24** Adversarial review of `4cc6df6` (v0.40.1), and of the card as a whole. **Verdict:
+clean, to `human-review/`.** All four fixes hold. Acceptance 2 is ticked. Acceptance 3 is the
+in-game look, which is Rob's.
 
-For each spec, Balance, Feral, Guardian and Resto:
-1. `/reload`. Open the talent window. Pass: the `Dungeon` row shows as not matching its loadout,
-   because the stored build moved. On Resto, a character with no "Dungeon" loadout shows it as not
-   saved.
-2. `/djbis loadouts`, then **Reset to plan** (or Create) for `Dungeon`. Pass: the tree matches
-   Archon's recommended +7 to +21 tree for that spec. Guardian's hero tree is Elune's Chosen.
-3. Resto: `/djbis tidy`. Pass: it lists "Dungeon: heal only" as old. `/djbis tidy yes` deletes it.
-   If it is the loadout you have selected, pick another first.
+What held:
+- `PYTHONDONTWRITEBYTECODE=1 python update-builds.py --check` exits 0 ("BUILDS block already
+  current") and leaves no `__pycache__`. `offline-check.lua` prints "no FAIL lines" under Lua 5.1
+  and Lua 5.4.6. The game folder's `DjinnisBiS.lua` and `.toc` are byte-identical to `4cc6df6`.
+- Fix 1, the "against" lists. I wrote my own decoder, reading Blizzard's `ReadLoadoutContent` in
+  `wow-ui-source`. It borrows only `Bits`, `PIN` and `guide_builds` from `update-builds.py`. It
+  decodes each pin and the Dreamgrove build it replaced, with Raidbots' `talents.json`, live hero
+  tree only, by rank, granted nodes included. All eight strings are version 2, their own spec, and
+  34/34/13. Balance, Feral and Resto match the v0.40.0 comment's lists exactly, ranks included
+  (Killer Instinct 2, Forestwalk 1 to 2, Thriving Vegetation 1 to 2). Guardian matches too, with
+  one convention: the list names the hero tree's own node ("Elune's Chosen", "Druid of the Claw")
+  and leaves out the keystone each one grants for free (Boundless Moonlight, Ravage). No granted
+  node differs in any other spec.
+- Fix 2. Against `DOTC`, the Feral pin takes Convoke the Spirits, Double-Clawed Rake, Hunger for
+  Battle, Lycara's Inspiration and Ursine Vigor. It leaves Incarnation, Tireless Energy, Ashamane's
+  Guidance, Forestwalk and Innervate. The `PIN` comment names those five swaps. Convoke for
+  Incarnation is one choice node (82114). The other four pairings are point moves, so the pairing
+  is the comment's own, but the set is right.
+- Fix 3. "Dungeon: heal only" is in `PlanTab.RETIRED`, and no spec's live build has that name.
+  `PlanTab.tidy` deletes only names in `RETIRED`, only on the spec in hand, never a live name there,
+  never the selected loadout, and only on `yes`. Nothing else reads `RETIRED`. So the only loadout it
+  can take is one named exactly "Dungeon: heal only", which is the name the addon itself made.
+- Fix 4, the `Dungeon` guard. Each mutation ran on a copy in `$TEMP`, under `--check` and a write:
+  - Resto's `PIN` entry removed, renamed "Dungeon ", "dungeon" or "Dungeon: heal only": exit 1,
+    "Resto has no "Dungeon" build", Lua byte-identical.
+  - Feral's pin removed while Guardian still has its own: exit 1 for Feral. The guard reads only
+    the rows written after that spec's own header, so another spec's `Dungeon` cannot satisfy it.
+  - The Resto key renamed "Restoration": exit 1 at the `SPEC_ID` check.
+  - Feral's pin removed and `DOTC` put back in `PICK` as "Dungeon": the write passes, which is
+    right. The guard asks for a `Dungeon`, and a `PICK` one counts.
+  - Control, unchanged: exit 0 both ways.
+- Acceptance 2's `proves:`. `--check` exits 0. Feral's pin with 3 characters broken exits 1
+  ("points {'specNodes': 16, 'classNodes': 20}"). Resto's pin holding Feral's string exits 1 (spec
+  103). Neither wrote the Lua.
+
+Fixed in place: the card's live ask sat at the bottom, under a second "What I need from you" that
+still asked the first, answered question. The live ask is now `## What I need from you` under the
+title, with a Fail line and why it needs Rob. The old one is renamed as answered.
+
+Not findings:
+- No offline check covers the new `RETIRED` entry. Deleting it leaves `offline-check.lua` green.
+  Step 3 of the ask is the check for it.
+- The card is about 400 lines, over the board's 100. Most of it is the review thread.
+
+Step 4 (look at it in a browser) does not apply. No browser surface: there is no browser and no
+game client. The only UI effects are four stored talent strings, one retired loadout name and one
+label in `/djbis talents`. The in-game check is Rob's, above.
+
+Security:
+1. **Weakest point:** unchanged. The points check is the only guard on a pasted string. A string
+   with the right spec and counts but the wrong talents still passes.
+2. **Unchecked:** nothing new. `PIN`'s spec keys and each spec's `Dungeon` are checked now. The
+   fetches trust the network, and this is author tooling that never ships.
+3. **Leaks:** nothing. Messages print a spec name, point counts or a loadout name. The strings are
+   public.
