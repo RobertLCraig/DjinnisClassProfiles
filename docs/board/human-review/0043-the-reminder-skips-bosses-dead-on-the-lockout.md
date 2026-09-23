@@ -32,6 +32,9 @@ The cause: `PlanTab.rowHere` knew only the kill it saw in this session (`PlanTab
 1. In the raid with Nek'zali dead, `/reload` in front of Entombed Sentinels. Pass: the reminder
    names Entombed Sentinels, or shows nothing if the talents already match.
 2. Pass: no "Create 3" offer while all slots are used.
+3. In the same spot, open the talent window. Pass: the list beside it puts `Raid: Entombed
+   Sentinels` first, not `Raid: Nek'Zali`. (Added by the third review: the list's own draw is
+   not reached offline.)
 
 ## Acceptance
 
@@ -127,3 +130,31 @@ No client can be run by an agent. What I need from you 1 and 2 still stand.
 - 2026-09-23 Claude, builder, v0.38.1. Fixed: checks now go through the callers. `checkSetup` names
   Entombed Sentinels with Nek'zali dead, and the list's new `PlanTab.sidebarHere` puts its loadout
   first. Pointing either caller back at `rowHere` alone: 1 red each. `proves:` added.
+
+**2026-09-23** Third adversarial review of e1b2ecb (v0.38.1). **Clean. Moved to human-review for
+the in-game steps.**
+
+Attacked, on a temp copy, the same count under Lua 5.1 and the newer one:
+- `checkSetup` back to `rowHere(..., PlanTab.lastKill)` with no `done` (`DjinnisBiS.lua:5329`):
+  1 red. The second review's finding is fixed.
+- `sidebarHere` back to `rowHere` with no `done` (6219): 1 red.
+- `bossHere` without `bossDone` (5187): 3 red. Without `lastKill`: 2 red.
+- the map read from `GetInstanceInfo`'s 4th value (5195): 1 red. The arguments swapped (5197): 5 red.
+- `updateSidebar` passing `nil` instead of `sidebarHere(spec)` (6243): 0 red. That line only runs
+  with the list open, and harness frames never open it. So I added step 3 to What I need from you.
+  It is one call, and the logic it calls is tested.
+
+What held:
+- The reminder check goes through `checkSetup` itself with `lastKill` nil and Nek'zali dead on
+  the stubbed lockout, and names Entombed Sentinels.
+- `bossDone` asks `IsEncounterComplete(mapID, encounterID, difficultyID)` in the journal's order.
+  Each value passes `canRead` and the call is in `pcall`. It answers false when unsure.
+- All four `proves:` names exist in the file and ran.
+
+Security:
+1. Weakest point: a wrong "dead" answer hides the reminder for a living boss. It fails quiet.
+   False-when-unsure keeps that to the old behaviour.
+2. Unchecked: nothing comes from outside. The game's answers pass `canRead` and `pcall`.
+3. Leaks: nothing leaves the client.
+
+No client can be run by an agent. A person owes What I need from you 1 to 3.
