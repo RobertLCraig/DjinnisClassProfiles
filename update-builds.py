@@ -52,7 +52,7 @@ PICK = {
         "Coiled Altar": ["Raid: Coiled Altar"],
         "Ulatek": ["Raid: Ula'tek"],
         "Nymrissa (Lair)": ["Raid: Nymrissa"],
-        "DOTC": ["Dungeon"],
+        # "DOTC" backed "Dungeon" until 2026-09-24; PIN has it now (card 0047).
     },
     "Guardian": {
         # The guide gives one raid build per hero tree and does not rank them.
@@ -67,6 +67,21 @@ PICK = {
         "M+ #HealersHeal": ["Dungeon: heal only"],
         "M+ Cat DPS": ["Dungeon: cat damage"],
         "M+ Caster DPS": ["Dungeon: caster damage"],
+    },
+}
+
+# Builds no guide publishes, pinned by hand: loadout name -> (string, source).
+# Checked for spec and points like the rest, and never refreshed: copy a new
+# string in when the tree changes (the points check fails loudly when it does).
+PIN = {
+    "Feral": {
+        # Card 0047. Archon, Mythic+, High Keys, all dungeons, recommended build
+        # (39.5%, 2,600 runs), 2026-09-24. It is Dreamgrove's DOTC with
+        # Double-Clawed Rake for Tireless Energy; Archon's +7 to +21 top build
+        # takes Double-Clawed Rake too. Archon has a human check, so it cannot
+        # be fetched here.
+        "Dungeon": ("CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB",
+                    "Archon high keys #1, 2026-09-24"),
     },
 }
 
@@ -149,6 +164,12 @@ def block(trees):
             for name in names:
                 assert len(name) <= 30 and '"' not in name, name
                 lines.append(f'\t\t["{name}"] = "{code}", -- {source}')
+        for name, (code, source) in PIN.get(spec, {}).items():
+            got, spent = points(code, tree)
+            if got != SPEC_ID[spec] or spent != POINTS:
+                sys.exit(f"{spec} pinned {name}: spec {got}, points {spent}. Copy a fresh string in.")
+            assert len(name) <= 30 and '"' not in name and not any(name in n for n in PICK[spec].values()), name
+            lines.append(f'\t\t["{name}"] = "{code}", -- {source}')
         lines.append("\t},")
     lines += ["}", END]
     return lines

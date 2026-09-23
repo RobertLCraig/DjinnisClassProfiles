@@ -516,7 +516,7 @@ end
 -- WHEN to pick the build (Rob, 2026-09-23), and are the ones DjinnisDreamgrove
 -- 0.7.0 imported, so a loadout made there is the same loadout here. Card 0030.
 -- BEGIN GENERATED BUILDS
-PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, read 2026-09-23"
+PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, read 2026-09-24"
 PlanTab.BUILDS = {
 	Balance = {
 		["Raid: Single Target"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
@@ -534,7 +534,7 @@ PlanTab.BUILDS = {
 		["Raid: Coiled Altar"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZm5BmZAAAAYJY2gxMjaGzCzMzYMzDMDAAAAAAwAAAAIAY2mZpZZmlNwMDwiZGGAAzMAYA", -- Coiled Altar
 		["Raid: Ula'tek"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Ulatek
 		["Raid: Nymrissa"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYLwmhxMjaGziZmZmlxMmBAAAAAAYAAAA0MLzyMzMgALgZGgFzgBAAwMbYA", -- Nymrissa (Lair)
-		["Dungeon"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzMzGzMzMGzmx2MLzYm5BmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAA0MLzyMzMgALgZGgFGMAAAmZDD", -- DOTC
+		["Dungeon"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", -- Archon high keys #1, 2026-09-24
 	},
 	Guardian = {
 		["Raid: Druid of the Claw"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxsYmZMzmZZgZbZgxMMaimZmlZmZmxYGzAAAAAYwMWmBAAAgamlZZmZGAALYGALmBDYxy2AgZ2gB", -- DotC Raid

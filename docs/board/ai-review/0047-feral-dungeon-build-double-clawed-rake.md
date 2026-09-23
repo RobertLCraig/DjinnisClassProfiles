@@ -36,7 +36,9 @@ Pick one. This is a preference: both are sound by the guide.
 
 ## Acceptance
 
-- [ ] Rob picks 1 or 2.
+- [x] Rob picks 1 or 2. (2, through Archon's string; see Comments.)
+- [ ] WHEN `update-builds.py` runs, THE FERAL `Dungeon` BUILD SHALL be the pinned Archon string, and a pinned string that fails the points check SHALL stop the run. proves: `python update-builds.py --check` exits 0; the broken-string run above exits 1
+- [ ] Rob's `Dungeon` loadout, reset to plan, has Double-Clawed Rake and not Tireless Energy. proves: manual
 
 ## Comments
 
@@ -51,6 +53,30 @@ screenshot: Feral, Mythic+, High Keys, all dungeons. That is the top 5% of keys 
 - Alt #1 (28.4%): Convoke and Hunger for Battle, in place of Incarnation and Ashamane's Guidance.
 - wowvalor.app, top 50 Feral players: Double-Clawed Rake 94%, Tireless Energy 6%.
 
+A second Archon page from Rob: +7 to +21, 47,977 runs. Druid of the Claw 91.9%. Its recommended
+build (33.1%) has Double-Clawed Rake on and Tireless Energy off. None of its three alternatives
+change either talent.
+
 That makes option 1 (Wildstalker) the 1.4% choice, and moves the recommendation to **option 2**.
 Its cost is now smaller: `update-builds.py` would keep Archon's string pinned, since Archon cannot
 be fetched unattended. The points check still fails loudly when a tree change breaks it.
+
+**2026-09-24** Rob: "Option 1 looking good so far". In the chat, option 1 was: replace the Feral
+`Dungeon` build with Archon's High Keys recommended build. That is this card's option 2, with
+Archon's string rather than hand-moved points.
+
+**2026-09-24** Builder, v0.39.4.
+- `update-builds.py` gains `PIN`: builds no guide publishes, each with its source. They get the
+  same spec and points check as guide builds, and are never refreshed. Feral `Dungeon` is pinned to
+  Archon's High Keys #1 string. `DOTC` leaves `PICK`.
+- The BUILDS block is regenerated. Only Feral `Dungeon` and the read date change.
+- Checked: `--check` then passes. A pinned string with 3 characters broken is refused
+  ("points {'specNodes': 13, 'classNodes': 17}"). `offline-check.lua` shows no FAIL lines under
+  both Luas.
+
+## What I need from you, now
+
+1. `/reload`. Open the talent window as Feral. Pass: the `Dungeon` row shows as not matching its
+   loadout (the stored build moved).
+2. `/djbis loadouts`, then **Reset to plan** for `Dungeon`. Pass: the tree has Double-Clawed Rake
+   and no Tireless Energy, with every other talent the same as before.
