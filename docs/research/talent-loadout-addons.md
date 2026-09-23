@@ -88,8 +88,12 @@ source only.
 4. **From ImprovedTalentLoadouts, only what Rob used.** Gear set per build is already in DjinnisBiS (card 0012). Action bars and layout are open questions.
 5. **The TalentTreeTweaks diff**: hover a row and the tree lights up the nodes that would change. That answers "what is a choice" in the game, not in a document.
 
+## Settled by Rob
+
+- **The temporary loadout was a sticking point with ImprovedTalentLoadouts** (Rob, 2026-09-23). So a Djinni version does not wear builds through a Blizzard loadout it owns and rewrites. It writes into the active config, the TalentLoadoutsEx way.
+
 ## Could not settle
 
-- **Why Rob left each addon.** A Djinni version that repeats the reason is wasted work.
+- **Why Rob left TalentLoadoutsEx**, and whether the temporary loadout was the only problem with ImprovedTalentLoadouts. A Djinni version that repeats the reason is wasted work.
 - Which ImprovedTalentLoadouts features he used.
 - Whether writing nodes directly still works in 12.1 for every node type. TalentLoadoutsEx declares 120100 and its last change is recent, which is evidence, not proof.
