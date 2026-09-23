@@ -229,3 +229,86 @@ Rob pulled `wow-ui-source` during this fix (`live`, 782825221 to 09b9db794). The
 this card is in `SimpleTextureBaseAPIDocumentation.lua`: `ChecksForbiddenAspects` on `self` for
 texture setters. That applies to forbidden textures. The preview only sets textures on its own
 frames, so it is not affected.
+
+**2026-09-23, third adversarial review (review-card) of 8e8a9db, verdict: findings, back to todo.**
+
+There is no browser and no game client here. Instead of step 4, I read the frame code against
+Blizzard's source in `wow-ui-source` (branch `live`, 09b9db794). Nothing from v0.39.1 or v0.39.2
+has been seen in a client.
+
+Harness: `offline-check.lua` prints "no FAIL lines" under Lua 5.1.5 and under 5.4.6. I ran 18
+mutations on a `$TEMP` copy, and both interpreters gave the same result every time.
+- Caught: no `ghostUI` restore, ghost on the hidden button, no scale guard, no UIParent guard,
+  `shown()` bypassing `ui.canRead`, the top guard bypassing it, 11 buttons, tip-off keeps the
+  ghost, combat keeps it, no redraw, and a throw mid-block (it becomes a FAIL line, not a crash).
+- Survived: the two in finding 2, plus five covered under "Noted" and "What held".
+
+Findings:
+
+1. **A throw inside the block leaves `PlanTab.ghostKey` set.** The `pcall` puts back `ghostUI` and
+   `ghosts`, but not the key. Probed: I put an `error()` after the first fake `showGhost`, and after
+   the restore `ghostKey` was still `"Feral"`.
+   - In a client, the next `barsChanged` (any bar save, load or undo) calls
+     `showGhost("Feral")` with the real `ghostUI` and the real saved bars. That draws Rob's Feral
+     layout over his bars with nothing pointed at, and it stays until some Load button or row
+     fires `OnLeave`.
+   - This only happens after a throw, which also prints a FAIL, so the risk is small. But the brief
+     was "everything put back if a check throws", and this is not.
+   - Fix: call `PlanTab.hideGhost()` straight after the restore line, and add
+     `PlanTab.ghostKey == nil` to the "real frame calls are back" check.
+2. **The `PlanTab.ghosts` half of the swap is not checked.** Two mutations stay green:
+   - **Drop `ghosts` from the restore.** After `/djbis test`, the pool holds the fake tables. Their
+     metatable swallows every call, so the preview does nothing until `/reload`, and nothing says so.
+   - **Drop the `PlanTab.ghosts = {}` swap.** The fake block then reuses the real frames made by the
+     earlier `showGhost("Feral")` and moves them to fake coordinates. They are hidden again before
+     the command returns, but fake tables are appended to the real pool.
+   - The restore check compares `ghostUI.canRead` and `ghostUI.make` only. The `make` comparison is
+     redundant: once `ghostUI == keptUI`, it follows.
+   - Fix: record `#keptGhosts` before the block, then check `PlanTab.ghosts == keptGhosts` and that
+     the count did not change.
+
+Noted, not findings:
+- The fake `SetPoint` ignores its second argument, so anchoring the ghost on `p.frame` (a
+  Blizzard button) instead of `ui.top()` stays green. Criterion 3 is `proves: manual`, and reading
+  the code confirms `ui.top()`. If you want it covered, have the fake record `relativeTo`.
+- `ui.canRead(slot)` in `ghostButtons` is untested. Swapping it for the real `canRead` stays green.
+  `b.action` is a Lua field that `UpdateAction` computes, not an API return, so this is low risk.
+- With a secret UIParent scale, `showGhost` returns 0 but leaves `ghostKey` set. The tooltip then
+  says "Your bars show it now" while nothing is drawn. `OnLeave` clears it, so no harm is done.
+- The old "Every shown action button..." comment now sits above `ghostUI` instead of
+  `ghostButtons`.
+- `sidebarChecks` (card 0034, line 8439) writes the `GameTooltip` global during `/djbis test`.
+  That code predates this card, and card 0038's suspect list does not include it yet.
+
+What held, from the brief's questions:
+- **Does the new block write any Blizzard global or the `canRead` upvalue? No.** The only
+  assignments to `canRead` are at lines 1021-1025. The block writes only `PlanTab.ghostUI`,
+  `PlanTab.ghosts`, `PlanTab.ghostKey` and `db().bars`, which is our own SavedVariables and is put
+  back at the end of `barChecks`. It calls the real `GameTooltip:Hide()` and `hideTreeDiff` through
+  `sidebarTipOff`, which reads and calls but writes nothing. The `canRead` field in `ghostUI` is
+  captured from the file-local at load time.
+- **Is everything put back if a check throws? Partly.** `ghostUI` and `ghosts` are put back after
+  the `pcall`, and the "ran to the end" check turns a throw into a FAIL. `ghostKey` is not
+  (finding 1).
+- **Does `ghostUI.make` create frames the same way as before? Yes.** It still calls
+  `CreateFrame("Frame", nil, UIParent)`, and `SetFrameStrata("DIALOG")` is still in `showGhost`,
+  unchanged. `CreateFrame` and `UIParent` are looked up when the call runs, as before. The anchor is
+  `ui.top()`, which is `UIParent`. The harness cannot see strata or parent (both mutations survive),
+  so these points rest on reading the code.
+- **Do the earlier in-client checks draw real ghosts, and are they always hidden? Yes, and yes.**
+  - The check at line 8213 runs `showGhost("Feral")` with the real `ghostUI` and
+    `db().bars = { Feral = { slots = {} } }`. In a client it creates real DIALOG frames on
+    UIParent over every shown button: dark squares, amber where the stubbed `readBars` holds
+    something.
+  - `hideGhost()` is the next statement, in the same Lua call, so no frame is rendered in between
+    and Rob sees nothing.
+  - The "Balance" and "combat" calls start with `hideGhost()` and draw nothing.
+  - The frames join the real pool, the same frames a real hover would use.
+  - One side effect: a preview Rob had up while typing `/djbis test` would be cleared.
+- `ActionButtonUtil.ActionBarButtonNames` is unchanged at 09b9db794 (ActionButtonUtil.lua:31).
+  The real `ghostUI.names` is not exercised offline, where the harness has no `ActionButtonUtil`,
+  so replacing it with `{}` survives. It is the same expression as before the fix.
+
+Security: **Weakest point:** `/djbis test` in a client. After a throw, a stale `ghostKey` could
+draw an unasked preview (finding 1). **Unchecked:** the pool restore (finding 2). **Leaks:**
+nothing. It is all local.
