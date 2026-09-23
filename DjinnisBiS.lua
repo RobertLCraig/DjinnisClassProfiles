@@ -6094,7 +6094,7 @@ function PlanTab.buildSidebar()
 	f.data = CreateDataProvider()
 	f.scroll:SetDataProvider(f.data)
 	-- Hidden in combat (the card): nothing on it may be clicked then anyway.
-	f:SetScript("OnEvent", function(self) self:Hide() self.tab:Hide() pcall(PlanTab.hideGhost) end)
+	f:SetScript("OnEvent", PlanTab.sidebarCombat)
 	f:RegisterEvent("PLAYER_REGEN_DISABLED")
 	if not f:IsEventRegistered("PLAYER_REGEN_DISABLED") then
 		PlanTab.say("Could not register PLAYER_REGEN_DISABLED, so the plan list stays up in combat. Its clicks still do nothing there.")
@@ -6152,6 +6152,12 @@ function PlanTab.sidebarTip(row)
 	GameTooltip:AddLine("Double-click to switch to it.", 0, 1, 0)
 	GameTooltip:Show()
 	pcall(PlanTab.showTreeDiff, e.loadout, e.code)  -- card 0034
+end
+
+function PlanTab.sidebarCombat(f)
+	f:Hide()
+	f.tab:Hide()
+	pcall(PlanTab.hideGhost)
 end
 
 function PlanTab.sidebarTipOff()
@@ -7441,13 +7447,23 @@ end
 -- Every shown action button and the slot it shows now, the form page too.
 -- The names are Blizzard's (Shared/ActionButtonUtil.lua); `action` is set by
 -- ActionBarActionButtonMixin:UpdateAction. Read only.
+-- IsVisible and GetEffectiveScale may hand back a secret (SimpleFrameAPIDocumentation).
+local function shown(frame)
+	local v = frame:IsVisible()
+	return canRead(v) and v
+end
+
 function PlanTab.ghostButtons()
 	local out = {}
 	for _, prefix in ipairs(ActionButtonUtil and ActionButtonUtil.ActionBarButtonNames or {}) do
 		for i = 1, 12 do
+			-- An empty button is hidden when the bar's "Always Show Buttons"
+			-- is off, but its container stays up while the bar has room for it
+			-- (ActionBarMixin:UpdateShownButtons): that slot a load may fill (0046 review).
 			local b = _G[prefix .. i]
-			local slot = b and b:IsVisible() and b.action
-			if canRead(slot) and type(slot) == "number" then out[#out + 1] = { frame = b, slot = slot } end
+			local place = b and (shown(b) and b or b.container and shown(b.container) and b.container)
+			local slot = place and b.action
+			if canRead(slot) and type(slot) == "number" then out[#out + 1] = { frame = place, slot = slot } end
 		end
 	end
 	return out
@@ -7462,6 +7478,7 @@ function PlanTab.showGhost(key)
 	PlanTab.ghostKey = key
 	local plan = PlanTab.ghostPlan(layout.slots or {}, PlanTab.ghostButtons(), PlanTab.readBars())
 	local top = UIParent:GetEffectiveScale()
+	if not canRead(top) then return 0 end
 	for i, p in ipairs(plan) do
 		local g = PlanTab.ghosts[i]
 		if not g then
@@ -7475,8 +7492,9 @@ function PlanTab.showGhost(key)
 			PlanTab.ghosts[i] = g
 		end
 		local l, b, w, h = p.frame:GetRect()
-		if canRead(l) and l then
-			local s = p.frame:GetEffectiveScale() / top
+		local scale = p.frame:GetEffectiveScale()
+		if canRead(l) and l and canRead(scale) then
+			local s = scale / top
 			g:ClearAllPoints()
 			g:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", l * s, b * s)
 			g:SetSize(w * s, h * s)
@@ -8190,6 +8208,52 @@ function PlanTab.barChecks(check)
 	PlanTab.showGhost("Feral")
 	check(ghostTest .. ", nothing in combat", PlanTab.ghostKey, nil)
 	combat = false
+	-- the frame side (0046 review), on fakes that remember what was done to them:
+	-- TestBar1 shown, TestBar2 hidden and empty in a shown place, TestBar3 off
+	-- the bar, TestBar4 shown but its visibility a secret
+	local keptFrames = { ActionButtonUtil, CreateFrame, UIParent, canRead, PlanTab.ghosts }
+	local function fake(visible, x, scale)
+		return { IsVisible = function() return visible end, GetRect = function() return x, 10, 40, 40 end,
+			GetEffectiveScale = function() return scale or 1 end }
+	end
+	local secret = {}
+	canRead = function(v) return v ~= secret end
+	TestBar1, TestBar2, TestBar3, TestBar4 = fake(true, 100, 1.5), fake(false, 200), fake(false, 300), fake(secret, 400)
+	TestBar1.action, TestBar2.action, TestBar3.action, TestBar4.action = 1, 2, 3, 4
+	TestBar2.container, TestBar3.container = fake(true, 200), fake(false, 300)
+	ActionButtonUtil = { ActionBarButtonNames = { "TestBar" } }
+	local slotsOf = {}
+	for _, b in ipairs(PlanTab.ghostButtons()) do slotsOf[#slotsOf + 1] = b.slot end
+	check(ghostTest .. ", an empty hidden button in a shown place counts; off the bar or secret, not", table.concat(slotsOf, ","), "1,2")
+	local drawn = {}
+	CreateFrame = function()
+		local g = { shown = false }
+		function g:SetPoint(_, _, _, x, y) self.x, self.y = x, y end
+		function g:SetSize(w) self.w = w end
+		function g:Show() self.shown = true end
+		function g:Hide() self.shown = false end
+		function g:CreateTexture() return setmetatable({}, { __index = function() return function() end end }) end
+		setmetatable(g, { __index = function() return function() end end })
+		drawn[#drawn + 1] = g
+		return g
+	end
+	UIParent = { GetEffectiveScale = function() return 0.75 end }
+	PlanTab.ghosts = {}
+	db().bars = { Feral = { slots = { { type = "spell", id = 5221 } } } }
+	check(ghostTest .. ", draws one per place", PlanTab.showGhost("Feral"), 2)
+	check(ghostTest .. ", at the button, in UIParent's scale", ("%d,%d,%d"):format(drawn[1].x, drawn[1].y, drawn[1].w), "200,20,80")
+	PlanTab.sidebarTipOff()
+	check(ghostTest .. ", gone when the mouse leaves a row", tostring(drawn[1].shown) .. "/" .. tostring(PlanTab.ghostKey), "false/nil")
+	PlanTab.showGhost("Feral")
+	PlanTab.sidebarCombat({ Hide = function() end, tab = { Hide = function() end } })
+	check(ghostTest .. ", gone in combat", tostring(drawn[1].shown) .. "/" .. tostring(PlanTab.ghostKey), "false/nil")
+	PlanTab.showGhost("Feral")
+	TestBar2.container = fake(false, 200)
+	PlanTab.barsChanged()
+	check(ghostTest .. ", redrawn after a load, and a place gone is hidden", tostring(drawn[1].shown) .. "/" .. tostring(drawn[2].shown), "true/false")
+	PlanTab.hideGhost()
+	TestBar1, TestBar2, TestBar3, TestBar4 = nil, nil, nil, nil
+	ActionButtonUtil, CreateFrame, UIParent, canRead, PlanTab.ghosts = keptFrames[1], keptFrames[2], keptFrames[3], keptFrames[4], keptFrames[5]
 
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]

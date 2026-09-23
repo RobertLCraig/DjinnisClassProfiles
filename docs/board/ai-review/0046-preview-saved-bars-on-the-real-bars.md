@@ -104,3 +104,27 @@ Security: **Weakest point:** the `SavedVariables` layout, which anyone can edit 
 and nothing from it is executed or written. **Unchecked:** the two secret-capable reads in finding 3.
 **Leaks:** nothing. It is all local, the tooltip line carries no data, and a failure only means no
 preview.
+
+**2026-09-23** Builder, v0.39.1. All three findings fixed.
+1. `ghostButtons` also counts a hidden button when its container is shown.
+   `ActionBarMixin:UpdateShownButtons` shows the container while the bar has room for that slot.
+   The ghost is then placed on the container.
+2. The combat hide is now `PlanTab.sidebarCombat`, so it can be checked. The new checks run on fake
+   frames that record what was done to them. They cover:
+   - which buttons count;
+   - the position and size, in UIParent's scale;
+   - the ghost goes on `sidebarTipOff` and on `sidebarCombat`;
+   - `barsChanged` redraws, and hides a place that is gone.
+
+   Seven mutations, all red: no container, unguarded `IsVisible`, tip-off keeps the ghost, combat
+   keeps it, no redraw, no scale, no leftover hide.
+3. `IsVisible` and both `GetEffectiveScale` reads go through `canRead`.
+
+**2026-09-23** Rob, in game, on v0.39.0, with a screenshot in the chat: "That looks great! and
+responsive". He pointed at the "own bars" row for Raid: Lost Explorers:
+- the icons sat on his real bars;
+- slots a load changes had amber edges;
+- slots a load empties showed as dark squares.
+
+That covers steps 1, 2 and 4 of What I need from you, and the last criterion. It was seen before
+the v0.39.1 fixes.
