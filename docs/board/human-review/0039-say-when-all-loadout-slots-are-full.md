@@ -30,8 +30,9 @@ vague reason.
 
 ## Acceptance
 
-- [ ] WHEN every loadout slot is used, THE ADDON SHALL say so and make nothing.
-- [ ] WHEN a slot is free, THE ADDON SHALL make loadouts as before.
+- [ ] WHEN every loadout slot is used, THE ADDON SHALL say so and make nothing. proves: `no loadout is made in combat or with the talent window open, all slots full`, `..., and it says so`, `..., slots are counted over every spec`, and in a client (What I need from you, 1)
+- [ ] WHEN a slot is free, THE ADDON SHALL make loadouts as before. proves: `..., a free slot is counted`, `Create makes every missing build, and nothing else`, and in a client (What I need from you, 2)
+- [ ] WHEN every slot is used, `/djbis tidy` SHALL still list and delete. proves: `tidy removes only the old Dreamgrove names, and only on yes, even with every slot used`
 
 ## Comments
 
@@ -74,3 +75,38 @@ at: `/djbis tidy` with all slots full, once the fix lands.
   - `loadoutFence(anySlots)` skips the slot count. `tidy` passes true, so it runs at the cap. Check:
     `tidy removes only ..., even with every slot used`. Putting the old fence back: 1 red.
   - `freeLoadoutSlots` stops at a spec id of 0 too.
+
+**2026-09-23** Second adversarial review, of b5530b3 (v0.38.0). Verdict: **clean, to human-review**
+for the in-game checks.
+
+Attacked:
+- Both harnesses (Lua 5.1 and the newer one) print "no FAIL lines".
+- Mutations on a temp copy, red count the same under both:
+  - tidy back on the plain fence: 1 red.
+  - `anySlots` ignored in the fence: 1 red.
+  - the slot check gone: 4 red.
+  - slots counted for the active spec only: 15 red.
+  - no stop at spec id 0: 0 red. That is the small note from the first review. A druid never
+    reaches it, so it is not a finding.
+  - the spare's fence (`makeLoadouts(jobs, wear)`) back to the slot check: 0 red. That belongs to
+    0040. It only matters when the game's list lags a delete, and `wearSpare` checks the slots itself
+    first.
+- Every other caller of `loadoutFence`: `makeLoadouts` for Create and Reset still counts slots. Only
+  tidy and the spare skip the count.
+
+What held: the finding is fixed. At the cap, tidy lists and deletes. Create and Reset are still
+refused at the cap with the same line.
+
+What broke: nothing in the code. The criteria had no `proves:`, which the first review noted and
+the fix left. I fixed that in place: each criterion now names the checks above, and a third
+criterion covers tidy at the cap.
+
+Security:
+1. Weakest point: the count trusts `GetConfigIDsBySpecID` for specs that are not active. If it
+   answers short, the fence stays open, which is the old behaviour.
+2. Unchecked: nothing comes from outside. `tidy` only deletes names on the retired list, never the
+   selected one, and only on `yes`.
+3. Leaks: nothing leaves the client. The refusal prints the cap number only.
+
+No agent can run the game. A person still owes What I need from you 1 and 2, and one more look:
+with all 40 slots used, `/djbis tidy` lists the old names and `/djbis tidy yes` deletes them.
