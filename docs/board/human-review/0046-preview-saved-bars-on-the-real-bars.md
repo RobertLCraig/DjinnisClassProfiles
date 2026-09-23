@@ -327,3 +327,64 @@ before the scale guard.
 
 Left as noted: the fake `SetPoint` ignores the anchor frame (criterion 3 is manual). The slot
 `canRead` has no check. The older `GameTooltip` swap in `sidebarChecks` is now on card `0038`.
+
+**2026-09-23, fourth adversarial review (review-card) of 6e6945a, verdict: clean, to human-review.**
+
+The scope was the two third-review findings, the moved `ghostKey`, and anything those changes
+newly break. There is no browser and no game client here. Instead of step 4, I read the frame code
+against `wow-ui-source` (branch `live`, 09b9db794). Nothing from v0.39.1 to v0.39.3 has been seen
+in a client. The game folder holds v0.39.3, byte-identical to the repo's `DjinnisBiS.lua`. I only
+read it.
+
+Harness: `offline-check.lua` prints "no FAIL lines" under Lua 5.1.5 and 5.4.6. I ran 12 mutations
+on a `$TEMP` copy, and both interpreters gave the same result every time.
+- **Caught:**
+  - a throw mid-block;
+  - a throw with the hide after the restore removed. The new "no preview left up" check fails on
+    its own: "expected nil, got Feral";
+  - `ghosts` left out of the restore: "true/0, got false/4";
+  - no `PlanTab.ghosts = {}` swap: "true/0, got true/4";
+  - the key set before the scale guard again. The secret-scale check reads "0/false/Feral";
+  - the key never set. "shown for a saved layout" and the `barsChanged` redraw check both go red;
+  - the key set only when `#plan > 0`;
+  - `barsChanged` not redrawing.
+- **Survived, and all equivalent:**
+  - the hide after the restore removed, with no throw. The block already ends in `hideGhost`, so
+    the line only matters after a throw, and that case is caught (above);
+  - the hide moved to before the restore. `ghostKey` is cleared either way, and the real pool was
+    never touched inside the block;
+  - the key set after the draw loop instead of before it;
+  - changing the pool check's expected value to the live count. That is a probe of the check
+    itself, so surviving means nothing.
+
+Findings: none.
+
+What held:
+- **Finding 1 (a stale key after a throw) is fixed.** `hideGhost()` runs right after the restore,
+  on the real pool, and a check confirms the key is nil. It also clears a preview that was up when
+  `/djbis test` was typed, which the third review already noted.
+- **Finding 2 (the pool half of the swap) is fixed.** Both pool mutations go red. On a client the
+  real pool is not empty (offline it is 0), so a missing swap would reuse real frames without
+  adding any. The count check cannot see that. But the fake `top()` is then passed as
+  `SetPoint`'s `relativeTo`, which must be a `ScriptRegion`
+  (SimpleScriptRegionResizingAPIDocumentation.lua:144). That throws, and "ran to the end" catches
+  it.
+- **The knock-on from moving `ghostKey`.** A saved layout, outside combat, with a readable UIParent
+  scale, still sets the key before the draw loop. Both the "key never set" and "only when drawn"
+  mutations go red, so `barsChanged` still redraws. A throw in `ghostButtons`, `readBars` or
+  `ghostPlan` now leaves no key. Before, it left one, so this is an improvement. The tooltip lines
+  (lines 6077 and 6146) test `pcall(...) and PlanTab.ghostKey`, so they follow the new rule.
+- The `loadBars` comment is back above `loadBars`. The `0038` suspect line now names
+  `sidebarChecks` and `GameTooltip`.
+
+Noted, not findings:
+- Suppose a `barsChanged` redraw meets a secret UIParent scale. `showGhost` hides first and returns
+  before setting the key, so later loads under the same hover no longer redraw. I found nothing
+  that makes UIParent's scale secret, and `OnLeave` resets it all.
+- The key is still set when `#plan` is 0, for example in a vehicle with every bar hidden. The
+  tooltip then says "Your bars show it now" with nothing drawn. This predates the fix and is
+  harmless.
+
+Security: **Weakest point:** `/djbis test` in a client. It is now covered after a throw: the key
+is cleared and the pool is checked. **Unchecked:** the anchor frame (criterion 3 is manual) and
+the slot `canRead`, both as noted before. **Leaks:** nothing. It is all local.
