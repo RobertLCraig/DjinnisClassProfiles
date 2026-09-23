@@ -5904,8 +5904,10 @@ function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded,
 		{ key = "own", label = "Your loadouts", icon = PlanTab.OWN_ICON, rows = own } }
 	if context == "mplus" then groups[1], groups[2] = groups[2], groups[1] end
 	local ticked
+	local bars = type(db().bars) == "table" and db().bars or {}
 	for _, g in ipairs(groups) do
 		for _, r in ipairs(g.rows) do
+			r.bars = bars[spec .. " / " .. r.loadout] ~= nil or nil  -- its own action bars (card 0042)
 			local build = r.code or PlanTab.buildFor(spec, r.loadout)
 			r.saved = saved == nil or saved[r.loadout] ~= nil  -- nil: the game would not say, so no grey
 			r.warn = not r.own and build and problemOf and problemOf(build) or nil
@@ -6076,6 +6078,7 @@ function PlanTab.sidebarTip(row)
 	if e.tick then GameTooltip:AddLine("This is the build in play.", 0, 1, 0) end
 	if not e.saved then GameTooltip:AddLine("No loadout of its own on this character. Double-click wears it through the spare loadout, \"" .. PlanTab.SPARE .. e.loadout .. "\".", 1, 0.7, 0, true) end
 	if e.own then GameTooltip:AddLine("Your own loadout. The plan has no build of this name.", 0.7, 0.7, 0.7, true) end
+	if e.bars then GameTooltip:AddLine("Has its own action bars. Switching to it offers them.", 0.4, 0.8, 1, true) end
 	if e.warn then GameTooltip:AddLine(e.warn, 1, 0.3, 0.3, true) end
 	if not e.tick then GameTooltip:AddLine("On the tree: green it adds, red it drops, amber it changes.", 0.8, 0.8, 0.8, true) end
 	GameTooltip:AddLine("Double-click to switch to it.", 0, 1, 0)
@@ -6135,7 +6138,7 @@ function PlanTab.sidebarRow(row, e)
 	end
 	local text = PlanTab.sidebarText(e)
 	row.name:SetText((e.saved or e.mark) and text or (GREY .. e.loadout .. "   spare|r"))  -- worn through the spare, card 0040
-	row.bosses:SetText(GREY .. table.concat(e.bosses, ", ") .. "|r")
+	row.bosses:SetText(GREY .. table.concat(e.bosses, ", ") .. "|r" .. (e.bars and ((#e.bosses > 0 and "   " or "") .. "|cff66ccffown bars|r") or ""))
 	if e.warn then row.mark:SetTexture("Interface\\DialogFrame\\UI-Dialog-Icon-AlertNew")
 	elseif e.tick then row.mark:SetTexture("Interface\\Buttons\\UI-CheckBox-Check") end
 	row.mark:SetShown(e.warn ~= nil or e.tick == true)
@@ -7033,6 +7036,7 @@ function PlanTab.saveBars(forBuild, ask, expect)
 	local layout, n, k = PlanTab.captureBars()
 	barsDB()[key] = layout
 	PlanTab.say(("Saved %d action bar slots and %d key bindings as the %s layout."):format(n, k, key))
+	if PlanTab.sidebar and PlanTab.sidebar:IsShown() then pcall(PlanTab.updateSidebar) end  -- its "own bars" mark (card 0042)
 	return key
 end
 
@@ -7806,6 +7810,15 @@ function PlanTab.sidebarChecks(check)
 	check(ownTest .. ", none when the game will not list them", names(PlanTab.sidebarList("Feral", "raid")):find("Your loadouts", 1, true), nil)
 	check(ownTest .. ", the spare's build is read from its name", PlanTab.spareBuild("BiS: Raid: Vashnik"), "Raid: Vashnik")
 	check(ownTest .. ", and no other name", PlanTab.spareBuild("Raid: Vashnik"), nil)
+
+	-- card 0042: a build with its own action bars says so
+	local keptBars = db().bars
+	db().bars = { ["Feral / Raid: Sszorak"] = { slots = {} }, Feral = { slots = {} } }
+	local barsOf = {}
+	for _, e in ipairs(PlanTab.sidebarList("Feral", "raid")) do if e.loadout then barsOf[e.loadout] = e.bars end end
+	check("a row says when its build has its own action bars", barsOf["Raid: Sszorak"], true)
+	check("a row says when its build has its own action bars, and only that row", barsOf["Raid: Nek'Zali"], nil)
+	db().bars = keptBars
 end
 
 -- Card 0034's checks: which nodes a build would change, which nodes are
