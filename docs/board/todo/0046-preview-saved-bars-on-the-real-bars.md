@@ -128,3 +128,82 @@ responsive". He pointed at the "own bars" row for Raid: Lost Explorers:
 
 That covers steps 1, 2 and 4 of What I need from you, and the last criterion. It was seen before
 the v0.39.1 fixes.
+
+**2026-09-23, second adversarial review (review-card) of 2b9ce6b, verdict: findings, back to todo.**
+
+No browser and no game client here, so step 4 was replaced by reading the frame code against
+Blizzard's source in `wow-ui-source` (branch `live`, 782825221). Rob saw v0.39.0 in game; nothing
+from v0.39.1 has been seen in a client.
+
+Harness: `offline-check.lua` prints "no FAIL lines" under both Lua 5.1.5 and 5.4.6. Fifteen
+mutations on a `$TEMP` copy, the same result under both interpreters. Caught: no container, container
+visibility unguarded, combat keeps the ghost, tip-off keeps it, no redraw, no scale conversion, no
+hide before a redraw, hidden button's slot read through its own `IsVisible`, no `SetPoint` (that one
+throws rather than FAILs). Survived: the six in findings 1 to 3.
+
+Findings:
+
+1. **The container fix is not proven by its test.** The fake `TestBar2` and its container have the
+   same rect (x 200), so placing the ghost on the hidden button instead of the container
+   (`frame = b` for `frame = place`) stays green. The point of the fix is to place on the shown
+   container, not on the hidden button, and nothing checks it. Fix: give the container a
+   different x and check `drawn[2].x`.
+2. **The two new scale guards are untested.** Removing `canRead(scale)`, or the
+   `if not canRead(top) then return 0 end` line, stays green: no fake returns a secret scale.
+   This is the finding 3 fix from the first review. Fix: one fake with a secret `GetEffectiveScale`,
+   plus one run with a secret `UIParent` scale.
+3. **The fakes are swapped in and back without protection, and the swap itself is a taint risk.**
+   - The new block sets `canRead` (the file-local every secret guard uses), `CreateFrame`,
+     `UIParent` and `ActionButtonUtil`, then puts them back on line 8256 with no `pcall`.
+   - Offline, a throw kills the run, so it is loud there. In a client, `/djbis test` is called
+     straight from `SlashCmdList` with no `pcall`. A throw anywhere from line 8220 to 8256 would
+     leave all four swapped for the session. `canRead` would then treat a real secret as readable,
+     and `CreateFrame`/`UIParent` would stay stub tables.
+   - The harness cannot see this. Taking out the restore line, or only its `canRead` part, or
+     only its `CreateFrame`/`UIParent` part, stays green.
+   - Worse, even when the values are put back, addon code has written to the globals
+     `UIParent`, `CreateFrame` and `ActionButtonUtil`. Under WoW's taint model, a global written by
+     addon code stays tainted until `/reload`, and Blizzard code that reads it runs tainted. That
+     is the class of failure card 0038 is chasing ("Secret values are only allowed during
+     untainted execution"). This is reasoning from the taint model, not something seen in a
+     client.
+   - HANDOVER already warns that `/djbis test` swaps globals such as `InCombatLockdown`. But
+     `UIParent` and `CreateFrame` are read by almost every Blizzard file, and `ActionButtonUtil` by
+     the action buttons themselves. A `/djbis test` before Rob's 0038 taint log would muddy it.
+   - Suggested fix: let the ghost code take its three dependencies through `PlanTab` fields the
+     test can swap, for example `PlanTab.ghostNames()`, `PlanTab.newGhost()` and
+     `PlanTab.ghostTop()`. Then no Blizzard global and no `canRead` are touched. If a swap remains,
+     run the block in a `pcall` and restore after it.
+   - Note: `barChecks` already swaps `C_ActionBar`, `C_Spell`, `InCombatLockdown` and
+     `db().bars` without a `pcall`, from card 0033. That predates this card and is not a finding
+     here, but it belongs on 0038 as a suspect too.
+
+What held:
+- **`button.container` is right for all eight bars.** Every name in
+  `ActionButtonUtil.ActionBarButtonNames` (ActionButtonUtil.lua:31-40) is a bar inheriting
+  `EditModeActionBarTemplate` → `ActionBarTemplate`:
+  - `MainActionBar` (MainActionBar.xml:29);
+  - `MultiBarBottomLeft`/`BottomRight`/`Left`/`Right` and `MultiBar5`-`7` (MultiActionBars.xml:45-220).
+  `ActionBar_OnLoad` (ActionBar.lua:13-34) gives every button a container, including
+  `ActionButton1`-`12` through the `MainActionBar` branch. `noSpacers` is false in
+  ActionBarTemplate.xml:39. It is true only in `StanceBar.xml` and `PossessActionBar.xml`,
+  and neither bar is in the list. So `UpdateShownButtons` (ActionBar.lua:208) shows the container
+  for every slot up to `numButtonsShowable`, and the Edit Mode icon count sets that value
+  (EditModeSystemTemplates.lua:1064). Icon size is `container:SetScale`
+  (EditModeSystemTemplates.lua:1087), and the code reads the container's own
+  `GetEffectiveScale`, so the size is right.
+- **A hidden button has the right `action` for the form page.** Paging sets `actionpage` on
+  `MainActionBar`, and every registered button inherits it (`useparent-actionpage`,
+  ActionButton.lua:456). `ActionBarController_UpdateAll` and `ResetToDefault`
+  (ActionBarController.lua:143-189) then call `UpdateAction` on every frame in
+  `ActionBarButtonEventsFrame.frames`, shown or not. `UpdateAction` (ActionButton.lua:529-535)
+  sets `self.action` before any visibility check.
+- In a vehicle or override bar, `MainActionBar` is hidden, so `IsVisible` on its containers is
+  false and nothing is drawn on the main bar.
+- Edge case, noted only: a button hidden by the `statehidden` attribute keeps a shown container,
+  so it would be previewed. No Mainline Blizzard code sets `statehidden` on these buttons. Only
+  another addon's state driver could.
+- The `sidebarCombat` extraction is the same three calls as the old inline handler.
+
+Security: **Weakest point:** `/djbis test` in a client, finding 3. **Unchecked:** a secret
+scale (finding 2). **Leaks:** nothing. It is all local, and a failure only means no preview.
