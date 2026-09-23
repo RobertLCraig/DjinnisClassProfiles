@@ -76,10 +76,11 @@ PICK = {
 PIN = {
     "Feral": {
         # Card 0047. Archon, Mythic+, High Keys, all dungeons, recommended build
-        # (39.5%, 2,600 runs), 2026-09-24. It is Dreamgrove's DOTC with
-        # Double-Clawed Rake for Tireless Energy; Archon's +7 to +21 top build
-        # takes Double-Clawed Rake too. Archon has a human check, so it cannot
-        # be fetched here.
+        # with its recommended class tree (39.5% and 64.7%, 2,600 runs),
+        # 2026-09-24. Against Dreamgrove's DOTC: Double-Clawed Rake for Tireless
+        # Energy, and Lycara's Inspiration and Ursine Vigor for Innervate and
+        # Forestwalk (wowvalor top 50: 100%, 82%, 12%, 2%). Archon has a human
+        # check, so it cannot be fetched here.
         "Dungeon": ("CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB",
                     "Archon high keys #1, 2026-09-24"),
     },
@@ -148,7 +149,9 @@ def guide_builds(spec):
 
 
 def block(trees):
-    lines = [BEGIN, f'PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, read {date.today()}"', "PlanTab.BUILDS = {"]
+    if set(PIN) - set(SPEC_ID):
+        sys.exit(f"PIN names a spec SPEC_ID does not: {sorted(set(PIN) - set(SPEC_ID))}. Its builds would vanish.")
+    lines = [BEGIN, f'PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, and the pinned builds in update-builds.py PIN, read {date.today()}"', "PlanTab.BUILDS = {"]
     for spec in SPEC_ID:
         guide = guide_builds(spec)
         missing = set(PICK[spec]) - set(guide)
@@ -168,7 +171,8 @@ def block(trees):
             got, spent = points(code, tree)
             if got != SPEC_ID[spec] or spent != POINTS:
                 sys.exit(f"{spec} pinned {name}: spec {got}, points {spent}. Copy a fresh string in.")
-            assert len(name) <= 30 and '"' not in name and not any(name in n for n in PICK[spec].values()), name
+            if len(name) > 30 or '"' in name or any(name in n for n in PICK[spec].values()):
+                sys.exit(f"{spec} pinned {name!r}: over 30 letters, a quote, or already a PICK name.")
             lines.append(f'\t\t["{name}"] = "{code}", -- {source}')
         lines.append("\t},")
     lines += ["}", END]

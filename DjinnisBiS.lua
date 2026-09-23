@@ -516,7 +516,7 @@ end
 -- WHEN to pick the build (Rob, 2026-09-23), and are the ones DjinnisDreamgrove
 -- 0.7.0 imported, so a loadout made there is the same loadout here. Card 0030.
 -- BEGIN GENERATED BUILDS
-PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, read 2026-09-24"
+PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, and the pinned builds in update-builds.py PIN, read 2026-09-24"
 PlanTab.BUILDS = {
 	Balance = {
 		["Raid: Single Target"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
@@ -552,7 +552,7 @@ PlanTab.BUILDS = {
 }
 -- END GENERATED BUILDS
 
--- The stored build behind a loadout name: Dreamgrove's where it has one, else
+-- The stored build behind a loadout name: the BUILDS block's where it has one, else
 -- the gear plan cell simmed under that name. nil for a name nobody planned,
 -- which is judged by name alone. Pure, for /bis test.
 function PlanTab.buildFor(spec, name)
@@ -589,7 +589,7 @@ PlanTab.BOSSES = {
 		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "Raid: Ula'tek" },
 		-- a lair boss, not a raid one: her id is from BigWigs_MidnightLairs
 		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "st", loadout = "Raid: Nymrissa" },
-		-- One Mythic+ loadout, not one per dungeon (card 0009): Dreamgrove's,
+		-- One Mythic+ loadout, not one per dungeon (card 0009): Archon's (card 0047),
 		-- a Druid of the Claw build. Rob's own sim on 2026-09-21 had "WS M+"
 		-- 214,785 over "DotC M+" 207,837 on two targets; a dungeon-style sim
 		-- should settle which, and none has run yet.
@@ -4665,7 +4665,7 @@ function PlanTab.sayTalents()
 		local differs = PlanTab.talentStringsDiffer(live, build)
 		local verdict = differs == nil and (GREY .. "cannot compare|r")
 			or (differs and ("|cffff2020different|r") or (GREEN .. "same|r"))
-		print(("%s%s|r %s(Dreamgrove)|r %s: %s"):format(GOLD, name, GREY, verdict, build))
+		print(("%s%s|r %s(plan)|r %s: %s"):format(GOLD, name, GREY, verdict, build))
 	end
 end
 

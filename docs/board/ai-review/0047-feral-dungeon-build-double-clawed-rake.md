@@ -148,9 +148,25 @@ Security:
 3. **Leaks:** nothing. A failure prints the spec id and point counts, and the addon holds only a
    public talent string.
 
+**2026-09-24** Builder, after the review.
+1. The class-tree change is real, and it is the right row. In Rob's pasted page, the first
+   `exportCode` comes straight after the "Recommended Class Tree" row (64.7%). wowvalor's top 50 M+
+   Feral players take Lycara's Inspiration 100%, Ursine Vigor 82%, Innervate 12% and Forestwalk 2%.
+   So the string stays. What was wrong was my description: the `PIN` comment now names all three
+   swaps, and so does step 2 below. The commit message of `a8ddeb1` stays wrong, and this comment
+   corrects it.
+2. `block()` stops when `PIN` names a spec that `SPEC_ID` does not. Tested on a copy with
+   `"feral"`: exit 1, and "PIN names a spec SPEC_ID does not: ['feral']".
+3. `/djbis talents` labels BUILDS rows "(plan)", not "(Dreamgrove)". `BUILD_SOURCE` and the two
+   comments now name the pinned builds.
+4. The pinned-name checks use `sys.exit`, not `assert`.
+
+`--check` exits 0. `offline-check.lua` shows no FAIL lines under both Luas.
+
 ## What I need from you, now
 
 1. `/reload`. Open the talent window as Feral. Pass: the `Dungeon` row shows as not matching its
    loadout (the stored build moved).
 2. `/djbis loadouts`, then **Reset to plan** for `Dungeon`. Pass: the tree has Double-Clawed Rake
-   and no Tireless Energy, with every other talent the same as before.
+   and Lycara's Inspiration and Ursine Vigor, and no Tireless Energy, Innervate or Forestwalk.
+   Every other talent is the same as before.
