@@ -22,6 +22,9 @@ Rob, 2026-09-23, after the Load bars buttons: "an undo button sounds eminently u
 2. Click **Load bars: spec**. Pass: **Undo bars** lights up. Click it: the bars go back, and it
    greys again.
 3. Pass: the list still shows several rows above the five buttons.
+4. Click **Load bars: spec**, then rebind one key by hand, then click **Undo bars**. Pass: it asks
+   first, and **Undo anyway** puts the bars and keys back. (Added by the third review, as the
+   second one asked.)
 
 ## Acceptance
 
@@ -127,3 +130,30 @@ No client can be run by an agent. Once fixed, What I need from you 1 to 3 stand,
 key after Load bars, click Undo bars. Pass: it asks first.
 - 2026-09-23 Claude, builder, v0.38.1. Fixed: a key changed by hand asks too (dropping the key
   compare: 2 red), and "Undo anyway" is checked to be `undoBars` (a no-op: 1 red). `proves:` added.
+
+**2026-09-23** Third adversarial review of e1b2ecb (v0.38.1). **Clean. Moved to human-review for
+the in-game steps.**
+
+Attacked, on a temp copy, the same count under Lua 5.1 and the newer one:
+- no key compare (`DjinnisBiS.lua:7362`, drop `sameKeys`): 2 red. The second review's finding is fixed.
+- "Undo anyway" a no-op (7370): 1 red. The buttons swapped: 2 red. Never ask: 5 red.
+- `promptBusy` ignored (7365): 0 red. A second question would write over the open one. Nothing
+  is lost, since the open one can be asked again. A note, as the second review said.
+
+What held:
+- The prompt calls `onClick()` with no arguments (4401), so `undoBars` gets none, and it fences
+  combat, a full cursor and a vehicle bar again at the click. A prompt left open into a fight is
+  refused there.
+- With bars and keys as the last load left them, one click undoes. After a slot or a key changed
+  by hand it asks, and Cancel changes nothing.
+- All five `proves:` names exist and ran. The grey state itself is only in a client (harness
+  frames keep no state), which What I need from you 1 and 2 cover.
+
+Security:
+1. Weakest point: "Undo anyway" overwrites the character's bars and keys. It now sits behind a
+   question whenever anything changed since the load.
+2. Unchecked: nothing from outside. The undo is this character's own saved bars.
+3. Leaks: nothing. It prints counts only.
+
+No client can be run by an agent. A person owes What I need from you 1 to 4, and the five buttons
+in the 280 px list on the smallest talent window.
