@@ -5975,7 +5975,34 @@ function PlanTab.buildSidebar()
 	-- Shared/Scroll/ScrollBoxListView.lua allows a frame type for a template).
 	f.scroll = CreateFrame("Frame", nil, f, "WowScrollBoxList")
 	f.scroll:SetPoint("TOPLEFT", 6, -32)
-	f.scroll:SetPoint("BOTTOMRIGHT", -22, 8)
+	f.scroll:SetPoint("BOTTOMRIGHT", -22, 16 + PlanTab.SIZE.button)
+	-- Save the action bars and keys, to the build in play or for the whole
+	-- spec (card 0036). The same as /djbis bars save build and /djbis bars save.
+	local half = (PlanTab.SIDEBAR_W - 24) / 2
+	f.saveBuild = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	f.saveBuild:SetSize(half, PlanTab.SIZE.button)
+	f.saveBuild:SetPoint("BOTTOMLEFT", 8, 8)
+	f.saveBuild:SetText("Save bars: build")
+	f.saveBuild:SetScript("OnClick", function() PlanTab.saveBars(true, true) end)
+	f.saveSpec = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	f.saveSpec:SetSize(half, PlanTab.SIZE.button)
+	f.saveSpec:SetPoint("BOTTOMRIGHT", -8, 8)
+	f.saveSpec:SetText("Save bars: spec")
+	f.saveSpec:SetScript("OnClick", function() PlanTab.saveBars(false, true) end)
+	local tips = {
+		[f.saveBuild] = { "Save bars to this build", "Your action bars and key bindings now, kept for the loadout you have selected. Switching to it on any character offers them." },
+		[f.saveSpec] = { "Save bars for the spec", "Your action bars and key bindings now, kept for every build of this spec that has none of its own, on every character." },
+	}
+	for button, tip in pairs(tips) do
+		button:SetScript("OnEnter", function(self)
+			GameTooltip:SetOwner(self, "ANCHOR_TOP")
+			GameTooltip:AddLine(tip[1], 1, 1, 1)
+			GameTooltip:AddLine(tip[2], nil, nil, nil, true)
+			GameTooltip:AddLine("/djbis bars undo puts back the bars from before an apply. /djbis bars offers a saved layout.", 0.7, 0.7, 0.7, true)
+			GameTooltip:Show()
+		end)
+		button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+	end
 	f.bar = CreateFrame("EventFrame", nil, f, "MinimalScrollBar")
 	f.bar:SetPoint("TOPLEFT", f.scroll, "TOPRIGHT", 6, 0)
 	f.bar:SetPoint("BOTTOMLEFT", f.scroll, "BOTTOMRIGHT", 6, 0)
@@ -6865,8 +6892,11 @@ function PlanTab.barsFence()
 	return nil
 end
 
--- /djbis bars save [build]. Answers the key saved, or nil.
-function PlanTab.saveBars(forBuild)
+-- /djbis bars save [build], and the two buttons under the talent window list
+-- (card 0036). Answers the key saved, nil, or "ask" when `ask` is set and a
+-- layout of that key exists: a button click is easy to make by mistake, and
+-- the spec layout is account-wide, so replacing one asks first.
+function PlanTab.saveBars(forBuild, ask, expect)
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return nil end
 	local spec = playerSpec()
@@ -6876,6 +6906,22 @@ function PlanTab.saveBars(forBuild)
 		local build = PlanTab.activeLoadoutName()
 		if not build then PlanTab.say("No saved loadout is selected, so there is no build to save the bars for.") return nil end
 		key = spec .. " / " .. build
+	end
+	-- the prompt can outlive the build it asked about, as 0033's Apply could
+	if expect and key ~= expect then
+		PlanTab.say("The spec or build changed since that question, so nothing was saved. Click the button again.")
+		return nil
+	end
+	local old = barsDB()[key]
+	if ask and old then
+		PlanTab.prompt("Djinni's BiS: action bars", {
+			("Replace the saved %s layout%s with the bars and keys you have now?"):format(key, old.saved and (" from " .. old.saved) or ""),
+			forBuild and "It is used when you switch to this build, on every character." or "It is used for every " .. spec .. " build that has no layout of its own, on every character.",
+		}, {
+			{ label = "Replace", onClick = function() PlanTab.saveBars(forBuild, nil, key) end },
+			{ label = "Cancel" },
+		})
+		return "ask"
 	end
 	local slots, n = PlanTab.readBars(), 0
 	for _ in pairs(slots) do n = n + 1 end
@@ -7374,6 +7420,30 @@ function PlanTab.barChecks(check)
 	PlanTab.activeLoadoutName = keptActive
 	if shown then shown.buttons[1].onClick() end
 	check(buildTest .. ", a stale offer's Apply does nothing", shown ~= nil and bars[10] and bars[10].id, 4242)
+
+	-- Card 0036: the Save buttons. A new layout saves at once; replacing one asks.
+	local saveButtonTest = "the Save bars buttons"
+	local keptActiveSave = PlanTab.activeLoadoutName
+	PlanTab.activeLoadoutName = function() return "Dungeon" end
+	shown = nil
+	check(saveButtonTest .. ", a build with no layout saves at once", PlanTab.saveBars(true, true), "Feral / Dungeon")
+	check(saveButtonTest .. ", and asks nothing", shown, nil)
+	local before = db().bars.Feral
+	check(saveButtonTest .. ", replacing the spec layout asks first", PlanTab.saveBars(false, true), "ask")
+	check(saveButtonTest .. ", and keeps it until Replace", db().bars.Feral, before)
+	check(saveButtonTest .. ", Cancel does nothing", shown.buttons[2].label .. "/" .. tostring(shown.buttons[2].onClick), "Cancel/nil")
+	PlanTab.saveBars(false, true)
+	shown.buttons[1].onClick()
+	check(saveButtonTest .. ", Replace saves it", db().bars.Feral ~= before and db().bars.Feral.slots[10] and db().bars.Feral.slots[10].id, 4242)
+	-- a question about one build, answered after switching to another
+	PlanTab.saveBars(true, true)
+	local dungeon = db().bars["Feral / Dungeon"]
+	PlanTab.activeLoadoutName = function() return "Raid: Sszorak" end
+	local sszorak = db().bars["Feral / Raid: Sszorak"]
+	shown.buttons[1].onClick()
+	check(saveButtonTest .. ", a stale Replace saves nothing", db().bars["Feral / Raid: Sszorak"] == sszorak and db().bars["Feral / Dungeon"] == dungeon, true)
+	PlanTab.activeLoadoutName = keptActiveSave
+	db().bars.Feral, db().bars["Feral / Dungeon"] = before, nil  -- the checks below use the first druid's layout
 
 	local fenceTest = "the bars are not touched in combat or with the cursor full"
 	combat = true
