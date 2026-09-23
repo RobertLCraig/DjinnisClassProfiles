@@ -6789,8 +6789,13 @@ PlanTab.keysRefused = {}
 
 function PlanTab.keysDiffer(want)
 	local have, n = PlanTab.readKeys(), 0
-	for key, action in pairs(have) do if want[key] ~= action and not PlanTab.keysRefused[key] then n = n + 1 end end
-	for key in pairs(want) do if have[key] == nil and not PlanTab.keysRefused[key] then n = n + 1 end end
+	-- key -> the action refused on it: only that pair is skipped, so another
+	-- layout's binding on the same key still counts (second review)
+	local refused = PlanTab.keysRefused
+	for key, action in pairs(have) do
+		if want[key] ~= action and not (want[key] and refused[key] == want[key]) then n = n + 1 end
+	end
+	for key in pairs(want) do if have[key] == nil and refused[key] ~= want[key] then n = n + 1 end end
 	return n
 end
 
@@ -6806,7 +6811,7 @@ function PlanTab.placeKeys(want)
 			if SetBinding(key, action) then changed = changed + 1
 			else
 				refused[#refused + 1] = ("key %s: will not bind to %s"):format(key, action)
-				PlanTab.keysRefused[key] = true
+				PlanTab.keysRefused[key] = action
 			end
 		end
 	end
@@ -6864,21 +6869,40 @@ function PlanTab.saveBars(forBuild)
 	return key
 end
 
+function PlanTab.sameBars(a, b)
+	for slot = 1, PlanTab.BAR_SLOTS do
+		if PlanTab.barSlot(slot) and not sameAction(a[slot], b[slot]) then return false end
+	end
+	return true
+end
+
+function PlanTab.sameKeys(a, b)
+	for key, action in pairs(a) do if b[key] ~= action then return false end end
+	for key in pairs(b) do if a[key] == nil then return false end end
+	return true
+end
+
 -- Applies a saved layout. The layout it replaces is kept for /djbis bars undo.
 function PlanTab.applyBars(key)
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return "fenced" end
 	local layout = key and barsDB()[key]
 	if not layout then PlanTab.say("No saved layout called " .. tostring(key) .. ".") return "none" end
-	DjinnisBiSCharDB = DjinnisBiSCharDB or {}
-	-- The undo is the bars from before the FIRST apply since the last undo: a
-	-- second apply must not write over the character's own (0033 review).
+	local c = DjinnisBiSCharDB or {}
+	DjinnisBiSCharDB = c
+	-- The undo is the character's own bars. Kept over a second apply only if
+	-- nothing moved since the first (barsAfter): a second apply straight after
+	-- must not write over them, and one weeks later after hand changes must
+	-- not undo to before those changes (0033 review, twice).
 	local withKeys = type(layout.keys) == "table" and next(layout.keys) ~= nil  -- none before v0.32.0; empty is never obeyed
-	DjinnisBiSCharDB.barsUndo = DjinnisBiSCharDB.barsUndo or PlanTab.readBars()
-	DjinnisBiSCharDB.keysUndo = DjinnisBiSCharDB.keysUndo or (withKeys and PlanTab.readKeys() or nil)
+	local now, nowKeys = PlanTab.readBars(), PlanTab.readKeys()
+	if not (c.barsUndo and c.barsAfter and PlanTab.sameBars(now, c.barsAfter) and PlanTab.sameKeys(nowKeys, c.keysAfter or {})) then
+		c.barsUndo, c.keysUndo = now, withKeys and nowKeys or nil
+	end
 	local placed, skipped = PlanTab.placeBars(layout.slots)
 	local keys, refused = 0, {}
 	if withKeys then keys, refused = PlanTab.placeKeys(layout.keys) end
+	c.barsAfter, c.keysAfter = PlanTab.readBars(), PlanTab.readKeys()
 	for _, line in ipairs(refused) do skipped[#skipped + 1] = line end
 	PlanTab.barsSeen = key
 	PlanTab.say(("Applied the %s layout: %d slots and %d keys changed, %d skipped. %s/djbis bars undo|r%s puts the old ones back.")
@@ -6894,6 +6918,7 @@ function PlanTab.undoBars()
 	if not undo then PlanTab.say("Nothing to undo on this character.") return "none" end
 	local keysUndo = DjinnisBiSCharDB.keysUndo
 	DjinnisBiSCharDB.barsUndo, DjinnisBiSCharDB.keysUndo = nil, nil
+	DjinnisBiSCharDB.barsAfter, DjinnisBiSCharDB.keysAfter = nil, nil
 	local placed, skipped = PlanTab.placeBars(undo)
 	local keys = keysUndo and PlanTab.placeKeys(keysUndo) or 0
 	PlanTab.say(("The bars and keys are back as they were: %d slots and %d keys changed, %d skipped."):format(placed, keys, #skipped))
@@ -7024,6 +7049,9 @@ function PlanTab.loadoutChecks(check)
 	local dreamgrove = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAAEAMLzs0sMzyGYmBYhBDAgZGAMA"
 	check(gapTest .. ", a fresh import of a build is not drifted", PlanTab.talentStringsDiffer(GEAR_PLAN.Feral.mplus.talents, dreamgrove), false)
 	check(gapTest .. ", a string that is not base64 cannot be compared", PlanTab.talentStringsDiffer(nek, nek:sub(1, 40) .. "!"), nil)
+	-- node number, ranks and choice, as Blizzard's own reader decodes them (second review)
+	local key = PlanTab.nodeKey(dreamgrove)
+	check(gapTest .. ", the nodes decode as Blizzard's reader does", key:find("^40:m:0,41:m:0,42:m:0,43:m:0,44:m:0,45:m:1,") ~= nil and key:find(",114:1:0,", 1, true) ~= nil, true)
 
 	local kept = { C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil, InCombatLockdown, PlayerSpellsFrame, print, PlanTab.prompt }
 	local calls, printed, shown, combat, windowOpen, canNew = {}, {}, nil, false, false, 0
@@ -7261,6 +7289,9 @@ function PlanTab.barChecks(check)
 	check(applyTest .. ", a binding the game refuses is listed", table.concat(printed, "\n"):find("key F: will not bind to MYADDON_X", 1, true) ~= nil, true)
 	check(applyTest .. ", and the bindings are saved", saves > 0, true)
 	check(applyTest .. ", a refused key does not keep it from matching", PlanTab.offerBars(true), "same")
+	local otherWant = PlanTab.readKeys()
+	otherWant.F = "ACTIONBUTTON1"
+	check(applyTest .. ", but another action on that key still counts", PlanTab.keysDiffer(otherWant), 1)
 	PlanTab.applyBars("Feral")  -- a second apply: the undo must still hold the character's own bars
 
 	local undoTest = "one undo puts the bars back"
@@ -7269,6 +7300,13 @@ function PlanTab.barChecks(check)
 	check(undoTest .. ", slot 1 holds its item again", bars[1] and bars[1].id, 2)
 	check(undoTest .. ", only once", PlanTab.undoBars(), "none")
 	check(undoTest .. ", the keys too", (bound.E or "") .. "/" .. (bound.R or "") .. "/" .. tostring(bound.Q), "ACTIONBUTTON2/ACTIONBUTTON1/nil")
+
+	-- Apply, a change by hand, apply again: the undo holds the hand change,
+	-- not the bars from before the first apply (second review).
+	PlanTab.applyBars("Feral")
+	known[777], bars[9] = true, { type = "spell", id = 777 }
+	PlanTab.applyBars("Feral")
+	check(undoTest .. ", the one before the last apply when bars moved in between", PlanTab.undoBars() and bars[9] and bars[9].id, 777)
 
 	local buildTest = "a build with its own layout is offered that one"
 	check(buildTest .. ", saved for the build", PlanTab.saveBars(true), "Feral / Raid: Sszorak")
@@ -7347,6 +7385,11 @@ function PlanTab.sidebarChecks(check)
 	check(tickTest .. ", either one", ticked(PlanTab.sidebarList("Balance", "raid", balance[st], st)), st)
 	balance[twin] = keptTwin
 	check(tickTest .. ", a hand-edited fold setting is ignored", #PlanTab.sidebarList("Feral", "raid", nil, nil, nil, nil, true) > 3, true)
+	local keptFold, keptUpdate = db().sidebarFolded, PlanTab.updateSidebar
+	db().sidebarFolded, PlanTab.updateSidebar = true, function() end
+	PlanTab.sidebarClick({ element = { group = "raid" } })
+	check(tickTest .. ", and a fold click replaces it", type(db().sidebarFolded) == "table" and db().sidebarFolded.raid, true)
+	db().sidebarFolded, PlanTab.updateSidebar = keptFold, keptUpdate
 
 	local markTest = "a row says when it is not saved, and when it cannot be read"
 	list = PlanTab.sidebarList("Feral", "raid", nil, nil, nil, { ["Raid: Nek'Zali"] = 1 }, nil, nil, function(code) return code == feral.Dungeon and "old tree" or nil end)
@@ -7372,6 +7415,7 @@ function PlanTab.treeChecks(check)
 	check(diffTest .. ", an added one", diff[3], "add")
 	check(diffTest .. ", another choice", diff[4], "change")
 	check(diffTest .. ", another rank", diff[5], "change")
+	check(diffTest .. ", a granted node is not a pick", PlanTab.nodeWord({ isNodeSelected = true, isNodeGranted = true }, { isNodeSelected = false }), nil)
 	local choices = PlanTab.nodeChoices({ have, have, want })
 	check("the choices are where the builds disagree", choices[1] == nil and choices[2] == "choice" and choices[3] == "choice", true)
 	check("one build has no choices", next(PlanTab.nodeChoices({ have })), nil)

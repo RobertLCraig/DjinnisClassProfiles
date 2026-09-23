@@ -33,8 +33,9 @@ good is written up in `docs/research/talent-loadout-addons.md`.
   Other builds holds stored builds no boss row names: Guardian's and Resto's raid builds today.
 - Boss portraits are TalentLoadoutsEx's Season 2 icon IDs (`PlanTab.BOSS_ICON`). A dungeon row
   has the Mythic+ icon, 4352494.
-- **The tick** compares strings, never names, and lands on one row. Balance stores one build under
-  three boss names, so the selected name wins, else the first.
+- **The tick** compares builds, never names, and lands on one row. When two builds hold the same
+  talents, the selected name wins, else the first. (Since `43b4530` no two stored builds do; the
+  checks lend one build another's string to prove it.)
 - **The warning mark** runs Blizzard's import checks in order (TalentLoadoutsEx's
   `validator.lua`): bad string, other game version, other spec, older tree. **Expect it on every
   Guardian and Resto build**: their strings carry a real, older tree stamp. DjinnisDreamgrove
