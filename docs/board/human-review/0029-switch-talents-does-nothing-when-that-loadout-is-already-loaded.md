@@ -191,3 +191,35 @@ answers it.
   and 4) still stand once the check above is fixed.
 - 2026-09-23 Claude, builder, v0.38.1. Fixed: the checks' stubs now answer `edited` from the spec
   argument, so dropping `playerSpec()` from the call goes red (5 red).
+
+**2026-09-23** Third adversarial review of e1b2ecb (v0.38.1). **Clean. Moved to human-review for
+the in-game steps.**
+
+**Attacked.** Both harnesses print "no FAIL lines". Mutations on a temp copy, same count under
+Lua 5.1 and the newer one:
+- `activeLoadoutName()` without the spec (`DjinnisBiS.lua:3952`), the second review's finding: 5 red.
+- `selectedIt` always true (3953): 1 red.
+- no unmoved guard (3954): 3 red.
+- `loadTalents` no longer clears a spare wish (3935, card 0040's change in this function): 3 red.
+
+**What held.**
+- The second review's finding is fixed. Both stubs now answer `edited` from the argument they get,
+  so the drift line cannot vanish silently.
+- An unmoved loadout says "is on already" and opens nothing. A moved one opens the window and
+  points at Reset to plan. With the spare wearing a build that also has its own loadout, the
+  helper is asked for the build's own loadout.
+- Every criterion names a check that exists and ran. Criterion 4 is a client run and says so.
+- The game folder holds v0.38.1, byte for byte the same file as the repository.
+
+**Still a note, not a finding.** Two loadouts with the build's name: `savedLoadoutNames` keeps one
+id, and Blizzard's helper loads the first by name. It needs the player to make the duplicate.
+
+**Security.**
+1. Weakest point: the `edited` answer. If it is wrong the player is told a moved build is fine.
+   No write follows, because "on" only prints.
+2. Unchecked: nothing comes from outside. Names come from plan data or a loadout name that passed
+   `canRead`.
+3. Leaks: nothing leaves the client. One chat line to the player only.
+
+**Not checked in a client.** No agent can run the game. A person owes What I need from you steps
+1, 2, 2a and 4.
