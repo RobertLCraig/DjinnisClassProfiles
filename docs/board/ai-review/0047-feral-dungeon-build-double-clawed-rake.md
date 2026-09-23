@@ -1,4 +1,4 @@
-# 0047 Which Feral dungeon build carries Double-Clawed Rake
+# 0047 Each spec's dungeon build is the one players run (began with Feral's Double-Clawed Rake)
 
 ## Why
 
@@ -37,8 +37,8 @@ Pick one. This is a preference: both are sound by the guide.
 ## Acceptance
 
 - [x] Rob picks 1 or 2. (2, through Archon's string; see Comments.)
-- [ ] WHEN `update-builds.py` runs, THE FERAL `Dungeon` BUILD SHALL be the pinned Archon string, and a pinned string that fails the points check SHALL stop the run. proves: `python update-builds.py --check` exits 0; the broken-string run above exits 1
-- [ ] Rob's `Dungeon` loadout, reset to plan, has Double-Clawed Rake and not Tireless Energy. proves: manual
+- [ ] WHEN `update-builds.py` runs, EACH SPEC'S `Dungeon` BUILD SHALL be its pinned Archon string, and a pinned string that fails the points check SHALL stop the run. proves: `python update-builds.py --check` exits 0; the broken-string run above exits 1
+- [ ] Each spec's `Dungeon` loadout, reset to plan, matches Archon's recommended +7 to +21 tree. proves: manual
 
 ## Comments
 
@@ -223,10 +223,42 @@ reviewed here. None of it is reviewed, and the step 2 pass line below may not ho
 the card to `human-review/` would hand Rob an unreviewed build. Next: when that work is committed,
 review it on this card.
 
+**2026-09-24** Builder, v0.40.0: all four specs. Rob: "replicate what we have done for Feral, for
+all the other specs too".
+- wowvalor's top 50 M+ players per spec first showed where Dreamgrove's dungeon builds differ from
+  what is played. Guardian's is the wrong hero tree (Druid of the Claw; players 100% Elune's
+  Chosen). Balance has 7 talents different. Each Resto build has 4 to 6 different.
+- Rob's pasted Archon pages for Balance, Guardian and Resto rendered the right spec. But their
+  embedded `exportCode`s were all Feral's (spec 103, and `totalParses` 2600, the first page's). So
+  Rob copied each recommended build with Archon's Export button, at Mythic+ +7 to +21, all
+  dungeons, and pasted the four strings.
+- Each string decodes to its own spec, with 34/34/13 points. Against the build each replaces:
+  - Balance, against `Elune's Chosen M+`: adds Astral Influence, Elune's Guidance, Fluid Form,
+    Lycara's Inspiration, Orbit Breaker and Sunseeker Mushroom. Drops Killer Instinct (2),
+    Meteorites, Perfectly-Honed Instincts, Stellar Amplification and Sundered Firmament.
+  - Feral, against the High Keys pin: Convoke and Hunger for Battle for Incarnation and Ashamane's
+    Guidance. Double-Clawed Rake stays.
+  - Guardian, against `Razeless`: Elune's Chosen in place of Druid of the Claw, and Matted Fur 2,
+    Fury of Nature 2, Perfectly-Honed Instincts, Moondust in the class and spec trees.
+  - Resto, against `M+ #HealersHeal`: Rake, Rip, Swipe, Grievous Wounds, Heart of the Wild, Wild
+    Charge, Innervate, and Thriving Vegetation 2. Drops Starfire, Starsurge, Astral Influence,
+    Killer Instinct, Lore of the Grove, Nurturing Dormancy, Perfectly-Honed Instincts, Tiger Dash
+    and Ursine Vigor.
+- **Resto's "Dungeon: heal only" is renamed "Dungeon"**, because the new build weaves cat. Every
+  spec's main dungeon build is now "Dungeon". Balance and Feral boss rows already use that name.
+  Guardian and Resto have no boss rows. Rob's old "Dungeon: heal only" loadout will list under
+  Your loadouts.
+- These keep Dreamgrove: Guardian "Dungeon: survive more", and Resto "Dungeon: cat damage" and
+  "Dungeon: caster damage".
+- The re-review's three wording notes are fixed: the two comments and the docstring now name the
+  pins, and the `/djbis talents` label reads "(stored build)".
+
 ## What I need from you, now
 
-1. `/reload`. Open the talent window as Feral. Pass: the `Dungeon` row shows as not matching its
-   loadout (the stored build moved).
-2. `/djbis loadouts`, then **Reset to plan** for `Dungeon`. Pass: the tree has Double-Clawed Rake
-   and Lycara's Inspiration and Ursine Vigor, and no Tireless Energy, Innervate or Forestwalk.
-   Every other talent is the same as before.
+For each spec, Balance, Feral, Guardian and Resto:
+1. `/reload`. Open the talent window. Pass: the `Dungeon` row shows as not matching its loadout,
+   because the stored build moved. On Resto, a character with no "Dungeon" loadout shows it as not
+   saved.
+2. `/djbis loadouts`, then **Reset to plan** (or Create) for `Dungeon`. Pass: the tree matches
+   Archon's recommended +7 to +21 tree for that spec. Guardian's hero tree is Elune's Chosen.
+3. Resto: delete the old "Dungeon: heal only" loadout if you no longer want it.

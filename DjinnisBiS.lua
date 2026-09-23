@@ -512,7 +512,8 @@ function PlanTab.rankState(kind, planned, worn)
 end
 
 -- GENERATED, do not hand-edit. Rewritten by update-builds.py from Dreamgrove's
--- four compendium pages: spec -> loadout name -> import string. The names say
+-- four compendium pages, and each spec's "Dungeon" from Archon (update-builds.py
+-- PIN, card 0047): spec -> loadout name -> import string. The names say
 -- WHEN to pick the build (Rob, 2026-09-23), and are the ones DjinnisDreamgrove
 -- 0.7.0 imported, so a loadout made there is the same loadout here. Card 0030.
 -- BEGIN GENERATED BUILDS
@@ -522,7 +523,7 @@ PlanTab.BUILDS = {
 		["Raid: Single Target"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
 		["Raid: Cleave"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA", -- Elune's Chosen - Cleave
 		["Raid: Nek'Zali, Nymrissa"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWGbzYGbsMjxMzMzCGGgBYZbshpZmlRAAAA2MzMzMYzAjZAMzAADA", -- Keeper of the Grove - Cleave
-		["Dungeon"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZswyMLjxMjNMAYstNzgxsNCMBAAAYhZmZGsZMjxAAwMDWGA", -- Elune's Chosen M+
+		["Dungeon"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMLMYMLzsMzCzM2YZmlxMjxGGGgx22MDGz2AYCAAAwCzMzMYzwYMAAMzglBA", -- Archon M+ +7 to +21 #1, 2026-09-24
 	},
 	Feral = {
 		["Raid: Nek'Zali"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALBDDjZG1MmlxMzMGzYAAAAAAYgBAAAAAY2mZpZbmlNwMDwiZGGAAzMAYA", -- Nekzali
@@ -534,20 +535,20 @@ PlanTab.BUILDS = {
 		["Raid: Coiled Altar"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZm5BmZAAAAYJY2gxMjaGzCzMzYMzDMDAAAAAAwAAAAIAY2mZpZZmlNwMDwiZGGAAzMAYA", -- Coiled Altar
 		["Raid: Ula'tek"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Ulatek
 		["Raid: Nymrissa"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYLwmhxMjaGziZmZmlxMmBAAAAAAYAAAA0MLzyMzMgALgZGgFzgBAAwMbYA", -- Nymrissa (Lair)
-		["Dungeon"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", -- Archon high keys #1, 2026-09-24
+		["Dungeon"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", -- Archon M+ +7 to +21 #1, 2026-09-24
 	},
 	Guardian = {
 		["Raid: Druid of the Claw"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxsYmZMzmZZgZbZgxMMaimZmlZmZmxYGzAAAAAYwMWmBAAAgamlZZmZGAALYGALmBDYxy2AgZ2gB", -- DotC Raid
 		["Raid: Elune's Chosen"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmhtZGjZ2MLzgxyAMzY0ENzMLmZmZWGzwAAAAAYwM2mBssNzgxsMAmCAAAshZMgFzgBsYZbAmZAM", -- EC Raid Default
-		["Dungeon"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxswMjZWMLzMmZZZgZzwoJamZWmZmZmlxMMAAAAAgZsZAAAAomZZWmZmBAwCm5BAWMDGwiFDAmZDG", -- Razeless
 		["Dungeon: survive more"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxswMjZWMLzMPwMLLDMbGGNRzMziZmZmlZm5BMAAAAAgZsYAAAAomZZWmZmBAwCmBwiZwAzCAgZ2gB", -- Razeless sustain
+		["Dungeon"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD", -- Archon M+ +7 to +21 #1, 2026-09-24
 	},
 	Resto = {
 		["Raid: short on mana"] = "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmNjNmBAAAAAAAAAALDa2MjpZGDPgZZmZmZY4BGAAAAAAAAYbbsgpZmlBAwsNzSz2Mb2YMzMMzAjmBAzMzMAMA", -- Raid w/ mana return
 		["Raid: mana is fine"] = "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmFjNmBAAAAAAAAAALQzmZMNzAjZZMzMzihHYAAAAAAAAgttxCmmZWGAAz2MLNbzsZjZmZGmZgRzAgZmZGAGA", -- Raid w/o mana return
-		["Dungeon: heal only"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsN8AMzsMjNbzAAAAAAAAAAgNDNbmx0MD8AmlxMzMLGeAAAAAAMAAGwyyYBTzMLDAgZbmtmtZWsxMzMwMMGNDAwMDADA", -- M+ #HealersHeal
 		["Dungeon: cat damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsN8AMzsMjNbzAAAAAAAAAAgtBNbGmmZMDmFzMzMLzwDYAAAAAAAwAWWGLYamZZAAMbzs1sNziNGzMwMLY0MAAzMAMA", -- M+ Cat DPS
 		["Dungeon: caster damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsNz8AwsMjNbzAAAAAAAAAAgNDNbzMmmZAmFmZmZxwDAAAAAgBAYGwyyYBTzMLDAgZbmtmtZWsxYmZwMbY0MAAzMAMA", -- M+ Caster DPS
+		["Dungeon"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsMzMzMLzwMAAAAAAAwAAAAAgZbmtmtZWsxYmBmBoZAAmZAYA", -- Archon M+ +7 to +21 #1, 2026-09-24
 	},
 }
 -- END GENERATED BUILDS
@@ -565,7 +566,7 @@ function PlanTab.buildFor(spec, name)
 end
 
 -- Which saved loadout and which gear scenario go with which boss. The loadout
--- is Dreamgrove's build for that boss, by the name in PlanTab.BUILDS (Rob,
+-- is the stored build for that boss, by the name in PlanTab.BUILDS (Rob,
 -- 2026-09-23: DjinnisDreamgrove merges into this addon, card 0030).
 -- Guardian and Resto have no rows: the guide gives one raid build per hero
 -- tree or per mana state, not one per boss, so which fits a boss is Rob's.
@@ -4665,7 +4666,7 @@ function PlanTab.sayTalents()
 		local differs = PlanTab.talentStringsDiffer(live, build)
 		local verdict = differs == nil and (GREY .. "cannot compare|r")
 			or (differs and ("|cffff2020different|r") or (GREEN .. "same|r"))
-		print(("%s%s|r %s(plan)|r %s: %s"):format(GOLD, name, GREY, verdict, build))
+		print(("%s%s|r %s(stored build)|r %s: %s"):format(GOLD, name, GREY, verdict, build))
 	end
 end
 

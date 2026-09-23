@@ -12,7 +12,8 @@ Sources: the four compendium pages in GitHub's dreamgrove/dreamgrove, fetched
 with `gh api` because plain web fetch is blocked for unattended agents on this
 machine, and Raidbots' talents.json for the tree. Every build is decoded the way
 Blizzard's ReadLoadoutContent reads it and must spend 34 class, 34 spec and 13
-hero points in its own spec, or nothing is written.
+hero points in its own spec, or nothing is written. Each spec's "Dungeon" is
+not Dreamgrove's but a string pinned in PIN below (card 0047), checked the same way.
 """
 import json
 import re
@@ -40,7 +41,7 @@ PICK = {
         "Elune's Chosen - Single Target": ["Raid: Single Target"],
         "Elune's Chosen - Cleave": ["Raid: Cleave"],
         "Keeper of the Grove - Cleave": ["Raid: Nek'Zali, Nymrissa"],
-        "Elune's Chosen M+": ["Dungeon"],
+        # Each spec's "Dungeon" is in PIN since card 0047: what players run.
     },
     "Feral": {
         "Nekzali": ["Raid: Nek'Zali"],
@@ -52,19 +53,16 @@ PICK = {
         "Coiled Altar": ["Raid: Coiled Altar"],
         "Ulatek": ["Raid: Ula'tek"],
         "Nymrissa (Lair)": ["Raid: Nymrissa"],
-        # "DOTC" backed "Dungeon" until 2026-09-24; PIN has it now (card 0047).
     },
     "Guardian": {
         # The guide gives one raid build per hero tree and does not rank them.
         "DotC Raid": ["Raid: Druid of the Claw"],
         "EC Raid Default": ["Raid: Elune's Chosen"],
-        "Razeless": ["Dungeon"],
         "Razeless sustain": ["Dungeon: survive more"],
     },
     "Resto": {
         "Raid w/ mana return": ["Raid: short on mana"],
         "Raid w/o mana return": ["Raid: mana is fine"],
-        "M+ #HealersHeal": ["Dungeon: heal only"],
         "M+ Cat DPS": ["Dungeon: cat damage"],
         "M+ Caster DPS": ["Dungeon: caster damage"],
     },
@@ -73,16 +71,29 @@ PICK = {
 # Builds no guide publishes, pinned by hand: loadout name -> (string, source).
 # Checked for spec and points like the rest, and never refreshed: copy a new
 # string in when the tree changes (the points check fails loudly when it does).
+# Card 0047: each spec's "Dungeon" is Archon's recommended build for Mythic+,
+# +7 to +21, all dungeons, copied by Rob with Archon's Export button on
+# 2026-09-24. Archon has a human check, so it cannot be fetched here: to
+# refresh, paste the new strings in. The card holds what each changed against
+# Dreamgrove's build it replaced.
+ARCHON = "Archon M+ +7 to +21 #1, 2026-09-24"
 PIN = {
+    "Balance": {
+        # replaced "Elune's Chosen M+"; Elune's Chosen 98.7% of 110,634 runs
+        "Dungeon": ("CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMLMYMLzsMzCzM2YZmlxMjxGGGgx22MDGz2AYCAAAwCzMzMYzwYMAAMzglBA", ARCHON),
+    },
     "Feral": {
-        # Card 0047. Archon, Mythic+, High Keys, all dungeons, recommended build
-        # with its recommended class tree (39.5% and 64.7%, 2,600 runs),
-        # 2026-09-24. Against Dreamgrove's DOTC: Double-Clawed Rake for Tireless
-        # Energy, and Lycara's Inspiration and Ursine Vigor for Innervate and
-        # Forestwalk (wowvalor top 50: 100%, 82%, 12%, 2%). Archon has a human
-        # check, so it cannot be fetched here.
-        "Dungeon": ("CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB",
-                    "Archon high keys #1, 2026-09-24"),
+        # replaced "DOTC": Double-Clawed Rake, not Tireless Energy (card 0047's why)
+        "Dungeon": ("CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", ARCHON),
+    },
+    "Guardian": {
+        # replaced "Razeless", a Druid of the Claw build; Elune's Chosen 99.2% of 177,831 runs
+        "Dungeon": ("CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD", ARCHON),
+    },
+    "Resto": {
+        # replaced "M+ #HealersHeal" ("Dungeon: heal only"): it weaves cat, so the
+        # old name would lie. Wildstalker 88.0% of 78,289 runs.
+        "Dungeon": ("CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsMzMzMLzwMAAAAAAAwAAAAAgZbmtmtZWsxYmBmBoZAAmZAYA", ARCHON),
     },
 }
 
