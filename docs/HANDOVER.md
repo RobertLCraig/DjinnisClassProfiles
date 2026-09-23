@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.33.4, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds card `0035` only; `0031`, `0032` and `0034` passed a second review and sit in `human-review/`; `0033` was fixed a fifth time at v0.33.4 and is in `ai-review/` again; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
+**Status:** v0.33.4, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds card `0035` only; `0031` to `0034` passed review (0033 on its sixth pass, at v0.33.4) and sit in `human-review/`; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
 _Last updated: 2026-09-23 (v0.33.4: a refused key is offered again once its addon is on, card 0033; v0.33.3: a stale bars offer applies nothing, refused keys kept per character, card 0033; v0.33.2: the bars undo keeps the keys after a layout without them, card 0033; v0.33.1: the bars undo is retaken when the bars moved since the last apply, card 0033; v0.33.0: review fixes for 0031 to 0034, talent strings compared node by node; v0.32.0: key bindings go with the action bars, card 0033; v0.31.0: Balance builds named by fight, `Raid: Single Target`, `Raid: Cleave`, `Raid: Nek'Zali, Nymrissa`; a build for one boss keeps `Raid: <boss>` (Rob); v0.30.0: hover a build to see on the tree what it changes, card 0034; v0.29.0: the talent window list looks like TalentLoadoutsEx, card 0032; v0.28.0: action bar layouts per spec and per build, `/djbis bars`, card 0033; v0.27.0: the planned builds become real loadouts, `/djbis loadouts` and `/djbis tidy`, card 0031)_
 
 ## Goal & success criteria
@@ -214,7 +214,7 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this.** Cards `0031` to `0034` are built (loadouts per character, the list's look, shared action bars, tree highlight). `0031`, `0032` and `0034` passed review and wait for a client; `0033` waits on a sixth review, then a client. `0035`, retire DjinnisDreamgrove and DjinnisClassProfiles, stays in `todo/` until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
+**`docs/board/` owns this.** Cards `0031` to `0034` are built (loadouts per character, the list's look, shared action bars, tree highlight). All four passed review and wait for a client. On `0033`, watch for a key prompt that returns every login while **Apply** does nothing (sixth review note). `0035`, retire DjinnisDreamgrove and DjinnisClassProfiles, stays in `todo/` until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
 
 Twenty-seven cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.33.4 (deployed 2026-09-23). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 

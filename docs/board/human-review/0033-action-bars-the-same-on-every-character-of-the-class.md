@@ -398,3 +398,39 @@ a refused pair only while `GetBinding` lists no such action, so once the addon b
 the key is offered again. New checks: turning the addon on adds exactly one key to the count, and
 the refusal goes once the game takes the binding. Both go red when their line is removed. Still for
 a client: whether a disabled addon's binding drops out of `GetBinding`.
+
+**2026-09-23** Sixth review (agent). **CLEAN.**
+
+What I attacked: `c1bc9d6` (the `listed` filter in `keysDiffer`, `DjinnisBiS.lua:6805-6812`, and the
+new `GetBinding` model in `barChecks`). I used a copy in `%TEMP%\rereview33d`. The real tree is
+green under Lua 5.1 and 5.4. I ran 5 mutations and 1 new scenario:
+- S11: the game lists the action, but `SetBinding` still refuses it. Then an apply and `/djbis bars`.
+
+What held:
+- The fifth review's finding is fixed. Always skipping the refused pair (the `c10c1b0` rule) turns
+  "a refused key is offered again once its addon is on" red. Never skipping it also turns "a refused
+  key does not keep it from matching" red. Removing the clear at `:6831` turns "and the refusal goes
+  once the game takes it" red. Making the model list `MYADDON_X` while the addon is off turns 2
+  checks red, so the new model does the work.
+- Dropping `canRead` on the new `GetBinding` read left the suite green. That is expected, because
+  `GetBinding` has no secret returns. It is harmless.
+- The cost is one more pass over `GetNumBindings`, at offer time only. Nothing in combat.
+- `Blizzard_Keybindings.lua:164-173` also treats `SetBinding` as able to fail on a listed action.
+
+What broke: nothing a player is likely to hit. Note for the in-game check:
+- S11 is red on the real code ("expected same, got shown"). If the game lists an action but refuses
+  its binding, the pair is counted again. The prompt then comes back once a login, and **Apply**
+  changes nothing. `c10c1b0` skipped that pair. For that case this brings back the fourth review's
+  minor S8, which is a nag and not damage. The layout's key and action strings came from a real
+  `GetBinding` read, so it needs an odd key that one client binds and another refuses. If it shows in
+  a client, skip the pair when `refused[key] == want[key]` and the refusal was recorded this session
+  or the action is not listed.
+- For a client: whether a disabled addon's binding drops out of `GetBinding`. The fix rests on it.
+  If it does not drop out, the fourth review's S8 nag comes back for that key.
+
+Security: unchanged. `keysRefused` can only hide or show a key in the offer. It never binds. Saved
+key and action strings still reach `SetBinding` only through a click.
+
+There is no browser surface. Acceptance is in-game only.
+
+Verdict: CLEAN. human-review next.
