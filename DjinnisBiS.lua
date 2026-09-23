@@ -6010,23 +6010,36 @@ function PlanTab.buildSidebar()
 	-- Shared/Scroll/ScrollBoxListView.lua allows a frame type for a template).
 	f.scroll = CreateFrame("Frame", nil, f, "WowScrollBoxList")
 	f.scroll:SetPoint("TOPLEFT", 6, -32)
-	f.scroll:SetPoint("BOTTOMRIGHT", -22, 16 + PlanTab.SIZE.button)
+	f.scroll:SetPoint("BOTTOMRIGHT", -22, 20 + 2 * PlanTab.SIZE.button)
 	-- Save the action bars and keys, to the build in play or for the whole
 	-- spec (card 0036). The same as /djbis bars save build and /djbis bars save.
 	local half = (PlanTab.SIDEBAR_W - 24) / 2
 	f.saveBuild = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 	f.saveBuild:SetSize(half, PlanTab.SIZE.button)
-	f.saveBuild:SetPoint("BOTTOMLEFT", 8, 8)
+	f.saveBuild:SetPoint("BOTTOMLEFT", 8, 12 + PlanTab.SIZE.button)
 	f.saveBuild:SetText("Save bars: build")
 	f.saveBuild:SetScript("OnClick", function() PlanTab.saveBars(true, true) end)
 	f.saveSpec = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 	f.saveSpec:SetSize(half, PlanTab.SIZE.button)
-	f.saveSpec:SetPoint("BOTTOMRIGHT", -8, 8)
+	f.saveSpec:SetPoint("BOTTOMRIGHT", -8, 12 + PlanTab.SIZE.button)
 	f.saveSpec:SetText("Save bars: spec")
 	f.saveSpec:SetScript("OnClick", function() PlanTab.saveBars(false, true) end)
+	-- and put them back (card 0044), the same as the offer's Apply
+	f.loadBuild = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	f.loadBuild:SetSize(half, PlanTab.SIZE.button)
+	f.loadBuild:SetPoint("BOTTOMLEFT", 8, 8)
+	f.loadBuild:SetText("Load bars: build")
+	f.loadBuild:SetScript("OnClick", function() PlanTab.loadBars(true) end)
+	f.loadSpec = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+	f.loadSpec:SetSize(half, PlanTab.SIZE.button)
+	f.loadSpec:SetPoint("BOTTOMRIGHT", -8, 8)
+	f.loadSpec:SetText("Load bars: spec")
+	f.loadSpec:SetScript("OnClick", function() PlanTab.loadBars(false) end)
 	local tips = {
 		[f.saveBuild] = { "Save bars to this build", "Your action bars and key bindings now, kept for the loadout you have selected. Switching to it on any character offers them." },
 		[f.saveSpec] = { "Save bars for the spec", "Your action bars and key bindings now, kept for every build of this spec that has none of its own, on every character." },
+		[f.loadBuild] = { "Load this build's bars", "Puts the action bars and key bindings saved for the loadout you have selected on this character." },
+		[f.loadSpec] = { "Load the spec's bars", "Puts the action bars and key bindings saved for this spec on this character." },
 	}
 	for button, tip in pairs(tips) do
 		button:SetScript("OnEnter", function(self)
@@ -7192,6 +7205,24 @@ function PlanTab.applyBars(key, from)
 	return "applied"
 end
 
+-- The Load bars buttons (card 0044): the build's own layout, or the spec's.
+-- No question first: /djbis bars undo puts the old bars back.
+function PlanTab.loadBars(forBuild)
+	local spec = playerSpec()
+	if not spec then PlanTab.say("Action bar layouts are for druids.") return "none" end
+	local key = spec
+	if forBuild then
+		local build = PlanTab.activeLoadoutName()
+		if not build then PlanTab.say("No saved loadout is selected, so there is no build to load bars for.") return "none" end
+		key = spec .. " / " .. build
+	end
+	if not barsDB()[key] then
+		PlanTab.say(("No saved %s layout yet. Save bars first."):format(key))
+		return "none"
+	end
+	return PlanTab.applyBars(key)
+end
+
 function PlanTab.undoBars()
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return "fenced" end
@@ -7713,6 +7744,18 @@ function PlanTab.barChecks(check)
 	check(saveButtonTest .. ", a stale Replace saves nothing", db().bars["Feral / Raid: Sszorak"] == sszorak and db().bars["Feral / Dungeon"] == dungeon, true)
 	PlanTab.activeLoadoutName = keptActiveSave
 	db().bars.Feral, db().bars["Feral / Dungeon"] = before, nil  -- the checks below use the first druid's layout
+
+	-- Card 0044: the Load bars buttons pick the layout; applyBars is checked below
+	local loadButtonTest, keptApply, applied = "the Load bars buttons", PlanTab.applyBars, nil
+	PlanTab.applyBars = function(key) applied = key return "applied" end
+	PlanTab.activeLoadoutName = function() return "Raid: Sszorak" end
+	check(loadButtonTest .. ", the build's own", PlanTab.loadBars(true) .. "/" .. tostring(applied), "applied/Feral / Raid: Sszorak")
+	check(loadButtonTest .. ", the spec's", PlanTab.loadBars(false) .. "/" .. tostring(applied), "applied/Feral")
+	PlanTab.activeLoadoutName, applied = function() return "Dungeon" end, nil
+	check(loadButtonTest .. ", a build with none loads nothing", PlanTab.loadBars(true) .. "/" .. tostring(applied), "none/nil")
+	PlanTab.activeLoadoutName = function() return nil end
+	check(loadButtonTest .. ", no loadout selected, nothing", PlanTab.loadBars(true) .. "/" .. tostring(applied), "none/nil")
+	PlanTab.applyBars, PlanTab.activeLoadoutName = keptApply, keptActiveSave
 
 	local fenceTest = "the bars are not touched in combat or with the cursor full"
 	combat = true
