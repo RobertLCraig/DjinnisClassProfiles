@@ -211,3 +211,70 @@ Verdict: BOUNCE on finding 1.
    It goes red when the match test is removed.
 2. `keysRefused` maps key -> the refused action, and only that pair is skipped. New check:
    another action wanted on the refused key still counts 1.
+
+**2026-09-23** Third review (agent). **BOUNCE.**
+
+What I attacked: `487ed86` (`sameBars`, `sameKeys`, `applyBars`, `undoBars`, `keysDiffer`,
+`placeKeys`) on a copy in `%TEMP%\rereview33`, under Lua 5.1. I ran 12 mutations and 5 new order
+scenarios, each added to `barChecks` on the copy:
+- S1: a layout with no keys, then one with keys, then undo.
+- S2: apply, a `/reload` (a deep copy of `DjinnisBiSCharDB` and a cleared `keysRefused`), apply,
+  undo.
+- S3: apply, undo, apply, undo.
+- S4: apply, a key bound by hand, apply, undo.
+- S5: a layout with keys, then one with none, then undo.
+
+What held:
+- S2 to S5 pass. The undo survives a `/reload`: `barsAfter` and `keysAfter` are plain tables of
+  strings and numbers, and `sameAction` compares by type and id or macro name, never by table
+  identity.
+- `keysAfter` is always written together with `barsAfter`, and `readKeys` always returns a table.
+  So `c.keysAfter or {}` can only matter in a hand-edited file, and there it takes a fresh undo,
+  which is the safe side.
+- `DjinnisBiSCharDB` is read only at click time, so the ADDON_LOADED rule in `DECISIONS.md` is met.
+- `keysRefused` is right: a refused key and action pair is skipped in both loops, and any other
+  action on that key still counts.
+- The cost is small. An apply now reads the keys twice and the bars three times, about 3 x
+  `GetNumBindings` calls to `GetBindingContextForAction`, once, on a click.
+- 8 of 12 mutations went red: always taking a fresh undo, dropping `sameBars`, not writing
+  `barsAfter`, taking `keysAfter` from before the apply, `keysRefused[key] = true`, the key-only
+  want loop, and going back to the `6d2fc63` rule.
+
+What broke:
+1. **Undo no longer brings back the keys after a layout with no keys, then one with keys**
+   (`DjinnisBiS.lua:6899-6901`). The first apply takes the undo with `keysUndo = nil`, because that
+   layout has no keys. The second apply keeps that undo, since nothing moved in between, and never
+   fills in `keysUndo`. Undo then puts the bars back but leaves the second layout's keys, which may
+   be the account binding set. This is the card's own path: a spec layout saved before v0.32.0 has
+   no keys, and a build layout does. `6d2fc63` had `keysUndo = keysUndo or (...)`, so this is a
+   regression. S1 goes red on the real code. **Fix:** add
+   `else c.keysUndo = c.keysUndo or (withKeys and nowKeys or nil)` to that `if`. The keys have not
+   moved since the first apply, so `nowKeys` is the right undo. On the copy that turns S1 to S5
+   green and all the existing checks stay green. Add S1 as a check.
+2. Minor, no check guards it: removing `sameKeys` from the keep test (`:6899`), making `sameKeys`
+   one-way (`:6881`), or going back to the key-only refusal in the `have` loop (`:6796`) leaves the
+   suite green. S4 catches the first two; add it. Clearing `barsAfter` in `undoBars` (`:6921`) is
+   dead code, because `barsUndo` is nil after an undo anyway. It is harmless.
+
+Aside, not this card: under Lua 5.4 (the `lua` on PATH here) the 0031 check "the nodes decode as
+Blizzard's reader does" is red. Under 5.1 it is green.
+
+Security:
+1. Weakest point: unchanged. A hand-edited `DjinnisBiSDB.bars` with a small key set unbinds
+   everything else in the binding set in use. A non-table `keysAfter` in `DjinnisBiSCharDB` would
+   throw in `sameKeys`. Both are the player's own files.
+2. Unchecked: saved key and action strings still go to `SetBinding` without validation. There is
+   no new entry point. The slash command still only offers, and apply needs a click.
+3. Leaks: nothing leaves the client. Chat lines name slots, keys and spells, locally.
+
+There is no browser surface. Acceptance is in-game only.
+
+Verdict: BOUNCE on finding 1.
+
+**2026-09-23** Builder, v0.33.2. Both findings fixed, as the review proposed.
+1. When the undo is kept, it now takes the keys from before this apply if it had none. New
+   check: a layout without keys, then one with keys, then undo: the keys are back.
+2. New check: a key bound by hand between two applies is what undo puts back. Removing
+   `sameKeys` from the keep test turns it red.
+Also, off this card: `nodeKey` returns an integer, so its check passes under Lua 5.4 as well
+as 5.1. Both interpreters run the harness clean.

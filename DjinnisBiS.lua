@@ -1775,7 +1775,7 @@ function PlanTab.nodeKey(code)
 			v = v + (math.floor((c - 1) / 2 ^ (pos % 6)) % 2) * 2 ^ n
 			pos = pos + 1
 		end
-		return v
+		return math.floor(v)  -- an integer under Lua 5.4 too, or it prints "1.0"
 	end
 	local node = 0
 	while pos < #code * 6 do
@@ -6898,6 +6898,10 @@ function PlanTab.applyBars(key)
 	local now, nowKeys = PlanTab.readBars(), PlanTab.readKeys()
 	if not (c.barsUndo and c.barsAfter and PlanTab.sameBars(now, c.barsAfter) and PlanTab.sameKeys(nowKeys, c.keysAfter or {})) then
 		c.barsUndo, c.keysUndo = now, withKeys and nowKeys or nil
+	else
+		-- a spec layout without keys, then a build's with them: the kept undo
+		-- needs the keys from before this apply too (third review)
+		c.keysUndo = c.keysUndo or (withKeys and nowKeys or nil)
 	end
 	local placed, skipped = PlanTab.placeBars(layout.slots)
 	local keys, refused = 0, {}
@@ -7307,6 +7311,21 @@ function PlanTab.barChecks(check)
 	known[777], bars[9] = true, { type = "spell", id = 777 }
 	PlanTab.applyBars("Feral")
 	check(undoTest .. ", the one before the last apply when bars moved in between", PlanTab.undoBars() and bars[9] and bars[9].id, 777)
+	-- A spec layout without keys, then one with them: undo puts the keys back (third review).
+	db().bars.NoKeys = { slots = db().bars.Feral.slots }
+	bound = { W = "MOVEFORWARD", ["1"] = "ACTIONBUTTON1", E = "ACTIONBUTTON2", H = "HOUSING_X" }
+	PlanTab.applyBars("NoKeys")
+	PlanTab.applyBars("Feral")
+	PlanTab.undoBars()
+	check(undoTest .. ", the keys too after a layout that had none", bound.E, "ACTIONBUTTON2")
+	-- A key bound by hand between two applies is what undo puts back.
+	bound = { W = "MOVEFORWARD", ["1"] = "ACTIONBUTTON1", Q = "ACTIONBUTTON2" }
+	PlanTab.applyBars("Feral")
+	bound.E = "ACTIONBUTTON1"
+	PlanTab.applyBars("Feral")
+	PlanTab.undoBars()
+	check(undoTest .. ", with a key bound by hand in between", bound.E, "ACTIONBUTTON1")
+	db().bars.NoKeys = nil
 
 	local buildTest = "a build with its own layout is offered that one"
 	check(buildTest .. ", saved for the build", PlanTab.saveBars(true), "Feral / Raid: Sszorak")
