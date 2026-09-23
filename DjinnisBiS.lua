@@ -6084,7 +6084,7 @@ function PlanTab.buildSidebar()
 		end)
 		button:SetScript("OnLeave", function() GameTooltip:Hide() pcall(PlanTab.hideGhost) end)
 	end
-	f.bar =CreateFrame("EventFrame", nil, f, "MinimalScrollBar")
+	f.bar = CreateFrame("EventFrame", nil, f, "MinimalScrollBar")
 	f.bar:SetPoint("TOPLEFT", f.scroll, "TOPRIGHT", 6, 0)
 	f.bar:SetPoint("BOTTOMLEFT", f.scroll, "BOTTOMRIGHT", 6, 0)
 	local view = CreateScrollBoxListLinearView(0, 0, 0, 0, 2)
