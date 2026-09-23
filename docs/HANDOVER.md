@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.32.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds card `0035` only; `0031` to `0034` are built and in `ai-review/`; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
-_Last updated: 2026-09-23 (v0.32.0: key bindings go with the action bars, card 0033; v0.31.0: Balance builds named by fight, `Raid: Single Target`, `Raid: Cleave`, `Raid: Nek'Zali, Nymrissa`; a build for one boss keeps `Raid: <boss>` (Rob); v0.30.0: hover a build to see on the tree what it changes, card 0034; v0.29.0: the talent window list looks like TalentLoadoutsEx, card 0032; v0.28.0: action bar layouts per spec and per build, `/djbis bars`, card 0033; v0.27.0: the planned builds become real loadouts, `/djbis loadouts` and `/djbis tidy`, card 0031)_
+**Status:** v0.33.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds card `0035` only; `0031` to `0034` were bounced by review, fixed at v0.33.0, and are back in `ai-review/` for a second pass; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
+_Last updated: 2026-09-23 (v0.33.0: review fixes for 0031 to 0034, talent strings compared node by node; v0.32.0: key bindings go with the action bars, card 0033; v0.31.0: Balance builds named by fight, `Raid: Single Target`, `Raid: Cleave`, `Raid: Nek'Zali, Nymrissa`; a build for one boss keeps `Raid: <boss>` (Rob); v0.30.0: hover a build to see on the tree what it changes, card 0034; v0.29.0: the talent window list looks like TalentLoadoutsEx, card 0032; v0.28.0: action bar layouts per spec and per build, `/djbis bars`, card 0033; v0.27.0: the planned builds become real loadouts, `/djbis loadouts` and `/djbis tidy`, card 0031)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -214,9 +214,9 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this.** Cards `0031` to `0034` are built (loadouts per character, the list's look, shared action bars, tree highlight) and wait in `ai-review/` for `/review-card`, then a client. `0035`, retire DjinnisDreamgrove and DjinnisClassProfiles, stays in `todo/` until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
+**`docs/board/` owns this.** Cards `0031` to `0034` are built (loadouts per character, the list's look, shared action bars, tree highlight). Review bounced all four; the fixes are in v0.33.0 and a second review pass is in `ai-review/`. Then a client. `0035`, retire DjinnisDreamgrove and DjinnisClassProfiles, stays in `todo/` until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
 
-Twenty-seven cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.31.0 (deployed 2026-09-23). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
+Twenty-seven cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.33.0 (deployed 2026-09-23). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 
 ## Blockers / open questions
 - **Rob's sims for `0028`**: which loadout each spec uses at 3+ targets, and a Top Gear run per spec per scenario. Nothing else on the board is blocked.
@@ -261,6 +261,10 @@ Twenty-seven cards in `human-review/` are one trip to a live client; each lists 
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
+- **2026-09-23, later** Four fresh reviewers bounced `0031` to `0034`; fixed at v0.33.0, one commit each.
+  Worth carrying: Dreamgrove strings mark granted talents and a client export through SimC does
+  not, so talent strings are compared node by node (`PlanTab.nodeKey`), never as text. A check that
+  fakes an edit by changing the last character changes only padding. Character macros start at 121.
 - **2026-09-23** Cards `0031` to `0034` built in one session, one commit each, v0.27.0 to v0.30.0.
   Worth carrying: `talentStringsDiffer` could not compare a Dreamgrove build at all (a zero-filled
   tree hash never matched the client's), so every drift and "edited" check on those rows was blind
