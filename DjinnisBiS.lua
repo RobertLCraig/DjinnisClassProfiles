@@ -6800,7 +6800,16 @@ function PlanTab.keysDiffer(want)
 	local have, n = PlanTab.readKeys(), 0
 	-- key -> the action refused on it: only that pair is skipped, so another
 	-- layout's binding on the same key still counts (second review)
-	local refused = PlanTab.refusedKeys()
+	-- ...and only while the game still lists no such action: once the addon
+	-- behind it is turned on, the key is offered again (fifth review)
+	local refused, listed = {}, {}
+	for i = 1, GetNumBindings() do
+		local action = GetBinding(i)
+		if canRead(action) and action then listed[action] = true end
+	end
+	for key, action in pairs(PlanTab.refusedKeys()) do
+		if not listed[action] then refused[key] = action end
+	end
 	for key, action in pairs(have) do
 		if want[key] ~= action and not (want[key] and refused[key] == want[key]) then n = n + 1 end
 	end
@@ -7246,12 +7255,18 @@ function PlanTab.barChecks(check)
 	-- HOUSING_X is in the housing editor's own binding context, not the normal one
 	C_KeyBindings = { GetBindingContextForAction = function(action) return action == "HOUSING_X" and 1 or 0 end }
 	PlanTab.keysRefused = {}
-	GetNumBindings = function() return #actions end
+	-- the game lists an addon's binding only while that addon is on
+	local function listedActions()
+		local out = {}
+		for _, a in ipairs(actions) do if a ~= "MYADDON_X" or PlanTab.hasMyAddon then out[#out + 1] = a end end
+		return out
+	end
+	GetNumBindings = function() return #listedActions() end
 	GetBinding = function(i)
-		local keys = {}
-		for key, action in pairs(bound) do if action == actions[i] then keys[#keys + 1] = key end end
+		local keys, a = {}, listedActions()[i]
+		for key, action in pairs(bound) do if action == a then keys[#keys + 1] = key end end
 		table.sort(keys)
-		return actions[i], "cat", keys[1], keys[2]
+		return a, "cat", keys[1], keys[2]
 	end
 	SetBinding = function(key, action)
 		if action == "MYADDON_X" and not PlanTab.hasMyAddon then return false end
@@ -7375,6 +7390,15 @@ function PlanTab.barChecks(check)
 	check("the bars offer waits while the prompt holds another question", PlanTab.offerBars(true), "busy")
 	check("the bars offer waits, and does not write over it", shown, nil)
 	PlanTab.promptBusy, PlanTab.later = keptBusy, keptLater
+
+	-- A refused key is offered again once its addon is on (fifth review), and
+	-- the refusal goes once the game takes the binding.
+	local offBefore = PlanTab.keysDiffer(db().bars.Feral.keys)
+	PlanTab.hasMyAddon = true
+	check("a refused key is offered again once its addon is on", PlanTab.keysDiffer(db().bars.Feral.keys) - offBefore, 1)
+	PlanTab.applyBars("Feral")
+	check("and the refusal goes once the game takes it", PlanTab.refusedKeys().F, nil)
+	PlanTab.hasMyAddon = nil
 
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]

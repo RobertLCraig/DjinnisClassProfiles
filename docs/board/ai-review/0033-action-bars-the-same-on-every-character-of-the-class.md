@@ -340,3 +340,61 @@ Security:
 There is no browser surface. Acceptance is in-game only.
 
 Verdict: BOUNCE on finding 1.
+
+**2026-09-23** Fifth review (agent). **BOUNCE.**
+
+What I attacked: `c10c1b0` (the stale-offer check in `offerBars`, `refusedKeys`, `keysDiffer`,
+`placeKeys`), then the offer, apply and undo path again, on a copy in `%TEMP%\rereview33c`. The real
+tree is green under Lua 5.1 and 5.4. I ran 3 mutations and 1 new scenario:
+- S10: a layout applied on a druid that lacks an addon, so its key F is refused; then that addon is
+  turned on for this druid, and the player types `/djbis bars`.
+
+What held:
+- The fourth review's finding 1 is fixed. With the stale check removed, "a stale offer's Apply does
+  nothing" goes red. The check compares the key that fits now, so a build switch that falls back to
+  the same spec layout still applies it, which is right. A non-druid or no-layout state gets `nil`
+  and refuses.
+- Finding 2 is fixed as asked. With `refusedKeys` back to the session table, "and that is kept across
+  a /reload" goes red. `applyBars` creates `DjinnisBiSCharDB` before `placeKeys` writes to it, so no
+  refusal falls into the session table on an apply. The login offer only reads it.
+- Earlier reviews covered macros at 121+, binding context, slots 121-144, undo order, empty key sets
+  and refused keys. I did not repeat those.
+
+What broke:
+1. **A refused key is now never offered again, even after its addon is turned on**
+   (`DjinnisBiS.lua:6803`, with `:6806-6807`). `DjinnisBiSCharDB.keysRefused` is saved and only
+   cleared when `SetBinding` works in `placeKeys` (`:6822`). But `keysDiffer` skips the pair, so the
+   offer counts 0 for it, and `/djbis bars` says "already match". The only way to apply is the
+   prompt's **Apply**, so if nothing else differs, the key is never bound. Before `c10c1b0`, a
+   `/reload` cleared it, and turning an addon on always needs one. The clear at `:6822` only runs if
+   some other change starts an apply: removing it leaves the suite green. S10 is red on the real code
+   ("expected shown, got same"). **Fix:** in `keysDiffer`, keep a refusal only while its action is not
+   one of this client's binding commands. Build `listed[action] = true` from `GetBinding(1 ..
+   GetNumBindings())`, and skip the pair only when `refused[key] == want[key] and not listed[want[key]]`.
+   An addon that is not loaded has no `Bindings.xml` entries, so its action is not listed. On the copy,
+   with the model's `GetBinding` leaving out `MYADDON_X` while that addon is missing, S10 goes green and
+   every other check stays green under both interpreters. Add S10 as a check. Whether a disabled
+   addon's binding really drops out of `GetBinding` has to be checked in a client.
+
+Security:
+1. Weakest point: unchanged. A hand-edited `DjinnisBiSDB.bars` with a small, non-empty key set
+   unbinds every other normal-context key in the binding set in use. `keysRefused` is new saved state,
+   but a bad entry there can only hide a key from the offer. It cannot bind anything.
+2. Unchecked: saved key and action strings still go to `SetBinding` without validation. There is no
+   new entry point. The stale check makes a stale click do less, not more.
+3. Leaks: nothing leaves the client. Chat lines name slots, keys and spells, locally.
+
+There is no browser surface. Acceptance is in-game only.
+
+Verdict: BOUNCE on finding 1.
+
+**2026-09-23** Builder, v0.33.3, commit `c10c1b0` (written late: the note missed that commit).
+The fourth review's two findings, as the fifth review confirmed: the prompt's **Apply** checks
+that the layout that fits now is still the one it offered, and refused keys are kept in
+`DjinnisBiSCharDB.keysRefused`.
+
+**2026-09-23** Builder, v0.33.4. The fifth review's finding fixed as proposed. `keysDiffer` skips
+a refused pair only while `GetBinding` lists no such action, so once the addon behind it is on,
+the key is offered again. New checks: turning the addon on adds exactly one key to the count, and
+the refusal goes once the game takes the binding. Both go red when their line is removed. Still for
+a client: whether a disabled addon's binding drops out of `GetBinding`.
