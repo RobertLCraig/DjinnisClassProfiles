@@ -165,3 +165,41 @@ frozen-button test.
 6. An empty key set is never saved and never placed.
 New checks cover each one, plus ClearCursor after the swap, the vehicle fence and the busy-prompt
 wait. Breaking each fix on a copy turned the checks red (10 of 10).
+
+**2026-09-23** Re-review of the v0.33.0 fixes (agent). **BOUNCE.**
+
+What I attacked: `6d2fc63`, with 14 mutations and one new scenario on a copy in `%TEMP%\rereview`.
+I checked the API claims against `wow-ui-source`:
+- `MacroConstantsDocumentation.lua` has `MAX_ACCOUNT_MACROS = 120`, and `Blizzard_MacroUI.lua:155`
+  puts character macros at `macroBase` + i.
+- `Enum.BindingContext.None = 0`, and housing is 1-8 (`KeyBindingsDocumentation.lua:192`).
+- `MultiActionBars.xml` uses pages 3-6 and 13-15, so slots 145-180 are player bars.
+- `SetBinding` is not in the generated docs. `Blizzard_Keybindings.lua:164` passes whatever
+  `GetBindingContextForAction` returns, which is nil or None for a normal action. So leaving the
+  context out is what Blizzard does for these actions.
+
+What held: 13 of 14 breaks went red. They covered the macro loop, the context filter (including
+letting context 1 through), slots 121-144, the "or" on both undos, the refused-key memory, and
+the two empty-key guards. `keysRefused` is not saved, so a /reload clears it. An addon can only be
+installed across a reload, so a key refused before the install is not ignored after it.
+
+What broke:
+1. **The undo can now throw away the player's own bar changes** (`DjinnisBiS.lua:6877`). The fix
+   keeps the first undo until `/djbis bars undo`. It lives in `DjinnisBiSCharDB`, so it can be
+   weeks old. Say the player applies a layout, then moves things by hand, then applies again, then
+   undoes. They get back the bars from before the first apply, and the hand changes are gone.
+   Before this fix they would have been kept. I proved it on the copy: put a spell in slot 9
+   between the two applies in `barChecks`, and after the undo slot 9 is empty.
+   **Fix:** at the end of `applyBars`, save `DjinnisBiSCharDB.barsAfter = PlanTab.readBars()`.
+   On the next apply, keep the old undo only when every slot of `readBars()` still `sameAction`s
+   `barsAfter`. Otherwise take a new one. Do the same for keys. Add the slot 9 case as a check.
+2. Minor: `keysRefused` is keyed by the key alone (`:6792-6793`, `:6809`). Once Feral's layout has
+   F refused, a Guardian layout that wants F for something else stops counting F for the rest of
+   the session. **Fix:** store the action (`keysRefused[key] = action`) and skip a key only when
+   `want[key] == PlanTab.keysRefused[key]`.
+
+Security: an empty key set is now refused on save and on apply. A small but non-empty broken key
+set can still unbind the rest. That was already noted, and it is still only the player's own saved
+file.
+
+Verdict: BOUNCE on finding 1.

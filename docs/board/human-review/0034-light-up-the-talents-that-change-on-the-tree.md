@@ -116,3 +116,27 @@ criteria still need a person at the client once this is fixed.
    decoder and the tooltip stubbed. It checks the colour on each node, the clear, a header's
    choices, the header's `names`, and the decoder's refusal. All five breaks that survived
    before now go red, and so does add/drop swapped.
+
+**2026-09-23** Re-review of the v0.33.0 fixes (agent). **CLEAN.**
+
+What I attacked: `3d67af9`, with 2 mutations on a copy in `%TEMP%\rereview`. I read the granted
+change against `ClassTalentImportExportMixin:WriteLoadoutContent` and `ReadLoadoutContent`.
+
+What held:
+- Remove `buildProblem` from `decodeBuild` and the "another game version" check goes red. The live
+  string comes from `GenerateImportString` for the current spec and tree, so the new check never
+  stops the player's own talents from being drawn.
+- The granted change is right. The client's export writes a granted node as selected but not
+  purchased, and `ReadLoadoutContent` sets `isNodeGranted` for it. A Dreamgrove string marks the
+  same node the same way. Both sides now count it as unselected, so a free talent never glows.
+- The hover wiring checks (colour per node, the clear, the header's names and choices) all stand.
+
+What is weak (no bounce): nothing checks the granted rule in `nodeWord` (`DjinnisBiS.lua:6193`).
+Put back plain `isNodeSelected` and everything stays green. Fix: add one check,
+`PlanTab.nodeWord({ isNodeSelected = true, isNodeGranted = true }, { isNodeSelected = false })`
+must be nil.
+
+Security: unchanged. The decoder is read-only, and a header this client would refuse now draws
+nothing.
+
+Verdict: CLEAN. Acceptance is in-game only, so the card goes to human-review next.

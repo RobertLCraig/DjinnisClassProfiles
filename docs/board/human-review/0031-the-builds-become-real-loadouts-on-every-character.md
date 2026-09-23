@@ -160,3 +160,36 @@ agent can run. Criteria 1-5 are in-game checks.
 4. `tidy` takes `loadoutFence` (combat, talent window, running queue). Checks cover its window
    and selected guards. A name two loadouts share is never replaced, and the player is told.
 Breaking each fix on a copy turned the checks red (5 of 5).
+
+**2026-09-23** Re-review of the v0.33.0 fixes (agent). **CLEAN.**
+
+What I attacked: `daf3506`, on a copy in `%TEMP%\rereview`. I ran 9 mutations and loaded Blizzard's
+own `ExportUtil.lua` and `ClassTalentImportExportMixin:ReadLoadoutContent` from `wow-ui-source`
+against `PlanTab.nodeKey`.
+
+What held:
+- `nodeKey` gives the same purchased nodes, ranks and choices as Blizzard's reader on all 23
+  stored builds. The start bit (152), the bit order and the granted rule are right.
+  `WriteLoadoutContent` writes a granted node as selected, not purchased, and `nodeKey` skips it.
+  So a client's `GenerateImportString` and a Dreamgrove string both drop granted nodes. The
+  comparison holds whichever way an exporter marks them.
+- A string cut short reads as "differs" rather than throwing. That is what Blizzard's reader does
+  too: missing bits are "not selected". The last partial node is harmless.
+- These breaks all went red: a text compare, counting granted nodes, ignoring `twice`, dropping
+  the "deleted and not made again" line, and tidy back to a combat-only fence.
+
+What is weak (no bounce):
+- The checks cannot see the ranks, the choice, the node number or the start bit. Dropping any one
+  of them from `nodeKey`'s key stays green (4 breaks survived). Dropping the choice would let a
+  build that differs only on a choice node read as matching. Fix: in `loadoutChecks`, check that
+  `PlanTab.nodeKey(dreamgrove):gsub("%.0", "")` starts with
+  `40:m:0,41:m:0,42:m:0,43:m:0,44:m:0,45:m:1,` and contains `,114:1:0,`. Those values come from
+  Blizzard's reader.
+- The comment above `PlanTab.B64` says a client export leaves granted nodes out. According to
+  `WriteLoadoutContent`, it marks them as granted. The code is right either way. Only the reason
+  given is wrong.
+
+Security: unchanged from the first pass. The decode is pure, there is no outside input, and every
+delete is behind a click.
+
+Verdict: CLEAN. Acceptance is in-game only, so the card goes to human-review next.

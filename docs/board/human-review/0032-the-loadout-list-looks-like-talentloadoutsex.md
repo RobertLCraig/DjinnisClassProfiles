@@ -143,3 +143,27 @@ human-review, a person must check:
 3. Rows call `RegisterForClicks("LeftButtonUp")`, as TalentLoadoutsEx does.
 The review also noted that the Built line on Balance's shared names is out of date. Since `43b4530`
 each Balance build has its own string.
+
+**2026-09-23** Re-review of the v0.33.0 fixes (agent). **CLEAN.**
+
+What I attacked: `4fbcc30`, with 4 mutations on a copy in `%TEMP%\rereview`.
+
+What held:
+- Tick-every-match and no-tie-break both go red now. The lent string goes to `Dungeon`, which is
+  in the Mythic+ group, so it sorts after `Raid: Single Target` in raid context. One of the two
+  checks really does need the tie-break.
+- Remove the fold guard in `sidebarList` and the new check throws, so it goes red.
+- The tick now goes through `nodeKey` (0031's fix). I checked `nodeKey` against Blizzard's reader
+  on all 23 builds. A fresh import ticks its row.
+
+What is weak (no bounce):
+- `sidebarClick`'s guard (`DjinnisBiS.lua:6010`) has no check. Put back `d.sidebarFolded or {}`
+  and everything stays green. It is one line and simple to read.
+- `RegisterForClicks` is frame code and cannot be checked here. It is for the in-game pass.
+- The Built line on this card (lines 36-37) still says Balance stores one build under three boss
+  names. That has been untrue since `43b4530`. Fix the text.
+
+Security: unchanged. The fold setting is the player's own saved file, and it is now type-checked
+on both paths.
+
+Verdict: CLEAN. Acceptance is in-game only, so the card goes to human-review next.
