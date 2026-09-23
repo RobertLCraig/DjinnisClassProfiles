@@ -85,3 +85,42 @@ No client can be run by an agent. The in-game checks are the card's What I need 
   - New checks stub `C_RaidLocks` and `GetInstanceInfo`: the lockout is asked as the journal asks
     it (`2939/3445/15`), a boss dead on it reads dead, and `bossHere` skips it. Mutations: `bossHere`
     without `bossDone` 1 red, the arguments swapped 3 red.
+
+**2026-09-23** Second adversarial review of b5530b3 (v0.38.0). Bounced to todo: one finding, and
+it is the first review's own finding, only half closed.
+
+Attacked, on a temp copy, the same under Lua 5.1 and the newer one:
+- `bossHere` without `bossDone`: 1 red.
+- `bossHere` without `lastKill`: 2 red.
+- `IsEncounterComplete` arguments swapped: 3 red.
+- the map read from `GetInstanceInfo`'s 4th value, not the 8th: 1 red.
+- **`checkSetup` back to `rowHere(..., PlanTab.lastKill)` with no `done`** (`DjinnisBiS.lua:5328`):
+  **0 red**.
+- **the list back to `rowHere(..., "raid", PlanTab.lastKill)`** (6235): **0 red**.
+
+**Finding: the reminder and the list can still stop skipping dead bosses with every check green.**
+The first review listed three mutations that stayed green. The first two were these call sites.
+They are still green. The new check at 10123 is named "the reminder's and the list's row skips
+it", but it calls `bossHere` directly. So it proves `bossHere` and not that the reminder or the
+list use it. The first review asked for the check to go through `checkSetup`. Fix: in the same
+stubbed setup (`C_RaidLocks`, `GetInstanceInfo` giving map 2939, difficulty 15, `lastKill` nil),
+call `PlanTab.checkSetup()` and check the popup title names Entombed Sentinels. The list half
+can be a check on `updateSidebar`'s `here`, or say on the card that only the game proves it.
+
+No criterion carries `proves:`. The first review said so and the fix left it. Name the checks.
+
+What held:
+- `bossDone` asks `IsEncounterComplete(mapID, encounterID, difficultyID)` in the journal's order.
+  Each value passes `canRead`, and the call is in `pcall`. It answers false when unsure, which is
+  the old behaviour.
+- `bossHere` is now the one place both callers go through, and `rowHere` skips dead bosses after
+  the last kill.
+- The offer part is unchanged since the first review and still holds.
+
+Security:
+1. Weakest point: a wrong "dead" answer hides the reminder for a living boss. It fails quiet.
+   False-when-unsure keeps that to the old behaviour.
+2. Unchecked: nothing from outside. The game's answers pass `canRead` and `pcall`.
+3. Leaks: nothing leaves the client.
+
+No client can be run by an agent. What I need from you 1 and 2 still stand.
