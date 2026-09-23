@@ -48,3 +48,52 @@ a global profile". Card `0033` saves both, but only by slash command (`/djbis ba
 - [ ] WHEN Rob clicks **Save bars: spec**, THE ADDON SHALL save them as the spec's layout.
 - [ ] WHEN a layout of that name exists, THE ADDON SHALL ask before replacing it.
 - [ ] In a client: both buttons show under the list and do not overlap it.
+
+## Comments
+
+### 2026-09-23, adversarial review of 67ff695
+
+What I attacked. I checked the acceptance, a question already up, combat and the fences, a click
+with no loadout, the sidebar layout, and whether each check goes red without its fix. The
+mutations ran on copies in `$TEMP/review36`. The harness is clean on the real code under Lua 5.1
+and 5.4.
+
+What held:
+- Each check goes red when its fix is removed. With no ask, 2 checks go red. With no stale guard, 1
+  goes red. When Replace saves nothing, 1 goes red. When Cancel saves, 1 goes red. When Replace
+  drops `expect`, "a stale Replace saves nothing" goes red.
+- Replace runs the whole of `saveBars` again. So combat, a full cursor and a vehicle bar at Replace
+  time are fenced again, and a spec that is no longer a druid spec saves nothing. The sidebar hides
+  itself on `PLAYER_REGEN_DISABLED`, and the buttons are plain, not secure.
+- With no loadout selected, or the starter build active, `activeLoadoutName` answers nil. Chat then
+  says there is no build, and nothing is saved.
+- Layout, read against `SharedUIPanelTemplates.xml` and `ScrollTemplates.xml`. The ScrollBox and
+  its bar end 40 px above the bottom, and the buttons sit from 8 to 32 px, so there is an 8 px gap.
+  Each button is 128 px wide, `(280 - 24) / 2`, with an 8 px gap between them. The close button is
+  at the top right, so nothing overlaps it. The labels fit in 128 px at GameFontNormal. Only a
+  client can confirm that.
+
+What broke: **saveBars writes over a question that is already up.** `DjinnisBiS.lua:6916` calls
+`PlanTab.prompt` without asking `PlanTab.promptBusy()`. The addon's own rule at `:6542` says a
+second question waits rather than writing over the first. A player can hit it like this:
+- Double-click a build in this sidebar. 0033's bars offer comes up.
+- Click **Save bars: build** or **Save bars: spec** beside it while that layout exists. The Replace
+  question takes the frame.
+- The offer is gone, and `barsSeen` is already set, so it does not come back until the key changes.
+- A "Group joined" setup offer (0024) is lost the same way, and there is no command to call it back.
+
+The fix is one line before `:6916`, and I checked it in a copy:
+`if ask and old and PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end`.
+Also add a check that stubs `promptBusy` to true and expects no prompt. With the fix it passes, and
+without it it fails. Both Luas are clean with the fix.
+
+Security:
+1. Weakest point: an account-wide spec layout can be replaced by a mis-click. The Replace question
+   guards against that, apart from the fault above.
+2. Unchecked input: none new. The key is built from `playerSpec()` and from a loadout name that
+   passed `canRead`. Nothing from outside the client comes in.
+3. What it leaks on failure: nothing. A failure prints a chat line to the player only.
+
+There is no browser surface. Acceptance can only be checked in a client.
+
+Verdict: BOUNCE, to todo, with the finding above.

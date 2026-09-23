@@ -5999,6 +5999,7 @@ function PlanTab.buildSidebar()
 			GameTooltip:AddLine(tip[1], 1, 1, 1)
 			GameTooltip:AddLine(tip[2], nil, nil, nil, true)
 			GameTooltip:AddLine("/djbis bars undo puts back the bars from before an apply. /djbis bars offers a saved layout.", 0.7, 0.7, 0.7, true)
+			GameTooltip:AddLine("Named profiles for any spec: /djbis bars save <name>, load <name>, list, delete <name>.", 0.7, 0.7, 0.7, true)
 			GameTooltip:Show()
 		end)
 		button:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -6913,6 +6914,8 @@ function PlanTab.saveBars(forBuild, ask, expect)
 		return nil
 	end
 	local old = barsDB()[key]
+	-- one frame for every question: a second waits rather than write over the first (0036 review)
+	if ask and old and PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
 	if ask and old then
 		PlanTab.prompt("Djinni's BiS: action bars", {
 			("Replace the saved %s layout%s with the bars and keys you have now?"):format(key, old.saved and (" from " .. old.saved) or ""),
@@ -6923,6 +6926,14 @@ function PlanTab.saveBars(forBuild, ask, expect)
 		})
 		return "ask"
 	end
+	local layout, n, k = PlanTab.captureBars()
+	barsDB()[key] = layout
+	PlanTab.say(("Saved %d action bar slots and %d key bindings as the %s layout."):format(n, k, key))
+	return key
+end
+
+-- This character's bars and keys as a layout, and how many of each.
+function PlanTab.captureBars()
 	local slots, n = PlanTab.readBars(), 0
 	for _ in pairs(slots) do n = n + 1 end
 	local keys, k = PlanTab.readKeys(), 0
@@ -6930,9 +6941,68 @@ function PlanTab.saveBars(forBuild, ask, expect)
 	-- No keys read is a failed read, not a wish to unbind every key, ESCAPE
 	-- and movement too (0033 review): the layout then leaves keys alone.
 	if k == 0 then keys = nil end
-	barsDB()[key] = { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil }
-	PlanTab.say(("Saved %d action bar slots and %d key bindings as the %s layout."):format(n, k, key))
-	return key
+	return { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil }, n, k
+end
+
+-- Named profiles (card 0037, Rob 2026-09-23): a layout under a name of his,
+-- account-wide, loadable on any spec. Kept apart from the spec and build
+-- layouts, so a name can never be taken for one and offered on its own.
+function PlanTab.profilesDB()
+	local d = db()
+	if type(d.barProfiles) ~= "table" then d.barProfiles = {} end
+	return d.barProfiles
+end
+
+-- The stored name for `name`, matched without case, or nil.
+function PlanTab.findProfile(name)
+	local want = name:lower()
+	for stored in pairs(PlanTab.profilesDB()) do
+		if stored:lower() == want then return stored end
+	end
+	return nil
+end
+
+-- Answers the name saved under, or nil.
+function PlanTab.saveProfile(name)
+	name = (name or ""):match("^%s*(.-)%s*$")
+	if name == "" or #name > 40 or name:find("|", 1, true) then  -- "|" starts a chat colour code
+		PlanTab.say("Give the profile a name of 1 to 40 characters, without \"|\": /djbis bars save <name>.")
+		return nil
+	end
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return nil end
+	local stored = PlanTab.findProfile(name)
+	local layout, n, k = PlanTab.captureBars()
+	PlanTab.profilesDB()[stored or name] = layout
+	PlanTab.say(("%s the %s profile: %d action bar slots and %d key bindings. %s/djbis bars load %s|r%s puts it on any character.")
+		:format(stored and "Replaced" or "Saved", stored or name, n, k, GOLD, stored or name, GREY))
+	return stored or name
+end
+
+function PlanTab.loadProfile(name)
+	name = (name or ""):match("^%s*(.-)%s*$")
+	local stored = name ~= "" and PlanTab.findProfile(name)
+	if not stored then PlanTab.say(("No profile called \"%s\". %s/djbis bars list|r%s shows them."):format(name, GOLD, GREY)) return "none" end
+	return PlanTab.applyBars(stored, PlanTab.profilesDB())
+end
+
+function PlanTab.listProfiles()
+	local names = {}
+	for name in pairs(PlanTab.profilesDB()) do names[#names + 1] = name end
+	table.sort(names)
+	if #names == 0 then PlanTab.say("No profiles yet. /djbis bars save <name> makes one.") return 0 end
+	PlanTab.say(("%d action bar profiles:"):format(#names))
+	for _, name in ipairs(names) do print(("  %s %s(saved %s)|r"):format(name, GREY, PlanTab.profilesDB()[name].saved or "?")) end
+	return #names
+end
+
+function PlanTab.deleteProfile(name)
+	name = (name or ""):match("^%s*(.-)%s*$")
+	local stored = name ~= "" and PlanTab.findProfile(name)
+	if not stored then PlanTab.say(("No profile called \"%s\"."):format(name)) return false end
+	PlanTab.profilesDB()[stored] = nil
+	PlanTab.say(("Deleted the %s profile."):format(stored))
+	return true
 end
 
 function PlanTab.sameBars(a, b)
@@ -6948,11 +7018,12 @@ function PlanTab.sameKeys(a, b)
 	return true
 end
 
--- Applies a saved layout. The layout it replaces is kept for /djbis bars undo.
-function PlanTab.applyBars(key)
+-- Applies a saved layout, from `from` (the named profiles) or else the spec
+-- and build layouts. The layout it replaces is kept for /djbis bars undo.
+function PlanTab.applyBars(key, from)
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return "fenced" end
-	local layout = key and barsDB()[key]
+	local layout = key and (from or barsDB())[key]
 	if not layout then PlanTab.say("No saved layout called " .. tostring(key) .. ".") return "none" end
 	local c = DjinnisBiSCharDB or {}
 	DjinnisBiSCharDB = c
@@ -6974,7 +7045,7 @@ function PlanTab.applyBars(key)
 	if withKeys then keys, refused = PlanTab.placeKeys(layout.keys) end
 	c.barsAfter, c.keysAfter = PlanTab.readBars(), PlanTab.readKeys()
 	for _, line in ipairs(refused) do skipped[#skipped + 1] = line end
-	PlanTab.barsSeen = key
+	if not from then PlanTab.barsSeen = key end  -- a profile is never offered, so never "seen"
 	PlanTab.say(("Applied the %s layout: %d slots and %d keys changed, %d skipped. %s/djbis bars undo|r%s puts the old ones back.")
 		:format(key, placed, keys, #skipped, GOLD, GREY))
 	for _, line in ipairs(skipped) do print("  " .. line) end
@@ -7037,9 +7108,15 @@ function PlanTab.offerBars(asked)
 	return "shown"
 end
 
+-- /djbis bars [save | save build | save <name> | load <name> | list | delete <name> | undo]
 function PlanTab.barsCommand(rest)
+	local verb, name = rest:match("^(%S+)%s+(.+)$")
 	if rest == "save" then PlanTab.saveBars(false)
 	elseif rest == "save build" then PlanTab.saveBars(true)
+	elseif verb == "save" then PlanTab.saveProfile(name)
+	elseif verb == "load" then PlanTab.loadProfile(name)
+	elseif verb == "delete" then PlanTab.deleteProfile(name)
+	elseif rest == "list" then PlanTab.listProfiles()
 	elseif rest == "undo" then PlanTab.undoBars()
 	else PlanTab.offerBars(true) end
 end
@@ -7429,6 +7506,10 @@ function PlanTab.barChecks(check)
 	check(saveButtonTest .. ", a build with no layout saves at once", PlanTab.saveBars(true, true), "Feral / Dungeon")
 	check(saveButtonTest .. ", and asks nothing", shown, nil)
 	local before = db().bars.Feral
+	local keptBusySave = PlanTab.promptBusy
+	PlanTab.promptBusy = function() return true end
+	check(saveButtonTest .. ", with another question up, it waits", PlanTab.saveBars(false, true) .. "/" .. tostring(shown), "busy/nil")
+	PlanTab.promptBusy = keptBusySave
 	check(saveButtonTest .. ", replacing the spec layout asks first", PlanTab.saveBars(false, true), "ask")
 	check(saveButtonTest .. ", and keeps it until Replace", db().bars.Feral, before)
 	check(saveButtonTest .. ", Cancel does nothing", shown.buttons[2].label .. "/" .. tostring(shown.buttons[2].onClick), "Cancel/nil")
@@ -7469,6 +7550,31 @@ function PlanTab.barChecks(check)
 	PlanTab.applyBars("Feral")
 	check("and the refusal goes once the game takes it", PlanTab.refusedKeys().F, nil)
 	PlanTab.hasMyAddon = nil
+
+	-- Card 0037: named profiles, kept apart from the spec and build layouts.
+	local profileTest = "a named action bar profile"
+	local keptProfiles = db().barProfiles
+	db().barProfiles = nil
+	bars[11] = { type = "spell", id = 5221 }
+	check(profileTest .. ", saved under its name", PlanTab.saveProfile("  Main  "), "Main")
+	check(profileTest .. ", holds the bars", PlanTab.profilesDB().Main.slots[11] and PlanTab.profilesDB().Main.slots[11].id, 5221)
+	check(profileTest .. ", never taken for a spec or build layout", db().bars.Main, nil)
+	check(profileTest .. ", the same name in other case replaces it", PlanTab.saveProfile("main"), "Main")
+	check(profileTest .. ", no empty name", PlanTab.saveProfile(" "), nil)
+	check(profileTest .. ", no name over 40 characters", PlanTab.saveProfile(("x"):rep(41)), nil)
+	check(profileTest .. ", no colour code in a name", PlanTab.saveProfile("a|cffff0000b"), nil)
+	bars[11] = nil
+	check(profileTest .. ", loads by name in any case", PlanTab.loadProfile("MAIN"), "applied")
+	check(profileTest .. ", onto the bars", bars[11] and bars[11].id, 5221)
+	check(profileTest .. ", and undo takes it off", PlanTab.undoBars() and bars[11], nil)
+	check(profileTest .. ", an unknown name loads nothing", PlanTab.loadProfile("Nope"), "none")
+	PlanTab.barsCommand("save Two Words")
+	check(profileTest .. ", the command takes a name with spaces", PlanTab.findProfile("two words"), "Two Words")
+	PlanTab.barsCommand("save build")
+	check(profileTest .. ", \"save build\" is still the build's layout", PlanTab.findProfile("build"), nil)
+	check(profileTest .. ", listed", PlanTab.listProfiles(), 2)
+	check(profileTest .. ", deleted by name", PlanTab.deleteProfile("main") and PlanTab.findProfile("Main"), nil)
+	db().barProfiles = keptProfiles
 
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]
