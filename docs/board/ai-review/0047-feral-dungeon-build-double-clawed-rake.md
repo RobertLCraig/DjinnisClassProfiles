@@ -163,6 +163,66 @@ Security:
 
 `--check` exits 0. `offline-check.lua` shows no FAIL lines under both Luas.
 
+**2026-09-24** Re-review of `b84b841`, the fixes for the four findings above. **Verdict: `b84b841`
+is clean, but the card stays in `ai-review/`.** While this pass ran, at 00:23, uncommitted changes
+appeared in `DjinnisBiS.lua` and `update-builds.py`. They replace the string reviewed here (see the
+end of this comment). Every check below ran on a clean tree at `b84b841` and finished by 00:22:43.
+
+Finding 1 holds: the right row, and the description now matches it.
+- Rob's pasted page: the first `exportCode` sits under "Recommended Feral Druid Talent Tree Build"
+  (Spec & Hero Popularity 39.5%, 2,600 runs). Within that build it is the "Recommended Class
+  Tree" alternative (64.7%). It matches the `PIN` string character for character. The next three
+  codes are Alternative Class Trees #1 to #3 (8.3%, 6.3%, 2.6%).
+- wowvalor, fetched with `curl` today: Lycara's Inspiration 50 of 50, Ursine Vigor 41, Innervate 6,
+  Forestwalk 1. That is 100%, 82%, 12% and 2%, as claimed. Double-Clawed Rake is 47 of 50 and
+  Tireless Energy 3.
+- The `PIN` comment and step 2 name all three swaps. The message on `a8ddeb1` stays wrong, and the
+  builder's comment above says so.
+
+Finding 2 holds. On copies in `$TEMP`, under `--check`, a write, and `-O --check`: `"feral"`
+exits 1 ("PIN names a spec SPEC_ID does not: ['feral']"). `"Feral "` with a broken string, which
+used to exit 0, now exits 1 with the same message. The Lua is untouched in both cases.
+
+Finding 3 holds. `/djbis talents` prints "(plan)", `BUILD_SOURCE` names `PIN`, and the Python and
+Lua copies of that line match. No test or doc expects "(Dreamgrove)". Not blocking:
+- Two comments still call every build Dreamgrove's: the block header at `DjinnisBiS.lua` line 514
+  and the `BOSSES` header at line 568 ("The loadout is Dreamgrove's build for that boss"). So does
+  the `update-builds.py` docstring.
+- "(plan)" prints just under the gear-plan cell rows, which print "(st)", "(2t)" and so on, so it
+  can read as "from the gear plan". "(stored)" would not.
+
+Finding 4 holds. A `PICK` name, a quote, and a 34-letter name each exit 1 with a `sys.exit`
+message and no traceback, and they do the same under `-O`. A 29-letter name is written, as it
+should be. The `PICK` loop's own `assert` (line 168) predates this card and guards constant names,
+so I have not raised it.
+
+Newly broken: nothing in code. `PYTHONDONTWRITEBYTECODE=1 python update-builds.py --check` exits
+0 and leaves no `__pycache__`. `offline-check.lua` prints "no FAIL lines" under Lua 5.1.5 and
+5.4.6. A broken pinned string still exits 1. That settles acceptance 2's `proves:`, but I have not
+ticked it: the uncommitted change replaces the string it covers. One doc slip: `docs/HANDOVER.md`
+line 219 says v0.39.5 was "deployed 2026-09-23". The game folder's copy is byte-identical to
+`b84b841` and was written at 00:19 on 2026-09-24. I have not fixed it, because the uncommitted
+work will move that line again.
+
+Step 4 (look at it in a browser) does not apply. There is no game client, and the only UI effect
+is a stored talent string and one label in `/djbis talents`. The in-game check stays with Rob,
+below.
+
+Security, for the fixes:
+1. **Weakest point:** unchanged. The points check is the only guard on a pasted string, so a string
+   with the right counts and the wrong talents still passes. Finding 1 was settled against the
+   source page, not by the tool.
+2. **Unchecked:** `PIN`'s spec keys are checked now. Nothing else new takes input.
+3. **Leaks:** nothing. The new messages print a spec key or a loadout name.
+
+**Why the card does not move.** At 00:23:05 and 00:23:19 another session changed `update-builds.py`
+and `DjinnisBiS.lua` and did not commit. It pins a `Dungeon` build from "Archon M+ +7 to +21 #1"
+for all four specs. That drops `Elune's Chosen M+`, `Razeless` and `M+ #HealersHeal` from `PICK`,
+turns Resto's "Dungeon: heal only" into "Dungeon", and gives Feral a different string from the one
+reviewed here. None of it is reviewed, and the step 2 pass line below may not hold for it. Moving
+the card to `human-review/` would hand Rob an unreviewed build. Next: when that work is committed,
+review it on this card.
+
 ## What I need from you, now
 
 1. `/reload`. Open the talent window as Feral. Pass: the `Dungeon` row shows as not matching its
