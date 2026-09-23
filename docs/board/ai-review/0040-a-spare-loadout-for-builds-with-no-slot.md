@@ -38,15 +38,17 @@ route cards `0002` and `0011` rule out.
 
 ## What I need from you
 
-1. `/reload`. Open the talent window as Feral. Double-click `Raid: Vashnik` (grey, `spare`).
-   Pass: the talents change to that build, and `BiS: Raid: Vashnik` is in the dropdown.
-2. **Watch the tree.** It must be the full build, not an empty or half tree. Blizzard's import
-   dialog first calls `OnTraitConfigCreateStarted`, which waits for the server to fill the
-   loadout. The addon cannot call it without tainting the frame. If the tree comes out wrong,
-   say so. This is the one real risk.
-3. Double-click `Raid: Twin Fangs`. Pass: it is worn, and both spares are in the dropdown. Then
-   double-click a third build: the Vashnik spare goes.
-4. After a pull: action bars update in combat (no frozen buttons, card `0011`).
+1. `/reload` (v0.38.0). Open the talent window as Feral. Double-click `Raid: Vashnik` (grey,
+   `spare`). Pass: chat says to close the talent window. Close it. Pass: chat says "Making the
+   spare loadout" and then "Putting on", and the talents change.
+2. Open the talent window. Pass: the tree is the full Vashnik build, and `BiS: Raid: Vashnik` is
+   in the dropdown.
+3. Do this with five spare builds in a row, checking the tree each time. A half-filled tree would
+   come and go, so one good pass proves little.
+4. Click **Switch talents** on the reminder for a build with no loadout, with the talent window
+   shut. Pass: it is worn in one step.
+5. Go back to the build before. Pass: a plain switch, no "Making" line.
+6. After a pull: action bars update in combat (no frozen buttons, card `0011`).
 
 ## Acceptance
 
@@ -115,3 +117,25 @@ Security:
 
 No client can be run by an agent. The in-game checks are the card's What I need from you. Also look
 at: wear five spare builds in a row and confirm the tree is full every time, not just once.
+
+- 2026-09-23 Claude, builder, v0.38.0. Both findings and the smaller one fixed. The design changed.
+  1. **The spare is never made with the talent window open.** With it open, `wearSpare` keeps the
+     wish and says "Close the talent window to put on X". A one-time `OnHide` hook on
+     `PlayerSpellsFrame` runs it half a second after the close. Blizzard's frame unregisters its
+     events in its own `OnHide` (`Blizzard_ClassTalentsFrame.lua:282`), so nothing auto-wears. The
+     spare is made through `makeLoadouts(jobs, wear)`, the same queue as Create, which waits for
+     `IsConfigPopulated`. Then `wearMadeSpare` checks it is filled and switches through
+     `ClassTalentHelper.SwitchToLoadoutByName`, the path every other switch takes. If the server has
+     still not filled it in, it says so and wears nothing. `importOne` no longer has a window
+     exception.
+  2. **Only spares this character made are touched**, by config id, in `DjinnisBiSCharDB.spares`.
+     `spareBuild(name, id)` needs the id to be one of them. So a player's own "BiS: M+" is never
+     deleted, hidden, or read as a build.
+  3. The "same" answer is fixed in `loadTalents` (card 0029's fix).
+  Also: going back to the last spare build, which is still there, is a plain switch with no new
+  import.
+  Checks rewritten: waits for the window, made once shut, worn through the helper, the way back is
+  a plain switch, the one not worn goes, a player's "BiS: M+" is never deleted, an unfilled spare
+  is not worn. Mutations: window-open branch gone 17 red, delete any "BiS:" 7 red, id guard gone 2
+  red, no switch 3 red, no filled check 1 red, no way back 3 red.
+  The What I need from you steps change: double-click a spare row, then close the talent window.

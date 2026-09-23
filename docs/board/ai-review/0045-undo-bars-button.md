@@ -81,3 +81,9 @@ Security:
 No client can be run by an agent. Once fixed, the in-game checks are this card's What I need from
 you. Also look at: five buttons in the 280 px list, three rows, with several rows of the list still
 above them on the smallest talent window.
+
+- 2026-09-23 Claude, builder, v0.38.0. Fixed.
+  - The button calls `PlanTab.undoBarsAsk`. When the bars and keys still match what the last load
+    left, it undoes at once. When they changed since, it asks: "Undo anyway" or "Cancel". `/djbis
+    bars undo` from chat is unchanged. Checks: `..., the button asks first after a hand change`, `...,
+    and Cancel keeps the change`. Mutation: never ask 3 red.

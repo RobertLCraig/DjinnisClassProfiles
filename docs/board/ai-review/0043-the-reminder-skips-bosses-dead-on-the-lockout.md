@@ -79,3 +79,9 @@ Security:
 3. Leaks: nothing leaves the client.
 
 No client can be run by an agent. The in-game checks are the card's What I need from you.
+
+- 2026-09-23 Claude, builder, v0.38.0. Fixed.
+  - Both callers go through one function, `PlanTab.bossHere(spec, here)`.
+  - New checks stub `C_RaidLocks` and `GetInstanceInfo`: the lockout is asked as the journal asks
+    it (`2939/3445/15`), a boss dead on it reads dead, and `bossHere` skips it. Mutations: `bossHere`
+    without `bossDone` 1 red, the arguments swapped 3 red.

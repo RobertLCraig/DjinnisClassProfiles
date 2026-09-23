@@ -69,3 +69,8 @@ Security:
 
 No client can be run by an agent. The in-game checks are the card's What I need from you. Also look
 at: `/djbis tidy` with all slots full, once the fix lands.
+
+- 2026-09-23 Claude, builder, v0.38.0. Fixed.
+  - `loadoutFence(anySlots)` skips the slot count. `tidy` passes true, so it runs at the cap. Check:
+    `tidy removes only ..., even with every slot used`. Putting the old fence back: 1 red.
+  - `freeLoadoutSlots` stops at a spec id of 0 too.

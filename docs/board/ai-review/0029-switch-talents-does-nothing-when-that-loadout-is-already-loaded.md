@@ -39,7 +39,7 @@ answers it.
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [x] WHEN the asked-for loadout is the one already selected, THE ADDON SHALL not ask the helper, and SHALL open the talent window and say in chat that the build must be saved over it. proves: `talents button says so when that loadout is loaded already`
+- [x] WHEN the asked-for loadout is the one already selected and its build moved, THE ADDON SHALL not ask the helper, and SHALL open the talent window and point at Reset to plan in chat. WHEN its build did not move, THE ADDON SHALL only say it is on already. proves: `talents button says so when that loadout is loaded already`, `..., unmoved it is on already`
 - [x] WHEN the popup's loadout is the row's own name with the wrong build, THE ADDON SHALL label the button "Fix talents", not "Switch talents". proves: `the row's own loadout with the wrong build is not a switch, the button says Fix talents`
 - [x] WHEN that is the case, THE ADDON SHALL say on the line that the build is not the one simmed, instead of "planned X, now X (edited)". proves: `the row's own loadout with the wrong build is not a switch, the line says the build is not the one simmed`
 - [x] WHEN Rob types `/djbis talents`, THE ADDON SHALL print the build in play and every planned build of the spec, each marked same, different or cannot compare. proves: run in a client 2026-09-22, three lines, both cells marked `different`
@@ -56,16 +56,18 @@ answers it.
 
 ## What I need from you
 
-1. `/reload` (the game folder holds v0.24.2), then walk into a dungeon on Feral so the popup comes
-   back. The talents line should read `WS M+ is loaded, but its build is not the one simmed` and
-   the button should say **Fix talents**.
-2. Click it. The talent window should open and one gold chat line should say to import the planned
-   build and save it over "WS M+". Nothing else should happen.
+1. `/reload` (the game folder holds v0.38.0). On Feral, select `Dungeon`, move one talent and
+   click Apply, then walk into a dungeon. The talents line should read `Dungeon is loaded, but its
+   build is not the one simmed` and the button should say **Fix talents**.
+2. Click it. The talent window should open and one gold chat line should point at
+   `/djbis loadouts` and Reset to plan. Nothing else should happen.
+2a. Put the talent back. Click the Plan tab's **Talents** button on that loadout. Chat should say
+   it is on already, and nothing about Reset.
 3. ~~`/djbis talents`~~ **Done, 2026-09-22.** Answered card `0014` item 4: the saved loadout has
    really drifted. Same 25-character header and same first 58 characters as the plan's `WS M+`,
    then divergent, 118 characters against 117. The mark is true and the baked string is fine.
    Rob's own fix is to delete the saved `WS M+` and import the plan's string under that name.
-4. With a genuinely wrong loadout loaded (say "DotC Raid ST *" in a key), the popup should still
+4. With a genuinely wrong loadout loaded (say `Raid: Nek'Zali` in a key), the popup should still
    say **Switch talents** and that button should still work.
 
 ## Comments
@@ -136,3 +138,14 @@ answers it.
 
   **Not checked in a client.** No agent can run the game. A person still owes the rewritten steps
   above in a dungeon, including the Fix talents click and a genuine Switch talents.
+
+- 2026-09-23 Claude, builder, v0.38.0. All three findings fixed.
+  1. `loadTalents` reads `edited` from `activeLoadoutName(playerSpec())`. An unmoved loadout answers
+     `"on"` and says it is on already. The drift line needs `edited`. It also needs the selected
+     config to be that name's own loadout: when the spare wears the build and the build has its own
+     loadout, the helper switches to it. New checks: `..., unmoved it is on already`, `..., and says
+     nothing of Reset`, `..., the build's own loadout is switched to past the spare`. Mutations: no
+     unmoved guard 3 red, `selectedIt` always true 1 red.
+  2. Criterion 1 reworded to the current behaviour.
+  3. Steps rewritten for `Dungeon` at v0.38.0, with the added Talents button step (2a).
+  Also: the comment above `loadTalents` no longer says the file writes nothing to `C_ClassTalents`.
