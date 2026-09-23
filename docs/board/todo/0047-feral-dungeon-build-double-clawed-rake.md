@@ -253,6 +253,105 @@ all the other specs too".
 - The re-review's three wording notes are fixed: the two comments and the docstring now name the
   pins, and the `/djbis talents` label reads "(stored build)".
 
+**2026-09-24** Adversarial review of `dabbba2` (v0.40.0, all four specs). **Verdict: findings, back
+to `todo/`.** Every string is sound and every guard holds. What fails is the description of two of
+the four strings, a comment that regressed, and two small gaps around the Resto rename.
+
+What held:
+- `PYTHONDONTWRITEBYTECODE=1 python update-builds.py --check` exits 0 ("BUILDS block already
+  current") and leaves no `__pycache__`. The first run timed out on the Raidbots handshake, and the
+  retry passed. `offline-check.lua` prints "no FAIL lines" under Lua 5.1.5 and 5.4.6.
+- Each pinned string decodes, with `update-builds.py`'s `Bits` and `points` and Raidbots'
+  `talents.json`, to version 2, its own spec (102, 103, 104, 105) and 34/34/13 points. Guardian's
+  live hero tree is Elune's Chosen. The other three keep theirs.
+- Rob's three Archon pages: the builder's claim is right. Each renders its own spec ("Balance
+  Druid" and so on, 11 times each), but all 9 embedded `exportCode`s on each page begin `CcGA`,
+  which is spec 103, and `totalParses` is 2600 on all three. That is the Feral High Keys page's
+  payload. The rendered numbers match the `PIN` comments: Balance Elune's Chosen 98.7% of 110,634,
+  Guardian Elune's Chosen 99.2% of 177,831, Resto Wildstalker 88.0% of 78,289.
+- The GENERATED block holds the four `PIN` strings character for character. The game folder's
+  `DjinnisBiS.lua` and `.toc` are byte-identical to `dabbba2`.
+- Mutations of a copy in `$TEMP`, never the repo:
+  - Resto's pin with 3 characters broken, Guardian's pin holding Resto's string, Balance's
+    truncated by 10: each exits 1 with a points or spec message, and the Lua is not written.
+  - Resto's pin renamed to `Dungeon: cat damage`, and Guardian `"Razeless": ["Dungeon"]` put back
+    in `PICK`: each exits 1 ("already a PICK name").
+  - Balance's `PIN` entry deleted: `--check` exits 1. See finding 4 for the write run.
+- The attack on the rename. Nothing in `DjinnisBiS.lua` still expects "Dungeon: heal only",
+  "Razeless", "Elune's Chosen M+" or "M+ #HealersHeal". Guardian and Resto have no `BOSSES` rows,
+  and neither has a gear-plan cell, so `setupSteps` offers them no loadout at all. The prompt
+  checks at lines 10112 to 10216 name only Feral's `Dungeon`. Their Healer case checks the change
+  to Resto, and no loadout. The only Guardian check that names builds, line
+  8324, expects "Dungeon; Dungeon: survive more" and passes. `offline-check.lua` names none of
+  them. The "M+ Razeless" and "M+ HealersHeal" in `RETIRED` are DjinnisDreamgrove 0.6.0's names,
+  not these.
+- Row order is not a problem. `PlanTab.BUILDS` is a hash, and its readers sort (`sidebarList` at
+  line 5919, `loadoutGaps` at 6459) or do not care (`sayTalents`). `--check` compares text, and
+  the generator is deterministic (`SPEC_ID` order, then `PICK`, then `PIN`), so the order cannot
+  make a false "out of date".
+- Balance's "against" list is exact, to the rank. So is Feral's against the High Keys pin (Convoke
+  and Hunger for Battle for Incarnation and Ashamane's Guidance). Neither hero tree changed.
+
+**Finding 1 (wording): the Guardian and Resto "against" lists are wrong.** Decoded node by node
+against `Razeless` and `M+ #HealersHeal` from today's compendiums, live hero tree only, by rank:
+- Guardian, class and spec trees: the pin adds Matted Fur 1 to 2, Perfectly-Honed Instincts and
+  Fury of Nature 2. That is 4 points. It drops **Fluid Form, Instincts of the Claw, Harnessed Rage
+  and Killing Blow**, which the list leaves out. Moondust is not a class or spec talent: it is
+  node 94597 in the Elune's Chosen hero tree.
+- Resto: the list is right except that it leaves out **Forestwalk 1 to 2**. The adds come to 9
+  points and the drops to 9, and the list has 8 adds.
+The same mistake was finding 1 of the first pass. Rob's step 2 does not use these lists, so it does
+not break his check, but the card is the only record of what each string changed.
+
+**Finding 2 (wording, a regression): the Feral `PIN` comment names 1 of 5 swaps.** It says
+"replaced "DOTC": Double-Clawed Rake, not Tireless Energy". Against `DOTC` the string now makes five:
+Double-Clawed Rake for Tireless Energy, Lycara's Inspiration for Forestwalk, Ursine Vigor for
+Innervate, Convoke for Incarnation, and Hunger for Battle for Ashamane's Guidance. `b84b841`
+named the first three, and this commit dropped them.
+
+**Finding 3 (minor, code): "Dungeon: heal only" is not in `PlanTab.RETIRED`.** The addon made that
+loadout, but now it lists under Your loadouts, as if Rob had made it. `/djbis tidy` will not remove
+it, and it takes a loadout slot from the new "Dungeon". Every rename before this one went into
+`RETIRED`, for example Balance's per-boss names. Adding it is one entry. No live build has that
+name, so `tidy`'s live-name guard is not a problem. Step 3 below then becomes `/djbis tidy`.
+
+**Finding 4 (minor, guard): nothing stops Resto's `Dungeon` from vanishing.** Deleting a spec's
+`PIN` entry and running without `--check` exits 0 ("BUILDS block written") and removes that spec's
+`Dungeon`. The harness catches it for Balance and Feral ("every boss row has a stored build") and
+for Guardian (the sidebar check at 8324). It does not catch it for Resto: with Resto's `Dungeon` row
+deleted, renamed back to "Dungeon: heal only", or holding Guardian's string, `offline-check.lua`
+prints "no FAIL lines" under both Luas. Acceptance 2 promises a `Dungeon` for each spec. The fix
+is one line in `block()`: stop when a spec has no `Dungeon` after `PICK` and `PIN`.
+
+Not findings. These are for Rob, because the card's title says "the one players run":
+- **Feral**: this string differs from Archon's High Keys #1 (the old pin) on 2 nodes, and on both
+  it is the minority choice among wowvalor's top 50 M+ Feral players: Convoke 19 and Incarnation
+  31, Hunger for Battle 17 and Ashamane's Guidance 31. The same string is an alternative in the High
+  Keys page's own `exportCode` list. Double-Clawed Rake, the card's reason, is 47 of 50.
+- **Resto**: wowvalor's top 50 agree with 10 of the 18 point moves. Archon's Top 100 tree (rendered
+  on Rob's Resto page, which is the right spec) shows the same split. The pin takes Swipe (27.4%
+  of the top 100, 11 of 50 on wowvalor), Grievous Wounds (43.6%, 17), Nature's Bounty (25.5%, 6)
+  and Regenerative Heartwood (27.2%, 6). It leaves out Nurturing Dormancy (68.8%, 33). Rake and Rip
+  are 23 of 50. The +7 to +21 pick is the most-run build, and not what the top players run. It is
+  also why "heal only" was renamed.
+- **Balance** agrees with wowvalor on all 11 point moves, and **Guardian** on all 33.
+- Guardian's "Dungeon: survive more" is still Dreamgrove's `Razeless sustain`, a Druid of the
+  Claw build, while "Dungeon" is now Elune's Chosen. The name suggests a variant of the same build.
+
+Step 4 (look at it in a browser) does not apply. There is no browser and no game client. The only
+UI effects are four stored talent strings, one renamed loadout (Resto "Dungeon: heal only" to
+"Dungeon") and one label in `/djbis talents` ("(stored build)"). The in-game check stays with Rob,
+below.
+
+Security:
+1. **Weakest point:** unchanged. The points check is the only guard on a pasted string. Three of the
+   four strings could not be checked against Archon's own export, because the pages embed Feral's.
+   They were checked against the rendered hero-tree share, Archon's Top 100 tree and wowvalor.
+2. **Unchecked:** that each spec keeps a `Dungeon` (finding 4). The fetches trust the network as
+   before, and this is author tooling that never ships.
+3. **Leaks:** nothing. Messages print a spec id, point counts or a loadout name. The strings are
+   public.
+
 ## What I need from you, now
 
 For each spec, Balance, Feral, Guardian and Resto:
