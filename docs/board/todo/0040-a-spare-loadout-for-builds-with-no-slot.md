@@ -139,3 +139,96 @@ at: wear five spare builds in a row and confirm the tree is full every time, not
   is not worn. Mutations: window-open branch gone 17 red, delete any "BiS:" 7 red, id guard gone 2
   red, no switch 3 red, no filled check 1 red, no way back 3 red.
   The What I need from you steps change: double-click a spare row, then close the talent window.
+
+**2026-09-23** Second adversarial review of b5530b3 (v0.38.0). Bounced to todo: three defects,
+two smaller ones, and a set of untested lines.
+
+The first review's findings are fixed as written. The spare is made with the window shut, through
+the queue, and worn through `ClassTalentHelper`. Only ids in `DjinnisBiSCharDB.spares` are deleted
+or hidden. The "same" misfire is gone. What follows is new, and each one was run in a temp copy
+with probe checks added to `loadoutChecks`.
+
+**Finding 1: a wish kept for the window's close overrides what the player chose after it.**
+Double-click a grey row with the window open. `wearSpare` keeps `PlanTab.spareWanted`
+(`DjinnisBiS.lua:6557`). Then double-click a build that has its own loadout. `loadTalents` switches
+to it at once (3969) and never clears the wish. Close the window. `spareOnHide` (6527) makes and
+wears the old spare, over the build the player picked last. On the way it deletes this
+character's other spare. Probe: calls `delete BiS: Raid: Sszorak|import BiS: Raid: Vashnik`,
+helper asked for `Raid: Nek'Zali` then `BiS: Raid: Vashnik`. The same holds after a spec change
+in the open window: the old spec's build is then imported for the new spec and fails aloud after
+the queue's wait. Fix: any later `loadTalents`, and a spec change, clears `spareWanted`.
+
+**Finding 2: a "BiS: X" this character does not own gets a twin.** Spares made by v0.36.0 to
+v0.37.1 were never recorded, so they are now "your own". The same happens to a player's loadout
+named exactly `BiS: <a planned build>`. Wearing X then:
+- skips "same" and the plain switch, because the id is not ours (6543, 6549)
+- imports a second `BiS: X`. Probe: two loadouts of that name.
+- `wearMadeSpare` records whichever id `savedLoadoutNames` keeps last (6638).
+- `SwitchToLoadoutByName` loads "the first one found" by name (`ClassTalentHelper.lua`), which
+  can be the old one. If that was a half-filled v0.36 spare, the tree is wrong again.
+The loadout left over is never deleted and holds a slot for good. Fix: if the spare name is
+already held by an id that is not ours, say so and make nothing, or adopt it once after checking
+its string matches the build. Also take the new id from `q.pendingID`, which
+`TRAIT_CONFIG_CREATED` gives (6848), not from a name lookup.
+
+**Finding 3: a spare that is made but not listed yet fails silently and is lost.** `wearMadeSpare`
+(6638) needs the new name in `savedLoadoutNames()`. If the list lags the import, it answers
+"failed". The comment says "stepLoadouts said why", but the import succeeded, so nothing was said.
+The id is never recorded. The spare then shows as the player's own and is never deleted. Probe:
+`wearMadeSpare({ wear = "Raid: Nymrissa", made = 1 })` answered "failed" and printed nothing. The
+code already believes the list can lag ("the list can lag a delete", 6568). The `q.pendingID` fix
+above covers this too.
+
+**Smaller.**
+- Combat while the queue waits: `wearMadeSpare` asks the helper with no `InCombatLockdown`
+  check and says "Putting on". Probe: helper asked in combat. Blizzard will refuse, so the line is
+  false.
+- Combat when the window closes: `spareOnHide` then `wearSpare` answer "combat" (6537) and say
+  nothing. The wish is gone. The player was told closing would wear it.
+
+**Untested (0 red under mutation, both harnesses):**
+- no `HookScript` at all (6560). The harness frame has no `HookScript`, so the hook line never runs
+  and the close-resumes design has no offline proof.
+- `spareOnHide` keeps the wish (6530), so every later close wears it again.
+- no half-second delay (6532).
+- `mine[worn]` dropped from "same" (6543) or from the plain switch (6549). Finding 2's route.
+- the plain switch skips `IsConfigPopulated` (6551).
+- a delete does not forget the id (6566).
+- `wearMadeSpare` without `q.made == 1` (6638). A failed import can then record and wear an old
+  "BiS: X".
+- `importOne` without its window guard (6585). That guard is the only thing stopping a retry while
+  the window is open again.
+- `activeLoadoutName` reading any "BiS: " name as a build (4637). The player's own "BiS: M+"
+  selected would read as a build "M+".
+Tested and red: the id not recorded, 5 red. `finishLoadouts` never wears, 6 red.
+
+**Blizzard source read.** `ClassTalentsFrameMixin:OnHide` (`Blizzard_ClassTalentsFrame.lua:277`)
+is the talents TAB's hide. It unregisters `TRAIT_CONFIG_CREATED`, `TRAIT_CONFIG_LIST_UPDATED` and
+`TRAIT_CONFIG_DELETED`. The hook is on `PlayerSpellsFrame`, the whole window. So:
+- Switching to the Spellbook tab does not fire the hook. The wish waits for the close. That is
+  safe, because the talents tab's events are already off.
+- Reopening the window while the queue runs registers the events again (`OnShow`, :142). If
+  `TRAIT_CONFIG_CREATED` arrives then, Blizzard wears the new config with no populated check
+  (:303-310). That is the first review's risk, narrowed to the server's round trip.
+- `SwitchToLoadoutByName` with the frame not loaded is fine: the event handler calls
+  `PlayerSpellsFrame_LoadUI` first (`ClassTalentHelper.lua`).
+- **Look at this in game.** With the window shut, the frame's name list (`configIDToName`,
+  :777) is only refreshed by `TRAIT_CONFIG_UPDATED`, the one event registered for good
+  (`Blizzard_SharedTalentFrame.lua:186`). If the new spare's `TRAIT_CONFIG_UPDATED` does not come
+  before `wearMadeSpare`, `LoadConfigByName` does not know the name and shows "invalid config"
+  (:1747). The addon still says "Putting on".
+
+**Security.**
+1. Weakest point: the name. `SwitchToLoadoutByName` and `savedLoadoutNames` both work by name, and
+   the player owns the names. Finding 2 is how a twin name makes the addon record and wear the wrong
+   loadout.
+2. Unchecked: the saved wish (finding 1) is acted on later with no check that it is still wanted.
+   `DjinnisBiSCharDB.spares` is never pruned of ids deleted by hand. Config ids are server ids and
+   not known to be reused, so a stale id matching a player's loadout is unlikely but not ruled out.
+   A prune of ids in no spec's list would close it.
+3. Leaks: nothing leaves the client. Failures print the build name and the game's reason.
+
+No client can be run by an agent. Once fixed, a person owes What I need from you 1 to 6, plus:
+- double-click a grey row, then a real loadout, then close. Pass: the real loadout stays on.
+- after step 1, no red "invalid config" message and the talents really change.
+- with an old v0.36 "BiS: X" in the dropdown, wear X. Pass: no second "BiS: X".
