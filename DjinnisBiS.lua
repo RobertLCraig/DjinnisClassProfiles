@@ -511,12 +511,69 @@ function PlanTab.rankState(kind, planned, worn)
 	return w[2] < p[2] and "lesser" or "ok"
 end
 
--- Which saved loadout and which gear scenario go with which boss. The hero tree
--- per boss is Dreamgrove's Feral compendium as updated 2026-09-18. The NAMES are
--- the loadouts DjinnisDreamgrove imported on 2026-09-02, because those are what
--- exist in the game to click. Dreamgrove's newer one-build-per-boss strings sim
--- about 1.5% over these and have no loadout yet; when DjinnisDreamgrove is
--- refreshed, change the names here to match.
+-- GENERATED, do not hand-edit. Rewritten by update-builds.py from Dreamgrove's
+-- four compendium pages: spec -> loadout name -> import string. The names say
+-- WHEN to pick the build (Rob, 2026-09-23), and are the ones DjinnisDreamgrove
+-- 0.7.0 imported, so a loadout made there is the same loadout here. Card 0030.
+-- BEGIN GENERATED BUILDS
+PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, read 2026-09-23"
+PlanTab.BUILDS = {
+	Balance = {
+		["Raid: Sszorak"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
+		["Raid: Vashnik"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
+		["Raid: Coiled Altar"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
+		["Raid: Twin Fangs"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA", -- Elune's Chosen - Cleave
+		["Raid: Lost Explorers"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA", -- Elune's Chosen - Cleave
+		["Raid: Entombed Sentinels"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA", -- Elune's Chosen - Cleave
+		["Raid: Nek'Zali"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWGbzYGbsMjxMzMzCGGgBYZbshpZmlRAAAA2MzMzMYzAjZAMzAADA", -- Keeper of the Grove - Cleave
+		["Raid: Nymrissa"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWGbzYGbsMjxMzMzCGGgBYZbshpZmlRAAAA2MzMzMYzAjZAMzAADA", -- Keeper of the Grove - Cleave
+		["Dungeon"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZswyMLjxMjNMAYstNzgxsNCMBAAAYhZmZGsZMjxAAwMDWGA", -- Elune's Chosen M+
+	},
+	Feral = {
+		["Raid: Nek'Zali"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALBDDjZG1MmlxMzMGzYAAAAAAYgBAAAAAY2mZpZbmlNwMDwiZGGAAzMAYA", -- Nekzali
+		["Raid: Entombed Sentinels"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMMmZmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxswMzMGzMAAAAAAYgBAAAQzsMLzMzACsAmZAWMzwAAAYmNMA", -- Entombed Sentinels
+		["Raid: Sszorak"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxsMzMzMGzYGAAAAAADMAAAAamlZZmZGAwCYmBYhBDAAgZ2wA", -- Sszorak
+		["Raid: Twin Fangs"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMmZ2WGmZZGzMmZAAAAYLYYYMzomxsMmZmZZMjBAAAAAgBGAAAAAgZbmlmlZ22AzMALmBDAgZGAMA", -- Twin Fangs
+		["Raid: Lost Explorers"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMGz2yYZsMzMzYmBAAAglgZDGzMqZMLzMzMjxMmBAAAAAAYAAAAEAMbzs0sMz2GYmBYxMYAAMzAgB", -- Lost Explorers
+		["Raid: Vashnik"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzG2mZZmZm5BmZAAAAYJY2gxMjaGzyMzMzYMjZAAAAAAAGAAAABAzyMLNLzssBmZAWMDGAAzMAYA", -- Vashnik
+		["Raid: Coiled Altar"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZm5BmZAAAAYJY2gxMjaGzCzMzYMzDMDAAAAAAwAAAAIAY2mZpZZmlNwMDwiZGGAAzMAYA", -- Coiled Altar
+		["Raid: Ula'tek"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Ulatek
+		["Raid: Nymrissa"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYLwmhxMjaGziZmZmlxMmBAAAAAAYAAAA0MLzyMzMgALgZGgFzgBAAwMbYA", -- Nymrissa (Lair)
+		["Dungeon"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzMzGzMzMGzmx2MLzYm5BmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAA0MLzyMzMgALgZGgFGMAAAmZDD", -- DOTC
+	},
+	Guardian = {
+		["Raid: Druid of the Claw"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxsYmZMzmZZgZbZgxMMaimZmlZmZmxYGzAAAAAYwMWmBAAAgamlZZmZGAALYGALmBDYxy2AgZ2gB", -- DotC Raid
+		["Raid: Elune's Chosen"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmhtZGjZ2MLzgxyAMzY0ENzMLmZmZWGzwAAAAAYwM2mBssNzgxsMAmCAAAshZMgFzgBsYZbAmZAM", -- EC Raid Default
+		["Dungeon"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxswMjZWMLzMmZZZgZzwoJamZWmZmZmlxMMAAAAAgZsZAAAAomZZWmZmBAwCm5BAWMDGwiFDAmZDG", -- Razeless
+		["Dungeon: survive more"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxswMjZWMLzMPwMLLDMbGGNRzMziZmZmlZm5BMAAAAAgZsYAAAAomZZWmZmBAwCmBwiZwAzCAgZ2gB", -- Razeless sustain
+	},
+	Resto = {
+		["Raid: short on mana"] = "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmNjNmBAAAAAAAAAALDa2MjpZGDPgZZmZmZY4BGAAAAAAAAYbbsgpZmlBAwsNzSz2Mb2YMzMMzAjmBAzMzMAMA", -- Raid w/ mana return
+		["Raid: mana is fine"] = "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmFjNmBAAAAAAAAAALQzmZMNzAjZZMzMzihHYAAAAAAAAgttxCmmZWGAAz2MLNbzsZjZmZGmZgRzAgZmZGAGA", -- Raid w/o mana return
+		["Dungeon: heal only"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsN8AMzsMjNbzAAAAAAAAAAgNDNbmx0MD8AmlxMzMLGeAAAAAAMAAGwyyYBTzMLDAgZbmtmtZWsxMzMwMMGNDAwMDADA", -- M+ #HealersHeal
+		["Dungeon: cat damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsN8AMzsMjNbzAAAAAAAAAAgtBNbGmmZMDmFzMzMLzwDYAAAAAAAwAWWGLYamZZAAMbzs1sNziNGzMwMLY0MAAzMAMA", -- M+ Cat DPS
+		["Dungeon: caster damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsNz8AwsMjNbzAAAAAAAAAAgNDNbzMmmZAmFmZmZxwDAAAAAgBAYGwyyYBTzMLDAgZbmtmtZWsxYmZwMbY0MAAzMAMA", -- M+ Caster DPS
+	},
+}
+-- END GENERATED BUILDS
+
+-- The stored build behind a loadout name: Dreamgrove's where it has one, else
+-- the gear plan cell simmed under that name. nil for a name nobody planned,
+-- which is judged by name alone. Pure, for /bis test.
+function PlanTab.buildFor(spec, name)
+	local build = spec and name and PlanTab.BUILDS[spec] and PlanTab.BUILDS[spec][name]
+	if build then return build end
+	for _, cell in pairs(spec and GEAR_PLAN[spec] or {}) do
+		if cell.loadout == name and type(cell.talents) == "string" and cell.talents ~= "" then return cell.talents end
+	end
+	return nil
+end
+
+-- Which saved loadout and which gear scenario go with which boss. The loadout
+-- is Dreamgrove's build for that boss, by the name in PlanTab.BUILDS (Rob,
+-- 2026-09-23: DjinnisDreamgrove merges into this addon, card 0030).
+-- Guardian and Resto have no rows: the guide gives one raid build per hero
+-- tree or per mana state, not one per boss, so which fits a boss is Rob's.
 -- `scenario` picks the gear plan cell: `st`, `2t`, `3t` (three or more) or
 -- `mplus`. A boss that is none of those cleanly takes `st`. No row says `3t`
 -- yet: that is a sim per spec, not a code change (card 0028).
@@ -527,20 +584,37 @@ end
 -- "Nek'zali the Soulcoiler", which is why the id is the thing to match on.
 PlanTab.BOSSES = {
 	Feral = {
-		{ boss = "Nek'zali",            id = 3470, scenario = "st", loadout = "WS Raid Most Bosses" },
-		{ boss = "Entombed Sentinels",  id = 3445, scenario = "st", loadout = "DotC Raid ST *" },
-		{ boss = "The Lost Explorers",  id = 3497, scenario = "2t", loadout = "WS Raid 2T *" },
-		{ boss = "Vashnik",             id = 3455, scenario = "st", loadout = "WS Raid Most Bosses" },
-		{ boss = "Sszorak",             id = 3420, scenario = "st", loadout = "DotC Raid ST *" },
-		{ boss = "The Twin Fangs",      id = 3421, scenario = "2t", loadout = "WS Raid 2T *" },
-		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "WS Raid Coiled Altar" },
-		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "WS Raid Most Bosses" },
+		{ boss = "Nek'zali",            id = 3470, scenario = "st", loadout = "Raid: Nek'Zali" },
+		{ boss = "Entombed Sentinels",  id = 3445, scenario = "st", loadout = "Raid: Entombed Sentinels" },
+		{ boss = "The Lost Explorers",  id = 3497, scenario = "2t", loadout = "Raid: Lost Explorers" },
+		{ boss = "Vashnik",             id = 3455, scenario = "st", loadout = "Raid: Vashnik" },
+		{ boss = "Sszorak",             id = 3420, scenario = "st", loadout = "Raid: Sszorak" },
+		{ boss = "The Twin Fangs",      id = 3421, scenario = "2t", loadout = "Raid: Twin Fangs" },
+		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "Raid: Coiled Altar" },
+		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "Raid: Ula'tek" },
 		-- a lair boss, not a raid one: her id is from BigWigs_MidnightLairs
-		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "st", loadout = "DotC Raid Most Bosses *" },
-		-- One Mythic+ loadout, not one per dungeon (card 0009). "WS M+" simmed
-		-- 214,785 against "DotC M+" 207,837 on two targets, 2026-09-21; a
-		-- dungeon-style sim should settle it, and none has run yet.
-		{ boss = "Mythic+, any key",   scenario = "mplus", loadout = "WS M+" },
+		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "st", loadout = "Raid: Nymrissa" },
+		-- One Mythic+ loadout, not one per dungeon (card 0009): Dreamgrove's,
+		-- a Druid of the Claw build. Rob's own sim on 2026-09-21 had "WS M+"
+		-- 214,785 over "DotC M+" 207,837 on two targets; a dungeon-style sim
+		-- should settle which, and none has run yet.
+		{ boss = "Mythic+, any key",   scenario = "mplus", loadout = "Dungeon" },
+	},
+	-- The scenario is the build's own: Dreamgrove's single target or cleave.
+	-- Balance has no gear plan yet, so it only labels the row.
+	Balance = {
+		{ boss = "Nek'zali",            id = 3470, scenario = "2t", loadout = "Raid: Nek'Zali" },
+		{ boss = "Entombed Sentinels",  id = 3445, scenario = "2t", loadout = "Raid: Entombed Sentinels" },
+		{ boss = "The Lost Explorers",  id = 3497, scenario = "2t", loadout = "Raid: Lost Explorers" },
+		{ boss = "Vashnik",             id = 3455, scenario = "st", loadout = "Raid: Vashnik" },
+		{ boss = "Sszorak",             id = 3420, scenario = "st", loadout = "Raid: Sszorak" },
+		{ boss = "The Twin Fangs",      id = 3421, scenario = "2t", loadout = "Raid: Twin Fangs" },
+		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "Raid: Coiled Altar" },
+		-- Ula'tek has no Balance build in the guide; the single target one is
+		-- the nearest. Uncertain, and Rob's to change.
+		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "Raid: Vashnik" },
+		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "2t", loadout = "Raid: Nymrissa" },
+		{ boss = "Mythic+, any key",   scenario = "mplus", loadout = "Dungeon" },
 	},
 }
 
@@ -4195,9 +4269,16 @@ end
 -- parts that differ. A spec with no plan cell has only the spec step. Pure.
 function PlanTab.setupSteps(spec, scenario, state)
 	local plan = gearPlanFor(spec, scenario)
+	-- The loadout is the first boss row's of the scenario (card 0030), so the
+	-- prompt and the Plan tab name the same build; the gear cell's simmed
+	-- name only where no row has the scenario.
+	local loadout = plan and plan.loadout
+	for _, row in ipairs(PlanTab.BOSSES[spec] or {}) do
+		if row.scenario == scenario then loadout = row.loadout; break end
+	end
 	local steps = {}
 	if state.spec ~= spec then steps.spec = spec end
-	if plan and plan.loadout and (steps.spec or state.loadout ~= plan.loadout) then steps.loadout = plan.loadout end
+	if plan and loadout and (steps.spec or state.loadout ~= loadout) then steps.loadout = loadout end
 	if plan and (steps.spec or not state.worn or #PlanTab.missingSlots(plan, state.worn) > 0) then
 		steps.set = PlanTab.setName(spec, scenario)
 	end
@@ -4473,12 +4554,11 @@ function PlanTab.talentsEdited(planned)
 end
 
 -- The saved loadout picked in the talent window, by name, or nil, and then
--- whether the talents have been edited away from the build planned for
--- `forSpec` and `scenario` (card 0014). The name alone is the last loadout
--- SELECTED, which a hand edit does not change. The cell's string is only the
--- plan for the loadout it was simmed under: a boss row on another loadout of
--- the same scenario has no planned build and is judged by name alone.
-function PlanTab.activeLoadoutName(forSpec, scenario)
+-- whether the talents have been edited away from the build stored for that
+-- name in `forSpec` (card 0014, PlanTab.buildFor). The name alone is the last
+-- loadout SELECTED, which a hand edit does not change. A name with no stored
+-- build is judged by name alone.
+function PlanTab.activeLoadoutName(forSpec)
 	local spec = C_SpecializationInfo
 	if not (spec and spec.GetSpecialization and C_ClassTalents and C_Traits) then return nil end
 	local ok, specID = pcall(spec.GetSpecializationInfo, spec.GetSpecialization())
@@ -4493,8 +4573,7 @@ function PlanTab.activeLoadoutName(forSpec, scenario)
 	local okInfo, info = pcall(C_Traits.GetConfigInfo, configID)
 	local name = okInfo and info and info.name
 	if not (name and canRead(name)) then return nil end
-	local planned, plannedFor = PlanTab.plannedTalents(forSpec, scenario)
-	return name, PlanTab.talentsEdited(plannedFor == name and planned or nil)
+	return name, PlanTab.talentsEdited(PlanTab.buildFor(forSpec, name))
 end
 
 -- /djbis talents: the build in play beside every planned build of the spec,
@@ -4518,6 +4597,12 @@ function PlanTab.sayTalents()
 				or (differs and ("|cffff2020different|r") or (GREEN .. "same|r"))
 			print(("%s%s|r %s(%s)|r %s: %s"):format(GOLD, cell.loadout or "?", GREY, scenario, verdict, cell.talents))
 		end
+	end
+	for name, build in pairs(PlanTab.BUILDS[spec] or {}) do
+		local differs = PlanTab.talentStringsDiffer(live, build)
+		local verdict = differs == nil and (GREY .. "cannot compare|r")
+			or (differs and ("|cffff2020different|r") or (GREEN .. "same|r"))
+		print(("%s%s|r %s(Dreamgrove)|r %s: %s"):format(GOLD, name, GREY, verdict, build))
 	end
 end
 
@@ -4573,9 +4658,7 @@ function PlanTab.simcAppend(profile)
 		end
 	end
 	local cells = {}
-	for _, cell in pairs(GEAR_PLAN[spec] or {}) do
-		if cell.loadout and cell.talents then cells[cell.loadout] = cell.talents end
-	end
+	for _, row in ipairs(bosses) do cells[row.loadout] = PlanTab.buildFor(spec, row.loadout) end
 	local lines, missing = PlanTab.simcLines(spec, bosses, saved, cells)
 	if #missing > 0 then
 		print(GOLD .. "Djinni's BiS|r " .. GREY .. "not saved in the game, so left out of the /simc export: |r"
@@ -4664,7 +4747,7 @@ function PlanTab.lines(forSpec)
 	if not bosses then
 		-- the strip under the character sheet says "Click for how", so say how
 		return {
-			{ text = ("%sNo boss plan for %s yet. Only Feral has one.|r"):format(GREY, spec or "this spec") },
+			{ text = ("%sNo boss plan for %s yet. Only Feral and Balance have one.|r"):format(GREY, spec or "this spec") },
 			{ text = GREY .. "For a gear plan: run a Raidbots Top Gear sim, then: .\\update-gear-plan.ps1 <report link> -Deploy|r" },
 		}
 	end
@@ -4697,16 +4780,14 @@ function PlanTab.lines(forSpec)
 		local colour = isPicked and LOADOUT_COLOUR[PlanTab.loadoutState(row.loadout, active, edited)] or GREY
 		local pulled
 		if pulls and row.id then
-			-- The planned string is the row's plan cell's own (Option A), and
-			-- only when the row's loadout is the one the cell was simmed under,
-			-- the same guard as activeLoadoutName; else the build is not judged.
+			-- The planned string is the one stored for the row's loadout
+			-- (Option A, PlanTab.buildFor); with none the build is not judged.
 			-- The pull's string is Hindsight's own encoder's, which it checks
 			-- against C_Traits.GenerateImportString at login and after every
 			-- client build (Encode.lua, VerifyEncoder). Until it says the two
 			-- agree, no string is compared (0023 review): another spec still is.
 			-- Not `planned`: that is the loot-spec id table two lines up.
-			local cellString, cellLoadout = PlanTab.plannedTalents(spec, row.scenario)
-			pulled = PlanTab.pullSpec(pulls, row.id, spec, HindsightDB.encoderOK == true and cellLoadout == row.loadout and cellString or nil)
+			pulled = PlanTab.pullSpec(pulls, row.id, spec, HindsightDB.encoderOK == true and PlanTab.buildFor(spec, row.loadout) or nil)
 		end
 		local best = row.id and PlanTab.bestLootSpec(PlanTab.POOL[row.id], planned, spec)
 		if isPicked then pickedBest = best end
@@ -6372,11 +6453,23 @@ local function selfTest()
 	for _, boss in ipairs(BOSS_ORDER) do
 		check(bossTest .. ", every raid boss is listed, " .. boss, planned[boss], true)
 	end
+	-- card 0030: a row's loadout name is a key into the generated builds, so a
+	-- typo in either is a row with no build and fails here
+	local buildTest = "every boss row has a stored build"
+	for spec, rows in pairs(PlanTab.BOSSES) do
+		for _, row in ipairs(rows) do
+			check(buildTest .. ", " .. spec .. " " .. row.boss, type(PlanTab.buildFor(spec, row.loadout)), "string")
+		end
+	end
+	check(buildTest .. ", Dreamgrove's before the gear cell", PlanTab.buildFor("Feral", "Raid: Sszorak"), PlanTab.BUILDS.Feral["Raid: Sszorak"])
+	check(buildTest .. ", the gear cell's for its own name", PlanTab.buildFor("Feral", GEAR_PLAN.Feral.st.loadout), GEAR_PLAN.Feral.st.talents)
+	check(buildTest .. ", nothing for a name nobody planned", PlanTab.buildFor("Feral", "Rob's own"), nil)
+	check(buildTest .. ", nothing without a spec", PlanTab.buildFor(nil, "Dungeon"), nil)
 
 	local flagTest = "loadout mismatch is flagged by name"
-	check(flagTest .. ", another loadout", PlanTab.loadoutState("WS Raid 2T *", "DotC Raid ST *"), "mismatch")
-	check(flagTest .. ", the same loadout", PlanTab.loadoutState("WS Raid 2T *", "WS Raid 2T *"), "match")
-	check(flagTest .. ", the game will not say", PlanTab.loadoutState("WS Raid 2T *", nil), "unknown")
+	check(flagTest .. ", another loadout", PlanTab.loadoutState("Raid: Twin Fangs", "DotC Raid ST *"), "mismatch")
+	check(flagTest .. ", the same loadout", PlanTab.loadoutState("Raid: Twin Fangs", "Raid: Twin Fangs"), "match")
+	check(flagTest .. ", the game will not say", PlanTab.loadoutState("Raid: Twin Fangs", nil), "unknown")
 
 	-- card 0014: the right name with the talents moved by hand is the wrong build
 	local editTest = "edited talents are marked"
@@ -6388,9 +6481,9 @@ local function selfTest()
 	check(editTest .. ", no active string", PlanTab.talentStringsDiffer(nil, aString), nil)
 	check(editTest .. ", no saved string", PlanTab.talentStringsDiffer(aString, false), nil)
 	check(editTest .. ", empty string", PlanTab.talentStringsDiffer("", aString), nil)
-	check(editTest .. ", same name still mismatches", PlanTab.loadoutState("WS Raid 2T *", "WS Raid 2T *", true), "mismatch")
-	check(sameTest .. ", same name matches", PlanTab.loadoutState("WS Raid 2T *", "WS Raid 2T *", false), "match")
-	check(editTest .. ", no loadout is still unknown", PlanTab.loadoutState("WS Raid 2T *", nil, true), "unknown")
+	check(editTest .. ", same name still mismatches", PlanTab.loadoutState("Raid: Twin Fangs", "Raid: Twin Fangs", true), "mismatch")
+	check(sameTest .. ", same name matches", PlanTab.loadoutState("Raid: Twin Fangs", "Raid: Twin Fangs", false), "match")
+	check(editTest .. ", no loadout is still unknown", PlanTab.loadoutState("Raid: Twin Fangs", nil, true), "unknown")
 	check(editTest .. ", another game build's string says nothing", PlanTab.talentStringsDiffer("X" .. aString:sub(2), aString), nil)
 
 	-- The planned build is the cell's own string (Option A), never the saved
@@ -6441,7 +6534,7 @@ local function selfTest()
 	check(combatTest .. ", reads again after", PlanTab.talentsEdited(aString), false)
 	check(combatTest .. ", and it was a read", reads, 1)
 	-- Through activeLoadoutName: the st cell was simmed on "DotC Raid ST *",
-	-- so on that loadout its string judges; on "WS Raid Most Bosses", also a
+	-- so on that loadout its string judges; on "Raid: Nek'Zali", also a
 	-- 1 target loadout, the cell is not the plan and only the name counts.
 	do
 		local wasStarter, wasSelected, wasInfo = C_ClassTalents.GetStarterBuildActive, C_ClassTalents.GetLastSelectedSavedConfigID, C_Traits.GetConfigInfo
@@ -6452,9 +6545,9 @@ local function selfTest()
 		activeString = bString
 		local name, edited = PlanTab.activeLoadoutName("Feral", "st")
 		check(editTest .. ", named and edited on the cell's loadout", name .. "/" .. tostring(edited), "DotC Raid ST */true")
-		loadout = "WS Raid Most Bosses"
+		loadout = "Raid: Nek'Zali"
 		name, edited = PlanTab.activeLoadoutName("Feral", "st")
-		check(noPlanTest .. ", another loadout of the scenario", name .. "/" .. tostring(edited), "WS Raid Most Bosses/nil")
+		check(noPlanTest .. ", another loadout of the scenario", name .. "/" .. tostring(edited), "Raid: Nek'Zali/nil")
 		C_ClassTalents.GetStarterBuildActive, C_ClassTalents.GetLastSelectedSavedConfigID, C_Traits.GetConfigInfo = wasStarter, wasSelected, wasInfo
 	end
 	C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString = wasActiveID, wasGenerate
@@ -6465,7 +6558,7 @@ local function selfTest()
 	local simcTest = "simc export carries each planned loadout"
 	local allSaved = {}
 	for _, row in ipairs(PlanTab.BOSSES.Feral) do allSaved[row.loadout] = true end
-	local ferals = { ["DotC Raid ST *"] = "AAAA", ["WS M+"] = "BBBB" }
+	local ferals = { ["Raid: Sszorak"] = "AAAA", ["Dungeon"] = "BBBB" }
 	local lines, missing = PlanTab.simcLines("Feral", PlanTab.BOSSES.Feral, allSaved, ferals)
 	local text = table.concat(lines, "\n")
 	check(simcTest .. ", a header", lines[1]:find("Feral", 1, true) ~= nil, true)
@@ -6477,14 +6570,14 @@ local function selfTest()
 	local missTest = "a missing loadout is left out and named"
 	local someSaved = {}
 	for name in pairs(allSaved) do someSaved[name] = true end
-	someSaved["WS Raid Coiled Altar"], someSaved["DotC Raid ST *"] = nil, nil
+	someSaved["Raid: Coiled Altar"], someSaved["Raid: Sszorak"] = nil, nil
 	lines, missing = PlanTab.simcLines("Feral", PlanTab.BOSSES.Feral, someSaved, ferals)
 	text = table.concat(lines, "\n")
-	check(missTest .. ", named once", table.concat(missing, ","), "WS Raid Coiled Altar")
+	check(missTest .. ", named once", table.concat(missing, ","), "Raid: Coiled Altar")
 	check(missTest .. ", no talents line for it", text:find("Coiled Altar (DBiS plan)", 1, true), nil)
 	check(missTest .. ", the plan's string stands in when it has one",
-		text:find("# Saved Loadout: DotC Raid ST * (DBiS plan)\n# talents=AAAA", 1, true) ~= nil, true)
-	check(missTest .. ", and that one is not named as missing", text:find("Saved Loadout: DotC", 1, true) ~= nil and #missing, 1)
+		text:find("# Saved Loadout: Raid: Sszorak (DBiS plan)\n# talents=AAAA", 1, true) ~= nil, true)
+	check(missTest .. ", and that one is not named as missing", text:find("Saved Loadout: Raid: Sszorak", 1, true) ~= nil and #missing, 1)
 	lines = PlanTab.simcLines("Feral", PlanTab.BOSSES.Feral, {}, {})
 	local stand = 0
 	for _, line in ipairs(lines) do if line:find("^# Saved Loadout") then stand = stand + 1 end end
@@ -6503,15 +6596,15 @@ local function selfTest()
 	local fake = { GetSimcProfile = function(self, a) return self.text .. tostring(a), nil end, text = profile }
 	LibStub = function(lib) return lib == "AceAddon-3.0" and { GetAddon = function(_, name) return name == "Simulationcraft" and fake or nil end } or nil end
 	C_ClassTalents.GetConfigIDsBySpecID = function() return { 1, 2 } end
-	C_Traits.GetConfigInfo = function(id) return { name = ({ "WS Raid Most Bosses", "DotC Raid ST *" })[id] } end
+	C_Traits.GetConfigInfo = function(id) return { name = ({ "Raid: Nek'Zali", "DotC Raid ST *" })[id] } end
 	check(hookTest .. ", armed through the Ace registry, not a global", PlanTab.armSimc(), true)
 	check(hookTest .. ", armed once", PlanTab.armSimc(), false)
 	local out, err = fake:GetSimcProfile("!")
 	check(hookTest .. ", the addon's own text survives, checksum last", out:sub(1, #profile + 1), profile .. "!")
 	check(hookTest .. ", the block follows the checksum line", out:find("# Checksum: ab12!\n# Djinni's BiS plan (Feral)", 1, true) ~= nil, true)
 	check(hookTest .. ", the arguments reach the addon", out:find("!", 1, true), #profile + 1)
-	check(hookTest .. ", saved names are read from the game", out:find("Saved Loadout: WS Raid Most Bosses (DBiS", 1, true), nil)
-	check(hookTest .. ", the plan's string for an unsaved one", out:find("# Saved Loadout: WS M+ (DBiS plan)\n# talents=" .. GEAR_PLAN.Feral.mplus.talents, 1, true) ~= nil, true)
+	check(hookTest .. ", saved names are read from the game", out:find("Saved Loadout: Raid: Nek'Zali (DBiS", 1, true), nil)
+	check(hookTest .. ", the plan's string for an unsaved one", out:find("# Saved Loadout: Dungeon (DBiS plan)\n# talents=" .. PlanTab.BUILDS.Feral.Dungeon, 1, true) ~= nil, true)
 	check(hookTest .. ", no error back", err, nil)
 	fake.GetSimcProfile = function() return nil, "boom" end
 	fake.DjinnisBiSWrapped = nil
@@ -6759,7 +6852,7 @@ local function selfTest()
 		PlayerSpellsUtil = { OpenToClassTalentsTab = function() opened = opened + 1 end }
 		local reads = {
 			GetConfigIDsBySpecID = function() return { 1, 2 } end,
-			GetConfigInfo = function(id) return { name = ({ "WS Raid 2T *", "DotC Raid ST *" })[id] } end,
+			GetConfigInfo = function(id) return { name = ({ "Raid: Twin Fangs", "DotC Raid ST *" })[id] } end,
 		}
 		-- an unknown key answers a function that does nothing, so a write call
 		-- from our code is reported by the "reads only" check, not by a crash
@@ -6772,7 +6865,7 @@ local function selfTest()
 			if line:find("|cffff0000FAIL|r", 1, true) then wasPrint(...) else printed[#printed + 1] = line end
 		end
 		InCombatLockdown = function() return true end
-		check("talents button does nothing in combat", PlanTab.loadTalents("WS Raid 2T *"), "combat")
+		check("talents button does nothing in combat", PlanTab.loadTalents("Raid: Twin Fangs"), "combat")
 		InCombatLockdown = wasCombat
 		check("talents button does nothing in combat, asks nothing", asked, nil)
 		check("talents button does nothing in combat, opens nothing", opened, 0)
@@ -6783,16 +6876,16 @@ local function selfTest()
 		check(missTest .. ", names the missing loadout", printed[1] and printed[1]:find("\"Not Saved\"", 1, true) ~= nil, true)
 		check(missTest .. ", in one line", #printed, 1)
 		local loadTest = "talents button loads a saved loadout through ClassTalentHelper"
-		check(loadTest, PlanTab.loadTalents("WS Raid 2T *"), "loaded")
-		check(loadTest .. ", by name", asked, "WS Raid 2T *")
+		check(loadTest, PlanTab.loadTalents("Raid: Twin Fangs"), "loaded")
+		check(loadTest .. ", by name", asked, "Raid: Twin Fangs")
 		check(loadTest .. ", without opening the window", opened, 1)
 		-- The loadout already loaded: the helper cannot change it, so the button
 		-- must say what will, rather than click and do nothing (Rob, 2026-09-22)
 		local sameTest = "talents button says so when that loadout is loaded already"
 		local wasActive = PlanTab.activeLoadoutName
-		PlanTab.activeLoadoutName = function() return "WS Raid 2T *" end
+		PlanTab.activeLoadoutName = function() return "Raid: Twin Fangs" end
 		printed, asked = {}, nil
-		check(sameTest, PlanTab.loadTalents("WS Raid 2T *"), "same")
+		check(sameTest, PlanTab.loadTalents("Raid: Twin Fangs"), "same")
 		check(sameTest .. ", asks the helper for nothing", asked, nil)
 		check(sameTest .. ", opens the window", opened, 2)
 		check(sameTest .. ", says to save the planned build over it", printed[1] and printed[1]:find("save it over", 1, true) ~= nil, true)
@@ -6817,7 +6910,7 @@ local function selfTest()
 			if line.button and line.button.label == "Talents" then line.button.onClick() end
 		end
 		PlanTab.boss = realBoss
-		check("drawn Talents button loads the picked boss's loadout", asked, "WS Raid 2T *")
+		check("drawn Talents button loads the picked boss's loadout", asked, "Raid: Twin Fangs")
 		ClassTalentHelper, PlayerSpellsUtil, C_ClassTalents, C_Traits, print, InCombatLockdown = wasHelper, wasUtil, wasTalents, wasTraits, wasPrint, wasCombat
 	end
 
@@ -7061,14 +7154,14 @@ local function selfTest()
 	-- feature that worked. The 0023 block draws with a pretend one.
 	local liveHindsightDB = HindsightDB
 	HindsightDB = nil
-	local wrong, right, unknown = drawn("DotC Raid ST *", false), drawn("WS Raid 2T *", false), drawn(nil)
-	local touched = drawn("WS Raid 2T *", true)
+	local wrong, right, unknown = drawn("DotC Raid ST *", false), drawn("Raid: Twin Fangs", false), drawn(nil)
+	local touched = drawn("Raid: Twin Fangs", true)
 	HindsightDB = liveHindsightDB
 	PlanTab.activeLoadoutName, PlanTab.boss = realActive, realBoss
-	check(editTest .. ", drawn after the name", touched:find("your loadout now: |r" .. WHITE .. "WS Raid 2T * (edited)|r", 1, true) ~= nil, true)
-	check(editTest .. ", drawn red on the same name", touched:find("|cffff2020WS Raid 2T *|r", 1, true) ~= nil, true)
-	check(editTest .. ", and told to reload it", touched:find("Click Talents to load \"WS Raid 2T *\"", 1, true) ~= nil, true)
-	check(sameTest .. ", drawn with nothing after", right:find("your loadout now: |r" .. WHITE .. "WS Raid 2T *|r", 1, true) ~= nil, true)
+	check(editTest .. ", drawn after the name", touched:find("your loadout now: |r" .. WHITE .. "Raid: Twin Fangs (edited)|r", 1, true) ~= nil, true)
+	check(editTest .. ", drawn red on the same name", touched:find("|cffff2020Raid: Twin Fangs|r", 1, true) ~= nil, true)
+	check(editTest .. ", and told to reload it", touched:find("Click Talents to load \"Raid: Twin Fangs\"", 1, true) ~= nil, true)
+	check(sameTest .. ", drawn with nothing after", right:find("your loadout now: |r" .. WHITE .. "Raid: Twin Fangs|r", 1, true) ~= nil, true)
 	check(sameTest .. ", not marked", right:find("(edited)", 1, true), nil)
 	check(sameTest .. ", unknown is not marked", unknown:find("(edited)", 1, true), nil)
 	for _, row in ipairs(PlanTab.BOSSES.Feral) do
@@ -7076,18 +7169,18 @@ local function selfTest()
 		check(bossTest .. ", drawn with loadout and scenario, " .. row.boss, wrong:find(
 			row.boss .. "|r   " .. colour .. row.loadout .. "|r   " .. GREY .. SCENARIO_LABEL[row.scenario], 1, true) ~= nil, true)
 	end
-	check(flagTest .. ", drawn red", wrong:find("|cffff2020WS Raid 2T *|r", 1, true) ~= nil, true)
-	check(flagTest .. ", and told to change it", wrong:find("Click Talents to load \"WS Raid 2T *\"", 1, true) ~= nil, true)
-	check(flagTest .. ", a match is drawn green", right:find("> The Twin Fangs|r   " .. GREEN .. "WS Raid 2T *|r", 1, true) ~= nil, true)
+	check(flagTest .. ", drawn red", wrong:find("|cffff2020Raid: Twin Fangs|r", 1, true) ~= nil, true)
+	check(flagTest .. ", and told to change it", wrong:find("Click Talents to load \"Raid: Twin Fangs\"", 1, true) ~= nil, true)
+	check(flagTest .. ", a match is drawn green", right:find("> The Twin Fangs|r   " .. GREEN .. "Raid: Twin Fangs|r", 1, true) ~= nil, true)
 	check(flagTest .. ", a match is not red", right:find("|cffff2020", 1, true), nil)
 	check(flagTest .. ", unknown is never red", unknown:find("|cffff2020", 1, true), nil)
 
 	-- Hindsight's last pull against the plan (card 0023), on a pretend
 	-- HindsightCharDB in its 1.8.9 shape: keys are the encounter id as a string.
-	-- The planned string is the plan cell's own (Option A): aString is the
-	-- Feral st cell's, simmed on "DotC Raid ST *", so only Entombed Sentinels
-	-- and Sszorak are judged by string; a row on another loadout of the
-	-- scenario, or a cell without a string, is not judged. The saved loadout
+	-- The planned string is the one stored for the row's loadout (Option A,
+	-- PlanTab.buildFor). The drawn part swaps in a builds table where only
+	-- Entombed Sentinels and Sszorak store aString, so only those two are
+	-- judged by string; a row with no stored build is not judged. The saved loadout
 	-- is never read: GenerateImportString is counted across every draw.
 	do
 		local pullTest = "boss row says the last pull used a different build"
@@ -7095,10 +7188,10 @@ local function selfTest()
 		local noneTest = "no error without hindsight or with a new layout"
 		local wasDB, wasChar, wasGen, reads = HindsightDB, HindsightCharDB, C_Traits.GenerateImportString, 0
 		local pulls = {
-			["3445"] = { specKey = "Druid:Feral", build = bString },              -- Entombed Sentinels, other build on the cell's loadout
+			["3445"] = { specKey = "Druid:Feral", build = bString },              -- Entombed Sentinels, other build than the stored one
 			["3420"] = { specKey = "Druid:Feral", build = aString },              -- Sszorak, the planned one
-			["3421"] = { specKey = "Druid:Feral", build = bString },              -- The Twin Fangs, the 2t cell has no string
-			["3470"] = { specKey = "Druid:Feral", build = bString },              -- Nek'zali, the row's loadout is not the cell's
+			["3421"] = { specKey = "Druid:Feral", build = bString },              -- The Twin Fangs, no stored build
+			["3470"] = { specKey = "Druid:Feral", build = bString },              -- Nek'zali, no stored build
 			["3429"] = { specKey = "Druid:Feral", build = "X" .. bString:sub(2) }, -- The Coiled Altar, another game build's header
 			["3455"] = { specKey = "Druid:Guardian" },                             -- Vashnik, other spec, no string
 			["3497"] = { specKey = "Druid:Feral" },                                -- The Lost Explorers, no string saved
@@ -7127,36 +7220,37 @@ local function selfTest()
 		check(noneTest .. ", pulls not a table", PlanTab.hindsightPulls(), nil)
 		HindsightDB, HindsightCharDB = { schema = 1, encoderOK = true }, { pulls = pulls }
 		check(pullTest .. ", schema 1 is read", PlanTab.hindsightPulls(), pulls)
-		-- as drawn: the planned string comes from GEAR_PLAN, nothing is stubbed
+		-- as drawn: the planned string comes from PlanTab.buildFor
 		C_Traits.GenerateImportString = function() reads = reads + 1 end
+		local realBuilds = PlanTab.BUILDS
+		PlanTab.BUILDS = { Feral = { ["Raid: Entombed Sentinels"] = aString, ["Raid: Sszorak"] = aString } }
 		PlanTab.boss = "Entombed Sentinels"
-		local drawnPulls = drawn("DotC Raid ST *", false)
+		local drawnPulls = drawn("Raid: Entombed Sentinels", false)
 		PlanTab.boss = "Vashnik"
-		local drawnOther = drawn("WS Raid Most Bosses", false)
+		local drawnOther = drawn("Raid: Vashnik", false)
 		HindsightDB = { schema = 2 }
-		local drawnNew = drawn("DotC Raid ST *", false)
+		local drawnNew = drawn("Raid: Entombed Sentinels", false)
 		-- Hindsight's encoder not yet verified against the game's: no string
 		-- compare, another spec still said (0023 review)
 		HindsightDB = { schema = 1 }
 		PlanTab.boss = "Entombed Sentinels"
-		local drawnUnverified = drawn("DotC Raid ST *", false)
-		-- the cell without a string: the st cell's taken away and put back
+		local drawnUnverified = drawn("Raid: Entombed Sentinels", false)
+		-- no stored build at all
 		HindsightDB = { schema = 1, encoderOK = true }
-		local was = GEAR_PLAN.Feral.st.talents
-		GEAR_PLAN.Feral.st.talents = nil
-		local drawnNoCell = drawn("DotC Raid ST *", false)
-		GEAR_PLAN.Feral.st.talents = was
+		PlanTab.BUILDS = { Feral = {} }
+		local drawnNoCell = drawn("Raid: Entombed Sentinels", false)
+		PlanTab.BUILDS = realBuilds
 		HindsightDB, HindsightCharDB, C_Traits.GenerateImportString = wasDB, wasChar, wasGen
 		PlanTab.activeLoadoutName, PlanTab.boss = realActive, realBoss
-		check(pullTest .. ", drawn red on the picked row", drawnPulls:find("> Entombed Sentinels|r   " .. GREEN .. "DotC Raid ST *|r   " .. GREY .. "1 target|r   |cffff2020last pull: other build, as Feral|r", 1, true) ~= nil, true)
-		check(pullTest .. ", drawn grey on another row", drawnPulls:find("Vashnik|r   " .. GREY .. "WS Raid Most Bosses|r   " .. GREY .. "1 target|r   " .. GREY .. "last pull: other build, as Guardian|r", 1, true) ~= nil, true)
+		check(pullTest .. ", drawn red on the picked row", drawnPulls:find("> Entombed Sentinels|r   " .. GREEN .. "Raid: Entombed Sentinels|r   " .. GREY .. "1 target|r   |cffff2020last pull: other build, as Feral|r", 1, true) ~= nil, true)
+		check(pullTest .. ", drawn grey on another row", drawnPulls:find("Vashnik|r   " .. GREY .. "Raid: Vashnik|r   " .. GREY .. "1 target|r   " .. GREY .. "last pull: other build, as Guardian|r", 1, true) ~= nil, true)
 		check(pullTest .. ", grey when not picked", drawnOther:find("|cffff2020last pull: other build, as Feral", 1, true), nil)
 		check(pullTest .. ", still said when not picked", drawnOther:find(GREY .. "last pull: other build, as Feral|r", 1, true) ~= nil, true)
-		check(sameTest2 .. ", drawn", drawnPulls:find("Sszorak|r   " .. GREY .. "DotC Raid ST *|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
-		check(sameTest2 .. ", no string saved, drawn", drawnPulls:find("The Lost Explorers|r   " .. GREY .. "WS Raid 2T *|r   " .. GREY .. "2 targets|r\n", 1, true) ~= nil, true)
-		check(sameTest2 .. ", the cell has no string, drawn", drawnPulls:find("The Twin Fangs|r   " .. GREY .. "WS Raid 2T *|r   " .. GREY .. "2 targets|r\n", 1, true) ~= nil, true)
-		check(sameTest2 .. ", the row's loadout is not the cell's, drawn", drawnPulls:find("Nek'zali|r   " .. GREY .. "WS Raid Most Bosses|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
-		check(sameTest2 .. ", another game build's header, drawn", drawnPulls:find("The Coiled Altar|r   " .. GREY .. "WS Raid Coiled Altar|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", drawn", drawnPulls:find("Sszorak|r   " .. GREY .. "Raid: Sszorak|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", no string saved, drawn", drawnPulls:find("The Lost Explorers|r   " .. GREY .. "Raid: Lost Explorers|r   " .. GREY .. "2 targets|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", the cell has no string, drawn", drawnPulls:find("The Twin Fangs|r   " .. GREY .. "Raid: Twin Fangs|r   " .. GREY .. "2 targets|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", the row's loadout is not the cell's, drawn", drawnPulls:find("Nek'zali|r   " .. GREY .. "Raid: Nek'Zali|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
+		check(sameTest2 .. ", another game build's header, drawn", drawnPulls:find("The Coiled Altar|r   " .. GREY .. "Raid: Coiled Altar|r   " .. GREY .. "1 target|r\n", 1, true) ~= nil, true)
 		check(sameTest2 .. ", the cell's string taken away, drawn", drawnNoCell:find("last pull: other build, as Feral", 1, true), nil)
 		check(pullTest .. ", the cell's string taken away, other spec still said", drawnNoCell:find("last pull: other build, as Guardian", 1, true) ~= nil, true)
 		check(sameTest2 .. ", the saved loadout is never read", reads, 0)
@@ -7495,7 +7589,7 @@ local function selfTest()
 		local wasLFG, wasSets, wasHelper, wasUtil, wasCombat, wasPrint, wasTimer = C_LFGList, C_EquipmentSet, ClassTalentHelper, PlayerSpellsUtil, InCombatLockdown, print, C_Timer
 		local wasSpecInfo, wasSpec, wasWornLink, wasLevel = C_SpecializationInfo.GetSpecializationInfo, C_SpecializationInfo.GetSpecialization, GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo
 		local wasPrompt, wasActive, wasLoad, wasPending = PlanTab.prompt, PlanTab.activeLoadoutName, PlanTab.loadTalents, PlanTab.pendingSetup
-		local role, mplus, active, current, bare = "HEALER", true, "WS M+", 2, nil
+		local role, mplus, active, current, bare = "HEALER", true, "Dungeon", 2, nil
 		local shown, asked, loaded, used, opened, printed = nil, nil, nil, nil, 0, {}
 		local specIDs = { 102, 103, 104, 105 }  -- Balance, Feral, Guardian, Resto in tab order
 		C_SpecializationInfo.GetSpecialization = function() return current end
@@ -7556,11 +7650,11 @@ local function selfTest()
 		check(fitTest .. ", no prompt", shown, nil)
 		active = "DotC Raid ST *"
 		steps = PlanTab.onAccepted(7, "inviteaccepted")
-		check(fitTest .. ", the loadout alone differs: only the loadout is offered", steps and steps.loadout, "WS M+")
+		check(fitTest .. ", the loadout alone differs: only the loadout is offered", steps and steps.loadout, "Dungeon")
 		check(fitTest .. ", the loadout alone differs: not the spec", steps and steps.spec, nil)
 		check(fitTest .. ", the loadout alone differs: not the set", steps and steps.set, nil)
-		check(fitTest .. ", the loadout alone differs: the prompt says which", said("Load loadout \"WS M+\""), true)
-		active, bare, shown = "WS M+", 1, nil
+		check(fitTest .. ", the loadout alone differs: the prompt says which", said("Load loadout \"Dungeon\""), true)
+		active, bare, shown = "Dungeon", 1, nil
 		steps = PlanTab.onAccepted(7, "inviteaccepted")
 		check(fitTest .. ", the gear alone differs: only the set is offered", steps and steps.set, "DBiS Feral M+")
 		check(fitTest .. ", the gear alone differs: not the loadout", steps and steps.loadout, nil)
@@ -7589,17 +7683,17 @@ local function selfTest()
 		check(stepTest .. ", a party member's spec change is not ours, really", asked, nil)
 		current = 2
 		check(stepTest .. ", the spec landing loads the loadout", PlanTab.onGroupEvent("PLAYER_SPECIALIZATION_CHANGED", "player"), "loadout")
-		check(stepTest .. ", the Feral Mythic+ loadout", loaded, "WS M+")
+		check(stepTest .. ", the Feral Mythic+ loadout", loaded, "Dungeon")
 		check(stepTest .. ", the loadout landing equips the set", PlanTab.onGroupEvent("TRAIT_CONFIG_UPDATED"), "set")
 		check(stepTest .. ", by its id", used, 5)
 		check(stepTest .. ", and nothing is pending after", PlanTab.pendingSetup, nil)
 		check(stepTest .. ", the next event does nothing", PlanTab.onGroupEvent("TRAIT_CONFIG_UPDATED"), nil)
 		-- landing on a spec other than the planned one is Rob choosing otherwise
-		PlanTab.pendingSetup = { spec = "Feral", loadout = "WS M+", set = "DBiS Feral M+", target = "Feral" }
+		PlanTab.pendingSetup = { spec = "Feral", loadout = "Dungeon", set = "DBiS Feral M+", target = "Feral" }
 		current = 4
 		check(stepTest .. ", landing on another spec abandons the setup", PlanTab.onGroupEvent("PLAYER_SPECIALIZATION_CHANGED", "player"), "abandoned")
 		check(stepTest .. ", landing on another spec abandons the setup, nothing pending", PlanTab.pendingSetup, nil)
-		check(stepTest .. ", landing on another spec abandons the setup, nothing loaded", loaded, "WS M+")
+		check(stepTest .. ", landing on another spec abandons the setup, nothing loaded", loaded, "Dungeon")
 		current = 2
 		-- a set nobody saved is said, not equipped
 		used = nil
@@ -7629,27 +7723,30 @@ local function selfTest()
 	-- beside the window needs a person; nothing here touches PlayerSpellsFrame.
 	do
 		local markTest = "sidebar marks the active loadout"
-		local raid = PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", "WS Raid 2T *", false)
+		local raid = PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", "Raid: Twin Fangs", false)
 		local names = {}
 		for i, r in ipairs(raid) do names[i] = r.loadout .. (r.mark and ("=" .. r.mark) or "") end
 		check(markTest .. ", raid rows, one per loadout, the active one marked", table.concat(names, "; "),
-			"WS Raid Most Bosses; DotC Raid ST *; WS Raid 2T *=active; WS Raid Coiled Altar; DotC Raid Most Bosses *")
-		check(markTest .. ", each with its bosses", table.concat((raid[1] or { bosses = {} }).bosses, ", "), "Nek'zali, Vashnik, Ula'tek")
-		local keys = PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "mplus", "WS M+", false)
-		check(markTest .. ", Mythic+ lists the key loadout only", #keys == 1 and (keys[1].loadout .. "=" .. tostring(keys[1].mark)), "WS M+=active")
+			"Raid: Nek'Zali; Raid: Entombed Sentinels; Raid: Lost Explorers; Raid: Vashnik; Raid: Sszorak; Raid: Twin Fangs=active; Raid: Coiled Altar; Raid: Ula'tek; Raid: Nymrissa")
+		check(markTest .. ", each with its bosses", table.concat((raid[1] or { bosses = {} }).bosses, ", "), "Nek'zali")
+		-- Balance's Ula'tek borrows Vashnik's build: one row, both bosses
+		local balance = PlanTab.sidebarRows(PlanTab.BOSSES.Balance, "raid", nil, false)
+		check(markTest .. ", a shared build is one row with both bosses", table.concat((balance[4] or { bosses = {} }).bosses, ", "), "Vashnik, Ula'tek")
+		local keys = PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "mplus", "Dungeon", false)
+		check(markTest .. ", Mythic+ lists the key loadout only", #keys == 1 and (keys[1].loadout .. "=" .. tostring(keys[1].mark)), "Dungeon=active")
 		-- `or {}`: a list drawn short is one red line here, not a nil-index error that ends the test
-		check(markTest .. ", the key loadout is not active in a raid list", (PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", "WS M+", false)[3] or {}).mark, nil)
-		check(markTest .. ", edited is said, not active", (PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", "WS Raid 2T *", true)[3] or {}).mark, "edited")
-		check(markTest .. ", unknown marks nothing", (PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", nil)[3] or {}).mark, nil)
+		check(markTest .. ", the key loadout is not active in a raid list", (PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", "Dungeon", false)[6] or {}).mark, nil)
+		check(markTest .. ", edited is said, not active", (PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", "Raid: Twin Fangs", true)[6] or {}).mark, "edited")
+		check(markTest .. ", unknown marks nothing", (PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "raid", nil)[6] or {}).mark, nil)
 		check(markTest .. ", no boss table, no rows", #PlanTab.sidebarRows(nil, "raid", nil), 0)
 		local none = { loadout = "" }
-		local text, apply = PlanTab.sidebarText(raid[3] or none)
-		check(markTest .. ", drawn green with the word", text, GREEN .. "WS Raid 2T *   active|r")
+		local text, apply = PlanTab.sidebarText(raid[6] or none)
+		check(markTest .. ", drawn green with the word", text, GREEN .. "Raid: Twin Fangs   active|r")
 		check(markTest .. ", the active row has no Apply", apply, false)
 		text, apply = PlanTab.sidebarText(raid[1] or none)
-		check(markTest .. ", drawn plain when not", text, WHITE .. "WS Raid Most Bosses|r")
+		check(markTest .. ", drawn plain when not", text, WHITE .. "Raid: Nek'Zali|r")
 		check(markTest .. ", with an Apply", apply, true)
-		text, apply = PlanTab.sidebarText({ loadout = "WS Raid 2T *", mark = "edited" })
+		text, apply = PlanTab.sidebarText({ loadout = "Raid: Twin Fangs", mark = "edited" })
 		check(markTest .. ", edited is amber and can be put back", text:find("edited", 1, true) ~= nil and apply, true)
 
 		local combatTest = "sidebar not changed in combat"
@@ -7793,7 +7890,7 @@ local function selfTest()
 		end
 		C_Item.GetDetailedItemLevelInfo = function(link) return ilvlById[tonumber(link:match("item:(%d+)"))] end
 		C_Container = nil  -- no bags: nothing to Equip until a check says so
-		local active, edited = "WS Raid Most Bosses", nil  -- Nek'zali's, the first raid row
+		local active, edited = "Raid: Nek'Zali", nil  -- Nek'zali's, the first raid row
 		PlanTab.activeLoadoutName = function() return active, edited end
 		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
 		local nek = PlanTab.BOSSES.Feral[1]
@@ -7807,7 +7904,7 @@ local function selfTest()
 		check(namesTest .. ", pure: everything on and the right loadout differs nowhere", PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn()), nil)
 		check(namesTest .. ", pure: no row is nothing to judge", PlanTab.wrongHere(nil, "X", nil, plan, PlanTab.readWorn()), nil)
 		check(namesTest .. ", pure: another loadout is named", PlanTab.wrongHere(nek, "DotC Raid ST *", nil, nil, nil).loadout, "DotC Raid ST *")
-		check(namesTest .. ", pure: an edited loadout says so", PlanTab.wrongHere(nek, "WS Raid Most Bosses", true, nil, nil).loadout, "WS Raid Most Bosses (edited)")
+		check(namesTest .. ", pure: an edited loadout says so", PlanTab.wrongHere(nek, "Raid: Nek'Zali", true, nil, nil).loadout, "Raid: Nek'Zali (edited)")
 		check(namesTest .. ", pure: an unknown loadout is not a difference", PlanTab.wrongHere(nek, nil, nil, nil, nil), nil)
 		bare = 1
 		check(namesTest .. ", pure: a wrong item is a change", table.concat(PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn()).change, ","), "1")
@@ -7824,13 +7921,13 @@ local function selfTest()
 		active = "DotC Raid ST *"
 		check(namesTest .. ", shown", PlanTab.checkSetup(), "shown")
 		check(namesTest .. ", the title is the place and the boss", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
-		check(namesTest .. ", the line says planned and now", PlanTab.popupModel and PlanTab.popupModel.lines[1], "|cffffd100Talents|r   planned |cff00ff00WS Raid Most Bosses|r, now |cffff2020DotC Raid ST *|r")
+		check(namesTest .. ", the line says planned and now", PlanTab.popupModel and PlanTab.popupModel.lines[1], "|cffffd100Talents|r   planned |cff00ff00Raid: Nek'Zali|r, now |cffff2020DotC Raid ST *|r")
 		bare = 1
 		PlanTab.checkSetup()
 		check(namesTest .. ", a wrong item is a line naming the slot in red", PlanTab.popupModel and PlanTab.popupModel.lines[2] and PlanTab.popupModel.lines[2]:match("^|cffffd100Head|r   |cffff2020") ~= nil, true)
 		bare = nil
 		GetInstanceInfo = function() return "A Dungeon", "party" end
-		active = "WS Raid Most Bosses"
+		active = "Raid: Nek'Zali"
 		check(namesTest .. ", in a dungeon it is the Mythic+ plan", PlanTab.checkSetup() == "shown" and PlanTab.popupModel.title, "A Dungeon: Mythic+, any key")
 		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
 
@@ -7866,7 +7963,7 @@ local function selfTest()
 		-- The row's own loadout, edited: there is nothing to switch to, so the
 		-- popup must not offer a switch (Rob, 2026-09-22)
 		local driftTest = "the row's own loadout with the wrong build is not a switch"
-		local drifted = PlanTab.wrongHere(nek, "WS Raid Most Bosses", true, nil, nil)
+		local drifted = PlanTab.wrongHere(nek, "Raid: Nek'Zali", true, nil, nil)
 		check(driftTest .. ", pure: marked drifted", drifted.drifted, true)
 		check(driftTest .. ", another loadout is not", PlanTab.wrongHere(nek, "DotC Raid ST *", nil, nil, nil).drifted, nil)
 		check(driftTest .. ", the button says Fix talents", built(drifted), "Fix talents")
@@ -7879,7 +7976,7 @@ local function selfTest()
 		local _, _, b = PlanTab.setupPopup("P", nek, "Feral", { loadout = "X", change = {}, fix = {}, marks = {} })
 		b[1].onClick()
 		PlanTab.loadTalents = wasLoad
-		check(buttonsTest .. ", Switch talents loads the row's loadout through loadTalents", loaded, "WS Raid Most Bosses")
+		check(buttonsTest .. ", Switch talents loads the row's loadout through loadTalents", loaded, "Raid: Nek'Zali")
 		local equipped, wasEquip = {}, PlanTab.equip
 		PlanTab.equip = function(entry, slotID) equipped[#equipped + 1] = slotID return true end
 		check(buttonsTest .. ", Equip all equips each slot through equip", PlanTab.equipAll({ [1] = { entry = {} }, [3] = { entry = {} } }, { 1, 3 }, "Feral", "st"), 2)
@@ -7887,7 +7984,7 @@ local function selfTest()
 		check(buttonsTest .. ", in those slots", table.concat(equipped, ","), "1,3")
 
 		local waitTest = "popup waits for combat, keys and fights"
-		active = "WS M+"  -- no raid row's, so every raid boss differs
+		active = "Dungeon"  -- no raid row's, so every raid boss differs
 		InCombatLockdown = function() return true end
 		check(waitTest .. ", combat", PlanTab.checkSetup(), "fenced")
 		check(waitTest .. ", nothing shown", PlanTab.popupModel, nil)
@@ -7940,7 +8037,7 @@ local function selfTest()
 		PlanTab.closePopup()
 		check(closedTest .. ", closed", PlanTab.popupModel, nil)
 		check(closedTest .. ", the answer is remembered", PlanTab.popupClosed,
-			"The Venomous Abyss|Nek'zali|WS M+|||Flask:cannot check,Food:cannot check,Augment rune:cannot check,Weapon oil:cannot check")
+			"The Venomous Abyss|Nek'zali|Dungeon|||Flask:cannot check,Food:cannot check,Augment rune:cannot check,Weapon oil:cannot check")
 		check(closedTest .. ", the same answer is not shown again", PlanTab.checkSetup(), "closed")
 		check(closedTest .. ", nor on a ready check", PlanTab.onSetupEvent("READY_CHECK", "Someone", 30), "closed")
 		bare = 1
@@ -8000,7 +8097,7 @@ local function selfTest()
 		end
 		C_Item.GetDetailedItemLevelInfo = function(link) return ilvlById[tonumber(link:match("item:(%d+)"))] end
 		C_Container = nil
-		local active = "WS Raid Most Bosses"
+		local active = "Raid: Nek'Zali"
 		PlanTab.activeLoadoutName = function() return active, nil end
 		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
 		local nek = PlanTab.BOSSES.Feral[1]
@@ -8082,7 +8179,7 @@ local function selfTest()
 		check(listTest .. ", talents first", line(1):find("planned", 1, true) ~= nil, true)
 		check(listTest .. ", then the slot", line(2):match("^|cffffd100Head|r   |cffffb300") ~= nil, true)
 		check(listTest .. ", then the consumables", line(3):match("^|cffffd100Flask|r") ~= nil, true)
-		active, wrongEnchant = "WS Raid Most Bosses", nil
+		active, wrongEnchant = "Raid: Nek'Zali", nil
 		PlanTab.hidePopup()
 		PlanTab.buffsWanted = nil
 		check(listTest .. ", the keystone slot opening asks and shows", PlanTab.onSetupEvent("CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN"), "shown")
@@ -8119,7 +8216,7 @@ local function selfTest()
 		PlanTab.loadTalents = function(name) loaded = name return "loaded" end
 		press(clicks[1])
 		PlanTab.loadTalents = wasLoad
-		check(fixTest .. ", the talents line loads the row's loadout", loaded, "WS Raid Most Bosses")
+		check(fixTest .. ", the talents line loads the row's loadout", loaded, "Raid: Nek'Zali")
 		local searched, wasSearch = nil, PlanTab.searchAH
 		PlanTab.searchAH = function(term) searched = term return true end
 		press(clicks[2])
@@ -8185,7 +8282,7 @@ local function selfTest()
 	do
 		local rowTest = "a 3t boss row draws the 3t cell"
 		local bosses, keptBoss = PlanTab.BOSSES.Feral, PlanTab.boss
-		local row = { boss = "Self-test 3+ boss", id = 9999, scenario = "3t", loadout = "WS Raid Most Bosses" }
+		local row = { boss = "Self-test 3+ boss", id = 9999, scenario = "3t", loadout = "Raid: Nek'Zali" }
 		bosses[#bosses + 1] = row
 		PlanTab.boss = row.boss
 		check(rowTest .. ", the tab opens on the 3+ row for 3+", PlanTab.bossFor(bosses, nil, "3t"), row.boss)
@@ -8212,14 +8309,17 @@ local function selfTest()
 	do
 		local bareTest = "a cell without talents has no planned build"
 		local wasIDs, wasPrint, kept = C_ClassTalents.GetConfigIDsBySpecID, print, GEAR_PLAN.Feral.mplus.talents
+		local keptBuild = PlanTab.BUILDS.Feral.Dungeon
 		C_ClassTalents.GetConfigIDsBySpecID = function() return {} end
 		print = function() end  -- the export says what it left out; not a check
-		local marker = "# Saved Loadout: WS M+ (DBiS plan)\n# talents="
-		check(bareTest .. ", with a string the export carries it", PlanTab.simcAppend("# Checksum: x"):find(marker .. kept, 1, true) ~= nil, true)
+		local marker = "# Saved Loadout: Dungeon (DBiS plan)\n# talents="
+		check(bareTest .. ", with a string the export carries it", PlanTab.simcAppend("# Checksum: x"):find(marker .. keptBuild, 1, true) ~= nil, true)
 		GEAR_PLAN.Feral.mplus.talents = nil
 		check(bareTest .. ", without one it hands over nothing", gearPlanFor("Feral", "mplus").talents, nil)
 		check(bareTest .. ", and still has its gear", gearPlanFor("Feral", "mplus").slots.head ~= nil, true)
-		check(bareTest .. ", the export carries no string for it", PlanTab.simcAppend("# Checksum: x"):find(marker, 1, true), nil)
+		PlanTab.BUILDS.Feral.Dungeon = nil
+		check(bareTest .. ", the export carries no string for a row with no build", PlanTab.simcAppend("# Checksum: x"):find(marker, 1, true), nil)
+		PlanTab.BUILDS.Feral.Dungeon = keptBuild
 		GEAR_PLAN.Feral.mplus.talents, C_ClassTalents.GetConfigIDsBySpecID, print = kept, wasIDs, wasPrint
 	end
 

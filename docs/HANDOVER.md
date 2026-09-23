@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.25.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` and `ai-review/` are empty; twenty-six cards sit in `human-review/` and every one waits on one trip to a live client.
-_Last updated: 2026-09-23 (v0.25.0: Feral 3+ targets cell baked, Wildstalker "WS Raid 3T"; no boss row uses it yet)_
+**Status:** v0.26.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds cards `0031` to `0035`; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
+_Last updated: 2026-09-23 (v0.26.0: Dreamgrove's builds baked in by `update-builds.py`, one per boss for Feral and Balance, card 0030)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -208,9 +208,9 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this.** Next to build: cards `0030` to `0035` in `todo/`, in number order (Dreamgrove merge, loadouts per character, the list's look, shared action bars, tree highlight, retire the old addons). Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
+**`docs/board/` owns this.** Next to build: cards `0031` to `0035` in `todo/`, in number order (`0030`, the Dreamgrove merge, is built; next: loadouts per character, the list's look, shared action bars, tree highlight, retire the old addons). Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
 
-Twenty-six cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.25.0.
+Twenty-seven cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.26.0. **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 
 ## Blockers / open questions
 - **Rob's sims for `0028`**: which loadout each spec uses at 3+ targets, and a Top Gear run per spec per scenario. Nothing else on the board is blocked.
