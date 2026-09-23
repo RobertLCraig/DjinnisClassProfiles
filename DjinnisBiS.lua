@@ -6063,8 +6063,8 @@ function PlanTab.buildSidebar()
 	local tips = {
 		[f.saveBuild] = { "Save bars to this build", "Your action bars and key bindings now, kept for the loadout you have selected. Switching to it on any character offers them." },
 		[f.saveSpec] = { "Save bars for the spec", "Your action bars and key bindings now, kept for every build of this spec that has none of its own, on every character." },
-		[f.loadBuild] = { "Load this build's bars", "Puts the action bars and key bindings saved for the loadout you have selected on this character." },
-		[f.loadSpec] = { "Load the spec's bars", "Puts the action bars and key bindings saved for this spec on this character." },
+		[f.loadBuild] = { "Load this build's bars", "Puts the action bars and key bindings saved for the loadout you have selected on this character.", true },
+		[f.loadSpec] = { "Load the spec's bars", "Puts the action bars and key bindings saved for this spec on this character.", false },
 		[f.undo] = { "Undo bars", "Puts back the action bars and key bindings this character had before the last load." },
 	}
 	for button, tip in pairs(tips) do
@@ -6072,13 +6072,19 @@ function PlanTab.buildSidebar()
 			GameTooltip:SetOwner(self, "ANCHOR_TOP")
 			GameTooltip:AddLine(tip[1], 1, 1, 1)
 			GameTooltip:AddLine(tip[2], nil, nil, nil, true)
+			if tip[3] ~= nil then
+				local key = PlanTab.loadKey(tip[3])
+				if key and pcall(PlanTab.showGhost, key) and PlanTab.ghostKey then
+					GameTooltip:AddLine("Your bars show it now. Amber: the slots a load changes.", 1, 0.6, 0, true)
+				end
+			end
 			GameTooltip:AddLine("/djbis bars undo puts back the bars from before an apply. /djbis bars offers a saved layout.", 0.7, 0.7, 0.7, true)
 			GameTooltip:AddLine("Named profiles for any spec: /djbis bars save <name>, load <name>, list, delete <name>.", 0.7, 0.7, 0.7, true)
 			GameTooltip:Show()
 		end)
-		button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+		button:SetScript("OnLeave", function() GameTooltip:Hide() pcall(PlanTab.hideGhost) end)
 	end
-	f.bar = CreateFrame("EventFrame", nil, f, "MinimalScrollBar")
+	f.bar =CreateFrame("EventFrame", nil, f, "MinimalScrollBar")
 	f.bar:SetPoint("TOPLEFT", f.scroll, "TOPRIGHT", 6, 0)
 	f.bar:SetPoint("BOTTOMLEFT", f.scroll, "BOTTOMRIGHT", 6, 0)
 	local view = CreateScrollBoxListLinearView(0, 0, 0, 0, 2)
@@ -6088,7 +6094,7 @@ function PlanTab.buildSidebar()
 	f.data = CreateDataProvider()
 	f.scroll:SetDataProvider(f.data)
 	-- Hidden in combat (the card): nothing on it may be clicked then anyway.
-	f:SetScript("OnEvent", function(self) self:Hide() self.tab:Hide() end)
+	f:SetScript("OnEvent", function(self) self:Hide() self.tab:Hide() pcall(PlanTab.hideGhost) end)
 	f:RegisterEvent("PLAYER_REGEN_DISABLED")
 	if not f:IsEventRegistered("PLAYER_REGEN_DISABLED") then
 		PlanTab.say("Could not register PLAYER_REGEN_DISABLED, so the plan list stays up in combat. Its clicks still do nothing there.")
@@ -6134,7 +6140,13 @@ function PlanTab.sidebarTip(row)
 	if e.tick then GameTooltip:AddLine("This is the build in play.", 0, 1, 0) end
 	if not e.saved then GameTooltip:AddLine("No loadout of its own on this character. Double-click wears it through the spare loadout, \"" .. PlanTab.SPARE .. e.loadout .. "\".", 1, 0.7, 0, true) end
 	if e.own then GameTooltip:AddLine("Your own loadout. The plan has no build of this name.", 0.7, 0.7, 0.7, true) end
-	if e.bars then GameTooltip:AddLine("Has its own action bars. Switching to it offers them.", 0.4, 0.8, 1, true) end
+	if e.bars then
+		GameTooltip:AddLine("Has its own action bars. Switching to it offers them.", 0.4, 0.8, 1, true)
+		local spec = playerSpec()
+		if spec and pcall(PlanTab.showGhost, spec .. " / " .. e.loadout) and PlanTab.ghostKey then
+			GameTooltip:AddLine("Your bars show them now. Amber: the slots a load changes.", 1, 0.6, 0, true)
+		end
+	end
 	if e.warn then GameTooltip:AddLine(e.warn, 1, 0.3, 0.3, true) end
 	if not e.tick then GameTooltip:AddLine("On the tree: green it adds, red it drops, amber it changes.", 0.8, 0.8, 0.8, true) end
 	GameTooltip:AddLine("Double-click to switch to it.", 0, 1, 0)
@@ -6145,6 +6157,7 @@ end
 function PlanTab.sidebarTipOff()
 	GameTooltip:Hide()
 	pcall(PlanTab.hideTreeDiff)
+	pcall(PlanTab.hideGhost)
 end
 
 -- The ScrollBox's initializer: builds a row the first time, then draws one
@@ -7325,15 +7338,19 @@ end
 
 -- The Load bars buttons (card 0044): the build's own layout, or the spec's.
 -- No question first: /djbis bars undo puts the old bars back.
-function PlanTab.loadBars(forBuild)
+-- The key they load, or nil and why. Also the key their hover shows (0046).
+function PlanTab.loadKey(forBuild)
 	local spec = playerSpec()
-	if not spec then PlanTab.say("Action bar layouts are for druids.") return "none" end
-	local key = spec
-	if forBuild then
-		local build = PlanTab.activeLoadoutName()
-		if not build then PlanTab.say("No saved loadout is selected, so there is no build to load bars for.") return "none" end
-		key = spec .. " / " .. build
-	end
+	if not spec then return nil, "Action bar layouts are for druids." end
+	if not forBuild then return spec end
+	local build = PlanTab.activeLoadoutName()
+	if not build then return nil, "No saved loadout is selected, so there is no build to load bars for." end
+	return spec .. " / " .. build
+end
+
+function PlanTab.loadBars(forBuild)
+	local key, why = PlanTab.loadKey(forBuild)
+	if not key then PlanTab.say(why) return "none" end
 	if not barsDB()[key] then
 		PlanTab.say(("No saved %s layout yet. Save bars first."):format(key))
 		return "none"
@@ -7385,6 +7402,97 @@ end
 -- The list's Undo button and "own bars" marks follow a save, a load and an undo.
 function PlanTab.barsChanged()
 	if PlanTab.sidebar and PlanTab.sidebar:IsShown() then pcall(PlanTab.updateSidebar) end
+	if PlanTab.ghostKey then pcall(PlanTab.showGhost, PlanTab.ghostKey) end  -- a load under the mouse: the amber goes
+end
+
+-- Card 0046: a saved layout drawn over the real bars while a Load bars
+-- button or an "own bars" row is pointed at, so where each action sits shows
+-- before it is loaded. Our own frames on UIParent, placed from each button's
+-- rect: nothing is written to, parented to or anchored on Blizzard's buttons.
+
+-- One entry per shown button: the saved action for its slot, and whether a
+-- load would change that slot. `buttons` is { { frame, slot } }, `now` is
+-- readBars(). Pure, for the checks.
+function PlanTab.ghostPlan(slots, buttons, now)
+	local plan = {}
+	for _, b in ipairs(buttons) do
+		if PlanTab.barSlot(b.slot) then
+			plan[#plan + 1] = { frame = b.frame, slot = b.slot, entry = slots[b.slot], changed = not sameAction(slots[b.slot], now[b.slot]) }
+		end
+	end
+	return plan
+end
+
+-- The icon of a saved action, nil for an empty slot, a question mark when
+-- this character cannot find it.
+function PlanTab.ghostIcon(entry)
+	if not entry then return nil end
+	local icon
+	if entry.type == "spell" then icon = C_Spell.GetSpellTexture(entry.id)
+	elseif entry.type == "item" then icon = C_Item.GetItemIconByID(entry.id)
+	elseif entry.type == "macro" then
+		local i = findMacro(entry.name, entry.index)
+		icon = i and select(2, GetMacroInfo(i))
+	elseif entry.type == "summonmount" and C_MountJournal then icon = select(3, C_MountJournal.GetMountInfoByID(entry.id))
+	end
+	return canRead(icon) and icon or 134400
+end
+
+-- Every shown action button and the slot it shows now, the form page too.
+-- The names are Blizzard's (Shared/ActionButtonUtil.lua); `action` is set by
+-- ActionBarActionButtonMixin:UpdateAction. Read only.
+function PlanTab.ghostButtons()
+	local out = {}
+	for _, prefix in ipairs(ActionButtonUtil and ActionButtonUtil.ActionBarButtonNames or {}) do
+		for i = 1, 12 do
+			local b = _G[prefix .. i]
+			local slot = b and b:IsVisible() and b.action
+			if canRead(slot) and type(slot) == "number" then out[#out + 1] = { frame = b, slot = slot } end
+		end
+	end
+	return out
+end
+
+PlanTab.ghosts = {}
+
+function PlanTab.showGhost(key)
+	PlanTab.hideGhost()
+	local layout = key and barsDB()[key]
+	if not layout or InCombatLockdown() then return 0 end
+	PlanTab.ghostKey = key
+	local plan = PlanTab.ghostPlan(layout.slots or {}, PlanTab.ghostButtons(), PlanTab.readBars())
+	local top = UIParent:GetEffectiveScale()
+	for i, p in ipairs(plan) do
+		local g = PlanTab.ghosts[i]
+		if not g then
+			g = CreateFrame("Frame", nil, UIParent)
+			g:SetFrameStrata("DIALOG")
+			g.edge = g:CreateTexture(nil, "BACKGROUND")
+			g.edge:SetAllPoints()
+			g.icon = g:CreateTexture(nil, "ARTWORK")
+			g.icon:SetPoint("TOPLEFT", 2, -2)
+			g.icon:SetPoint("BOTTOMRIGHT", -2, 2)
+			PlanTab.ghosts[i] = g
+		end
+		local l, b, w, h = p.frame:GetRect()
+		if canRead(l) and l then
+			local s = p.frame:GetEffectiveScale() / top
+			g:ClearAllPoints()
+			g:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", l * s, b * s)
+			g:SetSize(w * s, h * s)
+			-- amber: a load changes this slot; an empty one it will clear
+			if p.changed then g.edge:SetColorTexture(1, 0.6, 0, 1) else g.edge:SetColorTexture(0, 0, 0, 0.8) end
+			local icon = PlanTab.ghostIcon(p.entry)
+			if icon then g.icon:SetTexture(icon) else g.icon:SetColorTexture(0.05, 0.05, 0.05, 0.9) end
+			g:Show()
+		end
+	end
+	return #plan
+end
+
+function PlanTab.hideGhost()
+	PlanTab.ghostKey = nil
+	for _, g in ipairs(PlanTab.ghosts) do g:Hide() end
 end
 
 -- On login, and when the build or spec changes: when the layout that fits now
@@ -8050,6 +8158,38 @@ function PlanTab.barChecks(check)
 	check(profileTest .. ", listed", PlanTab.listProfiles(), 2)
 	check(profileTest .. ", deleted by name", PlanTab.deleteProfile("main") and PlanTab.findProfile("Main"), nil)
 	db().barProfiles = keptProfiles
+
+	-- card 0046: the preview over the real bars
+	local ghostTest = "the saved bars drawn over the real ones"
+	local plan = PlanTab.ghostPlan(
+		{ { type = "spell", id = 5221 }, nil, { type = "macro", name = "Prowl it", index = 1 } },
+		{ { frame = "a", slot = 1 }, { frame = "b", slot = 2 }, { frame = "c", slot = 3 }, { frame = "d", slot = 121 }, { frame = "e", slot = 73 } },
+		{ { type = "spell", id = 5221 }, { type = "spell", id = 1822 }, { type = "macro", name = "Prowl it", index = 9 } })
+	check(ghostTest .. ", one per button, never the skyriding page", #plan, 4)
+	check(ghostTest .. ", the same action is not marked", plan[1].changed, false)
+	check(ghostTest .. ", a slot the load clears is marked", tostring(plan[2].entry) .. "/" .. tostring(plan[2].changed), "nil/true")
+	check(ghostTest .. ", a macro is matched by name", plan[3].changed, false)
+	check(ghostTest .. ", two empty slots are not marked", plan[4].changed, false)
+	check(ghostTest .. ", each at its own button", plan[4].frame, "e")
+	C_Spell.GetSpellTexture = function(id) return "tex" .. id end
+	GetMacroInfo = function(i) if macros[i] then return macros[i], "macroTex" end end
+	check(ghostTest .. ", a spell's icon", PlanTab.ghostIcon({ type = "spell", id = 5221 }), "tex5221")
+	check(ghostTest .. ", a macro's icon, found by name", PlanTab.ghostIcon({ type = "macro", name = "Prowl it", index = 7 }), "macroTex")
+	check(ghostTest .. ", a missing macro is a question mark", PlanTab.ghostIcon({ type = "macro", name = "Gone", index = 1 }), 134400)
+	check(ghostTest .. ", a flyout is a question mark", PlanTab.ghostIcon({ type = "flyout", id = 1 }), 134400)
+	check(ghostTest .. ", an empty slot has no icon", PlanTab.ghostIcon(nil), nil)
+	GetMacroInfo = function(i) return macros[i] end
+	db().bars = { Feral = { slots = {} } }
+	PlanTab.showGhost("Feral")
+	check(ghostTest .. ", shown for a saved layout", PlanTab.ghostKey, "Feral")
+	PlanTab.hideGhost()
+	check(ghostTest .. ", and hidden", PlanTab.ghostKey, nil)
+	PlanTab.showGhost("Balance")
+	check(ghostTest .. ", nothing for a layout not saved", PlanTab.ghostKey, nil)
+	combat = true
+	PlanTab.showGhost("Feral")
+	check(ghostTest .. ", nothing in combat", PlanTab.ghostKey, nil)
+	combat = false
 
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]
