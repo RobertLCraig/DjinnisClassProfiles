@@ -5869,7 +5869,9 @@ function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded,
 	local list = {}
 	for _, g in ipairs(groups) do
 		if #g.rows > 0 then
-			list[#list + 1] = { group = g.key, label = g.label, icon = g.icon, count = #g.rows, folded = folded and folded[g.key] or nil }
+			local header = { group = g.key, label = g.label, icon = g.icon, count = #g.rows, folded = folded and folded[g.key] or nil, names = {} }
+			for _, r in ipairs(g.rows) do header.names[#header.names + 1] = r.loadout end  -- card 0034's choices
+			list[#list + 1] = header
 			if not (folded and folded[g.key]) then
 				for _, r in ipairs(g.rows) do list[#list + 1] = r end
 			end
@@ -5968,7 +5970,7 @@ end
 
 -- One click on a header folds it; a double-click on a build switches to it
 -- through PlanTab.loadTalents, and nothing else here writes (the card).
-local function sidebarClick(row)
+function PlanTab.sidebarClick(row)
 	local e = row.element
 	if not (e and e.group) or InCombatLockdown() then return end
 	local d = db()
@@ -5977,9 +5979,19 @@ local function sidebarClick(row)
 	PlanTab.updateSidebar()
 end
 
-local function sidebarTip(row)
+function PlanTab.sidebarTip(row)
 	local e = row.element
-	if not e or e.group then return end
+	if not e then return end
+	if e.group then
+		GameTooltip:SetOwner(row, "ANCHOR_NONE")
+		GameTooltip:SetPoint("RIGHT", row, "LEFT", -4, 0)
+		GameTooltip:AddLine(e.label, 1, 1, 1)
+		GameTooltip:AddLine("Blue on the tree: the talents these builds do not agree on. The rest are in every one.", 0.3, 0.6, 1, true)
+		GameTooltip:AddLine("Click to fold or open.", 0, 1, 0)
+		GameTooltip:Show()
+		pcall(PlanTab.showChoices, e.names)  -- card 0034
+		return
+	end
 	GameTooltip:SetOwner(row, "ANCHOR_NONE")
 	GameTooltip:SetPoint("RIGHT", row, "LEFT", -4, 0)
 	GameTooltip:AddLine(e.loadout, 1, 1, 1)
@@ -5987,14 +5999,15 @@ local function sidebarTip(row)
 	if e.tick then GameTooltip:AddLine("This is the build in play.", 0, 1, 0) end
 	if not e.saved then GameTooltip:AddLine("Not saved on this character. /djbis loadouts makes it.", 1, 0.7, 0, true) end
 	if e.warn then GameTooltip:AddLine(e.warn, 1, 0.3, 0.3, true) end
+	if not e.tick then GameTooltip:AddLine("On the tree: green it adds, red it drops, amber it changes.", 0.8, 0.8, 0.8, true) end
 	GameTooltip:AddLine("Double-click to switch to it.", 0, 1, 0)
 	GameTooltip:Show()
-	if PlanTab.showTreeDiff then pcall(PlanTab.showTreeDiff, e.loadout) end  -- card 0034
+	pcall(PlanTab.showTreeDiff, e.loadout)  -- card 0034
 end
 
-local function sidebarTipOff()
+function PlanTab.sidebarTipOff()
 	GameTooltip:Hide()
-	if PlanTab.hideTreeDiff then pcall(PlanTab.hideTreeDiff) end
+	pcall(PlanTab.hideTreeDiff)
 end
 
 -- The ScrollBox's initializer: builds a row the first time, then draws one
@@ -6023,12 +6036,12 @@ function PlanTab.sidebarRow(row, e)
 		row.bosses:SetWordWrap(false)
 		row:SetHighlightTexture("Interface\\FriendsFrame\\UI-FriendsFrame-HighlightBar-Blue", "ADD")
 		row:GetHighlightTexture():SetAlpha(0.4)
-		row:SetScript("OnClick", sidebarClick)
+		row:SetScript("OnClick", PlanTab.sidebarClick)
 		row:SetScript("OnDoubleClick", function(self)
 			if self.element and self.element.loadout then PlanTab.loadTalents(self.element.loadout) end
 		end)
-		row:SetScript("OnEnter", sidebarTip)
-		row:SetScript("OnLeave", sidebarTipOff)
+		row:SetScript("OnEnter", PlanTab.sidebarTip)
+		row:SetScript("OnLeave", PlanTab.sidebarTipOff)
 	end
 	row.element = e
 	row.icon:SetTexture(e.icon)
@@ -6108,6 +6121,115 @@ function PlanTab.armSidebar()
 	end)
 	if PlayerSpellsFrame:IsShown() then update() end
 	return true
+end
+
+-- What a build would change, drawn on the tree (card 0034) ----------------
+--
+-- Rob, 2026-09-23: "I dont know ... what my actual 'choice' nodes are vs what
+-- the 'essential' nodes are." Hover a build in the list and the tree tints
+-- the nodes it would add, drop or change; hover a group header and it tints
+-- the nodes its builds disagree on, the choices. Drawing only, after
+-- TalentTreeTweaks' inspectDiff.lua: one texture per node button, kept in our
+-- own weak table, masked to the icon. No field is written on a Blizzard frame
+-- and nothing is called that writes talents. Both builds are decoded with
+-- Blizzard's own ReadLoadoutContent, so a match is by node, not by text.
+
+-- TalentTreeTweaks' default colours; the choice colour is ours.
+PlanTab.DIFF_COLOUR = { add = { 0, 1, 0.3, 0.58 }, drop = { 1, 0, 0, 0.5 }, change = { 1, 0.67, 0, 0.75 }, choice = { 0.3, 0.6, 1, 0.6 } }
+PlanTab.treeGlow = setmetatable({}, { __mode = "k" })
+
+-- A build as Blizzard's importer reads it: one entry per node of the tree,
+-- in C_Traits.GetTreeNodes order. nil when it will not read.
+function PlanTab.decodeBuild(code, treeID)
+	local IE = ClassTalentImportExportMixin
+	if not (IE and ExportUtil and type(code) == "string" and treeID) then return nil end
+	local stream = ExportUtil.MakeImportDataStream(code)
+	local ok, valid = pcall(IE.ReadLoadoutHeader, IE, stream)
+	if not (ok and valid) then return nil end
+	local okContent, content = pcall(IE.ReadLoadoutContent, IE, stream, treeID)
+	return okContent and content or nil
+end
+
+function PlanTab.nodeWord(have, want)
+	local h, w = have and have.isNodeSelected, want and want.isNodeSelected
+	if w and not h then return "add" end
+	if h and not w then return "drop" end
+	if h and w and (have.choiceNodeSelection ~= want.choiceNodeSelection or have.partialRanksPurchased ~= want.partialRanksPurchased) then
+		return "change"
+	end
+	return nil
+end
+
+-- Node index -> "add", "drop" or "change" going from `have` to `want`. Pure.
+function PlanTab.nodeDiff(have, want)
+	local out = {}
+	for i = 1, math.max(#have, #want) do out[i] = PlanTab.nodeWord(have[i], want[i]) end
+	return out
+end
+
+-- Node index -> "choice" where the builds do not all agree. Pure.
+function PlanTab.nodeChoices(builds)
+	local out = {}
+	for b = 2, #builds do
+		for i, word in pairs(PlanTab.nodeDiff(builds[1], builds[b])) do
+			if word then out[i] = "choice" end
+		end
+	end
+	return out
+end
+
+function PlanTab.hideTreeDiff()
+	for _, glow in pairs(PlanTab.treeGlow) do glow:Hide() end
+end
+
+-- Tints the node buttons named in `marks` (node index -> word). Answers how
+-- many, or why none.
+function PlanTab.paintTree(marks, treeID)
+	PlanTab.hideTreeDiff()
+	local talents = PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame
+	if InCombatLockdown() or not (talents and talents:IsShown() and talents.EnumerateAllTalentButtons) then return "no tree" end
+	local nodes, byNode = C_Traits.GetTreeNodes(treeID), {}
+	for i, word in pairs(marks) do if nodes[i] then byNode[nodes[i]] = word end end
+	local painted = 0
+	for button in talents:EnumerateAllTalentButtons() do
+		local word = button.GetNodeID and byNode[button:GetNodeID()]
+		if word then
+			local glow = PlanTab.treeGlow[button]
+			if not glow then
+				glow = button:CreateTexture(nil, "OVERLAY")
+				glow:SetAllPoints(button)
+				glow:SetTexture("Interface\\Tooltips\\UI-Tooltip-Background")
+				if button.IconMask then glow:AddMaskTexture(button.IconMask) end
+				PlanTab.treeGlow[button] = glow
+			end
+			local c = PlanTab.DIFF_COLOUR[word]
+			glow:SetVertexColor(c[1], c[2], c[3], c[4])
+			glow:Show()
+			painted = painted + 1
+		end
+	end
+	return painted
+end
+
+function PlanTab.treeNow()
+	return PlayerUtil and C_ClassTalents.GetTraitTreeForSpec(PlayerUtil.GetCurrentSpecID())
+end
+
+-- Hover on a build row.
+function PlanTab.showTreeDiff(name)
+	local treeID = PlanTab.treeNow()
+	local want = PlanTab.decodeBuild(PlanTab.buildFor(playerSpec(), name), treeID)
+	local have = PlanTab.decodeBuild(PlanTab.liveTalents(), treeID)
+	if not (want and have) then PlanTab.hideTreeDiff() return "unreadable" end
+	return PlanTab.paintTree(PlanTab.nodeDiff(have, want), treeID)
+end
+
+-- Hover on a group header: the nodes its builds disagree on.
+function PlanTab.showChoices(names)
+	local treeID, spec, builds = PlanTab.treeNow(), playerSpec(), {}
+	for _, name in ipairs(names or {}) do builds[#builds + 1] = PlanTab.decodeBuild(PlanTab.buildFor(spec, name), treeID) end
+	if #builds < 2 then PlanTab.hideTreeDiff() return "too few" end
+	return PlanTab.paintTree(PlanTab.nodeChoices(builds), treeID)
 end
 
 -- The plan's builds as real loadouts on every character (card 0031) ---------
@@ -6977,6 +7099,54 @@ function PlanTab.sidebarChecks(check)
 	check(markTest .. ", the game would not say: no grey", PlanTab.sidebarList("Feral", "raid")[3].saved, true)
 	check(markTest .. ", the warning on the one build", list[#list].warn, "old tree")
 	check(markTest .. ", and only there", list[2].warn, nil)
+end
+
+-- Card 0034's checks: which nodes a build would change, which nodes are
+-- choices, and that the tint lands on exactly those buttons and goes again.
+function PlanTab.treeChecks(check)
+	local function node(selected, choice, ranks)
+		return { isNodeSelected = selected, choiceNodeSelection = choice or 1, partialRanksPurchased = ranks or 0 }
+	end
+	local have = { node(true), node(true), node(false), node(true, 1), node(true, 1, 2) }
+	local want = { node(true), node(false), node(true), node(true, 2), node(true, 1, 1) }
+	local diffTest = "the nodes a build would change"
+	local diff = PlanTab.nodeDiff(have, want)
+	check(diffTest .. ", the same node is not marked", diff[1], nil)
+	check(diffTest .. ", a dropped one", diff[2], "drop")
+	check(diffTest .. ", an added one", diff[3], "add")
+	check(diffTest .. ", another choice", diff[4], "change")
+	check(diffTest .. ", another rank", diff[5], "change")
+	local choices = PlanTab.nodeChoices({ have, have, want })
+	check("the choices are where the builds disagree", choices[1] == nil and choices[2] == "choice" and choices[3] == "choice", true)
+	check("one build has no choices", next(PlanTab.nodeChoices({ have })), nil)
+
+	local paintTest = "the tint lands on the marked buttons only"
+	local kept = { PlayerSpellsFrame, C_Traits, InCombatLockdown }
+	local function button(id)
+		local b = { GetNodeID = function() return id end }
+		b.CreateTexture = function()
+			local shown = false
+			return { SetAllPoints = function() end, SetTexture = function() end, SetVertexColor = function() end,
+				Show = function() shown = true end, Hide = function() shown = false end, IsShown = function() return shown end }
+		end
+		return b
+	end
+	local buttons = { button(101), button(102), button(103) }
+	PlayerSpellsFrame = { TalentsFrame = { IsShown = function() return true end, EnumerateAllTalentButtons = function()
+		local i = 0
+		return function() i = i + 1 return buttons[i] end
+	end } }
+	C_Traits = { GetTreeNodes = function() return { 101, 102, 103 } end }
+	InCombatLockdown = function() return false end
+	check(paintTest, PlanTab.paintTree({ [2] = "drop", [3] = "add" }, 1), 2)
+	check(paintTest .. ", not the unchanged node", PlanTab.treeGlow[buttons[1]], nil)
+	check(paintTest .. ", the dropped node is lit", PlanTab.treeGlow[buttons[2]]:IsShown(), true)
+	PlanTab.hideTreeDiff()
+	check(paintTest .. ", and all of it goes when the hover ends", PlanTab.treeGlow[buttons[2]]:IsShown() or PlanTab.treeGlow[buttons[3]]:IsShown(), false)
+	InCombatLockdown = function() return true end
+	check(paintTest .. ", nothing in combat", PlanTab.paintTree({ [1] = "add" }, 1), "no tree")
+	PlayerSpellsFrame, C_Traits, InCombatLockdown = kept[1], kept[2], kept[3]
+	for b in pairs(PlanTab.treeGlow) do PlanTab.treeGlow[b] = nil end
 end
 
 -- one runnable check: /bis test
@@ -9343,6 +9513,7 @@ local function selfTest()
 	PlanTab.loadoutChecks(check)  -- card 0031
 	PlanTab.barChecks(check)  -- card 0033
 	PlanTab.sidebarChecks(check)  -- card 0032
+	PlanTab.treeChecks(check)  -- card 0034
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")

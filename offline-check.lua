@@ -120,7 +120,7 @@ do
 		["C_Traits.GenerateImportString"] = true,  -- a read: the "(edited)" compare (card 0014)
 		["C_ClassTalents.CanCreateNewConfig"] = true, ["C_ClassTalents.IsConfigPopulated"] = true,
 		["C_ClassTalents.GetTraitTreeForSpec"] = true, ["C_Traits.GetLoadoutSerializationVersion"] = true,
-		["C_Traits.GetTreeHash"] = true,
+		["C_Traits.GetTreeHash"] = true, ["C_Traits.GetTreeNodes"] = true,  -- card 0034's node order
 		-- Card 0031: these two make and delete SAVED loadouts, the same calls
 		-- Blizzard's import and delete dialogs make. Neither changes the talents
 		-- in play. CommitConfig, LoadConfig, PurchaseRank and SetSelection stay

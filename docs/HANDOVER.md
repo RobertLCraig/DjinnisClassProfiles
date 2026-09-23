@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.29.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds cards `0034` and `0035`; `0031`, `0032` and `0033` are built and in `ai-review/`; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
-_Last updated: 2026-09-23 (v0.29.0: the talent window list looks like TalentLoadoutsEx, card 0032; v0.28.0: action bar layouts per spec and per build, `/djbis bars`, card 0033; v0.27.0: the planned builds become real loadouts, `/djbis loadouts` and `/djbis tidy`, card 0031)_
+**Status:** v0.30.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. `todo/` holds card `0035` only; `0031` to `0034` are built and in `ai-review/`; twenty-seven cards sit in `human-review/` and every one waits on one trip to a live client.
+_Last updated: 2026-09-23 (v0.30.0: hover a build to see on the tree what it changes, card 0034; v0.29.0: the talent window list looks like TalentLoadoutsEx, card 0032; v0.28.0: action bar layouts per spec and per build, `/djbis bars`, card 0033; v0.27.0: the planned builds become real loadouts, `/djbis loadouts` and `/djbis tidy`, card 0031)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -42,6 +42,11 @@ under `Libs/`: `LibStub`, `CallbackHandler-1.0`, `LibDataBroker-1.1` and `LibDBI
 step beyond `release.ps1` and no test suite: **every check that matters happens in a live game
 client, which no agent can run** - which is exactly why card `0001` is a question for Rob rather
 than a task.
+
+**Two Lua 5.1 ceilings in `DjinnisBiS.lua`, and both are hit.** The main chunk holds 200 locals, so
+a new helper goes on `PlanTab`, not in a new `local function` (met on card `0034`). `selfTest`
+holds 60 upvalues, so a new card's checks go in a `PlanTab.<name>Checks(check)` function called
+from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `treeChecks`).
 
 ## Key files / structure
 - `DjinnisBiS.lua` - the whole addon.
@@ -209,7 +214,7 @@ worse than one panel. `373` offline checks passed against the table and the tier
 deploy, which proves the data and the pure logic and **no frame**.
 
 ## What's next (in order)
-**`docs/board/` owns this.** Next to build: cards `0031` to `0035` in `todo/`, in number order (`0030`, the Dreamgrove merge, is built; next: loadouts per character, the list's look, shared action bars, tree highlight, retire the old addons). Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
+**`docs/board/` owns this.** Cards `0031` to `0034` are built (loadouts per character, the list's look, shared action bars, tree highlight) and wait in `ai-review/` for `/review-card`, then a client. `0035`, retire DjinnisDreamgrove and DjinnisClassProfiles, stays in `todo/` until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on card `0028` (one per spec per scenario, `3t` on a 3+ target loadout), then `.\update-gear-plan.ps1 <ids>` and a `BOSSES` row or two set to `3t`.
 
 Twenty-seven cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.26.0. **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 
@@ -256,6 +261,11 @@ Twenty-seven cards in `human-review/` are one trip to a live client; each lists 
 One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
 
 ## Session log
+- **2026-09-23** Cards `0031` to `0034` built in one session, one commit each, v0.27.0 to v0.30.0.
+  Worth carrying: `talentStringsDiffer` could not compare a Dreamgrove build at all (a zero-filled
+  tree hash never matched the client's), so every drift and "edited" check on those rows was blind
+  until `0031`; and the first bar check that failed was a real fault, two empty slots not counting
+  as the same. Break one check on purpose after a first-try pass: it proves the checks ran.
 - **2026-09-22, last** Seventeen cards built by sub-agents, each in its own git worktree (`.claude/worktrees/`), merged one branch at a time with both Lua checks after each merge, then reviewed the same way. `git log --format='%ad %s'` has the order.
   Worth carrying: resume a rate-limited agent with a message rather than relaunching, its worktree keeps the edits; a builder started before a review lands needs a hand merge.
 - **2026-09-22, last** Card `0009` reviewed, four fixes and four checks, deployed at v0.19.1.
