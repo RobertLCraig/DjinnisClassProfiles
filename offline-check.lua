@@ -25,6 +25,9 @@ frameMT.__index = function()
 	return function() return nil end
 end
 
+-- event -> the frames that registered it, so the spec run can fire one (0049)
+local registered = {}
+
 local function newFrame()
 	local f = setmetatable({}, frameMT)
 	f.CreateFontString = function() return newFrame() end
@@ -32,6 +35,11 @@ local function newFrame()
 	f.IsShown = function() return false end
 	f.GetHeight = function() return 100 end
 	f.IsEventRegistered = function() return true end
+	f.RegisterEvent = function(self, event)
+		registered[event] = registered[event] or {}
+		table.insert(registered[event], self)
+	end
+	f.SetScript = function(self, name, fn) if name == "OnEvent" then self.onEvent = fn end end
 	return f
 end
 
@@ -52,6 +60,13 @@ wipe = function(t)
 end
 HandleModifiedItemClick = noop
 InCombatLockdown = function() return false end
+GetCursorInfo = function() return nil end  -- the bar commands' fence (the 0049 spec run)
+-- Every bar slot empty and nothing up. Anything else it is asked answers nil.
+C_ActionBar = setmetatable({
+	HasVehicleActionBar = function() return false end,
+	HasOverrideActionBar = function() return false end,
+}, { __index = function() return function() return nil end end })
+GetNumBindings = function() return 0 end  -- no key bindings to save with the bars
 
 CR_CRIT_MELEE, CR_HASTE_MELEE, CR_MASTERY, CR_VERSATILITY_DAMAGE_DONE = 11, 18, 26, 29
 local RATINGS = { [11] = 900, [18] = 1200, [26] = 1000, [29] = 300 }
@@ -104,9 +119,58 @@ print = function(...)
 	realPrint(line)
 end
 
+-- `lua offline-check.lua 250` loads the addon as that spec (card 0049, Blood)
+-- and, instead of the self-test, types every slash command a player would.
+-- The self-test's checks are written for Feral, so they are not run then.
+-- This proves no command errors on another class; it proves nothing drawn.
+local asSpec = tonumber(arg and arg[1])
+if asSpec then
+	C_SpecializationInfo.GetSpecializationInfo = function() return asSpec end
+	UnitClass = function() return "?", "?", nil end  -- the spec must decide the class, not this
+end
+local tooltipHook
+TooltipDataProcessor.AddTooltipPostCall = function(_, hook) tooltipHook = hook end
+
 local here = arg and arg[0] and arg[0]:match("^(.*)[/\\][^/\\]*$") or "."
 dofile(here .. "/DjinnisBiS.lua")
-SlashCmdList.DJINNISBIS("test")
+if not asSpec then
+	SlashCmdList.DJINNISBIS("test")
+else
+	-- Not "" (the window): it needs a template's children, which no stub has,
+	-- and it fails the same way as Feral. The window's spec buttons are the
+	-- four druid specs whatever the class, so it is druid gear by design.
+	local commands = { "here", "talents", "loadouts", "tidy", "bars", "bars list", "bars save",
+		"bars save build", "bars undo", "bars load nothing", "Venomous" }
+	for _, cmd in ipairs(commands) do
+		local ok, err = pcall(SlashCmdList.DJINNISBIS, cmd)
+		if not ok then print("|cffff0000FAIL|r /djbis " .. cmd .. " as spec " .. asSpec .. ": " .. tostring(err)) end
+	end
+	-- A gear tooltip on another class: no line from the druid gear list.
+	local added = {}
+	local tip = setmetatable({ AddLine = function(_, text) added[#added + 1] = text end }, frameMT)
+	GameTooltip = tip
+	TooltipUtil.GetDisplayedItem = function() return "Any Helm", "|cff|Hitem:1:::|h[Any Helm]|h|r", 1 end
+	C_Item.GetItemInfoInstant = function() return 1, "Armor", "Plate", "INVTYPE_HEAD" end
+	local ok, err = pcall(tooltipHook, tip)
+	if not ok then print("|cffff0000FAIL|r the item tooltip as spec " .. asSpec .. ": " .. tostring(err)) end
+	for _, text in ipairs(added) do
+		if text:find("BiS", 1, true) then print("|cffff0000FAIL|r the item tooltip as spec " .. asSpec .. " says: " .. text) end
+	end
+	-- A boss kill and a finished key: the druid verdict would reach
+	-- RaidWarningUtil, which is not stubbed, so reaching it fails here.
+	local fired = 0
+	for _, event in ipairs({ "ENCOUNTER_END", "CHALLENGE_MODE_COMPLETED" }) do
+		for _, frame in ipairs(registered[event] or {}) do
+			if frame.onEvent then
+				fired = fired + 1
+				local okEvent, errEvent = pcall(frame.onEvent, frame, event, 3445, "Vashnik", 16, 20, 1)
+				if not okEvent then print("|cffff0000FAIL|r " .. event .. " as spec " .. asSpec .. ": " .. tostring(errEvent)) end
+			end
+		end
+	end
+	if fired == 0 then print("|cffff0000FAIL|r no frame took ENCOUNTER_END: the event capture is broken") end
+	realPrint("offline-check: typed " .. #commands .. " commands, hovered one item and fired " .. fired .. " events as spec " .. asSpec)
+end
 
 -- Card 0011: no C_ClassTalents or C_Traits call that changes talents, anywhere
 -- in the file's code (comments may name them). Every such call in code must

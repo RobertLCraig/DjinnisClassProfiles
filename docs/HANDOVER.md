@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.40.1, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob. Every class is next: `0049`, then `0050` and `0051`.
-_Last updated: 2026-09-24 (v0.40.1. Each spec's `Dungeon` build is pinned from Archon in `update-builds.py` PIN, not read from Dreamgrove: card `0047`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+**Status:** v0.41.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob. Every class: `0050` (builds) and `0051` (bars) are next.
+_Last updated: 2026-09-24 (v0.41.0. Every class has a spec key, and gear stays druid-only behind `PlanTab.gearHere()`: card `0049`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -19,8 +19,9 @@ go and look it up.
 Success, as it appears to operate: the answer is correct for Season 2, The Venomous Abyss, and it is
 reachable fast enough to use during a roll.
 
-**The non-goals are unknown and need Rob.** The obvious open one: is this druid-only on purpose, or
-druid-first?
+Druid-first, not druid-only (Rob, card `0048`). Action bars and talent builds work on every class,
+keyed by `PlanTab.SPECS` (card `0049`). The gear plan, the BiS list and the loot card stay druid-only
+and say so; `PlanTab.gearHere()` is the one gate.
 
 ## Canonical data shape
 `DjinnisBiSDB`, one account-wide SavedVariables table declared in the `.toc`, and since v0.28.0
@@ -76,7 +77,10 @@ from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `tree
   the game, under plain Lua, by stubbing enough of Blizzard's API to load the file: `lua
   offline-check.lua`, exit code 0 for a pass. **It proves the data and the pure logic and it proves
   no frame**, because every stubbed frame method does nothing, so a layout, anchor or event fault
-  passes straight through it.
+  passes straight through it. **`lua offline-check.lua 250` (any spec id) is a second mode**: it
+  loads as that spec and types every slash command, hovers one item and fires a boss kill instead of
+  the self-test, which is written for Feral. Run a non-druid id after touching anything spec-keyed.
+  **Read its output whole:** a Lua 5.1 load error ("more than 60 upvalues") prints no FAIL line.
 - `Libs/LibDBIcon-1.0/` - the minimap button and, at `LibDBIcon-1.0.lua:508-526`, the runtime
   `AddonCompartmentFrame:RegisterAddon(...)` call that card `0001` turns on. **Read that card before
   touching how the window opens**; the two routes into the addon drawer are mutually exclusive and
@@ -216,7 +220,7 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Trap on `0033`: a key prompt that returns every login while **Apply** does nothing. `0035` waits until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on `0028`, then `.\update-gear-plan.ps1 <ids>`.
 
-Forty-three cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.40.1 (deployed 2026-09-24). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`.
+Forty-three cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.41.0 (deployed 2026-09-24). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`.
 
 Trap: every spec's `Dungeon` is pinned in PIN and never refreshes; Rob copies new strings with Archon's Export button (Mythic+, +7 to +21), card `0047`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 

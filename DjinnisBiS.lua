@@ -1058,7 +1058,38 @@ local function allRatings(read)
 	return ratings
 end
 
-local SPEC_BY_ID = { [102] = "Balance", [103] = "Feral", [104] = "Guardian", [105] = "Resto" }
+-- Every spec, as { id, key, class id, role } (card 0049). The key is the name
+-- everything here files a spec under: saved bars, stored builds, plan cells.
+-- The druid keys are the old ones, so saved data still finds them. A name two
+-- classes share carries its class ("Frost Mage"). Ids and names from Raidbots'
+-- talents.json, 2026-09-24. Within a class the order is the role prompt's
+-- preference, so Feral comes before Balance as it always has.
+PlanTab.SPECS = {
+	{ 71, "Arms", 1, "DAMAGER" }, { 72, "Fury", 1, "DAMAGER" }, { 73, "Protection Warrior", 1, "TANK" },
+	{ 65, "Holy Paladin", 2, "HEALER" }, { 66, "Protection Paladin", 2, "TANK" }, { 70, "Retribution", 2, "DAMAGER" },
+	{ 253, "Beast Mastery", 3, "DAMAGER" }, { 254, "Marksmanship", 3, "DAMAGER" }, { 255, "Survival", 3, "DAMAGER" },
+	{ 259, "Assassination", 4, "DAMAGER" }, { 260, "Outlaw", 4, "DAMAGER" }, { 261, "Subtlety", 4, "DAMAGER" },
+	{ 256, "Discipline", 5, "HEALER" }, { 257, "Holy Priest", 5, "HEALER" }, { 258, "Shadow", 5, "DAMAGER" },
+	{ 250, "Blood", 6, "TANK" }, { 251, "Frost Death Knight", 6, "DAMAGER" }, { 252, "Unholy", 6, "DAMAGER" },
+	{ 262, "Elemental", 7, "DAMAGER" }, { 263, "Enhancement", 7, "DAMAGER" }, { 264, "Restoration Shaman", 7, "HEALER" },
+	{ 62, "Arcane", 8, "DAMAGER" }, { 63, "Fire", 8, "DAMAGER" }, { 64, "Frost Mage", 8, "DAMAGER" },
+	{ 265, "Affliction", 9, "DAMAGER" }, { 266, "Demonology", 9, "DAMAGER" }, { 267, "Destruction", 9, "DAMAGER" },
+	{ 268, "Brewmaster", 10, "TANK" }, { 270, "Mistweaver", 10, "HEALER" }, { 269, "Windwalker", 10, "DAMAGER" },
+	{ 104, "Guardian", 11, "TANK" }, { 105, "Resto", 11, "HEALER" }, { 103, "Feral", 11, "DAMAGER" }, { 102, "Balance", 11, "DAMAGER" },
+	{ 577, "Havoc", 12, "DAMAGER" }, { 581, "Vengeance", 12, "TANK" }, { 1480, "Devourer", 12, "DAMAGER" },
+	{ 1467, "Devastation", 13, "DAMAGER" }, { 1468, "Preservation", 13, "HEALER" }, { 1473, "Augmentation", 13, "DAMAGER" },
+}
+PlanTab.DRUID = 11  -- the class id the gear plan, the guide list and the loot card are for
+local SPEC_BY_ID = {}
+PlanTab.CLASS_OF = {}    -- key -> class id
+PlanTab.ROLE_SPECS = {}  -- class id -> role -> keys, in the order above
+for _, s in ipairs(PlanTab.SPECS) do
+	local id, key, class, role = s[1], s[2], s[3], s[4]
+	SPEC_BY_ID[id], PlanTab.CLASS_OF[key] = key, class
+	PlanTab.ROLE_SPECS[class] = PlanTab.ROLE_SPECS[class] or {}
+	PlanTab.ROLE_SPECS[class][role] = PlanTab.ROLE_SPECS[class][role] or {}
+	table.insert(PlanTab.ROLE_SPECS[class][role], key)
+end
 
 local function playerSpec()
 	local api = C_SpecializationInfo
@@ -1067,6 +1098,20 @@ local function playerSpec()
 	if not index then return nil end
 	local ok, id = pcall(api.GetSpecializationInfo, index)
 	return ok and SPEC_BY_ID[id] or nil
+end
+
+-- The player's class id: the spec's when it is known, else UnitClass's.
+function PlanTab.playerClass()
+	local spec = playerSpec()
+	if spec then return PlanTab.CLASS_OF[spec] end
+	return UnitClass and select(3, UnitClass("player")) or nil
+end
+
+-- True where the gear plan, the guide's BiS list and the loot card apply: on
+-- a druid. Elsewhere they stay quiet rather than tell a Mage what Feral wants
+-- (card 0048, question 2: gear for other classes comes later).
+function PlanTab.gearHere()
+	return PlanTab.playerClass() == PlanTab.DRUID
 end
 
 -- u.gg's hero keys are the display name lowercased, apostrophes dropped and
@@ -1340,12 +1385,14 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
 		if not equipLoc or equipLoc == "" or equipLoc == "INVTYPE_NON_EQUIP_IGNORE" then return end
 	end
 
-	local entry = match(name)
+	local gear = PlanTab.gearHere()
+	local entry = gear and match(name)
 	-- The guide list and the simmed gear plan are two sources. "Not BiS" from
 	-- the guide beside "in plan" from the sim reads as a contradiction, so the
 	-- guide only says no when the plan says nothing either.
-	local planLines = PlanTab.planLinesForLink(link, id) or {}
-	if entry then
+	local planLines = gear and PlanTab.planLinesForLink(link, id) or {}
+	if not gear then  -- nothing: the list is druid gear, and a Mage's tooltip is not the place (0049)
+	elseif entry then
 		tooltip:AddLine(GREEN .. "BiS: " .. table.concat(entry.specs, ", ") .. "|r")
 	elseif #planLines == 0 then
 		tooltip:AddLine(GREY .. "Not BiS" .. "|r")
@@ -1420,6 +1467,9 @@ roll:RegisterEvent("START_LOOT_ROLL")
 roll:RegisterEvent("CHALLENGE_MODE_COMPLETED")
 roll:RegisterEvent("ENCOUNTER_END")
 roll:SetScript("OnEvent", function(_, event, arg1, arg2, _, _, success)
+	-- The verdicts are druid gear: on another class a kill would flash a raid
+	-- warning about loot it cannot use (0049).
+	if not PlanTab.gearHere() then return end
 	if event == "CHALLENGE_MODE_COMPLETED" then
 		bonusRollVerdict((GetInstanceInfo()))
 		return
@@ -3214,6 +3264,7 @@ PlanTab.poolsDone = false
 
 function PlanTab.harvestPools()
 	if PlanTab.poolsDone or not EJ_GetNumTiers or InCombatLockdown() then return end
+	if not PlanTab.gearHere() then return end  -- the pools feed only the druid loot card (0049)
 	-- never walk the journal under the player: every call below moves its selection
 	if EncounterJournal and EncounterJournal:IsShown() then return end
 	local keptTier = EJ_GetCurrentTier and EJ_GetCurrentTier()
@@ -3241,7 +3292,8 @@ function PlanTab.harvestPools()
 			local pool = PlanTab.POOL[dungeonID] or {}
 			PlanTab.POOL[dungeonID] = pool
 			for specID, spec in pairs(SPEC_BY_ID) do
-				if not pool[spec] then
+				-- the journal filters by class and spec, so only this class's specs
+				if PlanTab.CLASS_OF[spec] == classID and not pool[spec] then
 					EJ_SelectEncounter(journalID)
 					EJ_SetLootFilter(classID, specID)
 					-- a filter change is asynchronous: the list is the previous
@@ -3409,7 +3461,7 @@ end
 -- to call again on the next EJ_LOOT_DATA_RECIEVED, a bounded number of times.
 function PlanTab.lootCardModel()
 	local _, instanceType, _, _, _, _, _, mapID = GetInstanceInfo()
-	if instanceType ~= "raid" then return nil end
+	if instanceType ~= "raid" or not PlanTab.gearHere() then return nil end
 	pcall(PlanTab.harvestPools)
 	-- The raid is told by journal id, the way the journal's own OnShow finds
 	-- where you stand (AdventureGuideUtil.GetCurrentJournalInstance): the map
@@ -4155,6 +4207,8 @@ function PlanTab.sendToKeystoneLoot()
 	local api = PlanTab.keystoneLoot()
 	local function say(text) print(GOLD .. "Djinni's BiS|r " .. GREY .. text .. "|r") end
 	if not api then say("KeystoneLoot is not loaded.") return nil end
+	-- the wanted list is druid gear, and it is filed under this character (0049)
+	if not PlanTab.gearHere() then say("The gear plan is for druids only, for now.") return nil end
 	local function call(method, ...)
 		local ok, result = pcall(api[method], api, ...)
 		if not ok then say("KeystoneLoot refused " .. method .. ": " .. tostring(result)) end
@@ -4310,14 +4364,16 @@ end
 -- the place from the listing's first activity. Nothing changes without the
 -- click. The prompt frame is the small one below; card 0013 builds a fuller
 -- popup and the two should become one frame once both are merged.
-PlanTab.ROLE_SPECS = { TANK = { "Guardian" }, HEALER = { "Resto" }, DAMAGER = { "Feral", "Balance" } }
 PlanTab.ROLE_LABEL = { TANK = "Tank", HEALER = "Healer", DAMAGER = "Damage" }
 
--- The spec the plan wants for `role`: the current one when it already fills
--- the role, else the first of the role's specs with a plan for `scenario`,
--- else the first named. nil for a role the table does not know. Pure.
-function PlanTab.specForRole(role, current, scenario)
-	local specs = PlanTab.ROLE_SPECS[role]
+-- The spec the plan wants for `role`, among the class's own specs
+-- (PlanTab.ROLE_SPECS, built beside PlanTab.SPECS): the current one when it
+-- already fills the role, else the first of the role's specs with a plan for
+-- `scenario`, else the first named. nil for a role the class cannot fill, a
+-- Mage asked to tank. `class` is for when the spec is not known. Pure.
+function PlanTab.specForRole(role, current, scenario, class)
+	local byRole = PlanTab.ROLE_SPECS[PlanTab.CLASS_OF[current or ""] or class or 0]
+	local specs = byRole and byRole[role]
 	if not specs then return nil end
 	for _, spec in ipairs(specs) do if spec == current then return spec end end
 	for _, spec in ipairs(specs) do if gearPlanFor(spec, scenario) then return spec end end
@@ -4415,7 +4471,7 @@ end
 -- current setup already fits. Returns the steps and the lines for the checks.
 function PlanTab.offerSetup(role, place, mplus)
 	local current = playerSpec()
-	local spec = PlanTab.specForRole(role, current, mplus and "mplus" or "st")
+	local spec = PlanTab.specForRole(role, current, mplus and "mplus" or "st", PlanTab.playerClass())
 	if not spec then return nil end
 	local scenario = mplus and "mplus" or planScenario(spec)
 	local steps = PlanTab.setupSteps(spec, scenario, {
@@ -4809,6 +4865,9 @@ function PlanTab.lines(forSpec)
 	local spec = forSpec or playerSpec()
 	local bosses = spec and PlanTab.BOSSES[spec]
 	if not bosses then
+		if spec and PlanTab.CLASS_OF[spec] ~= PlanTab.DRUID then  -- 0049: one line, no how-to
+			return { { text = GREY .. "Gear plans are for druids only, for now.|r" } }
+		end
 		-- the strip under the character sheet says "Click for how", so say how
 		return {
 			{ text = ("%sNo boss plan for %s yet. Only Feral and Balance have one.|r"):format(GREY, spec or "this spec") },
@@ -7191,7 +7250,7 @@ function PlanTab.saveBars(forBuild, ask, expect)
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return nil end
 	local spec = playerSpec()
-	if not spec then PlanTab.say("Action bar layouts are for druids.") return nil end
+	if not spec then PlanTab.say("The game has not said which spec you are in yet, so there is nowhere to save the bars.") return nil end
 	local key = spec
 	if forBuild then
 		local build = PlanTab.activeLoadoutName()
@@ -7349,7 +7408,7 @@ end
 -- hover shows (0046).
 function PlanTab.loadKey(forBuild)
 	local spec = playerSpec()
-	if not spec then return nil, "Action bar layouts are for druids." end
+	if not spec then return nil, "The game has not said which spec you are in yet." end
 	if not forBuild then return spec end
 	local build = PlanTab.activeLoadoutName()
 	if not build then return nil, "No saved loadout is selected, so there is no build to load bars for." end
@@ -8387,6 +8446,23 @@ end
 
 -- Card 0034's checks: which nodes a build would change, which nodes are
 -- choices, and that the tint lands on exactly those buttons and goes again.
+-- Card 0049: every spec, each key once, and the druid keys saved data uses.
+-- `lua offline-check.lua <spec id>` is the other half: every command as that spec.
+function PlanTab.specChecks(check)
+	local keys, ids, n = {}, {}, 0
+	for _, s in ipairs(PlanTab.SPECS) do
+		n = n + 1
+		if keys[s[2]] or ids[s[1]] then check("every spec, a key or id twice", s[2], "once") end
+		keys[s[2]], ids[s[1]] = true, true
+	end
+	check("every spec, 40 of them", n, 40)
+	check("every spec, the druid keys stay", table.concat({ SPEC_BY_ID[102], SPEC_BY_ID[103], SPEC_BY_ID[104], SPEC_BY_ID[105] }, " "), "Balance Feral Guardian Resto")
+	check("every spec, a shared name carries its class", SPEC_BY_ID[64] .. ", " .. SPEC_BY_ID[251], "Frost Mage, Frost Death Knight")
+	check("every spec, the class of a key", PlanTab.CLASS_OF["Devourer"], 12)
+	local lines = PlanTab.lines("Blood")
+	check("every spec, another class's plan is one line", #lines .. " " .. lines[1].text, "1 " .. GREY .. "Gear plans are for druids only, for now.|r")
+end
+
 function PlanTab.treeChecks(check)
 	local function node(selected, choice, ranks)
 		return { isNodeSelected = selected, choiceNodeSelection = choice or 1, partialRanksPurchased = ranks or 0 }
@@ -10154,6 +10230,12 @@ local function selfTest()
 		check(roleTest .. ", a damage role keeps a damage spec", PlanTab.specForRole("DAMAGER", "Balance", "mplus"), "Balance")
 		check(roleTest .. ", a damage role from a tank picks the spec with a Mythic+ plan", PlanTab.specForRole("DAMAGER", "Guardian", "mplus"), "Feral")
 		check(roleTest .. ", an unknown role maps to nothing", PlanTab.specForRole("NONE", "Feral", "mplus"), nil)
+		-- card 0049: another class stays in its own specs
+		check(roleTest .. ", a Death Knight tanks as Blood", PlanTab.specForRole("TANK", "Frost Death Knight", "mplus"), "Blood")
+		check(roleTest .. ", a Shaman heals as Restoration", PlanTab.specForRole("HEALER", "Elemental", "st"), "Restoration Shaman")
+		check(roleTest .. ", a Mage cannot tank", PlanTab.specForRole("TANK", "Frost Mage", "st"), nil)
+		check(roleTest .. ", an unread spec uses the class", PlanTab.specForRole("TANK", nil, "st", 10), "Brewmaster")
+		check(roleTest .. ", an unread spec and class is nothing", PlanTab.specForRole("TANK", nil, "st"), nil)
 		local steps = PlanTab.onAccepted(7, "inviteaccepted")
 		check(roleTest, shown ~= nil, true)
 		check(roleTest .. ", names the role and the place", said("Healer for Ara-Kara, City of Echoes"), true)
@@ -10878,6 +10960,7 @@ local function selfTest()
 	PlanTab.barChecks(check)  -- card 0033
 	PlanTab.sidebarChecks(check)  -- card 0032
 	PlanTab.treeChecks(check)  -- card 0034
+	PlanTab.specChecks(check)  -- card 0049
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")
@@ -10892,6 +10975,7 @@ SLASH_DJINNISBIS2 = "/bis"
 SlashCmdList.DJINNISBIS = function(msg)
 	msg = msg:match("^%s*(.-)%s*$")
 	if msg == "" then DjinnisBiS_Toggle()
+	elseif msg == "here" and not PlanTab.gearHere() then PlanTab.say("The BiS list is druid gear, so there is no verdict for this class.")
 	elseif msg == "here" then bonusRollVerdict((GetInstanceInfo()))
 	elseif msg == "test" then selfTest()
 	elseif msg == "talents" then PlanTab.sayTalents()
