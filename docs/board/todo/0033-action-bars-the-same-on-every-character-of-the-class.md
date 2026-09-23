@@ -90,3 +90,65 @@ buttons as on the first druid.
 - [ ] WHEN a layout is applied, THE ADDON SHALL keep the previous layout for one undo.
 - [ ] IN combat, THE ADDON SHALL refuse and say why.
 - [ ] In a client: after an apply, one pull on a dummy with no frozen button. Writing slots from addon code is how MySlot works, but it is not yet proven clear of the fault in `0002`.
+
+## Comments
+
+**2026-09-23, adversarial review (agent). Verdict: BOUNCE.**
+
+**Attacked.** I read commits 99c0348, 198e102 and fa454ac. I checked each API claim against
+`wow-ui-source` (live, 2026-09-18). I ran `lua offline-check.lua`, which was green. Then I ran 18
+mutations on a temp copy.
+
+**Held.** 15 of the 18 mutations turned a check red. They covered the combat and cursor fences, the
+two-empties rule, macro by name, emptying a slot, the undo being written and used up, the build key,
+the "seen" rule, unbinding, `SaveBindings`, the skip list, apply only on a click, and the probe
+clearing the cursor. `GetActionText`, `HasAction`, `PickupSpell`, `PickupItem` and
+`PickupSpellBookItem` have no secret returns. Flyout matching is right: `GetSpellBookItemType`'s
+`actionID` is the flyoutID. `DjinnisBiSCharDB` is in the `.toc` and is only read at click time.
+
+**Broke.**
+1. **Character macros are never found.** `findMacro` (`DjinnisBiS.lua:6617-6620`) loops
+   `1..account+character`. Character macros live at 121-150
+   (`Blizzard_MacroUI.lua:240`, `macroBase = MAX_ACCOUNT_MACROS`). So a per-character macro is
+   skipped as "no macro named X" when it exists. I proved it by modelling a macro at index 121 in the
+   harness: 2 checks went red. The prior art (`ActionBarProfiles.lua:276`) has the same bug. Myslot
+   (`Myslot.lua:451,460`) gets it right. Fix: loop `1..account`, then
+   `MAX_ACCOUNT_MACROS+1 .. MAX_ACCOUNT_MACROS+character`. Add a check with a macro at 121.
+2. **Key bindings ignore binding context.** `readKeys` (`:6703`) builds one key->action table
+   across all contexts. `Bindings_Standard.xml:1637+` has housing-editor bindings in their own
+   contexts, so they can share a key with a gameplay binding. The later entry wins, and the gameplay
+   binding for that key drops out of the layout. `placeKeys` (`:6726,6730`) then calls `SetBinding`
+   with no context. It could bind a housing command on a gameplay key, which kills that key in
+   combat. Blizzard (`Blizzard_Keybindings.lua:164-167`) and Myslot (`:1292-1296`) both pass
+   `C_KeyBindings.GetBindingContextForAction(action)`. Fix: skip any action whose context is not
+   nil or `Enum.BindingContext.None`, or key the table by context and key and pass the context.
+
+**Weaker, fix while there.**
+- `BAR_SLOTS = 180` (`:6585`) also reads and writes pages 11-12 (slots 121-144). Those are not
+  player bars. `MultiActionBars.xml` pages are 3-6 and 13-15, and `ActionButtonUtil.lua:189-229`
+  treats the other pages as bonus, vehicle, override and temp-shapeshift bars. An empty slot there in
+  the layout clears the other character's skyriding bar. Fix: skip 121-144.
+- A second apply overwrites the undo (`:6791`). Apply the spec layout, then a build layout, and the
+  original bars are gone. Fix: `barsUndo = barsUndo or readBars()`, and the same for keys.
+- `keysDiffer` (`:6715`) counts a key the game refuses. So `/djbis bars` never says "already match"
+  once one addon binding is missing.
+- Three mutations survived: removing `ClearCursor` after `PlaceAction`, removing the vehicle and
+  override fence, and ignoring `promptBusy` in `offerBars`. No check guards them.
+- In a macro slot, `GetActionInfo`'s second return is the spell ID, not the macro index
+  (`AssistedCombatManager.lua:148-150`). That makes the "index hint" wrong. It is harmless because
+  the name decides.
+
+**Security.**
+1. Weakest point: the account-wide `DjinnisBiSDB.bars` is trusted as-is. If an edited or broken
+   layout holds `keys = {}`, applying it unbinds every key, including ESCAPE and movement. It does
+   so in the account binding set, so every character that shares the set loses them too. Undo
+   repairs this only on the character where the layout was applied.
+2. Unchecked: the saved key and action strings go to `SetBinding` without validation. There is no
+   other way in. The slash command only offers; it never applies.
+3. Leaks: nothing leaves the client. Failures print slot numbers and spell names to the local chat
+   frame only.
+
+**Not verifiable here.** There is no browser surface. The UI runs in a game client, which no agent
+can run, so these need a person: the form bars at 73-120, whether spell-override IDs keep a slot
+looking "changed", the grid flicker from up to 180 pick-ups in the automatic probe, and the
+frozen-button test.

@@ -83,3 +83,67 @@ shows it: the new loadout should say `same`.
 - [ ] WHEN the selected loadout is the one to replace, THE ADDON SHALL say so and wait, because deleting the worn loadout drops to the starter build.
 - [ ] IN combat, or with the talent window open, THE ADDON SHALL refuse and say why.
 - [ ] In a client: no frozen action bar after creating, replacing and switching builds, then one pull on a dummy.
+
+## Comments
+
+**2026-09-23** Adversarial review (agent). **BOUNCE.**
+
+What I attacked: the section at `DjinnisBiS.lua` 6230-6569, `talentStringsDiffer` (1763), `loadTalents`,
+`loadoutChecks`, the offline-check allowlist, and 43b4530's tidy change. I checked the APIs against
+`wow-ui-source` 12.1.0 (69875): `Blizzard_ClassTalentImportExport.lua`, `ExportUtil.lua`,
+`Blizzard_ClassTalentsFrame.lua`, `ClassTalentsDocumentation.lua`. `lua offline-check.lua` passes. I
+ran 22 mutations on a copy in `%TEMP%\rev0031`.
+
+**What held.**
+- No talent-wearing call. The allowlist scan and the `touched` stub both go red if a `LoadConfig` is added.
+- The combat fence, the talent-window fence, the "made only on a click" rule, Not now, the
+  "unknown is not all missing" rule, the skip of the selected loadout, and tidy's live-name guard.
+  Each one goes red when broken.
+- The header bit layout is right. Version and spec are 24 bits, so chars 1-4. The hash is chars
+  5-25 plus the low 2 bits of char 26. Blizzard's importer does treat an all-zero hash as "skip
+  the check".
+- Events: the handler is set first, and each event is checked with `IsEventRegistered`.
+  `armLoadouts` runs at PLAYER_LOGIN.
+- Secrets: names, export strings and the spec-event unit all go through `canRead`.
+- A spec change mid-queue: the spec check in `importOne` runs before `DeleteConfig`.
+- A /reload mid-queue loses the queue and nothing else. Delete and import run in the same frame.
+
+**What broke.**
+1. **Every freshly made Feral loadout will probably read "drifted" at once** (`DjinnisBiS.lua:1772`).
+   The card's Open note can already be seen offline. The gear cell `WS M+` (line 421) came through
+   SimC from the loadout Dreamgrove 0.6.0 imported under that name. When I decode its nodes, they
+   match Dreamgrove's own `WS M+` string on every purchased node. They still differ as text. The
+   Dreamgrove string marks nodes 103, 120, 121, 210 and 226 as *selected but not purchased*
+   (granted). The client export leaves those nodes unselected. `DotC Raid ST *` shows the same
+   thing, and the current `BUILDS.Feral` strings carry the same granted marks. So the likely result
+   is this. The prompt offers Reset to plan on every login and spec change. Reset deletes the
+   loadout and makes it again, and it still reads drifted. The sidebar marks every Dreamgrove row
+   `(edited)`.
+   **Fix:** stop comparing the node bits as text. Walk both streams node by node. The format
+   describes itself, so the tree is not needed: 1 bit for selected, then 1 for purchased, then 1
+   for partial ranks (+6 bits), then 1 for choice (+2 bits). Count a granted node as unselected
+   and ignore trailing unselected nodes. Then compare. Add a check: the gear-cell `WS M+` against
+   Dreamgrove's `WS M+` must be `false`.
+2. **Nothing checks the rule "a bad string never costs the old loadout".** If I move `DeleteConfig`
+   in front of the header parse, every check still passes. The same is true if I drop the spec,
+   version or empty-entries refusals, or stop clearing `job.replace`. **Fix:** add a Reset check
+   with `ReadLoadoutHeader` returning false, and one with no entries. Both should expect no
+   `delete` call.
+3. **Minor (`stepLoadouts`, 6390):** say Delete succeeds, then both import tries fail. The only
+   line is "X failed". It does not say the old loadout is gone. **Fix:** when `job.replace` was
+   used up, say "deleted, not made again; Create will make it".
+4. **Minor:** `tidy` does not check the talent window or a running queue. Blizzard's own delete
+   dialog runs with the window open, so the harm is small. No check covers tidy's selected guard.
+   `savedLoadoutNames` keeps one id per name, so if two loadouts share a planned name, Reset
+   deletes whichever one came last. Skip a name that more than one loadout holds.
+
+**Security.**
+1. Weakest point: the drift test decides what gets deleted. A wrong "drifted" (finding 1) is a
+   delete that keeps coming back. It only ever hits names on the addon's own list, and never the
+   selected loadout.
+2. Unchecked: there is no outside input. The strings are compiled into the file. Slash commands
+   and buttons need the player, and every delete is behind a click or `tidy yes`.
+3. Leaks: nothing. There is no network, and failures print only a loadout name and the game's reason.
+
+**Not verifiable here:** there is no browser surface. The UI runs only in a game client, which no
+agent can run. Criteria 1-5 are in-game checks.
