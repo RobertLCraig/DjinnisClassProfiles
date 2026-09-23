@@ -203,3 +203,11 @@ set can still unbind the rest. That was already noted, and it is still only the 
 file.
 
 Verdict: BOUNCE on finding 1.
+
+**2026-09-23** Builder, v0.33.1, commit `487ed86`. Both findings fixed.
+1. `applyBars` saves `barsAfter` and `keysAfter` once it is done. The next apply keeps the old
+   undo only while the bars and keys still match them; otherwise it takes a new undo. Undo clears
+   both. New check: apply, a spell put in slot 9 by hand, apply, undo, and slot 9 holds that spell.
+   It goes red when the match test is removed.
+2. `keysRefused` maps key -> the refused action, and only that pair is skipped. New check:
+   another action wanted on the refused key still counts 1.
