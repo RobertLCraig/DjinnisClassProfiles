@@ -6171,10 +6171,13 @@ PlanTab.DIFF_COLOUR = { add = { 0, 1, 0.3, 0.58 }, drop = { 1, 0, 0, 0.5 }, chan
 PlanTab.treeGlow = setmetatable({}, { __mode = "k" })
 
 -- A build as Blizzard's importer reads it: one entry per node of the tree,
--- in C_Traits.GetTreeNodes order. nil when it will not read.
+-- in C_Traits.GetTreeNodes order. nil when it will not read, or when its
+-- header says another version, spec or tree: read anyway, a short string is
+-- "nothing selected" and an old tree's nodes land out of line (0034 review).
 function PlanTab.decodeBuild(code, treeID)
 	local IE = ClassTalentImportExportMixin
 	if not (IE and ExportUtil and type(code) == "string" and treeID) then return nil end
+	if PlanTab.buildProblem(code) then return nil end
 	local stream = ExportUtil.MakeImportDataStream(code)
 	local ok, valid = pcall(IE.ReadLoadoutHeader, IE, stream)
 	if not (ok and valid) then return nil end
@@ -6182,8 +6185,11 @@ function PlanTab.decodeBuild(code, treeID)
 	return okContent and content or nil
 end
 
+-- A granted node is the game's, not a pick: one exporter marks it and another
+-- does not (the 0031 review), so it counts as unselected.
 function PlanTab.nodeWord(have, want)
-	local h, w = have and have.isNodeSelected, want and want.isNodeSelected
+	local h = have and have.isNodeSelected and not have.isNodeGranted
+	local w = want and want.isNodeSelected and not want.isNodeGranted
 	if w and not h then return "add" end
 	if h and not w then return "drop" end
 	if h and w and (have.choiceNodeSelection ~= want.choiceNodeSelection or have.partialRanksPurchased ~= want.partialRanksPurchased) then
@@ -7290,9 +7296,12 @@ function PlanTab.treeChecks(check)
 	local function button(id)
 		local b = { GetNodeID = function() return id end }
 		b.CreateTexture = function()
-			local shown = false
-			return { SetAllPoints = function() end, SetTexture = function() end, SetVertexColor = function() end,
-				Show = function() shown = true end, Hide = function() shown = false end, IsShown = function() return shown end }
+			local shown, glow = false, {}
+			glow.SetAllPoints, glow.SetTexture = function() end, function() end
+			glow.SetVertexColor = function(_, r, g, bl) glow.colour = r .. "," .. g .. "," .. bl end
+			glow.Show, glow.Hide = function() shown = true end, function() shown = false end
+			glow.IsShown = function() return shown end
+			return glow
 		end
 		return b
 	end
@@ -7310,6 +7319,48 @@ function PlanTab.treeChecks(check)
 	check(paintTest .. ", and all of it goes when the hover ends", PlanTab.treeGlow[buttons[2]]:IsShown() or PlanTab.treeGlow[buttons[3]]:IsShown(), false)
 	InCombatLockdown = function() return true end
 	check(paintTest .. ", nothing in combat", PlanTab.paintTree({ [1] = "add" }, 1), "no tree")
+	InCombatLockdown = function() return false end
+
+	-- The hover itself, row to tree and back (0034 review: five breaks here
+	-- passed). The build lookup, the decoder and the tooltip are stubbed.
+	local hoverTest = "hovering a row lights what that build changes"
+	local keptHover = { PlanTab.buildFor, PlanTab.liveTalents, PlanTab.decodeBuild, PlanTab.treeNow, GameTooltip }
+	local decoded = { live = have, X = { node(true), node(false), node(true) }, Y = { node(true), node(true), node(false) } }
+	PlanTab.buildFor = function(_, name) return name end
+	PlanTab.liveTalents = function() return "live" end
+	PlanTab.decodeBuild = function(code) return decoded[code] end
+	PlanTab.treeNow = function() return 1 end
+	GameTooltip = setmetatable({}, { __index = function() return function() end end })
+	local function colour(i) local g = PlanTab.treeGlow[buttons[i]] return g and g:IsShown() and g.colour or "none" end
+	local function rgb(word) local c = PlanTab.DIFF_COLOUR[word] return c[1] .. "," .. c[2] .. "," .. c[3] end
+	PlanTab.sidebarTip({ element = { loadout = "X", bosses = {} } })
+	check(hoverTest .. ", the dropped node is red", colour(2), rgb("drop"))
+	check(hoverTest .. ", the added node is green", colour(3), rgb("add"))
+	check(hoverTest .. ", the kept node is plain", colour(1), "none")
+	PlanTab.sidebarTipOff()
+	check(hoverTest .. ", and it all goes when the hover ends", colour(2) .. colour(3), "nonenone")
+	local header
+	for _, e in ipairs(PlanTab.sidebarList("Feral", "raid")) do if e.group and not header then header = e end end
+	check("a group header names its builds, for the choices", header and header.names and #header.names > 1, true)
+	PlanTab.sidebarTip({ element = { group = "raid", label = "Raid", names = { "X", "Y" } } })
+	check("hovering a header lights the nodes its builds disagree on", colour(2) .. "|" .. colour(3), rgb("choice") .. "|" .. rgb("choice"))
+	PlanTab.sidebarTipOff()
+	PlanTab.buildFor, PlanTab.liveTalents, PlanTab.decodeBuild, PlanTab.treeNow, GameTooltip = keptHover[1], keptHover[2], keptHover[3], keptHover[4], keptHover[5]
+
+	-- The decoder refuses a string whose header this client would refuse.
+	local keptIE = { ClassTalentImportExportMixin, ExportUtil, PlayerUtil, C_ClassTalents }
+	local version = 2
+	ClassTalentImportExportMixin = { ReadLoadoutHeader = function() return true, version, 103, {} end,
+		IsHashEmpty = function() return true end, ReadLoadoutContent = function() return { node(true) } end }
+	ExportUtil = { MakeImportDataStream = function() return {} end }
+	PlayerUtil = { GetCurrentSpecID = function() return 103 end }
+	C_ClassTalents = { GetTraitTreeForSpec = function() return 1 end }
+	C_Traits = { GetLoadoutSerializationVersion = function() return 2 end }
+	check("a build reads when its header fits this client", PlanTab.decodeBuild("s", 1) ~= nil, true)
+	version = 1
+	check("a build from another game version is not drawn", PlanTab.decodeBuild("s", 1), nil)
+	ClassTalentImportExportMixin, ExportUtil, PlayerUtil, C_ClassTalents = keptIE[1], keptIE[2], keptIE[3], keptIE[4]
+
 	PlayerSpellsFrame, C_Traits, InCombatLockdown = kept[1], kept[2], kept[3]
 	for b in pairs(PlanTab.treeGlow) do PlanTab.treeGlow[b] = nil end
 end
