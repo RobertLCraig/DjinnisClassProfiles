@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.47.2, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
+**Status:** v0.47.3, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
 _Last updated: 2026-09-24 (v0.47.0: Djinni's BiS renamed to Djinni's Class Profiles, card `0058`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria

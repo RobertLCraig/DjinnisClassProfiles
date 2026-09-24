@@ -385,6 +385,8 @@ do
 		-- in play. CommitConfig, LoadConfig, PurchaseRank and SetSelection stay
 		-- off this list: those are the frozen-action-bar route (card 0002).
 		["C_ClassTalents.ImportLoadout"] = true, ["C_ClassTalents.DeleteConfig"] = true,
+		-- the call behind Blizzard's rename box: a loadout's name, never its talents
+		["C_ClassTalents.RenameConfig"] = true,
 	}
 	local src = assert(io.open(here .. "/DjinnisClassProfiles.lua")):read("*a")
 	local seen = 0

@@ -36,3 +36,7 @@ To write with the build. Tag, untag and the clean-up list are pure and go in the
 ## Comments
 
 **2026-09-24, Claude.** Written when `0058` was split.
+
+**2026-09-24, Claude.** Card `0060` added a second made name: the worn loadout is reset through
+`<name> (new)` (`PlanTab.SWAP_SUFFIX`), then renamed. With the tag that is 5 + 24 + 6 = 35 letters,
+over 30. Shorten the suffix, or treat it as the spare's name is treated.
