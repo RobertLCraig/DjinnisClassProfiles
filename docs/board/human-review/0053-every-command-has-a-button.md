@@ -1,5 +1,24 @@
 # 0053 Every command has a button
 
+## What I need from you
+
+**Try the More menu in game, and say if you want the self-test back in it.**
+
+1. `/reload`. Open the BiS window from the minimap button. Click **More** (top right, left of Import sim).
+2. Click **Save bars as a profile...**. Type a name. Press Enter. Chat says it saved.
+3. Click **More** again. Point at **Profile: <name>**. Click **Load**. Then **More > Undo bars**.
+4. **More > Profile: <name> > Delete**. A box asks. Click Delete.
+5. Open the talent window. The list beside it has a small **More** at the top. The title does not run under it.
+6. Look at each menu item once. No item should do nothing, and no message should say to type a command.
+7. Close the build list with its X. **More** in the main window now shows **Show the build list**. Click it, then open the talent window: the list is back.
+
+Pass is every step doing what it says. Fail is an item that does nothing, a message that says to type
+a command, or text under the More button. Say which step on this card.
+
+**Why it needs you:** it is in-game UI, which no agent can run. And you asked for every command to
+have a button, but the self-test no longer has one (card `0056`: it broke your talent window). That
+is your call.
+
 ## Why
 
 Rob, 2026-09-24: "lets make sure that all comands have a button in the UI. I shouldnt need to type
@@ -12,12 +31,12 @@ any commands to make use of the addon".
 | `/djbis` | Minimap button (existing) |
 | `/djbis <boss>` | The By Boss tab (existing) |
 | `/djbis here` | More > Bonus roll worth it here? (druids only, as the verdict is druid gear) |
-| `/djbis test` | More > Run the self-test |
+| `/djbis test` | None on purpose, since v0.45.0 (card `0056`): typed only |
 | `/djbis talents` | More > Compare talents with the plan |
 | `/djbis loadouts` | More > Make the planned loadouts |
 | `/djbis tidy`, `tidy yes` | More > Delete old Dreamgrove loadouts (druids only). It lists, then asks Delete / Cancel |
 | `/djbis bars` | More > Offer the saved bars |
-| `/djbis bars save`, `save build` | Save bars: spec / build, beside the talent window (existing) |
+| `/djbis bars save`, `save build` | Save bars: spec / build, beside the talent window (existing), and More > Save bars for this spec / build in the main window |
 | `/djbis bars undo` | Undo bars beside the talent window (existing), and More > Undo bars in the main window |
 | `/djbis bars save <name>` | More > Save bars as a profile... opens a name box (Enter is OK, Escape is Cancel) |
 | `/djbis bars load <name>` | More > Profile: <name> > Load |
@@ -40,15 +59,6 @@ Typed `tidy` now asks the same question as the menu; `tidy yes` still deletes at
 - [x] No text the player sees names a slash command. proves: `offline-check.lua` source scan (comments and the two `SLASH_` lines are allowed)
 - [x] All 36 non-druid specs still pass the spec mode. proves: `lua offline-check.lua <spec id>`, each
 - [ ] In game: the More button in the main window and beside the talent window opens the menu; each item works; the name box saves a profile. proves: manual (Rob)
-
-## What Rob checks in game
-
-1. `/reload`. Open the BiS window from the minimap button. Click **More** (top right, left of Import sim).
-2. Click **Save bars as a profile...**. Type a name. Press Enter. Chat says it saved.
-3. Click **More** again. Point at **Profile: <name>**. Click **Load**. Then **More > Undo bars**.
-4. **More > Profile: <name> > Delete**. A box asks. Click Delete.
-5. Open the talent window. The list beside it has a small **More** at the top. The title does not run under it.
-6. Look at each menu item once. No item should do nothing, and no message should say to type a command.
 
 ## Not this card
 
@@ -191,3 +201,30 @@ the next time the talent window opens.
 "Show the build list" is hidden while Talent Loadout Manager is loaded. And from Rob's first click:
 **Run the self-test is off the menu** (card `0056`): it swaps the game's own tables while it runs
 and broke the talent window until a reload. It is a check for whoever changes the addon.
+
+**2026-09-24, Claude (third adversarial review, of 552c380). Clean: to human-review.**
+
+Each earlier finding:
+- The no-layout message: **closed.** It says "More > Save bars for this spec", which is always
+  there. No check covers the text (my mutation putting the old words back stays green). It is one
+  string and it reads right.
+- `/bis` before `.`, `,`, `;`, `!`, `?` or `)`: **closed.** The builder's "/bis." mutation goes red.
+- "Show the build list" hidden while Talent Loadout Manager is loaded: **closed.** No check covers
+  the gate (my mutation removing it stays green). It is one `and not PlanTab.rivalLoaded()` and it
+  is right.
+
+Fixed in place, on the card only: the command table still said `/djbis test` is "More > Run the
+self-test". It now says there is no button, on purpose. The first criterion is about the table, so
+the table had to say so. The `bars save` row now names the window's two new items too. "What Rob
+checks in game" became `## What I need from you` at the top, with the build list step added.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. I read the whole output; no load error.
+  All 36 non-druid specs pass spec mode.
+- The builder's 31 mutations (`%TEMP%\mut0053.py`) each turn it red, run on a scratch copy.
+
+Security: unchanged from the first review. Profile names come from the player's own
+SavedVariables. Nothing is sent anywhere, and no other player is read.
+
+**No browser, no game client.** The surface is in-game UI, so "look at it in a real browser" does
+not apply. Rob's seven steps and the self-test question are under `## What I need from you`.
