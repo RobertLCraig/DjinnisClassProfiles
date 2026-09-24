@@ -289,3 +289,49 @@ call the loadouts made at 81 different, and Make offers to reset them.
 3. `configName` is checked directly against a swapped `C_Traits.GetConfigInfo`.
 
 Mutations: `%TEMP%\mut0053.py`, now 54, all red, run alone on a fresh scratch copy.
+
+**2026-09-24, Claude (fifth adversarial review, of 96974cd, read on the renamed file at 3b16a73).
+Back to todo: two small gaps in the checks. The code holds.**
+
+How I tried it: a scratch copy (`%TEMP%\rev0058`). The builder's `mut0053.py` was adapted to the
+renamed file and strings (`adapt.py`, `mut0053cp.py`), and my own list is `revmut.py`. One run at a
+time. Nothing ran on the real file.
+
+Findings, in the order to fix them:
+
+1. **Compare's plan lines can ignore the level, and the check stays green.** `sayTalents` passes
+   `short` twice: to the stored builds and to the gear plan's cells (DjinnisClassProfiles.lua:4968).
+   Change the cell call to `false` and nothing goes red. The check reads only the "(stored build)"
+   line (line 9105). A druid below the cap would then see his plan cells called "different" beside
+   stored builds called "the plan, as far as this level allows". Fix: in `levelChecks`, also read a
+   plan cell's line with the build in play trimmed from that cell's `talents`.
+2. **`belowCap`'s `level <= 0` guard has no check** (line 2041). Remove it and nothing goes red.
+   Fix: check `PlanTab.belowCap(0, 90)` is false.
+
+Each earlier finding:
+- Fourth review 1 (Compare's level wiring): **closed** for the stored builds. `mayBeShort(nil)` in
+  `sayTalents` goes red ("compare reads no id"). The plan-cell call is open (finding 1).
+- Fourth review 2 (28 talent lines in chat): **closed.** `sayTalents(out)` collects the lines, and
+  a clean offline run prints no talent string. "compare prints nothing" goes red.
+- Fourth review 3 (`configName` never run): **closed.** It runs against a swapped
+  `C_Traits.GetConfigInfo` (line 9089), and "configName reads nothing" goes red.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. I read the whole output: no load error, no
+  FAIL line. All 36 non-druid specs pass spec mode; 102 to 105 fail it, as expected.
+- The builder's 54 mutations, adapted to the new name: 54 caught, 0 missed.
+- My 2 mutations for this card: 0 caught, 2 missed (the two findings).
+- `mayBeShort` writes only a plain number that `belowCap` has already read as one, so no secret is
+  stored. The rename changes nothing here beyond the table name (`DjinnisCPCharDB.madeAt`).
+
+Security, where the card produced code:
+1. *Weakest point:* below the cap the compare is looser on purpose. It hides a trimmed build, not
+   an attack.
+2. *Unchecked:* the plan-cell half of Compare (finding 1).
+3. *Leaks:* nothing. No network, no chat to others, no other player's data.
+
+**No browser, no game client.** The surface is in-game UI. After the fix, on the level 81 warlock,
+with the rename in (card 0058; the command is now `/dcp`): `/reload`. **More > Make the planned
+loadouts** says every build matches. **More > Compare talents with the plan** says "the plan, as
+far as this level allows". Open the talent window: the list is beside it, or its tab is. At 82,
+both Make and Compare call the loadouts made at 81 different, and Make offers to reset them.
