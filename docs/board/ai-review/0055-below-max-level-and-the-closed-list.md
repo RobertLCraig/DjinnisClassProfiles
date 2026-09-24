@@ -126,3 +126,22 @@ made. **More > Compare talents with the plan** does not call them different. Ope
 the list is beside it, or its "BiS plan" tab is. Close the list, `/reload`, open the talent window
 again: the tab is there. Then, at 82 or later, **Make the planned loadouts** offers to fill the
 loadouts made at 81.
+
+**2026-09-24, Claude. The second review's findings, fixed in v0.45.0.**
+
+1. A level-up now brings the loadout back. `PlanTab.noteMade` keeps the level each loadout was made
+   at (`DjinnisBiSCharDB.madeAt`, config id -> level) once the queue has waited for it.
+   `PlanTab.mayBeShort(id)` is false for one made below today's level, so the offer resets it. An
+   import that bought nothing is no longer "part of the plan". A loadout made before v0.45.0 has no
+   level noted and counts as made now; it drifts at the next level-up after a Reset.
+2. `belowCap(level, cap)` is pure; the reads are `PlanTab.readLevels`. `levelChecks` covers 81/90,
+   90/90, no level, no cap, a secret level, and drives `offerLoadouts` and `talentsEdited` with a
+   trimmed loadout (one node fewer) at 81, after a level-up and at the cap.
+3. Compare talents uses `PlanTab.compareWord`, which says "the plan, as far as this level allows"
+   for a trimmed build. Its read is `PlanTab.activeTalentString`, shared with `talentsEdited`.
+4. `m` stands against a plan's number below the cap: the apex node exports "all ranks" at 81 when the
+   plan buys 1 of 4.
+
+Also: "Show the build list" is hidden while Talent Loadout Manager is loaded. Mutations: 31 in
+`%TEMP%\mut0053.py`, all red, including every one listed in the review (`<=`, level-up ignored,
+`talentsEdited` on the exact compare, the offer passing false, the secret guard removed).

@@ -186,3 +186,8 @@ Nothing leaks.
 **No browser, no game client.** Rob's six steps above still apply, plus: with the build list closed,
 **More** in the main window shows **Show the build list**, and clicking it brings the list back
 the next time the talent window opens.
+**2026-09-24, Claude. The second review's leftovers, fixed in v0.45.0.** The no-layout message says
+"More > Save bars for this spec". The scan also flags `/bis` before `.`, `,`, `;`, `!`, `?` and `)`.
+"Show the build list" is hidden while Talent Loadout Manager is loaded. And from Rob's first click:
+**Run the self-test is off the menu** (card `0056`): it swaps the game's own tables while it runs
+and broke the talent window until a reload. It is a check for whoever changes the addon.

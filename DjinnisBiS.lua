@@ -2000,14 +2000,17 @@ end
 function PlanTab.partOfPlan(have, planned)
 	local a, p = PlanTab.nodeKey(have or ""), PlanTab.nodeKey(planned or "")
 	if not (a and p) then return nil end
+	if a == "" then return false end  -- an import that bought nothing is not the plan (0055 review)
 	local want = {}
 	for node, ranks, choice in p:gmatch("(%d+):(%w+):(%d+)") do want[node] = { ranks = ranks, choice = choice } end
 	for node, ranks, choice in a:gmatch("(%d+):(%w+):(%d+)") do
 		local w = want[node]
 		if not w or w.choice ~= choice then return false end
-		-- "m" is all of the node's ranks: the plan's "m" allows any, and a
-		-- plan with fewer cannot be told apart from more, so that is not part
-		if w.ranks ~= "m" and (ranks == "m" or tonumber(ranks) > tonumber(w.ranks)) then return false end
+		-- "m" is all the ranks the node has at this level: an apex node opens
+		-- 1 rank at 81 and 3 at 84, so a plan's "1 of 4" exports as "m" at 81
+		-- (0055 review). The import never buys more than the plan's ranks, so
+		-- "m" is part of any plan rank; only a number can be seen to be more.
+		if w.ranks ~= "m" and ranks ~= "m" and tonumber(ranks) > tonumber(w.ranks) then return false end
 	end
 	return true
 end
@@ -2020,14 +2023,52 @@ function PlanTab.planDiffers(have, planned, short)
 	return differs
 end
 
--- True below the level cap, where the game cannot hold a whole build yet.
--- false when either level cannot be read: then the plan must match exactly.
-function PlanTab.belowCap()
+-- The character's level and the level cap, or nil for one the game will not
+-- give. The only reads behind belowCap, so the checks swap this.
+function PlanTab.readLevels()
 	local okLevel, level = pcall(UnitLevel, "player")
 	local okCap, cap = pcall(GetMaxLevelForPlayerExpansion)
-	if not (okLevel and okCap and canRead(level) and canRead(cap)) then return false end
+	return okLevel and level or nil, okCap and cap or nil
+end
+
+-- True below the level cap, where the game cannot hold a whole build yet.
+-- false when either level cannot be read: then the plan must match exactly.
+-- Pure with both levels given; with none it reads them.
+function PlanTab.belowCap(level, cap)
+	if level == nil and cap == nil then level, cap = PlanTab.readLevels() end
+	if not (PlanTab.canRead(level) and PlanTab.canRead(cap)) then return false end
 	if type(level) ~= "number" or type(cap) ~= "number" or level <= 0 then return false end
 	return level < cap
+end
+
+-- The level each loadout this addon made was made at, config id -> level,
+-- per character (0055 review: a loadout made at 81 is still "part of the
+-- plan" at 85, so without this Reset never offered the fuller one).
+function PlanTab.madeAt()
+	local c = DjinnisBiSCharDB or {}
+	DjinnisBiSCharDB = c
+	if type(c.madeAt) ~= "table" then c.madeAt = {} end
+	return c.madeAt
+end
+
+-- May loadout `id` hold only part of its plan? Below the cap, unless it was
+-- made at a lower level than now: then more of the plan fits, and it drifted.
+function PlanTab.mayBeShort(id, level, cap)
+	if level == nil and cap == nil then level, cap = PlanTab.readLevels() end
+	if not PlanTab.belowCap(level, cap) then return false end
+	local made = id and PlanTab.madeAt()[id]
+	if type(made) == "number" and made < level then return false end
+	return true
+end
+
+-- What one compare says, for Compare talents: "same", "part" (the plan as
+-- far as this level allows), "different" or "cannot". Pure.
+function PlanTab.compareWord(have, planned, short)
+	local differs = PlanTab.talentStringsDiffer(have, planned)
+	if differs == nil then return "cannot" end
+	if not differs then return "same" end
+	if short and PlanTab.partOfPlan(have, planned) then return "part" end
+	return "different"
 end
 
 -- The planned build for `spec` and `scenario`: the plan cell's own `talents`
@@ -4864,16 +4905,21 @@ PlanTab.lastEdited = {}
 function PlanTab.talentsEdited(planned)
 	if not planned then return nil end
 	if InCombatLockdown() then return PlanTab.lastEdited[planned] end
+	local active = PlanTab.activeTalentString()
 	local edited = nil
-	if C_ClassTalents.GetActiveConfigID and C_Traits.GenerateImportString then
-		local activeConfigID = C_ClassTalents.GetActiveConfigID()
-		if activeConfigID then
-			local ok, active = pcall(C_Traits.GenerateImportString, activeConfigID)
-			edited = PlanTab.planDiffers(ok and active, planned, PlanTab.belowCap())
-		end
-	end
+	if active ~= nil then edited = PlanTab.planDiffers(active, planned, PlanTab.mayBeShort(PlanTab.selectedConfigID())) end
 	PlanTab.lastEdited[planned] = edited
 	return edited
+end
+
+-- The talents in play as an import string; false when the game refused the
+-- export, nil when there is no active config to ask about.
+function PlanTab.activeTalentString()
+	if not (C_ClassTalents and C_ClassTalents.GetActiveConfigID and C_Traits and C_Traits.GenerateImportString) then return nil end
+	local activeConfigID = C_ClassTalents.GetActiveConfigID()
+	if not activeConfigID then return nil end
+	local ok, active = pcall(C_Traits.GenerateImportString, activeConfigID)
+	return ok and active or false
 end
 
 -- The saved loadout picked in the talent window, by name, or nil, and then
@@ -4907,28 +4953,24 @@ end
 -- describe one build and do not match character for character.
 function PlanTab.sayTalents()
 	local spec = playerSpec()
-	local live
-	if C_ClassTalents and C_ClassTalents.GetActiveConfigID and C_Traits and C_Traits.GenerateImportString then
-		local id = C_ClassTalents.GetActiveConfigID()
-		local ok, string = pcall(C_Traits.GenerateImportString, id)
-		if ok and type(string) == "string" and canRead(string) then live = string end
-	end
+	local live = PlanTab.activeTalentString()
+	if not (type(live) == "string" and canRead(live)) then live = nil end
+	-- below the cap a build in play can only be part of a plan (0055 review)
+	local short = PlanTab.mayBeShort(PlanTab.selectedConfigID())
 	print(GOLD .. "Djinni's BiS|r " .. GREY .. "the build in play:|r " .. (live or (GREY .. "not readable|r")))
 	for scenario, cell in pairs(GEAR_PLAN[spec] or {}) do
 		if type(cell.talents) == "string" and cell.talents ~= "" then
-			local differs = PlanTab.talentStringsDiffer(live, cell.talents)
-			local verdict = differs == nil and (GREY .. "cannot compare|r")
-				or (differs and ("|cffff2020different|r") or (GREEN .. "same|r"))
-			print(("%s%s|r %s(%s)|r %s: %s"):format(GOLD, cell.loadout or "?", GREY, scenario, verdict, cell.talents))
+			print(("%s%s|r %s(%s)|r %s: %s"):format(GOLD, cell.loadout or "?", GREY, scenario, PlanTab.VERDICT[PlanTab.compareWord(live, cell.talents, short)], cell.talents))
 		end
 	end
 	for name, build in pairs(PlanTab.BUILDS[spec] or {}) do
-		local differs = PlanTab.talentStringsDiffer(live, build)
-		local verdict = differs == nil and (GREY .. "cannot compare|r")
-			or (differs and ("|cffff2020different|r") or (GREEN .. "same|r"))
-		print(("%s%s|r %s(stored build)|r %s: %s"):format(GOLD, name, GREY, verdict, build))
+		print(("%s%s|r %s(stored build)|r %s: %s"):format(GOLD, name, GREY, PlanTab.VERDICT[PlanTab.compareWord(live, build, short)], build))
 	end
 end
+PlanTab.VERDICT = {
+	cannot = GREY .. "cannot compare|r", different = "|cffff2020different|r", same = GREEN .. "same|r",
+	part = GREEN .. "the plan, as far as this level allows|r",
+}
 
 -- The /simc export (card 0018). The Simulationcraft addon already writes every
 -- saved loadout of the spec as "# Saved Loadout: NAME" then "# talents=...",
@@ -6730,8 +6772,8 @@ end
 -- Which planned builds have no saved loadout of their name, and which saved
 -- loadouts of a planned name no longer hold the planned build. `saved` is
 -- PlanTab.savedLoadoutNames() (name -> config id), `stringOf(id)` that
--- loadout's export. `short` is PlanTab.belowCap(): then a loadout that holds
--- part of the plan is not drifted. One that cannot be compared is neither. nil when the game
+-- loadout's export. `short` is PlanTab.mayBeShort, or a boolean for all: where
+-- it says so, a loadout that holds part of the plan is not drifted. One that cannot be compared is neither. nil when the game
 -- would not list the loadouts: "all missing" would be a lie. Pure, for /bis test.
 function PlanTab.loadoutGaps(builds, saved, stringOf, short)
 	if not saved then return nil end
@@ -6739,7 +6781,7 @@ function PlanTab.loadoutGaps(builds, saved, stringOf, short)
 	for name, build in pairs(builds or {}) do
 		local id = saved[name]
 		if not id then missing[#missing + 1] = name
-		elseif PlanTab.planDiffers(stringOf(id), build, short) then drifted[#drifted + 1] = name end
+		elseif PlanTab.planDiffers(stringOf(id), build, (type(short) == "function" and short(id)) or short == true) then drifted[#drifted + 1] = name end
 	end
 	table.sort(missing)
 	table.sort(drifted)
@@ -6998,6 +7040,7 @@ end
 function PlanTab.stepLoadouts()
 	local q = PlanTab.q
 	if not q then return end
+	PlanTab.noteMade(q)
 	q.i = q.i + 1
 	local job = q.jobs[q.i]
 	if not job then return PlanTab.finishLoadouts() end
@@ -7005,6 +7048,7 @@ function PlanTab.stepLoadouts()
 	local ok, err, stale = PlanTab.importOne(job)
 	if ok then
 		q.made = q.made + 1
+		q.lastMade = job
 		if stale then q.stale = q.stale + 1 end
 	elseif q.final then
 		print(("%sDjinni's BiS|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, job.name, GREY, tostring(err)))
@@ -7013,6 +7057,21 @@ function PlanTab.stepLoadouts()
 		q.retry[#q.retry + 1] = job
 	end
 	PlanTab.waitThenStep()
+end
+
+-- The level the last job's loadout was made at, once the queue has waited
+-- for it: the config the queue watched, else by name (0055 review).
+function PlanTab.noteMade(q)
+	local job = q.lastMade
+	if not job then return nil end
+	q.lastMade = nil
+	local id = q.pendingID
+	local okInfo, info = pcall(C_Traits.GetConfigInfo, id or 0)
+	if not (id and okInfo and info and info.name == job.name) then id = (PlanTab.savedLoadoutNames() or {})[job.name] end
+	local level = PlanTab.readLevels()
+	if not (id and type(level) == "number" and PlanTab.canRead(level)) then return nil end
+	PlanTab.madeAt()[id] = level
+	return id
 end
 
 -- Every step waits, a failed one too. The event only names the config to
@@ -7064,7 +7123,7 @@ function PlanTab.createMissing()
 	local spec = playerSpec()
 	local builds = spec and PlanTab.BUILDS[spec] or {}
 	local saved = PlanTab.savedLoadoutNames()
-	local missing = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.belowCap())
+	local missing = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.mayBeShort)
 	if not missing then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
 	local room = PlanTab.loadoutRoom(saved)
 	local jobs = {}
@@ -7084,7 +7143,7 @@ function PlanTab.resetDrifted()
 	local spec = playerSpec()
 	local builds = spec and PlanTab.BUILDS[spec] or {}
 	local saved, twice = PlanTab.savedLoadoutNames()
-	local _, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.belowCap())
+	local _, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.mayBeShort)
 	if not drifted then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
 	local selected, jobs = PlanTab.selectedConfigID(), {}
 	for _, name in ipairs(drifted) do
@@ -7123,7 +7182,7 @@ function PlanTab.offerLoadouts(asked)
 		return "no builds"
 	end
 	local saved = PlanTab.savedLoadoutNames()
-	local missing, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.belowCap())
+	local missing, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.mayBeShort)
 	if not missing then return "unknown" end
 	-- no room: those builds are worn through the spare, so not offered (card 0040)
 	local room = PlanTab.loadoutRoom(saved)
@@ -7839,7 +7898,7 @@ function PlanTab.offerBars(asked)
 	local spec = playerSpec()
 	local key = PlanTab.barsKey(spec, (PlanTab.activeLoadoutName()))
 	if not key then
-		if asked then PlanTab.say("No saved layout for " .. (spec or "this spec") .. ". Click " .. GOLD .. "Save bars: spec|r" .. GREY .. " beside the talent window, on the character whose bars are right.") end
+		if asked then PlanTab.say("No saved layout for " .. (spec or "this spec") .. ". Click " .. GOLD .. "More > Save bars for this spec|r" .. GREY .. " on the character whose bars are right.") end
 		return "none"
 	end
 	if not asked and key == PlanTab.barsSeen then return "seen" end
@@ -7891,7 +7950,7 @@ function PlanTab.menuItems(where)
 	local function add(item) items[#items + 1] = item end
 	if where == "sidebar" then
 		add({ text = "Open the BiS window", tip = "The gear plan, by boss, by slot, stats and the plan.", fn = DjinnisBiS_Toggle })
-	elseif db().sidebarClosed then
+	elseif db().sidebarClosed and not PlanTab.rivalLoaded() then  -- with Talent Loadout Manager there is no list to show
 		add({ text = "Show the build list", tip = "Opens the list beside the talent window again.", fn = function() PlanTab.setSidebarClosed(false) end })
 	end
 	add({ title = "Talents" })
@@ -7924,8 +7983,9 @@ function PlanTab.menuItems(where)
 		add({ title = "Loot" })
 		add({ text = "Bonus roll worth it here?", tip = "Says if anything in the plan drops in this instance.", fn = function() SlashCmdList.DJINNISBIS("here") end })
 	end
-	add({ divider = true })
-	add({ text = "Run the self-test", tip = "Checks the addon's own logic. The result shows in chat.", fn = function() SlashCmdList.DJINNISBIS("test") end })
+	-- No self-test here: it swaps the game's own tables while it runs and
+	-- broke the talent window until a reload (Rob, 2026-09-24). It is a check
+	-- for whoever changes the addon, not a thing to use it by.
 	return items
 end
 
@@ -8135,11 +8195,11 @@ function PlanTab.loadoutChecks(check)
 		PlanTab.nodeKey = function(code) return lists[code] end
 		check(partTest .. ", fewer nodes and ranks", part("1:m:0,5:2:0"), true)
 		check(partTest .. ", the whole plan", part("1:m:0,5:3:0,9:m:1"), true)
-		check(partTest .. ", no nodes at all", part(""), true)
+		check(partTest .. ", but not an import that bought nothing", part(""), false)
 		check(partTest .. ", not with a node the plan has not", part("1:m:0,7:m:0"), false)
 		check(partTest .. ", not with another choice", part("9:m:0"), false)
 		check(partTest .. ", not with more ranks", part("5:4:0"), false)
-		check(partTest .. ", not with all ranks where the plan has some", part("5:m:0"), false)
+		check(partTest .. ", all the ranks this level opens, where the plan has some", part("5:m:0"), true)
 		check(partTest .. ", nothing said about a string that will not read", part(nil), nil)
 		lists[sen] = "1:m:0,5:2:0"
 		local _, short = PlanTab.loadoutGaps({ A = nek }, { A = 1 }, function() return sen end, true)
@@ -8197,11 +8257,14 @@ function PlanTab.loadoutChecks(check)
 	PlanTab.prompt = function(_, lines, buttons) shown = { lines = lines, buttons = buttons } end
 
 	local offerTest = "the missing builds are offered, and made only on a click"
+	-- a real prompt open in the client (the login offer) would answer "busy" (Rob, 2026-09-24)
+	local keptBusy = PlanTab.promptBusy
+	PlanTab.promptBusy = function() return false end
 	check(offerTest, PlanTab.offerLoadouts(), "shown")
 	check(offerTest .. ", nothing made by the offer", #calls, 0)
 	check(offerTest .. ", with a Create button", shown and shown.buttons[1].label, "Create 9")
 	check(offerTest .. ", and no Reset while nothing drifted", shown and shown.buttons[2].label, "Not now")
-	shown.buttons[2].onClick()
+	if shown then shown.buttons[2].onClick() end
 	check(offerTest .. ", Not now holds for the spec", PlanTab.offerLoadouts(), "dismissed")
 	check(offerTest .. ", but asking still shows it", PlanTab.offerLoadouts(true), "shown")
 	PlanTab.offerDismissed = {}
@@ -8228,7 +8291,11 @@ function PlanTab.loadoutChecks(check)
 
 	local makeTest = "Create makes every missing build, and nothing else"
 	canNew = 1  -- the first ask is refused: the server is busy, and the build is queued again quietly
+	local keptNote, noted = PlanTab.noteMade, {}
+	PlanTab.noteMade = function(q) if q.lastMade then noted[#noted + 1] = q.lastMade.name end return keptNote(q) end
 	check(makeTest, PlanTab.createMissing(), "started")
+	PlanTab.noteMade = keptNote
+	check(makeTest .. ", each made loadout's level is noted (card 0055)", #noted, 9)
 	check(makeTest .. ", one import per missing build", #calls, 9)
 	check(makeTest .. ", never the one already saved", table.concat(calls, "|"):find("Nek'Zali", 1, true), nil)
 	check(makeTest .. ", the busy one came back on the second pass", calls[#calls] ~= nil and calls[1] ~= calls[#calls], true)
@@ -8406,6 +8473,7 @@ function PlanTab.loadoutChecks(check)
 
 	C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil = kept[1], kept[2], kept[3], kept[4], kept[5]
 	InCombatLockdown, PlayerSpellsFrame, print, PlanTab.prompt = kept[6], kept[7], kept[8], kept[9]
+	PlanTab.promptBusy = keptBusy
 	PlanTab.offerDismissed, PlanTab.q = {}, nil
 end
 
@@ -8897,6 +8965,88 @@ end
 
 -- Card 0034's checks: which nodes a build would change, which nodes are
 -- choices, and that the tint lands on exactly those buttons and goes again.
+-- Card 0055: below the level cap. Every read goes through a PlanTab field,
+-- so nothing of Blizzard's is swapped here.
+function PlanTab.levelChecks(check)
+	local t = "below the level cap"
+	local names = { "readLevels", "canRead", "madeAt", "savedLoadoutNames", "loadoutString", "nodeKey", "promptBusy",
+		"prompt", "activeTalentString", "selectedConfigID", "lastEdited", "say" }
+	local kept = {}
+	for _, name in ipairs(names) do kept[name] = PlanTab[name] end
+	local ok, err = pcall(function()
+		check(t .. ", 81 of 90", PlanTab.belowCap(81, 90), true)
+		check(t .. ", 90 of 90", PlanTab.belowCap(90, 90), false)
+		check(t .. ", no level", PlanTab.belowCap(nil, 90), false)
+		check(t .. ", no cap", PlanTab.belowCap(81, nil), false)
+		PlanTab.canRead = function(v) return v ~= 81 end
+		check(t .. ", a secret level", PlanTab.belowCap(81, 90), false)
+		PlanTab.canRead = kept.canRead
+		PlanTab.readLevels = function() return nil, nil end
+		check(t .. ", the game will not say", PlanTab.belowCap(), false)
+		PlanTab.readLevels = function() return 81, 90 end
+		check(t .. ", read from the game", PlanTab.belowCap(), true)
+
+		local made = {}
+		PlanTab.madeAt = function() return made end
+		check(t .. ", a loadout made at no known level may be short", PlanTab.mayBeShort(7), true)
+		made[7] = 81
+		check(t .. ", one made at this level may be short", PlanTab.mayBeShort(7), true)
+		PlanTab.readLevels = function() return 84, 90 end
+		check(t .. ", one made lower than now may not", PlanTab.mayBeShort(7), false)
+		PlanTab.readLevels = function() return 90, 90 end
+		check(t .. ", none at the cap", PlanTab.mayBeShort(8), false)
+
+		-- The loop Rob hit on a level 81 warlock, through the offer itself: a
+		-- loadout the game trimmed (one node fewer) is offered no reset.
+		local name, feral = "Raid: Nek'Zali", PlanTab.BUILDS.Feral
+		local code = feral[name]
+		local trimmed, ids, byID, n = PlanTab.movePoint(code), {}, {}, 0
+		for each, build in pairs(feral) do n = n + 1 ids[each] = n byID[n] = build end
+		local fullKey = kept.nodeKey(code)
+		PlanTab.nodeKey = function(c) if c == trimmed then return (fullKey:gsub(",[^,]*$", "")) end return kept.nodeKey(c) end
+		PlanTab.savedLoadoutNames = function() return ids end
+		PlanTab.loadoutString = function(id) return id == ids[name] and trimmed or byID[id] end
+		PlanTab.promptBusy = function() return false end
+		local shown
+		PlanTab.prompt = function(_, lines) shown = table.concat(lines, " ") end
+		PlanTab.say = function() end
+		made = {}
+		PlanTab.readLevels = function() return 81, 90 end
+		shown = nil
+		check(t .. ", the offer takes a trimmed loadout as the plan", PlanTab.offerLoadouts(true), "complete")
+		made[ids[name]] = 81
+		PlanTab.readLevels = function() return 84, 90 end
+		shown = nil
+		check(t .. ", after a level-up the offer resets it", PlanTab.offerLoadouts(true) == "shown" and shown and shown:find(name, 1, true) ~= nil, true)
+		PlanTab.readLevels = function() return 90, 90 end
+		shown = nil
+		check(t .. ", and at the cap too", PlanTab.offerLoadouts(true) == "shown" and shown and shown:find(name, 1, true) ~= nil, true)
+
+		-- the talents in play: not "edited", and Compare says so
+		made = {}
+		PlanTab.activeTalentString = function() return trimmed end
+		PlanTab.selectedConfigID = function() return ids[name] end
+		PlanTab.lastEdited = {}
+		PlanTab.readLevels = function() return 81, 90 end
+		check(t .. ", the build in play is not edited", PlanTab.talentsEdited(code), false)
+		PlanTab.lastEdited = {}
+		PlanTab.readLevels = function() return 90, 90 end
+		check(t .. ", but at the cap it is", PlanTab.talentsEdited(code), true)
+		check(t .. ", Compare says part of the plan", PlanTab.compareWord(trimmed, code, true), "part")
+		check(t .. ", Compare says same for the plan", PlanTab.compareWord(code, code, true), "same")
+		check(t .. ", Compare says different at the cap", PlanTab.compareWord(trimmed, code, false), "different")
+		check(t .. ", Compare cannot without a build", PlanTab.compareWord(nil, code, true), "cannot")
+
+		-- the level is noted when the queue has made a loadout
+		PlanTab.readLevels = function() return 83, 90 end
+		local q = { lastMade = { name = name } }
+		check(t .. ", a made loadout's level is noted", PlanTab.noteMade(q) == ids[name] and made[ids[name]], 83)
+		check(t .. ", once", PlanTab.noteMade(q), nil)
+	end)
+	for _, name in ipairs(names) do PlanTab[name] = kept[name] end
+	check(t .. ", ran", ok or tostring(err), true)
+end
+
 -- Card 0053: every slash command has a click. Each menu item is found by its
 -- text and clicked, with the functions it should reach swapped on PlanTab.
 function PlanTab.menuChecks(check)
@@ -8949,7 +9099,7 @@ function PlanTab.menuChecks(check)
 		check(t .. ", Save bars as a profile", click(w, "Save bars as a profile..."), "askProfileName")
 		check(t .. ", no profiles says so", click(w, "No profiles yet"), "disabled")
 		check(t .. ", Bonus roll here", click(w, "Bonus roll worth it here?"), "slash(here)")
-		check(t .. ", Run the self-test", click(w, "Run the self-test"), "slash(test)")
+		check(t .. ", no self-test in the menu", click(w, "Run the self-test"), "none")
 		check(t .. ", the window needs no Open item", click(w, "Open the BiS window"), "none")
 
 		local s = PlanTab.menuItems("sidebar")
@@ -11180,7 +11330,9 @@ local function selfTest()
 		dead[3445] = nil
 		check(namesTest .. ", a boss left alive behind the last kill is not gone back to", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3497, done).boss, "Vashnik")
 		-- 0043 review: the lockout read itself, and the one place both callers use
-		local wasLocks, wasInstance, wasKilled, lockAsk = C_RaidLocks, GetInstanceInfo, PlanTab.lastKill, nil
+		-- its own name: reusing wasInstance shadowed the block's, and the block's
+		-- restore then put a fake GetInstanceInfo back for good (found by runSelfTest)
+		local wasLocks, lockInstance, wasKilled, lockAsk = C_RaidLocks, GetInstanceInfo, PlanTab.lastKill, nil
 		C_RaidLocks = { IsEncounterComplete = function(map, id, diff) lockAsk = map .. "/" .. id .. "/" .. tostring(diff) return id == 3470 end }
 		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 15, "Heroic", 30, 0, false, 2939 end
 		PlanTab.lastKill = nil
@@ -11193,7 +11345,7 @@ local function selfTest()
 		PlanTab.hidePopup()
 		active = "Raid: Nek'Zali"
 		check(namesTest .. ", the list puts the next living boss first", PlanTab.sidebarHere("Feral"), "Raid: Entombed Sentinels")
-		C_RaidLocks, GetInstanceInfo, PlanTab.lastKill = wasLocks, wasInstance, wasKilled
+		C_RaidLocks, GetInstanceInfo, PlanTab.lastKill = wasLocks, lockInstance, wasKilled
 		active = "DotC Raid ST *"
 		check(namesTest .. ", shown", PlanTab.checkSetup(), "shown")
 		check(namesTest .. ", the title is the place and the boss", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
@@ -11611,10 +11763,80 @@ local function selfTest()
 	PlanTab.treeChecks(check)  -- card 0034
 	PlanTab.specChecks(check)  -- card 0049
 	PlanTab.menuChecks(check)  -- card 0053
+	PlanTab.levelChecks(check)  -- card 0055
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")
 		or ("|cffff0000[BiS] " .. failed .. " check(s) failed|r"))
+end
+
+-- The self-test swaps Blizzard's own tables and frames for fakes while it
+-- runs, and each check puts them back at its own end. One that threw skipped
+-- its restore and left the game with a fake talent window (Rob, 2026-09-24:
+-- "The talent window is no longer openable after closing it"). So every
+-- global, the fields of every C_ namespace and of the other tables the checks
+-- write into, and every PlanTab field are noted first and put back after,
+-- whatever happened. A write to a Blizzard global still taints it until the
+-- interface reloads, so in a client the test ends by offering the reload.
+PlanTab.SWAPPED_TABLES = { "Enum", "SlashCmdList", "ClassTalentImportExportMixin", "ExportUtil", "PlayerUtil",
+	"KeystoneLootAPI", "ClassTalentHelper", "PlayerSpellsUtil" }
+
+function PlanTab.snapshot()
+	local snap = { g = {}, fields = {}, plan = {} }
+	local function note(t)
+		if type(t) ~= "table" or snap.fields[t] then return end
+		local copy = {}
+		for k, v in pairs(t) do copy[k] = v end
+		snap.fields[t] = copy
+	end
+	for k, v in pairs(_G) do
+		snap.g[k] = v
+		if type(k) == "string" and k:sub(1, 2) == "C_" then note(v) end
+	end
+	for _, name in ipairs(PlanTab.SWAPPED_TABLES) do note(rawget(_G, name)) end
+	for k, v in pairs(PlanTab) do snap.plan[k] = v end
+	return snap
+end
+
+-- Puts back what changed. Answers how many Blizzard values and how many
+-- PlanTab fields it had to, and the first few Blizzard names.
+function PlanTab.restore(snap)
+	local blizzard, plan, names = 0, 0, {}
+	local function put(t, k, v, label)
+		if rawequal(rawget(t, k), v) then return end
+		rawset(t, k, v)
+		blizzard = blizzard + 1
+		if #names < 5 then names[#names + 1] = label end
+	end
+	for k, v in pairs(snap.g) do put(_G, k, v, tostring(k)) end
+	for t, copy in pairs(snap.fields) do
+		for k, v in pairs(copy) do put(t, k, v, "a field " .. tostring(k)) end
+	end
+	for k, v in pairs(snap.plan) do
+		if not rawequal(PlanTab[k], v) then PlanTab[k] = v plan = plan + 1 end
+	end
+	return blizzard, plan, names
+end
+
+-- `run` is for offline-check.lua's proof of this net; the slash passes none.
+function PlanTab.runSelfTest(run)
+	local snap = PlanTab.snapshot()
+	local ok, err = pcall(run or selfTest)
+	local blizzard, _, names = PlanTab.restore(snap)
+	if not ok then print("|cffff0000FAIL|r the self-test stopped part way: " .. tostring(err)) end
+	if blizzard > 0 then
+		print(("|cffff0000FAIL|r the self-test left %d of the game's own values swapped (%s); they are put back now"):format(blizzard, table.concat(names, ", ")))
+	end
+	if type(ReloadUI) == "function" then
+		PlanTab.prompt("Djinni's BiS: self-test", {
+			"The self-test is done. The result is in chat.",
+			"It swaps parts of the game's own interface while it runs, so some game windows may not work until the interface reloads.",
+		}, {
+			{ label = "Reload now", onClick = ReloadUI },
+			{ label = "Later" },
+		})
+	end
+	return ok, blizzard
 end
 
 -- /djbis first: /bis was not always ours, another addon can claim it and
@@ -11627,7 +11849,7 @@ SlashCmdList.DJINNISBIS = function(msg)
 	if msg == "" then DjinnisBiS_Toggle()
 	elseif msg == "here" and not PlanTab.gearHere() then PlanTab.say("The BiS list is druid gear, so there is no verdict for this class.")
 	elseif msg == "here" then bonusRollVerdict((GetInstanceInfo()))
-	elseif msg == "test" then selfTest()
+	elseif msg == "test" then PlanTab.runSelfTest()
 	elseif msg == "talents" then PlanTab.sayTalents()
 	elseif msg == "loadouts" then PlanTab.offerLoadouts(true)
 	elseif msg == "tidy" then PlanTab.tidyAsk()

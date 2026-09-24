@@ -142,6 +142,35 @@ if asSpec and not source:find("{ " .. asSpec .. ", \"", 1, true) then
 end
 if not asSpec then
 	SlashCmdList.DJINNISBIS("test")
+	-- Card 0055: the net around the self-test. A test that swaps a Blizzard
+	-- global, a C_ field and a PlanTab field and then throws must leave all
+	-- three as they were, and say so. PlanTab is the slash handler's upvalue.
+	local PlanTab
+	for i = 1, 60 do
+		local name, value = debug.getupvalue(SlashCmdList.DJINNISBIS, i)
+		if not name then break end
+		if name == "PlanTab" then PlanTab = value end
+	end
+	if not PlanTab then
+		print("|cffff0000FAIL|r the self-test net: PlanTab is not reachable from the slash handler, so the net is unproven")
+	else
+		local realInfo, realCount, realSay, said = GetInstanceInfo, C_Item.GetItemCount, PlanTab.say, {}
+		local wrapped = print
+		print = function(...) said[#said + 1] = table.concat({ ... }, " ") end
+		local ok, swapped = PlanTab.runSelfTest(function()
+			GetInstanceInfo = function() return "Fake" end
+			C_Item.GetItemCount = function() return 99 end
+			PlanTab.say = function() end
+			error("thrown on purpose")
+		end)
+		print = wrapped
+		local text = table.concat(said, "\n")
+		if ok ~= false or swapped ~= 2 then print("|cffff0000FAIL|r the self-test net: expected false and 2 swapped, got " .. tostring(ok) .. " and " .. tostring(swapped)) end
+		if GetInstanceInfo ~= realInfo or C_Item.GetItemCount ~= realCount or PlanTab.say ~= realSay then print("|cffff0000FAIL|r the self-test net did not put everything back") end
+		if not (text:find("stopped part way", 1, true) and text:find("thrown on purpose", 1, true) and text:find("2 of the game's own values", 1, true)) then
+			print("|cffff0000FAIL|r the self-test net did not say what happened: " .. text)
+		end
+	end
 else
 	-- Not "" (the window): it needs a template's children, which no stub has,
 	-- and it fails the same way as Feral. The window's spec buttons are the
@@ -252,7 +281,7 @@ do
 		if code:find("SLASH_DJINNISBIS%d") then registered = registered + 1
 		-- any case, anywhere in the line: "Type /BIS ..." slipped past a narrower
 		-- pattern (0053 review). "/BiS: Raid" in a check's text is a value, not a command.
-		elseif code:lower():find("/djbis", 1, true) or code:lower():find("/bis[%s\"'|]") or code:lower():find("/bis$") then
+		elseif code:lower():find("/djbis", 1, true) or code:lower():find("/bis[%s\"'|%.,;!?)]") or code:lower():find("/bis$") then
 			print("|cffff0000FAIL|r no text names a slash command, use the button's name: line " .. lineNo)
 		end
 	end
