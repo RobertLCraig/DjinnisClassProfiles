@@ -219,3 +219,64 @@ offers to reset the loadouts made at 81.
 
 Mutations: `%TEMP%\mut0053.py` has 40, all red. The reviewer's `rev56\revmut.py` ones that still
 apply are all red too.
+
+**2026-09-24, Claude (fourth adversarial review, of 7a81698). Back to todo: three small findings,
+all about the checks. The code for the third review's findings holds.**
+
+How I tried it: a scratch copy (`%TEMP%\rev5556`), `mut.py` for mutations and `exp.py` for runs that
+count what the self-test prints. Nothing ran on the real file.
+
+Findings, in the order to fix them:
+
+1. **Compare's level wiring is still not checked, and that was the last review's finding 3.**
+   Change `sayTalents` to `PlanTab.mayBeShort(nil)` (DjinnisBiS.lua:4962) and the check stays green.
+   The two checks at lines 9077 and 9079 change only the level, with nothing noted. With `nil`, a
+   loadout made at 81 is still "the plan, as far as this level allows" in Compare at 82, while
+   **Make the planned loadouts** calls it drifted. That is the same disagreement finding 3 was
+   about. Fix: add a third case, noted at 81 and read at 82, where Compare says "different".
+2. **Every self-test now prints 28 lines of talent strings into chat.** `compareLine` calls the real
+   `sayTalents`, which prints each line before it returns them. `print` is not swapped in
+   `levelChecks`. In a client, `/djbis test` then prints 46 lines, and the result is hard to find
+   among them. Fix: split the printing from the lines (a `PlanTab.talentLines` that `sayTalents`
+   prints), or swap `print` for the two calls.
+3. **Two parts of the refactor have no check.** Remove the print loop from `sayTalents` and the
+   check stays green, so **Compare talents with the plan** could print nothing and still pass. Make
+   `PlanTab.configName` return nil and it also stays green, because the check swaps `configName`
+   out, so the reader itself is never run. Fix: check that the slash command prints the lines, and
+   run `configName` once against a stubbed `C_Traits.GetConfigInfo`.
+
+Each earlier finding:
+- Third review 1 (no level noted): **closed.** `mayBeShort` notes today's level the first time.
+  The check "noted at first sight, drifts at the next level" goes red with the note removed and
+  with `level - 1`. v0.46.0 is the version in the game folder (checked read-only).
+- Third review 2 (fake levels in saved data): **closed through card 0056's net**, but that net
+  does not check the character's table (see 0056). Offline this path never writes `madeAt`, so no
+  check covers it here either.
+- Third review 3 (untested paths): **the `noteMade` half is closed.** Both the trusted and the
+  ignored watched id now go red. **The Compare half is open** (finding 1 above).
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1.5 and 5.4.6. I read the whole output: no load error,
+  no FAIL line. The builder's 40 mutations each go red on the scratch copy.
+- My 10 mutations for this card: 7 caught (no note, note one level low, Compare `short = false`,
+  watched id trusted, watched id ignored, level-up ignored, `made <= level`). 3 missed (findings 1
+  and 3).
+- A Reset goes through `makeLoadouts`, so `noteMade` notes the new level. That stops a Reset loop
+  after a level-up.
+- `mayBeShort` writes only below the cap and only with a level that `belowCap` has already found
+  readable and numeric. So no secret is stored.
+- Lua 5.1 limits: the file loads under 5.1.5, so it has no more than 200 main-chunk locals and 60
+  upvalues per function. This change adds only PlanTab fields.
+
+Security, where the card produced code:
+1. *Weakest point:* the first level noted is today's, not the level the loadout was made at. If
+   Rob first loads v0.46.0 at 82 or later, his loadouts from 81 are noted then. They come back one
+   level-up later than they should. They are a trimmed build, not a risk.
+2. *Unchecked:* Compare's per-loadout level (finding 1) and `configName`'s own read (finding 3).
+3. *Leaks:* nothing. No network, no chat to others, no other player's data.
+
+**No browser, no game client.** The surface is in-game UI. After the fix, on the level 81 warlock:
+`/reload`. **More > Make the planned loadouts** says every build matches. **More > Compare talents
+with the plan** says "the plan, as far as this level allows". Open the talent window: the list is
+beside it, or its "BiS plan" tab is. At 82, both **Make the planned loadouts** and **Compare**
+call the loadouts made at 81 different, and Make offers to reset them.
