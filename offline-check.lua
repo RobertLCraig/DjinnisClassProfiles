@@ -241,6 +241,22 @@ do
 	if seen == 0 then print("|cffff0000FAIL|r no small font on values, labels or buttons: saw no font name at all, the scan is broken") end
 end
 
+-- Card 0053: every command has a button, so no text the player sees names a
+-- slash command. Comments may; the two lines that register the command do.
+do
+	local src = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
+	local registered, lineNo = 0, 0
+	for line in src:gmatch("[^\n]*\n?") do
+		lineNo = lineNo + 1
+		local code = line:gsub("%-%-.*$", "")
+		if code:find("SLASH_DJINNISBIS%d") then registered = registered + 1
+		elseif code:find("/djbis", 1, true) or code:find("\"/bis[\" ]") then
+			print("|cffff0000FAIL|r no text names a slash command, use the button's name: line " .. lineNo)
+		end
+	end
+	if registered ~= 2 then print("|cffff0000FAIL|r no text names a slash command: saw " .. registered .. " registrations, not 2, the scan is broken") end
+end
+
 realPrint(failures == 0 and "offline-check: no FAIL lines"
 	or ("offline-check: " .. failures .. " FAIL lines"))
 os.exit(failures == 0 and 0 or 1)

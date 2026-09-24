@@ -3312,6 +3312,10 @@ local function buildWindow()
 	importButton:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, -58)
 	importButton:SetText("Import sim")
 	importButton:SetScript("OnClick", function() DjinnisBiS_ShowImport(activeSpec) end)
+	-- every slash command as a click (card 0053)
+	f.more = PlanTab.moreButton(f, "window")
+	f.more:SetSize(90, PlanTab.SIZE.tab)
+	f.more:SetPoint("RIGHT", importButton, "LEFT", -4, 0)
 
 	f.specs = {}
 	for i, spec in ipairs(SPEC_ORDER) do
@@ -4142,7 +4146,7 @@ function PlanTab.loadTalents(name)
 		local code = PlanTab.buildFor(playerSpec(), name)
 		if code then return PlanTab.wearSpare(name, code) end  -- card 0040
 		PlanTab.openTalents()
-		print(("%sDjinni's BiS|r %sno saved loadout named \"%s\" for this spec.|r %s/djbis loadouts|r %smakes the planned ones.|r"):format(GOLD, GREY, name, GOLD, GREY))
+		print(("%sDjinni's BiS|r %sno saved loadout named \"%s\" for this spec.|r %sMore > Make the planned loadouts|r %smakes the planned ones.|r"):format(GOLD, GREY, name, GOLD, GREY))
 		return "missing"
 	end
 	-- Already the selected loadout: Blizzard's Apply writes a hand edit into the
@@ -4163,7 +4167,7 @@ function PlanTab.loadTalents(name)
 		PlanTab.openTalents()
 		-- Card 0031 closes this: Reset to plan makes it again from the stored
 		-- string, once another loadout is selected.
-		print(("%sDjinni's BiS|r %s\"%s\" is loaded already, but its build is not the planned one. Pick another loadout, then|r %s/djbis loadouts|r %soffers Reset to plan.|r")
+		print(("%sDjinni's BiS|r %s\"%s\" is loaded already, but its build is not the planned one. Pick another loadout, then|r %sMore > Make the planned loadouts|r %soffers Reset to plan.|r")
 			:format(GOLD, GREY, name, GOLD, GREY))
 		return "same"
 	end
@@ -6254,6 +6258,13 @@ function PlanTab.buildSidebar()
 	f.close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
 	f.close:SetPoint("TOPRIGHT", -2, -2)
 	f.close:SetScript("OnClick", function() PlanTab.setSidebarClosed(true) end)
+	f.more = PlanTab.moreButton(f, "sidebar")  -- card 0053
+	f.more:SetSize(60, 20)
+	f.more:SetPoint("RIGHT", f.close, "LEFT", 0, 0)
+	-- a long title ("No stored builds for Frost Death Knight yet") stops at More
+	f.title:SetPoint("RIGHT", f.more, "LEFT", -4, 0)
+	f.title:SetJustifyH("LEFT")
+	f.title:SetWordWrap(false)
 	-- Blizzard's list: ScrollBox, its scroll bar, one view, one data provider.
 	-- Rows are plain buttons made by PlanTab.sidebarRow (Blizzard_SharedXML/
 	-- Shared/Scroll/ScrollBoxListView.lua allows a frame type for a template).
@@ -6309,8 +6320,7 @@ function PlanTab.buildSidebar()
 					GameTooltip:AddLine("Your bars show it now. Amber: the slots a load changes.", 1, 0.6, 0, true)
 				end
 			end
-			GameTooltip:AddLine("/djbis bars undo puts back the bars from before an apply. /djbis bars offers a saved layout.", 0.7, 0.7, 0.7, true)
-			GameTooltip:AddLine("Named profiles for any spec: /djbis bars save <name>, load <name>, list, delete <name>.", 0.7, 0.7, 0.7, true)
+			GameTooltip:AddLine("More (top right): named profiles for any spec, the saved bars offer and the talent tools.", 0.7, 0.7, 0.7, true)
 			GameTooltip:Show()
 		end)
 		button:SetScript("OnLeave", function() GameTooltip:Hide() pcall(PlanTab.hideGhost) end)
@@ -6955,7 +6965,7 @@ function PlanTab.stepLoadouts()
 		if stale then q.stale = q.stale + 1 end
 	elseif q.final then
 		print(("%sDjinni's BiS|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, job.name, GREY, tostring(err)))
-		if job.deleted then PlanTab.say(("The old \"%s\" was deleted and not made again. %s/djbis loadouts|r%s offers to create it."):format(job.name, GOLD, GREY)) end
+		if job.deleted then PlanTab.say(("The old \"%s\" was deleted and not made again. %sMore > Make the planned loadouts|r%s offers to create it."):format(job.name, GOLD, GREY)) end
 	else
 		q.retry[#q.retry + 1] = job
 	end
@@ -7038,7 +7048,7 @@ function PlanTab.resetDrifted()
 		if twice and twice[name] then
 			PlanTab.say(("Two loadouts are named \"%s\", so neither is replaced. Rename or delete one in the talent window."):format(name))
 		elseif saved[name] == selected then
-			PlanTab.say(("\"%s\" is the loadout you have selected, so it is not replaced yet. Deleting it would drop you to the starter build. Pick another loadout, then type %s/djbis loadouts|r%s."):format(name, GOLD, GREY))
+			PlanTab.say(("\"%s\" is the loadout you have selected, so it is not replaced yet. Deleting it would drop you to the starter build. Pick another loadout, then click %sMore > Make the planned loadouts|r%s."):format(name, GOLD, GREY))
 		else
 			jobs[#jobs + 1] = { name = name, code = builds[name], replace = saved[name] }
 		end
@@ -7124,7 +7134,7 @@ function PlanTab.tidy(confirmed)
 	if not confirmed then
 		PlanTab.say(("These %d old loadouts would be deleted. Your own loadouts are not touched:"):format(#doomed))
 		for _, name in ipairs(doomed) do print("  " .. name) end
-		PlanTab.say("Type " .. GOLD .. "/djbis tidy yes|r" .. GREY .. " to delete them.")
+		PlanTab.say("Click Delete in the box that opens to delete them.")
 		return #doomed
 	end
 	local gone = 0
@@ -7160,8 +7170,8 @@ function PlanTab.armLoadouts()
 	watcher:SetScript("OnEvent", function(_, ...) PlanTab.onLoadoutEvent(...) end)
 	local refused = {
 		TRAIT_CONFIG_CREATED = "making loadouts waits longer between each.",
-		PLAYER_SPECIALIZATION_CHANGED = "a spec change does not offer the missing builds. Type /djbis loadouts.",
-		TRAIT_CONFIG_UPDATED = "a build change does not offer its action bars. Type /djbis bars.",
+		PLAYER_SPECIALIZATION_CHANGED = "a spec change does not offer the missing builds. Click More > Make the planned loadouts.",
+		TRAIT_CONFIG_UPDATED = "a build change does not offer its action bars. Click More > Offer the saved bars.",
 	}
 	for _, event in ipairs({ "TRAIT_CONFIG_CREATED", "PLAYER_SPECIALIZATION_CHANGED", "TRAIT_CONFIG_UPDATED" }) do
 		watcher:RegisterEvent(event)
@@ -7493,7 +7503,7 @@ end
 function PlanTab.saveProfile(name)
 	name = (name or ""):match("^%s*(.-)%s*$")
 	if name == "" or #name > 40 or name:find("|", 1, true) then  -- "|" starts a chat colour code
-		PlanTab.say("Give the profile a name of 1 to 40 characters, without \"|\": /djbis bars save <name>.")
+		PlanTab.say("Give the profile a name of 1 to 40 characters, without \"|\".")
 		return nil
 	end
 	if name:lower() == "build" then PlanTab.say("\"build\" means this build's layout. Pick another profile name.") return nil end
@@ -7502,7 +7512,7 @@ function PlanTab.saveProfile(name)
 	local stored = PlanTab.findProfile(name)
 	local layout, n, k = PlanTab.captureBars()
 	PlanTab.profilesDB()[stored or name] = layout
-	PlanTab.say(("%s the %s profile: %d action bar slots and %d key bindings. %s/djbis bars load %s|r%s puts it on any character.")
+	PlanTab.say(("%s the %s profile: %d action bar slots and %d key bindings. %sMore > Profile: %s|r%s loads it on any character.")
 		:format(stored and "Replaced" or "Saved", stored or name, n, k, GOLD, stored or name, GREY))
 	return stored or name
 end
@@ -7510,15 +7520,20 @@ end
 function PlanTab.loadProfile(name)
 	name = (name or ""):match("^%s*(.-)%s*$")
 	local stored = name ~= "" and PlanTab.findProfile(name)
-	if not stored then PlanTab.say(("No profile called \"%s\". %s/djbis bars list|r%s shows them."):format(name, GOLD, GREY)) return "none" end
+	if not stored then PlanTab.say(("No profile called \"%s\". %sMore|r%s lists them."):format(name, GOLD, GREY)) return "none" end
 	return PlanTab.applyBars(stored, PlanTab.profilesDB())
 end
 
-function PlanTab.listProfiles()
+function PlanTab.profileNames()
 	local names = {}
 	for name in pairs(PlanTab.profilesDB()) do names[#names + 1] = name end
 	table.sort(names)
-	if #names == 0 then PlanTab.say("No profiles yet. /djbis bars save <name> makes one.") return 0 end
+	return names
+end
+
+function PlanTab.listProfiles()
+	local names = PlanTab.profileNames()
+	if #names == 0 then PlanTab.say("No profiles yet. More > Save bars as a profile makes one.") return 0 end
 	PlanTab.say(("%d action bar profiles:"):format(#names))
 	for _, name in ipairs(names) do print(("  %s %s(saved %s)|r"):format(name, GREY, PlanTab.profilesDB()[name].saved or "?")) end
 	return #names
@@ -7574,7 +7589,7 @@ function PlanTab.applyBars(key, from)
 	c.barsAfter, c.keysAfter = PlanTab.readBars(), PlanTab.readKeys()
 	for _, line in ipairs(refused) do skipped[#skipped + 1] = line end
 	if not from then PlanTab.barsSeen = key end  -- a profile is never offered, so never "seen"
-	PlanTab.say(("Applied the %s layout: %d slots and %d keys changed, %d skipped. %s/djbis bars undo|r%s puts the old ones back.")
+	PlanTab.say(("Applied the %s layout: %d slots and %d keys changed, %d skipped. %sUndo bars|r%s puts the old ones back.")
 		:format(key, placed, keys, #skipped, GOLD, GREY))
 	for _, line in ipairs(skipped) do print("  " .. line) end
 	PlanTab.barsChanged()
@@ -7778,7 +7793,7 @@ function PlanTab.offerBars(asked)
 	local spec = playerSpec()
 	local key = PlanTab.barsKey(spec, (PlanTab.activeLoadoutName()))
 	if not key then
-		if asked then PlanTab.say("No saved layout for " .. (spec or "this spec") .. ". Type " .. GOLD .. "/djbis bars save|r" .. GREY .. " on the character whose bars are right.") end
+		if asked then PlanTab.say("No saved layout for " .. (spec or "this spec") .. ". Click " .. GOLD .. "Save bars: spec|r" .. GREY .. " beside the talent window, on the character whose bars are right.") end
 		return "none"
 	end
 	if not asked and key == PlanTab.barsSeen then return "seen" end
@@ -7797,7 +7812,7 @@ function PlanTab.offerBars(asked)
 		-- The prompt can outlive the spec or build it was for (fourth review)
 		{ label = "Apply", onClick = function()
 			if PlanTab.barsKey(playerSpec(), (PlanTab.activeLoadoutName())) ~= key then
-				PlanTab.say("The spec or build changed since that offer. Type " .. GOLD .. "/djbis bars|r" .. GREY .. " for the layout that fits now.")
+				PlanTab.say("The spec or build changed since that offer. Click " .. GOLD .. "More > Offer the saved bars|r" .. GREY .. " for the layout that fits now.")
 				return
 			end
 			PlanTab.applyBars(key)
@@ -7818,6 +7833,160 @@ function PlanTab.barsCommand(rest)
 	elseif rest == "list" then PlanTab.listProfiles()
 	elseif rest == "undo" then PlanTab.undoBars()
 	else PlanTab.offerBars(true) end
+end
+
+-- Every slash command as a click (card 0053, Rob 2026-09-24: "I shouldnt need
+-- to type any commands to make use of the addon"). The items are plain data so
+-- the self-test can read them; PlanTab.openMenu draws them with Blizzard's
+-- menu. `where` is "window" or "sidebar". An item is { title }, { divider },
+-- or { text, tip, fn, sub, disabled }. Every fn is called with no arguments.
+function PlanTab.menuItems(where)
+	local items = {}
+	local function add(item) items[#items + 1] = item end
+	if where == "sidebar" then
+		add({ text = "Open the BiS window", tip = "The gear plan, by boss, by slot, stats and the plan.", fn = DjinnisBiS_Toggle })
+	end
+	add({ title = "Talents" })
+	add({ text = "Make the planned loadouts", tip = "Offers to create or reset a loadout for every planned build of this spec.", fn = function() PlanTab.offerLoadouts(true) end })
+	add({ text = "Compare talents with the plan", tip = "Lists in chat the build in play beside every planned build of this spec.", fn = PlanTab.sayTalents })
+	if PlanTab.playerClass() == PlanTab.DRUID then
+		add({ text = "Delete old Dreamgrove loadouts", tip = "Lists the loadouts the old DjinnisDreamgrove addon made, then asks before it deletes them. Your own loadouts are not touched.", fn = PlanTab.tidyAsk })
+	end
+	add({ divider = true })
+	add({ title = "Action bars" })
+	add({ text = "Offer the saved bars", tip = "Offers the action bars and keys saved for this build, or for this spec.", fn = function() PlanTab.offerBars(true) end })
+	if where ~= "sidebar" then  -- the sidebar has its own Undo bars button
+		add({ text = "Undo bars", tip = "Puts back the action bars and key bindings from before the last load.", fn = PlanTab.undoBarsAsk })
+	end
+	add({ text = "Save bars as a profile...", tip = "Keeps your action bars and key bindings now under a name. A profile loads on any character and any spec.", fn = PlanTab.askProfileName })
+	local names = PlanTab.profileNames()
+	if #names == 0 then add({ text = "No profiles yet", disabled = true }) end
+	for _, name in ipairs(names) do
+		add({ text = ("Profile: %s"):format(name), tip = ("Saved %s."):format(PlanTab.profilesDB()[name].saved or "on an unknown day"), sub = {
+			{ text = "Load", tip = "Puts this profile on this character. Undo bars puts the old bars back.", fn = function() PlanTab.loadProfile(name) end },
+			{ text = "Delete", tip = "Asks first.", fn = function() PlanTab.deleteProfileAsk(name) end },
+		} })
+	end
+	if PlanTab.gearHere() then
+		add({ divider = true })
+		add({ title = "Loot" })
+		add({ text = "Bonus roll worth it here?", tip = "Says if anything in the plan drops in this instance.", fn = function() SlashCmdList.DJINNISBIS("here") end })
+	end
+	add({ divider = true })
+	add({ text = "Run the self-test", tip = "Checks the addon's own logic. The result shows in chat.", fn = function() SlashCmdList.DJINNISBIS("test") end })
+	return items
+end
+
+-- Draws `items` into a Blizzard menu description, submenus included.
+function PlanTab.fillMenu(root, items)
+	for _, item in ipairs(items) do
+		if item.divider then root:CreateDivider()
+		elseif item.title then root:CreateTitle(item.title)
+		else
+			local fn = item.fn
+			local button = root:CreateButton(item.text, fn and function() fn() end)
+			if item.disabled then button:SetEnabled(false) end
+			if item.tip and button.SetTitleAndTextTooltip then button:SetTitleAndTextTooltip(item.text, item.tip) end
+			if item.sub then PlanTab.fillMenu(button, item.sub) end
+		end
+	end
+end
+
+function PlanTab.openMenu(owner, where)
+	if not (MenuUtil and MenuUtil.CreateContextMenu) then return nil end
+	return MenuUtil.CreateContextMenu(owner, function(_, root) PlanTab.fillMenu(root, PlanTab.menuItems(where)) end)
+end
+
+-- The "More" button: the menu above, beside the window's other buttons.
+function PlanTab.moreButton(parent, where)
+	local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+	button:SetText("More")
+	button:SetScript("OnClick", function(self) PlanTab.openMenu(self, where) end)
+	return button
+end
+
+-- Delete old loadouts as a click: tidy lists them, then this asks.
+function PlanTab.tidyAsk()
+	local n = PlanTab.tidy(false)
+	if type(n) ~= "number" or n == 0 then return n end
+	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
+	PlanTab.prompt("Djinni's BiS: old loadouts", {
+		("Delete the %d old Dreamgrove loadouts listed in chat?"):format(n),
+		"Your own loadouts are not touched.",
+	}, {
+		{ label = "Delete", onClick = function() PlanTab.tidy(true) end },
+		{ label = "Cancel" },
+	})
+	return "ask"
+end
+
+function PlanTab.deleteProfileAsk(name)
+	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
+	PlanTab.prompt("Djinni's BiS: action bars", {
+		("Delete the %s profile?"):format(name),
+		"This cannot be undone.",
+	}, {
+		{ label = "Delete", onClick = function() PlanTab.deleteProfile(name) end },
+		{ label = "Cancel" },
+	})
+	return "ask"
+end
+
+-- A name box: a title, one line, an edit box and OK / Cancel. Enter is OK and
+-- Escape is Cancel. `onOK(text)` gets the text as typed. One frame, reused.
+function PlanTab.askName(title, line, onOK)
+	local f = PlanTab.askFrame
+	if not f then
+		f = CreateFrame("Frame", "DjinnisBiSAskName", UIParent, "BasicFrameTemplateWithInset")
+		f:SetSize(340, 132)
+		f:SetPoint("TOP", UIParent, "TOP", 0, -180)
+		f:SetMovable(true)
+		f:EnableMouse(true)
+		f:SetFrameStrata("DIALOG")
+		f:SetClampedToScreen(true)
+		f:RegisterForDrag("LeftButton")
+		f:SetScript("OnDragStart", f.StartMoving)
+		f:SetScript("OnDragStop", f.StopMovingOrSizing)
+		f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		f.title:SetPoint("TOP", f, "TOP", 0, -6)
+		f.text = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		f.text:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -34)
+		f.text:SetWidth(308)
+		f.text:SetJustifyH("LEFT")
+		f.box = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
+		f.box:SetSize(296, 22)
+		f.box:SetPoint("TOPLEFT", f, "TOPLEFT", 24, -58)
+		f.box:SetAutoFocus(true)
+		f.box:SetMaxLetters(40)
+		f.ok = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+		f.ok:SetSize(120, PlanTab.SIZE.button)
+		f.ok:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 16, 12)
+		f.ok:SetText("OK")
+		f.cancel = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+		f.cancel:SetSize(120, PlanTab.SIZE.button)
+		f.cancel:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -16, 12)
+		f.cancel:SetText("Cancel")
+		f.cancel:SetScript("OnClick", function() f:Hide() end)
+		f.box:SetScript("OnEscapePressed", function() f:Hide() end)
+		f.box:SetScript("OnEnterPressed", function() f.ok:Click() end)
+		tinsert(UISpecialFrames, "DjinnisBiSAskName")
+		PlanTab.askFrame = f
+	end
+	f.title:SetText(title)
+	f.text:SetText(line)
+	f.box:SetText("")
+	f.ok:SetScript("OnClick", function()
+		local text = f.box:GetText()
+		f:Hide()
+		onOK(text)
+	end)
+	f:Show()
+	f.box:SetFocus()
+	return f
+end
+
+function PlanTab.askProfileName()
+	return PlanTab.askName("Djinni's BiS: save bars", "A name for your action bars and key bindings now:", PlanTab.saveProfile)
 end
 
 local loader = CreateFrame("Frame")
@@ -8646,6 +8815,138 @@ end
 
 -- Card 0034's checks: which nodes a build would change, which nodes are
 -- choices, and that the tint lands on exactly those buttons and goes again.
+-- Card 0053: every slash command has a click. Each menu item is found by its
+-- text and clicked, with the functions it should reach swapped on PlanTab.
+function PlanTab.menuChecks(check)
+	local t = "every command has a button"
+	local names = { "offerLoadouts", "sayTalents", "tidyAsk", "offerBars", "undoBarsAsk", "askProfileName",
+		"loadProfile", "deleteProfileAsk", "profilesDB", "playerClass", "tidy", "prompt", "promptBusy", "askName",
+		"deleteProfile" }
+	local kept, calls = {}, {}
+	for _, name in ipairs(names) do kept[name] = PlanTab[name] end
+	local wasSlash, wasToggle = SlashCmdList.DJINNISBIS, DjinnisBiS_Toggle
+	local profiles, class, tidyAnswer, shown = {}, PlanTab.DRUID, 2, nil
+	local function find(items, text)
+		for _, item in ipairs(items) do if item.text == text then return item end end
+		return nil
+	end
+	-- clicks `text` and answers what it reached, "none" when there is no such item
+	local function click(items, text)
+		local item = find(items, text)
+		if not item then return "none" end
+		if item.disabled then return "disabled" end
+		calls = {}
+		item.fn()
+		return table.concat(calls, " ")
+	end
+	local ok, err = pcall(function()
+		for _, name in ipairs({ "offerLoadouts", "sayTalents", "tidyAsk", "offerBars", "undoBarsAsk", "askProfileName", "loadProfile", "deleteProfileAsk" }) do
+			PlanTab[name] = function(a) calls[#calls + 1] = name .. (a ~= nil and ("(" .. tostring(a) .. ")") or "") end
+		end
+		PlanTab.profilesDB = function() return profiles end
+		PlanTab.playerClass = function() return class end
+		SlashCmdList.DJINNISBIS = function(msg) calls[#calls + 1] = "slash(" .. msg .. ")" end
+		DjinnisBiS_Toggle = function() calls[#calls + 1] = "toggle" end
+		PlanTab.tidy = function(yes) calls[#calls + 1] = "tidy(" .. tostring(yes) .. ")" return 0 end
+
+		-- typed, tidy asks the same question the menu does
+		calls = {}
+		wasSlash("tidy")
+		check(t .. ", typed tidy asks first", table.concat(calls, " "), "tidyAsk")
+
+		local w = PlanTab.menuItems("window")
+		check(t .. ", Make the planned loadouts", click(w, "Make the planned loadouts"), "offerLoadouts(true)")
+		check(t .. ", Compare talents", click(w, "Compare talents with the plan"), "sayTalents")
+		check(t .. ", Delete old loadouts, on a druid", click(w, "Delete old Dreamgrove loadouts"), "tidyAsk")
+		check(t .. ", Offer the saved bars", click(w, "Offer the saved bars"), "offerBars(true)")
+		check(t .. ", Undo bars in the window", click(w, "Undo bars"), "undoBarsAsk")
+		check(t .. ", Save bars as a profile", click(w, "Save bars as a profile..."), "askProfileName")
+		check(t .. ", no profiles says so", click(w, "No profiles yet"), "disabled")
+		check(t .. ", Bonus roll here", click(w, "Bonus roll worth it here?"), "slash(here)")
+		check(t .. ", Run the self-test", click(w, "Run the self-test"), "slash(test)")
+		check(t .. ", the window needs no Open item", click(w, "Open the BiS window"), "none")
+
+		local s = PlanTab.menuItems("sidebar")
+		check(t .. ", the sidebar opens the window", click(s, "Open the BiS window"), "toggle")
+		check(t .. ", the sidebar has its own Undo button", click(s, "Undo bars"), "none")
+
+		profiles = { Raid = { saved = "2026-09-24" }, Arena = {} }
+		w = PlanTab.menuItems("window")
+		check(t .. ", profiles replace No profiles yet", click(w, "No profiles yet"), "none")
+		local raid, order = find(w, "Profile: Raid"), {}
+		for _, item in ipairs(w) do
+			local name = item.text and item.text:match("^Profile: (.+)$")
+			if name then order[#order + 1] = name end
+		end
+		check(t .. ", each profile is listed, in order", table.concat(order, ", "), "Arena, Raid")
+		check(t .. ", a profile loads", raid and click(raid.sub, "Load") or "no item", "loadProfile(Raid)")
+		check(t .. ", a profile deletes, after a question", raid and click(raid.sub, "Delete") or "no item", "deleteProfileAsk(Raid)")
+
+		class = 6
+		w = PlanTab.menuItems("window")
+		check(t .. ", a Death Knight has no tidy", click(w, "Delete old Dreamgrove loadouts"), "none")
+		check(t .. ", a Death Knight has no bonus roll verdict", click(w, "Bonus roll worth it here?"), "none")
+		check(t .. ", a Death Knight still has its bars", click(w, "Offer the saved bars"), "offerBars(true)")
+		class = PlanTab.DRUID
+
+		-- fillMenu draws what menuItems says, and calls fn with no arguments
+		local drawn = {}
+		local function fakeRoot(prefix)
+			return {
+				CreateDivider = function() drawn[#drawn + 1] = prefix .. "---" end,
+				CreateTitle = function(_, text) drawn[#drawn + 1] = prefix .. "#" .. text end,
+				CreateButton = function(_, text, fn)
+					drawn[#drawn + 1] = prefix .. text
+					local b = fakeRoot(prefix .. text .. ">")
+					b.fn = fn
+					b.SetEnabled = function(_, on) drawn[#drawn + 1] = prefix .. text .. (on and " on" or " off") end
+					b.SetTitleAndTextTooltip = function(_, title, tip) drawn[#drawn + 1] = prefix .. title .. " tip " .. tip end
+					drawn[text] = b
+					return b
+				end,
+			}
+		end
+		local got
+		PlanTab.fillMenu(fakeRoot(""), {
+			{ title = "T" }, { divider = true },
+			{ text = "A", tip = "a", fn = function(...) got = select("#", ...) end },
+			{ text = "B", disabled = true },
+			{ text = "C", sub = { { text = "D" } } },
+		})
+		check(t .. ", the menu is drawn from the items", table.concat(drawn, "; "), "#T; ---; A; A tip a; B; B off; C; C>D")
+		if drawn.A and drawn.A.fn then drawn.A.fn("data", "input") end
+		check(t .. ", a click passes no arguments", got, 0)
+
+		-- the questions: tidy asks before it deletes, and so does a profile
+		PlanTab.tidyAsk = kept.tidyAsk
+		PlanTab.promptBusy = function() return false end
+		PlanTab.prompt = function(_, _, buttons) shown = buttons end
+		PlanTab.tidy = function(yes) calls[#calls + 1] = "tidy(" .. tostring(yes) .. ")" return yes and 2 or tidyAnswer end
+		calls, shown = {}, nil
+		check(t .. ", tidy asks when there is something to delete", PlanTab.tidyAsk(), "ask")
+		if shown and shown[1].onClick then shown[1].onClick() end
+		check(t .. ", tidy deletes only on Delete", table.concat(calls, " "), "tidy(false) tidy(true)")
+		tidyAnswer, shown = 0, nil
+		PlanTab.tidyAsk()
+		check(t .. ", tidy does not ask about nothing", shown, nil)
+		PlanTab.deleteProfileAsk = kept.deleteProfileAsk
+		PlanTab.deleteProfile = function(name) calls[#calls + 1] = "deleteProfile(" .. name .. ")" end
+		calls, shown = {}, nil
+		PlanTab.deleteProfileAsk("Raid")
+		check(t .. ", a profile is not deleted before the answer", table.concat(calls, " "), "")
+		if shown and shown[1].onClick then shown[1].onClick() end
+		check(t .. ", a profile is deleted on Delete", table.concat(calls, " "), "deleteProfile(Raid)")
+		local onOK
+		PlanTab.askName = function(_, _, fn) onOK = fn end
+		kept.askProfileName()
+		check(t .. ", the name box saves a profile", onOK == kept.saveProfile or onOK == PlanTab.saveProfile, true)
+	end)
+	for _, name in ipairs(names) do PlanTab[name] = kept[name] end
+	SlashCmdList.DJINNISBIS, DjinnisBiS_Toggle = wasSlash, wasToggle
+	check(t .. ", ran", ok or tostring(err), true)
+	check(t .. ", and put everything back", PlanTab.playerClass == kept.playerClass and PlanTab.tidy == kept.tidy and SlashCmdList.DJINNISBIS == wasSlash, true)
+end
+
 -- Card 0049: every spec, each key once, and the druid keys saved data uses.
 -- `lua offline-check.lua <spec id>` is the other half: every command as that spec.
 function PlanTab.specChecks(check)
@@ -11212,6 +11513,7 @@ local function selfTest()
 	PlanTab.sidebarChecks(check)  -- card 0032
 	PlanTab.treeChecks(check)  -- card 0034
 	PlanTab.specChecks(check)  -- card 0049
+	PlanTab.menuChecks(check)  -- card 0053
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")
@@ -11231,7 +11533,8 @@ SlashCmdList.DJINNISBIS = function(msg)
 	elseif msg == "test" then selfTest()
 	elseif msg == "talents" then PlanTab.sayTalents()
 	elseif msg == "loadouts" then PlanTab.offerLoadouts(true)
-	elseif msg == "tidy" or msg == "tidy yes" then PlanTab.tidy(msg == "tidy yes")
+	elseif msg == "tidy" then PlanTab.tidyAsk()
+	elseif msg == "tidy yes" then PlanTab.tidy(true)
 	elseif msg == "bars" or msg:find("^bars ") then PlanTab.barsCommand(msg:sub(6))
 	else listBySource(msg) end
 end
