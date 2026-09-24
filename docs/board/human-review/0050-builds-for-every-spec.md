@@ -187,3 +187,7 @@ Security:
    game nothing is sent.
 
 No client here. Scripts: `%TEMP%\rv_decode.py`, `rv_foreign.py`, `rv_valor_all.py`, `rv_pin.py`.
+
+**2026-09-24, Rob answered the tag question.** A tag, and it is `[CP] `, not `BiS `: "BiS" means best
+in slot, which a talent loadout cannot be. The addon is renamed to DjinnisClassProfiles, everything
+kept (card `0058`), and the tag goes in with that rename.

@@ -1,5 +1,5 @@
 ---
-needs: 0050
+needs: 0050, 0058
 ---
 # 0057 A build manager in the game: copy, export, import, rename, delete, and set up this character
 
