@@ -223,3 +223,19 @@ Security, where the card produced code:
 no Lua error shows. Click **Later**. Open the spellbook, then the talent window, twice each: both work.
 **More > Make the planned loadouts** opens its box, so the prompt frame is real. **More > Offer the
 saved bars** still knows your layouts. Then click **Reload now**.
+**2026-09-24, Claude. The review's findings, fixed in v0.46.1.**
+
+1. **PlanTab fields a run adds are removed**, unless they hold a frame (`[0]` userdata). Proven with
+   a field no session had.
+2. **Saved data goes back first, on its own** (`PlanTab.restoreSaved`, in its own `pcall`, before
+   `restore`). It fills the tables the run started with and puts those back as the globals. Every
+   compare in `restore` goes through `same()`, a guarded `rawequal`. The net's two functions are
+   read before the run, so a run cannot swap them.
+3. **The net's other parts are proven in `offline-check.lua`**, in four runs: a throw (with a
+   nested saved table, a frame global, a fake and a real PlanTab frame), a refused write-back (a
+   `write` that throws for one key), an add-on loading mid-run (`addOns` raised), and a run that
+   breaks the net's own helper (saved data still back, the failure said). All 8 missed mutations
+   from the review are in `mut0053.py` and red.
+
+Not changed: `recheckSoon` still uses the real timer. It re-reads the real setup after 2 seconds,
+which is what a click does anyway.

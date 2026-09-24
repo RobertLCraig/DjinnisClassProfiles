@@ -280,3 +280,12 @@ Security, where the card produced code:
 with the plan** says "the plan, as far as this level allows". Open the talent window: the list is
 beside it, or its "BiS plan" tab is. At 82, both **Make the planned loadouts** and **Compare**
 call the loadouts made at 81 different, and Make offers to reset them.
+**2026-09-24, Claude. The fourth review's findings, fixed in v0.46.1.**
+
+1. Compare's level wiring is checked: a loadout made at 81 and compared at 82 must read
+   "different". `mayBeShort(nil)` in `sayTalents` now turns the check red.
+2. `sayTalents(out)` takes where its lines go; the check collects them, so the self-test prints no
+   talent strings. Removing the print loop turns the check red.
+3. `configName` is checked directly against a swapped `C_Traits.GetConfigInfo`.
+
+Mutations: `%TEMP%\mut0053.py`, now 54, all red, run alone on a fresh scratch copy.

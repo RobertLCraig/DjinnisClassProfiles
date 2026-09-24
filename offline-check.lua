@@ -78,8 +78,13 @@ time, date = os.time, os.date  -- WoW exposes both as globals; the plan's age re
 GetBuildInfo = function() return "12.1.0", "00000", "Sep 10 2026", 120100 end
 
 -- GetNumAddOns lets the self-test net count loaded add-ons, so its removal of
--- globals a run made is exercised here too (card 0056)
-C_AddOns = { IsAddOnLoaded = function() return false end, GetNumAddOns = function() return 0 end }
+-- globals a run made is exercised here too (card 0056). A net proof raises
+-- `addOns` to load one mid-run. By name, nothing is loaded: the rivals stay off.
+local addOns = 0
+C_AddOns = {
+	IsAddOnLoaded = function(i) return type(i) == "number" and i <= addOns end,
+	GetNumAddOns = function() return addOns end,
+}
 C_Item = {
 	GetItemInfoInstant = function() return nil end,
 	GetItemStats = function() return nil end,
@@ -159,17 +164,33 @@ if not asSpec then
 	if not PlanTab then
 		print("|cffff0000FAIL|r the self-test net: PlanTab is not reachable from the slash handler, so the net is unproven")
 	else
-		local realInfo, realCount, realSay, said = GetInstanceInfo, C_Item.GetItemCount, PlanTab.say, {}
+		local function fail(what) print("|cffff0000FAIL|r the self-test net " .. what) end
+		-- One run of the net, with chat and the prompt caught. Answers what the
+		-- net answered, what it said, and whether it offered the reload.
+		local wrapped, keptPrompt = print, PlanTab.prompt
+		local function net(run, write)
+			local said, offered = {}, nil
+			print = function(...) said[#said + 1] = table.concat({ ... }, " ") end
+			-- the reload is offered in a client, which has ReloadUI
+			PlanTab.prompt = function(_, _, buttons) offered = buttons end
+			local reloadUI = function() end
+			ReloadUI = reloadUI
+			local okNet, ok, swapped = pcall(PlanTab.runSelfTest, run, write)
+			print = wrapped
+			PlanTab.prompt, ReloadUI = keptPrompt, nil
+			if not okNet then fail("threw: " .. tostring(ok)) end
+			local reload = offered and offered[1] and offered[1].label == "Reload now" and offered[1].onClick == reloadUI
+			return ok, swapped, table.concat(said, "\n"), reload
+		end
+
+		-- A run that swaps, writes into saved data and makes things, then throws.
+		local realInfo, realCount, realSay = GetInstanceInfo, C_Item.GetItemCount, PlanTab.say
 		-- saved data as a client has it, written into and swapped by the run
-		DjinnisBiSDB = DjinnisBiSDB or {}
 		DjinnisBiSDB.bars = { ["Feral / Raid"] = { saved = "2026-09-24" } }
-		local realDB, hadFrame, realSlash = DjinnisBiSDB, rawget(_G, "PlayerSpellsFrame"), SlashCmdList.DJINNISBIS
-		local wrapped, keptPrompt, offered = print, PlanTab.prompt, nil
-		print = function(...) said[#said + 1] = table.concat({ ... }, " ") end
-		-- the reload is offered in a client, which has ReloadUI
-		PlanTab.prompt = function(_, _, buttons) offered = buttons end
-		ReloadUI = function() end
-		local ok, swapped = PlanTab.runSelfTest(function()
+		DjinnisBiSCharDB.madeAt = { [7] = 81 }
+		local realDB, realChar = DjinnisBiSDB, DjinnisBiSCharDB
+		local hadFrame, realSlash, hadPrompt = rawget(_G, "PlayerSpellsFrame"), SlashCmdList.DJINNISBIS, rawget(PlanTab, "promptFrame")
+		local ok, swapped, text, reload = net(function()
 			SlashCmdList.DJINNISBIS = function() end
 			Enum.DjinnisTestOnly = { Fake = 1 }
 			GetInstanceInfo = function() return "Fake" end
@@ -178,26 +199,68 @@ if not asSpec then
 			DjinnisBiSDB.bars = {}
 			DjinnisBiSDB.statContext = "raid"
 			DjinnisBiSDB = { fake = true }
+			DjinnisBiSCharDB.madeAt[24] = 90  -- one table down: a one-level copy keeps it
 			if hadFrame == nil then PlayerSpellsFrame = { IsShown = function() return true end } end
+			DjinnisTestFrame = { [0] = io.stdout }  -- a frame, as the client makes one
+			PlanTab.promptFrame = { IsShown = function() return true end }  -- a check's fake (0056 review)
+			PlanTab.madeFake = { IsShown = function() return true end }  -- a field no session had
+			PlanTab.madeFrame = { [0] = io.stdout }
 			error("thrown on purpose")
 		end)
-		print = wrapped
-		local reload = offered and offered[1] and offered[1].label == "Reload now" and offered[1].onClick == ReloadUI
-		PlanTab.prompt, ReloadUI = keptPrompt, nil
-		if not reload then print("|cffff0000FAIL|r the self-test net did not offer Reload now") end
-		if SlashCmdList.DJINNISBIS ~= realSlash or Enum.DjinnisTestOnly ~= nil then print("|cffff0000FAIL|r the self-test net missed a field of a table the checks write into") end
-		local text = table.concat(said, "\n")
-		local want = hadFrame == nil and 6 or 5
-		if ok ~= false or swapped ~= want then print("|cffff0000FAIL|r the self-test net: expected false and " .. want .. " swapped, got " .. tostring(ok) .. " and " .. tostring(swapped)) end
-		if GetInstanceInfo ~= realInfo or C_Item.GetItemCount ~= realCount or PlanTab.say ~= realSay then print("|cffff0000FAIL|r the self-test net did not put everything back") end
+		if not reload then fail("did not offer Reload now") end
+		if SlashCmdList.DJINNISBIS ~= realSlash or Enum.DjinnisTestOnly ~= nil then fail("missed a field of a table the checks write into") end
+		local want = hadFrame == nil and 5 or 4  -- the saved table goes back first, on its own
+		if ok ~= false or swapped ~= want then fail("expected false and " .. want .. " swapped, got " .. tostring(ok) .. " and " .. tostring(swapped)) end
+		if GetInstanceInfo ~= realInfo or C_Item.GetItemCount ~= realCount or PlanTab.say ~= realSay then fail("did not put everything back") end
 		if DjinnisBiSDB ~= realDB or not (DjinnisBiSDB.bars and DjinnisBiSDB.bars["Feral / Raid"]) or DjinnisBiSDB.statContext ~= nil then
-			print("|cffff0000FAIL|r the self-test net did not put the saved data back")
+			fail("did not put the saved data back")
 		end
-		if rawget(_G, "PlayerSpellsFrame") ~= hadFrame then print("|cffff0000FAIL|r the self-test net left a global the run made") end
-		DjinnisBiSDB.bars = nil
+		if DjinnisBiSCharDB ~= realChar or DjinnisBiSCharDB.madeAt[24] ~= nil or DjinnisBiSCharDB.madeAt[7] ~= 81 then
+			fail("did not put the character's saved data back, one table down too")
+		end
+		if rawget(_G, "PlayerSpellsFrame") ~= hadFrame then fail("left a global the run made") end
+		if rawget(_G, "DjinnisTestFrame") == nil then fail("removed a frame the run made") end
+		if rawget(PlanTab, "promptFrame") ~= hadPrompt then fail("left a PlanTab field the run added") end
+		if rawget(PlanTab, "madeFake") ~= nil then fail("left a PlanTab field the run added") end
+		if rawget(PlanTab, "madeFrame") == nil then fail("removed a frame the run kept on PlanTab") end
+		DjinnisTestFrame, PlanTab.madeFrame, DjinnisBiSDB.bars, DjinnisBiSCharDB.madeAt = nil, nil, nil, nil
 		if not (text:find("stopped part way", 1, true) and text:find("thrown on purpose", 1, true) and text:find(want .. " of the game's own values", 1, true)) then
-			print("|cffff0000FAIL|r the self-test net did not say what happened: " .. text)
+			fail("did not say what happened: " .. text)
 		end
+
+		-- A write-back the game refuses: the rest still goes back, and it says so.
+		ok, swapped, text = net(function()
+			GetInstanceInfo = function() return "Fake" end
+			C_Item.GetItemCount = function() return 99 end
+		end, function(t, k, v)
+			if k == "GetInstanceInfo" then error("frozen") end
+			rawset(t, k, v)
+		end)
+		if C_Item.GetItemCount ~= realCount then fail("stopped at a refused write-back") end
+		if not text:find("refused 1 write-backs", 1, true) then fail("did not say a write-back was refused: " .. text) end
+		GetInstanceInfo = realInfo
+
+		-- An add-on that loads while the test runs: its globals stay, and it says so.
+		ok, swapped, text = net(function()
+			addOns = 1
+			DjinnisTestAddOn = {}
+		end)
+		if rawget(_G, "DjinnisTestAddOn") == nil then fail("removed a global an add-on made while it ran") end
+		if not text:find("an add-on loaded during the self-test", 1, true) then fail("did not say an add-on loaded: " .. text) end
+		DjinnisTestAddOn, addOns = nil, 0
+
+		-- A run that breaks the net's own helper: the saved data is back all the
+		-- same, because it goes first, and the failure is said, not thrown.
+		local realCounter = PlanTab.loadedAddOns
+		DjinnisBiSDB.bars = { kept = true }
+		ok, swapped, text = net(function()
+			PlanTab.loadedAddOns = function() error("broken helper") end
+			DjinnisBiSDB.bars = {}
+		end)
+		PlanTab.loadedAddOns = realCounter
+		if not (DjinnisBiSDB.bars and DjinnisBiSDB.bars.kept) then fail("did not put the saved data back before the rest") end
+		if not text:find("could not put everything back", 1, true) then fail("did not say the restore failed: " .. text) end
+		DjinnisBiSDB.bars = nil
 	end
 else
 	-- Not "" (the window): it needs a template's children, which no stub has,

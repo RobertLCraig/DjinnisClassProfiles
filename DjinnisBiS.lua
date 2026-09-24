@@ -4954,7 +4954,8 @@ end
 -- compare, so when a loadout is the right NAME and still reads edited, this
 -- says which it is: a loadout that drifted from the sim, or two strings that
 -- describe one build and do not match character for character.
-function PlanTab.sayTalents()
+function PlanTab.sayTalents(out)
+	out = out or print  -- the checks read the lines without printing them (0055 review)
 	local spec = playerSpec()
 	local live = PlanTab.activeTalentString()
 	if not (type(live) == "string" and canRead(live)) then live = nil end
@@ -4969,8 +4970,7 @@ function PlanTab.sayTalents()
 	for name, build in pairs(PlanTab.BUILDS[spec] or {}) do
 		lines[#lines + 1] = ("%s%s|r %s(stored build)|r %s: %s"):format(GOLD, name, GREY, PlanTab.VERDICT[PlanTab.compareWord(live, build, short)], build)
 	end
-	for _, line in ipairs(lines) do print(line) end
-	return lines  -- for the checks
+	for _, line in ipairs(lines) do out(line) end
 end
 PlanTab.VERDICT = {
 	cannot = GREY .. "cannot compare|r", different = "|cffff2020different|r", same = GREEN .. "same|r",
@@ -9058,6 +9058,13 @@ function PlanTab.levelChecks(check)
 		local q = { lastMade = { name = name } }
 		check(t .. ", a made loadout's level is noted", PlanTab.noteMade(q) == ids[name] and made[ids[name]], 83)
 		check(t .. ", once", PlanTab.noteMade(q), nil)
+		-- the name is the game's own config name
+		local keptInfo = C_Traits.GetConfigInfo
+		C_Traits.GetConfigInfo = function(id) if id == 55 then return { name = name } end end
+		local read, none = PlanTab.configName(55), PlanTab.configName(56)
+		C_Traits.GetConfigInfo = keptInfo
+		check(t .. ", a config's name is read from the game", read, name)
+		check(t .. ", and no config has no name", none, nil)
 		-- the watched id when it names the build, else the name's id
 		PlanTab.configName = function(id) return id == 55 and name or "Other" end
 		q = { lastMade = { name = name }, pendingID = 55 }
@@ -9067,16 +9074,21 @@ function PlanTab.levelChecks(check)
 
 		-- Compare talents reads the level for the loadout selected
 		local function compareLine()
-			for _, line in ipairs(PlanTab.sayTalents() or {}) do
-				if line:find(name .. "|r", 1, true) and line:find("(stored build)", 1, true) then return line end
-			end
-			return "no line"
+			local found = "no line"
+			PlanTab.sayTalents(function(line)
+				if line:find(name .. "|r", 1, true) and line:find("(stored build)", 1, true) then found = line end
+			end)
+			return found
 		end
 		made = {}
 		PlanTab.readLevels = function() return 81, 90 end
 		check(t .. ", Compare says part of the plan below the cap", compareLine():find("as far as this level allows", 1, true) ~= nil, true)
 		PlanTab.readLevels = function() return 90, 90 end
 		check(t .. ", and different at it", compareLine():find("different", 1, true) ~= nil, true)
+		-- the level the selected loadout was made at, as Make reads it
+		made = { [ids[name]] = 81 }
+		PlanTab.readLevels = function() return 82, 90 end
+		check(t .. ", and different a level after it was made", compareLine():find("different", 1, true) ~= nil, true)
 	end)
 	for _, name in ipairs(names) do PlanTab[name] = kept[name] end
 	check(t .. ", ran", ok or tostring(err), true)
@@ -11883,15 +11895,45 @@ function PlanTab.isWidget(v)
 	return type(v) == "table" and type(rawget(v, 0)) == "userdata"
 end
 
+-- The saved data first, on its own: a reload writes whatever these tables
+-- hold to disk, so they must be right even if the rest of the restore fails
+-- (0056 review). Filled in place in the tables the run started with, and
+-- those put back as the globals. Answers how many it could not.
+function PlanTab.restoreSaved(snap)
+	local refused = 0
+	for name, copy in pairs(snap.saved or {}) do
+		local t = snap.g[name]
+		local ok = pcall(function()
+			for k in pairs(t) do t[k] = nil end
+			for k, v in pairs(copy) do t[k] = v end
+			rawset(_G, name, t)
+		end)
+		if not ok then refused = refused + 1 end
+	end
+	return refused
+end
+
+-- True only when the game lets the two be compared and they are the same
+-- value. A secret may refuse even rawequal, and a refusal must not stop the
+-- restore part way (0056 review).
+local function same(a, b)
+	local ok, is = pcall(rawequal, a, b)
+	return ok and is
+end
+
 -- Puts back what changed. Answers how many Blizzard values it had to, how
 -- many PlanTab fields, the first few Blizzard names, and how many writes the
 -- game refused. Every write is guarded: one refused write (a frozen table)
--- must not skip the rest (0056 review).
-function PlanTab.restore(snap)
+-- must not skip the rest (0056 review). `write` is for offline-check.lua's
+-- refused write; the self-test passes none.
+function PlanTab.restore(snap, write)
+	write = write or rawset
 	local blizzard, plan, names, refused = 0, 0, {}, 0
+	-- counted before anything is put back: the run may have swapped C_AddOns
+	local loadedNow = PlanTab.loadedAddOns()
 	local function put(t, k, v, label)
-		if rawequal(rawget(t, k), v) then return end
-		if pcall(rawset, t, k, v) then
+		if same(rawget(t, k), v) then return end
+		if pcall(write, t, k, v) then
 			blizzard = blizzard + 1
 			if #names < 5 then names[#names + 1] = label end
 		else
@@ -11902,12 +11944,11 @@ function PlanTab.restore(snap)
 	-- A global the run made. PlayerSpellsFrame is load-on-demand: a fake one
 	-- left behind stops Blizzard ever loading the real window (0056 review).
 	-- Unless an add-on loaded meanwhile: then a new global may be real.
-	local loadedNow = PlanTab.loadedAddOns()
 	local keepNew = snap.loaded == nil or loadedNow == nil or loadedNow ~= snap.loaded
 	if not keepNew then
 		local made = {}
 		for k, v in pairs(_G) do
-			if snap.g[k] == nil and not PlanTab.isWidget(v) then made[#made + 1] = k end
+			if same(snap.g[k], nil) and not PlanTab.isWidget(v) then made[#made + 1] = k end
 		end
 		for _, k in ipairs(made) do put(_G, k, nil, tostring(k)) end
 	end
@@ -11916,35 +11957,36 @@ function PlanTab.restore(snap)
 		-- a field the run added, such as a fake Enum.TraitConfigType (0056 review)
 		if not keepNew then
 			local added = {}
-			for k in pairs(t) do if copy[k] == nil then added[#added + 1] = k end end
+			for k in pairs(t) do if same(copy[k], nil) then added[#added + 1] = k end end
 			for _, k in ipairs(added) do put(t, k, nil, "a field " .. tostring(k)) end
 		end
 	end
-	for name, copy in pairs(snap.saved or {}) do
-		local t = rawget(_G, name)
-		if type(t) == "table" then
-			local ok = pcall(function()
-				for k in pairs(t) do t[k] = nil end
-				for k, v in pairs(copy) do t[k] = v end
-			end)
-			if not ok then refused = refused + 1 end
-		end
-	end
 	for k, v in pairs(snap.plan) do
-		if not rawequal(PlanTab[k], v) then PlanTab[k] = v plan = plan + 1 end
+		if not same(PlanTab[k], v) then PlanTab[k] = v plan = plan + 1 end
 	end
+	-- A field the run added, such as the fake prompt frame a check puts up
+	-- (0056 review). A real frame made on first use stays.
+	local added = {}
+	for k, v in pairs(PlanTab) do
+		if same(snap.plan[k], nil) and not PlanTab.isWidget(v) then added[#added + 1] = k end
+	end
+	for _, k in ipairs(added) do PlanTab[k] = nil plan = plan + 1 end
 	return blizzard, plan, names, refused, keepNew
 end
 
--- `run` is for offline-check.lua's proof of this net; the slash passes none.
-function PlanTab.runSelfTest(run)
+-- `run` and `write` are for offline-check.lua's proof of this net; the slash
+-- passes neither.
+function PlanTab.runSelfTest(run, write)
 	local snap = PlanTab.snapshot()
+	local restore, restoreSaved = PlanTab.restore, PlanTab.restoreSaved  -- a run cannot swap the net itself
 	local ok, err = pcall(run or selfTest)
-	local okRestore, blizzard, _, names, refused, keptNew = pcall(PlanTab.restore, snap)
+	local okSaved, savedRefused = pcall(restoreSaved, snap)
+	local okRestore, blizzard, _, names, refused, keptNew = pcall(restore, snap, write)
 	if not okRestore then
 		print("|cffff0000FAIL|r the self-test could not put everything back: " .. tostring(blizzard) .. ". Reload the interface now.")
 		blizzard, names, refused = 0, {}, 0
 	end
+	refused = refused + ((okSaved and savedRefused) or #PlanTab.SAVED_VARIABLES)
 	if not ok then print("|cffff0000FAIL|r the self-test stopped part way: " .. tostring(err)) end
 	if blizzard > 0 then
 		print(("|cffff0000FAIL|r the self-test left %d of the game's own values swapped (%s); they are put back now"):format(blizzard, table.concat(names, ", ")))
