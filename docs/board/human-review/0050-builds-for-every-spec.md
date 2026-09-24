@@ -5,23 +5,31 @@ needs: 0049
 
 ## What I need from you
 
-**Pick how the addon tells its own loadouts from yours.** Built and deployed since v0.42.0: every
-non-druid spec gets two loadouts, named `Dungeon` and `Raid`. The problem the review found: if an alt
-already has a loadout of yours called `Raid`, the addon takes it for its own, and "Reset to plan"
-deletes it and makes its build instead. Blizzard allows 30 letters in a loadout name, and the talent
-window only lists the current spec's loadouts, so class and spec in the name add nothing in game.
+**Say yes to the name tag, or pick the other option.**
 
-1. **Unique names inside the addon, short names in game (recommended).** The addon's own data keys
-   each build as `Warlock - Destruction - Dungeon - Default` (your format; no length limit there).
-   The loadout in game stays `Dungeon`. The addon knows its own loadouts by remembering which ones it
-   made (it already notes each one's config id since v0.45.0), not by name. Your own `Raid` is never
-   touched. Druid loadouts keep their names, so bars saved per build keep working. A loadout 0.42.0
-   to 0.44.0 made on an alt is not remembered, so it counts as yours; delete it by hand once.
-2. **A tag in the game name**, such as `Dungeon (BiS)`. Easy to see, but it costs 6 of the 30
-   letters, and every druid loadout would be made again, with its saved bars moved to the new name.
+The problem, in one example: your Warlock has a loadout **you** made and called `Raid`. The addon
+also makes a loadout called `Raid` for every spec. The addon only checks the name, so it thinks your
+`Raid` is its own. When your `Raid` does not match the addon's raid build, the addon offers "Reset to
+plan", and a click deletes your `Raid` and puts the addon's build in its place.
 
-Reply with 1 or 2. Findings 1, 3 and 4 below (which build wowvalor picks, a pin check, one more alt
-to test) are mine to fix and need nothing from you.
+Rob, 2026-09-24: "I accept if we have to clean up and reload talents across all characters." With
+that accepted, the tag is the simple fix:
+
+1. **A tag in the game name (recommended now).** Every loadout the addon makes starts with `BiS `:
+   `BiS Dungeon`, `BiS Raid`, `BiS Raid: Nek'Zali`. The longest is 28 letters of Blizzard's 30. The
+   addon touches only names that start with the tag, so a loadout you name yourself is never
+   touched, on any character, even after a `WTF` reset. You can also see at a glance which loadouts
+   are the addon's. The spare (card `0040`, today `BiS: <build>`) becomes `BiS spare`. Your old
+   untagged loadouts stay as yours; card `0057`'s "Set up this character" deletes the old addon ones
+   and makes the tagged ones, one character at a time, with bars saved per build moved to the new
+   name.
+2. **No tag.** The addon remembers the ids of the loadouts it made, per character. Nothing changes
+   in the talent window, but the memory is lost if that character's saved variables are lost, and
+   then the addon's loadouts count as yours.
+
+Internally the addon's keys become your format, `Warlock - Destruction - Dungeon - Default`, with
+either option. Findings 1, 3 and 4 below (which build wowvalor picks, a pin check, one more alt to
+test) are mine to fix and need nothing from you.
 
 ## Why
 
