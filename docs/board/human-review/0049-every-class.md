@@ -247,3 +247,54 @@ No client here. Rob's steps 1 to 6 stand, plus the Plan tab look in finding 3.
   stubbed), as the reviewer noted.
 - The self-test passes under Lua 5.1 and 5.4. The Lua change is self-test code only; deployed so
   the game folder matches the commit.
+
+**2026-09-24** Third adversarial review, of the card as a whole at `9b15154` (v0.41.3), with
+`9936f19` and `cf7016e` read again. **Verdict: clean, to `human-review/` for Rob's alt checks.**
+
+What held:
+- Harness, from `git show 9b15154` copies in `$TEMP`, output read whole, exit codes read. The
+  self-test exits 0 under Lua 5.1.5 and 5.4.6, "self-test passed", same output on both. All 36
+  non-druid spec runs exit 0 under both, 11 commands, one hover and 3 events each. 102 to 105 exit 1
+  with 8 FAIL lines each, which is the run working. 9999 exits 1 with "not in PlanTab.SPECS".
+- The last round's three findings. The reviewer's strip mutation now fails 2 checks. Deleting the
+  class restore now fails "the class is put back". The Plan tab buttons are step 7 of "What I need
+  from you", and the v0.41.1 wording is corrected in the thread.
+- The spec table, checked a new way: all 40 ids and class ids against Blizzard's own
+  `SPEC_FORMAT_STRINGS` (`Blizzard_ClassSpecializationsFrame.lua:14`, "mage-frost" and so on). 40 of
+  40 match. Every name matches except `Resto`, the old druid key on purpose.
+- `UnitClass`, the fallback in `playerClass`: `UnitDocumentation.lua:900` marks only `className`
+  conditionally secret. `classID`, the third return read here, is not.
+- 28 mutations on a copy. 22 caught, among them: `gearHere` always true (5 checks fail, and 8 FAIL
+  lines in the 250 run) and always false (9 checks), every gate removed one at a time (plan lines, tooltip, roll
+  event, `here`, loot card, KeystoneLoot, journal, `tidy`, the one-line Plan tab), `poolSpecs`
+  ignoring the class, `specForRole` ignoring the class, Resto renamed, Blood made damage, Frost Mage
+  and Arcane ids swapped, and the bar save and load keys changed.
+- Stored builds on another class: a copy with Feral's builds filed under Blood, run as 250. `/djbis
+  talents` lists all ten stored builds, and every command runs with no error. Card `0050` fills
+  this in.
+- The game folder's `DjinnisBiS.lua` and `.toc` hash the same as `9b15154`'s blobs.
+
+Survived, and why none bounces the card:
+- The plan tab choices and the strip's scenario button, ungated. Frame code, no offline check.
+  Rob's steps 5 and 7 are the proof, as the last round agreed.
+- `playerClass`'s `UnitClass` fallback, removed or reading the class name instead of the id, and
+  `offerSetup` not passing the class. No check sees the path where the spec is not yet known. It
+  fails closed: a broken fallback turns druid gear off until the spec is read, and never shows it
+  to another class. `specForRole`'s class argument has its own check.
+- Windwalker given class 4. Nothing checks each row's class id. The table matches Blizzard's today,
+  so a per-row check would only restate it.
+
+Not this card's, noted: an initial spec (a new character before level 10) is not in `SPECS`, so it
+reads "The game has not said which spec you are in yet". Safe, and the wording is wrong only there.
+
+Security:
+1. Weakest point: the druid gate is at nine places, not at the data. A new reader of `gearPlanFor`,
+   `POOL` or `bisFrom` has to remember `gearHere()`. Every reader today is gated or reads a
+   druid-only table.
+2. Unchecked: the spec id from the game goes through `SPEC_BY_ID` as an exact key, and an unknown
+   one is nil. Saved keys are matched as exact strings. `tidy` deletes nothing off a druid, so a
+   player's own loadout is never removed on another class. Nothing is read from another player.
+3. Leaks: nothing leaves the client. The one outward send, to KeystoneLoot, is gated before the API
+   is read. Failures print only to the player's own chat.
+
+No client here. What is left is Rob's seven steps above on a non-druid alt.
