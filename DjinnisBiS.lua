@@ -2194,6 +2194,9 @@ end
 -- The lines for a hovered or rolled link: {} for an unplanned item, nil for a
 -- link or id that cannot be read. `id` is the tooltip's own when it has one.
 function PlanTab.planLinesForLink(link, id)
+	-- The plans are druid gear: the tooltip, the roll's chat line and the roll
+	-- frame's glow all read here, so one gate covers all three (0049 review).
+	if not PlanTab.gearHere() then return {} end
 	if not link or not canRead(link) then return nil end
 	if not canRead(id) then return nil end
 	id = id or tonumber(link:match("item:(%d+)"))
@@ -2581,7 +2584,8 @@ refresh = function()
 	-- The content choice sits above the list on the Plan tab only, and the
 	-- list starts under it there.
 	local spec = playerSpec()
-	local states = activeTab == 4 and PlanTab.choices(spec and planScenario(spec), autoContext()) or {}
+	-- no scenario to choose on another class: its Plan tab is one line (0049 review)
+	local states = activeTab == 4 and PlanTab.stripScenario(spec) and PlanTab.choices(spec and planScenario(spec), autoContext()) or {}
 	for i, button in ipairs(window.choices) do
 		local state = states[i]
 		button:SetShown(state ~= nil)
@@ -3262,9 +3266,20 @@ end
 PlanTab.POOL = {}
 PlanTab.poolsDone = false
 
+-- The specs the journal is asked about: the class's own, as { id, key }. The
+-- journal filters by class and spec, so another class's spec is a nonsense
+-- filter (0049). Pure.
+function PlanTab.poolSpecs(classID)
+	local out = {}
+	for _, s in ipairs(PlanTab.SPECS) do
+		if s[3] == classID then out[#out + 1] = s end
+	end
+	return out
+end
+
 function PlanTab.harvestPools()
+	if not PlanTab.gearHere() then return "not druid" end  -- the pools feed only the druid loot card (0049)
 	if PlanTab.poolsDone or not EJ_GetNumTiers or InCombatLockdown() then return end
-	if not PlanTab.gearHere() then return end  -- the pools feed only the druid loot card (0049)
 	-- never walk the journal under the player: every call below moves its selection
 	if EncounterJournal and EncounterJournal:IsShown() then return end
 	local keptTier = EJ_GetCurrentTier and EJ_GetCurrentTier()
@@ -3291,9 +3306,9 @@ function PlanTab.harvestPools()
 		if dungeonID then
 			local pool = PlanTab.POOL[dungeonID] or {}
 			PlanTab.POOL[dungeonID] = pool
-			for specID, spec in pairs(SPEC_BY_ID) do
-				-- the journal filters by class and spec, so only this class's specs
-				if PlanTab.CLASS_OF[spec] == classID and not pool[spec] then
+			for _, s in ipairs(PlanTab.poolSpecs(classID)) do
+				local specID, spec = s[1], s[2]
+				if not pool[spec] then
 					EJ_SelectEncounter(journalID)
 					EJ_SetLootFilter(classID, specID)
 					-- a filter change is asynchronous: the list is the previous
@@ -3460,8 +3475,9 @@ end
 -- pools fill cell by cell (card 0022), so `lootCardPending` asks the loader
 -- to call again on the next EJ_LOOT_DATA_RECIEVED, a bounded number of times.
 function PlanTab.lootCardModel()
+	if not PlanTab.gearHere() then return nil, "not druid" end  -- the card sets a druid loot spec (0049)
 	local _, instanceType, _, _, _, _, _, mapID = GetInstanceInfo()
-	if instanceType ~= "raid" or not PlanTab.gearHere() then return nil end
+	if instanceType ~= "raid" then return nil end
 	pcall(PlanTab.harvestPools)
 	-- The raid is told by journal id, the way the journal's own OnShow finds
 	-- where you stand (AdventureGuideUtil.GetCurrentJournalInstance): the map
@@ -4206,9 +4222,9 @@ end
 function PlanTab.sendToKeystoneLoot()
 	local api = PlanTab.keystoneLoot()
 	local function say(text) print(GOLD .. "Djinni's BiS|r " .. GREY .. text .. "|r") end
-	if not api then say("KeystoneLoot is not loaded.") return nil end
 	-- the wanted list is druid gear, and it is filed under this character (0049)
-	if not PlanTab.gearHere() then say("The gear plan is for druids only, for now.") return nil end
+	if not PlanTab.gearHere() then say("The gear plan is for druids only, for now.") return "not druid" end
+	if not api then say("KeystoneLoot is not loaded.") return nil end
 	local function call(method, ...)
 		local ok, result = pcall(api[method], api, ...)
 		if not ok then say("KeystoneLoot refused " .. method .. ": " .. tostring(result)) end
@@ -5588,6 +5604,24 @@ function PlanTab.closePopup()
 	PlanTab.popupHidden(f)
 end
 
+-- The character sheet strip's words, and whether its scenario button shows.
+-- On another class there is no plan to pick a scenario for (0049 review).
+-- Pure.
+function PlanTab.stripScenario(spec)
+	return not spec or PlanTab.CLASS_OF[spec] == PlanTab.DRUID
+end
+
+function PlanTab.stripText(spec, plan, scenario, count)
+	if not spec then return GREY .. "Gear plan: no spec.|r" end
+	if not PlanTab.stripScenario(spec) then return GREY .. "Gear plans are for druids only, for now.|r" end
+	if not plan then
+		return ("%sNo %s gear plan for %s yet. Click for how.|r"):format(GREY, SCENARIO_LABEL[scenario], spec)
+	end
+	if count == 0 then return ("%sGear plan:|r %severy slot matches|r"):format(GOLD, GREEN) end
+	return ("%sGear plan:|r %s%d slot%s to fix.|r %sClick for the list.|r"):format(
+		GOLD, WHITE, count, count == 1 and "" or "s", GREY)
+end
+
 -- Returns the refresh function. `holder` is the character pane's frame and
 -- `below` is what the strip sits under.
 local function buildSlotMarks(holder, below)
@@ -5673,16 +5707,8 @@ local function buildSlotMarks(holder, below)
 			end
 		end
 
-		if not spec then
-			strip.text:SetText(GREY .. "Gear plan: no spec.|r")
-		elseif not plan then
-			strip.text:SetText(("%sNo %s gear plan for %s yet. Click for how.|r"):format(GREY, SCENARIO_LABEL[scenario], spec))
-		elseif count == 0 then
-			strip.text:SetText(("%sGear plan:|r %severy slot matches|r"):format(GOLD, GREEN))
-		else
-			strip.text:SetText(("%sGear plan:|r %s%d slot%s to fix.|r %sClick for the list.|r"):format(
-				GOLD, WHITE, count, count == 1 and "" or "s", GREY))
-		end
+		strip.scenario:SetShown(PlanTab.stripScenario(spec))
+		strip.text:SetText(PlanTab.stripText(spec, plan, scenario, count))
 	end
 
 	-- "7 slots to fix" on its own says nothing about which or how (Rob,
@@ -6930,6 +6956,12 @@ end
 -- /djbis tidy lists the old DjinnisDreamgrove names on this spec, and
 -- /djbis tidy yes deletes them. The selected one stays. Answers the count.
 function PlanTab.tidy(confirmed)
+	-- RETIRED names are ones this addon made on druids. On another class a
+	-- loadout of that name is the player's own, so tidy leaves it (0049 review).
+	if PlanTab.playerClass() ~= PlanTab.DRUID then
+		PlanTab.say("Nothing to tidy: the old loadouts were only ever made on druids.")
+		return "not druid"
+	end
 	local why = PlanTab.loadoutFence(true)  -- it frees slots, so never fenced by them (0039 review)
 	if why then PlanTab.say(why) return 0 end
 	local saved = PlanTab.savedLoadoutNames()
@@ -8461,6 +8493,42 @@ function PlanTab.specChecks(check)
 	check("every spec, the class of a key", PlanTab.CLASS_OF["Devourer"], 12)
 	local lines = PlanTab.lines("Blood")
 	check("every spec, another class's plan is one line", #lines .. " " .. lines[1].text, "1 " .. GREY .. "Gear plans are for druids only, for now.|r")
+	check("every spec, the sheet strip says the same", PlanTab.stripText("Blood", nil, "st", 0), GREY .. "Gear plans are for druids only, for now.|r")
+	check("every spec, no scenario button on another class", tostring(PlanTab.stripScenario("Blood")) .. " " .. tostring(PlanTab.stripScenario("Feral")), "false true")
+
+	-- Roles: nothing on disk states them, so the lists are the record (0049 review).
+	local byRole = {}
+	for _, s in ipairs(PlanTab.SPECS) do
+		byRole[s[4]] = (byRole[s[4]] and byRole[s[4]] .. ", " or "") .. s[2]
+	end
+	check("every spec, the tanks", byRole.TANK, "Protection Warrior, Protection Paladin, Blood, Brewmaster, Guardian, Vengeance")
+	check("every spec, the healers", byRole.HEALER, "Holy Paladin, Discipline, Holy Priest, Restoration Shaman, Mistweaver, Resto, Preservation")
+
+	local function ids(list)
+		local out = {}
+		for i, s in ipairs(list) do out[i] = s[1] end
+		return table.concat(out, " ")
+	end
+	check("every spec, the journal asks a druid's specs only", ids(PlanTab.poolSpecs(11)), "104 105 103 102")
+	check("every spec, and a Death Knight's", ids(PlanTab.poolSpecs(6)), "250 251 252")
+
+	-- Each druid-gear gate, as a Death Knight. Only PlanTab.playerClass is
+	-- swapped, never a Blizzard global (card 0038).
+	local planned = next(PlanTab.planIndex())
+	local wasClass = PlanTab.playerClass
+	local asDruid = planned and #(PlanTab.planLinesForLink("item:" .. planned) or {}) or 0
+	PlanTab.playerClass = function() return 6 end
+	local ok, err = pcall(function()
+		check("every spec, gear is druid-only", PlanTab.gearHere(), false)
+		check("every spec, a Death Knight's plan lines", planned and #(PlanTab.planLinesForLink("item:" .. planned) or { 1 }) or "no planned item", 0)
+		check("every spec, a Death Knight walks no journal", PlanTab.harvestPools(), "not druid")
+		check("every spec, a Death Knight gets no loot card", select(2, PlanTab.lootCardModel()), "not druid")
+		check("every spec, a Death Knight sends KeystoneLoot nothing", PlanTab.sendToKeystoneLoot(), "not druid")
+		check("every spec, a Death Knight's loadouts are never tidied", PlanTab.tidy(false), "not druid")
+	end)
+	PlanTab.playerClass = wasClass
+	if not ok then check("every spec, the Death Knight checks ran", err, nil) end
+	check("every spec, a druid's plan lines", asDruid > 0, true)
 end
 
 function PlanTab.treeChecks(check)

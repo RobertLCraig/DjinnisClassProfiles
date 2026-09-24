@@ -105,6 +105,7 @@ SlashCmdList = {}
 -- what it printed. Its own count is trusted for the summary line; this is the
 -- belt to that braces, and it is what makes the exit code meaningful.
 local failures = 0
+local watchBiS, bisLines = false, 0
 local realPrint = print
 print = function(...)
 	local parts = {}
@@ -116,6 +117,7 @@ print = function(...)
 	-- The red marker, not the bare word: the addon's own CONFIG_COMMIT_FAILED
 	-- chat line is not a failed check.
 	if line:find("|cffff0000FAIL|r", 1, true) or line:find("check(s) failed", 1, true) then failures = failures + 1 end
+	if watchBiS and line:find("[BiS]", 1, true) then bisLines = bisLines + 1 end  -- the spec run's roll events
 	realPrint(line)
 end
 
@@ -132,7 +134,12 @@ local tooltipHook
 TooltipDataProcessor.AddTooltipPostCall = function(_, hook) tooltipHook = hook end
 
 local here = arg and arg[0] and arg[0]:match("^(.*)[/\\][^/\\]*$") or "."
+local source = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
 dofile(here .. "/DjinnisBiS.lua")
+-- An id the addon does not know would run as "no spec" and pass (0049 review).
+if asSpec and not source:find("{ " .. asSpec .. ", \"", 1, true) then
+	print("|cffff0000FAIL|r spec " .. asSpec .. " is not in PlanTab.SPECS, so this run would prove nothing")
+end
 if not asSpec then
 	SlashCmdList.DJINNISBIS("test")
 else
@@ -145,21 +152,29 @@ else
 		local ok, err = pcall(SlashCmdList.DJINNISBIS, cmd)
 		if not ok then print("|cffff0000FAIL|r /djbis " .. cmd .. " as spec " .. asSpec .. ": " .. tostring(err)) end
 	end
-	-- A gear tooltip on another class: no line from the druid gear list.
+	-- The first item in the gear plan, by id and name, so a druid hovering it
+	-- gets a plan line. On another class the tooltip gets no line at all.
+	local plan = source:match("BEGIN GENERATED GEAR PLAN(.-)END GENERATED GEAR PLAN") or ""
+	local itemID, itemName = plan:match("\"id=(%d+),[^\n]-%-%- ([^\n]-)%s*\n")
+	if not itemID then print("|cffff0000FAIL|r no planned item in the gear plan block: the tooltip check would prove nothing") end
+	local itemLink = "|cffa335ee|Hitem:" .. tostring(itemID) .. "::::::::80:::::|h[" .. tostring(itemName) .. "]|h|r"
 	local added = {}
 	local tip = setmetatable({ AddLine = function(_, text) added[#added + 1] = text end }, frameMT)
 	GameTooltip = tip
-	TooltipUtil.GetDisplayedItem = function() return "Any Helm", "|cff|Hitem:1:::|h[Any Helm]|h|r", 1 end
-	C_Item.GetItemInfoInstant = function() return 1, "Armor", "Plate", "INVTYPE_HEAD" end
+	TooltipUtil.GetDisplayedItem = function() return itemName, itemLink, tonumber(itemID) end
+	C_Item.GetItemInfoInstant = function() return tonumber(itemID), "Armor", "Misc", "INVTYPE_NECK" end
 	local ok, err = pcall(tooltipHook, tip)
 	if not ok then print("|cffff0000FAIL|r the item tooltip as spec " .. asSpec .. ": " .. tostring(err)) end
 	for _, text in ipairs(added) do
-		if text:find("BiS", 1, true) then print("|cffff0000FAIL|r the item tooltip as spec " .. asSpec .. " says: " .. text) end
+		print("|cffff0000FAIL|r hovering " .. tostring(itemName) .. " as spec " .. asSpec .. " adds: " .. text)
 	end
-	-- A boss kill and a finished key: the druid verdict would reach
-	-- RaidWarningUtil, which is not stubbed, so reaching it fails here.
+	-- A boss kill, a finished key and a loot roll of that item: the druid
+	-- verdict would reach RaidWarningUtil, which is not stubbed, or print a
+	-- "[BiS]" chat line. Either fails here.
+	GetLootRollItemLink = function() return itemLink end
+	watchBiS = true
 	local fired = 0
-	for _, event in ipairs({ "ENCOUNTER_END", "CHALLENGE_MODE_COMPLETED" }) do
+	for _, event in ipairs({ "ENCOUNTER_END", "CHALLENGE_MODE_COMPLETED", "START_LOOT_ROLL" }) do
 		for _, frame in ipairs(registered[event] or {}) do
 			if frame.onEvent then
 				fired = fired + 1
@@ -168,7 +183,9 @@ else
 			end
 		end
 	end
-	if fired == 0 then print("|cffff0000FAIL|r no frame took ENCOUNTER_END: the event capture is broken") end
+	watchBiS = false
+	if bisLines > 0 then print("|cffff0000FAIL|r the roll events as spec " .. asSpec .. " printed " .. bisLines .. " [BiS] line(s)") end
+	if fired < 3 then print("|cffff0000FAIL|r only " .. fired .. " frames took the three events: the event capture is broken") end
 	realPrint("offline-check: typed " .. #commands .. " commands, hovered one item and fired " .. fired .. " events as spec " .. asSpec)
 end
 

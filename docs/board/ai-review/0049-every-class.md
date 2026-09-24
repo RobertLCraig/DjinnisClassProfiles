@@ -37,6 +37,9 @@ On one alt that is not a druid (the Death Knight, say), after `/reload`:
 2. `/djbis bars save`. Pass: it says the bars are saved for your spec. Then `/djbis bars undo` works.
 3. Hover any piece of gear. Pass: no "BiS" or "Not BiS" line.
 4. `/djbis here`. Pass: one line saying the BiS list is druid gear.
+5. Open the character sheet. Pass: the strip under it says "Gear plans are for druids only, for
+   now." and has no scenario button.
+6. On your next loot roll: no glow on the item's icon, and no "[BiS]" line in chat.
 
 ## Comments
 
@@ -144,3 +147,27 @@ No browser or client here. For Rob, once this is fixed, add to the alt checks ab
 item in a group (or watch a roll in a raid). Pass: no glow on the roll icon for a piece a druid
 plan holds. 6. Open the character sheet. Pass: the strip says gear plans are for druids, with no
 scenario button.
+
+**2026-09-24** Builder, v0.41.1: the five findings.
+1. The roll glow: `PlanTab.planLinesForLink` returns `{}` off a druid. The tooltip, the roll's chat
+   line and `markRollFrame` all read it, so one gate covers all three.
+2. The spec run now hovers the first item of the gear plan block, by its real id and name (a helm
+   in Feral's plan), and fails on ANY tooltip line. It also fires `START_LOOT_ROLL` for that item,
+   and fails on any "[BiS]" chat line during the three events. A spec id not in `PlanTab.SPECS`
+   fails the run. As 103 the run now fails 8 ways, as designed.
+3. Each gate returns "not druid" and sits first in its function: `harvestPools`, `lootCardModel`
+   (second return), `sendToKeystoneLoot`, `tidy`. `PlanTab.specChecks` swaps only
+   `PlanTab.playerClass` (never a Blizzard global) and checks each, plus the plan lines. The pool
+   walk's class filter is `PlanTab.poolSpecs(classID)`, checked for 11 and 6. The tank and healer
+   lists are checked in full: nothing on disk states roles, so the check is the record.
+4. The character sheet strip is `PlanTab.stripText` and `PlanTab.stripScenario`: off a druid it
+   reads "Gear plans are for druids only, for now." with no scenario button. The Plan tab hides its
+   scenario buttons there too. Both checked.
+5. `/djbis tidy` off a druid says "Nothing to tidy: the old loadouts were only ever made on
+   druids." and deletes nothing.
+- Mutations on a `$TEMP` copy, 13, each caught: every gate above, the class filter, a swapped role,
+  the strip text and button, the roll event gate, the tooltip gate and the `here` gate. The
+  plan-lines gate is caught by the self-test. The spec run stays green for it, because the tooltip
+  and the roll handler also gate on their own.
+- The self-test and all 36 non-druid spec runs pass under Lua 5.1 and 5.4, output read whole.
+- Rob's steps 5 and 6 above are the reviewer's two, now in "What I need from you".
