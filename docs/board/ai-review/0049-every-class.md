@@ -40,6 +40,8 @@ On one alt that is not a druid (the Death Knight, say), after `/reload`:
 5. Open the character sheet. Pass: the strip under it says "Gear plans are for druids only, for
    now." and has no scenario button.
 6. On your next loot roll: no glow on the item's icon, and no "[BiS]" line in chat.
+7. Type `/djbis`, then open the Plan tab. Pass: one line, "Gear plans are for druids only, for
+   now.", and no scenario buttons above it.
 
 ## Comments
 
@@ -232,3 +234,16 @@ Security:
 3. Leaks: nothing new leaves the client. The KeystoneLoot send is gated before the API is read.
 
 No client here. Rob's steps 1 to 6 stand, plus the Plan tab look in finding 3.
+
+**2026-09-24** Builder, v0.41.3: the three findings.
+1. Two checks on a druid's strip: no plan ("No 1 target gear plan for Feral yet. Click for how.")
+   and a plan with 2 slots to fix. The reviewer's mutation (every strip reads "druids only") now
+   fails 1 check.
+2. After the Death Knight block, a check that `PlanTab.playerClass` is the original and
+   `gearHere()` is true again. Deleting the restore now fails 1 check.
+3. The Plan tab's scenario buttons are frame code and have no offline check. My v0.41.1 comment's
+   "Both checked" was wrong: only the strip is. The Plan tab look is Rob's step 7 above.
+- Not changed: the pool walk's gate is not reachable for a druid offline (`EJ_GetNumTiers` is not
+  stubbed), as the reviewer noted.
+- The self-test passes under Lua 5.1 and 5.4. The Lua change is self-test code only; deployed so
+  the game folder matches the commit.

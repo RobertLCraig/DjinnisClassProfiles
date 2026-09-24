@@ -8515,6 +8515,9 @@ function PlanTab.specChecks(check)
 	check("every spec, another class's plan is one line", #lines .. " " .. lines[1].text, "1 " .. GREY .. "Gear plans are for druids only, for now.|r")
 	check("every spec, the sheet strip says the same", PlanTab.stripText("Blood", nil, "st", 0), GREY .. "Gear plans are for druids only, for now.|r")
 	check("every spec, no scenario button on another class", tostring(PlanTab.stripScenario("Blood")) .. " " .. tostring(PlanTab.stripScenario("Feral")), "false true")
+	-- and a druid's strip still says what it always said (0049 re-review)
+	check("every spec, a druid's strip with no plan", PlanTab.stripText("Feral", nil, "st", 0), GREY .. "No 1 target gear plan for Feral yet. Click for how.|r")
+	check("every spec, a druid's strip with a plan", PlanTab.stripText("Feral", {}, "st", 2), GOLD .. "Gear plan:|r " .. WHITE .. "2 slots to fix.|r " .. GREY .. "Click for the list.|r")
 
 	-- Roles: nothing on disk states them, so the lists are the record (0049 review).
 	local byRole = {}
@@ -8548,6 +8551,8 @@ function PlanTab.specChecks(check)
 	end)
 	PlanTab.playerClass = wasClass
 	if not ok then check("every spec, the Death Knight checks ran", err, nil) end
+	-- left swapped, every druid gear feature would be off until /reload
+	check("every spec, the class is put back", PlanTab.playerClass == wasClass and PlanTab.gearHere(), true)
 	check("every spec, a druid's plan lines", asDruid > 0, true)
 end
 
