@@ -343,3 +343,47 @@ both Make and Compare call the loadouts made at 81 different, and Make offers to
 2. `belowCap(0, 90)` is checked false.
 
 Both are in `%TEMP%\mut0058.py` and red.
+
+**2026-09-24, Claude (sixth adversarial review, of 3f550a6). Back to todo: one small gap in the
+checks. The code holds.**
+
+How I tried it: a scratch copy (`%TEMP%\rev3f5`, with the stub beside it). The builder's
+`mut0053cp.py` and `mut0058.py`, then my own list, `%TEMP%\rev3f5\revmut.py`. One run at a time.
+Nothing ran on the real file.
+
+Finding:
+
+1. **The plan cells' level is proven at 81 only, so the check cannot tell `short` from "below the
+   cap".** The new check (DjinnisClassProfiles.lua:9132) counts `short` flags at 81 with nothing
+   noted, where every right answer is `true`. Change the cell call at line 4969 to
+   `PlanTab.belowCap()` (the loadout's own level ignored) or to `true` (the cap ignored) and it stays
+   green. With `belowCap()`, at 82 a loadout made at 81 reads "different" on its stored-build line
+   and "the plan, as far as this level allows" on its plan-cell lines. That is the same disagreement
+   as the fourth review's finding 1, moved to the cells. Fix: run the same count twice more, at 82
+   with the loadout noted at 81 and at 90 of 90. Both must count `shorts == 0` with `calls > stored`.
+
+Each earlier finding:
+- Fifth review 1 (plan lines ignore the level): **half closed.** A cell call passing `false` goes
+  red. A cell call that ignores the loadout's level or the cap does not (finding 1).
+- Fifth review 2 (`level <= 0` unchecked): **closed.** "level 0 counted" goes red.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. I read the whole output: no load error, no
+  FAIL line. All 36 non-druid specs pass spec mode; 102 to 105 fail it (the `RaidWarningUtil` stub
+  and the druid tooltip lines), as expected.
+- The builder's 54 (`mut0053cp.py`) and 21 (`mut0058.py`): 75 caught, 0 missed.
+- My 3 mutations for this card: 1 caught (the stored-build call on `belowCap()`), 2 missed (finding 1).
+- The code: both calls in `sayTalents` pass the same `short`, read once from the selected loadout's
+  id. The cell half is right today; only its check is loose.
+
+Security, where the card produced code:
+1. *Weakest point:* below the cap the compare is looser on purpose. It hides a trimmed build, not
+   an attack.
+2. *Unchecked:* the plan-cell compare at 82 and at the cap (finding 1).
+3. *Leaks:* nothing. No network, no chat to others, no other player's data.
+
+**No browser, no game client.** The surface is in-game UI. After the fix, on the level 81 warlock:
+`/reload`. **More > Make the planned loadouts** says every build matches. **More > Compare talents
+with the plan** says "the plan, as far as this level allows" on every line. Open the talent window:
+the list is beside it, or its "Builds" tab is. At 82, both Make and Compare call the loadouts made
+at 81 different, and Make offers to reset them.
