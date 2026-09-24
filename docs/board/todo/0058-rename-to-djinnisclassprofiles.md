@@ -347,3 +347,88 @@ v0.47.1 is already in the game folder (not by me). Rob's list, after the fix:
 2. **HANDOVER.** The data-shape section says `DjinnisClassProfilesDB` is kept on purpose and why, and
    where the backup is. The status line says v0.47.2. The workspace HANDOVER now says the licence was
    lost in the merge and put back.
+
+**2026-09-24, Claude (third adversarial review, of 37c0ed3 and workspace 49ffae3). Back to todo:
+the `.toc` reader does not read a list as the client does, the stub's Interface is unchecked, and
+HANDOVER still says there is no remote.**
+
+How I tried it: a scratch copy (`%TEMP%\rev37c\DjinnisClassProfiles`, with `%TEMP%\rev37c\DjinnisBiS`
+beside it). The builder's `mut0058.py` and `mut0053cp.py`, then my own list,
+`%TEMP%\rev37c\revmut.py`, which also edits the stub's `.toc`. One run at a time. Nothing ran on the
+real files. The game folder and `WTF` were read only (file names and times), and nothing from the
+saved data is quoted here.
+
+Findings, in the order to fix them:
+
+1. **The `.toc` reader is looser than the client, and differs from it on repeats**
+   (offline-check.lua:447-464).
+   - `list()` splits on spaces as well as commas. So `## SavedVariables: DjinnisCPDB
+     DjinnisClassProfilesDB`, with the comma dropped, stays green. All 7 lists of more than one name
+     in `wow-ui-source`'s `.toc` files use commas. How the client splits cannot be read from the
+     source. If it splits on commas only, that line declares one name that is not a Lua name, and
+     the account's saved data is dropped at the next logout. That is the fault the first review
+     called the weakest point. Fix: split on commas only, trim, and require each name to match
+     `^[%a_][%w_]*$`.
+   - `directives()` keeps only the last line of a repeated directive (`out[name] = value`). The
+     client adds repeats up: `Blizzard_AuctionHouseUI_Mainline.toc:6-7` declares
+     `SavedVariablesPerCharacter` twice. So a stub with `## SavedVariablesPerCharacter:
+     DjinnisBiSDB` above the real line stays green, though the client would then declare the
+     account table per character as well. The other way round, the new `.toc`'s account list split
+     over two lines, which the client accepts, goes red. Fix: join repeated directives into one
+     list before the compare.
+2. **The stub's `## Interface` is not checked.** Set it to `110200` and the check stays green. An
+   enabled add-on on an old Interface is not loadable while the version check is on
+   (`Blizzard_AddOnList/AddonList.lua:783`, reason `INTERFACE_VERSION`). The stub is meant to stay
+   until every character has logged in, and the next patch bumps the main `.toc`. A stub left
+   behind then stops loading, and nothing is copied for anyone who logs in after that, with nothing
+   said. The old files stay on disk, so nothing is lost. Fix: check the stub's `Interface` equals
+   the main `.toc`'s.
+3. **HANDOVER still says this repository has no remote.** `docs/HANDOVER.md:254` says "No GitHub
+   remote and never published", and line 278 says "One branch, `master`. Clean. No remote". The
+   merge in this card made `origin` the public github.com/RobertLCraig/DjinnisClassProfiles (line 9
+   says so), and a `bis` branch is still there. A later session that orients from lines 254 and 278
+   will think nothing it commits is public. Fix both lines.
+
+Each earlier finding:
+- Second review 1 (the stub check loose and skipped when missing): **closed for what it named.** A
+  longer name, a name on the wrong line, names only in comments, a load-on-demand stub, a missing
+  stub folder and an extra name in the new `.toc` are each red. The reader's own gaps are finding 1.
+- Second review 2 (HANDOVER misses `DjinnisClassProfilesDB`): **closed.** Lines 34-38 say it is kept
+  on purpose, why, and where the backup is. The status line says v0.47.2. The workspace HANDOVER
+  line on the licence is right now (49ffae3).
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. I read the whole output: no load error, no
+  FAIL line. All 36 non-druid specs pass spec mode under both; 102 to 105 fail it, as expected.
+- The builder's 35 (`mut0058.py`) and 54 (`mut0053cp.py`): 89 caught, 0 missed.
+- My 4 mutations for this card: 1 caught (a second name on the stub's account line), 3 missed (the
+  comma, the repeated line, the stale Interface).
+- `copyOld` and `moveSavedData` (DjinnisClassProfiles.lua:8122-8138) are unchanged since the last
+  review and still first at `PLAYER_LOGIN`.
+
+Security, where the card produced code:
+1. *Weakest point:* still the `.toc` lines. The check now reads them as directives, but not as the
+   client splits and repeats them (finding 1).
+2. *Unchecked:* the stub's Interface (finding 2).
+3. *Leaks:* nothing in the game. HANDOVER understates what is public (finding 3).
+
+**No browser, no game client.** The surface is the game's add-on loader and saved-data files.
+
+**Look first: the stub is not in the game folder.** Read only: `_retail_\Interface\AddOns\` has
+`DjinnisClassProfiles` (v0.47.2) and no `DjinnisBiS` folder. The AddOns folder last changed at 03:36,
+just after the game wrote the account's `DjinnisBiS.lua`. If you removed it because every character
+has logged in, that is fine. If not, deploy the stub again (`bin\deploy.ps1 -WhatIf -Only DjinnisBiS`
+first), because a character that logs in without it gets no copy.
+
+Rob's list, after the fix:
+1. Restart the game fully. On a character that has not logged in since the rename: chat says
+   "Djinni's BiS is now Djinni's Class Profiles, and your saved data is copied over."
+2. The window has that character's saved bars, profiles, gear targets and sim imports. The minimap
+   button is where it was.
+3. `/reload`: no message this time.
+4. `/dump C_AddOns.GetAddOnOptionalDependencies("DjinnisClassProfiles")` shows `DjinnisBiS`.
+5. The add-on list shows "Djinni's BiS (old saved data)", not marked out of date. Leave it on until
+   every character has logged in once.
+6. Log in once on the `958357#1` account. Afterwards its `SavedVariables\DjinnisClassProfiles.lua`
+   still holds `DjinnisClassProfilesDB` (compare with the backup).
+7. A data bar that showed the old "DjinnisBiS" broker: add "DjinnisClassProfiles" again.
