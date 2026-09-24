@@ -4451,7 +4451,6 @@ function PlanTab.prompt(title, lines, buttons)
 		f.title:SetPoint("TOP", f, "TOP", 0, -6)
 		f.text = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 		f.text:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -34)
-		f.text:SetPoint("RIGHT", f, "RIGHT", -16, 0)
 		f.text:SetJustifyH("LEFT")
 		f.text:SetSpacing(4)
 		f.buttons = {}
@@ -4459,6 +4458,11 @@ function PlanTab.prompt(title, lines, buttons)
 		PlanTab.promptFrame = f
 	end
 	f.title:SetText(title)
+	-- The width first and on the text itself, so the wrap it is measured at
+	-- is the one drawn (Rob, 2026-09-24: a wrapped line ran under the buttons).
+	local width = math.max(380, 26 + #buttons * 126)  -- card 0031's offer has three buttons
+	f:SetWidth(width)
+	f.text:SetWidth(width - 32)
 	f.text:SetText(table.concat(lines, "\n"))
 	for i, spec in ipairs(buttons) do
 		local button = f.buttons[i]
@@ -4476,11 +4480,17 @@ function PlanTab.prompt(title, lines, buttons)
 		button:Show()
 	end
 	for i = #buttons + 1, #f.buttons do f.buttons[i]:Hide() end
-	-- ponytail: 18 a line is a guess for GameFontHighlight plus the spacing; measure with GetStringHeight if a line ever wraps
-	f:SetHeight(34 + #lines * 18 + 16 + PlanTab.SIZE.button + 12)
-	f:SetWidth(math.max(380, 26 + #buttons * 126))  -- card 0031's offer has three buttons
+	f:SetHeight(PlanTab.promptHeight(f.text:GetStringHeight(), #lines))
 	f:Show()
 	return f
+end
+
+-- The prompt's height from its text's measured height. A height that cannot
+-- be read (a secret, or no client) falls back to 18 a line, which is right
+-- only when no line wraps. Pure.
+function PlanTab.promptHeight(textHeight, lineCount)
+	local text = (PlanTab.canRead(textHeight) and type(textHeight) == "number" and textHeight > 0) and textHeight or lineCount * 18
+	return math.ceil(34 + text + 16 + PlanTab.SIZE.button + 12)
 end
 
 -- Decides what the prompt says and shows it, or shows nothing when the
@@ -8017,6 +8027,16 @@ end
 -- who know different spells, one macro each. Same reason to sit outside
 -- selfTest as loadoutChecks.
 function PlanTab.barChecks(check)
+	-- The bars prompt's height follows its measured text, so a wrapped line
+	-- is not drawn under the buttons (Rob's screenshot, 2026-09-24).
+	local B = PlanTab.SIZE.button
+	check("prompt height, from the measured text", PlanTab.promptHeight(70, 2), 34 + 70 + 16 + B + 12)
+	check("prompt height, unmeasured is 18 a line", PlanTab.promptHeight(nil, 2), 34 + 36 + 16 + B + 12)
+	local wasCanRead = PlanTab.canRead
+	PlanTab.canRead = function(v) return v ~= 70 end
+	check("prompt height, a secret height is never compared", PlanTab.promptHeight(70, 2), 34 + 36 + 16 + B + 12)
+	PlanTab.canRead = wasCanRead
+
 	local kept = { C_ActionBar, GetActionInfo, PickupAction, PlaceAction, GetCursorInfo, ClearCursor, C_Spell, C_Item,
 		PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print, PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB }
 	local keptBars = db().bars
