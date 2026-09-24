@@ -88,3 +88,74 @@ On one alt that is not a druid (the Death Knight, say), after `/reload`:
   either.
 - `--check` goes stale whenever wowvalor's recommended build moves, which can be daily. Rerun it
   without `--check` before a deploy.
+
+**2026-09-24** Adversarial review of `a63f003` (v0.42.0). **Verdict: findings, back to `todo/`.**
+The tooling is sound and `ungrant` is right. But the Dungeon source is not what the card says it
+is, and the generic names can reach a player's own loadouts.
+
+What held:
+- Harness. The self-test exits 0 under Lua 5.1.5 and 5.4.6. Spec runs 250, 62, 70 and 1473 exit 0
+  under both. `python update-builds.py --check` in the repo: exit 0, "already current", same 9 specs
+  with no Raid, tree clean.
+- `ungrant`, against Blizzard's own code (`Blizzard_ClassTalentImportExport.lua:70-160`,
+  `ExportUtil.lua`). The game exports a granted node as selected 1, purchased 0 and nothing more,
+  and that is what `ungrant` writes. My own decoder and writer (`%TEMP%\rv_decode.py`, from those
+  two files, not from the script) agree bit for bit on all 27 SimC strings. It changes exactly 2
+  (Beast Mastery, Marksmanship), and in each only the two free hero keystones differ; every other
+  node reads the same. Hero points go 14 to 13. Every stored string that has a granted keystone,
+  bought my way then ungranted, comes back bit for bit (84 of 86; the other 2 differ only in
+  trailing padding). `encode` pads as `ConvertToBase64` does.
+- Import shape. After `ungrant` the keystone imports as `ranksGranted` 1 and `ranksPurchased` 0
+  (`CreateImportLoadoutEntryInfoFromSingleNode`, :315-352). Both keystones granted is the same
+  shape Dreamgrove's and Archon's strings have, so the import gets 13 purchased hero ranks.
+  `nodeKey` ignores granted nodes, so the made loadout will not read as drifted.
+- All 86 stored strings decoded myself against Raidbots talents.json: right spec, 34/34/13 in the
+  live hero tree, no bad partial or choice bits. All 36 Dungeon strings equal the page's
+  `importString` today, and each decodes to the page's `heroTreeId`.
+- SimC. One `talents=` line in each of the 47 MID2 profiles. Frost Death Knight is stale in both
+  its files (`_Rider` too: 9 class points), so dropping it is right.
+- On copies in `%TEMP%`: a `Frost Mage` Dungeon PIN (a key with a space) is written as
+  `["Frost Mage"]` and wins; a Holy Paladin Raid PIN fills the gap and leaves the "No Raid" line; a
+  wrong-spec Raid PIN exits 1 with the Lua byte-identical. The builder's six mutations all go red,
+  and renaming `["Frost Mage"]` turns "a Dungeon build for each other spec" red.
+- Lua: `sayTalents`, `tidy` (druids only), `RETIRED`, the spare and the tree diff all take a
+  non-druid key and its strings without a special case.
+
+**Finding 1 (data): wowvalor's `recommendedBuild` is not the most-played build.** Its `amount` is 1
+to 13 of 50. Holy Paladin, Frost Mage and Preservation are 1: one character's build. Frost Mage's
+is Frostfire, which 14 of the top 50 run; 36 run Spellslinger (the page's own
+`topHeroTalentTrees`). Survival's is Pack Leader, 21 against Sentinel's 29. The docstring says "the
+exact build most of its top 50 characters of the spec run", and the card asked for the most-played
+build. Fix: refuse a recommended build whose `heroTreeId` is not the page's top hero tree, and name
+the spec as the Raid gaps are (PIN fills it); print `amount` in the run; correct the wording. If
+Rob would rather keep wowvalor's pick as it is, the card should say so.
+
+**Finding 2 (a player's loadout): "Dungeon" and "Raid" are names a player uses.** On every
+non-druid alt, a loadout the player named "Raid" now counts as the planned build. At login
+(`armLoadouts`, 5 seconds) and on a spec change, `offerLoadouts` lists it as "no longer holds the
+planned build", and "Reset to plan" (`resetDrifted`) deletes it and makes SimC's. The sidebar also
+takes it out of Your loadouts. The addon's own rule, above `PlanTab.RETIRED`, is that Rob's own
+loadouts are never touched, and 0049's review kept `tidy` off other classes for this reason. Fix:
+names a player would not choose (within 30 letters), or reset only loadouts this character made,
+kept by config id as spares are. A check with an own "Raid" on a Death Knight.
+
+**Finding 3 (minor): a pinned name on another class is not checked.** The druid path refuses a name
+over 30 letters or with a `"`. `other_classes` does not. On a copy, a PIN named `Dungeon "q"`
+exited 0 and wrote a Lua file that will not load (`']' expected near 'q'`).
+
+**Finding 4 (the manual step):** the Death Knight alt does not test the new risk. Ten Dungeon
+strings (Holy and Protection Paladin, Beast Mastery, Marksmanship, Fire, Frost Mage,
+Mistweaver, Windwalker, Devastation, Augmentation) mark the other spec's copy of a shared hero
+keystone as granted. No druid string does. The import passes it on as `ranksGranted` 1. Add one of
+those specs to Rob's check.
+
+Security:
+1. Weakest: third-party text becomes Lua. The wowvalor regex takes base64 only, and a SimC string
+   with any other character stops at the decoder before anything is written. The one open path is
+   finding 3, which is author-typed.
+2. Unchecked: which talents a string picks. The spec and points check passes any legal build, so a
+   thin or minority pick goes through unseen (finding 1).
+3. Leaks: the fetch sends a browser user agent to wowvalor and `gh` reads a public repository. In
+   game nothing is sent.
+
+No client here. Scripts: `%TEMP%\rv_decode.py`, `rv_foreign.py`, `rv_valor_all.py`, `rv_pin.py`.
