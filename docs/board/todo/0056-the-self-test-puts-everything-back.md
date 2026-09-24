@@ -313,3 +313,56 @@ say it failed, and the compare given must be the one used. Both mutations (the `
 
 Notes left as notes: `restoreSaved`'s refusal count has no offline way to refuse a plain table write,
 and `SWAPPED_TABLES` listing a table no check swaps costs nothing.
+
+**2026-09-24, Claude (fourth adversarial review, of 3f550a6). Back to todo: one finding, in the
+checks. The code holds.**
+
+How I tried it: a scratch copy (`%TEMP%\rev3f5`, with the stub beside it). The builder's
+`mut0053cp.py` and `mut0058.py`, then my own list, `%TEMP%\rev3f5\revmut.py`. One run at a time.
+Nothing ran on the real file.
+
+Finding:
+
+1. **Only one of the five guarded compares in `restore` is proven.** `same()` is called at
+   DjinnisClassProfiles.lua:12022 (`put`), 12038 (new globals), 12047 (new table fields), 12052
+   (PlanTab put back) and 12058 (new PlanTab fields). Replace any of the last four with a bare
+   `rawequal(...)` and the check stays green: 4 mutations, 4 missed. Two reasons. The refused-compare
+   run (offline-check.lua:243) hands in `equal`, so a call site that skips `same()` skips the fake as
+   well and nothing notices. And its secret is only a value the run writes, never one the snapshot
+   holds, so the four later loops never meet it. The last review's finding was that a compare which
+   throws must not stop the restore part way, and these four can still do that unseen. Fix: in that
+   run, swap the global `rawequal` to throw for the secret, as the last review asked, rather than
+   hand one in. Then put the secret in place before the run as a global, as a field of a noted table
+   (`Enum`), and as a PlanTab field, all left alone by the run. Check the run still puts its swapped
+   value back, does not say "could not put everything back", and leaves the three planted secrets
+   where they were.
+
+Each earlier finding:
+- Third review 1 (the `pcall` in `same()` unchecked): **closed for `same()` itself.** "compare not
+  guarded", "compare not the one given" and my "`same()` true on a refusal" all go red. The call
+  sites that go around it are open (finding 1).
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. I read the whole output: no load error, no
+  FAIL line. All 36 non-druid specs pass spec mode; 102 to 105 fail it, as expected.
+- The builder's 54 (`mut0053cp.py`) and 21 (`mut0058.py`): 75 caught, 0 missed.
+- My 6 mutations for this card: 2 caught (`same()` answering true on a refusal, `runSelfTest` not
+  passing `equal` on), 4 missed (finding 1).
+- The code: every compare in `restore` goes through `same()`, and `same()` treats a refusal as
+  "different", so a value is written back rather than skipped, and a snapshot value it cannot compare
+  is kept rather than deleted. That is the safe direction both ways.
+- Lua 5.1: the new `same` closure adds one upvalue (`equal`) to a function far from the limit. The file
+  loads under 5.1.5.
+
+Security, where the card produced code:
+1. *Weakest point:* a compare that throws at one of the four unproven call sites (finding 1). The
+   saved data goes back first, so the worst case is a half restore of the game's globals, and the
+   Reload box covers it.
+2. *Unchecked:* those four call sites, and a refusal inside `restoreSaved` (a note, as before).
+3. *Leaks:* nothing leaves the client. A FAIL line names up to five globals, which are public.
+
+**No browser, no game client.** The surface is in-game UI. After the fix: `/reload`, then `/dcp test`
+**before** opening the talent window or spellbook. Chat ends with "[CP] self-test passed", with no
+Lua error. Click **Later**. Open the spellbook, then the talent window, twice each: both work.
+**More > Make the planned loadouts** opens its box. **More > Offer the saved bars** still knows your
+layouts. Then click **Reload now**.
