@@ -207,3 +207,15 @@ Security, where the card produced code:
 with the plan** says "the plan, as far as this level allows", not "different". Open the talent
 window: the list is beside it, or its "BiS plan" tab is. Then at 82, **Make the planned loadouts**
 offers to reset the loadouts made at 81.
+**2026-09-24, Claude. The third review's findings, fixed in v0.46.0.**
+
+1. A loadout with no level noted gets today's level the first time it is compared
+   (`mayBeShort`), so Rob's level 81 loadouts come back at 82.
+2. The self-test's fake levels no longer stay: card `0056`'s net now writes `DjinnisBiSCharDB` back
+   whole after every run.
+3. `noteMade` reads the watched id's name through `PlanTab.configName`, and both paths are checked
+   (the build's own id, and another name falling back to the list). Compare talents returns its
+   lines, and a check reads the level wiring through it: part of the plan at 81, different at 90.
+
+Mutations: `%TEMP%\mut0053.py` has 40, all red. The reviewer's `rev56\revmut.py` ones that still
+apply are all red too.

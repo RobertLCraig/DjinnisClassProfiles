@@ -121,3 +121,19 @@ Security, where the card produced code:
 `/djbis test` **before** opening the talent window or spellbook. Click **Later**. Open the
 spellbook, then the talent window, twice each. Both work. **More > Offer the saved bars** still
 knows your layouts. Then click **Reload now**.
+
+**2026-09-24, Claude. The review's findings, fixed in v0.46.0.**
+
+1. **Saved data.** `DjinnisBiSDB` and `DjinnisBiSCharDB` are deep-copied before the run and written
+   back in place after, clean run or throw. The harness now proves a throw after the checks wiped
+   `bars` and set `statContext` leaves both as they were.
+2. **Globals the run made** are removed after it, unless they are frames (userdata at `[0]`), and
+   unless an add-on loaded during the run (then a new global may be real, and it says so). Fields a
+   run added to a noted table go the same way. The harness proves a fake `PlayerSpellsFrame` made
+   by the run is gone after, as are a new `Enum` field and a swapped `SlashCmdList` entry.
+3. **Every write-back is in `pcall`**, and `restore` itself is too; a refused write is a FAIL line
+   that says to reload.
+4. **Equip all's set save** goes through `PlanTab.later`, and the check holds it, so nothing fires on
+   the real equipment manager after the test.
+5. `loadoutChecks` now puts a shown prompt in place, as the client had, so the `promptBusy` pin is
+   proven. The harness proves the Reload now offer.

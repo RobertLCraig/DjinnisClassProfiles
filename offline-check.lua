@@ -77,7 +77,9 @@ GetInventoryItemLink = function() return nil end
 time, date = os.time, os.date  -- WoW exposes both as globals; the plan's age reads time()
 GetBuildInfo = function() return "12.1.0", "00000", "Sep 10 2026", 120100 end
 
-C_AddOns = { IsAddOnLoaded = function() return false end }
+-- GetNumAddOns lets the self-test net count loaded add-ons, so its removal of
+-- globals a run made is exercised here too (card 0056)
+C_AddOns = { IsAddOnLoaded = function() return false end, GetNumAddOns = function() return 0 end }
 C_Item = {
 	GetItemInfoInstant = function() return nil end,
 	GetItemStats = function() return nil end,
@@ -136,6 +138,9 @@ TooltipDataProcessor.AddTooltipPostCall = function(_, hook) tooltipHook = hook e
 local here = arg and arg[0] and arg[0]:match("^(.*)[/\\][^/\\]*$") or "."
 local source = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
 dofile(here .. "/DjinnisBiS.lua")
+-- The client has both saved tables before any slash command runs (empty on a
+-- first login), so the self-test net must find them, not see them made
+DjinnisBiSDB, DjinnisBiSCharDB = DjinnisBiSDB or {}, DjinnisBiSCharDB or {}
 -- An id the addon does not know would run as "no spec" and pass (0049 review).
 if asSpec and not source:find("{ " .. asSpec .. ", \"", 1, true) then
 	print("|cffff0000FAIL|r spec " .. asSpec .. " is not in PlanTab.SPECS, so this run would prove nothing")
@@ -155,19 +160,42 @@ if not asSpec then
 		print("|cffff0000FAIL|r the self-test net: PlanTab is not reachable from the slash handler, so the net is unproven")
 	else
 		local realInfo, realCount, realSay, said = GetInstanceInfo, C_Item.GetItemCount, PlanTab.say, {}
-		local wrapped = print
+		-- saved data as a client has it, written into and swapped by the run
+		DjinnisBiSDB = DjinnisBiSDB or {}
+		DjinnisBiSDB.bars = { ["Feral / Raid"] = { saved = "2026-09-24" } }
+		local realDB, hadFrame, realSlash = DjinnisBiSDB, rawget(_G, "PlayerSpellsFrame"), SlashCmdList.DJINNISBIS
+		local wrapped, keptPrompt, offered = print, PlanTab.prompt, nil
 		print = function(...) said[#said + 1] = table.concat({ ... }, " ") end
+		-- the reload is offered in a client, which has ReloadUI
+		PlanTab.prompt = function(_, _, buttons) offered = buttons end
+		ReloadUI = function() end
 		local ok, swapped = PlanTab.runSelfTest(function()
+			SlashCmdList.DJINNISBIS = function() end
+			Enum.DjinnisTestOnly = { Fake = 1 }
 			GetInstanceInfo = function() return "Fake" end
 			C_Item.GetItemCount = function() return 99 end
 			PlanTab.say = function() end
+			DjinnisBiSDB.bars = {}
+			DjinnisBiSDB.statContext = "raid"
+			DjinnisBiSDB = { fake = true }
+			if hadFrame == nil then PlayerSpellsFrame = { IsShown = function() return true end } end
 			error("thrown on purpose")
 		end)
 		print = wrapped
+		local reload = offered and offered[1] and offered[1].label == "Reload now" and offered[1].onClick == ReloadUI
+		PlanTab.prompt, ReloadUI = keptPrompt, nil
+		if not reload then print("|cffff0000FAIL|r the self-test net did not offer Reload now") end
+		if SlashCmdList.DJINNISBIS ~= realSlash or Enum.DjinnisTestOnly ~= nil then print("|cffff0000FAIL|r the self-test net missed a field of a table the checks write into") end
 		local text = table.concat(said, "\n")
-		if ok ~= false or swapped ~= 2 then print("|cffff0000FAIL|r the self-test net: expected false and 2 swapped, got " .. tostring(ok) .. " and " .. tostring(swapped)) end
+		local want = hadFrame == nil and 6 or 5
+		if ok ~= false or swapped ~= want then print("|cffff0000FAIL|r the self-test net: expected false and " .. want .. " swapped, got " .. tostring(ok) .. " and " .. tostring(swapped)) end
 		if GetInstanceInfo ~= realInfo or C_Item.GetItemCount ~= realCount or PlanTab.say ~= realSay then print("|cffff0000FAIL|r the self-test net did not put everything back") end
-		if not (text:find("stopped part way", 1, true) and text:find("thrown on purpose", 1, true) and text:find("2 of the game's own values", 1, true)) then
+		if DjinnisBiSDB ~= realDB or not (DjinnisBiSDB.bars and DjinnisBiSDB.bars["Feral / Raid"]) or DjinnisBiSDB.statContext ~= nil then
+			print("|cffff0000FAIL|r the self-test net did not put the saved data back")
+		end
+		if rawget(_G, "PlayerSpellsFrame") ~= hadFrame then print("|cffff0000FAIL|r the self-test net left a global the run made") end
+		DjinnisBiSDB.bars = nil
+		if not (text:find("stopped part way", 1, true) and text:find("thrown on purpose", 1, true) and text:find(want .. " of the game's own values", 1, true)) then
 			print("|cffff0000FAIL|r the self-test net did not say what happened: " .. text)
 		end
 	end
