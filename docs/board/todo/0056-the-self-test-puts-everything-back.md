@@ -137,3 +137,89 @@ knows your layouts. Then click **Reload now**.
    the real equipment manager after the test.
 5. `loadoutChecks` now puts a shown prompt in place, as the client had, so the `promptBusy` pin is
    proven. The harness proves the Reload now offer.
+
+**2026-09-24, Claude (second adversarial review, of 7a81698). Back to todo: the net leaves new
+PlanTab fields, can still skip your saved data, and half of it has no check.**
+
+How I tried it: a scratch copy (`%TEMP%\rev5556`), `mut.py` for mutations and `exp.py` for a throw
+or a failing compare at a chosen point. Nothing ran on the real file.
+
+Findings, in the order to fix them:
+
+1. **A PlanTab field the run adds is never removed, and the fix added one.** `restore` puts back
+   only PlanTab fields that existed at the snapshot (DjinnisBiS.lua:11933). `loadoutChecks` now sets
+   `PlanTab.promptFrame` to a fake with only `IsShown` (line 8272). If no prompt has been shown this
+   session, the snapshot has no `promptFrame`. A throw before line 8487 then leaves the fake. I put
+   the throw right after the first offer check. The net's Reload box then throws `attempt to index
+   field 'title'` (line 4682), so the slash command ends in a Lua error. `promptBusy()` answers true
+   from then on, and every later prompt throws the same way until a reload. That includes the
+   login loadout offer and the bars prompts. Fix: in `restore`, remove PlanTab fields the snapshot
+   did not have, unless they are widgets (as for globals). Add the case to the net's proof.
+2. **The saved data is still written back last, after the steps that can throw.** Finding 3 asked
+   for each `put` in a `pcall`. Only the `rawset` is guarded. The `rawequal(rawget(t, k), v)` in
+   `put` (line 11893) and the `snap.g[k] == nil` in the removal loop (line 11910) run outside it.
+   DECISIONS says a secret may not be compared. The source cannot say whether `rawequal` counts. If
+   one of them throws, `restore` stops before the saved data (line 11923). The FAIL line at 11945
+   then says "Reload the interface now", and the reload writes the test's saved data to disk. That
+   is finding 1 of the first review again. I simulated it by making `rawequal` throw on one global.
+   After the net, `bars` was empty and `statContext` was "raid". Fix: write the saved data back
+   first, since those are the addon's own tables. Move the compare inside the `pcall`.
+3. **Half of the net can be broken without the check going red.** Each of these mutations stays green:
+   - `deepCopy` one level deep. A nested write in place then stays. I ran it: fake spare id 24 is
+     left in `DjinnisBiSCharDB.spares`. That is the write the first review named, and the proof
+     only swaps whole fields (`bars = {}`).
+   - `DjinnisBiSCharDB` dropped from `SAVED_VARIABLES`. Card 0055's third finding is closed by this
+     table, and nothing checks it.
+   - `put` without `pcall`, `restore` without `pcall`, and the "refused" line removed. The harness
+     can test these: swap the global `rawset` to throw on one key.
+   - `isWidget` always false. A named frame made during a run would then lose its global. The
+     harness has no widget. A global with userdata at `[0]` (`io.stdout`) is one.
+   - `keepNew` always false. No check loads an add-on during a run.
+
+A note, not a finding: `PlanTab.recheckSoon` (line 5627) still calls the real `C_Timer`. The popup
+button checks (lines 11449 and 11691) click buttons that call it, so `checkSetup` runs 2 seconds
+after the test, against the real game. That only reads the real setup. At worst the real reminder
+shows, and it saves nothing. Route it through `PlanTab.later` when you are next in there.
+
+Each earlier finding:
+- 1 (saved data): **closed for a whole-field swap and a replaced table**, and the proof checks both.
+  **Open when a compare in `restore` throws** (finding 2). **Unproven for nested writes and the
+  character's table** (finding 3).
+- 2 (globals the run made): **closed for globals and noted tables.** The proof goes red for a fake
+  `PlayerSpellsFrame`, a new `Enum` field and a swapped `SlashCmdList` entry. **Open for PlanTab**
+  (finding 1).
+- 3 (`restore` unguarded): **half closed.** The writes and the call are guarded. The compares are
+  not, and none of it is checked (findings 2 and 3).
+- 4 (Equip all's set save): **closed.** It goes through `PlanTab.later`, and "saves the set once,
+  later" goes red with the old `C_Timer` call back.
+- 4b (a second `DjinnisBiSPrompt`): that one does not happen. New PlanTab fields are kept, so the
+  real frame stays, and finding 1 is that same rule the other way round.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1.5 and 5.4.6. I read the whole output: no load error,
+  no FAIL line. The builder's 40 mutations each go red on the scratch copy.
+- My 17 mutations for this card: 9 caught (saved data not restored, not cleared, new globals kept,
+  new table fields kept, `keepNew` always true, the fake `promptFrame` not put back by
+  `loadoutChecks`, the set save not held, no Reload offer, `C_` namespaces not noted). 8 missed
+  (finding 3).
+- A clean run leaves the character's saved table as it found it (checked before and after on the
+  scratch copy).
+- `C_AddOns.GetNumAddOns` and `IsAddOnLoaded` exist in 12.1.0 (AddOnsDocumentation.lua:256, 322).
+  `IsAddOnLoaded` takes a `uiAddon`, the same type `GetAddOnName` takes as an index (line 187), so
+  counting by index is sound. Whether the count
+  includes Blizzard's load-on-demand add-ons (`Blizzard_PlayerSpells`) cannot be read from the
+  source. So `keepNew` may not notice the load that matters most. No check in the self-test loads
+  one, so this is a note.
+
+Security, where the card produced code:
+1. *Weakest point:* what `restore` does when a step throws. It stops before the saved data and
+   tells you to reload (finding 2).
+2. *Unchecked:* nested saved data, the character's table, refused writes, widgets and the
+   add-on-loaded path (finding 3), and new PlanTab fields (finding 1).
+3. *Leaks:* nothing leaves the client. A FAIL line names up to five globals, which are public.
+
+**No browser, no game client.** The surface is in-game UI. After the fix: `/reload`, then
+`/djbis test` **before** opening the talent window or spellbook. Chat ends with the pass line, and
+no Lua error shows. Click **Later**. Open the spellbook, then the talent window, twice each: both work.
+**More > Make the planned loadouts** opens its box, so the prompt frame is real. **More > Offer the
+saved bars** still knows your layouts. Then click **Reload now**.
