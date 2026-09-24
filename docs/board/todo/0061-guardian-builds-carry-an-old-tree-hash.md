@@ -33,6 +33,28 @@ Risk with 1: the hash exists to catch a tree whose node order moved. The point-c
 most of that, not all. A build that spends the right points on the wrong nodes would pass. Rob sees
 it on the tree in step 2 below.
 
+## Recheck, 2026-09-25: the hash is the smaller problem
+
+Rob: "recheck guardian talent builds". Rob's Guardian SimC export (`2026-09-24 Guardian v1.txt`)
+decoded, then compared with the top 10 Guardians by Warcraft Logs rank on Altar of Fangs, Temple
+of Sethraliss, Mythic Sszorak and Mythic Vashnik (40 players). Swipe, Frenzied Regeneration,
+Verdant Heart and Boundless Moonlight are left out below: every loadout "lacks" them, so they are
+free nodes the comparison miscounts.
+
+- **All 40 play Elune's Chosen.** None play Druid of the Claw, in raid or in dungeons.
+- `Dungeon` (Archon, pinned) matches the top players exactly. Keep it.
+- `Raid: Druid of the Claw` is Druid of the Claw: 0 of 20 raid Guardians play it. It is the
+  same build as Rob's own `DotC Raid`.
+- `Raid: Elune's Chosen` is the right hero tree but takes Convoke (2 of 20) where 18 of 20 take
+  Incarnation: Guardian of Ursoc, and skips Ursoc's Guidance (20 of 20), Gory Fur (19), Elune's
+  Grace (17), Natural Recovery (17) and Improved Stampeding Roar (16).
+- `Dungeon: survive more` is Druid of the Claw: 0 of 20 dungeon Guardians play it.
+
+So option 1 above (zero the hash) would load builds nobody at the top plays. **Option 2 is the
+answer, with a different source**: replace the three strings with the builds top players run,
+the way `Dungeon` already is (card `0047`). Uncertain: Warcraft Logs ranks tanks by damage, which
+may favour an offensive build over a safe one.
+
 ## Done when
 
 1. `python update-builds.py --check` passes, and no string in the BUILDS block has a non-zero hash.
