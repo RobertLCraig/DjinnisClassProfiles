@@ -250,7 +250,9 @@ do
 		lineNo = lineNo + 1
 		local code = line:gsub("%-%-.*$", "")
 		if code:find("SLASH_DJINNISBIS%d") then registered = registered + 1
-		elseif code:find("/djbis", 1, true) or code:find("\"/bis[\" ]") then
+		-- any case, anywhere in the line: "Type /BIS ..." slipped past a narrower
+		-- pattern (0053 review). "/BiS: Raid" in a check's text is a value, not a command.
+		elseif code:lower():find("/djbis", 1, true) or code:lower():find("/bis[%s\"'|]") or code:lower():find("/bis$") then
 			print("|cffff0000FAIL|r no text names a slash command, use the button's name: line " .. lineNo)
 		end
 	end

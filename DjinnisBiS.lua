@@ -1991,6 +1991,45 @@ function PlanTab.talentStringsDiffer(active, planned)
 	return aNodes ~= pNodes
 end
 
+-- Below the level cap the game saves only the part of a build the character
+-- can hold: fewer points, and an apex node's ranks open at 81, 84 and 90.
+-- Rob, 2026-09-24, on a level 81 warlock: "Reset to plan" made the same
+-- loadout again on every click, and it never read as the plan. So there a
+-- build holds the plan when it is part of it: every node it buys is in the
+-- plan, with the same choice and no more ranks. Pure.
+function PlanTab.partOfPlan(have, planned)
+	local a, p = PlanTab.nodeKey(have or ""), PlanTab.nodeKey(planned or "")
+	if not (a and p) then return nil end
+	local want = {}
+	for node, ranks, choice in p:gmatch("(%d+):(%w+):(%d+)") do want[node] = { ranks = ranks, choice = choice } end
+	for node, ranks, choice in a:gmatch("(%d+):(%w+):(%d+)") do
+		local w = want[node]
+		if not w or w.choice ~= choice then return false end
+		-- "m" is all of the node's ranks: the plan's "m" allows any, and a
+		-- plan with fewer cannot be told apart from more, so that is not part
+		if w.ranks ~= "m" and (ranks == "m" or tonumber(ranks) > tonumber(w.ranks)) then return false end
+	end
+	return true
+end
+
+-- talentStringsDiffer, except that below the level cap (`short`) a build
+-- that is part of the plan does not differ.
+function PlanTab.planDiffers(have, planned, short)
+	local differs = PlanTab.talentStringsDiffer(have, planned)
+	if differs and short and PlanTab.partOfPlan(have, planned) then return false end
+	return differs
+end
+
+-- True below the level cap, where the game cannot hold a whole build yet.
+-- false when either level cannot be read: then the plan must match exactly.
+function PlanTab.belowCap()
+	local okLevel, level = pcall(UnitLevel, "player")
+	local okCap, cap = pcall(GetMaxLevelForPlayerExpansion)
+	if not (okLevel and okCap and canRead(level) and canRead(cap)) then return false end
+	if type(level) ~= "number" or type(cap) ~= "number" or level <= 0 then return false end
+	return level < cap
+end
+
 -- The planned build for `spec` and `scenario`: the plan cell's own `talents`
 -- string, the export the Top Gear report was simmed on, and then the loadout
 -- name it was simmed under. nil when the cell has no string: no planned
@@ -4830,7 +4869,7 @@ function PlanTab.talentsEdited(planned)
 		local activeConfigID = C_ClassTalents.GetActiveConfigID()
 		if activeConfigID then
 			local ok, active = pcall(C_Traits.GenerateImportString, activeConfigID)
-			edited = PlanTab.talentStringsDiffer(ok and active, planned)
+			edited = PlanTab.planDiffers(ok and active, planned, PlanTab.belowCap())
 		end
 	end
 	PlanTab.lastEdited[planned] = edited
@@ -6260,7 +6299,7 @@ function PlanTab.buildSidebar()
 	f.close:SetScript("OnClick", function() PlanTab.setSidebarClosed(true) end)
 	f.more = PlanTab.moreButton(f, "sidebar")  -- card 0053
 	f.more:SetSize(60, 20)
-	f.more:SetPoint("RIGHT", f.close, "LEFT", 0, 0)
+	f.more:SetPoint("RIGHT", f.close, "LEFT", -6, 0)  -- a gap, so a click meant for More does not close the list
 	-- a long title ("No stored builds for Frost Death Knight yet") stops at More
 	f.title:SetPoint("RIGHT", f.more, "LEFT", -4, 0)
 	f.title:SetJustifyH("LEFT")
@@ -6493,8 +6532,11 @@ function PlanTab.updateSidebar()
 	local f = PlanTab.sidebar or PlanTab.buildSidebar()
 	f.tab:SetShown(mode == "tab")
 	f:SetShown(mode == "open")
-	if mode ~= "open" then return mode end
+	if mode == "off" then return mode end
+	-- the tab too: one built closed had no place at all, so the way back
+	-- in was never drawn (Rob, 2026-09-24, on a warlock)
 	PlanTab.placeSidebar()
+	if mode ~= "open" then return mode end
 	f.undo:SetEnabled(PlanTab.canUndoBars())
 	local spec = playerSpec()
 	local context = (statContext())
@@ -6688,15 +6730,16 @@ end
 -- Which planned builds have no saved loadout of their name, and which saved
 -- loadouts of a planned name no longer hold the planned build. `saved` is
 -- PlanTab.savedLoadoutNames() (name -> config id), `stringOf(id)` that
--- loadout's export. One that cannot be compared is neither. nil when the game
+-- loadout's export. `short` is PlanTab.belowCap(): then a loadout that holds
+-- part of the plan is not drifted. One that cannot be compared is neither. nil when the game
 -- would not list the loadouts: "all missing" would be a lie. Pure, for /bis test.
-function PlanTab.loadoutGaps(builds, saved, stringOf)
+function PlanTab.loadoutGaps(builds, saved, stringOf, short)
 	if not saved then return nil end
 	local missing, drifted = {}, {}
 	for name, build in pairs(builds or {}) do
 		local id = saved[name]
 		if not id then missing[#missing + 1] = name
-		elseif PlanTab.talentStringsDiffer(stringOf(id), build) then drifted[#drifted + 1] = name end
+		elseif PlanTab.planDiffers(stringOf(id), build, short) then drifted[#drifted + 1] = name end
 	end
 	table.sort(missing)
 	table.sort(drifted)
@@ -7021,7 +7064,7 @@ function PlanTab.createMissing()
 	local spec = playerSpec()
 	local builds = spec and PlanTab.BUILDS[spec] or {}
 	local saved = PlanTab.savedLoadoutNames()
-	local missing = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString)
+	local missing = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.belowCap())
 	if not missing then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
 	local room = PlanTab.loadoutRoom(saved)
 	local jobs = {}
@@ -7041,7 +7084,7 @@ function PlanTab.resetDrifted()
 	local spec = playerSpec()
 	local builds = spec and PlanTab.BUILDS[spec] or {}
 	local saved, twice = PlanTab.savedLoadoutNames()
-	local _, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString)
+	local _, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.belowCap())
 	if not drifted then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
 	local selected, jobs = PlanTab.selectedConfigID(), {}
 	for _, name in ipairs(drifted) do
@@ -7069,7 +7112,10 @@ function PlanTab.promptBusy()
 end
 
 function PlanTab.offerLoadouts(asked)
-	if InCombatLockdown() then return "combat" end
+	if InCombatLockdown() then
+		if asked then PlanTab.say("Not in combat. Try again after the fight.") end  -- a click that says nothing looks broken (0053 review)
+		return "combat"
+	end
 	local spec = playerSpec()
 	local builds = spec and PlanTab.BUILDS[spec]
 	if not builds then
@@ -7077,7 +7123,7 @@ function PlanTab.offerLoadouts(asked)
 		return "no builds"
 	end
 	local saved = PlanTab.savedLoadoutNames()
-	local missing, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString)
+	local missing, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.belowCap())
 	if not missing then return "unknown" end
 	-- no room: those builds are worn through the spare, so not offered (card 0040)
 	local room = PlanTab.loadoutRoom(saved)
@@ -7845,6 +7891,8 @@ function PlanTab.menuItems(where)
 	local function add(item) items[#items + 1] = item end
 	if where == "sidebar" then
 		add({ text = "Open the BiS window", tip = "The gear plan, by boss, by slot, stats and the plan.", fn = DjinnisBiS_Toggle })
+	elseif db().sidebarClosed then
+		add({ text = "Show the build list", tip = "Opens the list beside the talent window again.", fn = function() PlanTab.setSidebarClosed(false) end })
 	end
 	add({ title = "Talents" })
 	add({ text = "Make the planned loadouts", tip = "Offers to create or reset a loadout for every planned build of this spec.", fn = function() PlanTab.offerLoadouts(true) end })
@@ -7855,7 +7903,11 @@ function PlanTab.menuItems(where)
 	add({ divider = true })
 	add({ title = "Action bars" })
 	add({ text = "Offer the saved bars", tip = "Offers the action bars and keys saved for this build, or for this spec.", fn = function() PlanTab.offerBars(true) end })
-	if where ~= "sidebar" then  -- the sidebar has its own Undo bars button
+	-- the sidebar has its own Save and Undo buttons; with Talent Loadout
+	-- Manager loaded there is no sidebar, so the window needs them (0053 review)
+	if where ~= "sidebar" then
+		add({ text = "Save bars for this spec", tip = "Your action bars and key bindings now, kept for every build of this spec that has none of its own.", fn = function() PlanTab.saveBars(false, true) end })
+		add({ text = "Save bars for this build", tip = "Your action bars and key bindings now, kept for the loadout you have selected.", fn = function() PlanTab.saveBars(true, true) end })
 		add({ text = "Undo bars", tip = "Puts back the action bars and key bindings from before the last load.", fn = PlanTab.undoBarsAsk })
 	end
 	add({ text = "Save bars as a profile...", tip = "Keeps your action bars and key bindings now under a name. A profile loads on any character and any spec.", fn = PlanTab.askProfileName })
@@ -8074,6 +8126,36 @@ function PlanTab.loadoutChecks(check)
 	-- node number, ranks and choice, as Blizzard's own reader decodes them (second review)
 	local key = PlanTab.nodeKey(dreamgrove)
 	check(gapTest .. ", the nodes decode as Blizzard's reader does", key:find("^40:m:0,41:m:0,42:m:0,43:m:0,44:m:0,45:m:1,") ~= nil and key:find(",114:1:0,", 1, true) ~= nil, true)
+	-- Below the level cap the game saves part of a build (Rob, a level 81
+	-- warlock, 2026-09-24). The node lists are handed in by swapping nodeKey.
+	local partTest = "below the level cap, part of the plan is the plan"
+	local keptKey, lists = PlanTab.nodeKey, { [nek] = "1:m:0,5:3:0,9:m:1" }
+	local function part(have) lists[sen] = have return PlanTab.partOfPlan(sen, nek) end
+	local okPart, errPart = pcall(function()
+		PlanTab.nodeKey = function(code) return lists[code] end
+		check(partTest .. ", fewer nodes and ranks", part("1:m:0,5:2:0"), true)
+		check(partTest .. ", the whole plan", part("1:m:0,5:3:0,9:m:1"), true)
+		check(partTest .. ", no nodes at all", part(""), true)
+		check(partTest .. ", not with a node the plan has not", part("1:m:0,7:m:0"), false)
+		check(partTest .. ", not with another choice", part("9:m:0"), false)
+		check(partTest .. ", not with more ranks", part("5:4:0"), false)
+		check(partTest .. ", not with all ranks where the plan has some", part("5:m:0"), false)
+		check(partTest .. ", nothing said about a string that will not read", part(nil), nil)
+		lists[sen] = "1:m:0,5:2:0"
+		local _, short = PlanTab.loadoutGaps({ A = nek }, { A = 1 }, function() return sen end, true)
+		check(partTest .. ", so the loadout is not drifted", #short, 0)
+		local _, full = PlanTab.loadoutGaps({ A = nek }, { A = 1 }, function() return sen end, false)
+		check(partTest .. ", but at the cap it is", table.concat(full, ","), "A")
+		lists[sen] = "1:m:0,7:m:0"
+		_, short = PlanTab.loadoutGaps({ A = nek }, { A = 1 }, function() return sen end, true)
+		check(partTest .. ", and an edit is drifted even below it", table.concat(short, ","), "A")
+		check(partTest .. ", planDiffers, below the cap", PlanTab.planDiffers(sen, nek, true), true)
+		lists[sen] = "1:m:0"
+		check(partTest .. ", planDiffers, part of it below the cap", PlanTab.planDiffers(sen, nek, true), false)
+		check(partTest .. ", planDiffers, part of it at the cap", PlanTab.planDiffers(sen, nek, false), true)
+	end)
+	PlanTab.nodeKey = keptKey
+	check(partTest .. ", ran", okPart or tostring(errPart), true)
 
 	local kept = { C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil, InCombatLockdown, PlayerSpellsFrame, print, PlanTab.prompt }
 	local calls, printed, shown, combat, windowOpen, canNew = {}, {}, nil, false, false, 0
@@ -8821,10 +8903,11 @@ function PlanTab.menuChecks(check)
 	local t = "every command has a button"
 	local names = { "offerLoadouts", "sayTalents", "tidyAsk", "offerBars", "undoBarsAsk", "askProfileName",
 		"loadProfile", "deleteProfileAsk", "profilesDB", "playerClass", "tidy", "prompt", "promptBusy", "askName",
-		"deleteProfile" }
+		"deleteProfile", "saveBars", "setSidebarClosed" }
 	local kept, calls = {}, {}
 	for _, name in ipairs(names) do kept[name] = PlanTab[name] end
-	local wasSlash, wasToggle = SlashCmdList.DJINNISBIS, DjinnisBiS_Toggle
+	local wasSlash, wasToggle, keptClosed = SlashCmdList.DJINNISBIS, DjinnisBiS_Toggle, db().sidebarClosed
+	db().sidebarClosed = nil
 	local profiles, class, tidyAnswer, shown = {}, PlanTab.DRUID, 2, nil
 	local function find(items, text)
 		for _, item in ipairs(items) do if item.text == text then return item end end
@@ -8840,7 +8923,7 @@ function PlanTab.menuChecks(check)
 		return table.concat(calls, " ")
 	end
 	local ok, err = pcall(function()
-		for _, name in ipairs({ "offerLoadouts", "sayTalents", "tidyAsk", "offerBars", "undoBarsAsk", "askProfileName", "loadProfile", "deleteProfileAsk" }) do
+		for _, name in ipairs({ "offerLoadouts", "sayTalents", "tidyAsk", "offerBars", "undoBarsAsk", "askProfileName", "loadProfile", "deleteProfileAsk", "saveBars", "setSidebarClosed" }) do
 			PlanTab[name] = function(a) calls[#calls + 1] = name .. (a ~= nil and ("(" .. tostring(a) .. ")") or "") end
 		end
 		PlanTab.profilesDB = function() return profiles end
@@ -8860,6 +8943,9 @@ function PlanTab.menuChecks(check)
 		check(t .. ", Delete old loadouts, on a druid", click(w, "Delete old Dreamgrove loadouts"), "tidyAsk")
 		check(t .. ", Offer the saved bars", click(w, "Offer the saved bars"), "offerBars(true)")
 		check(t .. ", Undo bars in the window", click(w, "Undo bars"), "undoBarsAsk")
+		check(t .. ", Save bars for this spec, with no sidebar", click(w, "Save bars for this spec"), "saveBars(false)")
+		check(t .. ", Save bars for this build, with no sidebar", click(w, "Save bars for this build"), "saveBars(true)")
+		check(t .. ", no Show the build list while it shows", click(w, "Show the build list"), "none")
 		check(t .. ", Save bars as a profile", click(w, "Save bars as a profile..."), "askProfileName")
 		check(t .. ", no profiles says so", click(w, "No profiles yet"), "disabled")
 		check(t .. ", Bonus roll here", click(w, "Bonus roll worth it here?"), "slash(here)")
@@ -8869,6 +8955,10 @@ function PlanTab.menuChecks(check)
 		local s = PlanTab.menuItems("sidebar")
 		check(t .. ", the sidebar opens the window", click(s, "Open the BiS window"), "toggle")
 		check(t .. ", the sidebar has its own Undo button", click(s, "Undo bars"), "none")
+		check(t .. ", and its own Save buttons", click(s, "Save bars for this spec"), "none")
+		db().sidebarClosed = true
+		check(t .. ", a closed build list can be shown again", click(PlanTab.menuItems("window"), "Show the build list"), "setSidebarClosed(false)")
+		db().sidebarClosed = keptClosed
 
 		profiles = { Raid = { saved = "2026-09-24" }, Arena = {} }
 		w = PlanTab.menuItems("window")
@@ -8942,7 +9032,7 @@ function PlanTab.menuChecks(check)
 		check(t .. ", the name box saves a profile", onOK == kept.saveProfile or onOK == PlanTab.saveProfile, true)
 	end)
 	for _, name in ipairs(names) do PlanTab[name] = kept[name] end
-	SlashCmdList.DJINNISBIS, DjinnisBiS_Toggle = wasSlash, wasToggle
+	SlashCmdList.DJINNISBIS, DjinnisBiS_Toggle, db().sidebarClosed = wasSlash, wasToggle, keptClosed
 	check(t .. ", ran", ok or tostring(err), true)
 	check(t .. ", and put everything back", PlanTab.playerClass == kept.playerClass and PlanTab.tidy == kept.tidy and SlashCmdList.DJINNISBIS == wasSlash, true)
 end
@@ -10924,6 +11014,13 @@ local function selfTest()
 		check(closedTest .. ", off while Talent Loadout Manager is loaded", PlanTab.sidebarMode(true, nil, true), "off")
 		check(closedTest .. ", off while it is loaded even when closed", PlanTab.sidebarMode(true, true, true), "off")
 		check(closedTest .. ", the rival is asked, not assumed", PlanTab.rivalLoaded(), false)
+		-- a list built closed still puts its tab somewhere (Rob, 2026-09-24)
+		local keptMode, keptPlace, placed = PlanTab.sidebarMode, PlanTab.placeSidebar, 0
+		local stub = { SetShown = function() end, tab = { SetShown = function() end } }
+		PlanTab.sidebarMode, PlanTab.placeSidebar, PlanTab.sidebar = function() return "tab" end, function() placed = placed + 1 end, stub
+		local okTab, tabMode = pcall(PlanTab.updateSidebar)
+		PlanTab.sidebarMode, PlanTab.placeSidebar, PlanTab.sidebar = keptMode, keptPlace, wasSidebar
+		check(closedTest .. ", the tab is placed when the list is closed", okTab and tabMode .. " " .. placed or tostring(tabMode), "tab 1")
 		check(closedTest .. ", the row fits two lines of normal text", PlanTab.SIDEBAR_ROW >= 32, true)
 	end
 

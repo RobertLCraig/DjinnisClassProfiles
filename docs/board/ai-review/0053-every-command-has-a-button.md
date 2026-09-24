@@ -132,3 +132,18 @@ Security, where the card produced code:
 run. After the fix, Rob still owes the six steps above. He should also look at two things. First,
 whether the tooltip on "Profile: X" sits over its Load / Delete submenu. Second, whether a long
 sidebar title such as "Beast Mastery Hunter builds" gets cut short at More.
+
+**2026-09-24, Claude. The three findings, fixed in v0.44.0.**
+
+1. The window's More has "Save bars for this spec" and "Save bars for this build"
+   (`saveBars(false, true)`, `saveBars(true, true)`), not shown in the sidebar's menu, which has
+   the buttons. Checked in `menuChecks`.
+2. The scan finds `/djbis` anywhere and `/bis` followed by a space, a quote, `|` or the end, in any
+   case. "/BiS: Raid" in a check's text is a loadout name and is not flagged. Your two mutations
+   ("Or type /BIS tidy yes") now go red.
+3. Make the planned loadouts says "Not in combat" when clicked in combat. No check: the only way to
+   fake combat is to swap `InCombatLockdown`, a Blizzard global.
+
+Also from Rob's first look (card `0055`): the window's More has "Show the build list" while the list
+is closed, and More sits 6 pixels from the sidebar's close button. `mut0053.py` now has 20 mutations,
+all red.
