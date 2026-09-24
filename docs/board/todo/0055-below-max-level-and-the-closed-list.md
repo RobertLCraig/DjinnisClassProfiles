@@ -393,3 +393,54 @@ at 81 different, and Make offers to reset them.
 The count of `short` flags now runs three times: at 81 (every line short), at 82 with the loadout
 noted at 81 (none), and at 90 of 90 (none). The plan cells passing `PlanTab.belowCap()` or `true` are
 both red. `%TEMP%\mut0058.py`, now 35 breaks, all red; `mut0053cp.py`, 54, all red.
+
+**2026-09-24, Claude (seventh adversarial review, of 37c0ed3). Back to todo: the same level wiring
+is unchecked on the third caller, `talentsEdited`. The code holds.**
+
+How I tried it: a scratch copy (`%TEMP%\rev37c`, with the stub beside it). The builder's
+`mut0058.py` and `mut0053cp.py`, then my own list, `%TEMP%\rev37c\revmut55.py`. One run at a time.
+Nothing ran on the real file.
+
+Findings, in the order to fix them:
+
+1. **`talentsEdited` can ignore the loadout's own level, and the check stays green.** Change
+   DjinnisClassProfiles.lua:4915 from `PlanTab.mayBeShort(PlanTab.selectedConfigID())` to
+   `PlanTab.belowCap()` and nothing goes red. The two checks on it (lines 9075 and 9078) change
+   only the level, 81 and 90, with nothing noted. With that change, at 82 a loadout made at 81 shows
+   no "(edited)" mark on the popup, the Plan tab or the list, while **Make the planned loadouts**
+   offers to reset it and **Compare** calls it different. That is the disagreement of the fourth
+   review (Compare) and the sixth (the plan cells), on the third caller. Fix: after line 9078, note
+   the loadout at 81, read at 82, and check `talentsEdited(code)` is true.
+2. **`mayBeShort`'s `id and` guard has no check** (line 2064). Remove it and a nil id indexes
+   `madeAt` with nil, which throws. A character below the cap with no saved loadout selected
+   (`GetLastSelectedSavedConfigID` answers nil) would then have `talentsEdited` and Compare throw.
+   Nothing goes red. Fix: check `PlanTab.mayBeShort(nil)` below the cap answers true and notes
+   nothing.
+
+Each earlier finding:
+- Sixth review 1 (the plan cells' level proven at 81 only): **closed.** The count now runs at 81,
+  at 82 with the loadout noted at 81, and at 90 of 90 (lines 9121-9144). The cell call on
+  `PlanTab.belowCap()` or on `true` goes red. So does a Compare that reads the active config's id
+  rather than the selected one (mine): 2 FAIL lines.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. I read the whole output: no load error, no
+  FAIL line, ends "[CP] self-test passed". All 36 non-druid specs pass spec mode under both; 102
+  to 105 fail it under 5.1, as expected.
+- The builder's 35 (`mut0058.py`) and 54 (`mut0053cp.py`): 89 caught, 0 missed.
+- My 3 mutations for this card: 1 caught (Compare on the active id), 2 missed (the two findings).
+- The code: all three callers (`talentsEdited`, both calls in `sayTalents`, the offer) read
+  `mayBeShort` of the selected loadout's id today. Only the checks are loose.
+
+Security, where the card produced code:
+1. *Weakest point:* below the cap the compare is looser on purpose. It hides a trimmed build, not
+   an attack.
+2. *Unchecked:* `talentsEdited` a level after a loadout was made (finding 1), and a nil id below
+   the cap (finding 2).
+3. *Leaks:* nothing. No network, no chat to others, no other player's data.
+
+**No browser, no game client.** The surface is in-game UI. After the fix, on the level 81 warlock:
+`/reload`. **More > Make the planned loadouts** says every build matches. **More > Compare talents
+with the plan** says "the plan, as far as this level allows" on every line. Open the talent window:
+the list is beside it, or its "Builds" tab is. At 82, **Make** offers to reset the loadouts made at
+81, **Compare** calls them different, and the popup or Plan tab marks the one in play "(edited)".
