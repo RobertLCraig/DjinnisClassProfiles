@@ -252,6 +252,26 @@ if not asSpec then
 		if text:find("could not put everything back", 1, true) then fail("threw at a refused compare: " .. text) end
 		GetInstanceInfo = realInfo
 
+		-- Every compare in the restore, not one: a secret already in place as a
+		-- global, an Enum field and a PlanTab field, and the game's own rawequal
+		-- refusing it (0056 review). The refusing rawequal goes in before the
+		-- snapshot, so the net never puts the real one back part way through.
+		local realRawequal = rawequal
+		DjinnisTestSecret, Enum.DjinnisTestSecret, PlanTab.testSecret = secret, secret, secret
+		rawequal = function(a, b)
+			if realRawequal(a, secret) or realRawequal(b, secret) then error("a secret") end
+			return realRawequal(a, b)
+		end
+		ok, swapped, text = net(function()
+			DjinnisTestSecret, Enum.DjinnisTestSecret, PlanTab.testSecret = 1, 1, 1
+		end)
+		rawequal = realRawequal
+		if text:find("could not put everything back", 1, true) then fail("threw at a secret it could not compare: " .. text) end
+		if not (rawequal(rawget(_G, "DjinnisTestSecret"), secret) and rawequal(Enum.DjinnisTestSecret, secret) and rawequal(rawget(PlanTab, "testSecret"), secret)) then
+			fail("did not put back a secret it could not compare")
+		end
+		DjinnisTestSecret, Enum.DjinnisTestSecret, PlanTab.testSecret = nil, nil, nil
+
 		-- An add-on that loads while the test runs: its globals stay, and it says so.
 		ok, swapped, text = net(function()
 			addOns = 1
@@ -422,28 +442,49 @@ end
 -- Profiles table so the game does not drop it, and the stub the copy reads
 -- from. Every "## " line comes before anything else, as in Blizzard's own.
 do
-	local toc = assert(io.open(here .. "/DjinnisClassProfiles.toc")):read("*a")
-	local function field(name) return toc:match("\n## " .. name .. ":%s*([^\r\n]*)") or "" end
-	local function has(list, name) return (", " .. list .. ","):find(", " .. name .. ",", 1, true) ~= nil end
-	local account, char = field("SavedVariables"), field("SavedVariablesPerCharacter")
-	for _, name in ipairs({ "DjinnisCPDB", "DjinnisClassProfilesDB" }) do
-		if not has(account, name) then print("|cffff0000FAIL|r the .toc keeps " .. name .. " (card 0058)") end
+	-- A .toc's directives, read as the client reads them: "## Name: value"
+	-- lines only, so a name in a comment or in another field does not count.
+	local function directives(text)
+		local out, seenOther, late = {}, false, nil
+		for line in text:gmatch("[^\r\n]*") do
+			local name, value = line:match("^## ([%w%-]+):%s*(.-)%s*$")
+			if name then
+				out[name] = value
+				if seenOther then late = late or line end
+			elseif line ~= "" then seenOther = true end
+		end
+		return out, late
 	end
-	if not has(char, "DjinnisCPCharDB") then print("|cffff0000FAIL|r the .toc keeps DjinnisCPCharDB per character (card 0058)") end
-	if not has(field("OptionalDeps"), "DjinnisBiS") then print("|cffff0000FAIL|r the .toc loads the DjinnisBiS stub first (card 0058)") end
-	local seenOther = false
-	for line in toc:gmatch("[^\r\n]*") do
-		if line:find("^## ") then
-			if seenOther then print("|cffff0000FAIL|r a .toc directive after other lines: " .. line) end
-		elseif line ~= "" then seenOther = true end
+	-- a comma list as a sorted string, so "B, A" and "A,B" read the same
+	local function list(value)
+		local names = {}
+		for name in (value or ""):gmatch("[^,%s]+") do names[#names + 1] = name end
+		table.sort(names)
+		return table.concat(names, ",")
 	end
-	-- the names the code copies from are the names the stub declares
-	local stub = io.open(here .. "/../DjinnisBiS/DjinnisBiS.toc")
-	if stub then
-		local text = stub:read("*a")
-		stub:close()
+	local function expect(what, got, want)
+		if got ~= want then print("|cffff0000FAIL|r " .. what .. ": " .. tostring(got) .. ", not " .. want .. " (card 0058)") end
+	end
+
+	local toc, late = directives(assert(io.open(here .. "/DjinnisClassProfiles.toc")):read("*a"))
+	expect("the .toc's account saved data", list(toc.SavedVariables), "DjinnisCPDB,DjinnisClassProfilesDB")
+	expect("the .toc's character saved data", list(toc.SavedVariablesPerCharacter), "DjinnisCPCharDB")
+	expect("the .toc loads the stub first", list(toc.OptionalDeps), "DjinnisBiS")
+	if late then print("|cffff0000FAIL|r a .toc directive after other lines: " .. late) end
+
+	-- The stub the copy reads from: it must be there, load at login, and
+	-- declare exactly the two names the code copies.
+	local file = io.open(here .. "/../DjinnisBiS/DjinnisBiS.toc")
+	if not file then
+		print("|cffff0000FAIL|r the DjinnisBiS stub is not beside this addon, so nothing loads the old saved data (card 0058)")
+	else
+		local stub, stubLate = directives(file:read("*a"))
+		file:close()
+		expect("the stub's account saved data", list(stub.SavedVariables), "DjinnisBiSDB")
+		expect("the stub's character saved data", list(stub.SavedVariablesPerCharacter), "DjinnisBiSCharDB")
+		if stub.LoadOnDemand and stub.LoadOnDemand ~= "0" then print("|cffff0000FAIL|r the stub is load-on-demand, so it is not loaded by login (card 0058)") end
+		if stubLate then print("|cffff0000FAIL|r a stub .toc directive after other lines: " .. stubLate) end
 		for _, name in ipairs({ "DjinnisBiSDB", "DjinnisBiSCharDB" }) do
-			if not text:find(name, 1, true) then print("|cffff0000FAIL|r the DjinnisBiS stub declares " .. name) end
 			if not source:find('rawget(_G, "' .. name .. '")', 1, true) then print("|cffff0000FAIL|r the copy at login reads " .. name) end
 		end
 	end

@@ -366,3 +366,10 @@ Security, where the card produced code:
 Lua error. Click **Later**. Open the spellbook, then the talent window, twice each: both work.
 **More > Make the planned loadouts** opens its box. **More > Offer the saved bars** still knows your
 layouts. Then click **Reload now**.
+
+**2026-09-24, Claude. The review's finding, fixed in v0.47.2.**
+
+A new net run in `offline-check.lua` puts a secret in place BEFORE the run as a global, an `Enum`
+field and a PlanTab field, and swaps the global `rawequal` for one that refuses it, before the
+snapshot, so the net never puts the real one back part way. The run changes all three. Each of the
+five compare sites turned back into a bare `rawequal` is red (`mut0058.py`, "bare compare, ...").

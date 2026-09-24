@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.47.0, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
+**Status:** v0.47.2, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
 _Last updated: 2026-09-24 (v0.47.0: Djinni's BiS renamed to Djinni's Class Profiles, card `0058`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
@@ -30,7 +30,12 @@ and say so; `PlanTab.gearHere()` is the one gate.
 `C:\Dev\WoWAddons\DjinnisBiS\` is a stub that still loads the old `DjinnisBiSDB` and
 `DjinnisBiSCharDB`; `PlanTab.moveSavedData` copies them once at login, marked `fromBiS`. The stub is
 tracked by the workspace repo, not this one. Remove it only after Rob says every character has
-logged in. **Its shape lives in
+logged in.
+**`DjinnisClassProfilesDB` is declared in the `.toc` and nothing reads or writes it. Do not remove
+it.** It is the OLD Class Profiles addon's data (action bar profiles), which lives in the file this
+folder name now owns; account `958357#1` still has some. Drop the name and the game deletes that
+data at the next logout. A copy is in `C:\Dev\WoWAddons\.wtf-backup-2026-09-24\`. The offline check
+fails if the `.toc`'s saved-data lists change. **Its shape lives in
 `DjinnisClassProfiles.lua` and nowhere else**; there is no `DATA-MODEL.md`, and that is a gap rather than a
 decision.
 

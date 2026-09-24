@@ -387,3 +387,9 @@ Security, where the card produced code:
 with the plan** says "the plan, as far as this level allows" on every line. Open the talent window:
 the list is beside it, or its "Builds" tab is. At 82, both Make and Compare call the loadouts made
 at 81 different, and Make offers to reset them.
+
+**2026-09-24, Claude. The sixth review's finding, fixed in v0.47.2.**
+
+The count of `short` flags now runs three times: at 81 (every line short), at 82 with the loadout
+noted at 81 (none), and at 90 of 90 (none). The plan cells passing `PlanTab.belowCap()` or `true` are
+both red. `%TEMP%\mut0058.py`, now 35 breaks, all red; `mut0053cp.py`, 54, all red.

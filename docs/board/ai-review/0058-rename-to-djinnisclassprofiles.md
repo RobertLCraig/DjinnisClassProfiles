@@ -336,3 +336,14 @@ v0.47.1 is already in the game folder (not by me). Rob's list, after the fix:
 6. Log in once on the `958357#1` account. Afterwards its `SavedVariables\DjinnisClassProfiles.lua`
    still holds `DjinnisClassProfilesDB` (compare with the backup).
 7. A data bar that showed the old "DjinnisBiS" broker: add "DjinnisClassProfiles" again.
+
+**2026-09-24, Claude. The review's findings, fixed in v0.47.2.**
+
+1. **The `.toc` checks read directives as the client does**, `## Name: value` lines only, and compare
+   each saved-data list whole: the new `.toc` must say exactly `DjinnisCPDB, DjinnisClassProfilesDB`
+   and `DjinnisCPCharDB`, and the stub exactly `DjinnisBiSDB` and `DjinnisBiSCharDB`. A missing stub
+   folder, a load-on-demand stub, a longer name, a name only in a comment, a name on the wrong line
+   and a directive after a comment are each red (`mut0058.py`, "toc ..." and "stub ...").
+2. **HANDOVER.** The data-shape section says `DjinnisClassProfilesDB` is kept on purpose and why, and
+   where the backup is. The status line says v0.47.2. The workspace HANDOVER now says the licence was
+   lost in the merge and put back.

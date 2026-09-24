@@ -9130,6 +9130,18 @@ function PlanTab.levelChecks(check)
 		for _ in pairs(feral) do stored = stored + 1 end
 		PlanTab.sayTalents(function() end)
 		check(t .. ", Compare reads the level on the gear plan's lines too", calls > stored and shorts == calls, true)
+		-- and the loadout's own level: made at 81, at 82 no line may read it as short
+		made = { [ids[name]] = 81 }
+		PlanTab.readLevels = function() return 82, 90 end
+		shorts, calls = 0, 0
+		PlanTab.sayTalents(function() end)
+		check(t .. ", no line short a level after the loadout was made", calls > stored and shorts, 0)
+		-- and the cap
+		made = {}
+		PlanTab.readLevels = function() return 90, 90 end
+		shorts, calls = 0, 0
+		PlanTab.sayTalents(function() end)
+		check(t .. ", no line short at the cap", calls > stored and shorts, 0)
 		PlanTab.compareWord = kept.compareWord
 	end)
 	for _, name in ipairs(names) do PlanTab[name] = kept[name] end
