@@ -145,3 +145,65 @@ loadouts made at 81.
 Also: "Show the build list" is hidden while Talent Loadout Manager is loaded. Mutations: 31 in
 `%TEMP%\mut0053.py`, all red, including every one listed in the review (`<=`, level-up ignored,
 `talentsEdited` on the exact compare, the offer passing false, the secret guard removed).
+
+**2026-09-24, Claude (third adversarial review, of 552c380). Back to todo: one finding left open
+for your own warlock, and two small ones.**
+
+Findings, in the order to fix them:
+
+1. **Rob's warlock loadouts still never come back on a level-up.** `mayBeShort` treats a loadout
+   with no level noted as "may be short" at every level below the cap. Every loadout made before
+   v0.45.0 has no level noted. That is all the loadouts on your level 81 warlock, made at 81 in
+   v0.44.0. So does one made by hand under a build's name, and one whose id the queue could not
+   find. From 82 to 89 none of them is offered a reset, and **Make the planned loadouts** says every
+   build matches. Only 90 brings them back. The build comment says one "drifts at the next level-up
+   after a Reset", but Reset is never offered for it below the cap, so that never happens. Fix: when
+   a planned loadout with no level noted is compared below the cap, note today's level for it then.
+   The next level-up then brings it back. Add a check: nothing noted at 81, then drifted at 82.
+2. **The self-test writes fake loadout levels into your character's saved data.** With a level the
+   game will give (any client), a clean run leaves `DjinnisBiSCharDB.madeAt` with config ids 21, 22,
+   23, 24 and 40 at your level. The spare checks run the real queue, and the real `noteMade` finds
+   those fake ids by name. Offline this never shows, because the harness has no `UnitLevel`; I
+   seeded one to see it (`%TEMP%\rev56\driver.lua`, `REV_LEVEL=81`). It only matters if a real
+   config id is that small, which nothing here can say. Fix it with card `0056`'s saved-data fix, or
+   swap `PlanTab.madeAt` in `loadoutChecks`.
+3. **Two paths have no check.** My mutations stay green when `noteMade` trusts any watched id (the
+   name check dropped) and when it ignores the watched id and goes by name only. The spare has the
+   same guard and a check for it ("a watched id with another name is not recorded"); copy that. And
+   `sayTalents` with `local short = false` stays green, though that call was the last review's
+   finding 3. Check that Compare prints "the plan, as far as this level allows" for a trimmed build.
+
+A note, not a finding: `madeAt` is never pruned, so a deleted loadout's id stays. The source cannot
+say whether the server ever reuses a config id. If it did, the worst case is one extra Reset, which
+notes the new level. Dropping ids that `GetConfigIDsBySpecID` no longer lists is cheap.
+
+Each earlier finding:
+- Finding 1 (level-up): **closed for loadouts made from v0.45.0 on**, open for older ones (finding 1
+  above). The level is noted after the queue waits, before the next job clears `pendingID`, and the
+  last job is noted on the step that ends the queue, also after the 15 second give-up.
+- Finding 2 (`belowCap` untested): **closed.** It is pure, with checks for 81/90, 90/90, no level, no
+  cap and a secret level, and the offer and `talentsEdited` are driven through it.
+- Finding 3 (Compare): **closed in code**, unchecked (finding 3 above).
+- Finding 4 (`m` against a number): **closed**, with a check and a mutation.
+- The empty import is no longer the plan: closed, checked.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. Output read whole, no load error. All 36
+  non-druid specs pass spec mode. The builder's 31 mutations each go red on a scratch copy.
+- `talentsEdited` and Compare key the level on `GetLastSelectedSavedConfigID`, the saved loadout's
+  id. That is the id `noteMade` writes, not the active config's id.
+- Only two callers still use the exact compare: `pullSpec` (druid raid pulls, left on purpose) and
+  the sidebar tick (under `## Not this card`).
+
+Security, where the card produced code:
+1. *Weakest point:* below the cap the rule is looser on purpose, and now for longer (finding 1).
+   It hides a stale loadout, not an attack.
+2. *Unchecked:* the by-name fallback in `noteMade` when `TRAIT_CONFIG_CREATED` is refused (finding
+   3), and test data in the saved variables (finding 2).
+3. *Leaks:* nothing. No network, no chat to others, no other player's data.
+
+**No browser, no game client.** The surface is in-game UI. After the fix, on the level 81 warlock:
+`/reload`. **More > Make the planned loadouts** says every build matches. **More > Compare talents
+with the plan** says "the plan, as far as this level allows", not "different". Open the talent
+window: the list is beside it, or its "BiS plan" tab is. Then at 82, **Make the planned loadouts**
+offers to reset the loadouts made at 81.
