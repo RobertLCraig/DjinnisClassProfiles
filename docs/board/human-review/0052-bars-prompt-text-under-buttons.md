@@ -104,3 +104,30 @@ No client here. Rob's look above stands once the check is in.
    deleted, and the width moved after the measure.
 2. Renamed "a secret height is not used". `canRead` stays first.
 - The self-test passes under Lua 5.1 and 5.4.
+
+**2026-09-24** Second adversarial review, of the check in `a63f003`. **Verdict: clean, to
+`human-review/`.** Both findings are closed. `PlanTab.prompt` itself is unchanged since `94faef6`.
+
+What held:
+- Harness. The self-test exits 0 under Lua 5.1.5 and 5.4.6, all four "prompt height" checks among
+  the passes. Spec runs 250, 62, 70 and 1473 exit 0 under both.
+- Finding 1. On a copy, the previous review's three mutations each turn "the real prompt measures
+  its wrapped text" red: the line count back, the text's width deleted, the width moved after the
+  measure. Two of mine go red too: measuring the title instead of the text, and a second
+  `SetHeight` after the measured one.
+- Finding 2. The check is renamed, and `PlanTab.canRead` is still the first test in
+  `promptHeight`.
+- The shadows are safe in a client. They are plain fields on our own frame and font string, and
+  setting them to nil falls back to the metatable's methods. `BasicFrameTemplateWithInset` and
+  its bases (`UIPanelTemplates.xml:514-602`) carry no mixin, so no `SetHeight` of the frame's own
+  is lost.
+
+Not covered, and not a blocker: the value given to the text's `SetWidth`. On a copy,
+`f.text:SetWidth(width + 200)` stays green. That text would run past the right edge; it would not
+sit under the buttons, which is this card's fault. Recording the argument in the shadow would
+cover it if it is ever wanted.
+
+Security: unchanged from the first review. The height a secret could hand back is guarded first,
+the text is the addon's own, and nothing is sent.
+
+No client here. Rob's look above is the proof that the measure returns the wrapped height at once.
