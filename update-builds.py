@@ -1,6 +1,6 @@
 """Author tooling, never shipped (pkgmeta.yaml ignores it).
 
-Rewrites the GENERATED BUILDS block in DjinnisBiS.lua: the talent builds Dreamgrove
+Rewrites the GENERATED BUILDS block in DjinnisClassProfiles.lua: the talent builds Dreamgrove
 recommends, one per boss where the guide gives one, named for WHEN to pick them
 (Rob, 2026-09-23: the old "DotC Raid ST *" names "don't convey information that
 lets me choose"). Card 0030; it replaces DjinnisDreamgrove's gen_data.py.
@@ -33,7 +33,7 @@ import sys
 import urllib.request
 from datetime import date
 
-LUA = "DjinnisBiS.lua"
+LUA = "DjinnisClassProfiles.lua"
 BEGIN, END = "-- BEGIN GENERATED BUILDS", "-- END GENERATED BUILDS"
 TALENTS = "https://www.raidbots.com/static/data/live/talents.json"
 POINTS = {"classNodes": 34, "specNodes": 34, "heroNodes": 13}
@@ -378,7 +378,7 @@ def main():
     lua = open(LUA, encoding="utf-8", newline="").read()
     if BEGIN not in lua or END not in lua:
         sys.exit(f"{LUA} has no {BEGIN} / {END} markers. Put them back rather than guessing where the table goes.")
-    req = urllib.request.Request(TALENTS, headers={"User-Agent": "curl/8.0 DjinnisBiS update-builds"})
+    req = urllib.request.Request(TALENTS, headers={"User-Agent": "curl/8.0 DjinnisClassProfiles update-builds"})
     with urllib.request.urlopen(req, timeout=60) as r:
         trees = json.load(r)
     nl = "\r\n" if "\r\n" in lua else "\n"

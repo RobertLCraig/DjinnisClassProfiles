@@ -1,4 +1,4 @@
-# HANDOVER: Djinni's BiS (DBiS)
+# HANDOVER: Djinni's Class Profiles (was Djinni's BiS)
 
 > A World of Warcraft Retail addon that answers one question about a dropped item: which druid specs
 > want it. Scoped to Season 2, The Venomous Abyss. Read this, then `docs/board/`, before changing
@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.42.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob. Every class: `0051` (bars from the druid layout) is next.
-_Last updated: 2026-09-24 (v0.42.0. Every other spec has wowvalor and SimC builds: card `0050`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+**Status:** v0.47.0, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
+_Last updated: 2026-09-24 (v0.47.0: Djinni's BiS renamed to Djinni's Class Profiles, card `0058`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -24,9 +24,14 @@ keyed by `PlanTab.SPECS` (card `0049`). The gear plan, the BiS list and the loot
 and say so; `PlanTab.gearHere()` is the one gate.
 
 ## Canonical data shape
-`DjinnisBiSDB`, one account-wide SavedVariables table declared in the `.toc`, and since v0.28.0
-`DjinnisBiSCharDB`, per character, which holds only the action bar undo (card 0033). **Its shape lives in
-`DjinnisBiS.lua` and nowhere else**; there is no `DATA-MODEL.md`, and that is a gap rather than a
+`DjinnisCPDB`, one account-wide SavedVariables table declared in the `.toc`, and since v0.28.0
+`DjinnisCPCharDB`, per character (bar undo, spares, the level each loadout was made at).
+**The rename trap (card `0058`):** the game names a SavedVariables file after the addon's FOLDER.
+`C:\Dev\WoWAddons\DjinnisBiS\` is a stub that still loads the old `DjinnisBiSDB` and
+`DjinnisBiSCharDB`; `PlanTab.moveSavedData` copies them once at login, marked `fromBiS`. The stub is
+tracked by the workspace repo, not this one. Remove it only after Rob says every character has
+logged in. **Its shape lives in
+`DjinnisClassProfiles.lua` and nowhere else**; there is no `DATA-MODEL.md`, and that is a gap rather than a
 decision.
 
 The BiS data itself is season-scoped. **That is the thing about this addon that goes stale on a
@@ -44,15 +49,15 @@ step beyond `release.ps1` and no test suite: **every check that matters happens 
 client, which no agent can run** - which is exactly why card `0001` is a question for Rob rather
 than a task.
 
-**Two Lua 5.1 ceilings in `DjinnisBiS.lua`, and both are hit.** The main chunk holds 200 locals, so
+**Two Lua 5.1 ceilings in `DjinnisClassProfiles.lua`, and both are hit.** The main chunk holds 200 locals, so
 a new helper goes on `PlanTab`, not in a new `local function` (met on card `0034`). `selfTest`
 holds 60 upvalues, so a new card's checks go in a `PlanTab.<name>Checks(check)` function called
 from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `treeChecks`).
 
 ## Key files / structure
-- `DjinnisBiS.lua` - the whole addon.
+- `DjinnisClassProfiles.lua` - the whole addon.
 - `update-classcodex-data.ps1` - **author tooling, never shipped** (it is in `pkgmeta.yaml`'s ignore
-  list). Rewrites **two** blocks in `DjinnisBiS.lua`, `GENERATED TRINKET TIERS` and `GENERATED STAT
+  list). Rewrites **two** blocks in `DjinnisClassProfiles.lua`, `GENERATED TRINKET TIERS` and `GENERATED STAT
   TARGETS`, from ClassCodex's data files. **Its header carries the full reasoning for why that
   source and not the sites**, including what each site actually answered when tried. Read it before
   proposing a scraper. Those markers are load-bearing: the script refuses to write without them
@@ -73,7 +78,7 @@ from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `tree
   its rank is `craftingQuality`; a gem family is the name without "Flawless " or "Perfect " and its
   rank is its place ordered by quality then item level. Run it after `update-gear-plan.ps1` adds
   an enchant or gem the table has never seen; `--check` exits 1 when it must be run.
-- `offline-check.lua` - **author tooling, never shipped.** Runs the addon's own `/bis test` outside
+- `offline-check.lua` - **author tooling, never shipped.** Runs the addon's own the self-test outside
   the game, under plain Lua, by stubbing enough of Blizzard's API to load the file: `lua
   offline-check.lua`, exit code 0 for a pass. **It proves the data and the pure logic and it proves
   no frame**, because every stubbed frame method does nothing, so a layout, anchor or event fault
@@ -115,7 +120,7 @@ from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `tree
   character's dps gain per item. It is a per-character sim, not a public per-spec ranking, so it
   cannot answer "what tier is this trinket for Feral".
 - **One route into the addon compartment, not two.** Today it is the `.toc`
-  `## AddonCompartmentFunc: DjinnisBiS_Toggle` line. The alternative is `showInCompartment = true`
+  `## AddonCompartmentFunc: DjinnisClassProfiles_Toggle` line. The alternative is `showInCompartment = true`
   in the LibDBIcon saved settings. Card `0001` decides which, and both on at once is wrong.
 - **`Libs/` is tracked.** See `WoWAddons#0003`, which reversed its own criterion on that point:
   bundled libraries ship inside the addon, so they are part of the artefact.
@@ -127,8 +132,8 @@ from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `tree
 - **A Raidbots paste must be the whole `/simc` export, checksum line included.** Trimming the bag list flips the page to Unverified Input. Card 0018 appends its block after the checksum for the same reason.
 - **The `st` cell was simmed on "DotC Raid ST *" but four `st` boss rows load "WS Raid Most Bosses" or "WS Raid Coiled Altar".** So the cell's talents string judges a row only when the loadout in play is the cell's own; other rows are judged by name and never say edited. Card `0028`'s sims close that gap.
 - **The Feral Mythic+ cell is filled** (report `ttC3zNmZSvC7C2XQNSe6Bi`, DungeonSlice, loadout `WS M+`). Checks that need an empty cell take it away for the check and put it back; do not empty the block to test.
-- **Not proven anywhere but offline**: every card merged today (0011 to 0028). Each lists its looks under `## What I need from you`; none has been seen in a client. `/bis test` in a client is itself a look: several blocks swap globals such as `InCombatLockdown` and restore them, which may taint the session until `/reload`.
-- **One shared popup frame** (`DjinnisBiSPopup`, `PlanTab.popup`) serves 0013, 0017 and 0024. `PlanTab.hideSetup` takes down only 0013's own; a new card must not call `hidePopup` blind.
+- **Not proven anywhere but offline**: every card merged today (0011 to 0028). Each lists its looks under `## What I need from you`; none has been seen in a client. the self-test in a client is itself a look: several blocks swap globals such as `InCombatLockdown` and restore them, which may taint the session until `/reload`.
+- **One shared popup frame** (`DjinnisCPPopup`, `PlanTab.popup`) serves 0013, 0017 and 0024. `PlanTab.hideSetup` takes down only 0013's own; a new card must not call `hidePopup` blind.
 - The main chunk holds 177 top-level locals of Lua's 200. Add to `PlanTab`, never a local.
 
 **2026-09-22, card 0009: where you stand beats the pinned switch, at v0.19.0 and 0.19.1.**
@@ -140,7 +145,7 @@ Inside an instance both switches are greyed because the content is not a choice 
 button cycles 1, 2, Mythic+ outside, 1, 2 in a raid, and stays put in a dungeon.
 
 **2026-09-21, card 0004: a gear plan, at v0.13.0. Data only, nothing draws it yet.** `GEAR_PLAN` in
-`DjinnisBiS.lua` holds, per spec and scenario, the gear a Top Gear sim chose: each slot's item id,
+`DjinnisClassProfiles.lua` holds, per spec and scenario, the gear a Top Gear sim chose: each slot's item id,
 item level, enchant, gems and bonus ids, plus the talent loadout's name and import string.
 `gearPlanFor(spec, scenario)` hands it over parsed, and `planMatches` compares **item id and item
 level, never name**, because the same id drops on every track. **Only Feral `st` is filled.** The
@@ -152,7 +157,7 @@ cards: `0001` and `0002` in `human-review/`, `0003` and `0004` in `ai-review/`. 
 
 **2026-09-07, card 0003: stat targets, at v0.11.0.** The ratings the top 20% of each druid spec are
 observed to run, per hero talent, for raid and Mythic+, out of the same ClassCodex files the trinket
-tiers came from. They are drawn as four bars in three places: a new Stats tab in `/bis`, a pane
+tiers came from. They are drawn as four bars in three places: a new Stats tab in the window, a pane
 anchored beside the character sheet, and lines on any gear tooltip. Hovering an item anywhere shows
 a ghost segment on every open bar, and lines on the tooltip, saying what that item would do against
 the piece it would actually replace.
@@ -227,7 +232,7 @@ Trap: every druid spec's `Dungeon` is pinned in PIN and never refreshes; Rob cop
 
 ## Blockers / open questions
 - **Rob's sims for `0028`**: which loadout each spec uses at 3+ targets, and a Top Gear run per spec per scenario. Nothing else on the board is blocked.
-- **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's BiS*
+- **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's Class Profiles*
   appear in the minimap addon drawer, does the minimap button appear on the ring, and does hovering
   it show the summary tooltip.
 - **Card `0002` needs Rob in a live client too.** The ranked trinket block with ClassCodex disabled,
@@ -250,7 +255,7 @@ Trap: every druid spec's `Dungeon` is pinned in PIN and never refreshes; Rob cop
 2. Read `C:\Dev\WoWAddons\docs\DECISIONS.md` for the two 12.1 traps before touching event
    registration or anything keyed on a unit.
 3. Deploy from the workspace and never edit the game folder:
-   `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then the same without `-WhatIf`. The
+   `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisClassProfiles`, then the same without `-WhatIf`. The
    dry run is the plan.
 4. To refresh the gear plan after a Top Gear run, with or without an agent. It takes ids or full
    report links, several at once, and says which spec and scenario each one fills:

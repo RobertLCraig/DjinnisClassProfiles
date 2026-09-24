@@ -1,4 +1,5 @@
--- Djinni's BiS -- "do I roll on this?" for all four druid specs.
+-- Djinni's Class Profiles (was Djinni's Class Profiles until 0.47.0, card 0058) --
+-- "do I roll on this?" for all four druid specs, and talents and bars for every class.
 --
 -- ============================ EDIT THE LIST HERE ============================
 -- Season 2 / patch 12.1.0 / The Venomous Abyss.
@@ -822,9 +823,9 @@ local GREEN, GREY, GOLD, WHITE = "|cff00ff00", "|cff808080", "|cffffd100", "|cff
 -- at, so a drop can be judged against it.
 
 local function db()
-	DjinnisBiSDB = DjinnisBiSDB or {}
-	DjinnisBiSDB.gear = DjinnisBiSDB.gear or {}
-	return DjinnisBiSDB
+	DjinnisCPDB = DjinnisCPDB or {}
+	DjinnisCPDB.gear = DjinnisCPDB.gear or {}
+	return DjinnisCPDB
 end
 
 local function setGear(itemName, track, rank)
@@ -2045,8 +2046,8 @@ end
 -- per character (0055 review: a loadout made at 81 is still "part of the
 -- plan" at 85, so without this Reset never offered the fuller one).
 function PlanTab.madeAt()
-	local c = DjinnisBiSCharDB or {}
-	DjinnisBiSCharDB = c
+	local c = DjinnisCPCharDB or {}
+	DjinnisCPCharDB = c
 	if type(c.madeAt) ~= "table" then c.madeAt = {} end
 	return c.madeAt
 end
@@ -2244,7 +2245,7 @@ end
 
 local function buildBagGlows()
 	if Baganator and Baganator.API and Baganator.API.RegisterCornerWidget then
-		Baganator.API.RegisterCornerWidget("Djinni's BiS: gear plan", "djinnisbis_plan",
+		Baganator.API.RegisterCornerWidget("Djinni's Class Profiles: gear plan", "djinnisbis_plan",
 			function(_, details) return wantedSlotForLink(details.itemLink) ~= nil end,
 			function(itemButton)
 				local holder = CreateFrame("Frame", nil, itemButton)
@@ -2323,7 +2324,7 @@ local function armBagMarks()
 	}) do
 		watcher:RegisterEvent(event)
 		if not watcher:IsEventRegistered(event) then
-			print(GOLD .. "Djinni's BiS|r " .. GREY
+			print(GOLD .. "Djinni's Class Profiles|r " .. GREY
 				.. "could not register " .. event
 				.. ", so the bag marks will not refresh by themselves.|r")
 		end
@@ -3362,7 +3363,7 @@ local function buildWindow()
 	-- Blizzard's portrait window (card 0020, rule 6): the spec's icon in the
 	-- corner, the title bar, the close button, an inset for the content and a
 	-- bar along the bottom. Checked in Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.xml.
-	local f = CreateFrame("Frame", "DjinnisBiSFrame", UIParent, "ButtonFrameTemplate")
+	local f = CreateFrame("Frame", "DjinnisCPFrame", UIParent, "ButtonFrameTemplate")
 	f:SetSize(WINDOW_W, 600)
 	f:SetPoint("CENTER")
 	f:SetMovable(true)
@@ -3371,7 +3372,7 @@ local function buildWindow()
 	f:SetScript("OnDragStart", f.StartMoving)
 	f:SetScript("OnDragStop", f.StopMovingOrSizing)
 	f:SetClampedToScreen(true)
-	f:SetTitle("Djinni's BiS  " .. GREY .. "The Venomous Abyss|r")
+	f:SetTitle("Djinni's Class Profiles  " .. GREY .. "The Venomous Abyss|r")
 	-- PortraitFrameMixin's own read of the spec icon, class icon when no spec.
 	f:SetPortraitToSpecIcon()
 	f:SetScale(PlanTab.scale(db().scale))
@@ -3394,7 +3395,7 @@ local function buildWindow()
 	importButton:SetSize(130, PlanTab.SIZE.tab)
 	importButton:SetPoint("TOPRIGHT", f, "TOPRIGHT", -10, -58)
 	importButton:SetText("Import sim")
-	importButton:SetScript("OnClick", function() DjinnisBiS_ShowImport(activeSpec) end)
+	importButton:SetScript("OnClick", function() DjinnisClassProfiles_ShowImport(activeSpec) end)
 	-- every slash command as a click (card 0053)
 	f.more = PlanTab.moreButton(f, "window")
 	f.more:SetSize(90, PlanTab.SIZE.tab)
@@ -3435,7 +3436,7 @@ local function buildWindow()
 		f.choices[i] = button
 	end
 
-	local scroll = CreateFrame("ScrollFrame", "DjinnisBiSScroll", f, "UIPanelScrollFrameTemplate")
+	local scroll = CreateFrame("ScrollFrame", "DjinnisCPScroll", f, "UIPanelScrollFrameTemplate")
 	scroll:SetPoint("TOPLEFT", f.Inset, "TOPLEFT", 8, -6)
 	scroll:SetPoint("BOTTOMRIGHT", f.Inset, "BOTTOMRIGHT", -26, 6)
 	f.scroll = scroll
@@ -3469,8 +3470,8 @@ local function buildWindow()
 	end, f)
 	f.sizeSlider = slider
 
-	tinsert(UISpecialFrames, "DjinnisBiSFrame")  -- Escape closes it
-	-- A new frame is born shown, so without this the first /djbis after a
+	tinsert(UISpecialFrames, "DjinnisCPFrame")  -- Escape closes it
+	-- A new frame is born shown, so without this the first /dcp after a
 	-- reload "toggled" it closed and only the second opened it (Rob, 2026-09-22).
 	f:Hide()
 	return f
@@ -3673,7 +3674,7 @@ end
 -- number goes to SetLootSpecialization, out of combat only.
 function PlanTab.setLootSpec(spec)
 	if InCombatLockdown() then
-		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Loot spec not changed: you are in combat.|r")
+		print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "Loot spec not changed: you are in combat.|r")
 		return "combat"
 	end
 	local id
@@ -3729,7 +3730,7 @@ PlanTab.LOOT_CARD_ICONS = 6  -- item buttons per row; the rest is "+N more"
 
 function PlanTab.buildLootCard()
 	local S = PlanTab.SIZE
-	local f = CreateFrame("Frame", "DjinnisBiSLootCard", UIParent, "BasicFrameTemplateWithInset")
+	local f = CreateFrame("Frame", "DjinnisCPLootCard", UIParent, "BasicFrameTemplateWithInset")
 	f:SetWidth(24 + S.icon + 6 + 90 + PlanTab.LOOT_CARD_ICONS * (S.icon + 2) + 60 + 116)
 	f:SetPoint("TOP", UIParent, "TOP", 0, -140)
 	f:SetMovable(true)
@@ -3831,7 +3832,7 @@ function PlanTab.armLootCard()
 	for _, event in ipairs({ "PLAYER_ENTERING_WORLD", "PLAYER_LOOT_SPEC_UPDATED" }) do
 		watcher:RegisterEvent(event)
 		if not watcher:IsEventRegistered(event) then
-			print(GOLD .. "Djinni's BiS|r " .. GREY .. "could not register " .. event .. ", so the loot spec card will not show by itself.|r")
+			print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "could not register " .. event .. ", so the loot spec card will not show by itself.|r")
 		end
 	end
 end
@@ -3882,7 +3883,7 @@ function PlanTab.open(scenario)
 	window:Show()
 end
 
-function DjinnisBiS_Toggle()
+function DjinnisClassProfiles_Toggle()
 	window = window or buildWindow()
 	if window:IsShown() then
 		window:Hide()
@@ -3896,7 +3897,7 @@ end
 
 local importWindow
 local function buildImportWindow()
-	local f = CreateFrame("Frame", "DjinnisBiSImport", UIParent, "BasicFrameTemplateWithInset")
+	local f = CreateFrame("Frame", "DjinnisCPImport", UIParent, "BasicFrameTemplateWithInset")
 	f:SetSize(560, 420)
 	f:SetPoint("CENTER")
 	f:SetMovable(true)
@@ -3977,7 +3978,7 @@ local function buildImportWindow()
 	return f
 end
 
-function DjinnisBiS_ShowImport(spec)
+function DjinnisClassProfiles_ShowImport(spec)
 	importWindow = importWindow or buildImportWindow()
 	importWindow.spec = spec or activeSpec
 	for _, button in ipairs(importWindow.specs) do
@@ -4000,7 +4001,7 @@ end
 -- being installed. Card 0001.
 
 local function summaryLines(tooltip)
-	tooltip:AddLine("Djinni's BiS")
+	tooltip:AddLine("Djinni's Class Profiles")
 
 	local where = GetInstanceInfo and (GetInstanceInfo())
 	local here = where and bisFrom(where) or {}
@@ -4027,20 +4028,20 @@ local function buildBroker()
 	local ldb = LibStub("LibDataBroker-1.1", true)
 	if not ldb then return end
 
-	local broker = ldb:NewDataObject("DjinnisBiS", {
+	local broker = ldb:NewDataObject("DjinnisClassProfiles", {
 		type = "data source",
 		text = "BiS",
 		icon = "Interface\\Icons\\Ability_Druid_Maul",
-		OnClick = function() DjinnisBiS_Toggle() end,
+		OnClick = function() DjinnisClassProfiles_Toggle() end,
 		OnTooltipShow = summaryLines,
 	})
 	PlanTab.broker = broker  -- its text is kept by PlanTab.updateBroker (card 0026)
 
 	local icon = LibStub("LibDBIcon-1.0", true)
 	if icon and broker then
-		DjinnisBiSDB = DjinnisBiSDB or {}
-		DjinnisBiSDB.minimap = DjinnisBiSDB.minimap or { hide = false }
-		icon:Register("DjinnisBiS", broker, DjinnisBiSDB.minimap)
+		DjinnisCPDB = DjinnisCPDB or {}
+		DjinnisCPDB.minimap = DjinnisCPDB.minimap or { hide = false }
+		icon:Register("DjinnisClassProfiles", broker, DjinnisCPDB.minimap)
 	end
 end
 
@@ -4229,7 +4230,7 @@ function PlanTab.loadTalents(name)
 		local code = PlanTab.buildFor(playerSpec(), name)
 		if code then return PlanTab.wearSpare(name, code) end  -- card 0040
 		PlanTab.openTalents()
-		print(("%sDjinni's BiS|r %sno saved loadout named \"%s\" for this spec.|r %sMore > Make the planned loadouts|r %smakes the planned ones.|r"):format(GOLD, GREY, name, GOLD, GREY))
+		print(("%sDjinni's Class Profiles|r %sno saved loadout named \"%s\" for this spec.|r %sMore > Make the planned loadouts|r %smakes the planned ones.|r"):format(GOLD, GREY, name, GOLD, GREY))
 		return "missing"
 	end
 	-- Already the selected loadout: Blizzard's Apply writes a hand edit into the
@@ -4250,7 +4251,7 @@ function PlanTab.loadTalents(name)
 		PlanTab.openTalents()
 		-- Card 0031 closes this: Reset to plan makes it again from the stored
 		-- string, once another loadout is selected.
-		print(("%sDjinni's BiS|r %s\"%s\" is loaded already, but its build is not the planned one. Pick another loadout, then|r %sMore > Make the planned loadouts|r %soffers Reset to plan.|r")
+		print(("%sDjinni's Class Profiles|r %s\"%s\" is loaded already, but its build is not the planned one. Pick another loadout, then|r %sMore > Make the planned loadouts|r %soffers Reset to plan.|r")
 			:format(GOLD, GREY, name, GOLD, GREY))
 		return "same"
 	end
@@ -4267,7 +4268,7 @@ end
 -- loadout now" is redrawn. Called from the bag-mark watcher.
 function PlanTab.onTalentEvent(event)
 	if event == "CONFIG_COMMIT_FAILED" then
-		print(GOLD .. "Djinni's BiS|r " .. GREY .. "the talent change did not go through (CONFIG_COMMIT_FAILED). Stand still, out of combat, and click Talents again.|r")
+		print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "the talent change did not go through (CONFIG_COMMIT_FAILED). Stand still, out of combat, and click Talents again.|r")
 	end
 	if PlanTab.redraw then PlanTab.redraw() end
 end
@@ -4286,7 +4287,7 @@ function PlanTab.equip(entry, slotID)
 	-- nothing moved and nothing said so.
 	local function refused(why)
 		ClearCursor()  -- never leave it on the cursor: a click on the world from there is the destroy prompt
-		print(("%sDjinni's BiS|r %s%s not equipped: %s|r"):format(GOLD, GREY, C_Item.GetItemInfo(entry.id) or ("item " .. entry.id), why))
+		print(("%sDjinni's Class Profiles|r %s%s not equipped: %s|r"):format(GOLD, GREY, C_Item.GetItemInfo(entry.id) or ("item " .. entry.id), why))
 		return false
 	end
 	ClearCursor()
@@ -4316,7 +4317,7 @@ end
 function PlanTab.searchAH(term)
 	local ah = AuctionHouseFrame
 	if not (ah and ah:IsShown() and ah.SearchBar) then
-		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Open the auction house first, then click Search AH.|r")
+		print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "Open the auction house first, then click Search AH.|r")
 		return false
 	end
 	ah.SearchBar:SetSearchText(term)
@@ -4351,7 +4352,7 @@ end
 function PlanTab.priceOf(kind, id)
 	local api = PlanTab.auctionator()
 	if not api or kind ~= "gem" then return nil end
-	local ok, price = pcall(api.GetAuctionPriceByItemID, "DjinnisBiS", id)
+	local ok, price = pcall(api.GetAuctionPriceByItemID, "DjinnisClassProfiles", id)
 	return ok and type(price) == "number" and price or nil
 end
 
@@ -4381,7 +4382,7 @@ end
 function PlanTab.sendToAuctionator(list)
 	local api = PlanTab.auctionator()
 	if not api then
-		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Auctionator is not loaded.|r")
+		print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "Auctionator is not loaded.|r")
 		return false
 	end
 	local terms, skipped = {}, 0
@@ -4391,15 +4392,15 @@ function PlanTab.sendToAuctionator(list)
 	end
 	-- Nothing named yet would replace the last good list with an empty one (0025 review).
 	if #terms == 0 then
-		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Nothing on the list has a name yet; the Auctionator list is left as it was.|r")
+		print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "Nothing on the list has a name yet; the Auctionator list is left as it was.|r")
 		return false
 	end
-	local ok, err = pcall(api.CreateShoppingList, "DjinnisBiS", PlanTab.AUCTIONATOR_LIST, terms)
+	local ok, err = pcall(api.CreateShoppingList, "DjinnisClassProfiles", PlanTab.AUCTIONATOR_LIST, terms)
 	if not ok then
-		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Auctionator refused the list: " .. tostring(err) .. "|r")
+		print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "Auctionator refused the list: " .. tostring(err) .. "|r")
 		return false
 	end
-	print(("%sDjinni's BiS|r %s%d item%s sent to Auctionator's \"%s\" list%s.|r"):format(GOLD, GREY, #terms,
+	print(("%sDjinni's Class Profiles|r %s%d item%s sent to Auctionator's \"%s\" list%s.|r"):format(GOLD, GREY, #terms,
 		#terms == 1 and "" or "s", PlanTab.AUCTIONATOR_LIST,
 		skipped > 0 and (", " .. skipped .. " with no name yet left out") or ""))
 	return true
@@ -4412,7 +4413,7 @@ end
 -- key, a "favourite dropped" alert, marks on bag and character sheet icons)
 -- all run off that list. Its API is KeystoneLoot\modules\api.lua: colon
 -- methods on the global KeystoneLootAPI, every one pcalled here. What this
--- addon added is remembered in DjinnisBiSDB.keystoneLoot per KeystoneLoot
+-- addon added is remembered in DjinnisCPDB.keystoneLoot per KeystoneLoot
 -- character key, and only those are ever removed. Rob's own favourites are
 -- never touched.
 
@@ -4443,7 +4444,7 @@ end
 -- not know, which its AddFavorite answers false to.
 function PlanTab.sendToKeystoneLoot()
 	local api = PlanTab.keystoneLoot()
-	local function say(text) print(GOLD .. "Djinni's BiS|r " .. GREY .. text .. "|r") end
+	local function say(text) print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. text .. "|r") end
 	-- the wanted list is druid gear, and it is filed under this character (0049)
 	if not PlanTab.gearHere() then say("The gear plan is for druids only, for now.") return "not druid" end
 	if not api then say("KeystoneLoot is not loaded.") return nil end
@@ -4457,7 +4458,7 @@ function PlanTab.sendToKeystoneLoot()
 	if not ready then
 		-- READY fires once its saved variables are in. A click before that
 		-- waits for it once rather than adding to a list that is not there yet.
-		call("RegisterCallback", "READY", function() PlanTab.sendToKeystoneLoot() end, "DjinnisBiS")
+		call("RegisterCallback", "READY", function() PlanTab.sendToKeystoneLoot() end, "DjinnisClassProfiles")
 		say("KeystoneLoot is not ready yet. The plan goes over when it is.")
 		return nil
 	end
@@ -4587,7 +4588,7 @@ end
 -- until it lands; the Save set button calls it at once.
 function PlanTab.saveSetAndSay(spec, scenario)
 	local ok, detail = PlanTab.saveSet(spec, scenario)
-	print(("%sDjinni's BiS|r %s%s|r"):format(GOLD, ok and WHITE or GREY,
+	print(("%sDjinni's Class Profiles|r %s%s|r"):format(GOLD, ok and WHITE or GREY,
 		ok and ("Saved as equipment set " .. detail) or ("No equipment set saved: " .. detail)))
 	return ok
 end
@@ -4659,7 +4660,7 @@ end
 function PlanTab.prompt(title, lines, buttons)
 	local f = PlanTab.promptFrame
 	if not f then
-		f = CreateFrame("Frame", "DjinnisBiSPrompt", UIParent, "BasicFrameTemplateWithInset")
+		f = CreateFrame("Frame", "DjinnisCPPrompt", UIParent, "BasicFrameTemplateWithInset")
 		f:SetWidth(380)
 		f:SetPoint("TOP", UIParent, "TOP", 0, -180)
 		f:SetMovable(true)
@@ -4676,7 +4677,7 @@ function PlanTab.prompt(title, lines, buttons)
 		f.text:SetJustifyH("LEFT")
 		f.text:SetSpacing(4)
 		f.buttons = {}
-		tinsert(UISpecialFrames, "DjinnisBiSPrompt")
+		tinsert(UISpecialFrames, "DjinnisCPPrompt")
 		PlanTab.promptFrame = f
 	end
 	f.title:SetText(title)
@@ -4801,11 +4802,11 @@ function PlanTab.setupStep()
 	local api = C_EquipmentSet
 	local id = api and api.GetEquipmentSetID and api.UseEquipmentSet and api.GetEquipmentSetID(name)
 	if not id then
-		print(("%sDjinni's BiS|r %sno equipment set named \"%s\". Equip all on the Plan tab, then Save set.|r"):format(GOLD, GREY, name))
+		print(("%sDjinni's Class Profiles|r %sno equipment set named \"%s\". Equip all on the Plan tab, then Save set.|r"):format(GOLD, GREY, name))
 		return "no set"
 	end
 	api.UseEquipmentSet(id)
-	print(("%sDjinni's BiS|r %sequipping %s.|r"):format(GOLD, WHITE, name))
+	print(("%sDjinni's Class Profiles|r %sequipping %s.|r"):format(GOLD, WHITE, name))
 	return "set"
 end
 
@@ -4847,7 +4848,7 @@ function PlanTab.armGroupPrompt()
 	}) do
 		watcher:RegisterEvent(event)
 		if not watcher:IsEventRegistered(event) then
-			print(GOLD .. "Djinni's BiS|r " .. GREY
+			print(GOLD .. "Djinni's Class Profiles|r " .. GREY
 				.. "could not register " .. event
 				.. ", so the group prompt will not run by itself.|r")
 		end
@@ -4949,7 +4950,7 @@ function PlanTab.activeLoadoutName(forSpec)
 	return name, PlanTab.talentsEdited(PlanTab.buildFor(forSpec, name))
 end
 
--- /djbis talents: the build in play beside every planned build of the spec,
+-- /dcp talents: the build in play beside every planned build of the spec,
 -- and whether each is the same string. The popup's "(edited)" mark is that one
 -- compare, so when a loadout is the right NAME and still reads edited, this
 -- says which it is: a loadout that drifted from the sim, or two strings that
@@ -4961,7 +4962,7 @@ function PlanTab.sayTalents(out)
 	if not (type(live) == "string" and canRead(live)) then live = nil end
 	-- below the cap a build in play can only be part of a plan (0055 review)
 	local short = PlanTab.mayBeShort(PlanTab.selectedConfigID())
-	local lines = { GOLD .. "Djinni's BiS|r " .. GREY .. "the build in play:|r " .. (live or (GREY .. "not readable|r")) }
+	local lines = { GOLD .. "Djinni's Class Profiles|r " .. GREY .. "the build in play:|r " .. (live or (GREY .. "not readable|r")) }
 	for scenario, cell in pairs(GEAR_PLAN[spec] or {}) do
 		if type(cell.talents) == "string" and cell.talents ~= "" then
 			lines[#lines + 1] = ("%s%s|r %s(%s)|r %s: %s"):format(GOLD, cell.loadout or "?", GREY, scenario, PlanTab.VERDICT[PlanTab.compareWord(live, cell.talents, short)], cell.talents)
@@ -4990,7 +4991,7 @@ PlanTab.VERDICT = {
 -- loadout name to the plan's talent string. Returns the lines and the names
 -- left out, so /bis test can prove both without a client.
 function PlanTab.simcLines(spec, bosses, saved, cells)
-	local lines = { ("# Djinni's BiS plan (%s): boss -> loadout"):format(spec) }
+	local lines = { ("# Djinni's Class Profiles plan (%s): boss -> loadout"):format(spec) }
 	local missing, seen = {}, {}
 	for _, row in ipairs(bosses) do
 		lines[#lines + 1] = ("# %s -> %s"):format(row.boss, row.loadout)
@@ -5032,7 +5033,7 @@ function PlanTab.simcAppend(profile)
 	for _, row in ipairs(bosses) do cells[row.loadout] = PlanTab.buildFor(spec, row.loadout) end
 	local lines, missing = PlanTab.simcLines(spec, bosses, saved, cells)
 	if #missing > 0 then
-		print(GOLD .. "Djinni's BiS|r " .. GREY .. "not saved in the game, so left out of the /simc export: |r"
+		print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "not saved in the game, so left out of the /simc export: |r"
 			.. table.concat(missing, ", "))
 	end
 	return profile .. "\n" .. table.concat(lines, "\n") .. "\n"
@@ -5047,7 +5048,7 @@ end
 function PlanTab.armSimc()
 	local ace = LibStub and LibStub("AceAddon-3.0", true)
 	local simc = ace and ace:GetAddon("Simulationcraft", true)
-	if type(simc) ~= "table" or type(simc.GetSimcProfile) ~= "function" or simc.DjinnisBiSWrapped then return false end
+	if type(simc) ~= "table" or type(simc.GetSimcProfile) ~= "function" or simc.DjinnisCPWrapped then return false end
 	local build = simc.GetSimcProfile
 	simc.GetSimcProfile = function(self, ...)
 		local profile, err = build(self, ...)
@@ -5057,7 +5058,7 @@ function PlanTab.armSimc()
 		end
 		return profile, err
 	end
-	simc.DjinnisBiSWrapped = true
+	simc.DjinnisCPWrapped = true
 	return true
 end
 
@@ -5716,7 +5717,7 @@ function PlanTab.armSetupWatch()
 	for _, event in ipairs(PlanTab.SETUP_EVENTS) do
 		watcher:RegisterEvent(event)
 		if not watcher:IsEventRegistered(event) then
-			print(GOLD .. "Djinni's BiS|r " .. GREY .. "could not register " .. event
+			print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "could not register " .. event
 				.. ", so the wrong-setup popup will not answer it.|r")
 		end
 	end
@@ -5733,7 +5734,7 @@ end
 PlanTab.POPUP = { w = 480, line = 20, button = 130, pad = 14 }
 function PlanTab.buildPopup()
 	local P = PlanTab.POPUP
-	local f = CreateFrame("Frame", "DjinnisBiSPopup", UIParent, "BasicFrameTemplateWithInset")
+	local f = CreateFrame("Frame", "DjinnisCPPopup", UIParent, "BasicFrameTemplateWithInset")
 	f:SetSize(P.w, 120)
 	f:SetPoint("TOP", UIParent, "TOP", 0, -140)
 	f:SetMovable(true)
@@ -5747,7 +5748,7 @@ function PlanTab.buildPopup()
 	f.title:SetPoint("TOP", f, "TOP", 0, -6)
 	f.lines, f.buttons = {}, {}
 	f:SetScript("OnHide", function(self) PlanTab.popupHidden(self) end)
-	tinsert(UISpecialFrames, "DjinnisBiSPopup")  -- Escape closes it, as the X does
+	tinsert(UISpecialFrames, "DjinnisCPPopup")  -- Escape closes it, as the X does
 	f:Hide()
 	PlanTab.popupFrame = f
 	return f
@@ -5983,7 +5984,7 @@ local function buildSlotMarks(holder, below)
 	}) do
 		watcher:RegisterEvent(event)
 		if not watcher:IsEventRegistered(event) then
-			print(GOLD .. "Djinni's BiS|r " .. GREY
+			print(GOLD .. "Djinni's Class Profiles|r " .. GREY
 				.. "could not register " .. event
 				.. ", so the slot marks will not refresh by themselves. Reopen the sheet to update.|r")
 		end
@@ -5995,7 +5996,7 @@ end
 local function buildCharacterPane()
 	if not CharacterFrame then return end
 
-	local holder = CreateFrame("Frame", "DjinnisBiSCharacterPane", CharacterFrame)
+	local holder = CreateFrame("Frame", "DjinnisCPCharacterPane", CharacterFrame)
 	holder:SetWidth(PANE_W)
 	holder:SetFrameStrata("HIGH")
 
@@ -6100,7 +6101,7 @@ local function buildCharacterPane()
 	}) do
 		watcher:RegisterEvent(event)
 		if not watcher:IsEventRegistered(event) then
-			print(GOLD .. "Djinni's BiS|r " .. GREY
+			print(GOLD .. "Djinni's Class Profiles|r " .. GREY
 				.. "could not register " .. event
 				.. ", so the stat pane will not refresh by itself. Reopen it to update.|r")
 		end
@@ -6143,7 +6144,7 @@ local function armRatingCache()
 	watcher:SetScript("OnEvent", warm)
 	watcher:RegisterEvent("PLAYER_REGEN_ENABLED")
 	if not watcher:IsEventRegistered("PLAYER_REGEN_ENABLED") then
-		print(GOLD .. "Djinni's BiS|r " .. GREY
+		print(GOLD .. "Djinni's Class Profiles|r " .. GREY
 			.. "could not register PLAYER_REGEN_ENABLED, so stat bars first opened in combat stay hidden until the sheet is reopened.|r")
 	end
 	warm()
@@ -6333,7 +6334,7 @@ function PlanTab.setSidebarClosed(closed)
 end
 
 function PlanTab.buildSidebar()
-	local f = CreateFrame("Frame", "DjinnisBiSTalentSidebar", UIParent, "BackdropTemplate")
+	local f = CreateFrame("Frame", "DjinnisCPTalentSidebar", UIParent, "BackdropTemplate")
 	f:SetWidth(PlanTab.SIDEBAR_W)
 	f:SetFrameStrata("HIGH")
 	f:SetBackdrop(PANE_BACKDROP)
@@ -6358,7 +6359,7 @@ function PlanTab.buildSidebar()
 	f.scroll:SetPoint("TOPLEFT", 6, -32)
 	f.scroll:SetPoint("BOTTOMRIGHT", -22, 24 + 3 * PlanTab.SIZE.button)
 	-- Save the action bars and keys, to the build in play or for the whole
-	-- spec (card 0036). The same as /djbis bars save build and /djbis bars save.
+	-- spec (card 0036). The same as /dcp bars save build and /dcp bars save.
 	local half = (PlanTab.SIDEBAR_W - 24) / 2
 	f.saveBuild = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 	f.saveBuild:SetSize(half, PlanTab.SIZE.button)
@@ -6381,7 +6382,7 @@ function PlanTab.buildSidebar()
 	f.loadSpec:SetPoint("BOTTOMRIGHT", -8, 12 + PlanTab.SIZE.button)
 	f.loadSpec:SetText("Load bars: spec")
 	f.loadSpec:SetScript("OnClick", function() PlanTab.loadBars(false) end)
-	-- /djbis bars undo as a button (card 0045); greyed while there is nothing to undo
+	-- /dcp bars undo as a button (card 0045); greyed while there is nothing to undo
 	f.undo = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 	f.undo:SetHeight(PlanTab.SIZE.button)
 	f.undo:SetPoint("BOTTOMLEFT", 8, 8)
@@ -6427,7 +6428,7 @@ function PlanTab.buildSidebar()
 		PlanTab.say("Could not register PLAYER_REGEN_DISABLED, so the plan list stays up in combat. Its clicks still do nothing there.")
 	end
 	-- The way back in once closed: one button where the sidebar was.
-	f.tab = CreateFrame("Button", "DjinnisBiSTalentSidebarTab", UIParent, "UIPanelButtonTemplate")
+	f.tab = CreateFrame("Button", "DjinnisCPTalentSidebarTab", UIParent, "UIPanelButtonTemplate")
 	f.tab:SetSize(110, PlanTab.SIZE.button)
 	f.tab:SetFrameStrata("HIGH")
 	f.tab:SetText("BiS plan")
@@ -6603,7 +6604,7 @@ function PlanTab.armSidebar()
 	if PlanTab.sidebarArmed or not PlayerSpellsFrame then return false end
 	PlanTab.sidebarArmed = true
 	if PlanTab.rivalLoaded() then
-		print(GOLD .. "Djinni's BiS|r " .. GREY .. "Talent Loadout Manager has its own sidebar on the talent window, so the plan's is left off.|r")
+		print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "Talent Loadout Manager has its own sidebar on the talent window, so the plan's is left off.|r")
 		return false
 	end
 	local function update() pcall(PlanTab.updateSidebar) end
@@ -6751,7 +6752,7 @@ end
 -- PlanTab.RETIRED (delete, on request). Rob's own loadouts are never touched.
 
 -- The names DjinnisDreamgrove 0.6.0 imported, which 0.7.0 renamed. Deleted
--- only by /djbis tidy yes, after /djbis tidy has listed them.
+-- only by /dcp tidy yes, after /dcp tidy has listed them.
 PlanTab.RETIRED = {
 	["EC Raid ST"] = true, ["EC Raid Cleave"] = true, ["KotG Raid ST"] = true, ["KotG Raid Cleave"] = true,
 	["EC M+"] = true, ["KotG M+"] = true, ["DotC Raid"] = true, ["EC Raid Default"] = true,
@@ -6771,7 +6772,7 @@ PlanTab.RETIRED = {
 }
 
 function PlanTab.say(text)
-	print(GOLD .. "Djinni's BiS|r " .. GREY .. text .. "|r")
+	print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. text .. "|r")
 end
 
 -- Which planned builds have no saved loadout of their name, and which saved
@@ -6867,8 +6868,8 @@ PlanTab.OWN_ICON = "Interface\\Icons\\INV_Misc_Book_09"
 
 -- The spares this character made: config id -> true, kept across logins.
 function PlanTab.spareIDs()
-	local c = DjinnisBiSCharDB or {}
-	DjinnisBiSCharDB = c
+	local c = DjinnisCPCharDB or {}
+	DjinnisCPCharDB = c
 	if type(c.spares) ~= "table" then c.spares = {} end
 	return c.spares
 end
@@ -7056,7 +7057,7 @@ function PlanTab.stepLoadouts()
 		q.lastMade = job
 		if stale then q.stale = q.stale + 1 end
 	elseif q.final then
-		print(("%sDjinni's BiS|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, job.name, GREY, tostring(err)))
+		print(("%sDjinni's Class Profiles|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, job.name, GREY, tostring(err)))
 		if job.deleted then PlanTab.say(("The old \"%s\" was deleted and not made again. %sMore > Make the planned loadouts|r%s offers to create it."):format(job.name, GOLD, GREY)) end
 	else
 		q.retry[#q.retry + 1] = job
@@ -7168,7 +7169,7 @@ function PlanTab.resetDrifted()
 	return PlanTab.makeLoadouts(jobs)
 end
 
--- On login, on a spec change and on /djbis loadouts: what this character is
+-- On login, on a spec change and on /dcp loadouts: what this character is
 -- missing or has drifted, with one button per fix. Nothing is made without a
 -- click. "Not now" holds for this spec until the next /reload. Answers what
 -- it did, for the checks.
@@ -7219,12 +7220,12 @@ function PlanTab.offerLoadouts(asked)
 		buttons[#buttons + 1] = { label = "Reset to plan", onClick = PlanTab.resetDrifted }
 	end
 	buttons[#buttons + 1] = { label = "Not now", onClick = function() PlanTab.offerDismissed[spec] = true end }
-	PlanTab.prompt("Djinni's BiS: " .. spec .. " loadouts", lines, buttons)
+	PlanTab.prompt("Djinni's Class Profiles: " .. spec .. " loadouts", lines, buttons)
 	return "shown"
 end
 
--- /djbis tidy lists the old DjinnisDreamgrove names on this spec, and
--- /djbis tidy yes deletes them. The selected one stays. Answers the count.
+-- /dcp tidy lists the old DjinnisDreamgrove names on this spec, and
+-- /dcp tidy yes deletes them. The selected one stays. Answers the count.
 function PlanTab.tidy(confirmed)
 	-- RETIRED names are ones this addon made on druids. On another class a
 	-- loadout of that name is the player's own, so tidy leaves it (0049 review).
@@ -7469,7 +7470,7 @@ end
 PlanTab.keysRefused = {}
 
 function PlanTab.refusedKeys()
-	local c = DjinnisBiSCharDB
+	local c = DjinnisCPCharDB
 	if type(c) ~= "table" then return PlanTab.keysRefused end
 	if type(c.keysRefused) ~= "table" then c.keysRefused = {} end
 	return c.keysRefused
@@ -7544,7 +7545,7 @@ function PlanTab.barsFence()
 	return nil
 end
 
--- /djbis bars save [build], and the two buttons under the talent window list
+-- /dcp bars save [build], and the two buttons under the talent window list
 -- (card 0036). Answers the key saved, nil, or "ask" when `ask` is set and a
 -- layout of that key exists: a button click is easy to make by mistake, and
 -- the spec layout is account-wide, so replacing one asks first.
@@ -7568,7 +7569,7 @@ function PlanTab.saveBars(forBuild, ask, expect)
 	-- one frame for every question: a second waits rather than write over the first (0036 review)
 	if ask and old and PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
 	if ask and old then
-		PlanTab.prompt("Djinni's BiS: action bars", {
+		PlanTab.prompt("Djinni's Class Profiles: action bars", {
 			("Replace the saved %s layout%s with the bars and keys you have now?"):format(key, old.saved and (" from " .. old.saved) or ""),
 			forBuild and "It is used when you switch to this build, on every character." or "It is used for every " .. spec .. " build that has no layout of its own, on every character.",
 		}, {
@@ -7677,14 +7678,14 @@ function PlanTab.sameKeys(a, b)
 end
 
 -- Applies a saved layout, from `from` (the named profiles) or else the spec
--- and build layouts. The layout it replaces is kept for /djbis bars undo.
+-- and build layouts. The layout it replaces is kept for /dcp bars undo.
 function PlanTab.applyBars(key, from)
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return "fenced" end
 	local layout = key and (from or barsDB())[key]
 	if not layout then PlanTab.say("No saved layout called " .. tostring(key) .. ".") return "none" end
-	local c = DjinnisBiSCharDB or {}
-	DjinnisBiSCharDB = c
+	local c = DjinnisCPCharDB or {}
+	DjinnisCPCharDB = c
 	-- The undo is the character's own bars. Kept over a second apply only if
 	-- nothing moved since the first (barsAfter): a second apply straight after
 	-- must not write over them, and one weeks later after hand changes must
@@ -7723,7 +7724,7 @@ function PlanTab.loadKey(forBuild)
 end
 
 -- The Load bars buttons (card 0044): the build's own layout, or the spec's.
--- No question first: /djbis bars undo puts the old bars back.
+-- No question first: /dcp bars undo puts the old bars back.
 function PlanTab.loadBars(forBuild)
 	local key, why = PlanTab.loadKey(forBuild)
 	if not key then PlanTab.say(why) return "none" end
@@ -7737,11 +7738,11 @@ end
 function PlanTab.undoBars()
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return "fenced" end
-	local undo = DjinnisBiSCharDB and DjinnisBiSCharDB.barsUndo
+	local undo = DjinnisCPCharDB and DjinnisCPCharDB.barsUndo
 	if not undo then PlanTab.say("Nothing to undo on this character.") return "none" end
-	local keysUndo = DjinnisBiSCharDB.keysUndo
-	DjinnisBiSCharDB.barsUndo, DjinnisBiSCharDB.keysUndo = nil, nil
-	DjinnisBiSCharDB.barsAfter, DjinnisBiSCharDB.keysAfter = nil, nil
+	local keysUndo = DjinnisCPCharDB.keysUndo
+	DjinnisCPCharDB.barsUndo, DjinnisCPCharDB.keysUndo = nil, nil
+	DjinnisCPCharDB.barsAfter, DjinnisCPCharDB.keysAfter = nil, nil
 	local placed, skipped = PlanTab.placeBars(undo)
 	local keys = keysUndo and PlanTab.placeKeys(keysUndo) or 0
 	PlanTab.say(("The bars and keys are back as they were: %d slots and %d keys changed, %d skipped."):format(placed, keys, #skipped))
@@ -7750,7 +7751,7 @@ function PlanTab.undoBars()
 end
 
 function PlanTab.canUndoBars()
-	return type(DjinnisBiSCharDB) == "table" and DjinnisBiSCharDB.barsUndo ~= nil
+	return type(DjinnisCPCharDB) == "table" and DjinnisCPCharDB.barsUndo ~= nil
 end
 
 -- The Undo bars button. The undo is kept until used, so weeks of hand
@@ -7759,13 +7760,13 @@ end
 function PlanTab.undoBarsAsk()
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return "fenced" end
-	local c = DjinnisBiSCharDB
+	local c = DjinnisCPCharDB
 	if not PlanTab.canUndoBars() then return PlanTab.undoBars() end
 	if c.barsAfter and PlanTab.sameBars(PlanTab.readBars(), c.barsAfter) and PlanTab.sameKeys(PlanTab.readKeys(), c.keysAfter or {}) then
 		return PlanTab.undoBars()
 	end
 	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
-	PlanTab.prompt("Djinni's BiS: action bars", {
+	PlanTab.prompt("Djinni's Class Profiles: action bars", {
 		"Your bars or keys changed since the last load.",
 		"Undo puts back the ones from before that load, and those changes are lost.",
 	}, {
@@ -7897,7 +7898,7 @@ end
 
 -- On login, and when the build or spec changes: when the layout that fits now
 -- is not the one last offered and would change something, offer it. Asked
--- (/djbis bars), it offers even when it was offered before. Waits while the
+-- (/dcp bars), it offers even when it was offered before. Waits while the
 -- prompt is busy with another question. Answers what it did, for the checks.
 function PlanTab.offerBars(asked)
 	local why = PlanTab.barsFence()
@@ -7920,7 +7921,7 @@ function PlanTab.offerBars(asked)
 		if asked then PlanTab.say("The bars and keys already match the " .. key .. " layout.") end
 		return "same"
 	end
-	PlanTab.prompt("Djinni's BiS: action bars", {
+	PlanTab.prompt("Djinni's Class Profiles: action bars", {
 		("The %s layout would change %d slots and %d keys here."):format(key, n, k),
 		"Anything this character cannot place stays as it is.",
 	}, {
@@ -7937,7 +7938,7 @@ function PlanTab.offerBars(asked)
 	return "shown"
 end
 
--- /djbis bars [save | save build | save <name> | load <name> | list | delete <name> | undo]
+-- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo]
 function PlanTab.barsCommand(rest)
 	local verb, name = rest:match("^(%S+)%s+(.+)$")
 	if rest == "save" then PlanTab.saveBars(false)
@@ -7959,7 +7960,7 @@ function PlanTab.menuItems(where)
 	local items = {}
 	local function add(item) items[#items + 1] = item end
 	if where == "sidebar" then
-		add({ text = "Open the BiS window", tip = "The gear plan, by boss, by slot, stats and the plan.", fn = DjinnisBiS_Toggle })
+		add({ text = "Open the BiS window", tip = "The gear plan, by boss, by slot, stats and the plan.", fn = DjinnisClassProfiles_Toggle })
 	elseif db().sidebarClosed and not PlanTab.rivalLoaded() then  -- with Talent Loadout Manager there is no list to show
 		add({ text = "Show the build list", tip = "Opens the list beside the talent window again.", fn = function() PlanTab.setSidebarClosed(false) end })
 	end
@@ -7991,7 +7992,7 @@ function PlanTab.menuItems(where)
 	if PlanTab.gearHere() then
 		add({ divider = true })
 		add({ title = "Loot" })
-		add({ text = "Bonus roll worth it here?", tip = "Says if anything in the plan drops in this instance.", fn = function() SlashCmdList.DJINNISBIS("here") end })
+		add({ text = "Bonus roll worth it here?", tip = "Says if anything in the plan drops in this instance.", fn = function() SlashCmdList.DJINNISCP("here") end })
 	end
 	-- No self-test here: it swaps the game's own tables while it runs and
 	-- broke the talent window until a reload (Rob, 2026-09-24). It is a check
@@ -8032,7 +8033,7 @@ function PlanTab.tidyAsk()
 	local n = PlanTab.tidy(false)
 	if type(n) ~= "number" or n == 0 then return n end
 	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
-	PlanTab.prompt("Djinni's BiS: old loadouts", {
+	PlanTab.prompt("Djinni's Class Profiles: old loadouts", {
 		("Delete the %d old Dreamgrove loadouts listed in chat?"):format(n),
 		"Your own loadouts are not touched.",
 	}, {
@@ -8044,7 +8045,7 @@ end
 
 function PlanTab.deleteProfileAsk(name)
 	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
-	PlanTab.prompt("Djinni's BiS: action bars", {
+	PlanTab.prompt("Djinni's Class Profiles: action bars", {
 		("Delete the %s profile?"):format(name),
 		"This cannot be undone.",
 	}, {
@@ -8059,7 +8060,7 @@ end
 function PlanTab.askName(title, line, onOK)
 	local f = PlanTab.askFrame
 	if not f then
-		f = CreateFrame("Frame", "DjinnisBiSAskName", UIParent, "BasicFrameTemplateWithInset")
+		f = CreateFrame("Frame", "DjinnisCPAskName", UIParent, "BasicFrameTemplateWithInset")
 		f:SetSize(340, 132)
 		f:SetPoint("TOP", UIParent, "TOP", 0, -180)
 		f:SetMovable(true)
@@ -8091,7 +8092,7 @@ function PlanTab.askName(title, line, onOK)
 		f.cancel:SetScript("OnClick", function() f:Hide() end)
 		f.box:SetScript("OnEscapePressed", function() f:Hide() end)
 		f.box:SetScript("OnEnterPressed", function() f.ok:Click() end)
-		tinsert(UISpecialFrames, "DjinnisBiSAskName")
+		tinsert(UISpecialFrames, "DjinnisCPAskName")
 		PlanTab.askFrame = f
 	end
 	f.title:SetText(title)
@@ -8108,7 +8109,31 @@ function PlanTab.askName(title, line, onOK)
 end
 
 function PlanTab.askProfileName()
-	return PlanTab.askName("Djinni's BiS: save bars", "A name for your action bars and key bindings now:", PlanTab.saveProfile)
+	return PlanTab.askName("Djinni's Class Profiles: save bars", "A name for your action bars and key bindings now:", PlanTab.saveProfile)
+end
+
+-- The rename (card 0058). The game keeps saved data in a file named after the
+-- addon's folder, so DjinnisClassProfiles started empty. A stub DjinnisBiS
+-- folder still loads the old file, and this copies it over once: the account's
+-- at the first login, each character's at that character's first login. The
+-- old tables are left as they were, so nothing is lost if the copy is wrong.
+-- Pure: answers the table to keep and whether it copied.
+function PlanTab.copyOld(old, new)
+	if type(old) ~= "table" or (type(new) == "table" and new.fromBiS) then return new, false end
+	new = type(new) == "table" and new or {}
+	for k, v in pairs(old) do new[k] = PlanTab.deepCopy(v) end
+	new.fromBiS = true
+	return new, true
+end
+
+function PlanTab.moveSavedData()
+	local account, char
+	DjinnisCPDB, account = PlanTab.copyOld(rawget(_G, "DjinnisBiSDB"), DjinnisCPDB)
+	DjinnisCPCharDB, char = PlanTab.copyOld(rawget(_G, "DjinnisBiSCharDB"), DjinnisCPCharDB)
+	if account or char then
+		PlanTab.say("Djinni's BiS is now Djinni's Class Profiles, and your saved data is copied over. Turn off or delete the DjinnisBiS add-on once every character you play has logged in once.")
+	end
+	return account, char
 end
 
 local loader = CreateFrame("Frame")
@@ -8118,6 +8143,7 @@ loader:RegisterEvent("PLAYER_LOGIN")
 loader:RegisterEvent("EJ_LOOT_DATA_RECIEVED")
 loader:SetScript("OnEvent", function(_, event, name)
 	if event == "PLAYER_LOGIN" then
+		pcall(PlanTab.moveSavedData)  -- first: everything below reads the saved data (card 0058)
 		buildBroker()
 		pcall(armCharacterPane)
 		pcall(armBagMarks)
@@ -8140,14 +8166,14 @@ end)
 -- After the handler, and verified: a refused registration is silent (DECISIONS.md).
 loader:RegisterEvent("ADDON_LOADED")
 if not loader:IsEventRegistered("ADDON_LOADED") then
-	print(GOLD .. "Djinni's BiS|r " .. GREY .. "could not register ADDON_LOADED, so the plan sidebar will not appear beside the talent window.|r")
+	print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "could not register ADDON_LOADED, so the plan sidebar will not appear beside the talent window.|r")
 end
 
 -- /bis ---------------------------------------------------------------------
 
 local function listBySource(filter)
 	local want = filter:lower()
-	print(GOLD .. "Djinni's BiS|r -- items matching '" .. filter .. "':")
+	print(GOLD .. "Djinni's Class Profiles|r -- items matching '" .. filter .. "':")
 	local names = {}
 	for _, entry in pairs(lookup) do
 		if entry.boss:lower():find(want, 1, true) then names[#names + 1] = entry.name end
@@ -8384,7 +8410,7 @@ function PlanTab.loadoutChecks(check)
 	check(spareTest .. ", but says why", table.concat(printed, "\n"):find("no room for one", 1, true) ~= nil, true)
 	spareTest = "a build with no loadout of its own is worn through the spare"
 	local nextID, keptHelper, switched = 20, ClassTalentHelper, {}
-	local keptSpares = DjinnisBiSCharDB and DjinnisBiSCharDB.spares
+	local keptSpares = DjinnisCPCharDB and DjinnisCPCharDB.spares
 	ClassTalentHelper = { SwitchToLoadoutByName = function(n) switched[#switched + 1] = n end }
 	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name nextID = nextID + 1 names[nextID] = name return true end
 	Constants.TraitConsts.MAX_COMBAT_TRAIT_CONFIGS, calls = 8, {}
@@ -8474,7 +8500,7 @@ function PlanTab.loadoutChecks(check)
 	check(spareTest .. ", an unfilled spare is not worn", PlanTab.wearMadeSpare({ wear = "Raid: Sszorak", made = 1 }) .. "/" .. #switched, "unfilled/0")
 	api.IsConfigPopulated = function() return true end
 	for id = 21, 30 do names[id] = nil end
-	DjinnisBiSCharDB.spares, ClassTalentHelper = keptSpares, keptHelper
+	DjinnisCPCharDB.spares, ClassTalentHelper = keptSpares, keptHelper
 	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name return true end
 	selected, windowOpen = 9, false
 
@@ -8516,7 +8542,7 @@ function PlanTab.barChecks(check)
 		"width, text, measure " .. (34 + 100 + 16 + B + 12))
 
 	local kept = { C_ActionBar, GetActionInfo, PickupAction, PlaceAction, GetCursorInfo, ClearCursor, C_Spell, C_Item,
-		PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print, PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB }
+		PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print, PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisCPCharDB }
 	local keptBars = db().bars
 	local bars, cursor, known, macros, printed, shown, combat = {}, nil, {}, {}, {}, nil, false
 	local vehicle, held = false, 0  -- held: a pick up while the cursor still held a swapped-out action
@@ -8549,7 +8575,7 @@ function PlanTab.barChecks(check)
 	end
 	PlanTab.prompt = function(_, lines, buttons) shown = { lines = lines, buttons = buttons } end
 	PlanTab.activeLoadoutName = function() return "Raid: Sszorak" end
-	db().bars, PlanTab.barsSeen, DjinnisBiSCharDB = {}, nil, nil
+	db().bars, PlanTab.barsSeen, DjinnisCPCharDB = {}, nil, nil
 	-- key bindings: key -> action, over a fixed list of actions; MYADDON_X is
 	-- an addon's binding the second druid does not have, so the game refuses it
 	local keptKeys = { GetNumBindings, GetBinding, SetBinding, SaveBindings, GetCurrentBindingSet, C_KeyBindings, PlanTab.keysRefused }
@@ -8628,7 +8654,7 @@ function PlanTab.barChecks(check)
 	check(applyTest .. ", a binding the game refuses is listed", table.concat(printed, "\n"):find("key F: will not bind to MYADDON_X", 1, true) ~= nil, true)
 	check(applyTest .. ", and the bindings are saved", saves > 0, true)
 	check(applyTest .. ", a refused key does not keep it from matching", PlanTab.offerBars(true), "same")
-	check(applyTest .. ", and that is kept across a /reload", DjinnisBiSCharDB and DjinnisBiSCharDB.keysRefused and DjinnisBiSCharDB.keysRefused.F, "MYADDON_X")
+	check(applyTest .. ", and that is kept across a /reload", DjinnisCPCharDB and DjinnisCPCharDB.keysRefused and DjinnisCPCharDB.keysRefused.F, "MYADDON_X")
 	local otherWant = PlanTab.readKeys()
 	otherWant.F = "ACTIONBUTTON1"
 	check(applyTest .. ", but another action on that key still counts", PlanTab.keysDiffer(otherWant), 1)
@@ -8769,7 +8795,7 @@ function PlanTab.barChecks(check)
 	check(profileTest .. ", no colour code in a name", PlanTab.saveProfile("a|cffff0000b"), nil)
 	check(profileTest .. ", never called \"build\" in any case", PlanTab.saveProfile("Build"), nil)
 	bars[11] = nil
-	DjinnisBiSCharDB.barsUndo = nil  -- so the undo below can only be the load's own
+	DjinnisCPCharDB.barsUndo = nil  -- so the undo below can only be the load's own
 	check(profileTest .. ", loads by name in any case", PlanTab.loadProfile("MAIN"), "applied")
 	check(profileTest .. ", onto the bars", bars[11] and bars[11].id, 5221)
 	check(profileTest .. ", and undo takes it off", PlanTab.undoBars() and bars[11], nil)
@@ -8880,7 +8906,7 @@ function PlanTab.barChecks(check)
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]
 	PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print = kept[9], kept[10], kept[11], kept[12], kept[13]
-	PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB = kept[14], kept[15], kept[16]
+	PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisCPCharDB = kept[14], kept[15], kept[16]
 	GetNumBindings, GetBinding, SetBinding, SaveBindings, GetCurrentBindingSet = keptKeys[1], keptKeys[2], keptKeys[3], keptKeys[4], keptKeys[5]
 	C_KeyBindings, PlanTab.keysRefused = keptKeys[6], keptKeys[7]
 	PlanTab.hasMyAddon = nil
@@ -8950,7 +8976,7 @@ function PlanTab.sidebarChecks(check)
 	local ownTest = "the player's own loadouts are listed too"
 	local mine = PlanTab.movePoint(feral.Dungeon)
 	local keptSpares = PlanTab.spareIDs()
-	DjinnisBiSCharDB.spares = { [3] = true }  -- config 3 is this addon's spare; 4 is the player's own
+	DjinnisCPCharDB.spares = { [3] = true }  -- config 3 is this addon's spare; 4 is the player's own
 	list = PlanTab.sidebarList("Feral", "raid", mine, "Rob's PvP", nil,
 		{ ["Raid: Nek'Zali"] = 1, ["Rob's PvP"] = 2, ["BiS: Raid: Vashnik"] = 3, ["BiS: M+"] = 4 }, nil, nil, nil,
 		function(id) return id == 2 and mine or nil end)
@@ -8962,7 +8988,7 @@ function PlanTab.sidebarChecks(check)
 	check(ownTest .. ", the spare's build is read from its name", PlanTab.spareBuild("BiS: Raid: Vashnik", 3), "Raid: Vashnik")
 	check(ownTest .. ", and no other name", PlanTab.spareBuild("Raid: Vashnik", 3), nil)
 	check(ownTest .. ", nor the player's own \"BiS: \" loadout", PlanTab.spareBuild("BiS: M+", 4), nil)
-	DjinnisBiSCharDB.spares = keptSpares
+	DjinnisCPCharDB.spares = keptSpares
 
 	-- card 0042: a build with its own action bars says so
 	local keptBars = db().bars
@@ -9096,6 +9122,44 @@ end
 
 -- Card 0053: every slash command has a click. Each menu item is found by its
 -- text and clicked, with the functions it should reach swapped on PlanTab.
+-- Card 0058: the saved data under the old name is copied once, deep, and a
+-- character that has it already is left alone.
+function PlanTab.renameChecks(check)
+	local t = "the rename"
+	local nested = { bars = { k = 1 } }
+	local copy, moved = PlanTab.copyOld(nested, nil)
+	check(t .. ", the old data is copied", moved and copy.bars.k == 1 and copy.fromBiS, true)
+	check(t .. ", as a copy", copy.bars ~= nested.bars, true)
+	local mine = { fromBiS = true, gear = {} }
+	copy, moved = PlanTab.copyOld(nested, mine)
+	check(t .. ", not twice", moved == false and copy == mine and copy.bars == nil, true)
+	copy, moved = PlanTab.copyOld(nil, mine)
+	check(t .. ", nothing to copy", moved == false and copy == mine, true)
+	copy, moved = PlanTab.copyOld(nested, { gear = { x = 1 } })
+	check(t .. ", into a table made before the login", moved and copy.bars.k == 1, true)
+
+	-- through the globals, as at login
+	local kept = { rawget(_G, "DjinnisBiSDB"), rawget(_G, "DjinnisBiSCharDB"), DjinnisCPDB, DjinnisCPCharDB, PlanTab.say }
+	local said = 0
+	local ok, err = pcall(function()
+		DjinnisBiSDB, DjinnisBiSCharDB = { bars = { k = 1 } }, { madeAt = { [3] = 81 } }
+		DjinnisCPDB, DjinnisCPCharDB = nil, { fromBiS = true, madeAt = {} }
+		PlanTab.say = function() said = said + 1 end
+		local account, char = PlanTab.moveSavedData()
+		check(t .. ", the account's is copied at login", account and DjinnisCPDB.bars.k == 1, true)
+		check(t .. ", a character's copied before is left", char == false and next(DjinnisCPCharDB.madeAt) == nil, true)
+		check(t .. ", and it says so", said, 1)
+		account, char = PlanTab.moveSavedData()
+		check(t .. ", once", account == false and char == false and said == 1, true)
+		-- the next character to log in has its own copied
+		DjinnisCPCharDB = nil
+		account, char = PlanTab.moveSavedData()
+		check(t .. ", a new character's is copied at its login", account == false and char and DjinnisCPCharDB.madeAt[3] == 81 and said == 2, true)
+	end)
+	DjinnisBiSDB, DjinnisBiSCharDB, DjinnisCPDB, DjinnisCPCharDB, PlanTab.say = kept[1], kept[2], kept[3], kept[4], kept[5]
+	check(t .. ", ran", ok or tostring(err), true)
+end
+
 function PlanTab.menuChecks(check)
 	local t = "every command has a button"
 	local names = { "offerLoadouts", "sayTalents", "tidyAsk", "offerBars", "undoBarsAsk", "askProfileName",
@@ -9103,7 +9167,7 @@ function PlanTab.menuChecks(check)
 		"deleteProfile", "saveBars", "setSidebarClosed", "rivalLoaded", "barsFence", "barsKey", "say" }
 	local kept, calls = {}, {}
 	for _, name in ipairs(names) do kept[name] = PlanTab[name] end
-	local wasSlash, wasToggle, keptClosed = SlashCmdList.DJINNISBIS, DjinnisBiS_Toggle, db().sidebarClosed
+	local wasSlash, wasToggle, keptClosed = SlashCmdList.DJINNISCP, DjinnisClassProfiles_Toggle, db().sidebarClosed
 	db().sidebarClosed = nil
 	local profiles, class, tidyAnswer, shown = {}, PlanTab.DRUID, 2, nil
 	local function find(items, text)
@@ -9125,8 +9189,8 @@ function PlanTab.menuChecks(check)
 		end
 		PlanTab.profilesDB = function() return profiles end
 		PlanTab.playerClass = function() return class end
-		SlashCmdList.DJINNISBIS = function(msg) calls[#calls + 1] = "slash(" .. msg .. ")" end
-		DjinnisBiS_Toggle = function() calls[#calls + 1] = "toggle" end
+		SlashCmdList.DJINNISCP = function(msg) calls[#calls + 1] = "slash(" .. msg .. ")" end
+		DjinnisClassProfiles_Toggle = function() calls[#calls + 1] = "toggle" end
 		PlanTab.tidy = function(yes) calls[#calls + 1] = "tidy(" .. tostring(yes) .. ")" return 0 end
 
 		-- typed, tidy asks the same question the menu does
@@ -9238,9 +9302,9 @@ function PlanTab.menuChecks(check)
 		check(t .. ", the name box saves a profile", onOK == kept.saveProfile or onOK == PlanTab.saveProfile, true)
 	end)
 	for _, name in ipairs(names) do PlanTab[name] = kept[name] end
-	SlashCmdList.DJINNISBIS, DjinnisBiS_Toggle, db().sidebarClosed = wasSlash, wasToggle, keptClosed
+	SlashCmdList.DJINNISCP, DjinnisClassProfiles_Toggle, db().sidebarClosed = wasSlash, wasToggle, keptClosed
 	check(t .. ", ran", ok or tostring(err), true)
-	check(t .. ", and put everything back", PlanTab.playerClass == kept.playerClass and PlanTab.tidy == kept.tidy and SlashCmdList.DJINNISBIS == wasSlash, true)
+	check(t .. ", and put everything back", PlanTab.playerClass == kept.playerClass and PlanTab.tidy == kept.tidy and SlashCmdList.DJINNISCP == wasSlash, true)
 end
 
 -- Card 0049: every spec, each key once, and the druid keys saved data uses.
@@ -10036,13 +10100,13 @@ local function selfTest()
 	check(hookTest .. ", armed once", PlanTab.armSimc(), false)
 	local out, err = fake:GetSimcProfile("!")
 	check(hookTest .. ", the addon's own text survives, checksum last", out:sub(1, #profile + 1), profile .. "!")
-	check(hookTest .. ", the block follows the checksum line", out:find("# Checksum: ab12!\n# Djinni's BiS plan (Feral)", 1, true) ~= nil, true)
+	check(hookTest .. ", the block follows the checksum line", out:find("# Checksum: ab12!\n# Djinni's Class Profiles plan (Feral)", 1, true) ~= nil, true)
 	check(hookTest .. ", the arguments reach the addon", out:find("!", 1, true), #profile + 1)
 	check(hookTest .. ", saved names are read from the game", out:find("Saved Loadout: Raid: Nek'Zali (DBiS", 1, true), nil)
 	check(hookTest .. ", the plan's string for an unsaved one", out:find("# Saved Loadout: Dungeon (DBiS plan)\n# talents=" .. PlanTab.BUILDS.Feral.Dungeon, 1, true) ~= nil, true)
 	check(hookTest .. ", no error back", err, nil)
 	fake.GetSimcProfile = function() return nil, "boom" end
-	fake.DjinnisBiSWrapped = nil
+	fake.DjinnisCPWrapped = nil
 	PlanTab.armSimc()
 	out, err = fake:GetSimcProfile()
 	check(hookTest .. ", an error from the addon passes through", err, "boom")
@@ -10454,7 +10518,7 @@ local function selfTest()
 		check(priceTest .. ", the unpriced are counted", unpriced, 2)
 		local sendTest = "shopping list sent to auctionator"
 		check(sendTest, PlanTab.sendToAuctionator(shop), true)
-		check(sendTest .. ", as this addon", sent and sent.caller, "DjinnisBiS")
+		check(sendTest .. ", as this addon", sent and sent.caller, "DjinnisClassProfiles")
 		check(sendTest .. ", named", sent and sent.name, "DjinnisBiS plan")
 		check(sendTest .. ", the search term, rank stripped", sent and sent.terms[1], "Eyes of the Eagle")
 		check(sendTest .. ", a thing with no name yet is left out", sent and #sent.terms, 1)
@@ -11823,10 +11887,11 @@ local function selfTest()
 	PlanTab.specChecks(check)  -- card 0049
 	PlanTab.menuChecks(check)  -- card 0053
 	PlanTab.levelChecks(check)  -- card 0055
+	PlanTab.renameChecks(check)  -- card 0058
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
-	print(failed == 0 and (GREEN .. "[BiS] self-test passed|r")
-		or ("|cffff0000[BiS] " .. failed .. " check(s) failed|r"))
+	print(failed == 0 and (GREEN .. "[CP] self-test passed|r")
+		or ("|cffff0000[CP] " .. failed .. " check(s) failed|r"))
 end
 
 -- The self-test swaps Blizzard's own tables and frames for fakes while it
@@ -11865,7 +11930,7 @@ function PlanTab.snapshot()
 	snap.loaded = PlanTab.loadedAddOns()
 	return snap
 end
-PlanTab.SAVED_VARIABLES = { "DjinnisBiSDB", "DjinnisBiSCharDB" }
+PlanTab.SAVED_VARIABLES = { "DjinnisCPDB", "DjinnisCPCharDB" }
 
 -- Saved data holds no functions or cycles, so a plain recursive copy.
 function PlanTab.deepCopy(t)
@@ -11992,9 +12057,9 @@ function PlanTab.runSelfTest(run, write)
 		print(("|cffff0000FAIL|r the self-test left %d of the game's own values swapped (%s); they are put back now"):format(blizzard, table.concat(names, ", ")))
 	end
 	if refused > 0 then print(("|cffff0000FAIL|r the game refused %d write-backs after the self-test. Reload the interface now."):format(refused)) end
-	if okRestore and keptNew then print(GREY .. "[BiS] an add-on loaded during the self-test, so globals it made were left in place.|r") end
+	if okRestore and keptNew then print(GREY .. "[CP] an add-on loaded during the self-test, so globals it made were left in place.|r") end
 	if type(ReloadUI) == "function" then
-		PlanTab.prompt("Djinni's BiS: self-test", {
+		PlanTab.prompt("Djinni's Class Profiles: self-test", {
 			"The self-test is done. The result is in chat.",
 			"It swaps parts of the game's own interface while it runs, so some game windows may not work until the interface reloads.",
 		}, {
@@ -12005,14 +12070,14 @@ function PlanTab.runSelfTest(run, write)
 	return ok, blizzard
 end
 
--- /djbis first: /bis was not always ours, another addon can claim it and
--- whichever registers last wins (Rob, 2026-09-22). /bis stays as a second
--- name for the times nobody else takes it.
-SLASH_DJINNISBIS1 = "/djbis"
-SLASH_DJINNISBIS2 = "/bis"
-SlashCmdList.DJINNISBIS = function(msg)
+-- /dcp was the old Class Profiles command, so it is Rob's; /djcp is the long
+-- name. /djbis and /bis went with the rename (card 0058). Every command also
+-- has a button (card 0053).
+SLASH_DJINNISCP1 = "/dcp"
+SLASH_DJINNISCP2 = "/djcp"
+SlashCmdList.DJINNISCP = function(msg)
 	msg = msg:match("^%s*(.-)%s*$")
-	if msg == "" then DjinnisBiS_Toggle()
+	if msg == "" then DjinnisClassProfiles_Toggle()
 	elseif msg == "here" and not PlanTab.gearHere() then PlanTab.say("The BiS list is druid gear, so there is no verdict for this class.")
 	elseif msg == "here" then bonusRollVerdict((GetInstanceInfo()))
 	elseif msg == "test" then PlanTab.runSelfTest()

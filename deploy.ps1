@@ -1,5 +1,5 @@
 param(
-    [string]$AddonName = "DjinnisBiS",
+    [string]$AddonName = "DjinnisClassProfiles",
     [string]$Source = (Split-Path -Parent $MyInvocation.MyCommand.Definition),
     [string]$Destination = "C:/Games/World of Warcraft/_retail_/Interface/AddOns",
     [switch]$DryRun

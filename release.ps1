@@ -25,7 +25,7 @@ $ErrorActionPreference = "Stop"
 
 function Show-Usage {
     Write-Host ""
-    Write-Host "  DjinnisBiS release script" -ForegroundColor Cyan
+    Write-Host "  DjinnisClassProfiles release script" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  Usage: release.ps1 [-OutputDir <path>] [-ReleaseType release|beta|alpha]"
     Write-Host "                     [-DryRun] [-SkipTag] [-SkipPush]"
@@ -75,7 +75,7 @@ if ($OutputDir -match '^-') {
 }
 
 $Root             = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$AddonName        = "DjinnisBiS"
+$AddonName        = "DjinnisClassProfiles"
 $TocFile          = Join-Path $Root "$AddonName.toc"
 $ReleaseNotesFile = Join-Path $Root "RELEASE_NOTES.md"
 $ChangelogFile    = Join-Path $Root "CHANGELOG.md"
@@ -119,7 +119,7 @@ $Version = $versionMatch.Groups[1].Value.TrimStart('v')
 $Tag     = Make-Tag $Version $ReleaseType
 
 Write-Info ""
-Write-Info "=== DjinnisBiS Release: $Tag ($ReleaseType) ==="
+Write-Info "=== DjinnisClassProfiles Release: $Tag ($ReleaseType) ==="
 if ($DryRun) { Write-Warn "  DRY RUN - no files will be written, committed, tagged, or pushed" }
 Write-Info ""
 
@@ -421,7 +421,7 @@ if (-not $ghAvailable) {
     Remove-Item $tmpNotes -Force
 
     if ($LASTEXITCODE -eq 0) {
-        Write-Success "  GitHub Release created: https://github.com/RobertLCraig/DjinnisBiS/releases/tag/$Tag"
+        Write-Success "  GitHub Release created: https://github.com/RobertLCraig/DjinnisClassProfiles/releases/tag/$Tag"
     } else {
         Write-Warn "  gh release create failed (exit $LASTEXITCODE) -- create it manually:"
         Write-Warn "    & '$GhExe' release create $Tag '$ZipPath' --title '$Tag' --notes-file RELEASE_NOTES.md"
@@ -437,7 +437,7 @@ Write-Success "=== Release $Tag complete! ==="
 Write-Info ""
 Write-Info "  Local zip:  $ZipPath"
 if (-not $DryRun -and -not $SkipPush -and -not $SkipTag) {
-    Write-Info "  GitHub:     https://github.com/RobertLCraig/DjinnisBiS/releases/tag/$Tag"
+    Write-Info "  GitHub:     https://github.com/RobertLCraig/DjinnisClassProfiles/releases/tag/$Tag"
     Write-Info "  CurseForge: packaging triggered by pushed tag (file type: $ReleaseType)"
 }
 Write-Info ""

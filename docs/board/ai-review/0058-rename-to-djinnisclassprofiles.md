@@ -39,3 +39,36 @@ the self-test; the load on a real client is Rob's.
 
 **2026-09-24, Claude.** Written from Rob's answer. Open question for Rob before the repository
 moves: DjinnisBiS is a private GitHub repository and the old DjinnisClassProfiles is public.
+
+**2026-09-24, Claude. Built, v0.47.0. The tag moved to card `0059`.**
+
+Rob, 2026-09-24: "want to fulyl merge and rename. sure push into the DjinnisClassProfiles".
+
+- **One repository.** This repository's history is merged into the old DjinnisClassProfiles (merge
+  commit, `git read-tree` of this tree), so both histories are kept. The old Class Profiles code is
+  at tag `legacy-0.3.1`. The remote is the public github.com/RobertLCraig/DjinnisClassProfiles.
+- **Names.** `DjinnisClassProfiles.lua` and `.toc`, title "Djinni's Class Profiles", chat prefix,
+  prompts, window title, frame names `DjinnisCP*`, `DjinnisClassProfiles_Toggle`, slash `/dcp` and
+  `/djcp` (`/djbis` and `/bis` are gone; the offline scan flags all four in text). Kept on purpose:
+  Auctionator's list name "DjinnisBiS plan" and Baganator's widget id `djinnisbis_plan`, so Rob's
+  list and corner setting carry over; the roll lines' "[BiS]" (they are about gear).
+- **Saved data.** `DjinnisCPDB` and `DjinnisCPCharDB`. `PlanTab.moveSavedData`, first thing at
+  `PLAYER_LOGIN`, copies `DjinnisBiSDB` and `DjinnisBiSCharDB` once each, deep, marked `fromBiS`,
+  and says so. The old tables are never written.
+- **The stub.** `C:\Dev\WoWAddons\DjinnisBiS\`: a `.toc` that declares the two old tables, an
+  empty `.lua`, and its own mirroring `deploy.ps1`, so the deploy clears the old code out of the
+  game folder. Tracked by the workspace repository. The new `.toc` has `## OptionalDeps: DjinnisBiS`
+  so the stub loads first.
+- **The old local folder** moved to `%TEMP%\DjinnisBiS-old-2026-09-24`, not deleted.
+
+Checks: `PlanTab.renameChecks` (copy, deep, once, a new character's at its login, the message).
+`%TEMP%\mut0058.py` has 7 breaks, all red. Both Luas green; all 36 non-druid specs pass.
+
+## What I need from you
+
+After `/reload` (a full restart is safer: the folder list changed):
+1. Chat says "Djinni's BiS is now Djinni's Class Profiles, and your saved data is copied over."
+2. Open the window from the minimap button. Pass: your saved bars profiles, gear targets and sim
+   imports are all there.
+3. The add-on list shows "Djinni's BiS (old saved data)". Leave it on until every character you play
+   has logged in once, then turn it off.

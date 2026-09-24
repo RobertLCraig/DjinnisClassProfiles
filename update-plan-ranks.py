@@ -1,6 +1,6 @@
 """Author tooling, never shipped (pkgmeta.yaml ignores it).
 
-Rewrites the GENERATED PLAN RANKS block in DjinnisBiS.lua: for every enchant
+Rewrites the GENERATED PLAN RANKS block in DjinnisClassProfiles.lua: for every enchant
 and gem the gear plan asks for, every id in that enchant's or gem's family,
 with its rank. The game has no call from an enchant id to a name, and two gem
 ids can share a name ("Flawless Masterful Garnet" is 240907 and 240908), so
@@ -24,7 +24,7 @@ import sys
 import urllib.request
 from datetime import date
 
-LUA = "DjinnisBiS.lua"
+LUA = "DjinnisClassProfiles.lua"
 BEGIN, END = "-- BEGIN GENERATED PLAN RANKS", "-- END GENERATED PLAN RANKS"
 ENCHANTS = "https://www.raidbots.com/static/data/live/enchantments.json"
 GEMS = "https://www.raidbots.com/static/data/live/gems.json"
@@ -33,7 +33,7 @@ GEM_PREFIX = re.compile(r"^(Flawless|Perfect) ")
 
 def fetch(url):
     # Raidbots answers Python's default user agent with 403 and curl's with 200.
-    req = urllib.request.Request(url, headers={"User-Agent": "curl/8.0 DjinnisBiS update-plan-ranks"})
+    req = urllib.request.Request(url, headers={"User-Agent": "curl/8.0 DjinnisClassProfiles update-plan-ranks"})
     with urllib.request.urlopen(req, timeout=60) as r:
         return json.load(r)
 

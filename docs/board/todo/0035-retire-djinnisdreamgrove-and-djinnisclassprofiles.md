@@ -22,3 +22,6 @@ forward". DjinnisClassProfiles' job, action bars across characters, moves here i
 
 - [ ] Neither addon is in `Interface\AddOns`, and DjinnisBiS does everything `/dg` did.
 - [ ] Both repositories still exist, and say where their work went.
+
+**2026-09-24, Claude.** Changed by card `0058`: DjinnisClassProfiles is not retired. Its repository
+now holds this addon (Djinni's BiS renamed). Only DjinnisDreamgrove is retired by this card.

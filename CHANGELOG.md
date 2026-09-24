@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Djinni's BiS will be documented in this file.
+All notable changes to Djinni's Class Profiles (Djinni's BiS until 0.47.0) will be documented in this file.
 
 Entries are written here by `release.ps1`, copied verbatim from `RELEASE_NOTES.md`
 at the moment of the release. Nothing below has shipped yet.

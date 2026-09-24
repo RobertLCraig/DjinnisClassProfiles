@@ -5,3 +5,6 @@
 .claude/
 # Third-party addon source Rob downloaded to study (2026-09-23). Read here, never shipped or committed.
 /research/
+# From the old Class Profiles repository: a prompt file kept locally, and release output.
+/baseprompt.md
+/releases/

@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Bake the winning gear of one or more Raidbots Top Gear reports into
-    DjinnisBiS.lua, between the GENERATED GEAR PLAN markers.
+    DjinnisClassProfiles.lua, between the GENERATED GEAR PLAN markers.
 
 .DESCRIPTION
     An addon-author tool, not a runtime one, for the same reason
@@ -61,7 +61,7 @@ param(
     [switch]$Deploy,
     [string]$From,
     [switch]$SelfTest,
-    [string]$Target = (Join-Path $PSScriptRoot 'DjinnisBiS.lua')
+    [string]$Target = (Join-Path $PSScriptRoot 'DjinnisClassProfiles.lua')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -419,8 +419,8 @@ if ($wrote) {
 }
 if ($Deploy) {
     # deploys whether or not this run wrote, so "-Deploy" after a plain run works
-    & (Join-Path $PSScriptRoot '..\bin\deploy.ps1') -Only DjinnisBiS
+    & (Join-Path $PSScriptRoot '..\bin\deploy.ps1') -Only DjinnisClassProfiles
 }
 elseif ($wrote) {
-    Write-Host 'Next: run this again with -Deploy, or C:\Dev\WoWAddons\bin\deploy.ps1 -Only DjinnisBiS' -ForegroundColor Yellow
+    Write-Host 'Next: run this again with -Deploy, or C:\Dev\WoWAddons\bin\deploy.ps1 -Only DjinnisClassProfiles' -ForegroundColor Yellow
 }

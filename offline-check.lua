@@ -5,7 +5,7 @@
 -- Author tooling, never shipped: it is in pkgmeta.yaml's ignore list.
 --
 -- WHY IT EXISTS. Every check that matters for this addon happens in a live game
--- client, which no agent can run, so the whole of DjinnisBiS.lua's pure logic
+-- client, which no agent can run, so the whole of DjinnisClassProfiles.lua's pure logic
 -- would otherwise be unverifiable between sessions. This stubs just enough of
 -- Blizzard's API to load the file and reach the slash command. It proves the
 -- data and the pure logic. IT PROVES NO FRAME: every CreateFrame here returns a
@@ -141,23 +141,23 @@ local tooltipHook
 TooltipDataProcessor.AddTooltipPostCall = function(_, hook) tooltipHook = hook end
 
 local here = arg and arg[0] and arg[0]:match("^(.*)[/\\][^/\\]*$") or "."
-local source = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
-dofile(here .. "/DjinnisBiS.lua")
+local source = assert(io.open(here .. "/DjinnisClassProfiles.lua")):read("*a")
+dofile(here .. "/DjinnisClassProfiles.lua")
 -- The client has both saved tables before any slash command runs (empty on a
 -- first login), so the self-test net must find them, not see them made
-DjinnisBiSDB, DjinnisBiSCharDB = DjinnisBiSDB or {}, DjinnisBiSCharDB or {}
+DjinnisCPDB, DjinnisCPCharDB = DjinnisCPDB or {}, DjinnisCPCharDB or {}
 -- An id the addon does not know would run as "no spec" and pass (0049 review).
 if asSpec and not source:find("{ " .. asSpec .. ", \"", 1, true) then
 	print("|cffff0000FAIL|r spec " .. asSpec .. " is not in PlanTab.SPECS, so this run would prove nothing")
 end
 if not asSpec then
-	SlashCmdList.DJINNISBIS("test")
+	SlashCmdList.DJINNISCP("test")
 	-- Card 0055: the net around the self-test. A test that swaps a Blizzard
 	-- global, a C_ field and a PlanTab field and then throws must leave all
 	-- three as they were, and say so. PlanTab is the slash handler's upvalue.
 	local PlanTab
 	for i = 1, 60 do
-		local name, value = debug.getupvalue(SlashCmdList.DJINNISBIS, i)
+		local name, value = debug.getupvalue(SlashCmdList.DJINNISCP, i)
 		if not name then break end
 		if name == "PlanTab" then PlanTab = value end
 	end
@@ -186,20 +186,20 @@ if not asSpec then
 		-- A run that swaps, writes into saved data and makes things, then throws.
 		local realInfo, realCount, realSay = GetInstanceInfo, C_Item.GetItemCount, PlanTab.say
 		-- saved data as a client has it, written into and swapped by the run
-		DjinnisBiSDB.bars = { ["Feral / Raid"] = { saved = "2026-09-24" } }
-		DjinnisBiSCharDB.madeAt = { [7] = 81 }
-		local realDB, realChar = DjinnisBiSDB, DjinnisBiSCharDB
-		local hadFrame, realSlash, hadPrompt = rawget(_G, "PlayerSpellsFrame"), SlashCmdList.DJINNISBIS, rawget(PlanTab, "promptFrame")
+		DjinnisCPDB.bars = { ["Feral / Raid"] = { saved = "2026-09-24" } }
+		DjinnisCPCharDB.madeAt = { [7] = 81 }
+		local realDB, realChar = DjinnisCPDB, DjinnisCPCharDB
+		local hadFrame, realSlash, hadPrompt = rawget(_G, "PlayerSpellsFrame"), SlashCmdList.DJINNISCP, rawget(PlanTab, "promptFrame")
 		local ok, swapped, text, reload = net(function()
-			SlashCmdList.DJINNISBIS = function() end
+			SlashCmdList.DJINNISCP = function() end
 			Enum.DjinnisTestOnly = { Fake = 1 }
 			GetInstanceInfo = function() return "Fake" end
 			C_Item.GetItemCount = function() return 99 end
 			PlanTab.say = function() end
-			DjinnisBiSDB.bars = {}
-			DjinnisBiSDB.statContext = "raid"
-			DjinnisBiSDB = { fake = true }
-			DjinnisBiSCharDB.madeAt[24] = 90  -- one table down: a one-level copy keeps it
+			DjinnisCPDB.bars = {}
+			DjinnisCPDB.statContext = "raid"
+			DjinnisCPDB = { fake = true }
+			DjinnisCPCharDB.madeAt[24] = 90  -- one table down: a one-level copy keeps it
 			if hadFrame == nil then PlayerSpellsFrame = { IsShown = function() return true end } end
 			DjinnisTestFrame = { [0] = io.stdout }  -- a frame, as the client makes one
 			PlanTab.promptFrame = { IsShown = function() return true end }  -- a check's fake (0056 review)
@@ -208,14 +208,14 @@ if not asSpec then
 			error("thrown on purpose")
 		end)
 		if not reload then fail("did not offer Reload now") end
-		if SlashCmdList.DJINNISBIS ~= realSlash or Enum.DjinnisTestOnly ~= nil then fail("missed a field of a table the checks write into") end
+		if SlashCmdList.DJINNISCP ~= realSlash or Enum.DjinnisTestOnly ~= nil then fail("missed a field of a table the checks write into") end
 		local want = hadFrame == nil and 5 or 4  -- the saved table goes back first, on its own
 		if ok ~= false or swapped ~= want then fail("expected false and " .. want .. " swapped, got " .. tostring(ok) .. " and " .. tostring(swapped)) end
 		if GetInstanceInfo ~= realInfo or C_Item.GetItemCount ~= realCount or PlanTab.say ~= realSay then fail("did not put everything back") end
-		if DjinnisBiSDB ~= realDB or not (DjinnisBiSDB.bars and DjinnisBiSDB.bars["Feral / Raid"]) or DjinnisBiSDB.statContext ~= nil then
+		if DjinnisCPDB ~= realDB or not (DjinnisCPDB.bars and DjinnisCPDB.bars["Feral / Raid"]) or DjinnisCPDB.statContext ~= nil then
 			fail("did not put the saved data back")
 		end
-		if DjinnisBiSCharDB ~= realChar or DjinnisBiSCharDB.madeAt[24] ~= nil or DjinnisBiSCharDB.madeAt[7] ~= 81 then
+		if DjinnisCPCharDB ~= realChar or DjinnisCPCharDB.madeAt[24] ~= nil or DjinnisCPCharDB.madeAt[7] ~= 81 then
 			fail("did not put the character's saved data back, one table down too")
 		end
 		if rawget(_G, "PlayerSpellsFrame") ~= hadFrame then fail("left a global the run made") end
@@ -223,7 +223,7 @@ if not asSpec then
 		if rawget(PlanTab, "promptFrame") ~= hadPrompt then fail("left a PlanTab field the run added") end
 		if rawget(PlanTab, "madeFake") ~= nil then fail("left a PlanTab field the run added") end
 		if rawget(PlanTab, "madeFrame") == nil then fail("removed a frame the run kept on PlanTab") end
-		DjinnisTestFrame, PlanTab.madeFrame, DjinnisBiSDB.bars, DjinnisBiSCharDB.madeAt = nil, nil, nil, nil
+		DjinnisTestFrame, PlanTab.madeFrame, DjinnisCPDB.bars, DjinnisCPCharDB.madeAt = nil, nil, nil, nil
 		if not (text:find("stopped part way", 1, true) and text:find("thrown on purpose", 1, true) and text:find(want .. " of the game's own values", 1, true)) then
 			fail("did not say what happened: " .. text)
 		end
@@ -252,15 +252,15 @@ if not asSpec then
 		-- A run that breaks the net's own helper: the saved data is back all the
 		-- same, because it goes first, and the failure is said, not thrown.
 		local realCounter = PlanTab.loadedAddOns
-		DjinnisBiSDB.bars = { kept = true }
+		DjinnisCPDB.bars = { kept = true }
 		ok, swapped, text = net(function()
 			PlanTab.loadedAddOns = function() error("broken helper") end
-			DjinnisBiSDB.bars = {}
+			DjinnisCPDB.bars = {}
 		end)
 		PlanTab.loadedAddOns = realCounter
-		if not (DjinnisBiSDB.bars and DjinnisBiSDB.bars.kept) then fail("did not put the saved data back before the rest") end
+		if not (DjinnisCPDB.bars and DjinnisCPDB.bars.kept) then fail("did not put the saved data back before the rest") end
 		if not text:find("could not put everything back", 1, true) then fail("did not say the restore failed: " .. text) end
-		DjinnisBiSDB.bars = nil
+		DjinnisCPDB.bars = nil
 	end
 else
 	-- Not "" (the window): it needs a template's children, which no stub has,
@@ -269,8 +269,8 @@ else
 	local commands = { "here", "talents", "loadouts", "tidy", "bars", "bars list", "bars save",
 		"bars save build", "bars undo", "bars load nothing", "Venomous" }
 	for _, cmd in ipairs(commands) do
-		local ok, err = pcall(SlashCmdList.DJINNISBIS, cmd)
-		if not ok then print("|cffff0000FAIL|r /djbis " .. cmd .. " as spec " .. asSpec .. ": " .. tostring(err)) end
+		local ok, err = pcall(SlashCmdList.DJINNISCP, cmd)
+		if not ok then print("|cffff0000FAIL|r /dcp " .. cmd .. " as spec " .. asSpec .. ": " .. tostring(err)) end
 	end
 	-- The first item in the gear plan, by id and name, so a druid hovering it
 	-- gets a plan line. On another class the tooltip gets no line at all.
@@ -328,7 +328,7 @@ do
 		-- off this list: those are the frozen-action-bar route (card 0002).
 		["C_ClassTalents.ImportLoadout"] = true, ["C_ClassTalents.DeleteConfig"] = true,
 	}
-	local src = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
+	local src = assert(io.open(here .. "/DjinnisClassProfiles.lua")):read("*a")
 	local seen = 0
 	for line in src:gmatch("[^\n]+") do
 		for call in line:gsub("%-%-.*$", ""):gmatch("C_[CT][%w_]*%.[%w_]+") do
@@ -345,7 +345,7 @@ end
 -- is allowed only for a line of help, and every such line carries the marker
 -- `-- small font:` with its reason, so a new one has to say why it is small.
 do
-	local src = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
+	local src = assert(io.open(here .. "/DjinnisClassProfiles.lua")):read("*a")
 	local seen, lineNo = 0, 0
 	for line in src:gmatch("[^\n]*\n?") do
 		lineNo = lineNo + 1
@@ -364,15 +364,16 @@ end
 -- Card 0053: every command has a button, so no text the player sees names a
 -- slash command. Comments may; the two lines that register the command do.
 do
-	local src = assert(io.open(here .. "/DjinnisBiS.lua")):read("*a")
+	local src = assert(io.open(here .. "/DjinnisClassProfiles.lua")):read("*a")
 	local registered, lineNo = 0, 0
 	for line in src:gmatch("[^\n]*\n?") do
 		lineNo = lineNo + 1
 		local code = line:gsub("%-%-.*$", "")
-		if code:find("SLASH_DJINNISBIS%d") then registered = registered + 1
+		if code:find("SLASH_DJINNISCP%d") then registered = registered + 1
 		-- any case, anywhere in the line: "Type /BIS ..." slipped past a narrower
 		-- pattern (0053 review). "/BiS: Raid" in a check's text is a value, not a command.
-		elseif code:lower():find("/djbis", 1, true) or code:lower():find("/bis[%s\"'|%.,;!?)]") or code:lower():find("/bis$") then
+		elseif code:lower():find("/djbis", 1, true) or code:lower():find("/djcp", 1, true) or code:lower():find("/bis[%s\"'|%.,;!?)]") or code:lower():find("/bis$")
+			or code:lower():find("/dcp[%s\"'|%.,;!?)]") or code:lower():find("/dcp$") then
 			print("|cffff0000FAIL|r no text names a slash command, use the button's name: line " .. lineNo)
 		end
 	end

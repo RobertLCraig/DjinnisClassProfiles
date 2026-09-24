@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Refresh the generated tables in DjinnisBiS.lua from ClassCodex's data files.
+    Refresh the generated tables in DjinnisClassProfiles.lua from ClassCodex's data files.
 
 .DESCRIPTION
     An addon-author tool, not a runtime one. A WoW addon cannot make a network
@@ -75,7 +75,7 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [string]$ClassCodexPath = "C:\Games\World of Warcraft\_retail_\Interface\AddOns\ClassCodex",
-    [string]$Target = (Join-Path $PSScriptRoot 'DjinnisBiS.lua')
+    [string]$Target = (Join-Path $PSScriptRoot 'DjinnisClassProfiles.lua')
 )
 
 $ErrorActionPreference = 'Stop'
