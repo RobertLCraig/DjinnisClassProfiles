@@ -244,3 +244,95 @@ Then:
 
 The copy worked in Rob's client: after his 03:09 login, `DjinnisClassProfiles.lua` in each
 SavedVariables folder is the size of its `DjinnisBiS.lua`.
+
+**2026-09-24, Claude (second adversarial review, of 3f550a6 and workspace b9ba820). Back to todo:
+the stub half of the `.toc` check can be broken or skipped without going red, and the data shape
+in HANDOVER misses the table this fix added.**
+
+How I tried it: a scratch copy (`%TEMP%\rev3f5\DjinnisClassProfiles`, with `%TEMP%\rev3f5\DjinnisBiS`
+beside it). The builder's `mut0053cp.py` and `mut0058.py`, then my own list,
+`%TEMP%\rev3f5\revmut.py`, which also edits the stub's `.toc`. One run at a time. Nothing ran on the
+real files. The game folder and `WTF` were read only, and nothing from the saved data is quoted here.
+
+Findings, in the order to fix them:
+
+1. **The stub check reads loosely and skips itself when the stub is missing** (offline-check.lua:441-449).
+   `text:find(name)` looks for the name anywhere in the stub's `.toc`. So each of these stays green:
+   - `## SavedVariables: DjinnisBiSDB_Old` (the name is a substring of it)
+   - `DjinnisBiSCharDB` moved onto the account line and the per-character line removed. The game
+     would then never load the characters' old files, so no character's data is copied.
+   - both names only in a `#` comment, with no `SavedVariables` lines at all
+   - `## LoadOnDemand: 1` added, so the stub is not loaded by login and nothing is copied
+   - the `DjinnisBiS` folder not there at all (the check runs green with no word about it)
+   On the new `.toc`, declaring `DjinnisCPCharDB` on the account line as well stays green too, because
+   `has()` asks "is it in the list", not "is the list exactly this". The last review asked for
+   "exactly". Fix: read the stub with the same `field()` and `has()` as the new `.toc`:
+   `SavedVariables` is exactly `DjinnisBiSDB`, `SavedVariablesPerCharacter` is exactly
+   `DjinnisBiSCharDB`, and no `LoadOnDemand`. Check the new `.toc`'s two lists are exactly
+   `DjinnisCPDB, DjinnisClassProfilesDB` and `DjinnisCPCharDB`. When the stub is not found, print a
+   line that says the stub half did not run. A FAIL is fine until Rob deletes the stub.
+2. **HANDOVER's data shape does not name `DjinnisClassProfilesDB`** (docs/HANDOVER.md:27-37). The
+   `.toc` now declares a third saved table that nothing reads or writes. That is the kind of line a
+   later tidy removes. If it goes, the `958357#1` account's old Class Profiles data is dropped at that
+   account's next logout. The `.toc` comment explains it, but the doc that holds the data shape does
+   not. Add one sentence there. The status line (docs/HANDOVER.md:9) also still says v0.47.0.
+
+Each earlier finding:
+- 1 (the copy's wiring unchecked): **closed for the new addon.** The offline check fires the real
+  `PLAYER_LOGIN` handler. The copy, the minimap position (so the copy runs first), the old tables
+  left unwritten and the message are all checked. All 17 of the builder's 0058 mutations go red,
+  including every one I listed last time. **The stub half is open** (finding 1).
+- 2 (old name on screen): **closed.** "Builds", "Open the main window" and "(CP plan)" are in, and
+  the menu check pins the new text. The "DBiS " set prefix and the broker's "BiS" text are kept on
+  purpose, with a comment. Every other `DjinnisBiS` or `/bis` left in the file is a comment, the
+  copy's own table names, its message, or the Auctionator list name, which is listed as kept.
+- 3 (the Ace3 licence): **closed.** `Libs/CallbackHandler-1.0/LICENSE.txt` is tracked, is in
+  `origin/master` (3f550a6) and is not in `pkgmeta.yaml`'s ignore list, so it ships. The workspace
+  HANDOVER and PRD lines are fixed. One small point: b9ba820 says Class Profiles "kept its copy
+  through the merge". It lost it in the merge and got it back afterwards. The file is right now.
+- 4 (no acceptance): **closed.** Written, marked as written after the build, each with a `proves:`.
+- 5 (the old Class Profiles' data): **closed as far as it can be.** I confirmed it read only. On
+  `DJINNWRAITH`, `DjinnisClassProfiles.lua.bak` (03:14) already holds the new data too, so no copy of
+  the file from before the rename is left in the game folder. On `958357#1` the May file is still
+  in the game folder and in `.wtf-backup-2026-09-24\`, and the `.toc` now declares its table. No
+  `AddOns.txt` turns off `DjinnisClassProfiles` or `DjinnisBiS`.
+- 6 (broker name, line 1): **closed.** Line 1 is fixed. The broker is on Rob's list.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. I read the whole output: no load error, no
+  FAIL line. All 36 non-druid specs pass spec mode; 102 to 105 fail it, as expected.
+- The builder's 54 (`mut0053cp.py`) and 21 (`mut0058.py`): 75 caught, 0 missed.
+- My 5 mutations for this card: 0 caught, 5 missed (finding 1). Plus the stub folder removed: green.
+- `copyOld` and `moveSavedData` (DjinnisClassProfiles.lua:8122-8138) are as the card says: deep,
+  once per table through `fromBiS`, only reading the old tables, and first at `PLAYER_LOGIN`. The old
+  addon (tag `legacy-0.3.1`) declared only `DjinnisClassProfilesDB`, account-wide, so no
+  per-character file of its own is at risk.
+- In Rob's client, each new saved file is its old one plus about 20 bytes (the `fromBiS` line). The
+  one character file where the old `DjinnisBiS.lua` changed after the rename changed in how the game
+  wrote an array, not in what it held. So the copy did not write the old table.
+- The `.toc` directives all come before the first comment now, and the check holds that.
+
+Security, where the card produced code:
+1. *Weakest point:* the stub's `.toc`, which lives in another repository and which the check reads
+   loosely (finding 1). Get it wrong and the old data is not copied, with nothing said. It is still
+   not lost: the old files stay on disk while the stub is installed.
+2. *Unchecked:* the stub's `.toc` (finding 1), and `DjinnisClassProfilesDB`'s reason for existing
+   outside the `.toc` comment (finding 2).
+3. *Leaks:* nothing in the game. The public repository has the Ace3 notice back. The WTF backup under
+   `C:\Dev\WoWAddons\` is gitignored (the workspace `.gitignore` starts with `*`), but `C:\Dev` is a
+   Syncthing folder, so the backup goes to Rob's other machines. It is his own data on his own
+   machines, so this is a note.
+
+**No browser, no game client.** The surface is the game's add-on loader and saved-data files.
+v0.47.1 is already in the game folder (not by me). Rob's list, after the fix:
+1. Restart the game fully. On a character that has not logged in since the rename: chat says
+   "Djinni's BiS is now Djinni's Class Profiles, and your saved data is copied over."
+2. The window has that character's saved bars, profiles, gear targets and sim imports. The minimap
+   button is where it was.
+3. `/reload`: no message this time.
+4. `/dump C_AddOns.GetAddOnOptionalDependencies("DjinnisClassProfiles")` shows `DjinnisBiS`.
+5. The add-on list shows "Djinni's BiS (old saved data)". Leave it on until every character has
+   logged in once.
+6. Log in once on the `958357#1` account. Afterwards its `SavedVariables\DjinnisClassProfiles.lua`
+   still holds `DjinnisClassProfilesDB` (compare with the backup).
+7. A data bar that showed the old "DjinnisBiS" broker: add "DjinnisClassProfiles" again.
