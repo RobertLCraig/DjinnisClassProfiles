@@ -147,3 +147,42 @@ sidebar title such as "Beast Mastery Hunter builds" gets cut short at More.
 Also from Rob's first look (card `0055`): the window's More has "Show the build list" while the list
 is closed, and More sits 6 pixels from the sidebar's close button. `mut0053.py` now has 20 mutations,
 all red.
+
+**2026-09-24, Claude (second adversarial review, of 5d86315). Back to todo: one leftover of finding 1.**
+
+Finding:
+
+1. **The message still sends the player to a button that may not be there.** Finding 1 said that
+   `offerBars(true)` tells the player to "Click Save bars: spec beside the talent window", and with
+   Talent Loadout Manager loaded that button does not exist. The menu items are in now, but the
+   message is unchanged (DjinnisBiS.lua:7842, printed in spec mode: "No saved layout for
+   Affliction. Click Save bars: spec beside the talent window"). Fix: name **More > Save bars for
+   this spec**, which is always there, or name the sidebar button only when `sidebarMode` is not
+   "off". It is one line, but this pass commits only the card.
+
+Each earlier finding:
+- Finding 1, the menu part: **closed.** The window's More has "Save bars for this spec" and "for
+  this build", calling `saveBars(false, true)` and `(true, true)` as the sidebar buttons do, and
+  `menuChecks` proves each. The message part is the finding above.
+- Finding 2: **closed.** The scan lowercases the line and finds `/djbis` anywhere, and `/bis`
+  followed by a space, a quote, `|` or the end of the line. My two mutations ("Type /bis tidy yes"
+  and "/BIS") go red. It still misses `/bis` followed by a full stop or a comma ("Type /bis."). No such
+  text exists today, so this is a note, not a finding.
+- Finding 3: **closed.** `offerLoadouts(true)` says "Not in combat" in combat. There is no check,
+  because faking combat means swapping `InCombatLockdown`, and my mutation removing the message
+  stays green. The line is read and right.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6, output read whole, no load error. All 36
+  non-druid specs pass spec mode. The builder's 20 mutations each go red, run on a scratch copy.
+- The two new items are only in the window's menu, not the sidebar's, which has the buttons. The
+  gap between More and the close button is `-6` on More's own anchor, so the title still stops at
+  More.
+
+Security: the same as the first review. Profile names come from the player's own SavedVariables, and
+the new items only call `saveBars`, which reads the bars and writes SavedVariables behind `barsFence`.
+Nothing leaks.
+
+**No browser, no game client.** Rob's six steps above still apply, plus: with the build list closed,
+**More** in the main window shows **Show the build list**, and clicking it brings the list back
+the next time the talent window opens.
