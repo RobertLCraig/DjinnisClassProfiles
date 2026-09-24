@@ -239,3 +239,67 @@ saved bars** still knows your layouts. Then click **Reload now**.
 
 Not changed: `recheckSoon` still uses the real timer. It re-reads the real setup after 2 seconds,
 which is what a click does anyway.
+
+**2026-09-24, Claude (third adversarial review, of 96974cd, read on the renamed file at 3b16a73).
+Back to todo: one finding. The guarded compare, the fix for the last review's finding 2, has no
+check.**
+
+How I tried it: a scratch copy (`%TEMP%\rev0058`). The builder's `mut0053.py` was adapted to the
+renamed file (`mut0053cp.py`), and my own list is `revmut.py`. One run at a time. Nothing ran on
+the real file.
+
+Finding:
+
+1. **Take the `pcall` out of `same()` and the check stays green** (DjinnisClassProfiles.lua:11984,
+   `return rawequal(a, b)`). That guard was the last review's finding 2: a compare that throws on a
+   secret stops `restore` part way, and a reload then writes whatever is left. The saved data now
+   goes back first, which limits the damage, but nothing shows the rest of the restore survives a
+   compare that throws. Fix: add a fifth net run to `offline-check.lua` that swaps the global
+   `rawequal` to throw for one value. Then check the other values still go back and the run says
+   so. The second review did exactly this by hand.
+
+Each earlier finding:
+- Second review 1 (new PlanTab fields kept): **closed.** The proof adds `madeFake` and a fake
+  `promptFrame` and they go. A frame on PlanTab stays. "new PlanTab fields kept" and "PlanTab
+  frames removed" both go red.
+- Second review 2 (saved data written back last): **closed in code, half proven.** The saved data
+  goes first, in its own `pcall`, and "saved data last" goes red. The guarded compare is finding 1.
+- Second review 3 (half the net unchecked): **closed.** All eight are in `mut0053.py` and red:
+  one-level `deepCopy`, the character's table dropped, `put` and `restore` without `pcall`, the
+  "refused" line, `isWidget`, `keepNew`.
+
+Notes, not findings:
+- A refusal inside `restoreSaved` is neither counted nor said, and nothing checks either
+  (lines 11976 and 12054; both mutations stay green). The path cannot really be reached: the
+  tables are the addon's own and have no metatable. So it is only a note.
+- "A run cannot swap the net itself" (line 12046) is unproven. Read the two functions after the
+  run and it stays green. No real check swaps `PlanTab.restore`, so it is only a note.
+- `ClassTalentHelper` can leave `SWAPPED_TABLES` and nothing goes red. No check writes a field
+  into it; the checks swap the whole global. So it is only a note.
+- If `DjinnisCPCharDB` is still nil when the test starts, and an add-on loads during the run, the
+  test's own character table (fake `spares`, `madeAt`, `keysRefused`) is kept as a new global.
+  A reload then saves it. That needs both at once, so it is only a note.
+- The gear plan table is a main-chunk local. A throw between lines 9848 and 9851 leaves Feral's
+  Mythic+ cell empty until a reload. The Reload box covers it.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. I read the whole output: no load error, no
+  FAIL line. All 36 non-druid specs pass spec mode.
+- The builder's 54 mutations: 54 caught, 0 missed.
+- My 5 mutations for this card: 1 caught (`restoreSaved` not putting the global back), 4 missed
+  (finding 1 and the three notes above).
+- The rename moved `SAVED_VARIABLES` to `DjinnisCPDB` and `DjinnisCPCharDB`, so the net covers
+  the new tables. The old `DjinnisBiSDB` and `DjinnisBiSCharDB` are swapped whole by card 0058's
+  check and go back through the global restore.
+
+Security, where the card produced code:
+1. *Weakest point:* a compare that throws inside `restore` (finding 1). The saved data is safe
+   either way now.
+2. *Unchecked:* the guarded compare, and a refusal in `restoreSaved`.
+3. *Leaks:* nothing leaves the client. A FAIL line names up to five globals, which are public.
+
+**No browser, no game client.** The surface is in-game UI. After the fix, with the rename in (the
+command is now `/dcp`): `/reload`, then `/dcp test` **before** opening the talent window or
+spellbook. Chat ends with "[CP] self-test passed", with no Lua error. Click **Later**. Open the
+spellbook, then the talent window, twice each: both work. **More > Make the planned loadouts** opens
+its box. **More > Offer the saved bars** still knows your layouts. Then click **Reload now**.
