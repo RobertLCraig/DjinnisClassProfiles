@@ -3,6 +3,26 @@ needs: 0049
 ---
 # 0050 A dungeon and a raid build for every spec
 
+## What I need from you
+
+**Pick how the addon tells its own loadouts from yours.** Built and deployed since v0.42.0: every
+non-druid spec gets two loadouts, named `Dungeon` and `Raid`. The problem the review found: if an alt
+already has a loadout of yours called `Raid`, the addon takes it for its own, and "Reset to plan"
+deletes it and makes its build instead. Blizzard allows 30 letters in a loadout name, and the talent
+window only lists the current spec's loadouts, so class and spec in the name add nothing in game.
+
+1. **Unique names inside the addon, short names in game (recommended).** The addon's own data keys
+   each build as `Warlock - Destruction - Dungeon - Default` (your format; no length limit there).
+   The loadout in game stays `Dungeon`. The addon knows its own loadouts by remembering which ones it
+   made (it already notes each one's config id since v0.45.0), not by name. Your own `Raid` is never
+   touched. Druid loadouts keep their names, so bars saved per build keep working. A loadout 0.42.0
+   to 0.44.0 made on an alt is not remembered, so it counts as yours; delete it by hand once.
+2. **A tag in the game name**, such as `Dungeon (BiS)`. Easy to see, but it costs 6 of the 30
+   letters, and every druid loadout would be made again, with its saved bars moved to the new name.
+
+Reply with 1 or 2. Findings 1, 3 and 4 below (which build wowvalor picks, a pin check, one more alt
+to test) are mine to fix and need nothing from you.
+
 ## Why
 
 Rob, 2026-09-24, for all classes. Dreamgrove covers druids only.
