@@ -373,3 +373,58 @@ A new net run in `offline-check.lua` puts a secret in place BEFORE the run as a 
 field and a PlanTab field, and swaps the global `rawequal` for one that refuses it, before the
 snapshot, so the net never puts the real one back part way. The run changes all three. Each of the
 five compare sites turned back into a bare `rawequal` is red (`mut0058.py`, "bare compare, ...").
+
+**2026-09-24, Claude (seventh adversarial review, of 37c0ed3). Back to todo: a secret the run never
+touched is reported as swapped, and the old `==` form can come back unseen.**
+
+How I tried it: a scratch copy (`%TEMP%\rev37c`, with the stub beside it). The builder's
+`mut0058.py` and `mut0053cp.py`, then my own list, `%TEMP%\rev37c\revmut.py`, and one experiment,
+`%TEMP%\rev37c\untouched.py`. One run at a time. Nothing ran on the real file.
+
+Findings, in the order to fix them:
+
+1. **A secret the run leaves alone is called swapped, and written.** The last review asked for the
+   three planted secrets to be "left alone by the run". The new run (offline-check.lua:265-267)
+   changes all three instead, which steps round this. I ran it as asked, with a run that does
+   nothing: the net said "FAIL the self-test left 2 of the game's own values swapped
+   (DjinnisTestSecret, a field DjinnisTestSecret)", and the offline check stayed green, because
+   nothing reads that line. The cause is `put` (DjinnisClassProfiles.lua:12033-12041): `same()`
+   answers false both for "changed" and for "cannot compare", so an untouched secret is written
+   back and counted in `blizzard` and `names`. Writing it back is the safe direction, as the fourth
+   review said. Counting it is not. In a client, any add-on's global that holds a secret would give
+   a false FAIL line on every run, and this addon would write into that global. Fix: count a refused
+   compare on its own ("could not compare N, put back as noted"), not as a swap. Then add the
+   left-alone run and check that no "swapped" line names the planted secrets.
+2. **The `==` form the second review found can come back, and nothing goes red.** Change line 12050
+   back to `snap.g[k] == nil`, or line 12064 to `PlanTab[k] ~= v`. Both stay green. Plain Lua never
+   raises on `x == nil`, or on `==` between two types, so a check that runs the net cannot catch
+   this. A source check can: read `PlanTab.restore`'s body from `source`, as the 0053 scan does, and
+   fail on `==` or `~=` beside anything but the add-on counts (`snap.loaded`, `loadedNow`).
+
+Each earlier finding:
+- Fourth review 1 (four of the five guarded compares unproven): **closed for `rawequal`.** The
+  global `rawequal` refuses the secret from before the snapshot, and each of the five sites turned
+  into a bare `rawequal` goes red. The left-alone case it also asked for is finding 1.
+
+What held:
+- `offline-check.lua` exits 0 under Lua 5.1 and 5.4.6. I read the whole output: no load error, no
+  FAIL line. All 36 non-druid specs pass spec mode under both.
+- The builder's 35 (`mut0058.py`) and 54 (`mut0053cp.py`): 89 caught, 0 missed.
+- My 2 mutations for this card: 0 caught, 2 missed (finding 2). The experiment is finding 1.
+- The code: `restore` reads `rawequal` at call time (line 12022), so the swapped global is the one
+  used, and the refusing `rawequal` is in place before `snapshot`, so the net never writes the real
+  one back part way. The saved data still goes back first, in its own `pcall`.
+
+Security, where the card produced code:
+1. *Weakest point:* the net writes into every global whose value it cannot compare, including other
+   add-ons' (finding 1). It writes the same value back, so nothing is lost; the cost is taint and a
+   false FAIL line.
+2. *Unchecked:* the `==` form at the call sites (finding 2), and a refusal inside `restoreSaved`
+   (a note, as before).
+3. *Leaks:* nothing leaves the client. A FAIL line names up to five globals, which are public.
+
+**No browser, no game client.** The surface is in-game UI. After the fix: `/reload`, then `/dcp test`
+**before** opening the talent window or spellbook. Chat ends with "[CP] self-test passed", with no
+Lua error and no "left N of the game's own values swapped" line. Click **Later**. Open the
+spellbook, then the talent window, twice each: both work. **More > Make the planned loadouts** opens
+its box. **More > Offer the saved bars** still knows your layouts. Then click **Reload now**.
