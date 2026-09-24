@@ -14,7 +14,18 @@ machine, and Raidbots' talents.json for the tree. Every build is decoded the way
 Blizzard's ReadLoadoutContent reads it and must spend 34 class, 34 spec and 13
 hero points in its own spec, or nothing is written. Each spec's "Dungeon" is
 not Dreamgrove's but a string pinned in PIN below (card 0047), checked the same way.
+
+Every other class (card 0050) gets two builds, keyed by PlanTab.SPECS in the
+Lua, the one list of specs:
+- "Dungeon": wowvalor.app's recommendedBuild for Mythic+, the exact build most
+  of its top 50 characters of the spec run. It needs a browser user agent.
+- "Raid": SimulationCraft's default profile for the tier (SIMC_TIER), read with
+  `gh api`. SimC keeps none for healers or Evokers, so those specs have no
+  "Raid" and the run lists them rather than stopping. A PIN entry fills one.
+Archon, Icy Veins and Wowhead all refuse scripts (a human check or a 403), and
+that is not worked around.
 """
+import gzip
 import json
 import re
 import subprocess
@@ -28,6 +39,10 @@ TALENTS = "https://www.raidbots.com/static/data/live/talents.json"
 POINTS = {"classNodes": 34, "specNodes": 34, "heroNodes": 13}
 SPEC_ID = {"Balance": 102, "Feral": 103, "Guardian": 104, "Resto": 105}
 PAGE = {"Balance": "balance", "Feral": "feral", "Guardian": "guardian", "Resto": "resto"}
+DRUID = 11  # PlanTab.DRUID: druids keep the Dreamgrove rows above
+SIMC_TIER = "MID2"  # profiles/<tier>/ in simulationcraft/simc; move it with the season
+VALOR = "https://wowvalor.app/en/stats/{cls}/{spec}/m+"
+BROWSER = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"
 
 # Guide build name -> the loadout names it backs. One build can back several
 # bosses. A build not listed is left out on purpose. The loadout name box takes
@@ -117,6 +132,48 @@ class Bits:
         return v
 
 
+def encode(bits):
+    """ExportUtil's writer: bits LSB first, 6 a character, zero padded."""
+    bits = bits + [0] * (-len(bits) % 6)
+    return "".join(CHARS[sum(bits[i + j] << j for j in range(6))] for i in range(0, len(bits), 6))
+
+
+def ungrant(code, tree):
+    """The string with every free node (a hero tree's keystone) read as granted,
+    not purchased: the way the game exports it. SimC writes the keystone as
+    purchased, and Blizzard's import (CreateImportLoadoutEntryInfoFromSingleNode)
+    would then buy a 14th hero rank. Returns (code, how many were changed)."""
+    free = {n["id"] for n in tree["heroNodes"] if n.get("freeNode")}
+    s, out = Bits(code), []
+
+    def copy(n):
+        v = s.take(n)
+        out.extend((v >> i) & 1 for i in range(n))
+        return v
+
+    copy(8), copy(16), copy(128)
+    changed = 0
+    for node_id in tree["fullNodeOrder"]:
+        if not copy(1):
+            continue
+        if node_id in free:
+            if s.take(1):  # purchased: drop it and the rank and choice bits after it
+                if s.take(1):
+                    s.take(6)
+                if s.take(1):
+                    s.take(2)
+                changed += 1
+            out.append(0)
+            continue
+        if not copy(1):
+            continue
+        if copy(1):
+            copy(6)
+        if copy(1):
+            copy(2)
+    return (encode(out) if changed else code), changed
+
+
 def points(code, tree):
     """(spec id, {part: points}) for one import string."""
     s = Bits(code)
@@ -161,10 +218,128 @@ def guide_builds(spec):
     return out
 
 
+def lua_specs():
+    """PlanTab.SPECS from the Lua, in its order: [(id, key, class id)]."""
+    lua = open(LUA, encoding="utf-8").read()
+    rows = re.findall(r'\{ (\d+), "([^"]+)", (\d+), "(?:TANK|HEALER|DAMAGER)" \}', lua)
+    if len(rows) != 40:
+        sys.exit(f"PlanTab.SPECS in {LUA} reads as {len(rows)} specs, not 40. Fix the pattern or the table, do not guess.")
+    return [(int(i), key, int(cls)) for i, key, cls in rows]
+
+
+def slug(name):
+    return name.lower().replace("'", "").replace(" ", "-")
+
+
+def fetch(url, agent, tries=3):
+    """Three tries: a TLS handshake timeout on one page of 36 is common here."""
+    req = urllib.request.Request(url, headers={"User-Agent": agent, "Accept-Encoding": "gzip"})
+    for attempt in range(tries):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                body = r.read()
+                if r.headers.get("Content-Encoding") == "gzip":
+                    body = gzip.decompress(body)
+            return body.decode("utf-8", "replace")
+        except (urllib.error.URLError, TimeoutError) as e:
+            if attempt == tries - 1:
+                sys.exit(f"{url}: {e}. Nothing written.")
+
+
+def valor_dungeon(tree):
+    """wowvalor's recommendedBuild import string for the spec's Mythic+ page, or None."""
+    html = fetch(VALOR.format(cls=slug(tree["className"]), spec=slug(tree["specName"])), BROWSER)
+    at = html.find("recommendedBuild:")
+    m = at >= 0 and re.search(r'importString:"([A-Za-z0-9+/]+)"', html[at:at + 800])
+    return m.group(1) if m else None
+
+
+def simc_raid(tree):
+    """The talents= line of SimC's default profile for the spec this tier, or None."""
+    name = f"{SIMC_TIER}_{tree['className'].replace(' ', '_')}_{tree['specName'].replace(' ', '_')}.simc"
+    got = subprocess.run(
+        ["gh", "api", f"repos/simulationcraft/simc/contents/profiles/{SIMC_TIER}/{name}",
+         "-H", "Accept: application/vnd.github.raw"],
+        capture_output=True, text=True, encoding="utf-8")
+    if got.returncode != 0:
+        if "Not Found" in got.stdout + got.stderr:
+            return None
+        sys.exit(f"gh api failed on {name}: {got.stderr.strip()}")
+    m = re.search(r"^talents=(\S+)", got.stdout, re.M)
+    return m.group(1) if m else None
+
+
+def lua_key(key):
+    return key if re.fullmatch(r"[A-Za-z_]\w*", key) else f'["{key}"]'
+
+
+class Refused(Exception):
+    pass
+
+
+def checked(spec_name, spec_id, name, code, source, tree):
+    got, spent = points(code, tree)
+    if got != spec_id or spent != POINTS:
+        raise Refused(f"{spec_name} {name} ({source}): spec {got}, points {spent}")
+    return f'\t\t["{name}"] = "{code}", -- {source}'
+
+
+def other_classes(trees, lines):
+    """Every non-druid spec: PIN, else wowvalor's Dungeon and SimC's Raid.
+    A pinned or Dungeon string that fails the check stops the run. SimC's Raid
+    string only drops out, named: SimC keeps some profiles on a stale tree
+    (Frost Death Knight's spent 9 class points on 2026-09-24), and one stale
+    file must not hold every other spec back. Returns the specs with no Raid."""
+    no_raid = []
+    for spec_id, key, cls in lua_specs():
+        if cls == DRUID:
+            continue
+        tree = next((t for t in trees if t["specId"] == spec_id), None)
+        if not tree:
+            sys.exit(f"Raidbots has no tree for spec {spec_id} ({key}).")
+        pinned = PIN.get(key, {})
+        rows = {}
+        why_no_raid = "no profile"
+        for name, fetcher, source in (("Dungeon", valor_dungeon, "wowvalor M+ recommended"),
+                                      ("Raid", simc_raid, f"SimulationCraft {SIMC_TIER} profile")):
+            optional = name == "Raid" and name not in pinned
+            if name in pinned:
+                code, source = pinned[name]
+            else:
+                code = fetcher(tree)
+                if code:
+                    code, changed = ungrant(code, tree)
+                    if changed:
+                        source += ", free keystone read as granted"
+            if not code:
+                continue
+            try:
+                rows[name] = checked(key, spec_id, name, code, source, tree)
+            except Refused as e:
+                if not optional:
+                    sys.exit(f"{e}. Nothing written.")
+                why_no_raid = f"refused: {e}"
+        for name in pinned:
+            if name not in rows:
+                try:
+                    rows[name] = checked(key, spec_id, name, pinned[name][0], pinned[name][1], tree)
+                except Refused as e:
+                    sys.exit(f"{e}. Copy a fresh string into PIN.")
+        if "Dungeon" not in rows:
+            sys.exit(f"{key}: wowvalor gave no recommended build. Check its page, or PIN one.")
+        if "Raid" not in rows:
+            no_raid.append(f"{key} ({why_no_raid})")
+        lines.append(f"\t{lua_key(key)} = {{")
+        lines.extend(rows[name] for name in sorted(rows))
+        lines.append("\t},")
+    return no_raid
+
+
 def block(trees):
-    if set(PIN) - set(SPEC_ID):
-        sys.exit(f"PIN names a spec SPEC_ID does not: {sorted(set(PIN) - set(SPEC_ID))}. Its builds would vanish.")
-    lines = [BEGIN, f'PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, and the pinned builds in update-builds.py PIN, read {date.today()}"', "PlanTab.BUILDS = {"]
+    known = set(SPEC_ID) | {key for _, key, _ in lua_specs()}
+    if set(PIN) - known:
+        sys.exit(f"PIN names a spec PlanTab.SPECS does not: {sorted(set(PIN) - known)}. Its builds would vanish.")
+    lines = [BEGIN, f'PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums for druids, wowvalor.app and SimulationCraft for the rest, and the pinned builds in update-builds.py PIN, read {date.today()}"', "PlanTab.BUILDS = {"]
     for spec in SPEC_ID:
         guide = guide_builds(spec)
         missing = set(PICK[spec]) - set(guide)
@@ -192,6 +367,9 @@ def block(trees):
         if not any(line.startswith('\t\t["Dungeon"]') for line in lines[lines.index(f"\t{spec} = {{"):]):
             sys.exit(f"{spec} has no \"Dungeon\" build. Put its PIN or PICK entry back.")
         lines.append("\t},")
+    no_raid = other_classes(trees, lines)
+    if no_raid:
+        print(f"No Raid build, and no PIN for one: {'; '.join(no_raid)}", file=sys.stderr)
     lines += ["}", END]
     return lines
 

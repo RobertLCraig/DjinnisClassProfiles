@@ -517,7 +517,7 @@ end
 -- WHEN to pick the build (Rob, 2026-09-23), and are the ones DjinnisDreamgrove
 -- 0.7.0 imported, so a loadout made there is the same loadout here. Card 0030.
 -- BEGIN GENERATED BUILDS
-PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums, and the pinned builds in update-builds.py PIN, read 2026-09-24"
+PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums for druids, wowvalor.app and SimulationCraft for the rest, and the pinned builds in update-builds.py PIN, read 2026-09-24"
 PlanTab.BUILDS = {
 	Balance = {
 		["Raid: Single Target"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
@@ -549,6 +549,141 @@ PlanTab.BUILDS = {
 		["Dungeon: cat damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsN8AMzsMjNbzAAAAAAAAAAgtBNbGmmZMDmFzMzMLzwDYAAAAAAAwAWWGLYamZZAAMbzs1sNziNGzMwMLY0MAAzMAMA", -- M+ Cat DPS
 		["Dungeon: caster damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsNz8AwsMjNbzAAAAAAAAAAgNDNbzMmmZAmFmZmZxwDAAAAAgBAYGwyyYBTzMLDAgZbmtmtZWsxYmZwMbY0MAAzMAMA", -- M+ Caster DPS
 		["Dungeon"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsMzMzMLzwMAAAAAAAwAAAAAgZbmtmtZWsxYmBmBoZAAmZAYA", -- Archon M+ +7 to +21 #1, 2026-09-24
+	},
+	Arms = {
+		["Dungeon"] = "CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphxYmZzMzMzYmxMDAAAAgxyMDMhxy2ALgBMDTIzgNwMDDDmlZ2GgZGAMDDA", -- wowvalor M+ recommended
+		["Raid"] = "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzMmZGAAAghphxYmxyMzMzgxMDAAAAgZWmZAhxyyALgBMDTIzgNwMjtx2ALzsMAzMAYGGA", -- SimulationCraft MID2 profile
+	},
+	Fury = {
+		["Dungeon"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZmZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMBzwEYG2AmZYAAAmZYMLDjBjB", -- wowvalor M+ recommended
+		["Raid"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2MzMzMDjZmZGzMzsMzMmZmZzYmBAAixy2ALgJYGmAzwGwMDjNAAYmhxYYMYM", -- SimulationCraft MID2 profile
+	},
+	["Protection Warrior"] = {
+		["Dungeon"] = "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzYmZmZmxsZmZZYMGNmxYbxMzMjZYmBAAAALzMAzYAGYDWWMaMDgZJmZDGzMDDAwMDAAzAjB", -- wowvalor M+ recommended
+		["Raid"] = "CkEAAAAAAAAAAAAAAAAAAAAAA02AAAzMDzMzMzMzmxsMjxYmGGDLzMzMDGzMAAAAYZAYGDAsYGDbwAzwCNmZBmxMDmNAAzMAgZgxA", -- SimulationCraft MID2 profile
+	},
+	["Holy Paladin"] = {
+		["Dungeon"] = "CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAAWGwMzyMzsMjZMsY2MziZaixMmZmxY2yAwAwGYjFzMAIAgZmlllWmZYjtxDMYDYGDAwMDAzYMaA", -- wowvalor M+ recommended
+	},
+	["Protection Paladin"] = {
+		["Dungeon"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAgAMzsst0yMjFLLMDgBzshBAzMAYmBZsA", -- wowvalor M+ recommended
+		["Raid"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsNzYWmZMzYmxyyALzCDDAwAAAAAAg0MDzYmZMzs1GAGYGYGsNAAACwMzyySLzMWsthBghZYMAYmBAzAM2A", -- SimulationCraft MID2 profile
+	},
+	Retribution = {
+		["Dungeon"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGEAAwCgBAjZ2AmxMzGwMzwYGDG", -- wowvalor M+ recommended
+		["Raid"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAANbbzMzywMDAAAAAAjyYGmZsNmthZ2mxYMGmxCbDDYWmtZmZrBBAAsAYAwYGmBzYmZDYmZYMjBD", -- SimulationCraft MID2 profile
+	},
+	["Beast Mastery"] = {
+		["Dungeon"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzohG2AAwMmZmZ5BmxMzMzYmBzMmZYmxMzM2mZGzYGWGaGAAAAAAAAYGjBMzGBMLgtBA", -- wowvalor M+ recommended
+		["Raid"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGGzsMzwMmZMDzMGzMMzYGzsYmZMjZwYaGAAAAwMAAAMmZGgZ2IbwsA2GAG", -- SimulationCraft MID2 profile, free keystone read as granted
+	},
+	Marksmanship = {
+		["Dungeon"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwGMwMGNWGQmBbAAAAAAAAgZMzMjtZMzMmhlx0MGMLbbzMzMzMzMzCzsMMDAAgHYMGAmpNwAsxMbzYA", -- wowvalor M+ recommended
+		["Raid"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGQmBbAAAAAAAAgZMjZWMjZmxMYMNjBjtlZmZmZmZmZhZWGMDAAYMzMGAzYbDGgNmZbGD", -- SimulationCraft MID2 profile, free keystone read as granted
+	},
+	Survival = {
+		["Dungeon"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMgxMG2ILwMM0gFzMzMzMWGAAAAAAmxMzM2MGzYG2GTzAAAAMAYYZZm5BWYmZYGjBMzGAGjZmFDA", -- wowvalor M+ recommended
+		["Raid"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYmgtZMzMGzyAAAAAAwMmxMLmxYGzgx0MAAAADAmxyyMzsYMzMjZmBAzYZDGDjNDAA", -- SimulationCraft MID2 profile
+	},
+	Assassination = {
+		["Dungeon"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAYgFYGjGzGIbDYzAgZmxYA", -- wowvalor M+ recommended
+		["Raid"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsNDGAAAAAYWGsNDAAAAAIbzMzMzMjxyMzMbzsMzMzYGzYMmZMMAbmlBGwSwywEYYxgZGgxYA", -- SimulationCraft MID2 profile
+	},
+	Outlaw = {
+		["Dungeon"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFGPwMbTLD2mBAAAAAMbLzMzwMjZWMzMbDAAAAjBAjZxwQGYWYhWYjBYmBD8AA", -- wowvalor M+ recommended
+		["Raid"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMmZmtZmZmZMmF4BmZbaZw2MAAAAAALLzMzwMzMziZmZbAAAAYmBAjZxwQGYWYhWYjBYmBDMA", -- SimulationCraft MID2 profile
+	},
+	Subtlety = {
+		["Dungeon"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYGbLzMzMzMjBjZ2GAAAAGMmFzyADYBsMMhMLYGmZAmxA", -- wowvalor M+ recommended
+		["Raid"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMhMLYGmZAmxA", -- SimulationCraft MID2 profile
+	},
+	Discipline = {
+		["Dungeon"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmBmZbmtZmZmxMDAAAAAAAAAghZZGMzMDzYmBMNTMAzsghwYWGgxgFAAYMzMjBzAMzMTwM", -- wowvalor M+ recommended
+	},
+	["Holy Priest"] = {
+		["Dungeon"] = "CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAMzMmlxMjZGDzALzMzMAAAAGmlZYmZmhZMzAYmCgZWwQYMLDwYgFjZWA0MmZMGMDwMzMwA", -- wowvalor M+ recommended
+	},
+	Shadow = {
+		["Dungeon"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMjZMAAAAAAAAAAAAYMLzMGbzMmZ2mZGDz2MzYmZGbIDLbz0AMzMDAEgZb22CmNGAYwYmZGz2YGMzgZwA", -- wowvalor M+ recommended
+		["Raid"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMMjZGAAAAAAAAAAAAMLmxMbzMMz2MzYG2mZGzMzYDZGLmpBYmZGAIAz2stEMbMAwgxMzMmtxMYmBzgB", -- SimulationCraft MID2 profile
+	},
+	Blood = {
+		["Dungeon"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZxMzMzMAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbgsNgNAzYAAAmZAMA", -- wowvalor M+ recommended
+		["Raid"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwYWmZmxMmZmhZZmZmmZxMjxMAAAAAmZmZGmZGzMjZAgZmZGAAADMwMW0YZDklBsBYGzAAAmZwgB", -- SimulationCraft MID2 profile
+	},
+	["Frost Death Knight"] = {
+		["Dungeon"] = "CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjxYY2mZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEyYBzMmZGYAYYmBgBD", -- wowvalor M+ recommended
+	},
+	Unholy = {
+		["Dungeon"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMjBzyMzMTz2MzYmZMAAAAAAAAMzYMDAWGmZ2mZGzMjBGYGbassBYbiNMgZAYMzMMYmBDjB", -- wowvalor M+ recommended
+		["Raid"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMDDz2MzMTzmZmZMjBAAAAAAAgZGmZAwyMmZ2mZGjZAbmFDDZgZjhGLAYGAGzMjZAmZmxYA", -- SimulationCraft MID2 profile
+	},
+	Elemental = {
+		["Dungeon"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZmtxyMzMjhFLzMLDjZmFAgBAmZMMMA", -- wowvalor M+ recommended
+		["Raid"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCZWAgZbmZGjtFTYmxYxMzMmZWsMjFzMMzyAAGGAzMGGGA", -- SimulationCraft MID2 profile
+	},
+	Enhancement = {
+		["Dungeon"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbkFYGGawCAz2MmxYZZGbMzsNWmZmZYsMmBAYGGzMMCMzgBjB", -- wowvalor M+ recommended
+		["Raid"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDLkFYGGawCAzyMmxYZZGYmZbsMzMzMGGzAAMDjZGGBmZwgxA", -- SimulationCraft MID2 profile
+	},
+	["Restoration Shaman"] = {
+		["Dungeon"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZmZGjZMsAbwMW0YbAZGYDzMY2mZmRzyyMzmZMYZGzMGWmFAAYAMzgZGAGDG", -- wowvalor M+ recommended
+	},
+	Arcane = {
+		["Dungeon"] = "C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMzsgZQzMGAAAGAwMz0sssMDAEbAAsBzMDbWmxMLzYMzMzMswMzMzMAADAAwAMzAMAYYmZA", -- wowvalor M+ recommended
+		["Raid"] = "C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAAEwMzMLLzMxCAAwMzMjNLzMzsMjxYmZwCzYmZGAgBAAYmZBAMDAGmZG", -- SimulationCraft MID2 profile
+	},
+	Fire = {
+		["Dungeon"] = "C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGIgZmpZZbbGAgNzMjtZmZmxGAAAAAWMzMzAAAzYMzMzYmZZAYmhwYAzwYA", -- wowvalor M+ recommended
+		["Raid"] = "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMGAAAGAwMz0sstMDAwmZmx2MzMzYBAAAAALmZmZAAgZMmZmZMzsMAMzQGjBMDjB", -- SimulationCraft MID2 profile
+	},
+	["Frost Mage"] = {
+		["Dungeon"] = "CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMmZmZmZWMzMzMzMzsMTzMbzCAAAaBAA2AAAAAYbZMzMDmtZMzM2WAAAAzMYmMGwAYA", -- wowvalor M+ recommended
+		["Raid"] = "CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGjZMziZmZmZMDEAAYmZmllZm2AAAAAAgNA2WGzMzAbzYmZYBAAgZ2AmBGwADD", -- SimulationCraft MID2 profile
+	},
+	Affliction = {
+		["Dungeon"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMjZGNbmx2MzYWGAAwMzsMLmZ2GDAM2WGYATwMsFYYbAAAYGAAAzMjZMzsNGzYMzMzYYmZGAgBMA", -- wowvalor M+ recommended
+		["Raid"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZhhZmZmlBAAYmZZWmZml5BGAwCMwsY0YGQmNwyAAAwMAAwMDYmZMYGmZMzMGMzMzAAmBG", -- SimulationCraft MID2 profile
+	},
+	Demonology = {
+		["Dungeon"] = "CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMz2AAAAAAAAGzYYBGYb0CNsYMzYZ2mZmxMAwMjZmxMDwYGzYDAAMmZmxwwyMGwA", -- wowvalor M+ recommended
+		["Raid"] = "CoQAAAAAAAAAAAAAAAAAAAAAAYmxMzoZjZ2mZGzyAAAAAAAAGzYYBGYb0CNsYMGLzyMzMmBAmZMzMzMDgZGzAAAYMzMjhhlZMgB", -- SimulationCraft MID2 profile
+	},
+	Destruction = {
+		["Dungeon"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCZgthFaswAAAjBDAwMDwYGzMbAAAmZmBAAzwA", -- wowvalor M+ recommended
+		["Raid"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMmZGNLMzmZmZWmFzMzsYMWMDAAmZGzMziNYgZxoxMAmtYjBAAGDM2AAmZwYGzYDAAwMzMAAMGG", -- SimulationCraft MID2 profile
+	},
+	Brewmaster = {
+		["Dungeon"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDzmtZGjlhltHYbb2wsAAALzy0ysNzyAAABwwGYmBMNGAAwA", -- wowvalor M+ recommended
+		["Raid"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGzMWmxGmZMAAAAAAALLYmwMwMM2MDmZmZY2GzMmZBLb22GzYWAAglZZaZ2mZZAAgAMDbgZGw0YADAYA", -- SimulationCraft MID2 profile
+	},
+	Mistweaver = {
+		["Dungeon"] = "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZADGwYmZmhZDzwsMTAAAAAEgFbzsNbzMBAAYMAzAGDsIjZA", -- wowvalor M+ recommended
+	},
+	Windwalker = {
+		["Dungeon"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNmZwyMBAswsxMmZmZAAsYmlZbMBBAMjBwMAjlBiZmZzA", -- wowvalor M+ recommended
+		["Raid"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYw2MmhlZGbzAAAAAAAAAAAAsMMaGzAGwMGmZmZY2GmhZZmAAWMz2MDzMzMAA2AQzys0MzMLAYgZGAGLDgB8B", -- SimulationCraft MID2 profile
+	},
+	Havoc = {
+		["Dungeon"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMz2MmZmxYmMmZAAAAAAAzixsNDzMwMWmZmZYmBzyALzmZMMLaaMzMmxGAAAwAAAAYmBDAAAAD", -- wowvalor M+ recommended
+		["Raid"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYAzMzmxMzMmZmMmZAAAAAAAzyDMmtZYmxyMzYZm5BmZWmZWGjBWmFzYY200wMjhNAAAAAAAAmZwAAAAwA", -- SimulationCraft MID2 profile
+	},
+	Vengeance = {
+		["Dungeon"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZmMzMYYmZGYGzMmZmZmxgZmZsZmZbMMAAAAAAACYmZsBAAAgBmZmZmt2mZmBAAAAAYA", -- wowvalor M+ recommended
+		["Raid"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAYMzMjZmZkZmZY2MzMjBjZGzYmZGDzYmx2YmtxAAAAAAAABMzM2AAAAwgxMzMzSbzMzAgBAAAgB", -- SimulationCraft MID2 profile
+	},
+	Devourer = {
+		["Dungeon"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzYmxwMAAAAAAAMmthZGAAAAAAAAmxMMzMzMzMzMzYmFzYsolFmZmZ2abmZGADDABMGMmB", -- wowvalor M+ recommended
+		["Raid"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAAWMzMzMzMzMwMAAAAAAALzYMYGAAAAAAAAmxMMmZmZYmZGzsNzYsptFAEwAMjZmZbmZa2mZbmZMjBA", -- SimulationCraft MID2 profile
+	},
+	Devastation = {
+		["Dungeon"] = "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGzYMTjZmpZmZ2mZmZmZmZmZGgZmxYmZZmZgBGD2glxox2AyMIYDzgZGM8AA", -- wowvalor M+ recommended
+	},
+	Preservation = {
+		["Dungeon"] = "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYmZ2MMzMbPADAAMjZMjxYGhZAAAAmZGZGzMPwsMzMAYGzALgFwMMhsBbGGAzMjB", -- wowvalor M+ recommended
+	},
+	Augmentation = {
+		["Dungeon"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAwMMzAjpGzMzAAAAgZmZMmZWGzMwMMwYGLsQGYGGaELYMzMDAM", -- wowvalor M+ recommended
 	},
 }
 -- END GENERATED BUILDS
@@ -8034,8 +8169,21 @@ function PlanTab.barChecks(check)
 	check("prompt height, unmeasured is 18 a line", PlanTab.promptHeight(nil, 2), 34 + 36 + 16 + B + 12)
 	local wasCanRead = PlanTab.canRead
 	PlanTab.canRead = function(v) return v ~= 70 end
-	check("prompt height, a secret height is never compared", PlanTab.promptHeight(70, 2), 34 + 36 + 16 + B + 12)
+	check("prompt height, a secret height is not used", PlanTab.promptHeight(70, 2), 34 + 36 + 16 + B + 12)
 	PlanTab.canRead = wasCanRead
+	-- and the real prompt measures its text after the width is set (0052
+	-- review). Only our own frame's methods are shadowed, then removed.
+	local f = PlanTab.prompt("t", { "a" }, { { label = "One" } })
+	local order, height = {}, nil
+	f.text.SetWidth = function() order[#order + 1] = "width" end
+	f.text.SetText = function() order[#order + 1] = "text" end
+	f.text.GetStringHeight = function() order[#order + 1] = "measure" return 100 end
+	f.SetHeight = function(_, h) height = h end
+	local okPrompt, errPrompt = pcall(PlanTab.prompt, "t", { "a" }, { { label = "One" } })
+	f.text.SetWidth, f.text.SetText, f.text.GetStringHeight, f.SetHeight = nil, nil, nil, nil
+	f:Hide()
+	check("prompt height, the real prompt measures its wrapped text", okPrompt and (table.concat(order, ", ") .. " " .. tostring(height)) or errPrompt,
+		"width, text, measure " .. (34 + 100 + 16 + B + 12))
 
 	local kept = { C_ActionBar, GetActionInfo, PickupAction, PlaceAction, GetCursorInfo, ClearCursor, C_Spell, C_Item,
 		PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print, PlanTab.prompt, PlanTab.activeLoadoutName, DjinnisBiSCharDB }
@@ -8554,6 +8702,16 @@ function PlanTab.specChecks(check)
 	-- left swapped, every druid gear feature would be off until /reload
 	check("every spec, the class is put back", PlanTab.playerClass == wasClass and PlanTab.gearHere(), true)
 	check("every spec, a druid's plan lines", asDruid > 0, true)
+
+	-- Card 0050: every other spec has its Dungeon build, filed under its key.
+	local noDungeon = {}
+	for _, s in ipairs(PlanTab.SPECS) do
+		if s[3] ~= PlanTab.DRUID and not (PlanTab.BUILDS[s[2]] and PlanTab.BUILDS[s[2]].Dungeon) then noDungeon[#noDungeon + 1] = s[2] end
+	end
+	check("every spec, a Dungeon build for each other spec", table.concat(noDungeon, ", "), "")
+	local shown = {}
+	for _, e in ipairs(PlanTab.sidebarList("Blood", "raid")) do shown[#shown + 1] = e.group and ("[" .. e.label .. "]") or e.loadout end
+	check("every spec, a Death Knight's list", table.concat(shown, "; "), "[Mythic+]; Dungeon; [Other builds]; Raid")
 end
 
 function PlanTab.treeChecks(check)

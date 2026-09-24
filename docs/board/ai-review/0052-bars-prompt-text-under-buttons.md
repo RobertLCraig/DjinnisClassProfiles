@@ -20,7 +20,7 @@ only while no line wraps. Both of those lines wrap at 380 wide.
 
 ## Acceptance
 
-- [x] WHEN the prompt's text wraps, THE PROMPT SHALL be tall enough that no text sits under the buttons. proves: the three "prompt height" checks in `PlanTab.barChecks`
+- [x] WHEN the prompt's text wraps, THE PROMPT SHALL be tall enough that no text sits under the buttons. proves: the four "prompt height" checks in `PlanTab.barChecks`, the last on the real prompt
 - [ ] Rob sees the action bars prompt with every line above the buttons. proves: manual
 
 ## What I need from you
@@ -95,3 +95,12 @@ Security:
 3. Leaks: nothing. The frame draws only on the player's own screen and sends nothing.
 
 No client here. Rob's look above stands once the check is in.
+
+**2026-09-24** Builder, v0.42.0: the two findings.
+1. `PlanTab.barChecks` now drives the real prompt with its own text's `SetWidth`, `SetText` and
+   `GetStringHeight` shadowed (returning 100) and `SetHeight` recorded, then removes the shadows.
+   "prompt height, the real prompt measures its wrapped text" expects "width, text, measure 186" at
+   today's button size. Your three mutations each fail it: the line count back, the text's width
+   deleted, and the width moved after the measure.
+2. Renamed "a secret height is not used". `canRead` stays first.
+- The self-test passes under Lua 5.1 and 5.4.

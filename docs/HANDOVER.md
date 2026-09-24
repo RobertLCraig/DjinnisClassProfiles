@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.41.3, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob. Every class: `0050` (builds) and `0051` (bars) are next.
-_Last updated: 2026-09-24 (v0.41.3. Every class has a spec key, and gear stays druid-only behind `PlanTab.gearHere()`: card `0049`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+**Status:** v0.42.0, `/djbis` (and `/bis`), `Interface: 120100`. No remote. Built cards wait in `human-review/` for one trip to a live client. `0038` waits on a taint log from Rob. Every class: `0051` (bars from the druid layout) is next.
+_Last updated: 2026-09-24 (v0.42.0. Every other spec has wowvalor and SimC builds: card `0050`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -220,9 +220,10 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Trap on `0033`: a key prompt that returns every login while **Apply** does nothing. `0035` waits until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on `0028`, then `.\update-gear-plan.ps1 <ids>`.
 
-Forty-three cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.41.3 (deployed 2026-09-24). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`.
+Forty-three cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.42.0 (deployed 2026-09-24). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`.
 
-Trap: every spec's `Dungeon` is pinned in PIN and never refreshes; Rob copies new strings with Archon's Export button (Mythic+, +7 to +21), card `0047`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
+Trap: other classes' builds come from wowvalor (`Dungeon`, can move daily, so `--check` goes stale) and SimulationCraft's `SIMC_TIER` profiles (`Raid`, none for healers or Evokers; move `SIMC_TIER` each season), card `0050`. SimC writes free hero keystones as bought; `ungrant` fixes that, do not remove it.
+Trap: every druid spec's `Dungeon` is pinned in PIN and never refreshes; Rob copies new strings with Archon's Export button (Mythic+, +7 to +21), card `0047`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 
 ## Blockers / open questions
 - **Rob's sims for `0028`**: which loadout each spec uses at 3+ targets, and a Top Gear run per spec per scenario. Nothing else on the board is blocked.
