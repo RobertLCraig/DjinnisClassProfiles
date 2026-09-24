@@ -171,3 +171,64 @@ scenario button.
   and the roll handler also gate on their own.
 - The self-test and all 36 non-druid spec runs pass under Lua 5.1 and 5.4, output read whole.
 - Rob's steps 5 and 6 above are the reviewer's two, now in "What I need from you".
+
+**2026-09-24** Second adversarial review, of `cf7016e` (v0.41.1). **Verdict: findings, back to `todo/`.**
+The five fixes hold and no druid gear reaches another class that I could find. What bounces it is
+three new checks that a mutation still walks past, two of them on the druid side.
+
+What held:
+- Harness, from a copy of `cf7016e` in `$TEMP`, output read whole, exit codes read. Self-test exits
+  0 under Lua 5.1.5 and 5.4.6. All 36 non-druid spec runs exit 0 under both. 102, 103, 104 and 105
+  exit 1 with 8 FAIL lines each, which is the run working: as 103 it hovers "Enigmatic
+  Dreamwatcher's Somnolent Stare" (271528, the first item in the plan block) and gets the BiS line
+  and two plan lines, and the roll prints "[BiS] PLAN". Ids 9999, 25, 1 and 0 exit 1 with "not in
+  PlanTab.SPECS". The id guard is a text search, but only the `SPECS` rows have the `{ <n>, "` shape.
+- Finding 1 is fixed. `planLinesForLink` is gated first, so `markRollFrame` hides the glow off a
+  druid, and a pooled glow is hidden too. Every other `planIndex`, `plannedIds` and `gearPlanFor`
+  reader is behind a gate, a druid-only table (`SPEC_ORDER`, `BOSSES`) or the one-line Plan tab.
+- The spec mode cannot pass on nothing: an empty plan block fails, an unknown id fails, and fewer
+  than three frames taking the events fails. It counts frames, not events, so a second frame on
+  `ENCOUNTER_END` would hide a lost `START_LOOT_ROLL`. Not a finding today: only the roll frame
+  registers them.
+- The `playerClass` swap is restored on the error path. Mutation: `error("boom")` inside the Death
+  Knight block. The run reports "the Death Knight checks ran: ... boom" and nothing else goes red.
+- No druid broken by a gate. Each gate forced closed for a druid too: the plan lines (7 FAIL),
+  the loot card (4), KeystoneLoot (10), `tidy` (10), `stripScenario` (1). The self-test swaps
+  `C_SpecializationInfo` to Feral for its whole run, so `asDruid` holds on any class in a client.
+- Globals: a `luac -l` SETGLOBAL list of `9936f19` and `cf7016e` is identical. Main-chunk locals
+  unchanged. The new self-test block swaps only `PlanTab.playerClass`.
+- The builder's `mut0049.sh`: all 13 reproduce, and "plan lines gate, spec run" stays green, as the
+  comment says.
+- The game folder matches the working tree, which is `cf7016e` plus the uncommitted `PlanTab.prompt`
+  change. The 0049 lines are identical.
+
+**Finding 1 (test gap): a druid's character sheet strip has no check.** `stripText` is new and
+pure, and only its Blood branch is checked. Mutation: `if not PlanTab.stripScenario(spec)` made
+`if spec`, so every druid's strip reads "Gear plans are for druids only, for now." The self-test
+stays green. Fix: check `stripText("Feral", nil, "st", 0)` (the "No 1 target gear plan" line) and
+one plan case with a count.
+
+**Finding 2 (test gap): nothing notices if the class swap is not put back.** Mutation: delete
+`PlanTab.playerClass = wasClass`. The self-test stays green. In a client that would switch off
+every druid gear feature until `/reload`. The code restores correctly today, so this is the check,
+not the code. Fix: after the restore, check `PlanTab.gearHere()` is true, or take `asDruid` there.
+
+**Finding 3 (test gap and wording): the Plan tab's scenario buttons off a druid.** The comment says
+"The Plan tab hides its scenario buttons there too. Both checked." Only the strip is checked.
+Mutation: drop `PlanTab.stripScenario(spec) and` from `refresh`. Green. It is frame wiring, so a
+look is the right proof. Fix: add to "What I need from you": on the Death Knight, open `/djbis`,
+Plan tab. Pass: one line, "Gear plans are for druids only, for now.", and no scenario buttons.
+The strip's hidden button (step 5) is the same kind: frame code, Rob's look.
+
+Not this card's, noted: `harvestPools` never runs for a druid offline. Forcing its gate closed for
+a druid too leaves the self-test green.
+
+Security:
+1. Weakest point: still the gates, now nine, but the plan lines are gated at the data, so the three
+   roll and tooltip readers share one gate. A new reader of `gearPlanFor` or `POOL` still has to
+   remember.
+2. Unchecked: a spec id from a patch is nil and reads as no spec. Safe. `tidy` off a druid deletes
+   nothing, so no player-named loadout can be removed on another class.
+3. Leaks: nothing new leaves the client. The KeystoneLoot send is gated before the API is read.
+
+No client here. Rob's steps 1 to 6 stand, plus the Plan tab look in finding 3.
