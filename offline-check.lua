@@ -168,14 +168,14 @@ if not asSpec then
 		-- One run of the net, with chat and the prompt caught. Answers what the
 		-- net answered, what it said, and whether it offered the reload.
 		local wrapped, keptPrompt = print, PlanTab.prompt
-		local function net(run, write)
+		local function net(run, write, equal)
 			local said, offered = {}, nil
 			print = function(...) said[#said + 1] = table.concat({ ... }, " ") end
 			-- the reload is offered in a client, which has ReloadUI
 			PlanTab.prompt = function(_, _, buttons) offered = buttons end
 			local reloadUI = function() end
 			ReloadUI = reloadUI
-			local okNet, ok, swapped = pcall(PlanTab.runSelfTest, run, write)
+			local okNet, ok, swapped = pcall(PlanTab.runSelfTest, run, write, equal)
 			print = wrapped
 			PlanTab.prompt, ReloadUI = keptPrompt, nil
 			if not okNet then fail("threw: " .. tostring(ok)) end
@@ -240,6 +240,18 @@ if not asSpec then
 		if not text:find("refused 1 write-backs", 1, true) then fail("did not say a write-back was refused: " .. text) end
 		GetInstanceInfo = realInfo
 
+		-- A compare the game refuses, as a secret can: the value still goes back.
+		local secret, compared = function() return "Fake" end, 0
+		ok, swapped, text = net(function() GetInstanceInfo = secret end, nil, function(a, b)
+			compared = compared + 1
+			if rawequal(a, secret) or rawequal(b, secret) then error("a secret") end
+			return rawequal(a, b)
+		end)
+		if compared == 0 then fail("never compared through the compare it was given") end
+		if GetInstanceInfo ~= realInfo then fail("stopped at a refused compare") end
+		if text:find("could not put everything back", 1, true) then fail("threw at a refused compare: " .. text) end
+		GetInstanceInfo = realInfo
+
 		-- An add-on that loads while the test runs: its globals stay, and it says so.
 		ok, swapped, text = net(function()
 			addOns = 1
@@ -261,6 +273,32 @@ if not asSpec then
 		if not (DjinnisCPDB.bars and DjinnisCPDB.bars.kept) then fail("did not put the saved data back before the rest") end
 		if not text:find("could not put everything back", 1, true) then fail("did not say the restore failed: " .. text) end
 		DjinnisCPDB.bars = nil
+
+		-- Card 0058: the rename's saved data, at login, as the client runs it.
+		-- The old minimap position must reach the icon: a copy that ran after
+		-- the icon was registered would leave it on a fresh table.
+		local keptLibStub, keptOld, keptOldChar = LibStub, DjinnisBiSDB, DjinnisBiSCharDB
+		local keptNew, keptNewChar, keptSay, said = DjinnisCPDB, DjinnisCPCharDB, PlanTab.say, {}
+		local iconDB
+		LibStub = function(name)
+			if name == "LibDataBroker-1.1" then return { NewDataObject = function(_, _, obj) return obj end } end
+			if name == "LibDBIcon-1.0" then return { Register = function(_, _, _, db) iconDB = db end } end
+		end
+		DjinnisBiSDB = { bars = { x = 1 }, minimap = { hide = false, minimapPos = 42 } }
+		DjinnisBiSCharDB = { madeAt = { [5] = 80 } }
+		DjinnisCPDB, DjinnisCPCharDB = nil, nil
+		PlanTab.say = function(line) said[#said + 1] = line end
+		local fired = 0
+		for _, frame in ipairs(registered.PLAYER_LOGIN or {}) do
+			if frame.onEvent then fired = fired + 1 pcall(frame.onEvent, frame, "PLAYER_LOGIN") end
+		end
+		if fired == 0 then fail("the rename: no frame took PLAYER_LOGIN, so the copy at login is unproven") end
+		if not (DjinnisCPDB and DjinnisCPDB.bars and DjinnisCPDB.bars.x == 1) then fail("the rename: the account's saved data was not copied at login") end
+		if not (DjinnisCPCharDB and DjinnisCPCharDB.madeAt and DjinnisCPCharDB.madeAt[5] == 80) then fail("the rename: the character's saved data was not copied at login") end
+		if not (iconDB and iconDB.minimapPos == 42 and DjinnisCPDB and iconDB == DjinnisCPDB.minimap) then fail("the rename: the minimap icon did not get the old position") end
+		if DjinnisBiSDB.fromBiS ~= nil or DjinnisBiSCharDB.fromBiS ~= nil or DjinnisBiSDB.bars == DjinnisCPDB.bars then fail("the rename: the old saved data was written into or shared") end
+		if not (said[1] and said[1]:find("copied over", 1, true)) then fail("the rename: the copy was not said") end
+		LibStub, DjinnisBiSDB, DjinnisBiSCharDB, DjinnisCPDB, DjinnisCPCharDB, PlanTab.say = keptLibStub, keptOld, keptOldChar, keptNew, keptNewChar, keptSay
 	end
 else
 	-- Not "" (the window): it needs a template's children, which no stub has,
@@ -378,6 +416,37 @@ do
 		end
 	end
 	if registered ~= 2 then print("|cffff0000FAIL|r no text names a slash command: saw " .. registered .. " registrations, not 2, the scan is broken") end
+end
+
+-- Card 0058: the .toc declares the saved tables the code keeps, the old Class
+-- Profiles table so the game does not drop it, and the stub the copy reads
+-- from. Every "## " line comes before anything else, as in Blizzard's own.
+do
+	local toc = assert(io.open(here .. "/DjinnisClassProfiles.toc")):read("*a")
+	local function field(name) return toc:match("\n## " .. name .. ":%s*([^\r\n]*)") or "" end
+	local function has(list, name) return (", " .. list .. ","):find(", " .. name .. ",", 1, true) ~= nil end
+	local account, char = field("SavedVariables"), field("SavedVariablesPerCharacter")
+	for _, name in ipairs({ "DjinnisCPDB", "DjinnisClassProfilesDB" }) do
+		if not has(account, name) then print("|cffff0000FAIL|r the .toc keeps " .. name .. " (card 0058)") end
+	end
+	if not has(char, "DjinnisCPCharDB") then print("|cffff0000FAIL|r the .toc keeps DjinnisCPCharDB per character (card 0058)") end
+	if not has(field("OptionalDeps"), "DjinnisBiS") then print("|cffff0000FAIL|r the .toc loads the DjinnisBiS stub first (card 0058)") end
+	local seenOther = false
+	for line in toc:gmatch("[^\r\n]*") do
+		if line:find("^## ") then
+			if seenOther then print("|cffff0000FAIL|r a .toc directive after other lines: " .. line) end
+		elseif line ~= "" then seenOther = true end
+	end
+	-- the names the code copies from are the names the stub declares
+	local stub = io.open(here .. "/../DjinnisBiS/DjinnisBiS.toc")
+	if stub then
+		local text = stub:read("*a")
+		stub:close()
+		for _, name in ipairs({ "DjinnisBiSDB", "DjinnisBiSCharDB" }) do
+			if not text:find(name, 1, true) then print("|cffff0000FAIL|r the DjinnisBiS stub declares " .. name) end
+			if not source:find('rawget(_G, "' .. name .. '")', 1, true) then print("|cffff0000FAIL|r the copy at login reads " .. name) end
+		end
+	end
 end
 
 realPrint(failures == 0 and "offline-check: no FAIL lines"

@@ -303,3 +303,13 @@ command is now `/dcp`): `/reload`, then `/dcp test` **before** opening the talen
 spellbook. Chat ends with "[CP] self-test passed", with no Lua error. Click **Later**. Open the
 spellbook, then the talent window, twice each: both work. **More > Make the planned loadouts** opens
 its box. **More > Offer the saved bars** still knows your layouts. Then click **Reload now**.
+
+**2026-09-24, Claude. The review's finding, fixed in v0.47.1.**
+
+`restore` takes an `equal` (default `rawequal`), and `same()` is a closure over it. The offline check
+passes one that throws for one value, as a secret can: the value must still go back, the net must not
+say it failed, and the compare given must be the one used. Both mutations (the `pcall` removed, and
+`rawequal` used in place of the one given) are in `%TEMP%\mut0058.py` and red.
+
+Notes left as notes: `restoreSaved`'s refusal count has no offline way to refuse a plain table write,
+and `SWAPPED_TABLES` listing a table no check swaps costs nothing.

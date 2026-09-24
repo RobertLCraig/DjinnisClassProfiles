@@ -2,16 +2,19 @@
 ## Title: Djinni's Class Profiles
 ## Notes: Shows which druid specs want a dropped item, and what it does to your stat targets. Saves action bars and talent builds on every class. Season 2, The Venomous Abyss.
 ## Author: Djinni
-## Version: 0.47.0
+## Version: 0.47.1
 ## IconTexture: Interface\Icons\Ability_Druid_Maul
 ## AddonCompartmentFunc: DjinnisClassProfiles_Toggle
-## SavedVariables: DjinnisCPDB
+## SavedVariables: DjinnisCPDB, DjinnisClassProfilesDB
 ## SavedVariablesPerCharacter: DjinnisCPCharDB
-# The stub DjinnisBiS folder holds the saved data from before the rename; it loads
-# first, and the first load copies it over (card 0058).
 ## OptionalDeps: DjinnisBiS
 ## DefaultState: enabled
 ## X-Category: Raid & Loot
+
+# Card 0058, the rename from DjinnisBiS. The stub DjinnisBiS folder loads the old
+# saved data first, and PlanTab.moveSavedData copies it at login. DjinnisClassProfilesDB
+# is the OLD Class Profiles addon's data, which lives in the file this folder name
+# now owns: declared only so the game keeps it on disk. Nothing reads or writes it.
 
 # Libraries. Listed directly rather than through an embeds.xml: four files do
 # not need a manifest pointing at them.

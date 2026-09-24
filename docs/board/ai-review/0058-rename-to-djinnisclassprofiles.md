@@ -27,8 +27,23 @@ whether that meant the gear side goes too, he answered **A: rename only, everyth
 
 ## Acceptance
 
-To write with the build. The pure parts (the tag, the length check, the copy of saved data) go in
-the self-test; the load on a real client is Rob's.
+Written after the build (the review's finding 4), so attack the code, not these ticks.
+
+- [x] The old saved data is copied once per account and once per character, deep, into a table
+      made before login too, never writing the old tables, and it says so.
+      proves: `PlanTab.renameChecks`
+- [x] The copy runs first at `PLAYER_LOGIN`, so the minimap icon gets the old position.
+      proves: `offline-check.lua`, "the rename" block (fires the real login handler)
+- [x] The `.toc` keeps `DjinnisCPDB`, `DjinnisCPCharDB` and the old Class Profiles'
+      `DjinnisClassProfilesDB`, loads the stub first, and has every `## ` line before anything else.
+      The stub declares the two tables the copy reads.
+      proves: `offline-check.lua`, the `.toc` block
+- [x] No text the player sees names a slash command, old or new.
+      proves: `offline-check.lua`, the card 0053 scan
+- [x] The public repository ships the Ace3 licence, `Libs/CallbackHandler-1.0/LICENSE.txt`.
+      proves: `git ls-files Libs`
+- [ ] In the game: the message, the data, the stub in the add-on list, no second message after
+      `/reload`. proves: manual (Rob; see What I need from you)
 
 ## Not this card
 
@@ -203,3 +218,29 @@ Then:
 7. `/reload`: no message this time.
 8. On a second character: the message again, and that character's loadouts and spares are its own.
 9. Your broker display still shows the plan line, or you re-add it.
+
+**2026-09-24, Claude. The review's findings, fixed in v0.47.1.**
+
+1. **The copy's wiring is checked.** The offline check fires the real `PLAYER_LOGIN` handler with old
+   data and a fake minimap library: the data must arrive, the icon must get the old position (so the
+   copy runs first), the old tables must be unwritten, and the message must say "copied over". The
+   `.toc` is read too (names, `OptionalDeps`, directive order), and the stub's names are matched to
+   the code's. `renameChecks` adds: keeps what a table made before login held, the old table unwritten,
+   the message text.
+2. **Old name on screen.** The talent tab is "Builds", the menu item "Open the main window", the /simc
+   marker "(CP plan)". Kept on purpose, with a comment: the equipment set prefix "DBiS " (Rob's saved
+   sets are found by it) and the broker text "BiS: on plan" (it counts gear against the BiS plan).
+3. **Licence.** `Libs/CallbackHandler-1.0/LICENSE.txt` is back, from tag `legacy-0.3.1`. The workspace
+   `docs/HANDOVER.md` and `docs/PRD.md` lines are corrected.
+4. **Acceptance** written above, marked as written after the build.
+5. **The old Class Profiles' data.** Too late for one file: Rob loaded v0.47.0 at 03:09, and the
+   game rewrote `WTF\Account\DJINNWRAITH\SavedVariables\DjinnisClassProfiles.lua` at 03:13. Whether it
+   held old Class Profiles data before cannot be told now. The other account, `958357#1`, still had
+   it (`DjinnisClassProfilesDB`, action bar profiles, May 2026). Every such file was copied, read only,
+   to `C:\Dev\WoWAddons\.wtf-backup-2026-09-24\`, and the `.toc` now declares
+   `DjinnisClassProfilesDB` so the game keeps it. No `AddOns.txt` has `DjinnisClassProfiles` disabled.
+6. **Smaller.** Line 1 of the Lua file fixed. The broker and minimap names stay `DjinnisClassProfiles`;
+   a data bar that showed the old broker needs it added again (on Rob's list).
+
+The copy worked in Rob's client: after his 03:09 login, `DjinnisClassProfiles.lua` in each
+SavedVariables folder is the size of its `DjinnisBiS.lua`.

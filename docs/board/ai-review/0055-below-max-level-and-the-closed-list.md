@@ -335,3 +335,11 @@ with the rename in (card 0058; the command is now `/dcp`): `/reload`. **More > M
 loadouts** says every build matches. **More > Compare talents with the plan** says "the plan, as
 far as this level allows". Open the talent window: the list is beside it, or its tab is. At 82,
 both Make and Compare call the loadouts made at 81 different, and Make offers to reset them.
+
+**2026-09-24, Claude. The fifth review's findings, fixed in v0.47.1.**
+
+1. A check counts the `short` flag on every compare `sayTalents` makes at level 81: the gear plan's
+   lines must read the level too, not only the stored builds.
+2. `belowCap(0, 90)` is checked false.
+
+Both are in `%TEMP%\mut0058.py` and red.

@@ -1,4 +1,4 @@
--- Djinni's Class Profiles (was Djinni's Class Profiles until 0.47.0, card 0058) --
+-- Djinni's Class Profiles (was Djinni's BiS until 0.47.0, card 0058) --
 -- "do I roll on this?" for all four druid specs, and talents and bars for every class.
 --
 -- ============================ EDIT THE LIST HERE ============================
@@ -4030,7 +4030,7 @@ local function buildBroker()
 
 	local broker = ldb:NewDataObject("DjinnisClassProfiles", {
 		type = "data source",
-		text = "BiS",
+		text = "BiS",  -- the gear count, PlanTab.brokerText
 		icon = "Interface\\Icons\\Ability_Druid_Maul",
 		OnClick = function() DjinnisClassProfiles_Toggle() end,
 		OnTooltipShow = summaryLines,
@@ -4522,6 +4522,7 @@ end
 -- letters="16"): "DBiS Guardian 2T" is exactly 16. A longer name that the
 -- server cut short would not be found again and would be created afresh on
 -- every Equip all. ST, 2T and 3T are raid cells, so "Raid" is not spelt out.
+-- Kept from before the rename (card 0058): the sets Rob saved are found by it.
 PlanTab.SET_PREFIX = "DBiS "
 PlanTab.SET_SUFFIX = { st = "ST", ["2t"] = "2T", ["3t"] = "3T", mplus = "M+" }
 function PlanTab.setName(spec, scenario)
@@ -5001,7 +5002,7 @@ function PlanTab.simcLines(spec, bosses, saved, cells)
 			seen[row.loadout] = true
 			local talents = cells[row.loadout]
 			if talents then
-				lines[#lines + 1] = ("# Saved Loadout: %s (DBiS plan)"):format(row.loadout)
+				lines[#lines + 1] = ("# Saved Loadout: %s (CP plan)"):format(row.loadout)
 				lines[#lines + 1] = "# talents=" .. talents
 			else
 				missing[#missing + 1] = row.loadout
@@ -6431,7 +6432,7 @@ function PlanTab.buildSidebar()
 	f.tab = CreateFrame("Button", "DjinnisCPTalentSidebarTab", UIParent, "UIPanelButtonTemplate")
 	f.tab:SetSize(110, PlanTab.SIZE.button)
 	f.tab:SetFrameStrata("HIGH")
-	f.tab:SetText("BiS plan")
+	f.tab:SetText("Builds")
 	f.tab:SetScript("OnClick", function() PlanTab.setSidebarClosed(false) end)
 	PlanTab.sidebar = f
 	return f
@@ -7960,7 +7961,7 @@ function PlanTab.menuItems(where)
 	local items = {}
 	local function add(item) items[#items + 1] = item end
 	if where == "sidebar" then
-		add({ text = "Open the BiS window", tip = "The gear plan, by boss, by slot, stats and the plan.", fn = DjinnisClassProfiles_Toggle })
+		add({ text = "Open the main window", tip = "The gear plan, by boss, by slot, stats and the plan.", fn = DjinnisClassProfiles_Toggle })
 	elseif db().sidebarClosed and not PlanTab.rivalLoaded() then  -- with Talent Loadout Manager there is no list to show
 		add({ text = "Show the build list", tip = "Opens the list beside the talent window again.", fn = function() PlanTab.setSidebarClosed(false) end })
 	end
@@ -9007,7 +9008,7 @@ end
 function PlanTab.levelChecks(check)
 	local t = "below the level cap"
 	local names = { "readLevels", "canRead", "madeAt", "savedLoadoutNames", "loadoutString", "nodeKey", "promptBusy",
-		"prompt", "activeTalentString", "selectedConfigID", "lastEdited", "say", "configName" }
+		"prompt", "activeTalentString", "selectedConfigID", "lastEdited", "say", "configName", "compareWord" }
 	local kept = {}
 	for _, name in ipairs(names) do kept[name] = PlanTab[name] end
 	local ok, err = pcall(function()
@@ -9015,6 +9016,7 @@ function PlanTab.levelChecks(check)
 		check(t .. ", 90 of 90", PlanTab.belowCap(90, 90), false)
 		check(t .. ", no level", PlanTab.belowCap(nil, 90), false)
 		check(t .. ", no cap", PlanTab.belowCap(81, nil), false)
+		check(t .. ", a level of 0 is no level", PlanTab.belowCap(0, 90), false)
 		PlanTab.canRead = function(v) return v ~= 81 end
 		check(t .. ", a secret level", PlanTab.belowCap(81, 90), false)
 		PlanTab.canRead = kept.canRead
@@ -9115,6 +9117,20 @@ function PlanTab.levelChecks(check)
 		made = { [ids[name]] = 81 }
 		PlanTab.readLevels = function() return 82, 90 end
 		check(t .. ", and different a level after it was made", compareLine():find("different", 1, true) ~= nil, true)
+		-- every line reads the level, the gear plan's cells too, not only the stored builds
+		local shorts, calls = 0, 0
+		PlanTab.compareWord = function(have, planned, short)
+			calls = calls + 1
+			if short then shorts = shorts + 1 end
+			return kept.compareWord(have, planned, short)
+		end
+		made = {}
+		PlanTab.readLevels = function() return 81, 90 end
+		local stored = 0
+		for _ in pairs(feral) do stored = stored + 1 end
+		PlanTab.sayTalents(function() end)
+		check(t .. ", Compare reads the level on the gear plan's lines too", calls > stored and shorts == calls, true)
+		PlanTab.compareWord = kept.compareWord
 	end)
 	for _, name in ipairs(names) do PlanTab[name] = kept[name] end
 	check(t .. ", ran", ok or tostring(err), true)
@@ -9137,6 +9153,9 @@ function PlanTab.renameChecks(check)
 	check(t .. ", nothing to copy", moved == false and copy == mine, true)
 	copy, moved = PlanTab.copyOld(nested, { gear = { x = 1 } })
 	check(t .. ", into a table made before the login", moved and copy.bars.k == 1, true)
+	copy = PlanTab.copyOld(nested, { only = 1 })
+	check(t .. ", keeping what it held", copy.only, 1)
+	check(t .. ", and the old data is not written", nested.fromBiS, nil)
 
 	-- through the globals, as at login
 	local kept = { rawget(_G, "DjinnisBiSDB"), rawget(_G, "DjinnisBiSCharDB"), DjinnisCPDB, DjinnisCPCharDB, PlanTab.say }
@@ -9144,11 +9163,13 @@ function PlanTab.renameChecks(check)
 	local ok, err = pcall(function()
 		DjinnisBiSDB, DjinnisBiSCharDB = { bars = { k = 1 } }, { madeAt = { [3] = 81 } }
 		DjinnisCPDB, DjinnisCPCharDB = nil, { fromBiS = true, madeAt = {} }
-		PlanTab.say = function() said = said + 1 end
+		local text
+		PlanTab.say = function(line) said, text = said + 1, line end
 		local account, char = PlanTab.moveSavedData()
 		check(t .. ", the account's is copied at login", account and DjinnisCPDB.bars.k == 1, true)
 		check(t .. ", a character's copied before is left", char == false and next(DjinnisCPCharDB.madeAt) == nil, true)
-		check(t .. ", and it says so", said, 1)
+		check(t .. ", and it says so", said == 1 and text and text:find("copied over", 1, true) ~= nil, true)
+		check(t .. ", leaving the old data as it was", DjinnisBiSDB.fromBiS == nil and DjinnisBiSDB.bars ~= DjinnisCPDB.bars, true)
 		account, char = PlanTab.moveSavedData()
 		check(t .. ", once", account == false and char == false and said == 1, true)
 		-- the next character to log in has its own copied
@@ -9211,10 +9232,10 @@ function PlanTab.menuChecks(check)
 		check(t .. ", no profiles says so", click(w, "No profiles yet"), "disabled")
 		check(t .. ", Bonus roll here", click(w, "Bonus roll worth it here?"), "slash(here)")
 		check(t .. ", no self-test in the menu", click(w, "Run the self-test"), "none")
-		check(t .. ", the window needs no Open item", click(w, "Open the BiS window"), "none")
+		check(t .. ", the window needs no Open item", click(w, "Open the main window"), "none")
 
 		local s = PlanTab.menuItems("sidebar")
-		check(t .. ", the sidebar opens the window", click(s, "Open the BiS window"), "toggle")
+		check(t .. ", the sidebar opens the window", click(s, "Open the main window"), "toggle")
 		check(t .. ", the sidebar has its own Undo button", click(s, "Undo bars"), "none")
 		check(t .. ", and its own Save buttons", click(s, "Save bars for this spec"), "none")
 		db().sidebarClosed = true
@@ -10073,9 +10094,9 @@ local function selfTest()
 	lines, missing = PlanTab.simcLines("Feral", PlanTab.BOSSES.Feral, someSaved, ferals)
 	text = table.concat(lines, "\n")
 	check(missTest .. ", named once", table.concat(missing, ","), "Raid: Coiled Altar")
-	check(missTest .. ", no talents line for it", text:find("Coiled Altar (DBiS plan)", 1, true), nil)
+	check(missTest .. ", no talents line for it", text:find("Coiled Altar (CP plan)", 1, true), nil)
 	check(missTest .. ", the plan's string stands in when it has one",
-		text:find("# Saved Loadout: Raid: Sszorak (DBiS plan)\n# talents=AAAA", 1, true) ~= nil, true)
+		text:find("# Saved Loadout: Raid: Sszorak (CP plan)\n# talents=AAAA", 1, true) ~= nil, true)
 	check(missTest .. ", and that one is not named as missing", text:find("Saved Loadout: Raid: Sszorak", 1, true) ~= nil and #missing, 1)
 	lines = PlanTab.simcLines("Feral", PlanTab.BOSSES.Feral, {}, {})
 	local stand = 0
@@ -10103,7 +10124,7 @@ local function selfTest()
 	check(hookTest .. ", the block follows the checksum line", out:find("# Checksum: ab12!\n# Djinni's Class Profiles plan (Feral)", 1, true) ~= nil, true)
 	check(hookTest .. ", the arguments reach the addon", out:find("!", 1, true), #profile + 1)
 	check(hookTest .. ", saved names are read from the game", out:find("Saved Loadout: Raid: Nek'Zali (DBiS", 1, true), nil)
-	check(hookTest .. ", the plan's string for an unsaved one", out:find("# Saved Loadout: Dungeon (DBiS plan)\n# talents=" .. PlanTab.BUILDS.Feral.Dungeon, 1, true) ~= nil, true)
+	check(hookTest .. ", the plan's string for an unsaved one", out:find("# Saved Loadout: Dungeon (CP plan)\n# talents=" .. PlanTab.BUILDS.Feral.Dungeon, 1, true) ~= nil, true)
 	check(hookTest .. ", no error back", err, nil)
 	fake.GetSimcProfile = function() return nil, "boom" end
 	fake.DjinnisCPWrapped = nil
@@ -11863,7 +11884,7 @@ local function selfTest()
 		local keptBuild = PlanTab.BUILDS.Feral.Dungeon
 		C_ClassTalents.GetConfigIDsBySpecID = function() return {} end
 		print = function() end  -- the export says what it left out; not a check
-		local marker = "# Saved Loadout: Dungeon (DBiS plan)\n# talents="
+		local marker = "# Saved Loadout: Dungeon (CP plan)\n# talents="
 		check(bareTest .. ", with a string the export carries it", PlanTab.simcAppend("# Checksum: x"):find(marker .. keptBuild, 1, true) ~= nil, true)
 		GEAR_PLAN.Feral.mplus.talents = nil
 		check(bareTest .. ", without one it hands over nothing", gearPlanFor("Feral", "mplus").talents, nil)
@@ -11978,21 +11999,22 @@ function PlanTab.restoreSaved(snap)
 	return refused
 end
 
--- True only when the game lets the two be compared and they are the same
--- value. A secret may refuse even rawequal, and a refusal must not stop the
--- restore part way (0056 review).
-local function same(a, b)
-	local ok, is = pcall(rawequal, a, b)
-	return ok and is
-end
 
 -- Puts back what changed. Answers how many Blizzard values it had to, how
 -- many PlanTab fields, the first few Blizzard names, and how many writes the
 -- game refused. Every write is guarded: one refused write (a frozen table)
 -- must not skip the rest (0056 review). `write` is for offline-check.lua's
--- refused write; the self-test passes none.
-function PlanTab.restore(snap, write)
-	write = write or rawset
+-- refused write, and `equal` for its refused compare; the self-test passes
+-- neither.
+function PlanTab.restore(snap, write, equal)
+	write, equal = write or rawset, equal or rawequal
+	-- True only when the game lets the two be compared and they are the same
+	-- value. A secret may refuse even rawequal, and a refusal must not stop the
+	-- restore part way (0056 review).
+	local function same(a, b)
+		local ok, is = pcall(equal, a, b)
+		return ok and is
+	end
 	local blizzard, plan, names, refused = 0, 0, {}, 0
 	-- counted before anything is put back: the run may have swapped C_AddOns
 	local loadedNow = PlanTab.loadedAddOns()
@@ -12039,14 +12061,14 @@ function PlanTab.restore(snap, write)
 	return blizzard, plan, names, refused, keepNew
 end
 
--- `run` and `write` are for offline-check.lua's proof of this net; the slash
--- passes neither.
-function PlanTab.runSelfTest(run, write)
+-- `run`, `write` and `equal` are for offline-check.lua's proof of this net;
+-- the slash passes none.
+function PlanTab.runSelfTest(run, write, equal)
 	local snap = PlanTab.snapshot()
 	local restore, restoreSaved = PlanTab.restore, PlanTab.restoreSaved  -- a run cannot swap the net itself
 	local ok, err = pcall(run or selfTest)
 	local okSaved, savedRefused = pcall(restoreSaved, snap)
-	local okRestore, blizzard, _, names, refused, keptNew = pcall(restore, snap, write)
+	local okRestore, blizzard, _, names, refused, keptNew = pcall(restore, snap, write, equal)
 	if not okRestore then
 		print("|cffff0000FAIL|r the self-test could not put everything back: " .. tostring(blizzard) .. ". Reload the interface now.")
 		blizzard, names, refused = 0, {}, 0
