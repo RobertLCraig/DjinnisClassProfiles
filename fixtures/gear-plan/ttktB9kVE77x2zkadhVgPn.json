@@ -1,0 +1,623 @@
+{
+  "simbot": {
+    "simType": "optimize",
+    "date": 1789974973270,
+    "enemyCount": 1,
+    "meta": {
+      "rawFormData": {
+        "optimize": {
+          "talentLoadouts": [
+            {
+              "name": "Active",
+              "string": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAA0MLzyMzMgALgZGgFGMAAAmZDD",
+              "rawString": "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAA0MLzyMzMgALgZGgFGMAAAmZDD"
+            },
+            {
+              "name": "WS Raid ST",
+              "string": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwYMjxYmZMmtFWGbzMzYmZAAAAYJY2gxMjaGzCzMzYMzDMDAAAAAAwAAAAIAY2mZpZZmlNwMDwiZGGAAzMAYA",
+              "rawString": "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAwYMjxYmZMmtFWGbzMzYmZAAAAYBMbwYmBzYWYmZGjZegZAAAAAAAGAAAAAgZbmFzyMLbgZGgFzMMAAmZAwA"
+            },
+            {
+              "name": "DotC Raid ST *",
+              "string": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxswMzMGzMzAAAAAAAMAAAAamlZZmZGQgFwMDwCzwAAAYmNMA",
+              "rawString": "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWAzGMmZwMmFmZmxYmZGAAAAAAgBAAAgZWmlZmZAALgZGgFmhBAAwMbYA"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "sim": {
+    "players": [
+      {
+        "name": "Djinni",
+        "specialization": "Feral Druid",
+        "collected_data": {
+          "dps": {
+            "mean": 134583.24295039842
+          }
+        }
+      }
+    ],
+    "profilesets": {
+      "results": [
+        {
+          "name": "Combo 145",
+          "mean": 176492.4851735047
+        },
+        {
+          "name": "Combo 144",
+          "mean": 169363.30417260784
+        },
+        {
+          "name": "Combo 143",
+          "mean": 145044.9373792856
+        },
+        {
+          "name": "Combo 142",
+          "mean": 176119.57939719138
+        },
+        {
+          "name": "Combo 141",
+          "mean": 168143.2608350368
+        },
+        {
+          "name": "Combo 140",
+          "mean": 144940.73303630296
+        },
+        {
+          "name": "Combo 137",
+          "mean": 142911.74533979074
+        },
+        {
+          "name": "Combo 136",
+          "mean": 170149.8716468904
+        },
+        {
+          "name": "Combo 135",
+          "mean": 164650.7403977311
+        },
+        {
+          "name": "Combo 133",
+          "mean": 168963.5864711442
+        },
+        {
+          "name": "Combo 100",
+          "mean": 168353.80761123012
+        },
+        {
+          "name": "Combo 102",
+          "mean": 161023.28299080144
+        },
+        {
+          "name": "Combo 99",
+          "mean": 162113.72134548996
+        },
+        {
+          "name": "Combo 90",
+          "mean": 164291.1130784309
+        },
+        {
+          "name": "Combo 134",
+          "mean": 139091.28545280002
+        },
+        {
+          "name": "Combo 96",
+          "mean": 162301.85560655736
+        },
+        {
+          "name": "Combo 94",
+          "mean": 169429.62422011493
+        },
+        {
+          "name": "Combo 85",
+          "mean": 168011.3671058181
+        },
+        {
+          "name": "Combo 84",
+          "mean": 161526.6981278939
+        },
+        {
+          "name": "Combo 97",
+          "mean": 166051.99628574736
+        },
+        {
+          "name": "Combo 95",
+          "mean": 137239.92128508008
+        },
+        {
+          "name": "Combo 101",
+          "mean": 138634.50598728054
+        },
+        {
+          "name": "Combo 89",
+          "mean": 141564.0882423607
+        },
+        {
+          "name": "Combo 121",
+          "mean": 170720.45513762513
+        },
+        {
+          "name": "Combo 87",
+          "mean": 164178.3923965474
+        },
+        {
+          "name": "Combo 98",
+          "mean": 138498.6382078869
+        },
+        {
+          "name": "Combo 91",
+          "mean": 170103.8834019949
+        },
+        {
+          "name": "Combo 88",
+          "mean": 170456.96686369233
+        },
+        {
+          "name": "Combo 74",
+          "mean": 135104.5236750595
+        },
+        {
+          "name": "Combo 80",
+          "mean": 138117.36636965358
+        },
+        {
+          "name": "Combo 82",
+          "mean": 166497.77435308968
+        },
+        {
+          "name": "Combo 76",
+          "mean": 163646.50701824302
+        },
+        {
+          "name": "Combo 107",
+          "mean": 137904.61638994806
+        },
+        {
+          "name": "Combo 81",
+          "mean": 160892.4265568881
+        },
+        {
+          "name": "Combo 75",
+          "mean": 157120.47444514395
+        },
+        {
+          "name": "Combo 83",
+          "mean": 137515.5068326608
+        },
+        {
+          "name": "Combo 93",
+          "mean": 163560.043425281
+        },
+        {
+          "name": "Combo 132",
+          "mean": 163346.48739703142
+        },
+        {
+          "name": "Combo 86",
+          "mean": 140842.54014451877
+        },
+        {
+          "name": "Combo 112",
+          "mean": 169958.63016973506
+        },
+        {
+          "name": "Combo 103",
+          "mean": 167145.47074356567
+        },
+        {
+          "name": "Combo 138",
+          "mean": 165081.24118511222
+        },
+        {
+          "name": "Combo 104",
+          "mean": 137696.8188259786
+        },
+        {
+          "name": "Combo 92",
+          "mean": 139220.2370822324
+        },
+        {
+          "name": "Combo 105",
+          "mean": 161886.69200612
+        },
+        {
+          "name": "Combo 106",
+          "mean": 167603.37691556825
+        },
+        {
+          "name": "Combo 77",
+          "mean": 136188.41748681045
+        },
+        {
+          "name": "Combo 108",
+          "mean": 160900.10250010368
+        },
+        {
+          "name": "Combo 109",
+          "mean": 168156.98984344682
+        },
+        {
+          "name": "Combo 139",
+          "mean": 172746.62082918908
+        },
+        {
+          "name": "Combo 128",
+          "mean": 137493.63903807363
+        },
+        {
+          "name": "Combo 114",
+          "mean": 161905.85283496924
+        },
+        {
+          "name": "Combo 115",
+          "mean": 167925.74950424334
+        },
+        {
+          "name": "Combo 131",
+          "mean": 140070.45734875917
+        },
+        {
+          "name": "Combo 116",
+          "mean": 140777.39627235895
+        },
+        {
+          "name": "Combo 79",
+          "mean": 164646.0374543911
+        },
+        {
+          "name": "Combo 118",
+          "mean": 169833.41401173227
+        },
+        {
+          "name": "Combo 123",
+          "mean": 162518.12455697465
+        },
+        {
+          "name": "Combo 117",
+          "mean": 163249.76612337297
+        },
+        {
+          "name": "Combo 119",
+          "mean": 140198.7703622726
+        },
+        {
+          "name": "Combo 111",
+          "mean": 163002.2140095508
+        },
+        {
+          "name": "Combo 113",
+          "mean": 139996.10387731413
+        },
+        {
+          "name": "Combo 120",
+          "mean": 164035.40968090197
+        },
+        {
+          "name": "Combo 122",
+          "mean": 138339.4741657925
+        },
+        {
+          "name": "Combo 126",
+          "mean": 162551.734149908
+        },
+        {
+          "name": "Combo 124",
+          "mean": 169793.50926950396
+        },
+        {
+          "name": "Combo 110",
+          "mean": 137821.28796541513
+        },
+        {
+          "name": "Combo 125",
+          "mean": 138941.37857453382
+        },
+        {
+          "name": "Combo 78",
+          "mean": 160041.12850940385
+        },
+        {
+          "name": "Combo 127",
+          "mean": 167911.51652857108
+        },
+        {
+          "name": "Combo 130",
+          "mean": 167724.9116836428
+        },
+        {
+          "name": "Combo 129",
+          "mean": 159928.25667860467
+        },
+        {
+          "name": "Combo 73",
+          "mean": 168996.07541739088
+        },
+        {
+          "name": "Combo 71",
+          "mean": 138577.16033221455
+        },
+        {
+          "name": "Combo 70",
+          "mean": 168190.03943164178
+        },
+        {
+          "name": "Combo 69",
+          "mean": 161182.64089679733
+        },
+        {
+          "name": "Combo 72",
+          "mean": 162780.11636340324
+        },
+        {
+          "name": "Combo 68",
+          "mean": 137784.32655875044
+        },
+        {
+          "name": "Combo 67",
+          "mean": 168903.04803653155
+        },
+        {
+          "name": "Combo 66",
+          "mean": 162587.6670230121
+        },
+        {
+          "name": "Combo 65",
+          "mean": 139179.35653130588
+        },
+        {
+          "name": "Combo 64",
+          "mean": 167415.9241086983
+        },
+        {
+          "name": "Combo 62",
+          "mean": 138076.7014030161
+        },
+        {
+          "name": "Combo 61",
+          "mean": 167635.43517860974
+        },
+        {
+          "name": "Combo 27",
+          "mean": 159657.0523302064
+        },
+        {
+          "name": "Combo 33",
+          "mean": 163245.17558705257
+        },
+        {
+          "name": "Combo 63",
+          "mean": 163301.53102373343
+        },
+        {
+          "name": "Combo 47",
+          "mean": 137529.8340188109
+        },
+        {
+          "name": "Combo 29",
+          "mean": 136777.88762359737
+        },
+        {
+          "name": "Combo 23",
+          "mean": 136197.95027345806
+        },
+        {
+          "name": "Combo 22",
+          "mean": 162174.15790169203
+        },
+        {
+          "name": "Combo 59",
+          "mean": 138608.69428152416
+        },
+        {
+          "name": "Combo 21",
+          "mean": 155623.61205707592
+        },
+        {
+          "name": "Combo 19",
+          "mean": 164351.91043194776
+        },
+        {
+          "name": "Combo 48",
+          "mean": 161902.85923892565
+        },
+        {
+          "name": "Combo 26",
+          "mean": 135562.80032568178
+        },
+        {
+          "name": "Combo 44",
+          "mean": 137427.93042406076
+        },
+        {
+          "name": "Combo 17",
+          "mean": 135179.09443252647
+        },
+        {
+          "name": "Combo 24",
+          "mean": 158969.54289316395
+        },
+        {
+          "name": "Combo 2",
+          "mean": 137052.35505254337
+        },
+        {
+          "name": "Combo 25",
+          "mean": 165170.21188425543
+        },
+        {
+          "name": "Combo 5",
+          "mean": 135816.28224062163
+        },
+        {
+          "name": "Combo 10",
+          "mean": 163716.02555317245
+        },
+        {
+          "name": "Combo 15",
+          "mean": 158123.2421555277
+        },
+        {
+          "name": "Combo 30",
+          "mean": 160526.2116886734
+        },
+        {
+          "name": "Combo 60",
+          "mean": 161342.26040031062
+        },
+        {
+          "name": "Combo 13",
+          "mean": 165348.18860256387
+        },
+        {
+          "name": "Combo 14",
+          "mean": 134796.02895181737
+        },
+        {
+          "name": "Combo 37",
+          "mean": 169368.1505282889
+        },
+        {
+          "name": "Combo 4",
+          "mean": 165231.5771325508
+        },
+        {
+          "name": "Combo 6",
+          "mean": 157364.52234863673
+        },
+        {
+          "name": "Combo 7",
+          "mean": 164139.53633076465
+        },
+        {
+          "name": "Combo 9",
+          "mean": 158958.5907602208
+        },
+        {
+          "name": "Combo 32",
+          "mean": 138844.0543366021
+        },
+        {
+          "name": "Combo 8",
+          "mean": 135049.16545977676
+        },
+        {
+          "name": "Combo 20",
+          "mean": 133403.57063448548
+        },
+        {
+          "name": "Combo 3",
+          "mean": 159723.03909438275
+        },
+        {
+          "name": "Combo 12",
+          "mean": 158940.7203682501
+        },
+        {
+          "name": "Combo 53",
+          "mean": 140497.4063516503
+        },
+        {
+          "name": "Combo 31",
+          "mean": 167073.27613223204
+        },
+        {
+          "name": "Combo 35",
+          "mean": 139895.7238889892
+        },
+        {
+          "name": "Combo 39",
+          "mean": 157107.17637913054
+        },
+        {
+          "name": "Combo 36",
+          "mean": 163732.8665111212
+        },
+        {
+          "name": "Combo 40",
+          "mean": 163047.84006172724
+        },
+        {
+          "name": "Combo 11",
+          "mean": 135762.3697195137
+        },
+        {
+          "name": "Combo 18",
+          "mean": 157597.05403668468
+        },
+        {
+          "name": "Combo 41",
+          "mean": 136815.58227583737
+        },
+        {
+          "name": "Combo 42",
+          "mean": 160112.1151440569
+        },
+        {
+          "name": "Combo 43",
+          "mean": 167301.31285554016
+        },
+        {
+          "name": "Combo 56",
+          "mean": 138313.67081656595
+        },
+        {
+          "name": "Combo 58",
+          "mean": 167890.79627521304
+        },
+        {
+          "name": "Combo 28",
+          "mean": 164292.89158366012
+        },
+        {
+          "name": "Combo 46",
+          "mean": 167049.0525732216
+        },
+        {
+          "name": "Combo 49",
+          "mean": 166674.66984086813
+        },
+        {
+          "name": "Combo 50",
+          "mean": 140901.18945628084
+        },
+        {
+          "name": "Combo 34",
+          "mean": 168444.01658987394
+        },
+        {
+          "name": "Combo 51",
+          "mean": 163586.8317760938
+        },
+        {
+          "name": "Combo 45",
+          "mean": 159831.53105632315
+        },
+        {
+          "name": "Combo 38",
+          "mean": 134020.89850338854
+        },
+        {
+          "name": "Combo 52",
+          "mean": 170794.68323392633
+        },
+        {
+          "name": "Combo 16",
+          "mean": 164257.53320342494
+        },
+        {
+          "name": "Combo 54",
+          "mean": 165877.27974323486
+        },
+        {
+          "name": "Combo 55",
+          "mean": 170261.676204669
+        },
+        {
+          "name": "Combo 57",
+          "mean": 163031.0728296177
+        }
+      ]
+    }
+  }
+}

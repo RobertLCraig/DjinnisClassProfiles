@@ -1,36 +1,43 @@
 # Release Notes
 
-## Version: 0.3.0
+<!--
+  This file is the PENDING release, not a record of the last one. The version
+  heading below names the next tag; everything under it is copied verbatim into
+  CHANGELOG.md when release.ps1 runs, and release.ps1 also rewrites the .toc to
+  match this version.
 
-### Keybinding Profiles, Per-Bar Filtering, Slot Overrides, JSON Export, Profile Organization
+  AFTER EVERY RELEASE: clear the body and bump the heading.
 
-#### New: Keybinding Profiles
-- Save and restore keybinding layouts as named profiles
-- Full CRUD: save, load, rename, delete, duplicate
-- JSON export/import via copy+paste
-- Confirmation dialog before restoring (replaces all bindings)
+  This is not housekeeping, it is the trap that already bit its sibling. In
+  DjinnisDataTexts the shipped notes were left here through a whole cycle, and a
+  later release run picked up that stale version, rewrote a newer .toc backwards,
+  and published the newer code to GitHub and CurseForge under the older tag. The
+  habit that avoids a repeat is clearing this file in the same sitting as the
+  release, not "next time". Shipped notes live in CHANGELOG.md, which is where
+  release.ps1 has already put them, so nothing here needs preserving.
 
-#### New: Per-Bar Profiles
-- Choose which action bars to include in save/restore operations
-- Bar filter checkboxes in Options (Main, Stance, Right 1/2, Bottom Right/Left, Extra 1/2/3)
+  Do NOT write a version heading inside a comment like this one. release.ps1
+  extracts the version by regex BEFORE it strips comments, so the first match in
+  the file wins even if it is commented out.
+-->
 
-#### New: Per-Character Slot Overrides
-- Override specific action bar slots on a per-character basis
-- Overridden slots use the current bar action instead of the profile's saved action during restore
-- Useful for racial abilities, profession skills, or character-specific abilities
-- Settings UI to add, view, and remove overrides
+## Version: 0.10.0
 
-#### New: JSON Export/Import
-- All profile types now export as minified JSON for easy copy+paste sharing
-- Action bar profiles: export single or all profiles as JSON
-- Talent profiles: export all talent profiles as JSON
-- Keybinding profiles: export as JSON
-- Import auto-detects JSON format alongside legacy ABP and MySlot formats
+First packaged version. Not yet released anywhere.
 
-#### New: Custom Profile Ordering
-- Up/down arrow buttons on each profile row in Settings
-- Custom order respected in tooltip, loadnext/loadprev cycling
+Shows which of your four druid specs want a dropped item, in the moment the roll
+timer is running.
 
-#### New: Profile Tags
-- Click-to-cycle tag button per profile: PvE, PvP, Raid, M+, Solo, Farm, Alt
-- Color-coded tag labels shown in both Settings and tooltip
+- Raid warning and a sound on a group loot roll for a BiS item
+- A BiS / Not BiS line on every gear tooltip
+- A window with two tabs: by boss, and a character-sheet paper doll by slot
+- Your equipped item shown above each BiS target, with a tick on ones you own
+- A per item target item level, Champion / Hero / Myth ranks, saved per account
+- A bonus roll verdict when a Mythic+ finishes and when a raid boss dies
+- Raidbots Droptimizer import, read from the report's data.csv by item id
+- Trinket tiers from u.gg and Icy Veins, S through D, on every trinket in the
+  By Slot tab plus a ranked list of every trinket those two sites rate
+- The tiers turn themselves off whenever ClassCodex is loaded, because that
+  addon is where they came from and it keeps them current
+
+Item data covers Midnight Season 2, The Venomous Abyss.

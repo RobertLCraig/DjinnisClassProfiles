@@ -1,0 +1,75 @@
+{
+  "simbot": {
+    "simType": "advanced",
+    "date": 1789977778370,
+    "enemyCount": 1,
+    "meta": {
+      "rawFormData": {
+        "optimize": {
+          "talentLoadouts": []
+        }
+      }
+    }
+  },
+  "sim": {
+    "players": [
+      {
+        "name": "Djinni",
+        "specialization": "Feral Druid",
+        "collected_data": {
+          "dps": {
+            "mean": 176841.0570971581
+          }
+        }
+      }
+    ],
+    "profilesets": {
+      "results": [
+        {
+          "name": "DG_MPlus_WS",
+          "mean": 149091.74201550428
+        },
+        {
+          "name": "DG_MPlus_DotC",
+          "mean": 151217.50559538024
+        },
+        {
+          "name": "DG_Nymrissa_DotC",
+          "mean": 159661.89241101645
+        },
+        {
+          "name": "DG_Ulatek_WS",
+          "mean": 158365.59303258898
+        },
+        {
+          "name": "DG_CoiledAltar_WS",
+          "mean": 166346.29633363034
+        },
+        {
+          "name": "DG_Vashnik_WS",
+          "mean": 147678.90234685346
+        },
+        {
+          "name": "DG_TwinFangs_WS",
+          "mean": 153744.77373799056
+        },
+        {
+          "name": "DG_LostExplorers_WS",
+          "mean": 156287.00529502216
+        },
+        {
+          "name": "DG_Sszorak_DotC",
+          "mean": 176710.20652130066
+        },
+        {
+          "name": "DG_Sentinels_DotC",
+          "mean": 175236.55947021276
+        },
+        {
+          "name": "DG_Nekzali_WS",
+          "mean": 168980.4991047075
+        }
+      ]
+    }
+  }
+}

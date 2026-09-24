@@ -1,0 +1,20 @@
+## Interface: 120100
+## Title: Djinni's BiS
+## Notes: Shows which druid specs want a dropped item, and what it does to your stat targets. Saves action bars and talent builds on every class. Season 2, The Venomous Abyss.
+## Author: Djinni
+## Version: 0.46.1
+## IconTexture: Interface\Icons\Ability_Druid_Maul
+## AddonCompartmentFunc: DjinnisBiS_Toggle
+## SavedVariables: DjinnisBiSDB
+## SavedVariablesPerCharacter: DjinnisBiSCharDB
+## DefaultState: enabled
+## X-Category: Raid & Loot
+
+# Libraries. Listed directly rather than through an embeds.xml: four files do
+# not need a manifest pointing at them.
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+
+DjinnisBiS.lua

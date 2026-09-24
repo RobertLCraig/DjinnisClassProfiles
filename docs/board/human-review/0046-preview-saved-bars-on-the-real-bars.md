@@ -1,0 +1,390 @@
+---
+needs: 0044
+model: fable  # interface work
+---
+# 0046 Point at a saved layout and see it on the real bars
+
+## Why
+
+Rob, 2026-09-23: "I wonder if there is a way to preview actionbars for saved actionbars". Offered a
+hover list or icons drawn over the real bars, he picked the second: "1 is okay but it lacks
+positioning infomation about the bars which is a major visual queue".
+
+## Built, v0.39.0
+
+- Point at **Load bars: build**, **Load bars: spec**, or a list row that says **own bars**. The
+  saved layout is drawn over your real action bars: each button shows the saved icon for its slot.
+- **Amber edge:** a load changes that slot. A dark square with an amber edge: the load empties it.
+- The main bar shows the slot of the form you are in (`button.action`), so in Cat Form you see the
+  saved Cat page.
+- Move the mouse away and it goes. It also goes in combat, and never shows in combat.
+- Click Load while pointing at the button: the amber goes, as the bars now match.
+- **Our own frames only.** Each is placed on `UIParent` from the button's `GetRect()` and scale.
+  Nothing is written to, parented to or anchored on Blizzard's buttons. Button names are
+  `ActionButtonUtil.ActionBarButtonNames` (Shared/ActionButtonUtil.lua:31).
+- Icons: spell `C_Spell.GetSpellTexture`, item `C_Item.GetItemIconByID`, macro by name
+  (`findMacro`, then `GetMacroInfo`), mount `C_MountJournal.GetMountInfoByID`. Any other kind, or
+  one not found, is a question mark.
+- `PlanTab.loadKey` is pulled out of `loadBars`, so the hover and the click use one key.
+- `barChecks`: 15 new checks on `ghostPlan`, `ghostIcon` and `showGhost`. Six mutations, all red:
+  always changed, skyriding page kept, no question mark, no combat fence, macro by index, hide
+  keeps the key. The frame drawing is not tested: the harness stubs every frame.
+
+## What I need from you
+
+1. `/reload`, open the talent window. Point at **Load bars: spec**. Pass: icons sit exactly on
+   your bars, the same size, on every bar you have shown.
+2. Pass: slots that differ have an amber edge. Slots that match have none.
+3. Move away. Pass: all of it goes.
+4. Point at a row that says **own bars**. Pass: that build's bars show.
+5. Change UI scale, or a bar's scale in Edit Mode, and do step 1 again. Pass: still on top.
+6. In Cat Form, step 1 again. Pass: the main bar shows the saved Cat page.
+
+## Acceptance
+
+- [ ] WHEN a Load bars button or an "own bars" row is pointed at, THE ADDON SHALL draw that layout's icons over the shown action buttons, amber where a load changes the slot. proves: `..., a slot the load clears is marked`, `..., the same action is not marked`, `..., a macro is matched by name`, `..., shown for a saved layout`
+- [ ] WHEN the mouse leaves, or in combat, THE PREVIEW SHALL not show. proves: `..., and hidden`, `..., nothing in combat`
+- [ ] THE PREVIEW SHALL never write to Blizzard's action buttons. proves: manual (read `PlanTab.showGhost`)
+- [ ] Rob sees the icons line up on his bars in a client.
+
+## Comments
+
+**2026-09-23, adversarial review (review-card), verdict: findings, back to todo.**
+
+No browser and no game client here, so step 4 was replaced by reading the frame code against
+Blizzard's source in `wow-ui-source` (branch `live`). Nothing below was seen in a client.
+
+Harness: `offline-check.lua` prints "no FAIL lines" under both Lua 5.1 interpreters. Fifteen
+mutations on a `$TEMP` copy. Caught under both: skyriding filter gone, always changed, never
+changed, no combat fence, hide keeps the key, no question mark, macro by index, `loadKey` dropping
+the build. Survived under both: the seven in finding 2.
+
+Findings:
+
+1. **A slot the load fills is never previewed when its bar hides empty buttons.**
+   `ActionBarMixin:UpdateShownButtons` (Blizzard_ActionBar/Shared/ActionBar.lua:198-206) calls
+   `SetShown(false)` on an empty button unless the grid is shown ("Always Show Buttons" off). So
+   `ghostButtons` drops it through `b:IsVisible()`, and the case the amber edge is there for (the
+   load puts something where there is nothing now) draws nothing on that bar. The button still has
+   its `action` and its rect. Suggested test: the bar's visibility plus
+   `index <= bar.numButtonsShowable` and not `statehidden`, not the button's own `IsVisible`.
+2. **Criterion 2's proves do not prove the wiring.** `..., and hidden` calls `hideGhost` directly.
+   Taking `hideGhost` out of `sidebarTipOff`, out of the combat `OnEvent`, or out of the `barsChanged`
+   re-show all stay green, as do dropping the rect guard, the scale conversion, the `IsVisible`
+   filter and the loop that hides frames beyond `#plan`. `sidebarTipOff` is a plain function: a
+   check that shows a ghost, calls it and expects `ghostKey` nil costs two lines. `ghostButtons`
+   can be checked with stub `_G` buttons.
+3. **Two secret-capable reads are unguarded.** `IsVisible` has `SecretReturnsForAspect = Shown` and
+   `GetEffectiveScale` has `SecretReturnsForAspect = Scale` (SimpleFrameAPIDocumentation.lua:968,
+   381). Only `GetRect` (`SecretWhenAnchoringSecret`) goes through `canRead`. The `pcall` catches the
+   error, so the worst case is a preview that stops partway through; per DECISIONS it should still
+   go through `canRead`.
+
+What held:
+- The placement. `GetRect` is in the button's own scaled units, so `l * ES(button) / ES(UIParent)`
+  in UIParent units, anchored at UIParent's BOTTOMLEFT on a scale-1 child, is right for UI scale and
+  Edit Mode bar scale.
+- `button.action` is Blizzard's own field (`ActionBarActionButtonMixin:UpdateAction`,
+  ActionButton.lua:535), and it is set whether or not the button is shown. `ActionBarButtonNames` is the
+  eight bars (ActionButtonUtil.lua:31).
+- No taint. Only reads (`IsVisible`, `GetRect`, `GetEffectiveScale`, a field) touch Blizzard's
+  buttons. The ghosts are plain non-mouse frames on UIParent, so they cannot steal `OnLeave`, and
+  showing one in combat could not be blocked anyway.
+- Stale frames: `showGhost` hides every pooled frame first.
+- `barsChanged` re-show: the redraw only happens while `ghostKey` is set, meaning the mouse is on the
+  source. `applyBars` reads back synchronously, so the amber goes after a load.
+- Spec change or the talent window closing while pointing: the sidebar hides, and that fires
+  `OnLeave` on whatever is under the mouse. That is believed, not seen, and it goes with the in-game
+  check.
+
+Fixed in place: `f.bar =CreateFrame` had lost a space in ec07325.
+
+Security: **Weakest point:** the `SavedVariables` layout, which anyone can edit by hand, supplies
+`entry.type`/`id`/`name`. An unknown type or an id that does not resolve becomes the question mark,
+and nothing from it is executed or written. **Unchecked:** the two secret-capable reads in finding 3.
+**Leaks:** nothing. It is all local, the tooltip line carries no data, and a failure only means no
+preview.
+
+**2026-09-23** Builder, v0.39.1. All three findings fixed.
+1. `ghostButtons` also counts a hidden button when its container is shown.
+   `ActionBarMixin:UpdateShownButtons` shows the container while the bar has room for that slot.
+   The ghost is then placed on the container.
+2. The combat hide is now `PlanTab.sidebarCombat`, so it can be checked. The new checks run on fake
+   frames that record what was done to them. They cover:
+   - which buttons count;
+   - the position and size, in UIParent's scale;
+   - the ghost goes on `sidebarTipOff` and on `sidebarCombat`;
+   - `barsChanged` redraws, and hides a place that is gone.
+
+   Seven mutations, all red: no container, unguarded `IsVisible`, tip-off keeps the ghost, combat
+   keeps it, no redraw, no scale, no leftover hide.
+3. `IsVisible` and both `GetEffectiveScale` reads go through `canRead`.
+
+**2026-09-23** Rob, in game, on v0.39.0, with a screenshot in the chat: "That looks great! and
+responsive". He pointed at the "own bars" row for Raid: Lost Explorers:
+- the icons sat on his real bars;
+- slots a load changes had amber edges;
+- slots a load empties showed as dark squares.
+
+That covers steps 1, 2 and 4 of What I need from you, and the last criterion. It was seen before
+the v0.39.1 fixes.
+
+**2026-09-23, second adversarial review (review-card) of 2b9ce6b, verdict: findings, back to todo.**
+
+No browser and no game client here, so step 4 was replaced by reading the frame code against
+Blizzard's source in `wow-ui-source` (branch `live`, 782825221). Rob saw v0.39.0 in game; nothing
+from v0.39.1 has been seen in a client.
+
+Harness: `offline-check.lua` prints "no FAIL lines" under both Lua 5.1.5 and 5.4.6. Fifteen
+mutations on a `$TEMP` copy, the same result under both interpreters. Caught: no container, container
+visibility unguarded, combat keeps the ghost, tip-off keeps it, no redraw, no scale conversion, no
+hide before a redraw, hidden button's slot read through its own `IsVisible`, no `SetPoint` (that one
+throws rather than FAILs). Survived: the six in findings 1 to 3.
+
+Findings:
+
+1. **The container fix is not proven by its test.** The fake `TestBar2` and its container have the
+   same rect (x 200), so placing the ghost on the hidden button instead of the container
+   (`frame = b` for `frame = place`) stays green. The point of the fix is to place on the shown
+   container, not on the hidden button, and nothing checks it. Fix: give the container a
+   different x and check `drawn[2].x`.
+2. **The two new scale guards are untested.** Removing `canRead(scale)`, or the
+   `if not canRead(top) then return 0 end` line, stays green: no fake returns a secret scale.
+   This is the finding 3 fix from the first review. Fix: one fake with a secret `GetEffectiveScale`,
+   plus one run with a secret `UIParent` scale.
+3. **The fakes are swapped in and back without protection, and the swap itself is a taint risk.**
+   - The new block sets `canRead` (the file-local every secret guard uses), `CreateFrame`,
+     `UIParent` and `ActionButtonUtil`, then puts them back on line 8256 with no `pcall`.
+   - Offline, a throw kills the run, so it is loud there. In a client, `/djbis test` is called
+     straight from `SlashCmdList` with no `pcall`. A throw anywhere from line 8220 to 8256 would
+     leave all four swapped for the session. `canRead` would then treat a real secret as readable,
+     and `CreateFrame`/`UIParent` would stay stub tables.
+   - The harness cannot see this. Taking out the restore line, or only its `canRead` part, or
+     only its `CreateFrame`/`UIParent` part, stays green.
+   - Worse, even when the values are put back, addon code has written to the globals
+     `UIParent`, `CreateFrame` and `ActionButtonUtil`. Under WoW's taint model, a global written by
+     addon code stays tainted until `/reload`, and Blizzard code that reads it runs tainted. That
+     is the class of failure card 0038 is chasing ("Secret values are only allowed during
+     untainted execution"). This is reasoning from the taint model, not something seen in a
+     client.
+   - HANDOVER already warns that `/djbis test` swaps globals such as `InCombatLockdown`. But
+     `UIParent` and `CreateFrame` are read by almost every Blizzard file, and `ActionButtonUtil` by
+     the action buttons themselves. A `/djbis test` before Rob's 0038 taint log would muddy it.
+   - Suggested fix: let the ghost code take its three dependencies through `PlanTab` fields the
+     test can swap, for example `PlanTab.ghostNames()`, `PlanTab.newGhost()` and
+     `PlanTab.ghostTop()`. Then no Blizzard global and no `canRead` are touched. If a swap remains,
+     run the block in a `pcall` and restore after it.
+   - Note: `barChecks` already swaps `C_ActionBar`, `C_Spell`, `InCombatLockdown` and
+     `db().bars` without a `pcall`, from card 0033. That predates this card and is not a finding
+     here, but it belongs on 0038 as a suspect too.
+
+What held:
+- **`button.container` is right for all eight bars.** Every name in
+  `ActionButtonUtil.ActionBarButtonNames` (ActionButtonUtil.lua:31-40) is a bar inheriting
+  `EditModeActionBarTemplate` → `ActionBarTemplate`:
+  - `MainActionBar` (MainActionBar.xml:29);
+  - `MultiBarBottomLeft`/`BottomRight`/`Left`/`Right` and `MultiBar5`-`7` (MultiActionBars.xml:45-220).
+  `ActionBar_OnLoad` (ActionBar.lua:13-34) gives every button a container, including
+  `ActionButton1`-`12` through the `MainActionBar` branch. `noSpacers` is false in
+  ActionBarTemplate.xml:39. It is true only in `StanceBar.xml` and `PossessActionBar.xml`,
+  and neither bar is in the list. So `UpdateShownButtons` (ActionBar.lua:208) shows the container
+  for every slot up to `numButtonsShowable`, and the Edit Mode icon count sets that value
+  (EditModeSystemTemplates.lua:1064). Icon size is `container:SetScale`
+  (EditModeSystemTemplates.lua:1087), and the code reads the container's own
+  `GetEffectiveScale`, so the size is right.
+- **A hidden button has the right `action` for the form page.** Paging sets `actionpage` on
+  `MainActionBar`, and every registered button inherits it (`useparent-actionpage`,
+  ActionButton.lua:456). `ActionBarController_UpdateAll` and `ResetToDefault`
+  (ActionBarController.lua:143-189) then call `UpdateAction` on every frame in
+  `ActionBarButtonEventsFrame.frames`, shown or not. `UpdateAction` (ActionButton.lua:529-535)
+  sets `self.action` before any visibility check.
+- In a vehicle or override bar, `MainActionBar` is hidden, so `IsVisible` on its containers is
+  false and nothing is drawn on the main bar.
+- Edge case, noted only: a button hidden by the `statehidden` attribute keeps a shown container,
+  so it would be previewed. No Mainline Blizzard code sets `statehidden` on these buttons. Only
+  another addon's state driver could.
+- The `sidebarCombat` extraction is the same three calls as the old inline handler.
+
+Security: **Weakest point:** `/djbis test` in a client, finding 3. **Unchecked:** a secret
+scale (finding 2). **Leaks:** nothing. It is all local, and a failure only means no preview.
+
+**2026-09-23** Builder, v0.39.2. All three findings fixed.
+1. The fake container now sits 50 to the right of its hidden button. A check reads where that
+   ghost lands (333, which is 250 in UIParent's scale).
+2. Two new checks: a button with a secret scale is not drawn, and a secret UIParent scale draws
+   nothing.
+3. The preview reaches Blizzard only through `PlanTab.ghostUI`: button names, button lookup, frame
+   making, UIParent and `canRead`. The checks swap that one table, never a Blizzard global or
+   `canRead`. They run inside `pcall`, and the table is put back after. Two checks then confirm
+   that the block ran to the end and that the real table is back.
+
+Also: a `Bar12` fake, so a loop that stops at 11 goes red.
+
+Six mutations, all red: ghost on the hidden button, no scale guard, no UIParent guard, no
+restore, 11 buttons, no `SetPoint`. "No restore" is now a FAIL line, not a crash. The review's
+note on the older 0033 checks (they swap `C_ActionBar`, `C_Spell` and `InCombatLockdown`) is on
+card `0038` as a suspect.
+
+Rob pulled `wow-ui-source` during this fix (`live`, 782825221 to 09b9db794). The only change near
+this card is in `SimpleTextureBaseAPIDocumentation.lua`: `ChecksForbiddenAspects` on `self` for
+texture setters. That applies to forbidden textures. The preview only sets textures on its own
+frames, so it is not affected.
+
+**2026-09-23, third adversarial review (review-card) of 8e8a9db, verdict: findings, back to todo.**
+
+There is no browser and no game client here. Instead of step 4, I read the frame code against
+Blizzard's source in `wow-ui-source` (branch `live`, 09b9db794). Nothing from v0.39.1 or v0.39.2
+has been seen in a client.
+
+Harness: `offline-check.lua` prints "no FAIL lines" under Lua 5.1.5 and under 5.4.6. I ran 18
+mutations on a `$TEMP` copy, and both interpreters gave the same result every time.
+- Caught: no `ghostUI` restore, ghost on the hidden button, no scale guard, no UIParent guard,
+  `shown()` bypassing `ui.canRead`, the top guard bypassing it, 11 buttons, tip-off keeps the
+  ghost, combat keeps it, no redraw, and a throw mid-block (it becomes a FAIL line, not a crash).
+- Survived: the two in finding 2, plus five covered under "Noted" and "What held".
+
+Findings:
+
+1. **A throw inside the block leaves `PlanTab.ghostKey` set.** The `pcall` puts back `ghostUI` and
+   `ghosts`, but not the key. Probed: I put an `error()` after the first fake `showGhost`, and after
+   the restore `ghostKey` was still `"Feral"`.
+   - In a client, the next `barsChanged` (any bar save, load or undo) calls
+     `showGhost("Feral")` with the real `ghostUI` and the real saved bars. That draws Rob's Feral
+     layout over his bars with nothing pointed at, and it stays until some Load button or row
+     fires `OnLeave`.
+   - This only happens after a throw, which also prints a FAIL, so the risk is small. But the brief
+     was "everything put back if a check throws", and this is not.
+   - Fix: call `PlanTab.hideGhost()` straight after the restore line, and add
+     `PlanTab.ghostKey == nil` to the "real frame calls are back" check.
+2. **The `PlanTab.ghosts` half of the swap is not checked.** Two mutations stay green:
+   - **Drop `ghosts` from the restore.** After `/djbis test`, the pool holds the fake tables. Their
+     metatable swallows every call, so the preview does nothing until `/reload`, and nothing says so.
+   - **Drop the `PlanTab.ghosts = {}` swap.** The fake block then reuses the real frames made by the
+     earlier `showGhost("Feral")` and moves them to fake coordinates. They are hidden again before
+     the command returns, but fake tables are appended to the real pool.
+   - The restore check compares `ghostUI.canRead` and `ghostUI.make` only. The `make` comparison is
+     redundant: once `ghostUI == keptUI`, it follows.
+   - Fix: record `#keptGhosts` before the block, then check `PlanTab.ghosts == keptGhosts` and that
+     the count did not change.
+
+Noted, not findings:
+- The fake `SetPoint` ignores its second argument, so anchoring the ghost on `p.frame` (a
+  Blizzard button) instead of `ui.top()` stays green. Criterion 3 is `proves: manual`, and reading
+  the code confirms `ui.top()`. If you want it covered, have the fake record `relativeTo`.
+- `ui.canRead(slot)` in `ghostButtons` is untested. Swapping it for the real `canRead` stays green.
+  `b.action` is a Lua field that `UpdateAction` computes, not an API return, so this is low risk.
+- With a secret UIParent scale, `showGhost` returns 0 but leaves `ghostKey` set. The tooltip then
+  says "Your bars show it now" while nothing is drawn. `OnLeave` clears it, so no harm is done.
+- The old "Every shown action button..." comment now sits above `ghostUI` instead of
+  `ghostButtons`.
+- `sidebarChecks` (card 0034, line 8439) writes the `GameTooltip` global during `/djbis test`.
+  That code predates this card, and card 0038's suspect list does not include it yet.
+
+What held, from the brief's questions:
+- **Does the new block write any Blizzard global or the `canRead` upvalue? No.** The only
+  assignments to `canRead` are at lines 1021-1025. The block writes only `PlanTab.ghostUI`,
+  `PlanTab.ghosts`, `PlanTab.ghostKey` and `db().bars`, which is our own SavedVariables and is put
+  back at the end of `barChecks`. It calls the real `GameTooltip:Hide()` and `hideTreeDiff` through
+  `sidebarTipOff`, which reads and calls but writes nothing. The `canRead` field in `ghostUI` is
+  captured from the file-local at load time.
+- **Is everything put back if a check throws? Partly.** `ghostUI` and `ghosts` are put back after
+  the `pcall`, and the "ran to the end" check turns a throw into a FAIL. `ghostKey` is not
+  (finding 1).
+- **Does `ghostUI.make` create frames the same way as before? Yes.** It still calls
+  `CreateFrame("Frame", nil, UIParent)`, and `SetFrameStrata("DIALOG")` is still in `showGhost`,
+  unchanged. `CreateFrame` and `UIParent` are looked up when the call runs, as before. The anchor is
+  `ui.top()`, which is `UIParent`. The harness cannot see strata or parent (both mutations survive),
+  so these points rest on reading the code.
+- **Do the earlier in-client checks draw real ghosts, and are they always hidden? Yes, and yes.**
+  - The check at line 8213 runs `showGhost("Feral")` with the real `ghostUI` and
+    `db().bars = { Feral = { slots = {} } }`. In a client it creates real DIALOG frames on
+    UIParent over every shown button: dark squares, amber where the stubbed `readBars` holds
+    something.
+  - `hideGhost()` is the next statement, in the same Lua call, so no frame is rendered in between
+    and Rob sees nothing.
+  - The "Balance" and "combat" calls start with `hideGhost()` and draw nothing.
+  - The frames join the real pool, the same frames a real hover would use.
+  - One side effect: a preview Rob had up while typing `/djbis test` would be cleared.
+- `ActionButtonUtil.ActionBarButtonNames` is unchanged at 09b9db794 (ActionButtonUtil.lua:31).
+  The real `ghostUI.names` is not exercised offline, where the harness has no `ActionButtonUtil`,
+  so replacing it with `{}` survives. It is the same expression as before the fix.
+
+Security: **Weakest point:** `/djbis test` in a client. After a throw, a stale `ghostKey` could
+draw an unasked preview (finding 1). **Unchecked:** the pool restore (finding 2). **Leaks:**
+nothing. It is all local.
+
+**2026-09-23** Builder, v0.39.3. Both findings fixed, and two of the notes.
+1. `PlanTab.hideGhost()` runs straight after the restore. A check then confirms that `ghostKey`
+   is nil.
+2. A check confirms that `PlanTab.ghosts` is the kept pool, at its kept size.
+- Note fixed: `showGhost` sets `ghostKey` only after the UIParent scale guard. So a secret scale
+  no longer makes the tooltip say "Your bars show it now". The secret-scale check now reads the
+  key as well.
+- Note fixed: the `loadBars` comment is back above `loadBars`.
+
+Mutations, all red: pool not restored, no pool swap, a throw with no hide after it, and the key set
+before the scale guard.
+
+Left as noted: the fake `SetPoint` ignores the anchor frame (criterion 3 is manual). The slot
+`canRead` has no check. The older `GameTooltip` swap in `sidebarChecks` is now on card `0038`.
+
+**2026-09-23, fourth adversarial review (review-card) of 6e6945a, verdict: clean, to human-review.**
+
+The scope was the two third-review findings, the moved `ghostKey`, and anything those changes
+newly break. There is no browser and no game client here. Instead of step 4, I read the frame code
+against `wow-ui-source` (branch `live`, 09b9db794). Nothing from v0.39.1 to v0.39.3 has been seen
+in a client. The game folder holds v0.39.3, byte-identical to the repo's `DjinnisBiS.lua`. I only
+read it.
+
+Harness: `offline-check.lua` prints "no FAIL lines" under Lua 5.1.5 and 5.4.6. I ran 12 mutations
+on a `$TEMP` copy, and both interpreters gave the same result every time.
+- **Caught:**
+  - a throw mid-block;
+  - a throw with the hide after the restore removed. The new "no preview left up" check fails on
+    its own: "expected nil, got Feral";
+  - `ghosts` left out of the restore: "true/0, got false/4";
+  - no `PlanTab.ghosts = {}` swap: "true/0, got true/4";
+  - the key set before the scale guard again. The secret-scale check reads "0/false/Feral";
+  - the key never set. "shown for a saved layout" and the `barsChanged` redraw check both go red;
+  - the key set only when `#plan > 0`;
+  - `barsChanged` not redrawing.
+- **Survived, and all equivalent:**
+  - the hide after the restore removed, with no throw. The block already ends in `hideGhost`, so
+    the line only matters after a throw, and that case is caught (above);
+  - the hide moved to before the restore. `ghostKey` is cleared either way, and the real pool was
+    never touched inside the block;
+  - the key set after the draw loop instead of before it;
+  - changing the pool check's expected value to the live count. That is a probe of the check
+    itself, so surviving means nothing.
+
+Findings: none.
+
+What held:
+- **Finding 1 (a stale key after a throw) is fixed.** `hideGhost()` runs right after the restore,
+  on the real pool, and a check confirms the key is nil. It also clears a preview that was up when
+  `/djbis test` was typed, which the third review already noted.
+- **Finding 2 (the pool half of the swap) is fixed.** Both pool mutations go red. On a client the
+  real pool is not empty (offline it is 0), so a missing swap would reuse real frames without
+  adding any. The count check cannot see that. But the fake `top()` is then passed as
+  `SetPoint`'s `relativeTo`, which must be a `ScriptRegion`
+  (SimpleScriptRegionResizingAPIDocumentation.lua:144). That throws, and "ran to the end" catches
+  it.
+- **The knock-on from moving `ghostKey`.** A saved layout, outside combat, with a readable UIParent
+  scale, still sets the key before the draw loop. Both the "key never set" and "only when drawn"
+  mutations go red, so `barsChanged` still redraws. A throw in `ghostButtons`, `readBars` or
+  `ghostPlan` now leaves no key. Before, it left one, so this is an improvement. The tooltip lines
+  (lines 6077 and 6146) test `pcall(...) and PlanTab.ghostKey`, so they follow the new rule.
+- The `loadBars` comment is back above `loadBars`. The `0038` suspect line now names
+  `sidebarChecks` and `GameTooltip`.
+
+Noted, not findings:
+- Suppose a `barsChanged` redraw meets a secret UIParent scale. `showGhost` hides first and returns
+  before setting the key, so later loads under the same hover no longer redraw. I found nothing
+  that makes UIParent's scale secret, and `OnLeave` resets it all.
+- The key is still set when `#plan` is 0, for example in a vehicle with every bar hidden. The
+  tooltip then says "Your bars show it now" with nothing drawn. This predates the fix and is
+  harmless.
+
+Security: **Weakest point:** `/djbis test` in a client. It is now covered after a throw: the key
+is cleared and the pool is checked. **Unchecked:** the anchor frame (criterion 3 is manual) and
+the slot `canRead`, both as noted before. **Leaks:** nothing. It is all local.

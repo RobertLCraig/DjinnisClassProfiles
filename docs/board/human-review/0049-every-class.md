@@ -1,0 +1,300 @@
+---
+needs: 0048
+---
+# 0049 DjinnisBiS works on every class, not only druids
+
+## Why
+
+Rob, 2026-09-24: "Expand this to work for all classes (not just druids)". His characters include a
+Death Knight, a Shaman, Hunters, Rogues, Monks and a Demon Hunter (from SavedInstances).
+
+## What
+
+- `SPEC_BY_ID` (`DjinnisBiS.lua`, near `playerSpec`) knows only 102 to 105. It becomes every
+  spec, keyed by spec id. Spec names repeat across classes (Frost, Restoration, Holy), so the key
+  must carry the class: for example `Frost DK` and `Frost Mage`, or the id itself. Druid names stay
+  as they are, so saved data (`db().bars.Feral`, the loadout names) keeps working.
+- Talents: the loadout list, the spare loadout, the Reset to plan flow and the boss reminder work
+  for any spec that has stored builds (card `0050`).
+- Bars: Save, Load, Undo, profiles and the preview already work per spec key. They must work under
+  the new keys.
+- Gear plan and boss rows stay druid-only (`0048` question 2, decided: later). On another class
+  they say so in one line, and do not error.
+- `/djbis test` passes, with checks on a non-druid spec (for example 250 Blood).
+
+## Acceptance
+
+- [x] WHEN a non-druid logs in, THE ADDON SHALL load with no error and offer its bar and talent features for that spec. proves: a new `offline-check.lua` run as spec 250
+- [x] WHEN a druid logs in, THE SAVED DATA SHALL still be found under the old keys. proves: the existing checks, unchanged
+- [ ] Rob logs in on one alt and sees the list and the bar buttons. proves: manual
+
+## What I need from you
+
+On one alt that is not a druid (the Death Knight, say), after `/reload`:
+1. Open the talent window. Pass: the list beside it shows, titled "Blood builds" (your own
+   loadouts) or "No stored builds for Blood yet". Stored builds come with card `0050`. Fail: a Lua
+   error, or no list.
+2. `/djbis bars save`. Pass: it says the bars are saved for your spec. Then `/djbis bars undo` works.
+3. Hover any piece of gear. Pass: no "BiS" or "Not BiS" line.
+4. `/djbis here`. Pass: one line saying the BiS list is druid gear.
+5. Open the character sheet. Pass: the strip under it says "Gear plans are for druids only, for
+   now." and has no scenario button.
+6. On your next loot roll: no glow on the item's icon, and no "[BiS]" line in chat.
+7. Type `/djbis`, then open the Plan tab. Pass: one line, "Gear plans are for druids only, for
+   now.", and no scenario buttons above it.
+
+## Comments
+
+**2026-09-24** Builder, v0.41.0.
+- `PlanTab.SPECS` holds all 40 specs as { id, key, class id, role }, from Raidbots' talents.json.
+  `SPEC_BY_ID`, `PlanTab.CLASS_OF` and `PlanTab.ROLE_SPECS` (class, then role) are built from it.
+  Druid keys are unchanged. A name two classes share carries the class: `Frost Mage`, `Frost Death
+  Knight`, `Holy Paladin`, `Holy Priest`, `Protection Paladin`, `Protection Warrior`,
+  `Restoration Shaman`.
+- The group finder's role prompt (`specForRole`) now picks among the class's own specs. Before, a
+  Death Knight accepted as tank was offered Guardian. A Mage asked to tank gets no prompt.
+- `PlanTab.gearHere()` (the class is druid) gates what is druid gear: the tooltip's BiS and plan
+  lines, the loot roll and boss kill verdicts (a raid warning and sound on every kill, on any class,
+  before this), `/djbis here`, the journal pool walk, the loot spec card and the KeystoneLoot send.
+  The Plan tab's no-plan text on another class is one line: "Gear plans are for druids only, for
+  now."
+- The bar messages no longer say bars "are for druids"; with every spec known, a nil spec means the
+  game has not said the spec yet.
+- The pool walk now filters the journal by the player's class and that class's specs only. It set a
+  druid spec on the player's class before, which on a non-druid was a nonsense filter.
+- Left as is: the main window (`/djbis`) is the druid gear browser, with its four druid spec
+  buttons, on any class. Hindsight's spec keys stay druid: they are read only for boss rows.
+- Checks: `PlanTab.specChecks` (40 specs, keys once, druid keys, shared names, the one line), and
+  five role checks. `offline-check.lua <spec id>` loads as that spec, types 11 slash commands, hovers
+  a helm and fires `ENCOUNTER_END` and `CHALLENGE_MODE_COMPLETED`. All 36 non-druid specs pass
+  under Lua 5.1 and 5.4. The self-test passes under both.
+- Mutations on a `$TEMP` copy, each caught: `gearHere` always true (spec 250 run: 2 FAIL lines), the
+  roll event gate removed (2), roles druid-only (5), "Frost Mage" renamed "Frost" (1), the one-line
+  text removed (1). Run as 103, the spec mode fails as it should, because Feral gets the gear lines.
+- Found on the way: the first version of the checks pushed `selfTest` past Lua 5.1's 60 upvalues.
+  The error prints no FAIL line, so a filtered run looked green. The checks moved to
+  `PlanTab.specChecks`, as the handover says, and the handover now warns to read the output whole.
+- Deployed with `-WhatIf -Only DjinnisBiS` first: 2 files, 0.40.1 to 0.41.0.
+
+**2026-09-24** Adversarial review of `9936f19` (v0.41.0). **Verdict: findings, back to `todo/`.**
+The spec table is right and the bars and role prompt hold. But one druid gear surface still reaches
+every class: the loot roll glow. And the new spec mode cannot see that kind of leak.
+
+What held:
+- Harness, read whole, under Lua 5.1.5 and 5.4.6. The self-test exits 0 with "self-test passed".
+  All 36 non-druid spec runs exit 0, 14 lines each. All four druid runs exit 1: 103 as designed,
+  and 102, 104 and 105 the same way ("Not BiS" and the RaidWarningUtil stub).
+- `PlanTab.SPECS` against Raidbots `talents.json` (fetched today): 40 of 40 spec ids and class ids
+  match. Every name matches except `Resto`, which is the old druid key on purpose. The roles are the
+  game's (Augmentation and Devourer damage, Vengeance and Brewmaster tank). `wow-ui-source` has no
+  static role table to settle them. It names 1480 "Devourer DH" (`TrackedCooldowns.lua:35`).
+- Saved data. Druid keys are unchanged and the self-test still finds them. All 40 keys are unique.
+  None holds " / ", so a spec key cannot collide with a build key. Profiles live in their own table.
+- The role prompt. `specForRole` stays inside the class, and a Mage asked to tank gets nothing.
+  `specIndexOf` walks 1 to 4 under `pcall`, so three-spec classes and Devourer (index 3) resolve.
+  A non-druid already in the role gets no prompt: `setupSteps` has no plan, so no steps.
+- Other gates read right: tooltip, `/djbis here`, roll and kill verdicts, loot card, pool walk,
+  KeystoneLoot, bag glows (no plan, so an empty wanted list), stat lines (no `STAT_TARGET`), the
+  wrong-setup popup and `simcAppend` (no `BOSSES` row).
+- No new global writes. A `luac -l` SETGLOBAL list of the file before and after is identical. No
+  new main-chunk local. The game folder's `.lua` and `.toc` are byte-identical to `9936f19`.
+- Mutations on a `$TEMP` copy. Caught: `playerClass` ignoring the spec, `specForRole` ignoring its
+  class argument, Blood's id changed, the `/djbis here` gate removed.
+
+**Finding 1 (bug): the loot roll glow shows druid gear on every class.** `PlanTab.markRollFrame`
+(line 2213) calls `planLinesForLink` with no `gearHere()` gate. A probe ran as 250 Blood and 264
+Restoration Shaman. It rolled Pendant of Malefic Fury (251142, a neck in Feral's plan), and the
+hook answered `true`: the glow shows. The tooltip on that roll is gated, so the frame glows and the
+hover says nothing. Fix: gate `planLinesForLink` itself, so every caller is covered, or gate
+`markRollFrame`.
+
+**Finding 2 (test gap): the spec mode cannot catch a plan line.** It hovers item 1, which is in no
+plan, and it fails only on text holding "BiS". Plan lines read "Feral raid: in plan". Mutation:
+ungate `planLines` in the tooltip. The 250 run stays green, and the probe shows "Feral raid: in
+plan" on a Blood tooltip. Fix: hover 251142 and fail on any added line. Also fire the roll hook.
+
+**Finding 3 (test gap): four gates and the role data have no check that can fail.** These
+mutations survived the self-test and the 250 and 1480 runs: the `lootCardModel` gate removed, the
+`sendToKeystoneLoot` gate removed, the `harvestPools` gate removed, the pool walk's class filter
+removed, Devourer made a tank, and Vengeance made damage. Also, `lua offline-check.lua 9999` exits
+0. An unknown id runs as "no spec", so a wrong id in `SPECS` passes its own spec run. Fix: the spec
+mode fails when the id does not resolve to a key. Add non-druid checks that `lootCardModel` and
+`sendToKeystoneLoot` answer nil. Pin a role or two per class in `specChecks`.
+
+**Finding 4 (wording): the character sheet still offers a gear plan on another class.** The strip
+reads "No 1 target gear plan for Blood yet. Click for how." Its scenario button still cycles. The
+Plan tab shows the four scenario buttons above the one line. The card says a gear surface says so
+in one line. Fix: on `not gearHere()`, the strip says "Gear plans are for druids only, for now."
+and the scenario button and the Plan tab choices hide.
+
+**Finding 5 (druid assumption): `/djbis tidy` works on any class.** `PlanTab.RETIRED` holds
+DjinnisDreamgrove's druid names. Several are generic, such as "Raid: Vashnik", "M+ Apex" and
+"Dungeon: heal only". On a Death Knight, tidy would list a hand-made loadout with one of those
+names as an old Dreamgrove loadout, and `tidy yes` deletes it. The code path predates this card.
+But this card is the one that says the addon works on every class. And card `0050` brings
+"Raid: <boss>" names to other specs. It needs "tidy yes" after a listing, so it is not silent.
+Fix: tidy says "No old Dreamgrove loadouts on this spec." when the class is not druid.
+
+Security:
+1. Weakest point: druid-only is enforced at eight call sites, not at the data. Every new consumer of
+   `planIndex` has to remember the gate. The roll glow is the one that did not (finding 1).
+2. Unchecked: the spec id from the game goes through `SPEC_BY_ID`, and an unknown one is nil. So a
+   spec added in a patch reads "The game has not said which spec you are in yet" for good. That is
+   wrong, but it is safe. Saved keys are only matched as exact strings. Nothing new is read from
+   another player.
+3. Leaks: nothing leaves the client. The one outward send, to KeystoneLoot, is gated. Failures
+   print only to the player's own chat.
+
+No browser or client here. For Rob, once this is fixed, add to the alt checks above: 5. Roll on any
+item in a group (or watch a roll in a raid). Pass: no glow on the roll icon for a piece a druid
+plan holds. 6. Open the character sheet. Pass: the strip says gear plans are for druids, with no
+scenario button.
+
+**2026-09-24** Builder, v0.41.1: the five findings.
+1. The roll glow: `PlanTab.planLinesForLink` returns `{}` off a druid. The tooltip, the roll's chat
+   line and `markRollFrame` all read it, so one gate covers all three.
+2. The spec run now hovers the first item of the gear plan block, by its real id and name (a helm
+   in Feral's plan), and fails on ANY tooltip line. It also fires `START_LOOT_ROLL` for that item,
+   and fails on any "[BiS]" chat line during the three events. A spec id not in `PlanTab.SPECS`
+   fails the run. As 103 the run now fails 8 ways, as designed.
+3. Each gate returns "not druid" and sits first in its function: `harvestPools`, `lootCardModel`
+   (second return), `sendToKeystoneLoot`, `tidy`. `PlanTab.specChecks` swaps only
+   `PlanTab.playerClass` (never a Blizzard global) and checks each, plus the plan lines. The pool
+   walk's class filter is `PlanTab.poolSpecs(classID)`, checked for 11 and 6. The tank and healer
+   lists are checked in full: nothing on disk states roles, so the check is the record.
+4. The character sheet strip is `PlanTab.stripText` and `PlanTab.stripScenario`: off a druid it
+   reads "Gear plans are for druids only, for now." with no scenario button. The Plan tab hides its
+   scenario buttons there too. Both checked.
+5. `/djbis tidy` off a druid says "Nothing to tidy: the old loadouts were only ever made on
+   druids." and deletes nothing.
+- Mutations on a `$TEMP` copy, 13, each caught: every gate above, the class filter, a swapped role,
+  the strip text and button, the roll event gate, the tooltip gate and the `here` gate. The
+  plan-lines gate is caught by the self-test. The spec run stays green for it, because the tooltip
+  and the roll handler also gate on their own.
+- The self-test and all 36 non-druid spec runs pass under Lua 5.1 and 5.4, output read whole.
+- Rob's steps 5 and 6 above are the reviewer's two, now in "What I need from you".
+
+**2026-09-24** Second adversarial review, of `cf7016e` (v0.41.1). **Verdict: findings, back to `todo/`.**
+The five fixes hold and no druid gear reaches another class that I could find. What bounces it is
+three new checks that a mutation still walks past, two of them on the druid side.
+
+What held:
+- Harness, from a copy of `cf7016e` in `$TEMP`, output read whole, exit codes read. Self-test exits
+  0 under Lua 5.1.5 and 5.4.6. All 36 non-druid spec runs exit 0 under both. 102, 103, 104 and 105
+  exit 1 with 8 FAIL lines each, which is the run working: as 103 it hovers "Enigmatic
+  Dreamwatcher's Somnolent Stare" (271528, the first item in the plan block) and gets the BiS line
+  and two plan lines, and the roll prints "[BiS] PLAN". Ids 9999, 25, 1 and 0 exit 1 with "not in
+  PlanTab.SPECS". The id guard is a text search, but only the `SPECS` rows have the `{ <n>, "` shape.
+- Finding 1 is fixed. `planLinesForLink` is gated first, so `markRollFrame` hides the glow off a
+  druid, and a pooled glow is hidden too. Every other `planIndex`, `plannedIds` and `gearPlanFor`
+  reader is behind a gate, a druid-only table (`SPEC_ORDER`, `BOSSES`) or the one-line Plan tab.
+- The spec mode cannot pass on nothing: an empty plan block fails, an unknown id fails, and fewer
+  than three frames taking the events fails. It counts frames, not events, so a second frame on
+  `ENCOUNTER_END` would hide a lost `START_LOOT_ROLL`. Not a finding today: only the roll frame
+  registers them.
+- The `playerClass` swap is restored on the error path. Mutation: `error("boom")` inside the Death
+  Knight block. The run reports "the Death Knight checks ran: ... boom" and nothing else goes red.
+- No druid broken by a gate. Each gate forced closed for a druid too: the plan lines (7 FAIL),
+  the loot card (4), KeystoneLoot (10), `tidy` (10), `stripScenario` (1). The self-test swaps
+  `C_SpecializationInfo` to Feral for its whole run, so `asDruid` holds on any class in a client.
+- Globals: a `luac -l` SETGLOBAL list of `9936f19` and `cf7016e` is identical. Main-chunk locals
+  unchanged. The new self-test block swaps only `PlanTab.playerClass`.
+- The builder's `mut0049.sh`: all 13 reproduce, and "plan lines gate, spec run" stays green, as the
+  comment says.
+- The game folder matches the working tree, which is `cf7016e` plus the uncommitted `PlanTab.prompt`
+  change. The 0049 lines are identical.
+
+**Finding 1 (test gap): a druid's character sheet strip has no check.** `stripText` is new and
+pure, and only its Blood branch is checked. Mutation: `if not PlanTab.stripScenario(spec)` made
+`if spec`, so every druid's strip reads "Gear plans are for druids only, for now." The self-test
+stays green. Fix: check `stripText("Feral", nil, "st", 0)` (the "No 1 target gear plan" line) and
+one plan case with a count.
+
+**Finding 2 (test gap): nothing notices if the class swap is not put back.** Mutation: delete
+`PlanTab.playerClass = wasClass`. The self-test stays green. In a client that would switch off
+every druid gear feature until `/reload`. The code restores correctly today, so this is the check,
+not the code. Fix: after the restore, check `PlanTab.gearHere()` is true, or take `asDruid` there.
+
+**Finding 3 (test gap and wording): the Plan tab's scenario buttons off a druid.** The comment says
+"The Plan tab hides its scenario buttons there too. Both checked." Only the strip is checked.
+Mutation: drop `PlanTab.stripScenario(spec) and` from `refresh`. Green. It is frame wiring, so a
+look is the right proof. Fix: add to "What I need from you": on the Death Knight, open `/djbis`,
+Plan tab. Pass: one line, "Gear plans are for druids only, for now.", and no scenario buttons.
+The strip's hidden button (step 5) is the same kind: frame code, Rob's look.
+
+Not this card's, noted: `harvestPools` never runs for a druid offline. Forcing its gate closed for
+a druid too leaves the self-test green.
+
+Security:
+1. Weakest point: still the gates, now nine, but the plan lines are gated at the data, so the three
+   roll and tooltip readers share one gate. A new reader of `gearPlanFor` or `POOL` still has to
+   remember.
+2. Unchecked: a spec id from a patch is nil and reads as no spec. Safe. `tidy` off a druid deletes
+   nothing, so no player-named loadout can be removed on another class.
+3. Leaks: nothing new leaves the client. The KeystoneLoot send is gated before the API is read.
+
+No client here. Rob's steps 1 to 6 stand, plus the Plan tab look in finding 3.
+
+**2026-09-24** Builder, v0.41.3: the three findings.
+1. Two checks on a druid's strip: no plan ("No 1 target gear plan for Feral yet. Click for how.")
+   and a plan with 2 slots to fix. The reviewer's mutation (every strip reads "druids only") now
+   fails 1 check.
+2. After the Death Knight block, a check that `PlanTab.playerClass` is the original and
+   `gearHere()` is true again. Deleting the restore now fails 1 check.
+3. The Plan tab's scenario buttons are frame code and have no offline check. My v0.41.1 comment's
+   "Both checked" was wrong: only the strip is. The Plan tab look is Rob's step 7 above.
+- Not changed: the pool walk's gate is not reachable for a druid offline (`EJ_GetNumTiers` is not
+  stubbed), as the reviewer noted.
+- The self-test passes under Lua 5.1 and 5.4. The Lua change is self-test code only; deployed so
+  the game folder matches the commit.
+
+**2026-09-24** Third adversarial review, of the card as a whole at `9b15154` (v0.41.3), with
+`9936f19` and `cf7016e` read again. **Verdict: clean, to `human-review/` for Rob's alt checks.**
+
+What held:
+- Harness, from `git show 9b15154` copies in `$TEMP`, output read whole, exit codes read. The
+  self-test exits 0 under Lua 5.1.5 and 5.4.6, "self-test passed", same output on both. All 36
+  non-druid spec runs exit 0 under both, 11 commands, one hover and 3 events each. 102 to 105 exit 1
+  with 8 FAIL lines each, which is the run working. 9999 exits 1 with "not in PlanTab.SPECS".
+- The last round's three findings. The reviewer's strip mutation now fails 2 checks. Deleting the
+  class restore now fails "the class is put back". The Plan tab buttons are step 7 of "What I need
+  from you", and the v0.41.1 wording is corrected in the thread.
+- The spec table, checked a new way: all 40 ids and class ids against Blizzard's own
+  `SPEC_FORMAT_STRINGS` (`Blizzard_ClassSpecializationsFrame.lua:14`, "mage-frost" and so on). 40 of
+  40 match. Every name matches except `Resto`, the old druid key on purpose.
+- `UnitClass`, the fallback in `playerClass`: `UnitDocumentation.lua:900` marks only `className`
+  conditionally secret. `classID`, the third return read here, is not.
+- 28 mutations on a copy. 22 caught, among them: `gearHere` always true (5 checks fail, and 8 FAIL
+  lines in the 250 run) and always false (9 checks), every gate removed one at a time (plan lines, tooltip, roll
+  event, `here`, loot card, KeystoneLoot, journal, `tidy`, the one-line Plan tab), `poolSpecs`
+  ignoring the class, `specForRole` ignoring the class, Resto renamed, Blood made damage, Frost Mage
+  and Arcane ids swapped, and the bar save and load keys changed.
+- Stored builds on another class: a copy with Feral's builds filed under Blood, run as 250. `/djbis
+  talents` lists all ten stored builds, and every command runs with no error. Card `0050` fills
+  this in.
+- The game folder's `DjinnisBiS.lua` and `.toc` hash the same as `9b15154`'s blobs.
+
+Survived, and why none bounces the card:
+- The plan tab choices and the strip's scenario button, ungated. Frame code, no offline check.
+  Rob's steps 5 and 7 are the proof, as the last round agreed.
+- `playerClass`'s `UnitClass` fallback, removed or reading the class name instead of the id, and
+  `offerSetup` not passing the class. No check sees the path where the spec is not yet known. It
+  fails closed: a broken fallback turns druid gear off until the spec is read, and never shows it
+  to another class. `specForRole`'s class argument has its own check.
+- Windwalker given class 4. Nothing checks each row's class id. The table matches Blizzard's today,
+  so a per-row check would only restate it.
+
+Not this card's, noted: an initial spec (a new character before level 10) is not in `SPECS`, so it
+reads "The game has not said which spec you are in yet". Safe, and the wording is wrong only there.
+
+Security:
+1. Weakest point: the druid gate is at nine places, not at the data. A new reader of `gearPlanFor`,
+   `POOL` or `bisFrom` has to remember `gearHere()`. Every reader today is gated or reads a
+   druid-only table.
+2. Unchecked: the spec id from the game goes through `SPEC_BY_ID` as an exact key, and an unknown
+   one is nil. Saved keys are matched as exact strings. `tidy` deletes nothing off a druid, so a
+   player's own loadout is never removed on another class. Nothing is read from another player.
+3. Leaks: nothing leaves the client. The one outward send, to KeystoneLoot, is gated before the API
+   is read. Failures print only to the player's own chat.
+
+No client here. What is left is Rob's seven steps above on a non-druid alt.

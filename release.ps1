@@ -12,8 +12,70 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# ---------------------------------------------------------------------------
+# Guard the first positional parameter
+#
+# $OutputDir is positional, so any unrecognised argument binds to it and is
+# then treated as a path to create. `release.ps1 --help` therefore did not
+# print help: it built the release into a new directory literally named
+# "--help", and the resulting zip was committed and sat in the repo until
+# 2026-08-12. Refuse anything flag-shaped instead of making a folder out of it.
+# ---------------------------------------------------------------------------
+
+function Show-Usage {
+    Write-Host ""
+    Write-Host "  DjinnisBiS release script" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Usage: release.ps1 [-OutputDir <path>] [-ReleaseType release|beta|alpha]"
+    Write-Host "                     [-DryRun] [-SkipTag] [-SkipPush]"
+    Write-Host ""
+    Write-Host "  The version comes from the '## Version:' line in RELEASE_NOTES.md."
+    Write-Host "  -DryRun previews without writing, committing, tagging or pushing."
+    Write-Host ""
+}
+
+# Two checks, because the two ways of launching this script bind arguments
+# differently and only covering one of them is worse than covering neither: it
+# reads as guarded while still firing a real release.
+#
+#   pwsh -File release.ps1 --help   ->  $OutputDir keeps its default,
+#                                       "--help" lands in $args
+#   & .\release.ps1 --help          ->  "--help" binds positionally to $OutputDir
+#
+# Measured on 2026-08-15, after the -File form ran a genuine release while the
+# guard, which only inspected $OutputDir, sat there looking correct.
+
+# 1. Anything unbound. Every real parameter is declared above, so a non-empty
+#    $args means the caller typed something this script does not understand.
+if ($args.Count -gt 0) {
+    $first = [string]$args[0]
+    if ($first -match '^-{1,2}(h|help|\?)$') {
+        Show-Usage
+        exit 0
+    }
+    Write-Host ""
+    Write-Host "ERROR: unrecognised argument '$first'." -ForegroundColor Red
+    Write-Host "       Refusing rather than starting a release you did not ask for." -ForegroundColor Red
+    Show-Usage
+    exit 1
+}
+
+# 2. A flag that bound positionally, which would then be created as a folder.
+if ($OutputDir -match '^-') {
+    if ($OutputDir -match '^-{1,2}(h|help|\?)$') {
+        Show-Usage
+        exit 0
+    }
+    Write-Host ""
+    Write-Host "ERROR: '$OutputDir' looks like a flag, not an output directory." -ForegroundColor Red
+    Write-Host "       It would have been created as a folder. Refusing." -ForegroundColor Red
+    Show-Usage
+    exit 1
+}
+
 $Root             = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$AddonName        = "DjinnisClassProfiles"
+$AddonName        = "DjinnisBiS"
 $TocFile          = Join-Path $Root "$AddonName.toc"
 $ReleaseNotesFile = Join-Path $Root "RELEASE_NOTES.md"
 $ChangelogFile    = Join-Path $Root "CHANGELOG.md"
@@ -57,7 +119,7 @@ $Version = $versionMatch.Groups[1].Value.TrimStart('v')
 $Tag     = Make-Tag $Version $ReleaseType
 
 Write-Info ""
-Write-Info "=== $AddonName Release: $Tag ($ReleaseType) ==="
+Write-Info "=== DjinnisBiS Release: $Tag ($ReleaseType) ==="
 if ($DryRun) { Write-Warn "  DRY RUN - no files will be written, committed, tagged, or pushed" }
 Write-Info ""
 
@@ -108,6 +170,7 @@ if ($tagExists -contains $Tag) {
     Write-Warn "  Tag '$Tag' already exists - auto-bumping patch version..."
 
     # Parse numeric version and increment patch until a free tag is found
+    # Strip any pre-release suffix (e.g. "0-beta" -> "0") before casting to int
     $parts = $Version.Split('.')
     $major = [int]$parts[0]
     $minor = [int]$parts[1]
@@ -122,18 +185,28 @@ if ($tagExists -contains $Tag) {
 
     Write-Success "  Bumped to: $Tag"
 
-    # Update RELEASE_NOTES.md (numeric version only, no suffix)
-    $rnContent = $rnContent -replace '(##\s+Version:\s*)\S+', "`${1}$Version"
-    [System.IO.File]::WriteAllText($ReleaseNotesFile, $rnContent, (New-Object System.Text.UTF8Encoding $false))
-    Write-Success "  Updated RELEASE_NOTES.md"
-
-    # Update .toc
+    # Both rewrites are DryRun-guarded. They were not until 0.9.15, which made
+    # -DryRun a liar in exactly the case you would most want to preview: a
+    # version that has already been tagged. The in-memory $rnContent and
+    # $tocContent are still updated either way, so the rest of the run previews
+    # the bumped version correctly without touching the working tree.
+    $rnContent  = $rnContent  -replace '(##\s+Version:\s*)\S+', "`${1}$Version"
     $tocContent = $tocContent -replace '(##\s+Version:\s*)\S+', "`${1}$Version"
-    [System.IO.File]::WriteAllText($TocFile, $tocContent, (New-Object System.Text.UTF8Encoding $false))
-    Write-Success "  Updated $AddonName.toc"
 
-    # Re-read for changelog extraction
-    $rnContent = Get-Content $ReleaseNotesFile -Raw -Encoding UTF8
+    if ($DryRun) {
+        Write-Warn "  [DryRun] Would update RELEASE_NOTES.md and $AddonName.toc to $Version"
+    } else {
+        [System.IO.File]::WriteAllText($ReleaseNotesFile, $rnContent, (New-Object System.Text.UTF8Encoding $false))
+        Write-Success "  Updated RELEASE_NOTES.md"
+
+        [System.IO.File]::WriteAllText($TocFile, $tocContent, (New-Object System.Text.UTF8Encoding $false))
+        Write-Success "  Updated $AddonName.toc"
+
+        # Re-read so the changelog extraction below sees exactly what was
+        # written. Skipped on a dry run, where nothing was written and the
+        # in-memory copy above is already the bumped text.
+        $rnContent = Get-Content $ReleaseNotesFile -Raw -Encoding UTF8
+    }
 }
 
 # ---------------------------------------------------------------------------
@@ -250,7 +323,9 @@ if ($DryRun) {
     Write-Warn "  [DryRun] Would include $count files in zip:"
     $filesToZip | ForEach-Object {
         $rel = $_.FullName.Substring($Root.Length).TrimStart('\','/')
-        Write-Host "    $AddonName/$rel" -ForegroundColor DarkGray
+        # Show the entry name the zip actually gets, so the preview is comparable
+        $entryName = ("$AddonName/" + $rel) -replace '\\', '/'
+        Write-Host "    $entryName" -ForegroundColor DarkGray
     }
 } else {
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -346,7 +421,7 @@ if (-not $ghAvailable) {
     Remove-Item $tmpNotes -Force
 
     if ($LASTEXITCODE -eq 0) {
-        Write-Success "  GitHub Release created"
+        Write-Success "  GitHub Release created: https://github.com/RobertLCraig/DjinnisBiS/releases/tag/$Tag"
     } else {
         Write-Warn "  gh release create failed (exit $LASTEXITCODE) -- create it manually:"
         Write-Warn "    & '$GhExe' release create $Tag '$ZipPath' --title '$Tag' --notes-file RELEASE_NOTES.md"
@@ -362,6 +437,7 @@ Write-Success "=== Release $Tag complete! ==="
 Write-Info ""
 Write-Info "  Local zip:  $ZipPath"
 if (-not $DryRun -and -not $SkipPush -and -not $SkipTag) {
+    Write-Info "  GitHub:     https://github.com/RobertLCraig/DjinnisBiS/releases/tag/$Tag"
     Write-Info "  CurseForge: packaging triggered by pushed tag (file type: $ReleaseType)"
 }
 Write-Info ""

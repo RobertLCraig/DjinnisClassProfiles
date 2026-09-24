@@ -1,0 +1,148 @@
+# Base Actor
+druid=Djinni
+race=harronir
+level=90
+spec=feral
+role=attack
+talents=CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAA0MLzyMzMgALgZGgFGMAAAmZDD
+### Combo 1
+# Branches of the Luminous Bloom 289
+head=,id=250024,enchant_id=7961,gem_id=240895,bonus_id=13338/13440/6652/13575/12806/13534
+# Pendant of Malefic Fury 311
+neck=,id=251142,gem_id=240983,bonus_id=12843/13440/6652/13668/12699,content_tuning=1279
+# Seedpods of the Luminous Bloom 289
+shoulder=,id=250022,enchant_id=7973,bonus_id=6652/13440/13340/13574/12806
+# Fireproof Drape 311
+back=,id=193763,bonus_id=12843/13440/6652/13662/12699,content_tuning=1279
+# Trunk of the Luminous Bloom 289
+chest=,id=250027,enchant_id=7987,bonus_id=6652/13440/13336/13575/12806
+# Fury-fletched Armlets 318
+wrist=,id=251135,bonus_id=12849/13440/6652/13695/13662/12699
+# Arbortenders of the Luminous Bloom 289
+hands=,id=250025,bonus_id=6652/13440/13337/13574/12806
+# Sash of the Forlorn Vessel 302
+waist=,id=268256,bonus_id=6652/13696/13662/13333/12836
+# Miststalker's Cuisses 302
+legs=,id=272243,bonus_id=6652/13662/12836,content_tuning=6015
+# Miststalker's Striders 298
+feet=,id=272240,enchant_id=8018,bonus_id=6652/13662/12835,content_tuning=6015
+# Omission of Light 276
+finger1=,id=251093,enchant_id=7967,gem_id=240894,bonus_id=13440/6652/13668/12699/12798,content_tuning=1279
+# Lightwarden's Bind 311
+finger2=,id=251194,enchant_id=7966,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,content_tuning=1279
+# Voracious Heart of Ula'tek 315
+trinket1=,id=270175,bonus_id=6652/13334/12844,content_tuning=4240
+# Vashnik's Sanguine Rancor 311
+trinket2=,id=270166,bonus_id=6652/13334/12843
+# Abyssal Broodfiend's Bardiche 308
+main_hand=,id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,content_tuning=7359
+off_hand=,
+talents=CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAA0MLzyMzMgALgZGgFGMAAAmZDD
+omnium_talents=136822:1/136819:1/136817:1/136815:1/136814:1
+
+name=Djinni
+
+# Consumables
+
+# Expansion Options
+temporary_enchant=
+midnight.crucible_of_erratic_energies_violence=1
+midnight.crucible_of_erratic_energies_sustenance=1
+midnight.crucible_of_erratic_energies_predation=1
+dragonflight.ruby_whelp_shell_training=
+
+# Actors
+### Combo 142
+# Enigmatic Dreamwatcher's Somnolent Stare 321
+profileset."Combo 142"+=head=,id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,redirected_base_stats=272242
+# Pendant of Malefic Fury 311
+profileset."Combo 142"+=neck=,id=251142,gem_id=240983,bonus_id=12843/13440/6652/13668/12699,content_tuning=1279
+# Enigmatic Dreamwatcher's Plumage 321
+profileset."Combo 142"+=shoulder=,id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,redirected_base_stats=273774
+# Fireproof Drape 311
+profileset."Combo 142"+=back=,id=193763,bonus_id=12843/13440/6652/13662/12699,content_tuning=1279
+# Vest of Reverent Adoration 321
+profileset."Combo 142"+=chest=,id=239048,enchant_id=7987,bonus_id=13440/6652/13662/12699/12846,content_tuning=1279
+# Fury-fletched Armlets 318
+profileset."Combo 142"+=wrist=,id=251135,bonus_id=12849/13440/6652/13695/13662/12699,gem_id=240908
+# Enigmatic Dreamwatcher's Gauntlets 311
+profileset."Combo 142"+=hands=,id=271529,bonus_id=13691/6652/13697/12843
+# Sash of the Forlorn Vessel 302
+profileset."Combo 142"+=waist=,id=268256,bonus_id=6652/13696/13662/13333/12836
+# Enigmatic Dreamwatcher's Leggings 302
+profileset."Combo 142"+=legs=,id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,redirected_base_stats=275519
+# Miststalker's Striders 298
+profileset."Combo 142"+=feet=,id=272240,enchant_id=8018,bonus_id=6652/13662/12835,content_tuning=6015
+# Omission of Light 276
+profileset."Combo 142"+=finger1=,id=251093,enchant_id=7967,gem_id=240894,bonus_id=13440/6652/13668/12699/12798,content_tuning=1279
+# Lightwarden's Bind 311
+profileset."Combo 142"+=finger2=,id=251194,enchant_id=7966,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,content_tuning=1279
+# Voracious Heart of Ula'tek 315
+profileset."Combo 142"+=trinket1=,id=270175,bonus_id=6652/13334/12844,content_tuning=4240
+# Vashnik's Sanguine Rancor 311
+profileset."Combo 142"+=trinket2=,id=270166,bonus_id=6652/13334/12843
+# Abyssal Broodfiend's Bardiche 308
+profileset."Combo 142"+=main_hand=,id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,content_tuning=7359
+profileset."Combo 142"+=off_hand=,
+profileset."Combo 142"+=talents=CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxswMzMGzMzAAAAAAAMAAAAamlZZmZGQgFwMDwCzwAAAYmNMA
+profileset."Combo 142"+=omnium_talents=136822:1/136819:1/136817:1/136815:1/136814:1
+
+### Combo 145
+# Enigmatic Dreamwatcher's Somnolent Stare 321
+profileset."Combo 145"+=head=,id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,redirected_base_stats=272242
+# Pendant of Malefic Fury 311
+profileset."Combo 145"+=neck=,id=251142,gem_id=240983,bonus_id=12843/13440/6652/13668/12699,content_tuning=1279
+# Enigmatic Dreamwatcher's Plumage 321
+profileset."Combo 145"+=shoulder=,id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,redirected_base_stats=273774
+# Fireproof Drape 311
+profileset."Combo 145"+=back=,id=193763,bonus_id=12843/13440/6652/13662/12699,content_tuning=1279
+# Vestment of the Awakening 321
+profileset."Combo 145"+=chest=,id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846
+# Fury-fletched Armlets 318
+profileset."Combo 145"+=wrist=,id=251135,bonus_id=12849/13440/6652/13695/13662/12699,gem_id=240908
+# Enigmatic Dreamwatcher's Gauntlets 311
+profileset."Combo 145"+=hands=,id=271529,bonus_id=13691/6652/13697/12843
+# Sash of the Forlorn Vessel 302
+profileset."Combo 145"+=waist=,id=268256,bonus_id=6652/13696/13662/13333/12836
+# Enigmatic Dreamwatcher's Leggings 302
+profileset."Combo 145"+=legs=,id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,redirected_base_stats=275519
+# Miststalker's Striders 298
+profileset."Combo 145"+=feet=,id=272240,enchant_id=8018,bonus_id=6652/13662/12835,content_tuning=6015
+# Omission of Light 276
+profileset."Combo 145"+=finger1=,id=251093,enchant_id=7967,gem_id=240894,bonus_id=13440/6652/13668/12699/12798,content_tuning=1279
+# Lightwarden's Bind 311
+profileset."Combo 145"+=finger2=,id=251194,enchant_id=7966,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,content_tuning=1279
+# Voracious Heart of Ula'tek 315
+profileset."Combo 145"+=trinket1=,id=270175,bonus_id=6652/13334/12844,content_tuning=4240
+# Vashnik's Sanguine Rancor 311
+profileset."Combo 145"+=trinket2=,id=270166,bonus_id=6652/13334/12843
+# Abyssal Broodfiend's Bardiche 308
+profileset."Combo 145"+=main_hand=,id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,content_tuning=7359
+profileset."Combo 145"+=off_hand=,
+profileset."Combo 145"+=talents=CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxswMzMGzMzAAAAAAAMAAAAamlZZmZGQgFwMDwCzwAAAYmNMA
+profileset."Combo 145"+=omnium_talents=136822:1/136819:1/136817:1/136815:1/136814:1
+
+
+
+# Simulation Options
+iterations=5000
+desired_targets=1
+max_time=300
+calculate_scale_factors=0
+scale_only=strength,intellect,agility,crit,mastery,vers,haste,weapon_dps,weapon_offhand_dps
+override.bloodlust=1
+override.arcane_intellect=1
+override.power_word_fortitude=1
+override.battle_shout=1
+override.mystic_touch=1
+override.chaos_brand=1
+override.skyfury=1
+override.mark_of_the_wild=1
+override.hunters_mark=1
+override.bleeding=1
+report_details=1
+single_actor_batch=1
+optimize_expressions=1
+buff_uptime_timeline=0
+buff_stack_uptime_timeline=0
+collect_action_sequence=0

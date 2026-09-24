@@ -1,25 +1,60 @@
 ## CurseForge / WoWInterface automatic packager configuration
 ## https://support.curseforge.com/support/solutions/articles/9000197281
+##
+## The `ignore:` list below is the SINGLE SOURCE OF TRUTH for what is not part of
+## the addon. Three things read it:
+##
+##   1. the CurseForge packager, which builds the zip users download
+##   2. release.ps1, which builds the local/GitHub release zip
+##   3. deploy.ps1, which mirrors into the game's Interface\AddOns folder
+##
+## Both scripts parse this block at runtime rather than keeping their own copies.
+## DjinnisDataTexts learned that the hard way: it kept three separate lists, they
+## drifted, and CURSEFORGE.md shipped inside every release zip as a result.
+##
+## The rule: if the addon does not need it to run in the game, it goes in this list.
 
-package-as: DjinnisClassProfiles
+package-as: DjinnisBiS
 
 ignore:
+  # Version control and agent tooling
   - .git
+  - .gitattributes
   - .gitignore
   - .claude
   - .agents
+  # Documentation. CHANGELOG.md is ignored here but still read by manual-changelog
+  # below: the packager publishes it to the addon page instead of shipping it.
   - CHANGELOG.md
   - CLAUDE.md
   - CURSEFORGE.md
   - README.md
-  - TODO.md
-  - docs
-  - deploy.ps1
-  - pkgmeta.yaml
-  - release.ps1
   - RELEASE_NOTES.md
+  - docs
+  # Build and deploy tooling
+  - deploy.ps1
+  - deploy.sh
+  - release.ps1
+  - pkgmeta.yaml
+  # Author tooling: regenerates the trinket tier and stat target tables from
+  # ClassCodex's data files, and runs the addon's own self-test outside the
+  # game. Both run on the author's machine, never in anybody's game folder.
+  - update-classcodex-data.ps1
+  # Bakes a Raidbots Top Gear result into the gear plan table, and the saved
+  # reports its -SelfTest runs against.
+  - update-gear-plan.ps1
+  - fixtures
+  # Names and ranks every enchant and gem the plan asks for, from Raidbots.
+  - update-plan-ranks.py
+  # Bakes Dreamgrove's talent builds into the builds table (card 0030).
+  - update-builds.py
+  - offline-check.lua
   - releases
-  - baseprompt.md
-  - DjinnisClassProfilesDB.lua
+  # A SavedVariables file, if one is ever copied into the repo to reproduce a bug
+  - DjinnisBiSDB.lua
+  # Other authors' addons, downloaded to study (2026-09-23). Never ours to ship.
+  - research
 
-changelog: CHANGELOG.md
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
