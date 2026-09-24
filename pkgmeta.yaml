@@ -53,6 +53,8 @@ ignore:
   # A SavedVariables file, if one is ever copied into the repo to reproduce a bug
   - DjinnisCPDB.lua
   - DjinnisBiSDB.lua
+  # The old Class Profiles repository's local prompt file (card 0058)
+  - baseprompt.md
   # Other authors' addons, downloaded to study (2026-09-23). Never ours to ship.
   - research
 
