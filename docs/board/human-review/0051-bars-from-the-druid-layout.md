@@ -324,3 +324,15 @@ Security:
 
 For Rob: finding 1 is the one to decide. Findings 2, 4 and 5 are small fixes. Finding 3 is the
 `/dcp bars` "already match" check, after loading.
+
+### v0.54.7: findings 2, 4 and 5 fixed
+
+- **Finding 2.** `translateBars` answers a third value: every button that keeps what it has, listed
+  or not. The chat line says "N buttons keep what they have now; the M with no match are below".
+- **Finding 4.** Two new checks: the menu names Feral while there is no Balance layout, and
+  `applyBars` clears `from`.
+- **Finding 5.** A spell with no readable name is called "spell <id>" in every skip line.
+- **Checked.** All three offline modes pass. Each of the four fixes, undone on purpose, fails
+  one check.
+- **Left for Rob.** Finding 1 (doubled spells from the keep rule) is his call. Finding 3 is the
+  in-game check: load, then `/dcp bars` should say "already match".
