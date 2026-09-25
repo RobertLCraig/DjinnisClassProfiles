@@ -4268,6 +4268,7 @@ function PlanTab.loadTalents(name)
 	if InCombatLockdown() then return "combat" end
 	-- a switch is a loadout change too, and the server takes one at a time (0059 review)
 	if PlanTab.tagging then PlanTab.say("Still working through old loadouts. Wait for the count.") return "busy" end
+	if PlanTab.swapping then PlanTab.say("Still putting the plan on. Wait for it to say so.") return "busy" end  -- card 0063
 	PlanTab.spareWanted = nil  -- a new ask replaces a spare still waiting on the window (second 0040 review)
 	local saved = PlanTab.savedLoadoutNames()
 	if saved and not saved[name] then
@@ -6913,6 +6914,7 @@ function PlanTab.loadoutFence(anySlots)
 	end
 	if PlanTab.q then return "Still making loadouts. Wait for the count." end
 	if PlanTab.tagging then return "Still working through old loadouts. Wait for the count." end  -- 0059 review
+	if PlanTab.swapping then return "Still putting the plan on. Wait for it to say so." end  -- card 0063
 	if not anySlots and PlanTab.freeLoadoutSlots() == 0 then
 		return ("All %d loadout slots are used, over all your specs. Delete some you do not use, then try again."):format(Constants.TraitConsts.MAX_COMBAT_TRAIT_CONFIGS)
 	end
@@ -6992,6 +6994,7 @@ function PlanTab.wearSpare(name, code)
 	if InCombatLockdown() then return "combat" end
 	if PlanTab.q then PlanTab.say("Still making loadouts. Wait for the count.") return "busy" end
 	if PlanTab.tagging then PlanTab.say("Still working through old loadouts. Wait for the count.") return "busy" end  -- 0059 review
+	if PlanTab.swapping then PlanTab.say("Still putting the plan on. Wait for it to say so.") return "busy" end  -- card 0063
 	local saved = PlanTab.savedLoadoutNames()
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
 	local selected, mine, deleted = PlanTab.selectedConfigID(), PlanTab.spareIDs(), 0
@@ -7048,6 +7051,9 @@ end
 -- game says it can make one, so a bad string never costs the old loadout.
 -- Returns ok, the reason when not, and whether the string carries an older
 -- tree stamp (reported, not obeyed: DjinnisDreamgrove card 0001, v0.5.0).
+-- A replace answers "deleted" and imports nothing: the server takes one
+-- change in flight, so the queue waits for the delete to land and then runs
+-- the same job again, which only imports (card 0063).
 function PlanTab.importOne(job)
 	local why = PlanTab.talentWindowOpen() and "the talent window is open" or InCombatLockdown() and "in combat"
 	if why then return false, why end
@@ -7078,7 +7084,8 @@ function PlanTab.importOne(job)
 		-- the starter build (0060 review, a job worked out before a switch)
 		if job.replace == PlanTab.selectedConfigID() then return false, "it is the loadout you are wearing now, so it is not replaced. Pick another, then click again" end
 		if not C_ClassTalents.DeleteConfig(job.replace) then return false, "the game would not delete the old one" end
-		job.replace, job.deleted = nil, true  -- gone: a retry only imports
+		job.goneID, job.replace, job.deleted = job.replace, nil, true  -- gone: a retry only imports
+		return "deleted"
 	end
 	local ok, err = C_ClassTalents.ImportLoadout(configID, entries, job.name, job.code)
 	if not ok and (not err or err == "") then err = ("the game refused without saying why (%d talents sent)"):format(#entries) end
@@ -7181,7 +7188,10 @@ function PlanTab.stepLoadouts()
 	if not job then return PlanTab.finishLoadouts() end
 	q.pendingID = nil
 	local ok, err, stale = PlanTab.importOne(job)
-	if ok then
+	if ok == "deleted" then
+		-- the same job next, once the delete has landed (card 0063)
+		q.i, q.goneID = q.i - 1, job.goneID
+	elseif ok then
 		q.made = q.made + 1
 		q.lastMade = job
 		if stale then q.stale = q.stale + 1 end
@@ -7218,7 +7228,9 @@ end
 
 -- Every step waits, a failed one too. The event only names the config to
 -- watch (PlanTab.onLoadoutEvent); ready is that config populated and the game
--- willing to make another (Blizzard_ClassTalentsFrame.lua:302).
+-- willing to make another (Blizzard_ClassTalentsFrame.lua:302). After a
+-- delete, ready is also the config gone and one beat more, as tagNext waits:
+-- the list can read it gone before the server is free (card 0063).
 function PlanTab.waitThenStep()
 	local q = PlanTab.q
 	q.gen, q.waited = q.gen + 1, 0
@@ -7226,6 +7238,11 @@ function PlanTab.waitThenStep()
 	local function poll()
 		if PlanTab.q ~= q or q.gen ~= gen then return end
 		q.waited = q.waited + PlanTab.POLL
+		if q.goneID and q.waited < PlanTab.GIVE_UP then
+			if PlanTab.configName(q.goneID) == nil then q.goneID = nil end
+			return PlanTab.later(PlanTab.POLL, poll)
+		end
+		q.goneID = nil
 		local okPop, populated = true, true
 		if q.pendingID then okPop, populated = pcall(C_ClassTalents.IsConfigPopulated, q.pendingID) end
 		local okNew, canNew = pcall(C_ClassTalents.CanCreateNewConfig)
@@ -7276,15 +7293,20 @@ function PlanTab.swapSelected(swap)
 		PlanTab.say(("\"%s\" is ready. After the fight, click %sMore > Make the planned loadouts|r%s to finish."):format(temp, GOLD, GREY))
 		return "combat"
 	end
+	-- the fence holds from the switch to the rename: the queue is gone by now,
+	-- and "Tag them" started meanwhile would collide with it (card 0063)
+	PlanTab.swapping = swap
 	if PlanTab.selectedConfigID() ~= newID then
-		if not (ClassTalentHelper and ClassTalentHelper.SwitchToLoadoutByName) then return "no helper" end
+		if not (ClassTalentHelper and ClassTalentHelper.SwitchToLoadoutByName) then PlanTab.swapping = nil return "no helper" end
 		ClassTalentHelper.SwitchToLoadoutByName(temp)
 	end
 	local waited = 0
 	local function poll()
+		if PlanTab.swapping ~= swap then return end
 		if PlanTab.selectedConfigID() == newID then return PlanTab.finishSwap(swap, newID) end
 		waited = waited + PlanTab.POLL
 		if waited >= PlanTab.GIVE_UP then
+			PlanTab.swapping = nil
 			PlanTab.say(("\"%s\" did not go on. Put it on in the talent window, then click %sMore > Make the planned loadouts|r%s to finish."):format(temp, GOLD, GREY))
 			return
 		end
@@ -7294,30 +7316,61 @@ function PlanTab.swapSelected(swap)
 	return "switching"
 end
 
--- The new one is on: the old one goes, and the new one takes its name.
+-- The new one is on: the old one goes, and only once the server shows it gone,
+-- and one beat more, does the new one take its name. Sent in one frame, the
+-- rename was refused: the server takes one loadout change in flight (card
+-- 0063). Each waits as tagNext does, and a refusal is tried again. Answers
+-- what it did at once; `swap.result` is how it ended.
 function PlanTab.finishSwap(swap, newID)
-	local temp = PlanTab.swapName(swap.name)
+	local temp, final = PlanTab.swapName(swap.name), PlanTab.tag(swap.name)
+	PlanTab.swapping = swap
+	local function stop(word, text)
+		swap.result = word
+		if PlanTab.swapping == swap then PlanTab.swapping = nil end
+		if text then PlanTab.say(text) end
+		if word == "done" and PlanTab.redraw then pcall(PlanTab.redraw) end
+	end
+	local function after(fn) PlanTab.later(PlanTab.POLL, function() if PlanTab.swapping == swap then fn() end end) end
+	-- sends `send` until the game takes it, then waits for `landed`
+	local function change(send, landed, refused, slow, nextStep)
+		local tries, waited = 0, 0
+		local function poll()
+			if landed() then return after(nextStep) end  -- one beat more, for the server to be free
+			waited = waited + PlanTab.POLL
+			if waited >= PlanTab.GIVE_UP then return stop(slow[1], slow[2]) end
+			after(poll)
+		end
+		local function try()
+			local ok, did = pcall(send)
+			if ok and did then return after(poll) end
+			tries = tries + 1
+			if tries < PlanTab.TAG_TRIES then return after(try) end
+			stop(refused[1], refused[2])
+		end
+		try()
+	end
+	local unnamed = { "unnamed", ("\"%s\" holds the plan and is on. Rename it to \"%s\" in the talent window."):format(temp, final) }
+	local function rename()
+		change(function() return C_ClassTalents.RenameConfig(newID, final) end,
+			function() return PlanTab.configName(newID) == final end, unnamed, unnamed,
+			function() stop("done", ("\"%s\" now holds the plan, and you are wearing it."):format(swap.name)) end)
+	end
 	if swap.oldID and swap.oldID ~= newID then
 		-- the old one on again: never deleted, and the new one not renamed onto
 		-- its name, which would make two (0060 review)
 		if PlanTab.selectedConfigID() == swap.oldID then
-			PlanTab.say(("\"%s\" is on again, so it is not replaced. Click %sMore > Make the planned loadouts|r%s to try again."):format(PlanTab.tag(swap.name), GOLD, GREY))
-			return "old worn"
+			stop("old worn", ("\"%s\" is on again, so it is not replaced. Click %sMore > Make the planned loadouts|r%s to try again."):format(final, GOLD, GREY))
+			return swap.result
 		end
-		local okDelete, deleted = pcall(C_ClassTalents.DeleteConfig, swap.oldID)
-		if not (okDelete and deleted) then
-			PlanTab.say(("\"%s\" holds the plan and is on. The game would not delete the old \"%s\"; delete it in the talent window."):format(temp, swap.name))
-			return "old kept"
-		end
+		local kept = { "old kept", ("\"%s\" holds the plan and is on. The game would not delete the old \"%s\"; delete it in the talent window."):format(temp, swap.name) }
+		change(function() return C_ClassTalents.DeleteConfig(swap.oldID) end,
+			function() return PlanTab.configName(swap.oldID) == nil end, kept,
+			{ "old kept", ("\"%s\" holds the plan and is on. The old \"%s\" did not go in time; delete it in the talent window, then rename the new one."):format(temp, swap.name) },
+			rename)
+	else
+		rename()
 	end
-	local okName, named = pcall(C_ClassTalents.RenameConfig, newID, PlanTab.tag(swap.name))
-	if not (okName and named) then
-		PlanTab.say(("\"%s\" holds the plan and is on. Rename it to \"%s\" in the talent window."):format(temp, PlanTab.tag(swap.name)))
-		return "unnamed"
-	end
-	PlanTab.say(("\"%s\" now holds the plan, and you are wearing it."):format(swap.name))
-	if PlanTab.redraw then pcall(PlanTab.redraw) end
-	return "done"
+	return swap.result or "working"
 end
 
 -- How many loadouts Create may make, or nil when the game will not say. Two
@@ -7588,6 +7641,7 @@ PlanTab.saveWaiting = nil  -- { spec =, names = { [build] = true } }
 function PlanTab.saveOne(name)
 	if InCombatLockdown() then PlanTab.say("Not in combat. Try again after the fight.") return "combat" end
 	if PlanTab.tagging then PlanTab.say("Still working through old loadouts. Wait for the count.") return "renaming" end
+	if PlanTab.swapping then PlanTab.say("Still putting the plan on. Wait for it to say so.") return "renaming" end  -- card 0063
 	local spec = playerSpec()
 	local builds = spec and PlanTab.BUILDS[spec]
 	if not (builds and builds[name]) then PlanTab.say(("\"%s\" is not a planned %s build."):format(tostring(name), spec or "")) return "not planned" end
@@ -10539,6 +10593,119 @@ function PlanTab.saveOneChecks(check)
 		PlanTab.loadoutRoom, PlanTab.talentWindowOpen, PlanTab.whenTalentsClose, PlanTab.saveWaiting = unpack(kept, 1, 13)
 end
 
+-- Card 0063: a replace and a Reset on the worn loadout, against the game as it
+-- is: one loadout change in flight. A change shows `lag` beats after it is
+-- sent, and the server is busy one beat past that, as in tagChecks.
+function PlanTab.swapChecks(check)
+	local t = "one loadout change at a time"
+	local keys = { "say", "later", "configName", "selectedConfigID", "savedLoadoutNames", "talentWindowOpen", "freeLoadoutSlots", "readLevels", "redraw", "q", "swapping", "tagging" }
+	local kept, keptG = {}, { C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil, InCombatLockdown }
+	for i, k in ipairs(keys) do kept[i] = PlanTab[k] end
+	local ok, err = pcall(function()
+		local live, pending, due, calls, said, now, busyUntil, lag, nextID, selected = {}, {}, {}, {}, {}, 0, 0, 1, 20, 9
+		local function change(id, to)
+			if now < busyUntil then calls[#calls + 1] = "refused" return false end
+			due[#due + 1] = { at = now + lag, id = id, to = to }
+			busyUntil = now + lag + 1
+			return true
+		end
+		local function drain()
+			local n = 0
+			while #pending > 0 and n < 500 do
+				now, n = now + 1, n + 1
+				for k, d in pairs(due) do if now >= d.at then live[d.id] = d.to due[k] = nil end end
+				local run = pending
+				pending = {}
+				for _, fn in ipairs(run) do fn() end
+			end
+		end
+		PlanTab.say = function(text) said[#said + 1] = text end
+		PlanTab.later = function(_, fn) pending[#pending + 1] = fn end
+		PlanTab.configName = function(id) return live[id] end
+		PlanTab.selectedConfigID = function() return selected end
+		PlanTab.savedLoadoutNames = function()
+			local out = {}
+			for id, name in pairs(live) do out[PlanTab.untag(name) or name] = id end
+			return out
+		end
+		PlanTab.talentWindowOpen = function() return false end
+		PlanTab.freeLoadoutSlots = function() return 5 end
+		PlanTab.readLevels = function() return nil end
+		PlanTab.redraw, PlanTab.q, PlanTab.swapping, PlanTab.tagging = nil, nil, nil, nil
+		InCombatLockdown = function() return false end
+		C_ClassTalents = {
+			GetActiveConfigID = function() return 50 end,
+			GetTraitTreeForSpec = function() return 77 end,
+			CanCreateNewConfig = function() return now >= busyUntil end,
+			IsConfigPopulated = function() return true end,
+			DeleteConfig = function(id) calls[#calls + 1] = "delete " .. id return change(id, nil) end,
+			RenameConfig = function(id, name) calls[#calls + 1] = "rename " .. id .. " to " .. name return change(id, name) end,
+			ImportLoadout = function(_, _, name)
+				calls[#calls + 1] = "import " .. name
+				nextID = nextID + 1
+				return change(nextID, name)
+			end,
+		}
+		C_Traits = {
+			GetLoadoutSerializationVersion = function() return 2 end,
+			GetConfigInfo = function() return { treeIDs = { 77 } } end,
+			GetTreeHash = function() return {} end,
+		}
+		ClassTalentImportExportMixin = {
+			ReadLoadoutHeader = function() return true, 2, 103, {} end,
+			IsHashEmpty = function() return true end,
+			HashEquals = function() return true end,
+			ReadLoadoutContent = function() return {} end,
+			ConvertToImportLoadoutEntryInfo = function() return { {} } end,
+		}
+		ExportUtil = { MakeImportDataStream = function() return {} end }
+		PlayerUtil = { GetCurrentSpecID = function() return 103 end }
+		local function saidAny(text) return table.concat(said, "\n"):find(text, 1, true) ~= nil end
+
+		-- a drifted loadout, not worn: deleted, then made once the delete has landed
+		live = { [2] = "[CP] Raid: Vashnik" }
+		check(t .. ", a replace starts", PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } }), "started")
+		check(t .. ", the delete goes alone", table.concat(calls, "|"), "delete 2")
+		drain()
+		check(t .. ", then the import, and nothing is refused", table.concat(calls, "|"), "delete 2|import [CP] Raid: Vashnik")
+		check(t .. ", the build is there once, and the old one gone", tostring(live[2]) .. "/" .. tostring(live[nextID]) .. "/" .. tostring(saidAny("Made 1 of 1")), "nil/[CP] Raid: Vashnik/true")
+		-- the server busy with something else at the click: still one at a time
+		live, calls, said, busyUntil = { [2] = "[CP] Raid: Vashnik" }, {}, {}, now + 3
+		PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } })
+		drain()
+		local sent = {}
+		for _, c in ipairs(calls) do if c ~= "refused" then sent[#sent + 1] = c end end
+		check(t .. ", a server busy at the click is waited out", table.concat(sent, "|") .. "/" .. tostring(saidAny("Made 1 of 1")), "delete 2|import [CP] Raid: Vashnik/true")
+
+		-- Reset on the worn loadout: the new one is on, the old one goes, and only then the rename
+		live, calls, said, busyUntil, selected = { [1] = "[CP] Raid: Nek'Zali", [5] = "[CP+] Raid: Nek'Zali" }, {}, {}, 0, 5
+		local swap = { name = "Raid: Nek'Zali", oldID = 1 }
+		check(t .. ", the swap's delete goes alone", PlanTab.finishSwap(swap, 5) .. "/" .. table.concat(calls, "|"), "working/delete 1")
+		check(t .. ", and the swap holds the fence meanwhile", tostring(PlanTab.loadoutFence(true)):find("Still putting the plan on", 1, true) ~= nil, true)
+		check(t .. ", so old loadouts wait", PlanTab.tagOld(), "fenced")
+		drain()
+		check(t .. ", the rename once the delete has landed, and nothing is refused", table.concat(calls, "|"), "delete 1|rename 5 to [CP] Raid: Nek'Zali")
+		check(t .. ", it ends holding the plan under its name", swap.result .. "/" .. tostring(live[5]) .. "/" .. tostring(live[1]) .. "/" .. tostring(saidAny("now holds the plan")), "done/[CP] Raid: Nek'Zali/nil/true")
+		check(t .. ", and lets go of the fence", tostring(PlanTab.swapping) .. "/" .. tostring(PlanTab.loadoutFence(true)), "nil/nil")
+		-- the switch has only just landed: the server is still busy, so each change is tried again
+		live, calls, said, busyUntil = { [1] = "[CP] Raid: Nek'Zali", [5] = "[CP+] Raid: Nek'Zali" }, {}, {}, now + 2
+		swap = { name = "Raid: Nek'Zali", oldID = 1 }
+		PlanTab.finishSwap(swap, 5)
+		drain()
+		check(t .. ", a busy server at the swap is tried again, not given up", swap.result .. "/" .. tostring(saidAny("Rename it")) .. "/" .. tostring(saidAny("would not delete")), "done/false/false")
+		-- a server that never answers ends it and says so, with the fence let go
+		live, calls, said, busyUntil = { [1] = "[CP] Raid: Nek'Zali", [5] = "[CP+] Raid: Nek'Zali" }, {}, {}, now + 1000
+		swap = { name = "Raid: Nek'Zali", oldID = 1 }
+		PlanTab.finishSwap(swap, 5)
+		drain()
+		check(t .. ", a delete never taken keeps the old one, and says so", swap.result .. "/" .. tostring(saidAny("would not delete")) .. "/" .. tostring(PlanTab.swapping), "old kept/true/nil")
+		busyUntil = 0
+	end)
+	check(t .. ", ran", ok or tostring(err), true)
+	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
+	C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil, InCombatLockdown = unpack(keptG, 1, 6)
+end
+
 function PlanTab.menuChecks(check)
 	local t = "every command has a button"
 	local names = { "offerLoadouts", "sayTalents", "tidyAsk", "offerBars", "undoBarsAsk", "askProfileName",
@@ -13272,6 +13439,7 @@ local function selfTest()
 	PlanTab.renameChecks(check)  -- card 0058
 	PlanTab.tagChecks(check)  -- card 0059
 	PlanTab.saveOneChecks(check)  -- card 0065
+	PlanTab.swapChecks(check)  -- card 0063
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[CP] self-test passed|r")

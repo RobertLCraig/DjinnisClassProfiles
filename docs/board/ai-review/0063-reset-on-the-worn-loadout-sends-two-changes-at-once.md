@@ -24,3 +24,21 @@ whole swap.
    for `finishSwap` and `importOne`.
 2. In game: wear a loadout whose build has drifted from the plan, click Reset to plan. Chat says it
    now holds the plan, with no "You can't do that right now" and no "Rename it in the talent window".
+
+## Comments
+
+**2026-09-25, Claude.** Built, v0.51.1.
+
+- `importOne` with a replace now only deletes and answers `"deleted"`. `stepLoadouts` runs the same
+  job again once `waitThenStep` sees the old config gone and one beat more; the second run only
+  imports.
+- `finishSwap` sends the delete, waits for the old config to read gone and one beat more, then the
+  rename, and waits for the new name. Each refusal is tried again, `TAG_TRIES` times a `POLL` apart,
+  as `tagNext` does. It answers `"working"` at once; `swap.result` holds how it ended.
+- `PlanTab.swapping` holds the fence from the switch in `swapSelected` to the end of the rename.
+  `loadoutFence`, `wearSpare`, `loadTalents` and `saveOne` refuse while it is set.
+- `PlanTab.swapChecks` runs both against the timed server model from `tagChecks`. With the fix
+  broken on purpose, five of its checks failed ("refused" in the calls); with it, none.
+- Not changed: `setupStep` (a group setup's spec change) waits for `tagging` only, not a swap.
+
+Done-when 1 passes (`offline-check.lua` under Lua 5.1, both modes). Done-when 2 is Rob's, in game.
