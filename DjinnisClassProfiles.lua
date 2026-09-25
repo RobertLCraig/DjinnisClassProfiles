@@ -6807,7 +6807,9 @@ end
 -- PlanTab.RETIRED (delete, on request). Rob's own loadouts are never touched.
 
 -- The names DjinnisDreamgrove 0.6.0 imported, which 0.7.0 renamed. Deleted
--- only by /dcp tidy yes, after /dcp tidy has listed them.
+-- only after a box lists them and a click agrees: /dcp tidy's, or the loadout
+-- box's "Delete them" (card 0062). Only a loadout whose own name is on this
+-- list, never a tagged "[CP] X" filed under X (0062 review).
 PlanTab.RETIRED = {
 	["EC Raid ST"] = true, ["EC Raid Cleave"] = true, ["KotG Raid ST"] = true, ["KotG Raid Cleave"] = true,
 	["EC M+"] = true, ["KotG M+"] = true, ["DotC Raid"] = true, ["EC Raid Default"] = true,
@@ -7409,7 +7411,9 @@ function PlanTab.retiredLoadouts(saved, selected)
 	if PlanTab.playerClass() ~= PlanTab.DRUID then return out end
 	local live = PlanTab.BUILDS[playerSpec() or ""] or {}
 	for name, id in pairs(saved or {}) do
-		if PlanTab.RETIRED[name] and not live[name] then
+		-- savedLoadoutNames files "[CP] X" under X: only a loadout really
+		-- named X is old (0062 review)
+		if PlanTab.RETIRED[name] and not live[name] and PlanTab.configName(id) == name then
 			out[#out + 1] = { id = id, from = name, delete = true, retired = true, stays = id == selected or nil }
 		end
 	end
@@ -7482,15 +7486,18 @@ function PlanTab.tagNext(again)
 	if not o then
 		PlanTab.tagging = nil
 		local setup = PlanTab.afterTagging()
-		if t.done > 0 or t.gone == 0 then PlanTab.say(("Tagged %d old loadout%s."):format(t.done, t.done == 1 and "" or "s")) end
-		if t.gone > 0 then PlanTab.say(("Deleted %d old Dreamgrove loadout%s."):format(t.gone, t.gone == 1 and "" or "s")) end
+		-- by what was asked, so a run the game refused says 0 of what it was (0062 review)
+		local renames, deletes = 0, 0
+		for _, q in ipairs(t.todo) do if q.retired then deletes = deletes + 1 else renames = renames + 1 end end
+		if renames > 0 or deletes == 0 then PlanTab.say(("Tagged %d of %d old loadout%s."):format(t.done, renames, renames == 1 and "" or "s")) end
+		if deletes > 0 then PlanTab.say(("Deleted %d of %d old Dreamgrove loadout%s."):format(t.gone, deletes, deletes == 1 and "" or "s")) end
 		if PlanTab.redraw then pcall(PlanTab.redraw) end
 		if not setup then PlanTab.later(1, function() PlanTab.offerLoadouts(true) end) end  -- what is still missing or drifted
 		return
 	end
 	if InCombatLockdown() then
 		PlanTab.tagging = nil
-		PlanTab.say(("Combat started, so %d old loadout%s were not tagged. After the fight, click %sMore > Make the planned loadouts|r%s, then Tag them."):format(#t.todo - t.i + 1, #t.todo - t.i + 1 == 1 and "" or "s", GOLD, GREY))
+		PlanTab.say(("Combat started, so %d old loadout%s were not done. After the fight, click %sMore > Make the planned loadouts|r%s, then Tag them."):format(#t.todo - t.i + 1, #t.todo - t.i + 1 == 1 and "" or "s", GOLD, GREY))
 		PlanTab.afterTagging()
 		return
 	end
@@ -7564,7 +7571,12 @@ function PlanTab.offerLoadouts(asked, declined)
 	if doable and not PlanTab.oldDismissed[spec] then
 		if not asked and PlanTab.offerDismissed[spec] then return "dismissed" end
 		if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerLoadouts(asked, declined) end) return "busy" end
-		local lines = { ("%d loadout%s made before this addon tagged its own with \"%s\":"):format(#before, #before == 1 and " was" or "s were", PlanTab.TAG) }
+		-- worded by what it does: a box of deletes is not a rename (0062 review)
+		local renames, deletes = 0, 0
+		for _, o in ipairs(before) do
+			if not o.stays and o.retired then deletes = deletes + 1 elseif not o.stays then renames = renames + 1 end
+		end
+		local lines = { ("%d old loadout%s on this spec, from before this addon tagged its own with \"%s\":"):format(#before, #before == 1 and "" or "s", PlanTab.TAG) }
 		for _, o in ipairs(before) do
 			lines[#lines + 1] = ("  %s%s|r  %s|r"):format(WHITE, o.from,
 				o.stays and o.retired and "stays: you are wearing it"
@@ -7573,9 +7585,11 @@ function PlanTab.offerLoadouts(asked, declined)
 				or o.delete and "|cffff4444deleted: a tagged one is there"
 				or ("renamed \"" .. o.to .. "\""))
 		end
-		lines[#lines + 1] = "Renaming keeps the talents. Your other loadouts are not touched."
+		if renames > 0 then lines[#lines + 1] = "Renaming keeps the talents." end
+		if deletes > 0 then lines[#lines + 1] = "The old Dreamgrove loadouts are deleted: this addon no longer makes them, and they use slots." end
+		lines[#lines + 1] = "Your other loadouts are not touched."
 		PlanTab.prompt("Djinni's Class Profiles: " .. spec .. " loadouts", lines, {
-			{ label = "Tag them", onClick = PlanTab.tagOld },
+			{ label = deletes == 0 and "Tag them" or renames == 0 and "Delete them" or "Tag and delete", onClick = PlanTab.tagOld },
 			{ label = "Not now", onClick = function()
 				PlanTab.oldDismissed[spec] = true
 				PlanTab.later(0.2, function() PlanTab.offerLoadouts(asked, true) end)  -- what is missing or drifted, next
@@ -7587,6 +7601,7 @@ function PlanTab.offerLoadouts(asked, declined)
 	if not missing then return "unknown" end
 	-- no room: those builds are worn through the spare, so not offered (card 0040)
 	local room = PlanTab.loadoutRoom(saved)
+	local unroomed = room == 0 and #missing or 0  -- for the Not now line (0062 review)
 	if room == 0 and #missing > 0 then
 		if asked then PlanTab.say(("%d builds have no loadout of their own and no room for one. Double-click them in the list beside the talent window: they are worn through the spare."):format(#missing)) end
 		missing = {}
@@ -7599,6 +7614,10 @@ function PlanTab.offerLoadouts(asked, declined)
 		if doable and asked and not declined then
 			PlanTab.oldDismissed[spec] = nil
 			return PlanTab.offerLoadouts(true)
+		end
+		if doable and declined and unroomed > 0 then
+			PlanTab.say(("%d planned %s builds have no loadout and no room for one; they are worn through the spare. Your old loadouts are left as they are."):format(unroomed, spec))
+			return "complete"
 		end
 		if doable and declined then PlanTab.say("Every planned " .. spec .. " build is saved. Your old untagged loadouts are left as they are.") return "complete" end
 		if asked then PlanTab.say("Every planned " .. spec .. " build is saved, and each one matches the plan.") end
@@ -7642,15 +7661,11 @@ function PlanTab.tidy(confirmed)
 	if why then PlanTab.say(why) return 0 end
 	local saved = PlanTab.savedLoadoutNames()
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet.") return 0 end
-	local selected, doomed = PlanTab.selectedConfigID(), {}
-	local live = PlanTab.BUILDS[playerSpec() or ""] or {}
-	for name, id in pairs(saved) do
-		if PlanTab.RETIRED[name] and not live[name] then
-			if id == selected then PlanTab.say(("\"%s\" is the loadout you have selected, so it stays. Pick another, then tidy again."):format(name))
-			else doomed[#doomed + 1] = name end
-		end
+	local doomed, todo = {}, {}
+	for _, o in ipairs(PlanTab.retiredLoadouts(saved, PlanTab.selectedConfigID())) do
+		if o.stays then PlanTab.say(("\"%s\" is the loadout you have selected, so it stays. Pick another, then tidy again."):format(o.from))
+		else doomed[#doomed + 1], todo[#todo + 1] = o.from, o end
 	end
-	table.sort(doomed)
 	if #doomed == 0 then PlanTab.say("No old Dreamgrove loadouts on this spec.") return 0 end
 	if not confirmed then
 		PlanTab.say(("These %d old loadouts would be deleted. Your own loadouts are not touched:"):format(#doomed))
@@ -7660,8 +7675,6 @@ function PlanTab.tidy(confirmed)
 	end
 	-- one at a time, through the renaming's queue: the server takes one change
 	-- in flight, and all six at once deleted one (Rob, 2026-09-25, card 0062)
-	local todo = {}
-	for _, name in ipairs(doomed) do todo[#todo + 1] = { id = saved[name], from = name, delete = true, retired = true } end
 	return PlanTab.startTagging(todo)
 end
 
@@ -8949,6 +8962,7 @@ function PlanTab.loadoutChecks(check)
 	check(tidyTest .. ", not with the talent window open", PlanTab.tidy(true), 0)
 	windowOpen, selected = false, 3
 	check(tidyTest .. ", never the selected one", PlanTab.tidy(true), 0)
+	check(tidyTest .. ", and says why", table.concat(printed, "\n"):find("so it stays. Pick another, then tidy again", 1, true) ~= nil, true)
 	check(tidyTest .. ", nothing deleted by either", #calls, 0)
 	selected = 9
 	-- 0039 review: tidy frees slots, so the slot cap never fences it (3 loadouts x 4 specs = 12)
@@ -9986,7 +10000,9 @@ function PlanTab.tagChecks(check)
 			local wasClass, wasSpecAPI0 = PlanTab.playerClass, C_SpecializationInfo
 			PlanTab.playerClass = function() return PlanTab.DRUID end
 			C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 102 end }  -- Balance
-			local oldSaved = { ["EC M+"] = 11, ["Raid: Vashnik"] = 12, ["KotG Raid ST"] = 13, ["[CP] Dungeon"] = 14, ["Rob's"] = 15 }
+			-- "WS M+" here is the tagged "[CP] WS M+", filed under its build name: never old (0062 review)
+			local oldSaved = { ["EC M+"] = 11, ["Raid: Vashnik"] = 12, ["KotG Raid ST"] = 13, ["Dungeon"] = 14, ["Rob's"] = 15, ["WS M+"] = 16 }
+			live = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST", [14] = "[CP] Dungeon", [15] = "Rob's", [16] = "[CP] WS M+" }
 			local seen = {}
 			for _, e in ipairs(kept[12](oldSaved, 11)) do seen[#seen + 1] = e.from .. (e.stays and " stays" or "") end
 			check(d .. ", listed on a druid, a name retired from this spec included, the worn one staying", table.concat(seen, "|"), "EC M+ stays|KotG Raid ST|Raid: Vashnik")
@@ -10006,16 +10022,38 @@ function PlanTab.tagChecks(check)
 			selected = 11
 			check(d .. ", the box asks about them", PlanTab.offerLoadouts(true), "old")
 			check(d .. ", each shown as deleted, the worn one staying", shown and table.concat(shown.lines, "\n"):find("KotG Raid ST|r  |cffff4444deleted: an old Dreamgrove loadout", 1, true) ~= nil and table.concat(shown.lines, "\n"):find("EC M+|r  stays: you are wearing it|r", 1, true) ~= nil, true)
-			live, calls, said, busyUntil = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST" }, {}, {}, 0
+			-- 0062 review: a box of deletes says delete, not rename
+			check(d .. ", a box of deletes is labelled Delete them", shown and shown.buttons[1].label, "Delete them")
+			check(d .. ", and does not speak of renaming", shown and table.concat(shown.lines, "\n"):find("Renaming", 1, true) == nil, true)
+			calls, said, busyUntil = {}, {}, 0
 			PlanTab.tagOld()
 			drain()
-			check(d .. ", Tag them deletes them one at a time, never the worn one", table.concat(calls, "|") .. "/" .. tostring(saidAny("Deleted 2 old Dreamgrove")) .. "/" .. tostring(saidAny("would not")), "delete 13|delete 12/true/false")
+			check(d .. ", Tag them deletes them one at a time, never the worn one", table.concat(calls, "|") .. "/" .. tostring(saidAny("Deleted 2 of 2 old Dreamgrove")) .. "/" .. tostring(saidAny("would not")), "delete 13|delete 12/true/false")
 			check(d .. ", and says only what it did", saidAny("Tagged"), false)
 			-- tidy, which deleted one of six at once in the client
-			live, calls, said, selected = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST" }, {}, {}, 99
+			live, calls, said, selected = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST", [14] = "[CP] Dungeon", [16] = "[CP] WS M+" }, {}, {}, 99
 			check(d .. ", tidy yes starts the queue", PlanTab.tidy(true), "started")
 			drain()
-			check(d .. ", and deletes all three, none refused", #calls .. "/" .. tostring(saidAny("Deleted 3 old Dreamgrove")) .. "/" .. tostring(saidAny("would not")), "3/true/false")
+			check(d .. ", and deletes all three, none refused", #calls .. "/" .. tostring(saidAny("Deleted 3 of 3 old Dreamgrove")) .. "/" .. tostring(saidAny("would not")), "3/true/false")
+			check(d .. ", and the tagged one filed under an old name is still there", live[16], "[CP] WS M+")
+			-- 0062 review: all refused says 0 of 3 deleted, not "Tagged 0"
+			live, calls, said = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST" }, {}, {}
+			local keptDel = C_ClassTalents.DeleteConfig
+			C_ClassTalents.DeleteConfig = function() return false end
+			PlanTab.tidy(true)
+			drain()
+			C_ClassTalents.DeleteConfig = keptDel
+			check(d .. ", every delete refused is 0 of 3, and no Tagged line", tostring(saidAny("Deleted 0 of 3 old Dreamgrove")) .. "/" .. tostring(saidAny("Tagged")), "true/false")
+			-- 0062 review: Not now with no room does not say every build is saved
+			local wasRoom, wasGaps0 = PlanTab.loadoutRoom, PlanTab.loadoutGaps
+			PlanTab.loadoutRoom = function() return 0 end
+			PlanTab.loadoutGaps = function() return { "Raid: Single Target", "Dungeon" }, {} end
+			live, said = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST" }, {}
+			PlanTab.oldDismissed = { Balance = true }  -- as its Not now leaves it
+			PlanTab.offerLoadouts(true, true)
+			PlanTab.oldDismissed = {}
+			check(d .. ", Not now with no room says the builds have none", tostring(saidAny("2 planned Balance builds have no loadout and no room")) .. "/" .. tostring(saidAny("Every planned")), "true/false")
+			PlanTab.loadoutRoom, PlanTab.loadoutGaps = wasRoom, wasGaps0
 			PlanTab.playerClass, C_SpecializationInfo = wasClass, wasSpecAPI0
 			PlanTab.retiredLoadouts = function() return {} end
 			PlanTab.savedLoadoutNames = function() return { ["Raid: Vashnik"] = 9 }, {}, old end
