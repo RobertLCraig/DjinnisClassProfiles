@@ -51,6 +51,8 @@ ignore:
   - update-builds.py
   - wcl.py
   - wcl-builds.py
+  # Bakes Bellular's keybinding categories into the bar categories table (card 0051).
+  - update-bar-categories.py
   - .cache
   - __pycache__
   - offline-check.lua

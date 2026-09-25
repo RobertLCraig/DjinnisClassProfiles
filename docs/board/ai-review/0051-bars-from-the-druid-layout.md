@@ -53,3 +53,38 @@ every spec, so muscle memory carries across. Rob's own keys play the part of Bel
 - [ ] WHEN a layout is made for a target spec, EACH BUTTON SHALL hold the target spec's ability of the same category as the druid template's ability on that button, and the rest SHALL be listed as skipped. proves: checks on a fixture Master Sheet
 - [ ] WHEN the druid ability sits on a form page, THE TARGET SHALL use the button it shows on. proves: a check with a Cat-page slot
 - [ ] Rob previews and loads it on one alt, and the keys feel the same as his druid. proves: manual
+
+## Comments
+
+**2026-09-25, Claude.** Built, v0.54.0.
+
+- `update-bar-categories.py` downloads the Master Sheet as CSV and writes the BAR CATEGORIES block:
+  40 categories, and one column per spec in `PlanTab.SPECS`. The four names the sheet uses twice
+  are read by position. A changed header stops the run. A cell loses a trailing "?" and a note in
+  brackets. "A/B" stays: the first one the character knows is used.
+- `PlanTab.translateBars(layout, from, to, api)` is pure. For each slot:
+  - The target's fighting page takes the druid's fighting page. That is bar 1 for another class
+    and for Resto, Bear (97-108) for Guardian, Moonkin (109-120) for Balance. Cat is 73-84. The
+    pages are read from Dominos' and Bartender's state drivers; Blizzard's UI source does not say.
+  - A spell with a category gets the target's spell for that category. An empty cell, or a spell
+    the character does not know, leaves the button empty and is listed with why.
+  - A spell with no category (Cat Form, a racial) stays only if the character knows it.
+  - Items, pets and mounts carry over. A druid macro or flyout carries only to a druid.
+  - Another class's pages 73-120 (a rogue's stealth bar) are left as they are now.
+  - A druid target's other form pages keep the template's spells it knows, not translated.
+  - The keys come across whole, as a copy.
+- `PlanTab.barsFrom(from)`: More > "Make bars from your Balance bars" (the template's name), or
+  `/dcp bars from [spec]`. The template is the role's druid spec, and Feral for the druid specs.
+  With no layout saved for the role's spec it falls back to Feral. The result is saved as this
+  spec's layout. One there already is replaced only after a question. Nothing goes on the bars:
+  Load bars: spec shows the preview, then loads it.
+- `PlanTab.barCategoryChecks` holds 19 checks on a fixture sheet, and the real table's shape. I broke
+  eight parts, one at a time; each made 2 to 6 checks fail.
+
+Acceptance 1 and 2 are proved by those checks. 3 is Rob's: on the druid in Balance, Guardian or
+Resto (Feral first), and on one alt, click More > Make bars from your ... bars, hover Load bars:
+spec, then load it.
+
+Two things Rob may want to know. A spell the character has not talented is left empty, since the
+game will not give its id; talent first, then make the bars. And Rob's saved Destruction layout is
+only replaced if he says Replace.

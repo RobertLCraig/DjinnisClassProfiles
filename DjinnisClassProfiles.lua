@@ -696,6 +696,66 @@ PlanTab.BUILDS = {
 }
 -- END GENERATED BUILDS
 
+-- GENERATED, do not hand-edit. Rewritten by update-bar-categories.py from
+-- Bellular's Midnight Keybinding Planner (card 0051): each category keeps one
+-- key in every spec, and this is the ability each spec puts in it. It turns a
+-- druid bar layout into another spec's (PlanTab.translateBars).
+-- BEGIN GENERATED BAR CATEGORIES
+PlanTab.BAR_CATEGORY_SOURCE = "Bellular's Midnight Keybinding Planner, Master Sheet, read 2026-09-25"
+PlanTab.BAR_CATEGORIES = {
+	"Combat 1", "Combat 2", "Combat 3", "Combat 4", "Combat 5", "Combat 6",
+	"Combat 7", "Combat 8", "Combat 9", "Combat 10", "Combat 11", "Combat 12",
+	"Class 1 (Movement)", "Class 2 (CC)", "Class 3 (Tag)", "Class 4 (Special)", "Self-Heal 1", "Self-Heal 2",
+	"Self-Heal 3 (Overflow)", "Self-Heal 4 (Emergency/Overflow)", "Class 5 (Purge)", "Class 6 (Dispel)", "Class 7 (Raid Defensive)", "Class 8 (Lust/BRes)",
+	"Personal Defensive 1", "Personal Defensive 2", "Movement Ability", "Movement Ability 2", "CC", "CC 2",
+	"Interrupt", "Slow", "Buff", "Res", "Immune/Spell Immune/Movement", "Taunt/Quick Access",
+	"PvP", "PvP 2", "PvP 3", "Mount",
+}
+-- spec -> the ability in each category above, "" for none, "A/B" for either
+PlanTab.BAR_ABILITIES = {
+	["Blood"] = { "Heart Strike", "Marrowrend", "Blood Boil", "Death and Decay", "Death Strike", "Vampiric Blood", "Death's Caress", "Consumption", "Dancing Rune Weapon", "Reaper's Mark", "", "Raise Dead", "Death Grip", "Gorefiend's Grasp", "", "", "", "Lichborne", "Death Coil", "Death Pact", "Control Undead", "Path of Frost", "Anti-Magic Zone", "Raise Ally", "Icebound Fortitude", "", "Death's Advance", "Wraith Walk", "Asphyxiate", "Blinding Sleet", "Mind Freeze", "Chains of Ice", "", "", "Anti-Magic Shell", "Dark Command", "Dark Simulacrum", "Death Chain", "", "Mount" },
+	["Frost Death Knight"] = { "Obliterate", "Frost Strike", "Howling Blast", "Frostscythe", "Pillar of Frost", "Glacial Advance", "Empower Rune Weapon", "Frostwyrm's Fury", "Breath of Sindragosa", "Reaper's Mark", "Remorseless Winter", "Raise Dead", "Death Grip", "Death and Decay", "", "", "Death Strike", "Lichborne", "Death Coil", "Death Pact", "Control Undead", "Path of Frost", "Anti-Magic Zone", "Raise Ally", "Icebound Fortitude", "", "Death's Advance", "Wraith Walk", "Asphyxiate", "Blinding Sleet", "Mind Freeze", "Chains of Ice", "", "", "Anti-Magic Shell", "Dark Command", "Dark Simulacrum", "", "", "" },
+	["Unholy"] = { "Scourge Strike", "Festering Strike", "Death Coil", "Putrefy", "Dark Transformation", "Epidemic", "Outbreak", "Soul Reaper", "Army of the Dead", "", "", "Raise Dead", "Death Grip", "Death and Decay", "", "", "Death Strike", "Lichborne", "Death Coil", "Death Pact", "Control Undead", "Path of Frost", "Anti-Magic Zone", "Raise Ally", "Icebound Fortitude", "", "Death's Advance", "Wraith Walk", "Asphyxiate", "Blinding Sleet", "Mind Freeze", "Chains of Ice", "", "", "Anti-Magic Shell", "Dark Command", "Dark Simulacrum", "Zombify", "", "" },
+	["Devourer"] = { "Consume", "Reap", "Void Ray", "Soul Immolation", "Void Metamorphosis", "The Hunt", "Voidblade", "Vengeful Retreat", "", "", "", "", "", "", "Throw Glaive", "Spectral Sight", "", "", "", "", "Consume Magic", "Imprison", "Darkness", "", "Blur", "", "Shift", "", "Void Nova", "Sigil of Misery", "Disrupt", "", "", "", "", "Torment", "", "", "", "" },
+	["Havoc"] = { "Chaos Strike", "Blade Dance", "Eye Beam", "Immolation Aura", "Essence Break", "The Hunt", "Felblade", "Vengeful Retreat", "Metamorphosis", "", "", "", "", "", "Throw Glaive", "Spectral Sight", "", "", "", "", "Consume Magic", "Imprison", "Darkness", "", "Blur", "", "Fel Rush", "", "Chaos Nova", "Sigil of Misery", "Disrupt", "", "", "", "", "Torment", "Rain from Above", "Illidan's Grasp", "Reverse Magic", "" },
+	["Vengeance"] = { "Fracture", "Soul Cleave", "Spirit Bomb", "Immolation Aura", "Demon Spikes", "Sigil of Flame", "Felblade", "Vengeful Retreat", "Metamorphosis", "Sigil of Spite", "Soul Carver", "Fel Devastation", "", "Sigil of Silence", "Throw Glaive", "Spectral Sight", "", "", "", "", "Consume Magic", "Imprison", "Darkness", "", "Fiery Brand", "", "Infernal Strike", "", "Chaos Nova", "Sigil of Misery", "Disrupt", "", "", "", "", "Torment", "Rain from Above", "Illidan's Grasp", "Reverse Magic", "" },
+	["Balance"] = { "Wrath", "Starfire", "Moonfire", "Sunfire", "Starsurge", "Starfall", "Lunar Eclipse", "Fury of Elune", "Celestial Alignment", "Convoke the Spirits", "Force of Nature", "Wild Mushroom", "Stampeding Roar", "Mass Entanglement", "Entangling Roots", "Hibernate", "Regrowth", "", "Innervate", "Heart of the Wild", "Soothe", "Remove Corruption", "", "Rebirth", "Barkskin", "", "Dash", "", "Mighty Bash", "Typhoon", "Solar Beam", "", "Mark of the Wild", "Revive", "Wild Charge", "Prowl", "Faerie Swarm", "", "Symbiotic Relationship", "" },
+	["Feral"] = { "Shred", "Rake", "Rip", "Ferocious Bite", "Tiger's Fury", "Feral Frenzy", "Swipe", "Primal Wrath", "Berserk", "Convoke the Spirits", "Moonfire", "Maim", "Stampeding Roar", "Mass Entanglement", "Entangling Roots", "Hibernate", "Regrowth", "Frenzied Regeneration", "Innervate", "Heart of the Wild", "Soothe", "Remove Corruption", "", "Rebirth", "Barkskin", "Survival Instincts", "Dash", "", "Mighty Bash", "Typhoon", "Skull Bash", "", "Mark of the Wild", "Revive", "Wild Charge", "Prowl", "", "", "Symbiotic Relationship", "" },
+	["Guardian"] = { "Mangle", "Thrash", "Maul", "Frenzied Regeneration", "Ironfur", "Moonfire", "Swipe", "Lunar Beam", "Berserk", "Convoke the Spirits", "Sundering Roar", "Bristling Fur", "Stampeding Roar", "Mass Entanglement", "Entangling Roots", "Hibernate", "Regrowth", "", "Innervate", "Heart of the Wild", "Soothe", "Remove Corruption", "Prowl", "Rebirth", "Barkskin", "Survival Instincts", "Dash", "", "Mighty Bash", "Typhoon", "Skull Bash", "", "Mark of the Wild", "Revive", "Wild Charge", "Growl", "", "", "Symbiotic Relationship", "" },
+	["Resto"] = { "Wrath", "Starfire", "Moonfire", "Sunfire", "Rejuvenation", "Regrowth", "Lifebloom", "Swiftmend", "Tranquility", "Incarnation: Tree Of Life", "Wild Growth", "Ironbark", "Stampeding Roar", "Mass Entanglement", "Entangling Roots", "Hibernate", "Nature's Swiftness", "Starsurge", "Innervate", "Heart of the Wild", "Soothe", "Nature's Cure", "Efflorescence", "Rebirth", "Barkskin", "", "Dash", "", "Mighty Bash", "Typhoon", "", "", "Mark of the Wild", "Revive", "Wild Charge", "Prowl", "", "", "Symbiotic Relationship", "" },
+	["Augmentation"] = { "Living Flame", "Azure Strike", "Eruption", "Fire Breath", "Ebon Might", "Upheaval", "Prescience", "Blistering Scales", "Breath of Eons", "", "", "Time Skip", "Zephyr", "Sleep Walk", "Landslide", "Spatial Paradox", "Verdant Embrace", "Emerald Blossom", "Tip the Scales", "Cauterizing Flame", "Rescue", "Expunge", "Source of Magic", "Fury of the Aspects", "Obsidian Scales", "", "Hover", "", "Tail Swipe", "Oppressing Roar", "Quell", "", "Blessing of the Bronze", "Return", "", "", "Swoop Up", "Chrono Loop", "Time Stop", "" },
+	["Devastation"] = { "Living Flame", "Azure Strike", "Disintegrate", "Fire Breath", "Dragonrage", "Eternity Surge", "Pyre", "", "Deep Breath", "", "", "", "Zephyr", "Sleep Walk", "Landslide", "Spatial Paradox", "Verdant Embrace", "Emerald Blossom", "Tip the Scales", "Cauterizing Flame", "Rescue", "Expunge", "Source of Magic", "Fury of the Aspects", "Obsidian Scales", "", "Hover", "", "Tail Swipe", "Oppressing Roar", "Quell", "", "Blessing of the Bronze", "Return", "", "", "Swoop Up", "Chrono Loop", "Time Stop", "" },
+	["Preservation"] = { "Living Flame", "Azure Strike", "Disintegrate", "Fire Breath", "Echo", "Reversion", "Time Dilation", "Temporal Anomaly", "Deep Breath", "Dream Flight", "Rewind", "Dream Breath", "Zephyr", "Sleep Walk", "Landslide", "Spatial Paradox", "Verdant Embrace", "Emerald Blossom", "Tip the Scales", "Cauterizing Flame", "Rescue", "Naturalize", "Source of Magic", "Fury of the Aspects", "Obsidian Scales", "", "Hover", "", "Tail Swipe", "Oppressing Roar", "", "", "Blessing of the Bronze", "Mass Return", "", "", "Swoop Up", "Chrono Loop", "Time Stop", "" },
+	["Beast Mastery"] = { "Cobra Shot", "Barbed Shot", "Kill Command", "Wild Thrash", "Black Arrow", "Bestial Wrath", "", "", "Hunter's Mark", "", "", "Roar of Sacrifice", "Tar Trap", "Freezing Trap", "Misdirection", "Call Pet 1", "Exhilaration", "Mend Pet", "Revive Pet", "Camouflage", "Tranquilizing Shot", "Flare", "Command Pet", "Ancient Hysteria", "Survival of the Fittest", "Feign Death", "Aspect of the Cheetah", "", "Intimidation", "Binding Shot", "Muzzle", "Concussive Shot", "", "", "Aspect of the Turtle", "Disengage", "Chimaeral Sting", "Dire Beast: Hawk", "Wild Kingdom", "" },
+	["Marksmanship"] = { "Steady Shot", "Arcane Shot", "Aimed Shot", "Rapid Fire", "Black Arrow", "Multi-Shot", "Volley", "Trueshot", "Hunter's Mark", "", "", "Roar of Sacrifice", "Tar Trap", "Freezing Trap", "Misdirection", "Call Pet 1", "Exhilaration", "Mend Pet", "Revive Pet", "Camouflage", "Tranquilizing Shot", "Flare", "Command Pet", "Harrier's Cry", "Survival of the Fittest", "Feign Death", "Aspect of the Cheetah", "", "Intimidation", "Binding Shot", "Muzzle", "Concussive Shot", "", "", "Aspect of the Turtle", "Disengage", "Chimaeral Sting", "", "", "" },
+	["Survival"] = { "Raptor Strike", "Kill Command", "Wildfire Bomb", "Takedown", "Boomstick", "Flamefang Pitch", "Hatchet Toss", "Harpoon", "Hunter's Mark", "Aspect of the Eagle", "", "Roar of Sacrifice", "Tar Trap", "Freezing Trap", "Misdirection", "Call Pet 1", "Exhilaration", "Mend Pet", "Revive Pet", "Camouflage", "Tranquilizing Shot", "Flare", "Command Pet", "Ancient Hysteria", "Survival of the Fittest", "Feign Death", "Aspect of the Cheetah", "", "Intimidation", "Binding Shot", "Muzzle", "Concussive Shot", "", "", "Aspect of the Turtle", "Disengage", "Chimaeral Sting", "", "", "" },
+	["Arcane"] = { "Arcane Blast", "Arcane Barrage", "Arcane Missiles", "Arcane Orb", "Touch of the Magi", "Arcane Pulse", "Arcane Surge", "Presence of Mind", "Evocation", "", "", "", "Mass Polymorph", "Cone of Cold", "Polymorph", "Mass Invisibility", "Alter Time", "Mirror Image", "", "", "Spellsteal", "Remove Curse", "Slow Fall", "Time Warp", "Prismatic Barrier", "", "Blink", "", "Frost Nova", "Supernova", "Counterspell", "", "", "Arcane Intellect", "Ice Block", "Greater Invisibility", "", "", "", "" },
+	["Fire"] = { "Fireball", "Fire Blast", "Pyroblast", "Scorch", "Combustion", "Flamestrike", "Meteor", "", "", "", "", "Arcane Explosion", "Mass Polymorph", "Cone of Cold", "Polymorph", "Mass Invisibility", "Alter Time", "Mirror Image", "", "", "Spellsteal", "Remove Curse", "Slow Fall", "Time Warp", "Prismatic Barrier", "", "Blink", "", "Frost Nova", "Supernova", "Counterspell", "", "", "Arcane Intellect", "Ice Block", "Greater Invisibility", "", "", "", "" },
+	["Frost Mage"] = { "Frostbolt", "Ice Lance", "Flurry", "Frozen Orb", "Ray of Frost", "Blizzard", "", "", "", "", "", "Arcane Explosion", "Mass Polymorph", "Cone of Cold", "Polymorph", "Mass Invisibility", "Alter Time", "Mirror Image", "", "", "Spellsteal", "Remove Curse", "Slow Fall", "Time Warp", "Prismatic Barrier", "", "Blink", "", "Frost Nova", "Supernova", "Counterspell", "", "", "Arcane Intellect", "Ice Block", "Greater Invisibility", "", "", "", "" },
+	["Brewmaster"] = { "Tiger Palm", "Blackout Kick", "Keg Smash", "Breath of Fire", "Celestial Infusion", "Purifying Brew", "Spinning Crane Kick", "Rushing Jade Wind", "Invoke Niuzao, the Black Ox", "Exploding Keg", "", "Chi Burst", "Transcendence: Transfer", "Ring of Peace", "Crackling Jade Lightning", "Touch of Death", "Vivify", "Expel Harm", "Soothing Mist", "Black Ox Brew", "Transcendence", "Detox", "Zen Flight", "Summon Black Ox Statue", "Fortifying Brew", "", "Roll", "Tiger's Lust", "Leg Sweep", "Paralysis", "Spear Hand Strike", "Disable", "Res", "", "", "Provoke", "Nimble Brew", "Double Barrel", "", "" },
+	["Mistweaver"] = { "Tiger Palm", "Blackout Kick", "Rising Sun Kick", "Spinning Crane Kick", "Sheilun's Gift", "Renewing Mist", "Enveloping Mist", "Soothing Mist", "Invoke Chi-Ji, the Red Crane", "Revival", "Celestial Conduit", "Life Cocoon", "Transcendence: Transfer", "Ring of Peace", "Crackling Jade Lightning", "Touch of Death", "Thunder Focus Tea", "", "", "Mana Tea", "Transcendence", "Detox", "Zen Flight", "Summon Jade Serpent Statue", "Fortifying Brew", "", "Roll", "Tiger's Lust", "Leg Sweep", "Paralysis", "Spear Hand Strike", "Disable", "Res", "", "", "Provoke", "Nimble Brew", "Double Barrel", "", "" },
+	["Windwalker"] = { "Tiger Palm", "Blackout Kick", "Rising Sun Kick", "Fists of Fury", "Strike of the Windlord", "Whirling Dragon Punch", "Spinning Crane Kick", "Zenith", "Invoke Xuen, the White Tiger", "", "", "Flying Serpent Kick", "Transcendence: Transfer", "Ring of Peace", "Crackling Jade Lightning", "Touch of Death", "Vivify", "", "Soothing Mist", "", "Transcendence", "Detox", "Zen Flight", "", "Fortifying Brew", "Touch of Karma", "Roll", "Tiger's Lust", "Leg Sweep", "Paralysis", "Spear Hand Strike", "Disable", "Res", "", "", "Provoke", "Nimble Brew", "Double Barrel", "", "" },
+	["Holy Paladin"] = { "Holy Shock", "Judgment", "Flash of Light", "Holy Light", "Shield of the Righteous", "Light of Dawn", "Word of Glory", "Holy Bulwark", "Avenging Wrath", "Aura Mastery", "", "", "Blessing of Freedom", "Blessing of Protection", "Blessing of Sacrifice", "", "Beacon of Light", "Beacon of Faith", "", "Lay on Hands", "Turn Evil", "Cleanse", "", "Intercession", "Divine Protection", "", "Divine Steed", "", "Hammer of Justice", "Blinding Light", "", "", "Res", "Weapon Buffs", "Divine Shield", "Hand of Reckoning", "", "", "", "" },
+	["Protection Paladin"] = { "Blessed Hammer", "Judgment", "Avenger's Shield", "Consecration", "Shield of the Righteous", "Divine Toll", "Word of Glory", "Holy Bulwark", "Sentinel", "", "", "", "Blessing of Freedom", "Blessing of Protection", "Blessing of Sacrifice", "Blessing of Spellwarding", "Flash of Light", "", "", "Lay on Hands", "Turn Evil", "Cleanse Toxins", "", "Intercession", "Ardent Defender", "Guardian of Ancient Kings", "Divine Steed", "", "Hammer of Justice", "Blinding Light", "Rebuke", "", "Res", "Weapon Buffs", "Divine Shield", "Hand of Reckoning", "", "", "", "" },
+	["Retribution"] = { "Crusader Strike", "Judgment", "Blade of Justice", "Final Verdict", "Divine Storm", "Divine Toll", "Execution Sentence", "Wake of Ashes", "Avenging Wrath", "", "", "", "Blessing of Freedom", "Blessing of Protection", "Blessing of Sacrifice", "", "Flash of Light", "Word of Glory", "", "Lay on Hands", "Turn Evil", "Cleanse Toxins", "", "Intercession", "Divine Protection", "", "Divine Steed", "", "Hammer of Justice", "Blinding Light", "Rebuke", "", "Res", "", "Divine Shield", "Hand of Reckoning", "", "", "", "" },
+	["Discipline"] = { "Smite", "Mind Blast", "Shadow Word: Pain", "Flash Heal", "Penance", "Power Word: Radiance", "Power Word: Shield", "Plea", "Evangelism", "Power Word: Barrier", "", "Pain Suppression", "Holy Nova", "Shadow Word: Death", "Mass Dispel", "Power Infusion", "Desperate Prayer", "", "", "", "Dispel Magic", "Purify", "Levitate", "Mind Soothe", "Fade", "", "Angelic Feather", "", "Psychic Scream", "Shackle Horror", "", "Mind Control", "Res", "Power Word: Fortitude", "Leap of Faith", "", "", "", "", "" },
+	["Holy Priest"] = { "Smite", "Holy Fire", "Prayer of Mending", "Flash Heal", "Holy Word: Serenity", "Prayer of Healing", "Holy Word: Sanctify", "Halo", "Apotheosis", "Divine Hymn", "", "Guardian Spirit", "Holy Nova", "Shadow Word: Death", "Mass Dispel", "Power Infusion", "Desperate Prayer", "", "", "", "Dispel Magic", "Purify", "Levitate", "Mind Soothe", "Fade", "", "Angelic Feather", "", "Psychic Scream", "Shackle Horror", "Holy Word: Chastise", "Mind Control", "Res", "Power Word: Fortitude", "Leap of Faith", "", "", "", "", "" },
+	["Shadow"] = { "Mind Flay", "Mind Blast", "Shadow Word: Pain", "Vampiric Touch", "Shadow Word: Madness", "Shadow Word: Death", "Tentacle Slam", "Void Torrent/Halo", "Voidform", "", "", "", "Holy Nova", "", "Mass Dispel", "Power Infusion", "Desperate Prayer", "Flash Heal", "Vampiric Embrace", "Power Word: Shield", "Dispel Magic", "Purify Disease", "Levitate", "Mind Soothe", "Fade", "", "Angelic Feather", "", "Psychic Scream", "Shackle Horror", "Silence", "Mind Control", "Res", "Power Word: Fortitude", "Leap of Faith", "Dispersion", "", "", "", "" },
+	["Assassination"] = { "Mutilate", "Garrote", "Rupture", "Envenom", "Kingsbane", "Fan of Knives", "Crimson Tempest", "", "Deathmark", "", "", "", "Sap", "Blind", "Poisoned Knife", "Vanish", "Crimson Vial", "Thistle Tea", "", "Cloak of Shadows", "Shiv", "Distract", "Tricks of the Trade", "Shroud of Concealment", "Evasion", "Feint", "Sprint", "", "Kidney Shot", "Cheap Shot", "Kick", "Gouge", "", "Poisons", "Shadowstep", "", "", "", "", "" },
+	["Outlaw"] = { "Sinister Strike", "Pistol Shot", "Between The Eyes", "Dispatch", "Roll the Bones", "Blade Flurry", "Blade Rush", "Killing Spree", "Adrenaline Rush", "Keep It Rolling", "Preparation", "", "Sap", "Blind", "", "Vanish", "Crimson Vial", "Thistle Tea", "", "Cloak of Shadows", "Shiv", "Distract", "Tricks of the Trade", "Shroud of Concealment", "Evasion", "Feint", "Sprint", "", "Kidney Shot", "Cheap Shot", "Kick", "Gouge", "", "Poisons", "Grappling Hook", "", "", "", "", "" },
+	["Subtlety"] = { "Backstab", "Shadowstrike", "Secret Technique", "Eviscerate", "Shadow Dance", "Shuriken Storm", "Black Powder", "Goremaw's Bite", "Shadow Blades", "", "", "", "Sap", "Blind", "Shuriken Toss", "Vanish", "Crimson Vial", "Thistle Tea", "", "Cloak of Shadows", "Shiv", "Distract", "Tricks of the Trade", "Shroud of Concealment", "Evasion", "Feint", "Sprint", "", "Kidney Shot", "Cheap Shot", "Kick", "Gouge", "", "Poisons", "Shadowstep", "", "", "", "", "" },
+	["Elemental"] = { "Lightning Bolt", "Lava Burst", "Flame Shock", "Chain Lightning", "Earth Shock", "Earthquake", "Stormkeeper", "Nature's Swiftness", "Ascendance", "", "", "Frost Shock", "Wind Rush Totem", "Tremor Totem", "Hex", "Spiritwalker's Grace", "Healing Surge", "Chain Heal", "Healing Stream Totem", "Earth Shield", "Purge", "Cleanse Spirit", "Totemic Projection", "Heroism", "Astral Shift", "Earth Elemental", "Ghost Wolf", "Spirit Walk", "Capacitor Totem", "Thunderstorm", "Wind Shear", "Earthgrab Totem", "Ancestral Spirit", "Skyfury", "", "", "", "", "", "" },
+	["Enhancement"] = { "Stormstrike", "Lava Lash", "Flame Shock", "Crash Lightning", "Sundering", "Lightning Bolt", "Chain Lightning", "Surging Totem", "Doom Winds", "", "Nature's Swiftness", "Frost Shock", "Wind Rush Totem", "Tremor Totem", "Hex", "Feral Lunge", "Healing Surge", "Chain Heal", "Healing Stream Totem", "Earth Shield", "Purge", "Cleanse Spirit", "Totemic Projection", "Heroism", "Astral Shift", "Earth Elemental", "Ghost Wolf", "Spirit Walk", "Capacitor Totem", "Thunderstorm", "Wind Shear", "Earthgrab Totem", "Ancestral Spirit", "Skyfury", "", "", "", "", "", "" },
+	["Restoration Shaman"] = { "Lightning Bolt", "Lava Burst", "Flame Shock", "Chain Lightning", "Riptide", "Healing Wave", "Chain Heal", "Nature's Swiftness", "Ascendance", "Healing Rain", "Unleash Life", "Spirit Link Totem", "Wind Rush Totem", "Tremor Totem", "Hex", "Spiritwalker's Grace", "", "", "Healing Stream Totem", "Earth Shield", "Purge", "Purify Spirit", "Totemic Projection", "Heroism", "Astral Shift", "Earth Elemental", "Ghost Wolf", "Spirit Walk", "Capacitor Totem", "Thunderstorm", "Wind Shear", "Earthgrab Totem", "Ancestral Vision", "Skyfury", "", "", "", "", "", "" },
+	["Affliction"] = { "Drain Soul", "Corruption", "Agony", "Unstable Affliction", "Haunt", "Seed of Corruption", "Dark Harvest", "", "Summon Darkglare", "Malevolence", "", "", "Curse of Exhaustion", "Curse of Tongues", "Curse of Weakness", "Blight of Weakness", "Drain Life", "Mortal Coil", "Fel Domination", "Summon Felhunter", "Banish", "", "Soulburn", "Soulstone", "Dark Pact", "Unending Resolve", "Burning Rush", "Demonic Gateway", "Shadowfury", "Fear", "Spell Lock", "Subjugate Demon", "Demonic Circle", "Demonic Circle: Teleport", "", "", "", "", "", "" },
+	["Demonology"] = { "Shadow Bolt", "Call Dreadstalkers", "Hand of Gul'dan", "Demonbolt", "Implosion/Power Siphon", "Summon Demonic Tyrant", "Summon Doomguard", "Grimoire: Fel Ravager", "", "", "", "", "Curse of Exhaustion", "Curse of Tongues", "Curse of Weakness", "Blight of Weakness", "Drain Life", "Mortal Coil", "Fel Domination", "Summon Felguard", "Banish", "", "Soulburn", "Soulstone", "Dark Pact", "Unending Resolve", "Burning Rush", "Demonic Gateway", "Shadowfury", "Fear", "Spell Lock", "Subjugate Demon", "Demonic Circle", "Demonic Circle: Teleport", "", "", "", "", "", "" },
+	["Destruction"] = { "Incinerate", "Conflagrate", "Immolate", "Chaos Bolt", "Shadowburn", "Rain of Fire", "Cataclysm", "Soul Fire", "Summon Infernal", "Malevolence", "Channel Demonfire", "Havoc", "Curse of Exhaustion", "Curse of Tongues", "Curse of Weakness", "Blight of Weakness", "Drain Life", "Mortal Coil", "Fel Domination", "Summon Felguard", "Banish", "", "Soulburn", "Soulstone", "Dark Pact", "Unending Resolve", "Burning Rush", "Demonic Gateway", "Shadowfury", "Fear", "Spell Lock", "Subjugate Demon", "Demonic Circle", "Demonic Circle: Teleport", "", "", "", "", "", "" },
+	["Arms"] = { "Slam", "Mortal Strike", "Colossus Smash", "Overpower", "Execute", "Cleave", "Thunder Clap/Rend", "Sweeping Strikes", "Avatar", "Bladestorm", "Demolish", "Champion's Spear", "Charge", "Piercing Howl", "Heroic Throw", "Wrecking Throw", "Impending Victory", "Ignore Pain", "Berserker Shout", "Spell Reflection", "Intervene", "", "Rallying Cry", "", "Die by the Sword", "", "Heroic Leap", "", "Storm Bolt", "Shockwave", "Pummel", "Hamstring", "Battle Shout", "", "", "Taunt", "", "", "", "" },
+	["Fury"] = { "Bloodthirst", "Raging Blow", "Rampage", "Whirlwind", "Execute", "Odyn's Fury", "Thunder Clap/Rend", "Recklessness", "Avatar/Bladestorm", "", "", "Champion's Spear", "Charge", "Piercing Howl", "Heroic Throw", "Wrecking Throw", "Impending Victory", "", "Berserker Shout", "Spell Reflection", "Intervene", "", "Rallying Cry", "", "Enraged Regeneration", "", "Heroic Leap", "", "Storm Bolt", "Shockwave", "Pummel", "Hamstring", "Battle Shout", "", "", "Taunt", "", "", "", "" },
+	["Protection Warrior"] = { "Shield Slam", "Revenge", "Thunder Clap", "Shield Block", "Execute", "Ignore Pain", "Shield Charge", "Demoralizing Shout", "Avatar", "Ravager", "Demolish", "Champion's Spear", "Charge", "Piercing Howl", "Heroic Throw", "Wrecking Throw", "Impending Victory", "", "Berserker Shout", "Spell Reflection", "Intervene", "Challenging Shout", "Rallying Cry", "", "Shield Wall", "", "Heroic Leap", "", "Storm Bolt", "Shockwave", "Pummel", "Hamstring", "Battle Shout", "", "", "Taunt", "", "", "", "" },
+}
+-- END GENERATED BAR CATEGORIES
+
 -- The stored build behind a loadout name: the BUILDS block's where it has one, else
 -- the gear plan cell simmed under that name. nil for a name nobody planned,
 -- which is judged by name alone. Pure, for /bis test.
@@ -9126,11 +9186,188 @@ function PlanTab.offerBars(asked)
 	return "shown"
 end
 
--- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo]
+-- Another spec's bars from a druid layout (card 0051) -------------------------
+--
+-- Bellular's categories (the BAR CATEGORIES block) give each ability a job,
+-- and a job keeps its button in every spec. So the druid ability on a button
+-- names the category, and the category names this spec's ability for that
+-- button. Keys are bound to buttons, not spells, so the druid's keys come
+-- whole. The result is a normal saved layout for the spec: the preview (card
+-- 0046), Load and Undo work on it unchanged, and it is seen before it is on.
+
+-- The page each druid spec fights on: its form's bonus bar, as Dominos' and
+-- Bartender's state drivers read them (Cat 73-84, Bear 97-108, Moonkin
+-- 109-120). Resto fights in caster form, on bar 1.
+PlanTab.FORM_PAGE = { Feral = 72, Guardian = 96, Balance = 108, Resto = 0 }
+PlanTab.RANGED = {
+	Balance = true, Elemental = true, Arcane = true, Fire = true, ["Frost Mage"] = true, Shadow = true,
+	Affliction = true, Demonology = true, Destruction = true, Devastation = true, Augmentation = true,
+	["Beast Mastery"] = true, Marksmanship = true, Devourer = true,
+}
+
+-- The druid layout `spec` copies, or nil. Card 0048: the druid spec of its
+-- role. Rob, 2026-09-24: Feral's bars have the work in them, so the other
+-- druid specs copy Feral first.
+function PlanTab.templateFor(spec)
+	local role, class
+	for _, s in ipairs(PlanTab.SPECS) do if s[2] == spec then class, role = s[3], s[4] end end
+	if not role or spec == "Feral" then return nil end
+	if class == PlanTab.DRUID then return "Feral" end
+	if role == "TANK" then return "Guardian" end
+	if role == "HEALER" then return "Resto" end
+	return PlanTab.RANGED[spec] and "Balance" or "Feral"
+end
+
+-- The category `name` holds in `spec`'s column, or nil. Without capitals:
+-- the sheet writes "Tree Of Life".
+function PlanTab.categoryOf(spec, name)
+	local column = PlanTab.BAR_ABILITIES[spec]
+	if not (column and name) then return nil end
+	name = name:lower()
+	for i, cell in ipairs(column) do
+		for alt in cell:gmatch("[^/]+") do if alt:lower() == name then return i end end
+	end
+	return nil
+end
+
+-- Where slot `slot` of `to`'s layout comes from, and how: "move" through the
+-- categories, "keep" as it is where this character knows it, "here" what the
+-- slot holds now. The fighting page takes the template's fighting page:
+-- a Mage's bar 1 is the button a cat's Shred shows on.
+function PlanTab.slotSource(slot, from, to)
+	local fromPage, toPage = PlanTab.FORM_PAGE[from] or 0, PlanTab.FORM_PAGE[to]
+	local fight = toPage or 0
+	if slot > fight and slot <= fight + 12 then return fromPage + slot - fight, "move" end
+	if slot > 72 and slot <= 120 then
+		-- another class's pages there are its own (a rogue's stealth bar)
+		if not toPage then return slot, "here" end
+		return slot, "keep"  -- a druid's other forms: the template's
+	end
+	return slot, "move"
+end
+
+-- `layout`, a `from` druid layout, as `to`'s. `api` answers for this
+-- character: name(id), known(id), find(name) a known spell's id, and `here`
+-- its bars now. Answers the layout and the skip lines. Pure, for /bis test.
+function PlanTab.translateBars(layout, from, to, api)
+	local slots, skipped = {}, {}
+	local function skip(slot, why) skipped[#skipped + 1] = ("slot %d: %s"):format(slot, why) end
+	for slot = 1, PlanTab.BAR_SLOTS do
+		local src, how = PlanTab.slotSource(slot, from, to)
+		local a
+		if PlanTab.barSlot(slot) then
+			if how == "here" then a = api.here[slot] else a = layout.slots[src] end  -- not and/or: an empty slot here is nil
+		end
+		if not a or how == "here" then
+			slots[slot] = a
+		elseif a.type == "macro" or a.type == "flyout" then
+			-- a druid's macro or flyout means nothing to another class
+			if PlanTab.FORM_PAGE[to] then slots[slot] = a else skip(slot, ("the druid's %s %s"):format(a.type, tostring(a.name or a.id))) end
+		elseif a.type ~= "spell" then
+			slots[slot] = a  -- an item, a pet or a mount is no class's
+		else
+			local name = api.name(a.id)
+			local cat = how == "move" and PlanTab.categoryOf(from, name)
+			local cell = cat and PlanTab.BAR_ABILITIES[to] and PlanTab.BAR_ABILITIES[to][cat]
+			if cat and (cell or "") == "" then
+				skip(slot, ("%s is %s, which %s leaves empty"):format(name, PlanTab.BAR_CATEGORIES[cat], to))
+			elseif cat then
+				local id
+				for alt in cell:gmatch("[^/]+") do id = id or api.find(alt) end
+				if id then slots[slot] = { type = "spell", id = id }
+				else skip(slot, ("%s is %s: %s, not known here"):format(name, PlanTab.BAR_CATEGORIES[cat], cell)) end
+			elseif api.known(a.id) then
+				slots[slot] = a
+			else
+				skip(slot, ("%s: no category, and not known here"):format(name or ("spell " .. a.id)))
+			end
+		end
+	end
+	local keys
+	if type(layout.keys) == "table" then
+		keys = {}
+		for key, action in pairs(layout.keys) do keys[key] = action end
+	end
+	return { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil, from = from }, skipped
+end
+
+-- The game's answers for translateBars, for this character.
+function PlanTab.barsApi()
+	local function known(id)
+		local ok, k = pcall(C_SpellBook.IsSpellKnownOrInSpellBook, id)
+		return ok and canRead(k) and k or false
+	end
+	return {
+		name = function(id)
+			local ok, n = pcall(C_Spell.GetSpellName, id)
+			return ok and canRead(n) and n or nil
+		end,
+		known = known,
+		find = function(name)
+			local ok, id = pcall(C_Spell.GetSpellIDForSpellIdentifier, name)
+			if not (ok and canRead(id) and id) then return nil end
+			return known(id) and id or nil
+		end,
+		here = PlanTab.readBars(),
+	}
+end
+
+-- /dcp bars from [druid spec], and More > Make bars from your druid's. Saves
+-- this spec's layout; one there already is replaced only after asking. The
+-- role's template falls back to Feral when there is none saved yet. Answers
+-- what it did, for the checks.
+function PlanTab.barsFrom(from, confirmed)
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return "fenced" end
+	local spec = playerSpec()
+	if not spec then PlanTab.say("The game has not said which spec you are in yet.") return "none" end
+	if from then
+		local asked = from:lower()
+		from = nil
+		for key in pairs(PlanTab.FORM_PAGE) do if key:lower() == asked then from = key end end
+		if not from then PlanTab.say("Name a druid spec: Feral, Balance, Guardian or Resto.") return "none" end
+	else
+		from = PlanTab.templateFor(spec)
+		if from and not barsDB()[from] and barsDB().Feral then from = "Feral" end
+	end
+	if not from or from == spec then PlanTab.say(("%s is the layout the others copy, so there is nothing to make it from."):format(spec)) return "none" end
+	local template = barsDB()[from]
+	if not (template and type(template.slots) == "table") then
+		PlanTab.say(("No saved %s layout yet. On your %s druid, click %sMore > Save bars for this spec|r%s first."):format(from, from, GOLD, GREY))
+		return "none"
+	end
+	if barsDB()[spec] and not confirmed then
+		if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
+		PlanTab.prompt("Djinni's Class Profiles: action bars", {
+			("Replace the saved %s layout%s with one made from your %s bars?"):format(spec, barsDB()[spec].saved and (" from " .. barsDB()[spec].saved) or "", from),
+			"It is used for every " .. spec .. " build that has no layout of its own, on every character.",
+		}, {
+			{ label = "Replace", onClick = function()
+				if playerSpec() ~= spec then PlanTab.say("The spec changed since that question, so nothing was made.") return end
+				PlanTab.barsFrom(from, true)
+			end },
+			{ label = "Cancel" },
+		})
+		return "ask"
+	end
+	local layout, skipped = PlanTab.translateBars(template, from, spec, PlanTab.barsApi())
+	local n = 0
+	for _ in pairs(layout.slots) do n = n + 1 end
+	barsDB()[spec] = layout
+	PlanTab.say(("Made the %s layout from your %s bars: %d slots, %d left empty. Hover %sLoad bars: spec|r%s to see it on your bars. Nothing changes until you load it.")
+		:format(spec, from, n, #skipped, GOLD, GREY))
+	for _, line in ipairs(skipped) do print("  " .. line) end
+	PlanTab.barsChanged()
+	return "made"
+end
+
+-- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo | from [spec]]
 function PlanTab.barsCommand(rest)
 	local verb, name = rest:match("^(%S+)%s+(.+)$")
 	if rest == "save" then PlanTab.saveBars(false)
 	elseif rest == "save build" then PlanTab.saveBars(true)
+	elseif rest == "from" then PlanTab.barsFrom()
+	elseif verb == "from" then PlanTab.barsFrom(name)
 	elseif verb == "save" then PlanTab.saveProfile(name)
 	elseif verb == "load" then PlanTab.loadProfile(name)
 	elseif verb == "delete" then PlanTab.deleteProfile(name)
@@ -9170,6 +9407,10 @@ function PlanTab.menuItems(where)
 		add({ text = "Save bars for this spec", tip = "Your action bars and key bindings now, kept for every build of this spec that has none of its own.", fn = function() PlanTab.saveBars(false, true) end })
 		add({ text = "Save bars for this build", tip = "Your action bars and key bindings now, kept for the loadout you have selected.", fn = function() PlanTab.saveBars(true, true) end })
 		add({ text = "Undo bars", tip = "Puts back the action bars and key bindings from before the last load.", fn = PlanTab.undoBarsAsk })
+	end
+	local template = PlanTab.templateFor(playerSpec())
+	if template then
+		add({ text = ("Make bars from your %s bars"):format(template), tip = "Your druid's layout, each button given this spec's ability for the same job (Bellular's keybinding categories). It is saved as this spec's layout. Nothing changes on your bars until you load it.", fn = function() PlanTab.barsFrom() end })
 	end
 	add({ text = "Save bars as a profile...", tip = "Keeps your action bars and key bindings now under a name. A profile loads on any character and any spec.", fn = PlanTab.askProfileName })
 	local names = PlanTab.profileNames()
@@ -11404,6 +11645,98 @@ function PlanTab.bonusChecks(check)
 	end)
 	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
 	RaidWarningUtil, PlaySound, print, GetInstanceInfo, Enum, ChatTypeInfo, SOUNDKIT, GetSpellConfirmationPromptsInfo = unpack(keptG, 1, 8)
+	check(t .. ", ran", ok or tostring(err), true)
+end
+
+-- Card 0051: a druid layout as another spec's, on a fixture Master Sheet,
+-- and the generated one's shape.
+function PlanTab.barCategoryChecks(check)
+	local t = "bars from the druid layout"
+	local whole = true
+	for _, s in ipairs(PlanTab.SPECS) do
+		local column = PlanTab.BAR_ABILITIES[s[2]]
+		if not column or #column ~= #PlanTab.BAR_CATEGORIES then whole = s[2] end
+	end
+	check(t .. ", the sheet has a full column for every spec", whole, true)
+	check(t .. ", and reads as the sheet does", PlanTab.categoryOf("Feral", "Shred") .. "/" .. PlanTab.BAR_ABILITIES.Destruction[1], "1/Incinerate")
+	check(t .. ", each spec's template is its role's druid spec", table.concat({ PlanTab.templateFor("Destruction"), PlanTab.templateFor("Arms"),
+		PlanTab.templateFor("Blood"), PlanTab.templateFor("Discipline"), PlanTab.templateFor("Balance"), tostring(PlanTab.templateFor("Feral")) }, " "),
+		"Balance Feral Guardian Resto Feral nil")
+
+	local keys = { "BAR_ABILITIES", "BAR_CATEGORIES", "say", "barsApi", "prompt", "promptBusy", "barsChanged" }
+	local kept, keptG = {}, { C_SpecializationInfo, print }
+	for i, k in ipairs(keys) do kept[i] = PlanTab[k] end
+	local d = db()
+	local keptBars = d.bars
+	local ok, err = pcall(function()
+		PlanTab.BAR_CATEGORIES = { "Combat 1", "Combat 2", "Interrupt", "Taunt/Quick Access" }
+		PlanTab.BAR_ABILITIES = {
+			Feral = { "Shred", "Rake", "Skull Bash", "Prowl" },
+			Guardian = { "Mangle", "Thrash", "Skull Bash", "Growl" },
+			Resto = { "Wrath", "Starfire", "", "Prowl" },
+			Destruction = { "Incinerate", "Conflagrate/Shadowburn", "", "" },
+		}
+		local ids = { Shred = 1, Rake = 2, ["Skull Bash"] = 3, Prowl = 4, ["Cat Form"] = 5, Mangle = 6, Thrash = 7, Growl = 8,
+			Wrath = 9, Starfire = 10, Incinerate = 11, Conflagrate = 12, Shadowburn = 13 }
+		local names = {}
+		for name, id in pairs(ids) do names[id] = name end
+		local function api(knownNames, here)
+			local known = {}
+			for _, name in ipairs(knownNames) do known[ids[name]] = true end
+			return { name = function(id) return names[id] end, known = function(id) return known[id] or false end,
+				find = function(name) return known[ids[name]] and ids[name] or nil end, here = here or {} }
+		end
+		local S = function(name) return { type = "spell", id = ids[name] } end
+		local feral = { slots = {
+			[1] = S("Wrath"), [13] = S("Rake"), [14] = { type = "macro", name = "MO Rake" }, [15] = { type = "item", id = 5512 },
+			[73] = S("Shred"), [74] = S("Rake"), [75] = S("Cat Form"), [76] = S("Prowl"), [77] = S("Skull Bash"), [98] = S("Mangle"),
+		}, keys = { ["1"] = "ACTIONBUTTON1" } }
+		local function spell(layout, slot) local a = layout.slots[slot] return a and (a.type == "spell" and names[a.id] or a.type) or "-" end
+		local function row(layout, slots) local out = {} for _, s in ipairs(slots) do out[#out + 1] = spell(layout, s) end return table.concat(out, " ") end
+
+		-- a Warlock: bar 1 is the button the cat's Shred shows on
+		local lock, skipped = PlanTab.translateBars(feral, "Feral", "Destruction", api({ "Incinerate", "Shadowburn" }, { [73] = S("Incinerate") }))
+		check(t .. ", each button takes the same job's ability, from the cat page", row(lock, { 1, 2, 3, 4, 5, 13 }), "Incinerate Shadowburn - - - Shadowburn")
+		check(t .. ", the rest are listed, each with why", #skipped .. "/" .. tostring(table.concat(skipped, "\n"):find("Prowl is Taunt/Quick Access, which Destruction leaves empty", 1, true) ~= nil)
+			.. "/" .. tostring(table.concat(skipped, "\n"):find("Cat Form: no category", 1, true) ~= nil), "4/true/true")
+		check(t .. ", a druid macro is left out, an item carried", spell(lock, 14) .. "/" .. spell(lock, 15), "-/item")
+		check(t .. ", the class's own pages 73 to 120 stay as they are", spell(lock, 73) .. "/" .. spell(lock, 98), "Incinerate/-")
+		check(t .. ", the keys come whole, as a copy", tostring(lock.keys["1"]) .. "/" .. tostring(lock.keys ~= feral.keys), "ACTIONBUTTON1/true")
+		-- a Guardian: the bear page takes the cat page, the other forms stay the druid's
+		local bear = PlanTab.translateBars(feral, "Feral", "Guardian", api({ "Mangle", "Thrash", "Skull Bash", "Growl", "Cat Form", "Shred", "Prowl" }))
+		check(t .. ", a druid's fighting page is its form's", row(bear, { 97, 98, 99, 100, 101 }), "Mangle Thrash Cat Form Growl Skull Bash")
+		check(t .. ", its other form pages keep what it knows, and its macros", row(bear, { 73, 74, 14 }), "Shred - macro")
+		-- a Resto druid fights on bar 1
+		local tree = PlanTab.translateBars(feral, "Feral", "Resto", api({ "Wrath", "Starfire", "Prowl" }))
+		check(t .. ", Resto fights on bar 1", row(tree, { 1, 2, 4 }), "Wrath Starfire Prowl")
+
+		-- the command: saved as the spec's layout, and one there asked about first
+		local said, printed, asked = {}, {}, nil
+		PlanTab.say = function(text) said[#said + 1] = text end
+		print = function(...) local line = tostring((...)) if line:find("FAIL|r", 1, true) then keptG[2](...) else printed[#printed + 1] = line end end
+		PlanTab.barsApi = function() return api({ "Incinerate", "Shadowburn" }) end
+		PlanTab.prompt = function(_, _, buttons) asked = buttons end
+		PlanTab.promptBusy = function() return false end
+		PlanTab.barsChanged = function() end
+		local specID = 267
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return specID end }
+		d.bars = {}
+		check(t .. ", with no druid layout it says what to save", PlanTab.barsFrom() .. "/" .. tostring(said[#said]:find("No saved Balance layout", 1, true) ~= nil), "none/true")
+		d.bars = { Feral = feral }
+		check(t .. ", with no Balance layout the Warlock copies Feral", PlanTab.barsFrom() .. "/" .. tostring(d.bars.Destruction and d.bars.Destruction.from), "made/Feral")
+		check(t .. ", and the skips are in chat", #printed, 4)
+		local mine = { slots = {}, saved = "2026-09-24" }
+		d.bars.Destruction = mine
+		check(t .. ", one there already is asked about first", PlanTab.barsFrom() .. "/" .. tostring(d.bars.Destruction == mine), "ask/true")
+		asked[1].onClick()
+		check(t .. ", and replaced once you say so", tostring(d.bars.Destruction ~= mine) .. "/" .. tostring(d.bars.Destruction.from), "true/Feral")
+		check(t .. ", a druid spec named that has no layout says so", PlanTab.barsFrom("guardian") .. "/" .. PlanTab.barsFrom("Moonfire"), "none/none")
+		specID = 103
+		check(t .. ", Feral itself has nothing to copy", PlanTab.barsFrom(), "none")
+	end)
+	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
+	C_SpecializationInfo, print = keptG[1], keptG[2]
+	d.bars = keptBars
 	check(t .. ", ran", ok or tostring(err), true)
 end
 
@@ -14298,6 +14631,7 @@ local function selfTest()
 	PlanTab.swapChecks(check)  -- card 0063
 	PlanTab.myBuildChecks(check)  -- card 0057
 	PlanTab.bonusChecks(check)  -- card 0054
+	PlanTab.barCategoryChecks(check)  -- card 0051
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[CP] self-test passed|r")
