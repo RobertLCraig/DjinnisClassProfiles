@@ -4829,7 +4829,11 @@ function PlanTab.setupStep()
 	steps.waiting = nil
 	-- a spec change or a switch now would collide with a rename in flight, and
 	-- a "busy" loadout step would be dropped: wait for the queue (0059 review)
-	if PlanTab.tagging then steps.afterTag = true return "renaming" end
+	if PlanTab.tagging then
+		if not steps.afterTag then PlanTab.say("Renaming old loadouts first. The group setup goes on after the count.") end  -- a click says something (third 0059 review)
+		steps.afterTag = true
+		return "renaming"
+	end
 	steps.afterTag = nil
 	if steps.spec then
 		if playerSpec() ~= steps.spec then
@@ -7424,9 +7428,17 @@ end
 -- The next one of PlanTab.tagging, or the count when they are all done.
 -- A group setup held by the queue goes on once it ends. setupStep itself
 -- waits out combat, as it always has.
+-- Answers true when a setup goes on, so the queue's end does not also offer
+-- the loadout box: a Create clicked while the setup's change is in flight
+-- would be refused, and after a spec change the box is for the spec left
+-- (third 0059 review). The timer runs it only if nothing ran it meanwhile.
 function PlanTab.afterTagging()
 	local steps = PlanTab.pendingSetup
-	if steps and steps.afterTag then PlanTab.later(PlanTab.POLL, PlanTab.setupStep) end
+	if not (steps and steps.afterTag) then return false end
+	PlanTab.later(PlanTab.POLL, function()
+		if PlanTab.pendingSetup == steps and steps.afterTag then PlanTab.setupStep() end
+	end)
+	return true
 end
 PlanTab.TAG_TRIES = 8  -- a refused change is tried again this many times, a POLL apart (0059 review)
 function PlanTab.tagNext(again)
@@ -7436,10 +7448,10 @@ function PlanTab.tagNext(again)
 	local o = t.todo[t.i]
 	if not o then
 		PlanTab.tagging = nil
-		PlanTab.afterTagging()
+		local setup = PlanTab.afterTagging()
 		PlanTab.say(("Tagged %d old loadout%s."):format(t.done, t.done == 1 and "" or "s"))
 		if PlanTab.redraw then pcall(PlanTab.redraw) end
-		PlanTab.later(1, function() PlanTab.offerLoadouts(true) end)  -- what is still missing or drifted
+		if not setup then PlanTab.later(1, function() PlanTab.offerLoadouts(true) end) end  -- what is still missing or drifted
 		return
 	end
 	if InCombatLockdown() then
@@ -9873,10 +9885,13 @@ function PlanTab.tagChecks(check)
 			PlanTab.pendingSetup = { loadout = "Dungeon" }
 			PlanTab.tagOld()
 			check(o .. ", a group setup waits for it, its loadout kept", PlanTab.setupStep() .. "/" .. tostring(PlanTab.pendingSetup and PlanTab.pendingSetup.loadout), "renaming/Dungeon")
+			check(o .. ", and says so", saidAny("goes on after"), true)
 			check(o .. ", and so does the loadout offer", wasOffer(true), "renaming")
 			PlanTab.setupStep = function() stepped = stepped + 1 end
+			reopened = false
 			drain()
 			check(o .. ", the setup goes on when it ends", stepped, 1)
+			check(o .. ", and the loadout box does not come too", reopened, false)
 			live, busyUntil, stepped, selected = { [1] = "Dungeon", [2] = "Raid: Vashnik" }, 0, 0, 5
 			old = { Dungeon = 1, ["Raid: Vashnik"] = 2 }  -- two, so combat meets the second
 			PlanTab.tagOld()
@@ -9884,6 +9899,20 @@ function PlanTab.tagChecks(check)
 			drain()
 			InCombatLockdown = function() return false end
 			check(o .. ", or when combat stops it", stepped, 1)
+			-- one not held by the queue is not run by its end, and a held one run meanwhile is not run twice
+			live, busyUntil, stepped = { [1] = "Dungeon" }, 0, 0
+			old = { Dungeon = 1 }
+			PlanTab.pendingSetup, reopened = { loadout = "Dungeon" }, false
+			PlanTab.tagOld()
+			drain()
+			check(o .. ", a setup it did not hold is left alone, and the box comes", stepped .. "/" .. tostring(reopened), "0/true")
+			live, busyUntil, stepped = { [1] = "Dungeon" }, 0, 0
+			PlanTab.pendingSetup = { loadout = "Dungeon", afterTag = true }
+			PlanTab.tagOld()
+			while PlanTab.tagging and #pending > 0 do beat() end
+			PlanTab.pendingSetup.afterTag = nil  -- as setupStep does when an event ran it first
+			drain()
+			check(o .. ", a held setup run meanwhile is not run again", stepped, 0)
 			PlanTab.pendingSetup, PlanTab.setupStep = wasSetup, wasStep
 			selected = 2  -- as the checks below expect
 			PlanTab.offerLoadouts = wasOffer

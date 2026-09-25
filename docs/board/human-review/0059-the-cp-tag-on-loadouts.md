@@ -5,11 +5,13 @@ needs: 0058
 
 ## What I need from you
 
-1. Deploy v0.48.4 (`.\bin\deploy.ps1 -WhatIf -Only DjinnisClassProfiles`, then without `-WhatIf`),
-   `/reload` on a character with loadouts from before the tag, and click "Tag them".
+1. v0.48.8 is in the game folder. `/reload` on a character with loadouts from before the tag, and
+   click "Tag them" **once**.
 
 **Pass:**
 - The box lists each old loadout with what happens to it (renamed, or deleted in red).
+- One click renames them all, about a second apart, then one "Tagged N old loadouts." line. No
+  "would not rename" line and no red "You can't do that right now".
 - The talent window then shows `[CP] <build>` names with the same talents, and the one you wore is
   still on.
 - The list beside the talent window shows those builds as saved, not grey.
@@ -341,7 +343,7 @@ Security. Unchanged: identity is a name, so a `[CP] X` anyone makes is the addon
 
 UI surface: the two offer boxes and the talent window. Not looked at: no agent can run the client.
 The last criterion stays `proves: manual`; the ask is at the top of the card.
-### 2026-09-25 — failed in a live client, fixed in v0.48.5
+### 2026-09-25: failed in a live client, fixed in v0.48.5
 
 Rob pressed "Tag them" with 4 old loadouts on Guardian. Each press renamed one. The game said "You can't do that right now" and chat said "The game would not rename" for the rest.
 
@@ -417,7 +419,7 @@ from a client-side name read, not from the server. Nothing leaves the client.
 UI surface: chat lines and the talent window. Not looked at: no agent can run the client. The
 in-game criterion stays `proves: manual`.
 
-### 2026-09-25 — review fixes, v0.48.6
+### 2026-09-25: review fixes, v0.48.6
 
 1. **A refusal now waits and tries again.** `tagNext` retries the same loadout up to `PlanTab.TAG_TRIES` (8) times, a `POLL` apart, before it says "would not". After each change lands it waits one more beat before the next, so the normal case sends no change the server must refuse.
 2. **Nothing else changes a loadout while the queue runs.** `loadoutFence` (Create, Reset, tidy, the spare), `wearSpare` and `loadTalents` (double-click, the Talents button) answer "Still renaming old loadouts" while `PlanTab.tagging` is set.
@@ -500,7 +502,7 @@ client.
 UI surface: chat lines, the offer box, and the talent window. Not looked at: no agent can run the
 client. The in-game criterion stays `proves: manual`.
 
-### 2026-09-25 — second review fixes, v0.48.7
+### 2026-09-25: second review fixes, v0.48.7
 
 Live result before these fixes (Rob, Feral, 10:47): 10 old loadouts, "Tagged 8" with two "would not rename" in the same second, then "Tagged 2" on a second click. The same-second timing is 0.48.5's cascade (0.48.6 reached the game folder at 10:46:10 and the client was not reloaded), so it confirms the first review's finding 1 rather than testing its fix.
 
@@ -509,3 +511,100 @@ Live result before these fixes (Rob, Feral, 10:47): 10 old loadouts, "Tagged 8" 
 3. **Checks:** combat and the worn loadout before a retry; the setup held and resumed at the end and after combat; the offer mid-queue. 19 mutants, all caught.
 4. The combat line names the button (`More > Make the planned loadouts`), not a slash command. The comment that lost its line break is fixed.
 5. **Not here:** `finishSwap` and `importOne` send two changes in one frame. That is card 0063. A double-click made with the talent window open is dropped if Tag them starts within 0.5 s of the window closing; chat says "Still renaming", so it is left.
+
+**2026-09-25, Claude (seventh adversarial review, of 7a7dc9a after f7c5dae and 687b844). Findings,
+none blocking: no loadout lost, no stuck queue, no setup lost. Recommend bounce to todo for two
+small fixes. Not moved and not committed; the brief said no commit.**
+
+What was run. `offline-check.lua` under Lua 5.1.5 in the repo (clean tree at 7a7dc9a): exit 0, "no
+FAIL lines", `[CP] self-test passed`. A `git archive` copy in `%TEMP%\rev0059g` with the
+`DjinnisBiS` stub; 11 mutations (`muts.py`); a timed probe (`probe.lua`: the first 145 lines of
+`offline-check.lua` plus `probe_tail.lua`) with one change in flight, a change landing 0.5 s after it
+is sent and the server busy for 1 s. API re-read in `wow-ui-source` (09b9db794):
+`ClassTalentHelper.SwitchToLoadoutByName` and `SwitchToSpecializationByIndex` call straight into
+`C_ClassTalents`; the source does not say whether `RenameConfig` fires `TRAIT_CONFIG_UPDATED`.
+
+**The second review's finding 1 is fixed.** Set up during the queue answers "renaming", keeps its
+steps and is run again 0.5 s after the queue ends or after combat stops it. Mutations caught: no
+resume at the end, no resume after combat, a combat resume skipped, the setup not held, the hold
+marked as `waiting` instead of `afterTag`. The offer during the queue answers "renaming" (caught).
+**Its finding 2** is card 0063, which exists. The lower notes (the offer during the queue, the
+combat line, the lost newline) are fixed.
+
+Attacked and held:
+- *Never resumes.* The queue ends only through the end path or the combat path, and both call
+  `afterTagging`. A queue that starts again before the resume holds the setup again, and the next
+  end resumes it. A setup given up by a change to another spec is nil, and nothing resumes it.
+- *`afterTag` with `waiting` and `PLAYER_REGEN_ENABLED`.* Set up in combat during the queue sets
+  `waiting` and returns before `afterTag`. Combat then stops the queue, `afterTagging` does nothing,
+  and `PLAYER_REGEN_ENABLED` resumes it once. If combat ends before the queue notices, the event
+  sets `afterTag` and the end resumes it. When combat stops the queue, the resume runs in combat,
+  sets `waiting`, and the event resumes it after the fight. Each path resumes it once.
+- *The watcher.* A change of spec during the hold to the target sends 1 s later, gets "renaming",
+  and resumes at the end. A change to another spec gives it up. When a spec step resumes, it sends
+  the change once, and `TRAIT_CONFIG_UPDATED` is ignored while `steps.spec` is set.
+- *`offerLoadouts` callers and "renaming".* None reads the answer. A busy retry or the 2 s spec
+  change offer that lands during the queue is dropped, and the queue's end asks again.
+
+**Finding 1: the end of the queue sends the held setup's change and then puts up the loadout box
+while that change is still in flight.** `afterTagging` schedules `setupStep` at `POLL` (0.5 s).
+`tagNext` schedules `offerLoadouts(true)` at 1 s. Probe P1: `2.0 Tagged 2` → `2.5 SWITCH loadout
+Dungeon` → `3.0 OFFER box asked=true`. The box's Create, Reset to plan and Tag them are fenced by
+`PlanTab.q` and `PlanTab.tagging`, and neither knows about the setup's switch. A click while the
+switch is in flight is two loadout changes at once, the refusal this card is about. Tag them retries
+for about 4 s. Create and Reset do not retry (card 0063's `importOne`). When the held step is a spec
+change, the box lists the spec being left. A click after the new spec lands gets "The spec changed
+while the talent window was open", and the talent window was never open. Before this commit a
+setup was dropped during the queue, so the two never met. Fix: when `afterTagging` resumes a setup,
+skip the end offer (the spec change's own offer covers a new spec), or have `offerLoadouts` wait
+while `PlanTab.pendingSetup` has a step in flight. Add a check that the end offer and a resume do
+not both happen.
+
+**Finding 2: Set up during the queue says nothing.** `setupStep` returns "renaming" with no chat
+line, and the Set up click ignores the answer. The "Group joined" box closes, nothing happens for
+the rest of the queue (seconds per loadout, up to about 20 s if one is slow), and then the spec or
+loadout changes by itself. The file's own rule is "a click that says nothing looks broken" (0053
+review), and `loadTalents` and `offerLoadouts` follow it. Fix: one line, "Renaming old loadouts
+first; the group setup goes on after."
+
+**Lower, not blocking:**
+- *Two resumes.* The resume timer calls `PlanTab.setupStep` without checking that the setup is
+  still held. If a `TRAIT_CONFIG_UPDATED` comes between the end of the queue and the timer, the
+  watcher resumes it first and the timer runs the next step too. Probe P2: `2.0 SWITCH loadout` →
+  `2.5 EQUIP set`, so the gear goes on before the loadout lands and not after
+  `TRAIT_CONFIG_UPDATED`, as designed. Whether an event comes in that half second is not
+  confirmed. Fix: in the timer, `if PlanTab.pendingSetup == steps and steps.afterTag then`.
+- *The reverse fence.* `tagOld` does not look at `pendingSetup`, so Tag them clicked while a setup's
+  spec change or switch is in flight sends a rename into it. The retries (8 × 0.5 s) carry a switch.
+  A spec change cast may outlast them, and then "would not rename" appears once for that loadout.
+- *Coverage.* Four mutations survive. `afterTagging` resuming a setup that was not held (A) matters:
+  it would send a spec change a second time during its own cast in the reverse fence case above.
+  `afterTag` never cleared (B), the resume before the clear (I) and the resume at once (J) are
+  harmless today. "Still renaming" said when asked (L) is not checked.
+- *A setup resumed after combat stopped the queue.* The build it wears may still be untagged, so
+  `loadTalents` reads it as missing and wears it through the spare (`[CP*]`, one import and one
+  slot) instead of switching to the old loadout. This follows from the card's design (untagged is
+  not the addon's) and chat says so. Noted only.
+- The ask at the top of the card says "Deploy v0.48.4"; the build is v0.48.7.
+- The builder's three `###` comment headings had em dashes (the hook flagged them). I changed them
+  to colons; no other change.
+
+Security. No new API call, event registration, or input path. `afterTagging` and the "renaming"
+answers only change the order of calls that already exist. Weakest point: the addon has no signal
+that a loadout change is in flight except its own queue, so a change it sends outside the queue (the
+setup, the swap) does not block anything else (Finding 1). Nothing leaves the client.
+
+UI surface: chat lines, the "Group joined" box and the loadout box. Not looked at: no agent can run
+the client. The in-game criterion stays `proves: manual`.
+
+### 2026-09-25: third review fixes, v0.48.8
+
+The third review found nothing blocking. Its two findings are fixed:
+
+1. **The queue's end no longer offers the loadout box when it resumes a held group setup.** `afterTagging` answers whether it resumed one, and the box waits for the next ask. Its timer runs the setup only if nothing ran it meanwhile (`pendingSetup` the same and `afterTag` still set), so an event cannot run it twice.
+2. **Set up clicked mid-queue says so**, once: "Renaming old loadouts first. The group setup goes on after the count."
+3. **Checks:** a setup not held is left alone and the box still comes; a held one run meanwhile is not run again; the box does not come with a resumed setup. 23 mutants, all caught.
+4. Left: `tagOld` does not wait for a setup's spec change in flight. The retries cover a loadout switch; a long spec-change cast may still give one "would not rename" line. Waiting on `pendingSetup` risks locking Tag them behind a setup the game never finishes, so it stays as is.
+5. The empty `C:\Dev\WoWAddons\DjinnisClassProfiles.lua` the review saw was made by a builder's debug step at 10:44 and is deleted.
+
+Moved to `human-review/`: the fixes are small and every one is pinned by a mutant; the open criterion is the in-game one above.
