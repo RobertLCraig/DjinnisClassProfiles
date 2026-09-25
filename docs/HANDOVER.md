@@ -245,9 +245,12 @@ Trap: `[IO.File]` in PowerShell resolves a relative path against .NET's current 
 Next after the in-game checks: `0057` (the build manager: your own builds in SavedVariables, then copy, import, rename, delete in the row menu), `0061` (Rob picks), then `0063`.
 Trap: the offline check must pass under Lua 5.1 (`"C:\Program Files (x86)\Lua\5.1\lua.exe"`), which the game runs; which one plain `lua` gives depends on the shell.
 
-Trap (card `0064`): build precedence is PIN, then Warcraft Logs (`wcl-builds.json`), then Dreamgrove, then wowvalor or SimC (`SIMC_TIER`, move it each season). A druid boss row's build is pooled over the bosses its loadout backs in `PlanTab.BOSSES`, so regrouping a row moves builds; run `wcl-builds.py` after. A build name is 24 letters at most (`NAME_MAX`). SimC writes free hero keystones as bought; `ungrant` fixes that, do not remove it.
+Trap (card `0064`): build precedence is PIN, then Warcraft Logs (`wcl-builds.json`), then Dreamgrove, then wowvalor or SimC (`SIMC_TIER`, move it each season).
+Trap: a druid boss row's build is pooled over the bosses its loadout backs in `PlanTab.BOSSES`, so regrouping a row moves builds; run `wcl-builds.py` after. A build name is 24 letters at most (`NAME_MAX`).
+Trap: SimC writes free hero keystones as bought; `ungrant` fixes that, do not remove it.
 Trap: `PlanTab.RETIRED_TAGGED` is the only list whose "[CP] X" copies the addon deletes; a retired name from before the tag (card `0059`) keeps its tagged copy. Retire a dropped build name there.
-Trap (card `0065`): Rob's rule, a right-click opens a menu and never acts. The row menu is `PlanTab.rowMenuItems` (plain data, drawn by `fillMenu`); card `0057` adds copy, import, rename and delete to it. The loadout box opens only when asked (More > Make the planned loadouts, `/dcp loadouts`). Save waits in `PlanTab.saveWaiting` while the talent window is open, because `whenTalentsClose` holds one job; Reset refuses with the window open.
+Trap (card `0065`): Rob's rule, a right-click opens a menu and never acts. The row menu is `PlanTab.rowMenuItems` (plain data, drawn by `fillMenu`); card `0057` adds copy, import, rename and delete to it.
+Trap: the loadout box opens only when asked (More > Make the planned loadouts, `/dcp loadouts`). Save waits in `PlanTab.saveWaiting` while the talent window is open, because `whenTalentsClose` holds one job; Reset refuses with the window open.
 
 ## Blockers / open questions
 - **The `DjinnisBiS` stub is not in the game folder** (checked 2026-09-25). A character that logs in
