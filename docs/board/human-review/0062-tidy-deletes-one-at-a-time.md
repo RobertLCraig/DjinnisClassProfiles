@@ -37,7 +37,7 @@ Built:
 
 On Balance: `/reload`, then change spec away and back (or open More > Make the planned loadouts).
 
-**Pass:** the box lists the old EC and KotG loadouts as "deleted: an old Dreamgrove loadout". "Delete them" deletes them all with one click, a second or so apart, then "Deleted N of N old Dreamgrove loadouts." A second later the box offers "Create" for the Balance builds.
+**Pass:** the box lists the old EC and KotG loadouts as "deleted: an old Dreamgrove loadout". "Delete them" deletes them all with one click, a second or so apart, then "Deleted N of N old loadouts." A second later the box offers "Create" for the Balance builds.
 
 **Fail:** a "would not delete" line, a loadout of yours deleted, or a Lua error.
 
@@ -117,3 +117,92 @@ finding 2, finding 3 with a check, and finding 4 guarded or ruled out in DECISIO
 5. Combat mid-queue says "were not done", not "were not tagged".
 
 Checks for each; 8 mutants, all caught (tidy's own worn-loadout line needed a new check; the queue already refused the delete).
+
+### 2026-09-25: second adversarial review of 692b6ed and b220c3d, bounced to todo
+
+Attacked: both commits, and every function they touch (`retiredLoadouts`, `beforeTag`, `tagOld`,
+`startTagging`, `tagNext`, `offerLoadouts`, `tidy`, `tidyAsk`, the `/dcp tidy` and `/dcp tidy yes`
+handler, `savedLoadoutNames`, `loadoutKey`, `untag`, `configName`, `loadoutFence`). Checked
+`DeleteConfig` (returns `success`) and `GetConfigInfo` (`MayReturnNothing`) against
+`Blizzard_APIDocumentationGenerated`. `offline-check.lua` passes (exit 0, no FAIL). 13 mutants and 3
+probes ran on a copy under %TEMP%.
+
+The five first-review findings are fixed:
+1. The box is worded by what it does: "Delete them" and the Dreamgrove line when every row is a
+   retired delete, "Tag and delete" and both lines for a mix, "Tag them" for renames only. A box of
+   "stays" rows alone is not shown, because `doable` is false.
+2. Not now with no room says "N planned Balance builds have no loadout and no room for one", not
+   "Every planned build is saved".
+3. The end line counts against what was asked. A tidy where every delete is refused says "Deleted 0 of
+   3 old Dreamgrove loadouts." and there is no "Tagged" line. There is a check for it.
+4. A tagged loadout is never read as an old one. `configName(id) == name` fails for "[CP] X" filed
+   under X. If `configName` is nil or stale, the row is hidden, which is harmless: it reads the same
+   `GetConfigInfo` that `savedLoadoutNames` read in the same frame. If "EC M+" and "[CP] EC M+" both
+   exist, one id wins the key. If the tagged one wins, the old one is hidden and is not deleted. I
+   found no way for the guard to let a wrong loadout through at list time. `tidy` shares the guard.
+5. Combat now says "were not done".
+
+What held: `tidy(true)` is fenced by `loadoutFence`, which refuses while `PlanTab.tagging` runs, so
+two queues never overlap. `tidyAsk` reads only `tidy(false)`, which still answers a number or "not
+druid". The slash handler ignores the result. Nothing loops: the re-offer at the end of the queue
+happens once per click.
+
+Findings, most severe first:
+
+1. **A loadout renamed while the queue runs is still deleted.** The name is checked when the player
+   clicks, and `tagNext` deletes by id seconds later. Before each delete it checks only whether the
+   loadout is worn. Probe: Balance, `tidy(true)` on EC M+ (11), KotG Raid ST (13) and Raid: Vashnik
+   (12). After the first delete is sent, 12 is renamed "Mine now". Result: `delete 11|delete 13|delete
+   12` and "Deleted 3 of 3". A loadout whose name is no longer on RETIRED is deleted. The 0059 delete
+   rows ("a tagged one is there") have the same gap. The fix is one line in `tagNext`, next to the
+   worn-one check: skip `o.delete` when `PlanTab.configName(o.id) ~= o.from`, and say so.
+2. **A 0059 delete is still called a rename.** Only `o.retired` counts as a delete, so an untagged
+   loadout deleted because "[CP] X" is there counts as a rename. Probe: old `Dungeon` (1) with
+   `[CP] Dungeon` present. The box says "Tag them" and "Renaming keeps the talents.", and the end line
+   says "Tagged 1 of 1 old loadout." for `delete 1`. The existing check at "renamed and deleted"
+   expects "Tagged 2" for one rename plus one delete. This wording is from 0059, but fix 1 claims
+   "worded by what it does", and this case contradicts it.
+3. **"Tagged 0 of 0 old loadouts."** Probe: the box lists EC M+, then the player picks EC M+ and clicks
+   Delete them. `tagOld` says it stays, then `startTagging({})` prints "Tagged 0 of 0". A queue of
+   nothing should print no count, or say that nothing was done.
+4. Minor wording: during a delete-only queue, `loadoutFence`, `tagOld` and `offerLoadouts` all say
+   "Still renaming", and the combat line says "then Tag them" for a tidy or "Delete them" run. The
+   second box's button still says "Tag old loadouts" when every row it opens is a delete. When the
+   delete box's Not now is clicked from an asked offer, it prints two near-identical "no room" lines
+   (lines 7606 and 7619).
+5. **Mutants that survived** (the rest were caught). Each one breaks a promise in the fix comment:
+   - the "Tag and delete" label replaced by "Delete them";
+   - the "The old Dreamgrove loadouts are deleted" line removed;
+   - the "Tagged d of R" and "Deleted g of D" denominators replaced by `#t.todo`, which is wrong only in
+     a mixed run;
+   - worn ("stays") rows counted in the box's renames and deletes;
+   - the combat line reverted to "not tagged";
+   - tidy's own worn-one skip (harmless, because `tagNext` refuses the delete).
+
+   No check drives a mixed rename-and-delete box or queue.
+
+Security:
+- Weakest point: a name match alone still decides a DeleteConfig. It is now asked for unprompted at
+  login and on a spec change. A druid who never ran DjinnisDreamgrove and names their own loadout "WS
+  M+" or "EC M+" (ordinary hero-talent shorthand) is offered its deletion under "old Dreamgrove
+  loadout". It needs a click, and the row names it, so I am not blocking on this. A guard would be to
+  offer the box rows only when there is evidence DjinnisDreamgrove ran on this character, and leave
+  `/dcp tidy` as the explicit route.
+- Unchecked: the name between the click and the delete (finding 1).
+- Leaks: nothing. Every output is local chat.
+
+No browser: this is a WoW addon and no agent can run the client. The in-game check under "What I need
+from you" still stands. It should also cover a mixed box (an untagged build loadout plus old
+Dreamgrove ones) and read the "Tag and delete" label.
+
+Needed to pass: finding 1, with a check that a loadout renamed mid-queue is not deleted. Findings 2
+and 3, and checks for the mixed box and the mixed end line, should be done in the same pass.
+### 2026-09-25: second review fixes, v0.48.11
+
+1. **A loadout renamed or gone since the click is left.** `tagNext` reads `PlanTab.configName(o.id)` before each change; if it is no longer `o.from` it says "changed since the click, so it is left as it is" and goes on. Checked: one renamed mid-tidy survives, the other two are deleted, "Deleted 2 of 3".
+2. **Every delete counts as a delete.** An untagged loadout deleted because its tagged copy exists now counts with the deletes: the box says "One whose tagged copy is there already is deleted", the button is "Tag and delete" for a mix, and the end lines are "Tagged d of R old loadouts." and "Deleted g of D old loadouts."
+3. **Nothing to do starts nothing:** when every row stays, `tagOld` answers "nothing" and prints no count.
+4. **Wording:** "Still working through old loadouts", the combat line says "click More > Make the planned loadouts again", the second box's button is "Old loadouts", and an asked "Not now" with no room says the no-room line once.
+5. **Checks** for a mixed box (label, all three lines, both counts), a worn row counting for neither, combat mid-tidy, and an unlanded delete not counted. 11 new mutants caught; the earlier rounds re-run with the new wording, all caught.
+
+Moved to `human-review/`: the open criterion is the in-game one above.
