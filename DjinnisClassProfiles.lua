@@ -7386,10 +7386,19 @@ function PlanTab.importOne(job)
 		end
 		-- gone already: a delete that landed after the queue gave up on it (second 0063 review)
 		-- so it is imported now
-		if PlanTab.configName(job.replace) == nil then
-			job.replace, job.deleted = nil, true
+		-- "deleted" only if this queue sent the delete: an id gone for another
+		-- reason was not ours to report (third 0067 review)
+		local now = PlanTab.configName(job.replace)
+		if now == nil then
+			job.replace, job.deleted = nil, job.sentDelete
 		else
+			-- by id, seconds after the click: renamed since, it is not the one
+			-- that was asked about (third 0067 review, as tagNext checks)
+			if job.replaceName and now ~= job.replaceName then
+				return false, ("\"%s\" was renamed since the click, so it is not replaced"):format(job.replaceName)
+			end
 			if not C_ClassTalents.DeleteConfig(job.replace) then return false, "the game would not delete the old one" end
+			job.sentDelete = true
 			job.goneID, job.replace, job.deleted = job.replace, nil, true  -- gone: a retry only imports
 			return "deleted"
 		end
@@ -7436,9 +7445,13 @@ end
 function PlanTab.makeLoadouts(jobs, wear, swaps, again)
 	if #jobs == 0 and not (swaps and #swaps > 0) then return "nothing" end  -- before any wait (third 0060 review)
 	-- a replace frees its own slot before it imports, so all replaces need no
-	-- free one; a swap's new loadout does (second 0067 review)
-	local replaces = not (swaps and #swaps > 0)
-	for _, job in ipairs(jobs) do if not job.replace then replaces = false end end
+	-- free one (second 0067 review). A swap that still needs its new loadout
+	-- comes with a job that has no replace; one with it only renames (third).
+	local replaces = true
+	for _, job in ipairs(jobs) do
+		if not job.replace then replaces = false end
+		if job.replace and not job.replaceName then job.replaceName = PlanTab.configName(job.replace) end
+	end
 	local why = PlanTab.loadoutFence(wear ~= nil or replaces)
 	-- the talent window open is no reason to make Rob click twice (Rob,
 	-- 2026-09-24): the work waits for the window to close. It is ASKED again
@@ -7577,6 +7590,12 @@ function PlanTab.waitThenStep()
 		local okPop, populated = true, true
 		if q.pendingID then okPop, populated = pcall(C_ClassTalents.IsConfigPopulated, q.pendingID) end
 		local okNew, canNew = pcall(C_ClassTalents.CanCreateNewConfig)
+		-- at the slot cap it stays false: the import took the slot the delete
+		-- freed. Then filled and one beat more is ready, as after a delete; the
+		-- wait was 15 s a job (third 0067 review).
+		if okPop and populated and not (okNew and canNew) and PlanTab.freeLoadoutSlots() == 0 then
+			if q.capBeat == gen then okNew, canNew = true, true else q.capBeat = gen end
+		end
 		if (okPop and populated and okNew and canNew) or q.waited >= PlanTab.GIVE_UP then PlanTab.stepLoadouts()
 		else PlanTab.later(PlanTab.POLL, poll) end
 	end
@@ -7889,6 +7908,8 @@ end
 -- `combat` takes the count left, "s" or "", "was" or "were", then GOLD and GREY.
 PlanTab.TAG_WORDS = { done = "Tagged %d of %d old loadout%s.", gone = "Deleted %d of %d old loadout%s.",
 	combat = "Combat started, so %d old loadout%s %s not done. After the fight, click %sMore > Make the planned loadouts|r%s again." }
+PlanTab.TIDY_WORDS = { done = "Tagged %d of %d old loadout%s.", gone = "Deleted %d of %d old loadout%s.",
+	combat = "Combat started, so %d old loadout%s %s not deleted. After the fight, click %sMore > Delete old loadouts|r%s again." }
 PlanTab.SPARE_WORDS = { done = "Renamed %d of %d spare loadout%s.", gone = "Deleted %d of %d leftover spare loadout%s.",
 	combat = "Combat started, so %d leftover spare loadout%s %s not deleted. Double-click the build again after the fight." }
 function PlanTab.startTagging(todo, words, after)
@@ -8510,7 +8531,7 @@ function PlanTab.tidy(confirmed)
 	end
 	-- one at a time, through the renaming's queue: the server takes one change
 	-- in flight, and all six at once deleted one (Rob, 2026-09-25, card 0062)
-	return PlanTab.startTagging(todo)
+	return PlanTab.startTagging(todo, PlanTab.TIDY_WORDS)
 end
 
 -- TRAIT_CONFIG_CREATED names the config the queue waits on.
@@ -11095,7 +11116,7 @@ function PlanTab.tagChecks(check)
 			InCombatLockdown = function() return true end
 			drain()
 			InCombatLockdown = function() return false end
-			check(d .. ", combat mid-tidy says not done, and where to click", tostring(saidAny("were not done")) .. "/" .. tostring(saidAny("Tag them")), "true/false")
+			check(d .. ", combat mid-tidy says not done, and where to click", tostring(saidAny("were not deleted")) .. "/" .. tostring(saidAny("Delete old loadouts|r")), "true/true")
 			-- 0062 review: all refused says 0 of 3 deleted, not "Tagged 0"
 			live, calls, said = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST" }, {}, {}
 			local keptDel = C_ClassTalents.DeleteConfig
@@ -11474,19 +11495,56 @@ function PlanTab.swapChecks(check)
 		DjinnisCPCharDB = DjinnisCPCharDB or {}
 		DjinnisCPCharDB.spares = { [3] = true, [4] = true }
 		live, calls, said, busyUntil, selected = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon" }, {}, {}, now, 4
+		local began = now
 		check(t .. ", the spare starts", PlanTab.wearSpare("Raid: Vashnik", "x"), "wearing")
 		drain()
+		local roomTicks = now - began
 		check(t .. ", it replaces the old spare, never the worn one, and nothing is refused", table.concat(calls, "|"), "delete 3|import [CP*] Raid: Vashnik|wear [CP*] Raid: Vashnik")
 		check(t .. ", and the old one is forgotten, the worn one kept", tostring(DjinnisCPCharDB.spares[3]) .. "/" .. tostring(DjinnisCPCharDB.spares[4]), "nil/true")
 		-- 0067 review: every slot used, the old spare is the room
 		DjinnisCPCharDB.spares = { [3] = true, [4] = true }
 		live, calls, said, busyUntil, selected, cap = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon" }, {}, {}, now, 4, 2
+		began = now
 		check(t .. ", with every slot used the old spare still makes the room", PlanTab.wearSpare("Raid: Vashnik", "x") .. "/" .. (function() drain() return table.concat(calls, "|") end)(), "wearing/delete 3|import [CP*] Raid: Vashnik|wear [CP*] Raid: Vashnik")
+		-- third 0067 review: at the cap the game never says it may make another,
+		-- and the queue waited out the 15 s give-up after each import
+		check(t .. ", and takes no longer than with room", now - began <= roomTicks + 1, true)
 		local keptConstants = Constants
 		Constants = Constants or { TraitConsts = { MAX_COMBAT_TRAIT_CONFIGS = 2 } }  -- the fence's line names the cap
 		-- and a replace (Reset to plan) at the cap, which the fence once refused (second 0067 review)
 		live, calls, said, busyUntil, selected = { [2] = "[CP] Raid: Vashnik", [4] = "[CP*] Dungeon" }, {}, {}, now, 4
 		check(t .. ", a replace at the cap goes ahead", PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } }) .. "/" .. (function() drain() return table.concat(calls, "|") end)(), "started/delete 2|import [CP] Raid: Vashnik")
+		-- two at the cap as fast as two with room
+		local function twoTicks()
+			live, calls, said, busyUntil = { [2] = "[CP] Raid: Vashnik", [5] = "[CP] Raid: Cleave" }, {}, {}, now
+			began = now
+			PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 }, { name = "[CP] Raid: Cleave", code = "x", replace = 5 } })
+			drain()
+			return now - began
+		end
+		local atCap = twoTicks()
+		cap = nil
+		local withRoom = twoTicks()
+		cap = 2
+		check(t .. ", two replaces at the cap take no longer than with room", atCap <= withRoom + 2, true)
+		-- an id gone for another reason, and no slot: the message must not say this queue deleted it
+		live, calls, said, busyUntil = { [4] = "[CP*] Dungeon", [7] = "Rob's own" }, {}, {}, now
+		PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } })
+		drain()
+		check(t .. ", a replace whose old one was never ours to delete does not say it was deleted", tostring(saidAny("was deleted")) .. "/" .. tostring(PlanTab.q), "false/nil")
+		cap = nil
+		-- renamed between the click and the delete: not deleted (third 0067 review, security)
+		live, calls, said, busyUntil = { [2] = "[CP] Raid: Vashnik", [4] = "[CP*] Dungeon" }, {}, {}, now + 2
+		PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } })
+		live[2] = "Rob's raid"
+		drain()
+		check(t .. ", a loadout renamed since the click is not deleted", table.concat(calls, "|"):find("delete", 1, true) == nil and live[2], "Rob's raid")
+		cap = 2
+		-- each words table says what to click after a fight
+		check(t .. ", the combat lines name their own button", table.concat({
+			(PlanTab.TIDY_WORDS.combat:format(1, "", "was", "", "")):match("click (More > %a+ %a+ %a+)") or "?",
+			PlanTab.MINE_WORDS.combat:find("Rename or delete", 1, true) and "mine" or "?",
+			(PlanTab.TAG_WORDS.combat:format(2, "s", "were", "", "")):match("2 old loadouts were") and "tag" or "?" }, "/"), "More > Delete old loadouts/mine/tag")
 		live, calls, said = { [2] = "[CP] Raid: Vashnik", [4] = "[CP*] Dungeon" }, {}, {}
 		check(t .. ", a new one at the cap does not", PlanTab.makeLoadouts({ { name = "[CP] Raid: Cleave", code = "x" } }) .. "/" .. #calls, "fenced/0")
 		Constants = keptConstants

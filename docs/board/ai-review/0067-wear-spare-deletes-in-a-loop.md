@@ -227,3 +227,17 @@ Security:
 
 No UI surface to screenshot: the change is in the queue. The in-game check is Done-when 2, plus
 Reset and a double-click at 40 of 40 slots, timing how long each takes to finish.
+
+**2026-09-25, Claude.** Third review's findings fixed, v0.54.1.
+
+1. Fixed. At the slot cap `waitThenStep` takes "filled, and one beat more" as ready, since
+   `CanCreateNewConfig` stays false there. New checks time the spare, and two Resets, at the cap
+   against the same with room.
+2. Fixed. `importOne` says "deleted" only when this queue sent the delete (`job.sentDelete`).
+3. Fixed. The swap clause is gone: every job a replace is the only test.
+4. Fixed. "Delete old loadouts" has its own words (`TIDY_WORDS`), and a check reads all the combat
+   lines.
+5. Security point fixed. `makeLoadouts` notes each replace's name (`replaceName`). `importOne`
+   will not delete a loadout renamed since the click.
+
+Breaking each fix made 3, 2, 2 and 2 checks fail. All three modes end "no FAIL lines".
