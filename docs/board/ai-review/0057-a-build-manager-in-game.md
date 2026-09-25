@@ -72,6 +72,91 @@ loadouts on its own (card `0065`), so it moved to card `0066`.
 
 ## Comments
 
+**2026-09-25, Claude (adversarial review of c6f3f46).** Verdict: **bounce**. One high finding, which
+is card `0059`'s trap coming back for your builds, and five smaller ones. The card stays in
+`ai-review/` for now because another session is editing `DjinnisClassProfiles.lua` for `0063`; move
+it to `todo/` when that session is done. Line numbers are c6f3f46's.
+
+What I ran and attacked:
+- `offline-check.lua`, `offline-check.lua 250` and `offline-check.lua 62` under Lua 5.1, in a copy
+  of c6f3f46. All three end "no FAIL lines". I read the output whole.
+- Seven mutations of `myBuildChecks`' guards. Five went red: the `[CP` refusal, the plan winning a
+  name clash, the combat fence in Rename, the worn-loadout guard in Delete, and the own-loadout
+  name check. **Delete's fence survived its removal**: no check covers it (finding 5).
+- Five probe checks added to the copy only, never to the repo. All five failed as predicted
+  (findings 1, 2 and 3).
+- Checked against `wow-ui-source` (live, 09b9db794): `ImportLoadout(configID, entries, name,
+  importString?)`, Blizzard's loadout name box is `letters="30"`, and Blizzard's import box has
+  `maxLetters` 1000 (`Blizzard_ClassTalentLoadoutImportDialog.xml:38`). The talent frame
+  listens for `TRAIT_CONFIG_DELETED` and `TRAIT_CONFIG_LIST_UPDATED`, so renaming or deleting
+  with the window open is fine, as the card says.
+- No browser applies here. This is a game addon and no agent can run the client. The six in-game
+  looks on this card are still Rob's.
+
+**Findings**
+
+1. **HIGH. A loadout of yours named like one of your builds is taken for that build's loadout,
+   and Reset deletes it.** `savedLoadoutNames` (4250) passes only the plan's builds to
+   `loadoutKey`. So an untagged "Mine" is filed as `saved["Mine"]`, the key the build "Mine" is
+   looked up by. The name check at creation (`myNameProblem`, 7874) covers only this character,
+   at that moment. How it happens: you make the build "Mine" on your druid. Your alt already has a
+   loadout "Mine" it made itself, or you later make one on either character. The row then reads as
+   saved or drifted, never missing. Wear switches to your own loadout. That loadout disappears from
+   Your loadouts (6367), and the build's action bars go with it. Reset to the plan... asks
+   "Reset '[CP] Mine'?" and then deletes **your** "Mine". A probe showed it: the job came out as
+   `[CP] Mine replace 21`, and 21 is the id of your own loadout (7522, then `importOne`). If you
+   are wearing it, the swap deletes it instead. The comment at 4247 reasons that your builds came
+   after the tag. That is true of the build and not of your loadout.
+   *Fix:* in `savedLoadoutNames`, file an untagged loadout named like one of your builds for this
+   spec apart from `names` (a fourth table). List it under Your loadouts by its own name. Then only
+   "[CP] Mine" is ever the build's loadout. Add a check that `saved.Mine` is nil and that
+   `rowState` answers missing.
+2. **MEDIUM. Deleting or renaming a build the plan has since named acts on the plan's loadout.**
+   `mineLoadout` (7967) finds "[CP] Dungeon". That is now the loadout for the plan's "Dungeon",
+   which `buildsOf` puts first. A probe showed `deleteMine("Dungeon")` sending
+   `delete [CP] Dungeon`. Rename takes it to "[CP] <new name>", and the plan's row then reads
+   missing. *Fix:* in `renameMine` and `deleteMine`, when `PlanTab.BUILDS[spec][name]` exists, leave
+   the loadout alone and change the saved list only. The Delete box should say so. Add a check.
+3. **MEDIUM-LOW. Rename and Delete check the fence only when this character has the loadout**
+   (7991, 8029). How it happens: Save to the game on "Mine" starts the queue making "[CP] Mine",
+   and you delete or rename "Mine" before the loadout lands. The build is changed and the queue
+   still makes "[CP] Mine", which is left with no build and shows under Your loadouts. A probe
+   showed Delete answering `deleted` while `PlanTab.q` was running. *Fix:* call `changeFence()`
+   first, whether or not a loadout exists.
+4. **LOW-MEDIUM. An import from an older tree is kept with a note, and then its row hides it.**
+   `sidebarList` (6386) warns with `buildProblem`, which gives `TREE_CHANGED`. With a warning,
+   `rowMenuItems` (7786) drops Copy and Export and greys Save, but a double-click still wears it
+   through the spare. The note says the game accepts it, and the row says the reverse. *Fix:* on a
+   row of yours, show `TREE_CHANGED` as a note, not a warning, and always offer Export of your
+   own string.
+5. **LOW (test gap).** With Delete's `changeFence` removed, every check still passes. Rename is
+   tested for combat only, and nothing tests a queue, a tag run or a swap in progress, which
+   acceptance line 5 promises. *Fix:* check Delete in combat, and both actions with `q`,
+   `tagging` and `swapping` set.
+6. **LOW. The import box has no limit, and only the header is checked.** `importAsk` (7952)
+   passes 0, and `importProblem` reads only the header. So a real header with a long tail after it
+   is kept in the account file and later sent as `ImportLoadout`'s `importString`. The same holds
+   for a hand-edited name in `myBuilds`: `buildsOf` and `sidebarList` accept any string key, even
+   one with `|` codes, over 24 letters, or starting `[CP`, none of which the name box would allow.
+   *Fix:* cap the box at 1000, as Blizzard does, and refuse anything but `[%w+/=]`. Pass saved
+   names through a name-shape check before they are listed or made.
+
+What held: you cannot pick a plan's name, and the plan's table is never written. `buildsOf`
+drops keys and values that are not strings. Stored strings lose their whitespace. The worn
+loadout is never deleted: this is checked when you click and again when the change is sent.
+Delete looks the loadout up again after its box. `tagNext` checks the name by id before it
+changes anything. Each byte counts as a letter in the name check, so a 24-letter name with the
+6-letter mark always fits Blizzard's 30. You cannot type `|` or `[CP`. A plan build that later
+takes your name wins, has no Wear or Save, and shows its warning.
+
+**Security**
+1. *Weakest point:* the key that loadouts are looked up by (finding 1). Any loadout the player
+   makes can take over a build's name on any character, and the addon's delete then goes to it.
+2. *Unchecked:* the account file edited by hand (names used without their rules), the pasted
+   string past its header, and the Rename and Delete fence when there is no loadout yet.
+3. *What it leaks:* nothing leaves the client. The only harm is local: a loadout you made yourself
+   deleted, or left behind with no build (findings 1 to 3).
+
 **2026-09-25, Claude.** Built, v0.52.0.
 
 - **Storage.** `PlanTab.myBuilds(spec)` is `DjinnisCPDB.myBuilds[spec]`: name -> import string.
