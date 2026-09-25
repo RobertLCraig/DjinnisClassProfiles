@@ -119,3 +119,56 @@ manual criterion stays open. Deploy was not touched.
 Checked: `lua offline-check.lua` under Lua 5.1.5, exit 0, no FAIL line. Spec mode 250, 62, 1467, 73
 clean; 102 gives its usual 8. Mutations (`%TEMP%\mut0060.ps1`): the reviewer's four and five more
 for the new code, 9 of 9 caught, after one check was added for an unworn leftover.
+
+**2026-09-25, adversarial review (second pass) of f48cdcd. Back to todo.**
+
+What held. `lua offline-check.lua` at the repo root: exit 0, no FAIL line, output read whole. The
+first review's findings:
+
+1. *Stale replay*: closed as stated. `makeLoadouts` hands `again` to `whenTalentsClose` and never the
+   saved jobs, and `importOne` refuses a `job.replace` that is `selectedConfigID()`. But the re-ask
+   opens a new hole; see finding 1 below.
+2. *Survivors*: closed. `%TEMP%\mut0060.ps1` run by me: 9 of 9 caught, including the four named in
+   the first review. The `"old worn"` branch in `finishSwap` cannot be reached from
+   `swapSelected`'s poll, which only calls it once `selectedConfigID() == newID`. It is a guard for
+   direct callers. That is fine, but the check calls it directly and does not follow a real flow.
+3. *Refused rename not finished*: closed. A worn `[CP+] X` with no `[CP] X` is renamed by Create,
+   and one that is not worn is replaced (`replace = temp`). Both have checks.
+4. *Edited leftover*: closed. `PlanTab.holdsPlan` fences both the Reset and the Create branch, and
+   each says so.
+
+APIs checked in `wow-ui-source` (live, 09b9db794): `RenameConfig(configID, name) -> success` and
+`GetLastSelectedSavedConfigID(specID) -> configID?` are in `ClassTalentsDocumentation.lua` as the
+code uses them, and `ClassTalentHelper.SwitchToLoadoutByName` is a thin wrapper over
+`C_ClassTalents.SwitchToLoadoutByName`.
+
+What broke.
+
+1. **The re-ask on close is wider than the click, and wipes edits made in the window.** The prompt
+   lists the spec and the loadouts it will reset or create (`offerLoadouts`). The click only
+   agreed to those. On close, `again` runs `resetDrifted` / `createMissing` from scratch, for
+   whatever spec and whatever drift is there *then*. The talent window is where talents are
+   edited. Proved in a scratch copy (`%TEMP%\rev0060`): the prompt offered only "Raid: Nek'Zali".
+   With the window open, "[CP] Raid: Entombed Sentinels" was edited so that it differs from its
+   plan. On close the calls were `delete [CP] Raid: Entombed Sentinels|import [CP] Raid: Entombed
+   Sentinels|delete [CP] Raid: Nek'Zali|import ...`. The player's edits to a loadout they were
+   never asked about are deleted. Had that loadout been the worn one, it would have gone through
+   the swap. Found by reading and not run: the Specialization tab is in the same window. Change
+   spec there and close it, and Reset or Create runs on the *other* spec's loadouts, which nobody
+   was shown. `spareOnHide` already refuses both cases (`w.spec ~= playerSpec() or w.selected ~=
+   ...`, the 0040 third review). Fix: keep the spec and the confirmed names with `again`. On close,
+   drop the ask if the spec changed, and only act on names still both confirmed and drifted or
+   missing. Needs a check that edits an unlisted loadout during the wait and one that changes spec.
+2. Minor. When the re-ask on close finds nothing left to do, `makeLoadouts` returns `"nothing"`
+   and says nothing. The player was told "this goes ahead then". And `whenTalentsClose` keeps only
+   the last ask, so Create and then Reset with the window open drops the Create without a word.
+   The second part predates this fix.
+
+Security. *Weakest point:* the deferred ask on `OnHide`. It runs destructive `DeleteConfig` work
+on state that was not what the player confirmed (finding 1). *Unchecked:* the spec and the
+confirmed name set on that path. Combat and the fence are checked again, and `importOne` now
+guards the worn id. There is no outside input: the build strings are baked in and nothing
+crosses the network. *Leaks:* nothing. Messages go to the local chat frame only.
+
+Not looked at in a client. There is no browser surface and the game cannot be run from here. The
+manual criterion stays open. Deploy was not touched.
