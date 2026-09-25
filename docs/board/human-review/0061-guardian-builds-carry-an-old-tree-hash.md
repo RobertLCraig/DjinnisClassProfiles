@@ -60,3 +60,17 @@ may favour an offensive build over a safe one.
 1. `python update-builds.py --check` passes, and no string in the BUILDS block has a non-zero hash.
 2. In game, as Guardian: `/reload`, open the talent window. None of the three rows shows the warning.
    Double-click `Raid: Druid of the Claw`. The tree it shows is a Druid of the Claw raid tree.
+
+## Comments
+
+### 2026-09-25: two of the three are gone (card 0064, v0.49.0)
+
+Guardian's two raid rows became one `Raid`, the Warcraft Logs typical build (zero hash). `Dungeon`
+is the logs' typical too. What is left, with a non-zero hash: Guardian `Dungeon: survive more`, and
+Resto `Dungeon: cat damage` and `Dungeon: caster damage` (Dreamgrove M+ variants). No top player in
+the 0064 sample runs any of the three exactly. The choice for Rob is the one above, narrowed:
+
+1. **Zero the hash** on Dreamgrove strings in `update-builds.py`, so the three load.
+2. **Drop the three rows**, leaving each spec its `Dungeon`. That frees 3 slots.
+
+Recommend 2: the logs say nobody at the top plays them, and slots are short on druids.

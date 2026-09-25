@@ -2,15 +2,21 @@
 
 ## What I need from you
 
-Rob, 2026-09-25: the addon is for his own use and is not to be published, so the terms question is
-about personal use only. He already has a client, **PersonalSelfImprovementAIBot** (client id
-`01a0c2df-a16b-7247-8c60-9d3b0a52824b`). Its secret is not on this machine.
+One trip to the game, v0.49.0:
 
-1. Put that client's secret in a Windows user environment variable, `WCL_CLIENT_SECRET`, and its id in
-   `WCL_CLIENT_ID`. Never in the repo or in chat: this folder is git and Syncthing-replicated.
+1. `/reload`.
+2. As Balance, Guardian and Resto, one at a time: the loadout box should list the retired rows
+   (`[CP] Raid: Elune's Chosen`, `Raid: Druid of the Claw`, `Raid: short on mana`,
+   `Raid: mana is fine`, `Raid: Nek'Zali, Nymrissa`, whichever you have) as "deleted: a build this
+   addon no longer makes". Click **Delete them**, wait for the count, then **Create**.
+3. Open the talent window on each druid spec. No row should show the "out of date" triangle except
+   Guardian `Dungeon: survive more` and Resto `Dungeon: cat damage` / `Dungeon: caster damage`
+   (Dreamgrove strings with a tree hash, card `0061`).
+4. Balance `Raid: Single Target` is now Keeper of the Grove (it was Elune's Chosen). If an action-bar
+   profile was saved for it, check the bars when you wear it.
+5. Feral: the raid rows are now mostly Wildstalker. The stat targets were simmed on other builds.
 
-   Or, instead: say the Regenesis site's client may be used. Its id and secret are already in
-   `C:\Dev\Regenesis\.env` (gitignored). It shares its rate limit with the guild site's own pulls.
+Pass: each spec's planned loadouts are made with no error, and the rows load.
 ## Why
 
 Rob, 2026-09-25: "I would really like to find a way to automate pulling those builds. As there is
@@ -65,3 +71,31 @@ Built: `wcl.py` (token, query) and `wcl-builds.py`, which writes `docs/builds/wc
 First full run, 40 specs: of BUILDS' 86 rows, 20 are the most common build, 35 are run by some of the sample, 31 by none. Guardian: `Dungeon` is the most common M+ build; both raid rows and `Dungeon: survive more` are run by no one, and every raid Guardian plays Elune's Chosen (card 0061's finding, now with 623 rankings).
 
 Open: the druids' per-boss raid rows are compared with the all-boss sample; they should be compared with their own boss's rankings. Then Rob decides how BUILDS takes these builds.
+
+### 2026-09-25: automatic, option A (Rob: "A", twice)
+
+Rob chose automatic builds, then fewer rows grouped by what players run over one row a boss (slots).
+
+- `wcl-builds.py` picks each sample's **typical** build: the medoid, the ranked build nearest all the others talent by talent. The most common exact string was often 2% of a sample. On Guardian M+ the typical is Archon's #1 exactly. Agreement is reported over contested talents only (taken by under 90%).
+- Druid boss rows are pooled per loadout: each row's typical is over every boss it backs, and each boss is also shown alone.
+- `update-builds.py` reads `docs/builds/wcl-builds.json`. Precedence is PIN, then Warcraft Logs, then Dreamgrove, then wowvalor or SimC. The druids' Archon pins are gone. A JSON older than 14 days stops the run. A row regrouped since the last run is refused until `wcl-builds.py` runs again. Guardian and Resto get one `Raid`. A `Dungeon`, `Raid` or boss row with no source stops the run.
+- Balance `PlanTab.BOSSES` has 3 rows: `Raid: Cleave` (Sentinels, Explorers, Twin Fangs; Elune's Chosen), `Raid: Nek'Zali, Altar` (Elune's Chosen), and `Raid: Single Target` (Vashnik, Sszorak, Ula'tek, Nymrissa; Keeper of the Grove, 92%).
+- Feral Twin Fangs (10 rankings), Coiled Altar and Ula'tek (none with talents) keep Dreamgrove's builds.
+- `PlanTab.RETIRED_TAGGED` holds 5 names the addon made tagged and no longer makes. `retiredLoadouts` offers "[CP] X" for those only. An older retired name's tagged copy is still never touched. The box wording no longer says every retired row is Dreamgrove's.
+- Names are capped at 24 letters (`NAME_MAX`), because the 30-letter box takes a 6-letter mark.
+
+Two fresh reviews found no bug that deletes a wanted loadout. Fixed from them:
+- A refused Warcraft Logs build now falls back to the older source.
+- Stale specs are dropped from the JSON.
+- Boss rows are matched on the Lua's current rows.
+- `agreement` was misleading.
+- The report text was false in four places.
+- Guardian and Resto `Raid` could drop out silently.
+- Tagged retirement was too broad.
+- The wording was fixed.
+
+Offline check: Feral and 250 pass. The 102, 104 and 105 modes show 8 FAIL lines. Those are a missing `RaidWarningUtil` stub in `offline-check.lua` and were there before this card.
+
+Not done here:
+- The sidebar lists Guardian and Resto `Raid` under "Other builds", because neither spec has boss rows.
+- Three Dreamgrove M+ rows keep a non-zero tree hash (card 0061).

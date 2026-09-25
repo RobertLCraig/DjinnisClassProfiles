@@ -45,6 +45,13 @@
      "share": 0.011180124223602485
     }
    ],
+   "pick": {
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMzMMbzMz0MLmZMmxAAAAAmZmZmZmZYGjBAjZmZGAAADMwMW0YZDw2A2AMjZAAAzMwwA",
+    "count": 13,
+    "share": 0.016149068322981366,
+    "agreement": 0.8146583850931677,
+    "contested": 25
+   },
    "distinct": 520,
    "split": [
     [
@@ -240,7 +247,7 @@
      "Asphyxiate (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 702,
@@ -291,6 +298,13 @@
      "share": 0.03418803418803419
     }
    ],
+   "pick": {
+    "code": "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZxMjZmxAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA",
+    "count": 93,
+    "share": 0.13247863247863248,
+    "agreement": 0.7467948717948718,
+    "contested": 4
+   },
    "distinct": 117,
    "split": [
     [
@@ -338,7 +352,7 @@
      "Asphyxiate (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Frost Death Knight": {
@@ -387,6 +401,13 @@
      "share": 0.018439716312056736
     }
    ],
+   "pick": {
+    "code": "CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjZYY2mZmZmZZmZkZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGAzgB",
+    "count": 13,
+    "share": 0.018439716312056736,
+    "agreement": 0.6884751773049645,
+    "contested": 8
+   },
    "distinct": 259,
    "split": [
     [
@@ -446,7 +467,7 @@
      "Asphyxiate (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 649,
@@ -493,6 +514,13 @@
      "share": 0.030816640986132512
     }
    ],
+   "pick": {
+    "code": "CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjZYY2mZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB",
+    "count": 28,
+    "share": 0.04314329738058552,
+    "agreement": 0.7172573189522342,
+    "contested": 8
+   },
    "distinct": 171,
    "split": [
     [
@@ -556,7 +584,7 @@
      "Grip of the Dead"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Unholy": {
@@ -605,6 +633,13 @@
      "share": 0.01524390243902439
     }
    ],
+   "pick": {
+    "code": "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMGDz2MzMTjZmxYGDAAAAAAAAzDMMGAsMDzsZmxMzYgBmxmGLLA2GsBgZAMzMzMmBzMYmZMA",
+    "count": 3,
+    "share": 0.004573170731707317,
+    "agreement": 0.6858370288248337,
+    "contested": 11
+   },
    "distinct": 396,
    "split": [
     [
@@ -692,7 +727,7 @@
      "Grip of the Dead"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 684,
@@ -743,6 +778,13 @@
      "share": 0.013157894736842105
     }
    ],
+   "pick": {
+    "code": "CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2MzMTz2MzYmZMAAAAAAAAMPwYYAwyMY2MzYmZMwAzYTjlFAbD2wAmBwMzMzYGMzghxA",
+    "count": 5,
+    "share": 0.007309941520467836,
+    "agreement": 0.7036732456140351,
+    "contested": 16
+   },
    "distinct": 355,
    "split": [
     [
@@ -862,7 +904,7 @@
      "Coil of Devastation"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Devourer": {
@@ -911,6 +953,13 @@
      "share": 0.04084507042253521
     }
    ],
+   "pick": {
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMmZmZmZmZYmtZGjNttAAADwMmZmtZmpZbmlZmxYGA",
+    "count": 2,
+    "share": 0.0028169014084507044,
+    "agreement": 0.5978646069968196,
+    "contested": 31
+   },
    "distinct": 203,
    "split": [
     [
@@ -1138,7 +1187,7 @@
      "Charred Warblades"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 679,
@@ -1189,6 +1238,13 @@
      "share": 0.0662739322533137
     }
    ],
+   "pick": {
+    "code": "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMzYmFzYsolFmZmZ2abmZGADDAAGDGzA",
+    "count": 122,
+    "share": 0.1796759941089838,
+    "agreement": 0.7022091310751104,
+    "contested": 5
+   },
    "distinct": 54,
    "split": [
     [
@@ -1232,7 +1288,7 @@
      "Master of the Glaive (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Havoc": {
@@ -1281,6 +1337,13 @@
      "share": 0.020227560050568902
     }
    ],
+   "pick": {
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMzmxMzMmZmMmZAAAAAAAzyDMmtZYmBzMWmZMDzMGzyALziZMMbMNmZGDbAAAAAAAAMzgBAAAgB",
+    "count": 29,
+    "share": 0.03666245259165613,
+    "agreement": 0.5781710914454278,
+    "contested": 27
+   },
    "distinct": 305,
    "split": [
     [
@@ -1496,7 +1559,7 @@
      "Infernal Armor"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 684,
@@ -1547,6 +1610,13 @@
      "share": 0.03508771929824561
     }
    ],
+   "pick": {
+    "code": "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMz2MmZmZGzkxMDAAAAAAYWMmtZYmBmxyMzMDzMYWGYZ2MjhZhpxMzYYDAAAYAAAAMzgBAAAgB",
+    "count": 10,
+    "share": 0.014619883040935672,
+    "agreement": 0.7406798245614036,
+    "contested": 24
+   },
    "distinct": 163,
    "split": [
     [
@@ -1742,7 +1812,7 @@
      "Shattered Destiny (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Vengeance": {
@@ -1791,6 +1861,13 @@
      "share": 0.02287581699346405
     }
    ],
+   "pick": {
+    "code": "CUkAAAAAAAAAAAAAAAAAAAAAAAAYMzMjZmZkZmBziZmZgZMzYGzMzYYmZmxmZmtxAAAAAAAAAmZGbAAAAYwMzMzMbtNzMDAMAAAAG",
+    "count": 16,
+    "share": 0.026143790849673203,
+    "agreement": 0.7584670231729056,
+    "contested": 11
+   },
    "distinct": 286,
    "split": [
     [
@@ -1874,7 +1951,7 @@
      "Disrupting Fury"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 653,
@@ -1925,6 +2002,13 @@
      "share": 0.022970903522205207
     }
    ],
+   "pick": {
+    "code": "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZkZmxwyMzMDMjZGzYmZGDmZmxmZmtxYGAAAAAAAAmZGbAAAAYgZmZmZrtZmZAAAAAAG",
+    "count": 1,
+    "share": 0.0015313935681470138,
+    "agreement": 0.7032924961715161,
+    "contested": 12
+   },
    "distinct": 273,
    "split": [
     [
@@ -2024,7 +2108,7 @@
      "Felfire Haste"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Balance": {
@@ -2073,6 +2157,13 @@
      "share": 0.019441069258809233
     }
    ],
+   "pick": {
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzYMzyMLmZGbsMzyYMzYBDDwYbbmBjZbAMBAAAYxMzMzgNDjxMAAmZgBA",
+    "count": 11,
+    "share": 0.013365735115431349,
+    "agreement": 0.6896876102379179,
+    "contested": 31
+   },
    "distinct": 432,
    "split": [
     [
@@ -2316,7 +2407,7 @@
      "Tiger Dash (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 669,
@@ -2363,6 +2454,13 @@
      "share": 0.02391629297458894
     }
    ],
+   "pick": {
+    "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhBjZZmlZWYmxGLzsMmZM2wwAM22mZwY2GATAAAAWMzMzMYzwYMAAMzglBA",
+    "count": 119,
+    "share": 0.17787742899850523,
+    "agreement": 0.7899850523168909,
+    "contested": 6
+   },
    "distinct": 165,
    "split": [
     [
@@ -2418,7 +2516,57 @@
      "Meteorites"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
+  },
+  "rows": {
+   "Raid: Nek'Zali, Altar": {
+    "bosses": [
+     "Nek'zali",
+     "The Coiled Altar"
+    ],
+    "sample": 191,
+    "pick": {
+     "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbDgJAAAALMzMzgNDjxMAAmZgBA",
+     "count": 1,
+     "share": 0.005235602094240838,
+     "agreement": 0.7412739965095986,
+     "contested": 12
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   },
+   "Raid: Cleave": {
+    "bosses": [
+     "Entombed Sentinels",
+     "The Lost Explorers",
+     "The Twin Fangs"
+    ],
+    "sample": 300,
+    "pick": {
+     "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzYMzyMLmZGbsMzyYMzYBDDwYbbmBjZbAMBAAAYxMzMzgNDjxMAAmZgBA",
+     "count": 10,
+     "share": 0.03333333333333333,
+     "agreement": 0.729047619047619,
+     "contested": 7
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   },
+   "Raid: Single Target": {
+    "bosses": [
+     "Vashnik",
+     "Sszorak",
+     "Ula'tek",
+     "Nymrissa Wavecaller"
+    ],
+    "sample": 332,
+    "pick": {
+     "code": "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzY2mZZsMjZsZWmxYmZGbYYAGgttxGmmZWGAAAAsZmZmZwmhxYAYmBAGA",
+     "count": 35,
+     "share": 0.10542168674698796,
+     "agreement": 0.6918298192771084,
+     "contested": 16
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   }
   }
  },
  "Feral": {
@@ -2467,6 +2615,13 @@
      "share": 0.009836065573770493
     }
    ],
+   "pick": {
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2YmZmxY2WGLjtZmZMzMAAAAsEMbwYmRNjZZMzMjxMmBAAAAAwADAAAAAwsNzSzyMLbgZGgFzgBAwMDAGA",
+    "count": 1,
+    "share": 0.001639344262295082,
+    "agreement": 0.7912909836065574,
+    "contested": 32
+   },
    "distinct": 468,
    "split": [
     [
@@ -2694,7 +2849,7 @@
      "Killing Strikes (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 681,
@@ -2745,6 +2900,13 @@
      "share": 0.030837004405286344
     }
    ],
+   "pick": {
+    "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB",
+    "count": 205,
+    "share": 0.3010279001468429,
+    "agreement": 0.7779735682819383,
+    "contested": 5
+   },
    "distinct": 145,
    "split": [
     [
@@ -2792,7 +2954,107 @@
      "Tireless Energy"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
+  },
+  "rows": {
+   "Raid: Nek'Zali": {
+    "bosses": [
+     "Nek'zali"
+    ],
+    "sample": 100,
+    "pick": {
+     "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwYmZMmtl5BWGbzMzMzMDAAAALBzGMmZUzYWGzMzYMjZAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB",
+     "count": 2,
+     "share": 0.02,
+     "agreement": 0.7613333333333333,
+     "contested": 15
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   },
+   "Raid: Entombed Sentinels": {
+    "bosses": [
+     "Entombed Sentinels"
+    ],
+    "sample": 100,
+    "pick": {
+     "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALBzmhxMjaGzCzMzYMjZAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB",
+     "count": 1,
+     "share": 0.01,
+     "agreement": 0.743,
+     "contested": 10
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   },
+   "Raid: Lost Explorers": {
+    "bosses": [
+     "The Lost Explorers"
+    ],
+    "sample": 100,
+    "pick": {
+     "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZWYmZmxY2WmBbzMzYmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA",
+     "count": 1,
+     "share": 0.01,
+     "agreement": 0.6841666666666667,
+     "contested": 12
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   },
+   "Raid: Vashnik": {
+    "bosses": [
+     "Vashnik"
+    ],
+    "sample": 100,
+    "pick": {
+     "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzGWmZZmZm5BmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA",
+     "count": 2,
+     "share": 0.02,
+     "agreement": 0.7408333333333333,
+     "contested": 12
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   },
+   "Raid: Sszorak": {
+    "bosses": [
+     "Sszorak"
+    ],
+    "sample": 100,
+    "pick": {
+     "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxsMmZmxYGzAAAAAAYgBAAAQzsMLzMzAAWAzMALmBDAAgZ2wA",
+     "count": 1,
+     "share": 0.01,
+     "agreement": 0.6043999999999999,
+     "contested": 25
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   },
+   "Raid: Twin Fangs": {
+    "bosses": [
+     "The Twin Fangs"
+    ],
+    "sample": 10,
+    "pick": {
+     "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMGz2ywMLzMzMmZAAAAYJYYYMzomxsMmZmZZMjBAAAAAgBGAAAAAgZbmlmlZ22AzMALmBDAgZGAMA",
+     "count": 1,
+     "share": 0.1,
+     "agreement": 0.65,
+     "contested": 6
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   },
+   "Raid: Nymrissa": {
+    "bosses": [
+     "Nymrissa Wavecaller"
+    ],
+    "sample": 100,
+    "pick": {
+     "code": "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYJY2MMmZUzYWGzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA",
+     "count": 1,
+     "share": 0.01,
+     "agreement": 0.7327777777777778,
+     "contested": 18
+    },
+    "ran": "2026-09-25 13:53 UTC"
+   }
   }
  },
  "Guardian": {
@@ -2837,6 +3099,13 @@
      "share": 0.016051364365971106
     }
    ],
+   "pick": {
+    "code": "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZGjZMDAAAAAYGbzAW2mZwY2GATAAAAbYmBYxMYAbW2GgZGAD",
+    "count": 38,
+    "share": 0.060995184590690206,
+    "agreement": 0.773354735152488,
+    "contested": 10
+   },
    "distinct": 282,
    "split": [
     [
@@ -2912,7 +3181,7 @@
      "Perfectly-Honed Instincts"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 710,
@@ -2959,6 +3228,13 @@
      "share": 0.038028169014084505
     }
    ],
+   "pick": {
+    "code": "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD",
+    "count": 151,
+    "share": 0.21267605633802816,
+    "agreement": 0.793661971830986,
+    "contested": 6
+   },
    "distinct": 144,
    "split": [
     [
@@ -3006,7 +3282,7 @@
      "Innervate"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Resto": {
@@ -3051,6 +3327,13 @@
      "share": 0.013908205841446454
     }
    ],
+   "pick": {
+    "code": "CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALGa2MjpZGgZZmZmZYYGAAAAAGAAAAAAAwsNzSz2Mb2YMzMYGY0MAAzMAMA",
+    "count": 15,
+    "share": 0.02086230876216968,
+    "agreement": 0.6522948539638387,
+    "contested": 8
+   },
    "distinct": 414,
    "split": [
     [
@@ -3118,7 +3401,7 @@
      "Ursine Vigor"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 609,
@@ -3169,6 +3452,13 @@
      "share": 0.013136288998357963
     }
    ],
+   "pick": {
+    "code": "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmNjNbzAAAAAAAAAAgFDNbzw0MDwsYmZmZxwDMAAAAAMAAzAAAAAgZbmtmtZWsxMzMYmZD0MAAzMAMA",
+    "count": 1,
+    "share": 0.0016420361247947454,
+    "agreement": 0.687807881773399,
+    "contested": 24
+   },
    "distinct": 309,
    "split": [
     [
@@ -3348,7 +3638,7 @@
      "Flash of Clarity"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Augmentation": {
@@ -3397,6 +3687,13 @@
      "share": 0.017789072426937738
     }
    ],
+   "pick": {
+    "code": "CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZGMYmZZmZMjZAAAAAAAAgZGjZwYqxMzMAAAAYGzYMzsMmZgZYgxMWYBGYGGagFMzYmBAG",
+    "count": 4,
+    "share": 0.005082592121982211,
+    "agreement": 0.6460539319497388,
+    "contested": 9
+   },
    "distinct": 402,
    "split": [
     [
@@ -3476,7 +3773,7 @@
      "Ancient Flame"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 649,
@@ -3527,6 +3824,13 @@
      "share": 0.01848998459167951
     }
    ],
+   "pick": {
+    "code": "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAwMMGGjpGzMzAAAAgZmZMmZWGzMwMMwYGLsADMDDNwCGzMzAAD",
+    "count": 1,
+    "share": 0.0015408320493066256,
+    "agreement": 0.7710763812458727,
+    "contested": 28
+   },
    "distinct": 314,
    "split": [
     [
@@ -3754,7 +4058,7 @@
      "Timelessness"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Devastation": {
@@ -3803,6 +4107,13 @@
      "share": 0.02824858757062147
     }
    ],
+   "pick": {
+    "code": "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMDMYMTjZmpZmx2MzMzMzMzMzAmxMzYmZZmZgBGD2glxox2AYGA2wAzMY4BA",
+    "count": 15,
+    "share": 0.0211864406779661,
+    "agreement": 0.7300494350282486,
+    "contested": 8
+   },
    "distinct": 208,
    "split": [
     [
@@ -3870,7 +4181,7 @@
      "Engulfing Blaze"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 647,
@@ -3921,6 +4232,13 @@
      "share": 0.023183925811437404
     }
    ],
+   "pick": {
+    "code": "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGzYMTjZmpZmZ2mZmZmZmZmZGgZmxYmZZmZgBGD2glxox2AYGA2wMYmBDPA",
+    "count": 36,
+    "share": 0.05564142194744977,
+    "agreement": 0.7033862582548827,
+    "contested": 11
+   },
    "distinct": 254,
    "split": [
     [
@@ -3992,7 +4310,7 @@
      "Attuned to the Dream"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Preservation": {
@@ -4041,6 +4359,13 @@
      "share": 0.014475271411338963
     }
    ],
+   "pick": {
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAgZMjZMGzImZAAAAmZGZGzMmlZmBAzYGYDsAmhJwmhNDDgZmxA",
+    "count": 4,
+    "share": 0.0048250904704463205,
+    "agreement": 0.7124246079613993,
+    "contested": 10
+   },
    "distinct": 430,
    "split": [
     [
@@ -4132,7 +4457,7 @@
      "Flow State"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 639,
@@ -4183,6 +4508,13 @@
      "share": 0.014084507042253521
     }
    ],
+   "pick": {
+    "code": "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGzYYMzsZGw2wAAAzYGzMjhZiZmBAAAMzMTGzMjZZMDAMmBWAbgZYCsxYzwMAzMMA",
+    "count": 5,
+    "share": 0.00782472613458529,
+    "agreement": 0.6884194053208137,
+    "contested": 10
+   },
    "distinct": 342,
    "split": [
     [
@@ -4270,7 +4602,7 @@
      "Tailwind"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Beast Mastery": {
@@ -4315,6 +4647,13 @@
      "share": 0.014367816091954023
     }
    ],
+   "pick": {
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMmZMzgZGzMMzYmZGmZGzYGMmmBAAAAAAAAzMmBYmNAMLgtBgB",
+    "count": 1,
+    "share": 0.0014367816091954023,
+    "agreement": 0.6740558292282429,
+    "contested": 14
+   },
    "distinct": 406,
    "split": [
     [
@@ -4438,7 +4777,7 @@
      "Camouflage"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 662,
@@ -4485,6 +4824,13 @@
      "share": 0.03474320241691843
     }
    ],
+   "pick": {
+    "code": "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzYbmZMjZwYaGAAAAAAAAYGjBMzGAmFw2AA",
+    "count": 23,
+    "share": 0.03474320241691843,
+    "agreement": 0.7036757301107754,
+    "contested": 6
+   },
    "distinct": 196,
    "split": [
     [
@@ -4532,7 +4878,7 @@
      "Trailblazer (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Marksmanship": {
@@ -4577,6 +4923,13 @@
      "share": 0.018292682926829267
     }
    ],
+   "pick": {
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmZxMmZGzgx0MGMbbmZmZmZmZGMzywMDAAYMzwAYGbMMAbMz2MG",
+    "count": 4,
+    "share": 0.004878048780487805,
+    "agreement": 0.7163414634146341,
+    "contested": 10
+   },
    "distinct": 369,
    "split": [
     [
@@ -4664,7 +5017,7 @@
      "Tenacious (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 610,
@@ -4715,6 +5068,13 @@
      "share": 0.019672131147540985
     }
    ],
+   "pick": {
+    "code": "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzwyYaGDmlttZmZmZmZmZhZWGmBAAwDMGDAzYDMAbMz2MG",
+    "count": 12,
+    "share": 0.019672131147540985,
+    "agreement": 0.6479508196721312,
+    "contested": 8
+   },
    "distinct": 183,
    "split": [
     [
@@ -4778,7 +5138,7 @@
      "Calling the Shots (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Survival": {
@@ -4827,6 +5187,13 @@
      "share": 0.012987012987012988
     }
    ],
+   "pick": {
+    "code": "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzgxYGzgx0MAAAADAmxyyMzswMzMzMzAAzYhhxYmZzAA",
+    "count": 10,
+    "share": 0.01855287569573284,
+    "agreement": 0.7293135435992578,
+    "contested": 10
+   },
    "distinct": 280,
    "split": [
     [
@@ -4914,7 +5281,7 @@
      "Wilderness Medicine"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 655,
@@ -4965,6 +5332,13 @@
      "share": 0.025954198473282442
     }
    ],
+   "pick": {
+    "code": "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGw2MzMzYmZbGAAAAAAzYmZGbzYMjZwYaGAAAgBAYZbmxyMmZYGjBgZsBGDzsZAA",
+    "count": 3,
+    "share": 0.004580152671755725,
+    "agreement": 0.5825841108283856,
+    "contested": 27
+   },
    "distinct": 215,
    "split": [
     [
@@ -5192,7 +5566,7 @@
      "Binding Shot"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Arcane": {
@@ -5237,6 +5611,13 @@
      "share": 0.030120481927710843
     }
    ],
+   "pick": {
+    "code": "C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAwMz0sssMDAgNAAAzMDbWmxMLzYMzMzMswMmZmBAYAAAGgZGwMAYYmZA",
+    "count": 97,
+    "share": 0.11686746987951807,
+    "agreement": 0.735140562248996,
+    "contested": 6
+   },
    "distinct": 309,
    "split": [
     [
@@ -5292,7 +5673,7 @@
      "Energized Familiar"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 712,
@@ -5339,6 +5720,13 @@
      "share": 0.021067415730337078
     }
    ],
+   "pick": {
+    "code": "C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMmFMDamZGAAAGAwMz0sssMDAgNAA2YMzMsZZGzsMjxMmZGWYmZmZGAgBAAYAmZAzAghZmB",
+    "count": 20,
+    "share": 0.028089887640449437,
+    "agreement": 0.6996388443017657,
+    "contested": 7
+   },
    "distinct": 252,
    "split": [
     [
@@ -5382,7 +5770,7 @@
      "Explosive Potential (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Fire": {
@@ -5427,6 +5815,13 @@
      "share": 0.024024024024024024
     }
    ],
+   "pick": {
+    "code": "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmlttZAA2MzM2mZmZGAAAAAwiZmZGAAYGjZmZGzMLDAzMwYMgZYMA",
+    "count": 1,
+    "share": 0.003003003003003003,
+    "agreement": 0.7220857220857221,
+    "contested": 11
+   },
    "distinct": 144,
    "split": [
     [
@@ -5518,7 +5913,7 @@
      "Wildfire"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 512,
@@ -5565,6 +5960,13 @@
      "share": 0.017578125
     }
    ],
+   "pick": {
+    "code": "C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGAwMz0sstMDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA",
+    "count": 1,
+    "share": 0.001953125,
+    "agreement": 0.6963975694444444,
+    "contested": 9
+   },
    "distinct": 204,
    "split": [
     [
@@ -5648,7 +6050,7 @@
      "Incantation of Swiftness"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Frost Mage": {
@@ -5697,6 +6099,13 @@
      "share": 0.019877675840978593
     }
    ],
+   "pick": {
+    "code": "CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGzMzMziZmZMjZAAAgZmZWWmZaDAAAAAA2AYbZMzMDmthxMsAAAwMbAzADYGMMA",
+    "count": 91,
+    "share": 0.13914373088685014,
+    "agreement": 0.7494707127734651,
+    "contested": 26
+   },
    "distinct": 289,
    "split": [
     [
@@ -5884,7 +6293,7 @@
      "Improved Counterspell"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 525,
@@ -5935,6 +6344,13 @@
      "share": 0.022857142857142857
     }
    ],
+   "pick": {
+    "code": "CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMmZmZmZWMzMjZMDAAAMzMzyyMTbAAwGAAAYBgtlxMzMY2GGzwCAAAzsBMDjBMDGGA",
+    "count": 8,
+    "share": 0.015238095238095238,
+    "agreement": 0.6312522045855379,
+    "contested": 27
+   },
    "distinct": 237,
    "split": [
     [
@@ -6150,7 +6566,7 @@
      "White Out (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Brewmaster": {
@@ -6199,6 +6615,13 @@
      "share": 0.013740458015267175
     }
    ],
+   "pick": {
+    "code": "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGzYGWmxGmZMAAAAAAALLYEzMwMM2YwMzMDz2YmxMLDLb22mtZMLAAwGAAAY2mlmZmZhhNAmZYaMAAgB",
+    "count": 4,
+    "share": 0.0061068702290076335,
+    "agreement": 0.743746330005872,
+    "contested": 26
+   },
    "distinct": 390,
    "split": [
     [
@@ -6402,7 +6825,7 @@
      "Chi Wave (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 698,
@@ -6453,6 +6876,13 @@
      "share": 0.034383954154727794
     }
    ],
+   "pick": {
+    "code": "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDzGzMmZZYZ7B22mNMLAAwysMtMbzsMAAAAG2AzMgpxAAAG",
+    "count": 20,
+    "share": 0.02865329512893983,
+    "agreement": 0.6378939828080229,
+    "contested": 4
+   },
    "distinct": 135,
    "split": [
     [
@@ -6496,7 +6926,7 @@
      "Roar from the Heavens (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Mistweaver": {
@@ -6545,6 +6975,13 @@
      "share": 0.01969057665260197
     }
    ],
+   "pick": {
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZZbmxCzoZMDYwgxsMzMzwsNYwiJAAAAAAYxyMLz2MDAAMgBYGwYYsIjZA",
+    "count": 26,
+    "share": 0.03656821378340366,
+    "agreement": 0.7422914638104512,
+    "contested": 13
+   },
    "distinct": 326,
    "split": [
     [
@@ -6660,7 +7097,7 @@
      "Chi Transfer"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 629,
@@ -6711,6 +7148,13 @@
      "share": 0.030206677265500796
     }
    ],
+   "pick": {
+    "code": "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZADGAzMzMMbYGmlZCAAAAAAWsNz2sNzAAADGDwMgxALyYGA",
+    "count": 27,
+    "share": 0.04292527821939587,
+    "agreement": 0.7740681858328917,
+    "contested": 9
+   },
    "distinct": 213,
    "split": [
     [
@@ -6786,7 +7230,7 @@
      "Jade Bond (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Windwalker": {
@@ -6835,6 +7279,13 @@
      "share": 0.016645326504481434
     }
    ],
+   "pick": {
+    "code": "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZY0wMMMgZMMzMzwsNMDzyMBAsYmtxMmZmZAAsYmlZZMBAAMGAzAMWGAzMzmPA",
+    "count": 4,
+    "share": 0.005121638924455826,
+    "agreement": 0.7251691970001829,
+    "contested": 14
+   },
    "distinct": 413,
    "split": [
     [
@@ -6934,7 +7385,7 @@
      "Touch of the Tiger"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 683,
@@ -6985,6 +7436,13 @@
      "share": 0.036603221083455345
     }
    ],
+   "pick": {
+    "code": "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYbmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNMDzyMBAswsxMmZmZAAsYmlZbMBAAmxAYGgxyAYmZ2M",
+    "count": 9,
+    "share": 0.013177159590043924,
+    "agreement": 0.7330405075646657,
+    "contested": 9
+   },
    "distinct": 206,
    "split": [
     [
@@ -7052,7 +7510,7 @@
      "Windwalking"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Holy Paladin": {
@@ -7097,6 +7555,13 @@
      "share": 0.016883116883116882
     }
    ],
+   "pick": {
+    "code": "CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGGzMDjZLDADYYDsxyMmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB",
+    "count": 275,
+    "share": 0.35714285714285715,
+    "agreement": 0.8137662337662338,
+    "contested": 5
+   },
    "distinct": 258,
    "split": [
     [
@@ -7132,7 +7597,7 @@
      "Empyreal Ward"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 692,
@@ -7183,6 +7648,13 @@
      "share": 0.01878612716763006
     }
    ],
+   "pick": {
+    "code": "CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAAWGwMzyMzsMjZMsY2MziZaihxMzMGzWGAGA2AbsYmBAAAmZWWWsMzwGbjZwGwMGAgZGAmxY0A",
+    "count": 26,
+    "share": 0.03757225433526012,
+    "agreement": 0.6748554913294798,
+    "contested": 8
+   },
    "distinct": 357,
    "split": [
     [
@@ -7254,7 +7726,7 @@
      "Empyreal Ward"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Protection Paladin": {
@@ -7303,6 +7775,13 @@
      "share": 0.011538461538461539
     }
    ],
+   "pick": {
+    "code": "CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMzMzMzMsMGWGWGGAgBAAAAAApZmlZGzMMmt2AwADYGsBAAAAzMLbLtMzYx2GzAgxMMGAMzAgZGwYB",
+    "count": 2,
+    "share": 0.002564102564102564,
+    "agreement": 0.7548368298368299,
+    "contested": 22
+   },
    "distinct": 580,
    "split": [
     [
@@ -7458,7 +7937,7 @@
      "Redoubt (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 694,
@@ -7509,6 +7988,13 @@
      "share": 0.01729106628242075
     }
    ],
+   "pick": {
+    "code": "CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAAAmZW2WaZmxilFmBwgZ2wAgZGAMzAGL",
+    "count": 44,
+    "share": 0.06340057636887608,
+    "agreement": 0.7429918784385644,
+    "contested": 11
+   },
    "distinct": 289,
    "split": [
     [
@@ -7580,7 +8066,7 @@
      "Consecration in Flame"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Retribution": {
@@ -7629,6 +8115,13 @@
      "share": 0.015130674002751032
     }
    ],
+   "pick": {
+    "code": "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxCbAYWmtZmZrBAAAWAMAYMDzgZMzsBMzMMGGMA",
+    "count": 21,
+    "share": 0.02888583218707015,
+    "agreement": 0.7477647867950482,
+    "contested": 8
+   },
    "distinct": 354,
    "split": [
     [
@@ -7688,7 +8181,7 @@
      "Holy Reprieve"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 682,
@@ -7739,6 +8232,13 @@
      "share": 0.026392961876832845
     }
    ],
+   "pick": {
+    "code": "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZZbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMbAzYmZDYmZYMjBD",
+    "count": 121,
+    "share": 0.1774193548387097,
+    "agreement": 0.6580645161290322,
+    "contested": 5
+   },
    "distinct": 151,
    "split": [
     [
@@ -7786,7 +8286,7 @@
      "Improved Blessing of Protection"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Discipline": {
@@ -7835,6 +8335,13 @@
      "share": 0.014322916666666666
     }
    ],
+   "pick": {
+    "code": "CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmBzwMmZbmZmZmZAAAAAAAAAAYGWmBzMzwMmZATz0YwMDAAwsNbLgxmBAgxYmxgZwMDmJYA",
+    "count": 2,
+    "share": 0.0026041666666666665,
+    "agreement": 0.669849537037037,
+    "contested": 9
+   },
    "distinct": 361,
    "split": [
     [
@@ -7914,7 +8421,7 @@
      "Move with Grace"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 638,
@@ -7965,6 +8472,13 @@
      "share": 0.01567398119122257
     }
    ],
+   "pick": {
+    "code": "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMGzwMbzYmZmZMzAAAAAAAAAAYYWmBzMzwMmZATzEDwMLYIMmlBYMYBAAGzMzYwMAzMzAmB",
+    "count": 3,
+    "share": 0.004702194357366771,
+    "agreement": 0.7702839756592292,
+    "contested": 34
+   },
    "distinct": 346,
    "split": [
     [
@@ -8208,7 +8722,7 @@
      "Petrifying Scream (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Holy Priest": {
@@ -8253,6 +8767,13 @@
      "share": 0.02546916890080429
     }
    ],
+   "pick": {
+    "code": "CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZWGzMmZMMDzsMzYGAAAAzYWmBzMzwMMDgZqBwMLYIMmlBYMwiZmZBgZMGjhZGgZmZgB",
+    "count": 55,
+    "share": 0.07372654155495978,
+    "agreement": 0.7709689774032938,
+    "contested": 7
+   },
    "distinct": 281,
    "split": [
     [
@@ -8312,7 +8833,7 @@
      "Angel's Mercy"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 663,
@@ -8359,6 +8880,13 @@
      "share": 0.013574660633484163
     }
    ],
+   "pick": {
+    "code": "CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYzMzYWGzMmZMMDsMzMzAAAAYYWmhZmZGmxMDgZKAmZBDhxsMAjBWMmZBgZMzYMYGgZmZgB",
+    "count": 2,
+    "share": 0.0030165912518853697,
+    "agreement": 0.7122636036663186,
+    "contested": 13
+   },
    "distinct": 365,
    "split": [
     [
@@ -8458,7 +8986,7 @@
      "Lightburst"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Shadow": {
@@ -8507,6 +9035,13 @@
      "share": 0.02544529262086514
     }
    ],
+   "pick": {
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMz2MGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA",
+    "count": 100,
+    "share": 0.1272264631043257,
+    "agreement": 0.7682521041299667,
+    "contested": 13
+   },
    "distinct": 271,
    "split": [
     [
@@ -8606,7 +9141,7 @@
      "Phantasm"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 630,
@@ -8657,6 +9192,13 @@
      "share": 0.014285714285714285
     }
    ],
+   "pick": {
+    "code": "CIQAAAAAAAAAAAAAAAAAAAAAAMjZMAAAAAAAAAAAAYMLzMGbzMmZ2mZGDz2MzYmZGbID2mpxAzMzAABY2mtNwsxAADGzMzY2GzgZGMDGA",
+    "count": 2,
+    "share": 0.0031746031746031746,
+    "agreement": 0.6221655328798186,
+    "contested": 28
+   },
    "distinct": 294,
    "split": [
     [
@@ -8880,7 +9422,7 @@
      "Move with Grace"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Assassination": {
@@ -8929,6 +9471,13 @@
      "share": 0.017879948914431672
     }
    ],
+   "pick": {
+    "code": "CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsYwAAAAAAzygtZAAAAAAZbmZmZmZMWmZmZbmlZmZGjZGjxMzYMAGYBmxoxsBYbAbGAMzMGD",
+    "count": 52,
+    "share": 0.06641123882503193,
+    "agreement": 0.8198251301699577,
+    "contested": 26
+   },
    "distinct": 345,
    "split": [
     [
@@ -9116,7 +9665,7 @@
      "Clear the Witnesses"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 662,
@@ -9167,6 +9716,13 @@
      "share": 0.03172205438066465
     }
    ],
+   "pick": {
+    "code": "CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAYgFYGjGzCgtBsZAwMzYMA",
+    "count": 45,
+    "share": 0.06797583081570997,
+    "agreement": 0.6818731117824773,
+    "contested": 20
+   },
    "distinct": 199,
    "split": [
     [
@@ -9322,7 +9878,7 @@
      "Chosen's Revelry (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Outlaw": {
@@ -9367,6 +9923,13 @@
      "share": 0.043478260869565216
     }
    ],
+   "pick": {
+    "code": "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMjZmxsAmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDG",
+    "count": 18,
+    "share": 0.030100334448160536,
+    "agreement": 0.7205267558528428,
+    "contested": 8
+   },
    "distinct": 205,
    "split": [
     [
@@ -9434,7 +9997,7 @@
      "Elusiveness (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 716,
@@ -9481,6 +10044,13 @@
      "share": 0.0446927374301676
     }
    ],
+   "pick": {
+    "code": "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFGPwMbTLD2mBAAAAAMbLzMzwMjZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBeA",
+    "count": 89,
+    "share": 0.12430167597765363,
+    "agreement": 0.6561142147734327,
+    "contested": 9
+   },
    "distinct": 141,
    "split": [
     [
@@ -9536,7 +10106,7 @@
      "Stillshroud"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Subtlety": {
@@ -9581,6 +10151,13 @@
      "share": 0.029769959404600813
     }
    ],
+   "pick": {
+    "code": "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMBmFMDzMAzYA",
+    "count": 287,
+    "share": 0.38836265223274696,
+    "agreement": 0.7063599458728012,
+    "contested": 2
+   },
    "distinct": 62,
    "split": [
     [
@@ -9600,7 +10177,7 @@
      "Unbreakable Stride"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 671,
@@ -9651,6 +10228,13 @@
      "share": 0.03129657228017884
     }
    ],
+   "pick": {
+    "code": "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYGbLzMzMzMjBjZ2GAAAAGMmNzyADYBsMMBmFMDzMAzYA",
+    "count": 85,
+    "share": 0.12667660208643816,
+    "agreement": 0.7769498261301541,
+    "contested": 6
+   },
    "distinct": 134,
    "split": [
     [
@@ -9702,7 +10286,7 @@
      "Stillshroud"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Elemental": {
@@ -9747,6 +10331,13 @@
      "share": 0.009641873278236915
     }
    ],
+   "pick": {
+    "code": "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMjxyMzMjhlZZmZZYMzsAAMAwMjhhB",
+    "count": 2,
+    "share": 0.0027548209366391185,
+    "agreement": 0.6556473829201102,
+    "contested": 16
+   },
    "distinct": 508,
    "split": [
     [
@@ -9878,7 +10469,7 @@
      "Healing Stream Totem"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 693,
@@ -9925,6 +10516,13 @@
      "share": 0.01443001443001443
     }
    ],
+   "pick": {
+    "code": "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMz2YZGzMGzysMzsMMmZWAAGAYmxwwA",
+    "count": 16,
+    "share": 0.023088023088023088,
+    "agreement": 0.7016922471467926,
+    "contested": 11
+   },
    "distinct": 401,
    "split": [
     [
@@ -10012,7 +10610,7 @@
      "Healing Stream Totem"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Enhancement": {
@@ -10057,6 +10655,13 @@
      "share": 0.015015015015015015
     }
    ],
+   "pick": {
+    "code": "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssMjNmZ2YZmZmhhxMAAzwYmxMTgZGMYMA",
+    "count": 12,
+    "share": 0.018018018018018018,
+    "agreement": 0.6906906906906907,
+    "contested": 10
+   },
    "distinct": 309,
    "split": [
     [
@@ -10132,7 +10737,7 @@
      "Tremor Totem (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 658,
@@ -10179,6 +10784,13 @@
      "share": 0.0243161094224924
     }
    ],
+   "pick": {
+    "code": "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssMjNmZ2GLzMzMMWGzAAMDjZGGBmZwgxA",
+    "count": 81,
+    "share": 0.12310030395136778,
+    "agreement": 0.7006079027355623,
+    "contested": 7
+   },
    "distinct": 267,
    "split": [
     [
@@ -10238,7 +10850,7 @@
      "Ancestral Wolf Affinity"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Restoration Shaman": {
@@ -10287,6 +10899,13 @@
      "share": 0.018915510718789406
     }
    ],
+   "pick": {
+    "code": "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmBbjZmpZbZmZzMmFWMzMjBzyAAAAzMDmZAgBzA",
+    "count": 11,
+    "share": 0.013871374527112233,
+    "agreement": 0.7215636822194199,
+    "contested": 10
+   },
    "distinct": 461,
    "split": [
     [
@@ -10370,7 +10989,7 @@
      "Fire and Ice"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 706,
@@ -10421,6 +11040,13 @@
      "share": 0.012747875354107648
     }
    ],
+   "pick": {
+    "code": "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzMjhhFYDmxiGbDgZgNMzgZbmxoZZZmZzMmNWMmZMsMLzAAwAYmBzMAMGMA",
+    "count": 5,
+    "share": 0.007082152974504249,
+    "agreement": 0.6511331444759206,
+    "contested": 10
+   },
    "distinct": 492,
    "split": [
     [
@@ -10512,7 +11138,7 @@
      "Tremor Totem (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Affliction": {
@@ -10561,6 +11187,13 @@
      "share": 0.019662921348314606
     }
    ],
+   "pick": {
+    "code": "CkQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAzMLzyMzsMGAwCMwsY0YGAzCYZAAAYGAAYmBzMjZGmZYmxMzYwMzMAAzAD",
+    "count": 16,
+    "share": 0.02247191011235955,
+    "agreement": 0.7482677902621723,
+    "contested": 30
+   },
    "distinct": 351,
    "split": [
     [
@@ -10792,7 +11425,7 @@
      "Oppressive Darkness"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 597,
@@ -10843,6 +11476,13 @@
      "share": 0.021775544388609715
     }
    ],
+   "pick": {
+    "code": "CkQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWGAAwMzsMLmZ2GDAM2WGYADYG2CMsNAAAMDAAgZmxMmZ2GjZMmZmZMMzMDAwAG",
+    "count": 2,
+    "share": 0.0033500837520938024,
+    "agreement": 0.6463428252372976,
+    "contested": 15
+   },
    "distinct": 226,
    "split": [
     [
@@ -10954,7 +11594,7 @@
      "Dark Accord (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Demonology": {
@@ -10999,6 +11639,13 @@
      "share": 0.015341701534170154
     }
    ],
+   "pick": {
+    "code": "CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAAAAAgxMGWgB2GWohFjZGLzyMzMmBAmZMzMmZAmZGzMAAAjZmZMMsMjBMA",
+    "count": 27,
+    "share": 0.03765690376569038,
+    "agreement": 0.7736782046405477,
+    "contested": 11
+   },
    "distinct": 410,
    "split": [
     [
@@ -11094,7 +11741,7 @@
      "Ichor of Devils (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 653,
@@ -11141,6 +11788,13 @@
      "share": 0.021439509954058193
     }
    ],
+   "pick": {
+    "code": "CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMzyAAAAAAAAGzYYBGYbYhGWMmZsMbzMzYGAYmxMzYmBYMjZsBAAGzMzYYYZGDYA",
+    "count": 23,
+    "share": 0.03522205206738132,
+    "agreement": 0.7265611706653055,
+    "contested": 9
+   },
    "distinct": 224,
    "split": [
     [
@@ -11212,7 +11866,7 @@
      "Ichor of Devils (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Destruction": {
@@ -11261,6 +11915,13 @@
      "share": 0.01517706576728499
     }
    ],
+   "pick": {
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmZmlZZmZmZxY2WMDAAmxYmZWsADMLGNmBwshNGAAYMAbAAzMYmZMGAAAmZmBAgxwA",
+    "count": 2,
+    "share": 0.003372681281618887,
+    "agreement": 0.692166181204967,
+    "contested": 11
+   },
    "distinct": 430,
    "split": [
     [
@@ -11368,7 +12029,7 @@
      "Lake of Fire"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 548,
@@ -11419,6 +12080,13 @@
      "share": 0.01824817518248175
     }
    ],
+   "pick": {
+    "code": "CsQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCMw2wCNWYAAgxgBAYmBYMjZmNAAAzMzAAgZYA",
+    "count": 20,
+    "share": 0.0364963503649635,
+    "agreement": 0.731903892944039,
+    "contested": 12
+   },
    "distinct": 249,
    "split": [
     [
@@ -11514,7 +12182,7 @@
      "Avatar of Destruction"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Arms": {
@@ -11559,6 +12227,13 @@
      "share": 0.02447980416156671
     }
    ],
+   "pick": {
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzYmZGAAAghphZGzMWmZmZGMmZAAAAAMzyMDMhxy2ALgBMDTgZwGYmhx2ALzsNAzMAYGGA",
+    "count": 91,
+    "share": 0.11138310893512852,
+    "agreement": 0.7691554467564259,
+    "contested": 10
+   },
    "distinct": 282,
    "split": [
     [
@@ -11638,7 +12313,7 @@
      "Interpose (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 679,
@@ -11685,6 +12360,13 @@
      "share": 0.039764359351988215
     }
    ],
+   "pick": {
+    "code": "CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGmZbZmZmZYGzMAAAAAGLzMwEGLbDsAGwMMBmBbgZGGGMLzsNAzMAYGGA",
+    "count": 122,
+    "share": 0.1796759941089838,
+    "agreement": 0.7389543446244478,
+    "contested": 4
+   },
    "distinct": 97,
    "split": [
     [
@@ -11720,7 +12402,7 @@
      "Berserker Shout (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Fury": {
@@ -11769,6 +12451,13 @@
      "share": 0.03801652892561983
     }
    ],
+   "pick": {
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2WmZmZmhxMzMzMjZWmxYmZmNzMzAAAxYZbgFwAmhJwMsBMzwAAAMzwYMMGMG",
+    "count": 23,
+    "share": 0.03801652892561983,
+    "agreement": 0.731198347107438,
+    "contested": 8
+   },
    "distinct": 180,
    "split": [
     [
@@ -11832,7 +12521,7 @@
      "Rumbling Earth"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 655,
@@ -11883,6 +12572,13 @@
      "share": 0.035114503816793895
     }
    ],
+   "pick": {
+    "code": "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZmZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMMAAAzMMmlhxgxA",
+    "count": 191,
+    "share": 0.2916030534351145,
+    "agreement": 0.7901853871319521,
+    "contested": 7
+   },
    "distinct": 125,
    "split": [
     [
@@ -11922,7 +12618,7 @@
      "Crushing Force"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  },
  "Protection Warrior": {
@@ -11971,6 +12667,13 @@
      "share": 0.009404388714733543
     }
    ],
+   "pick": {
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZmZGzmxsMMGjGmZYZmZmZwYmBAAAALjBYGDwAbwyiRjZAMbYmNYGzMY2AgZGAAmBGD",
+    "count": 1,
+    "share": 0.001567398119122257,
+    "agreement": 0.6564383891970098,
+    "contested": 26
+   },
    "distinct": 413,
    "split": [
     [
@@ -12190,7 +12893,7 @@
      "Second Wind"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   },
   "mplus": {
    "sample": 640,
@@ -12241,6 +12944,13 @@
      "share": 0.0203125
     }
    ],
+   "pick": {
+    "code": "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmNzMLzYMGNmxwiZmZGzwMDAAAAWmZAmxAMwGssY0YGAzCmZDGzMDmNAYmBAgZgxA",
+    "count": 17,
+    "share": 0.0265625,
+    "agreement": 0.7747596153846155,
+    "contested": 13
+   },
    "distinct": 273,
    "split": [
     [
@@ -12344,7 +13054,7 @@
      "Heavy Repercussions (choice)"
     ]
    ],
-   "ran": "2026-09-25 12:50 UTC"
+   "ran": "2026-09-25 13:53 UTC"
   }
  }
 }

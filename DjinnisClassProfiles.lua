@@ -518,173 +518,180 @@ end
 -- WHEN to pick the build (Rob, 2026-09-23), and are the ones DjinnisDreamgrove
 -- 0.7.0 imported, so a loadout made there is the same loadout here. Card 0030.
 -- BEGIN GENERATED BUILDS
-PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums for druids, wowvalor.app and SimulationCraft for the rest, and the pinned builds in update-builds.py PIN, read 2026-09-24"
+PlanTab.BUILD_SOURCE = "Warcraft Logs top rankings (typical build), dreamgrove.gg compendiums for the druid rows it does not cover, wowvalor.app and SimulationCraft where it has none, and the pinned builds in update-builds.py PIN, read 2026-09-25"
 PlanTab.BUILDS = {
 	Balance = {
-		["Raid: Single Target"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmhxMWYZmlZGjZ2wAgx2yMDGz2IwEAAAgFzMzMD2MMGzAAYmBLDA", -- Elune's Chosen - Single Target
-		["Raid: Cleave"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwswMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbjATAAAAWMzMzMYzYGjZAAMzADA", -- Elune's Chosen - Cleave
-		["Raid: Nek'Zali, Nymrissa"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWGbzYGbsMjxMzMzCGGgBYZbshpZmlRAAAA2MzMzMYzAjZAMzAADA", -- Keeper of the Grove - Cleave
-		["Dungeon"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMLMYMLzsMzCzM2YZmlxMjxGGGgx22MDGz2AYCAAAwCzMzMYzwYMAAMzglBA", -- Archon M+ +7 to +21 #1, 2026-09-24
+		["Dungeon"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhBjZZmlZWYmxGLzsMmZM2wwAM22mZwY2GATAAAAWMzMzMYzwYMAAMzglBA", -- Warcraft Logs M+, all dungeons: typical of 669, 79% agree on 6 contested, 2026-09-25
+		["Raid: Nek'Zali, Altar"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbDgJAAAALMzMzgNDjxMAAmZgBA", -- Warcraft Logs Nek'zali, The Coiled Altar: typical of 191, 74% agree on 12 contested, 2026-09-25
+		["Raid: Cleave"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzYMzyMLmZGbsMzyYMzYBDDwYbbmBjZbAMBAAAYxMzMzgNDjxMAAmZgBA", -- Warcraft Logs Entombed Sentinels, The Lost Explorers, The Twin Fangs: typical of 300, 73% agree on 7 contested, 2026-09-25
+		["Raid: Single Target"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzY2mZZsMjZsZWmxYmZGbYYAGgttxGmmZWGAAAAsZmZmZwmhxYAYmBAGA", -- Warcraft Logs Vashnik, Sszorak, Ula'tek, Nymrissa Wavecaller: typical of 332, 69% agree on 16 contested, 2026-09-25
 	},
 	Feral = {
-		["Raid: Nek'Zali"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALBDDjZG1MmlxMzMGzYAAAAAAYgBAAAAAY2mZpZbmlNwMDwiZGGAAzMAYA", -- Nekzali
-		["Raid: Entombed Sentinels"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMMmZmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxswMzMGzMAAAAAAYgBAAAQzsMLzMzACsAmZAWMzwAAAYmNMA", -- Entombed Sentinels
-		["Raid: Sszorak"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxsMzMzMGzYGAAAAAADMAAAAamlZZmZGAwCYmBYhBDAAgZ2wA", -- Sszorak
+		["Dungeon"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", -- Warcraft Logs M+, all dungeons: typical of 681, 78% agree on 5 contested, 2026-09-25
+		["Raid: Nek'Zali"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwYmZMmtl5BWGbzMzMzMDAAAALBzGMmZUzYWGzMzYMjZAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB", -- Warcraft Logs Nek'zali: typical of 100, 76% agree on 15 contested, 2026-09-25
+		["Raid: Entombed Sentinels"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALBzmhxMjaGzCzMzYMjZAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB", -- Warcraft Logs Entombed Sentinels: typical of 100, 74% agree on 10 contested, 2026-09-25
+		["Raid: Lost Explorers"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZWYmZmxY2WmBbzMzYmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs The Lost Explorers: typical of 100, 68% agree on 12 contested, 2026-09-25
+		["Raid: Vashnik"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzGWmZZmZm5BmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs Vashnik: typical of 100, 74% agree on 12 contested, 2026-09-25
+		["Raid: Sszorak"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxsMmZmxYGzAAAAAAYgBAAAQzsMLzMzAAWAzMALmBDAAgZ2wA", -- Warcraft Logs Sszorak: typical of 100, 60% agree on 25 contested, 2026-09-25
+		["Raid: Nymrissa"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYJY2MMmZUzYWGzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs Nymrissa Wavecaller: typical of 100, 73% agree on 18 contested, 2026-09-25
 		["Raid: Twin Fangs"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMmZ2WGmZZGzMmZAAAAYLYYYMzomxsMmZmZZMjBAAAAAgBGAAAAAgZbmlmlZ22AzMALmBDAgZGAMA", -- Twin Fangs
-		["Raid: Lost Explorers"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMGz2yYZsMzMzYmBAAAglgZDGzMqZMLzMzMjxMmBAAAAAAYAAAAEAMbzs0sMz2GYmBYxMYAAMzAgB", -- Lost Explorers
-		["Raid: Vashnik"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzG2mZZmZm5BmZAAAAYJY2gxMjaGzyMzMzYMjZAAAAAAAGAAAABAzyMLNLzssBmZAWMDGAAzMAYA", -- Vashnik
 		["Raid: Coiled Altar"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZm5BmZAAAAYJY2gxMjaGzCzMzYMzDMDAAAAAAwAAAAIAY2mZpZZmlNwMDwiZGGAAzMAYA", -- Coiled Altar
 		["Raid: Ula'tek"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Ulatek
-		["Raid: Nymrissa"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYLwmhxMjaGziZmZmlxMmBAAAAAAYAAAA0MLzyMzMgALgZGgFzgBAAwMbYA", -- Nymrissa (Lair)
-		["Dungeon"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", -- Archon M+ +7 to +21 #1, 2026-09-24
 	},
 	Guardian = {
-		["Raid: Druid of the Claw"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxsYmZMzmZZgZbZgxMMaimZmlZmZmxYGzAAAAAYwMWmBAAAgamlZZmZGAALYGALmBDYxy2AgZ2gB", -- DotC Raid
-		["Raid: Elune's Chosen"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmhtZGjZ2MLzgxyAMzY0ENzMLmZmZWGzwAAAAAYwM2mBssNzgxsMAmCAAAshZMgFzgBsYZbAmZAM", -- EC Raid Default
+		["Dungeon"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD", -- Warcraft Logs M+, all dungeons: typical of 710, 79% agree on 6 contested, 2026-09-25
+		["Raid"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZGjZMDAAAAAYGbzAW2mZwY2GATAAAAbYmBYxMYAbW2GgZGAD", -- Warcraft Logs raid, all bosses: typical of 623, 77% agree on 10 contested, 2026-09-25
 		["Dungeon: survive more"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxswMjZWMLzMPwMLLDMbGGNRzMziZmZmlZm5BMAAAAAgZsYAAAAomZZWmZmBAwCmBwiZwAzCAgZ2gB", -- Razeless sustain
-		["Dungeon"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD", -- Archon M+ +7 to +21 #1, 2026-09-24
 	},
 	Resto = {
-		["Raid: short on mana"] = "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmNjNmBAAAAAAAAAALDa2MjpZGDPgZZmZmZY4BGAAAAAAAAYbbsgpZmlBAwsNzSz2Mb2YMzMMzAjmBAzMzMAMA", -- Raid w/ mana return
-		["Raid: mana is fine"] = "CkGADBD3hSPCL9Y9gz68WcKvMMjxMLzMjZmxsNMYmFjNmBAAAAAAAAAALQzmZMNzAjZZMzMzihHYAAAAAAAAgttxCmmZWGAAz2MLNbzsZjZmZGmZgRzAgZmZGAGA", -- Raid w/o mana return
+		["Dungeon"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmNjNbzAAAAAAAAAAgFDNbzw0MDwsYmZmZxwDMAAAAAMAAzAAAAAgZbmtmtZWsxMzMYmZD0MAAzMAMA", -- Warcraft Logs M+, all dungeons: typical of 609, 69% agree on 24 contested, 2026-09-25
+		["Raid"] = "CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALGa2MjpZGgZZmZmZYYGAAAAAGAAAAAAAwsNzSz2Mb2YMzMYGY0MAAzMAMA", -- Warcraft Logs raid, all bosses: typical of 719, 65% agree on 8 contested, 2026-09-25
 		["Dungeon: cat damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsN8AMzsMjNbzAAAAAAAAAAgtBNbGmmZMDmFzMzMLzwDYAAAAAAAwAWWGLYamZZAAMbzs1sNziNGzMwMLY0MAAzMAMA", -- M+ Cat DPS
 		["Dungeon: caster damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsNz8AwsMjNbzAAAAAAAAAAgNDNbzMmmZAmFmZmZxwDAAAAAgBAYGwyyYBTzMLDAgZbmtmtZWsxYmZwMbY0MAAzMAMA", -- M+ Caster DPS
-		["Dungeon"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsMzMzMLzwMAAAAAAAwAAAAAgZbmtmtZWsxYmBmBoZAAmZAYA", -- Archon M+ +7 to +21 #1, 2026-09-24
 	},
 	Arms = {
-		["Dungeon"] = "CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphxYmZzMzMzYmxMDAAAAgxyMDMhxy2ALgBMDTIzgNwMDDDmlZ2GgZGAMDDA", -- wowvalor M+ recommended
-		["Raid"] = "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzMmZGAAAghphxYmxyMzMzgxMDAAAAgZWmZAhxyyALgBMDTIzgNwMjtx2ALzsMAzMAYGGA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGmZbZmZmZYGzMAAAAAGLzMwEGLbDsAGwMMBmBbgZGGGMLzsNAzMAYGGA", -- Warcraft Logs M+, all dungeons: typical of 679, 74% agree on 4 contested, 2026-09-25
+		["Raid"] = "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzYmZGAAAghphZGzMWmZmZGMmZAAAAAMzyMDMhxy2ALgBMDTgZwGYmhx2ALzsNAzMAYGGA", -- Warcraft Logs raid, all bosses: typical of 817, 77% agree on 10 contested, 2026-09-25
 	},
 	Fury = {
-		["Dungeon"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZmZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMBzwEYG2AmZYAAAmZYMLDjBjB", -- wowvalor M+ recommended
-		["Raid"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2MzMzMDjZmZGzMzsMzMmZmZzYmBAAixy2ALgJYGmAzwGwMDjNAAYmhxYYMYM", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZmZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMMAAAzMMmlhxgxA", -- Warcraft Logs M+, all dungeons: typical of 655, 79% agree on 7 contested, 2026-09-25
+		["Raid"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2WmZmZmhxMzMzMjZWmxYmZmNzMzAAAxYZbgFwAmhJwMsBMzwAAAMzwYMMGMG", -- Warcraft Logs raid, all bosses: typical of 605, 73% agree on 8 contested, 2026-09-25
 	},
 	["Protection Warrior"] = {
-		["Dungeon"] = "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzYmZmZmxsZmZZYMGNmxYbxMzMjZYmBAAAALzMAzYAGYDWWMaMDgZJmZDGzMDDAwMDAAzAjB", -- wowvalor M+ recommended
-		["Raid"] = "CkEAAAAAAAAAAAAAAAAAAAAAA02AAAzMDzMzMzMzmxsMjxYmGGDLzMzMDGzMAAAAYZAYGDAsYGDbwAzwCNmZBmxMDmNAAzMAgZgxA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmNzMLzYMGNmxwiZmZGzwMDAAAAWmZAmxAMwGssY0YGAzCmZDGzMDmNAYmBAgZgxA", -- Warcraft Logs M+, all dungeons: typical of 640, 77% agree on 13 contested, 2026-09-25
+		["Raid"] = "CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZmZGzmxsMMGjGmZYZmZmZwYmBAAAALjBYGDwAbwyiRjZAMbYmNYGzMY2AgZGAAmBGD", -- Warcraft Logs raid, all bosses: typical of 638, 66% agree on 26 contested, 2026-09-25
 	},
 	["Holy Paladin"] = {
-		["Dungeon"] = "CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAAWGwMzyMzsMjZMsY2MziZaixMmZmxY2yAwAwGYjFzMAIAgZmlllWmZYjtxDMYDYGDAwMDAzYMaA", -- wowvalor M+ recommended
+		["Dungeon"] = "CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAAWGwMzyMzsMjZMsY2MziZaihxMzMGzWGAGA2AbsYmBAAAmZWWWsMzwGbjZwGwMGAgZGAmxY0A", -- Warcraft Logs M+, all dungeons: typical of 692, 67% agree on 8 contested, 2026-09-25
+		["Raid"] = "CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGGzMDjZLDADYYDsxyMmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB", -- Warcraft Logs raid, all bosses: typical of 770, 81% agree on 5 contested, 2026-09-25
 	},
 	["Protection Paladin"] = {
-		["Dungeon"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAgAMzsst0yMjFLLMDgBzshBAzMAYmBZsA", -- wowvalor M+ recommended
-		["Raid"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsNzYWmZMzYmxyyALzCDDAwAAAAAAg0MDzYmZMzs1GAGYGYGsNAAACwMzyySLzMWsthBghZYMAYmBAzAM2A", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAAAmZW2WaZmxilFmBwgZ2wAgZGAMzAGL", -- Warcraft Logs M+, all dungeons: typical of 694, 74% agree on 11 contested, 2026-09-25
+		["Raid"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMzMzMzMsMGWGWGGAgBAAAAAApZmlZGzMMmt2AwADYGsBAAAAzMLbLtMzYx2GzAgxMMGAMzAgZGwYB", -- Warcraft Logs raid, all bosses: typical of 780, 75% agree on 22 contested, 2026-09-25
 	},
 	Retribution = {
-		["Dungeon"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGEAAwCgBAjZ2AmxMzGwMzwYGDG", -- wowvalor M+ recommended
-		["Raid"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAANbbzMzywMDAAAAAAjyYGmZsNmthZ2mxYMGmxCbDDYWmtZmZrBBAAsAYAwYGmBzYmZDYmZYMjBD", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZZbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMbAzYmZDYmZYMjBD", -- Warcraft Logs M+, all dungeons: typical of 682, 66% agree on 5 contested, 2026-09-25
+		["Raid"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxCbAYWmtZmZrBAAAWAMAYMDzgZMzsBMzMMGGMA", -- Warcraft Logs raid, all bosses: typical of 727, 75% agree on 8 contested, 2026-09-25
 	},
 	["Beast Mastery"] = {
-		["Dungeon"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzohG2AAwMmZmZ5BmxMzMzYmBzMmZYmxMzM2mZGzYGWGaGAAAAAAAAYGjBMzGBMLgtBA", -- wowvalor M+ recommended
-		["Raid"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGGzsMzwMmZMDzMGzMMzYGzsYmZMjZwYaGAAAAwMAAAMmZGgZ2IbwsA2GAG", -- SimulationCraft MID2 profile, free keystone read as granted
+		["Dungeon"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzYbmZMjZwYaGAAAAAAAAYGjBMzGAmFw2AA", -- Warcraft Logs M+, all dungeons: typical of 662, 70% agree on 6 contested, 2026-09-25
+		["Raid"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMmZMzgZGzMMzYmZGmZGzYGMmmBAAAAAAAAzMmBYmNAMLgtBgB", -- Warcraft Logs raid, all bosses: typical of 696, 67% agree on 14 contested, 2026-09-25
 	},
 	Marksmanship = {
-		["Dungeon"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwGMwMGNWGQmBbAAAAAAAAgZMzMjtZMzMmhlx0MGMLbbzMzMzMzMzCzsMMDAAgHYMGAmpNwAsxMbzYA", -- wowvalor M+ recommended
-		["Raid"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGQmBbAAAAAAAAgZMjZWMjZmxMYMNjBjtlZmZmZmZmZhZWGMDAAYMzMGAzYbDGgNmZbGD", -- SimulationCraft MID2 profile, free keystone read as granted
+		["Dungeon"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzwyYaGDmlttZmZmZmZmZhZWGmBAAwDMGDAzYDMAbMz2MG", -- Warcraft Logs M+, all dungeons: typical of 610, 65% agree on 8 contested, 2026-09-25
+		["Raid"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmZxMmZGzgx0MGMbbmZmZmZmZGMzywMDAAYMzwAYGbMMAbMz2MG", -- Warcraft Logs raid, all bosses: typical of 820, 72% agree on 10 contested, 2026-09-25
 	},
 	Survival = {
-		["Dungeon"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMgxMG2ILwMM0gFzMzMzMWGAAAAAAmxMzM2MGzYG2GTzAAAAMAYYZZm5BWYmZYGjBMzGAGjZmFDA", -- wowvalor M+ recommended
-		["Raid"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYmgtZMzMGzyAAAAAAwMmxMLmxYGzgx0MAAAADAmxyyMzsYMzMjZmBAzYZDGDjNDAA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGw2MzMzYmZbGAAAAAAzYmZGbzYMjZwYaGAAAgBAYZbmxyMmZYGjBgZsBGDzsZAA", -- Warcraft Logs M+, all dungeons: typical of 655, 58% agree on 27 contested, 2026-09-25
+		["Raid"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzgxYGzgx0MAAAADAmxyyMzswMzMzMzAAzYhhxYmZzAA", -- Warcraft Logs raid, all bosses: typical of 539, 73% agree on 10 contested, 2026-09-25
 	},
 	Assassination = {
-		["Dungeon"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAYgFYGjGzGIbDYzAgZmxYA", -- wowvalor M+ recommended
-		["Raid"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsNDGAAAAAYWGsNDAAAAAIbzMzMzMjxyMzMbzsMzMzYGzYMmZMMAbmlBGwSwywEYYxgZGgxYA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAYgFYGjGzCgtBsZAwMzYMA", -- Warcraft Logs M+, all dungeons: typical of 662, 68% agree on 20 contested, 2026-09-25
+		["Raid"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsYwAAAAAAzygtZAAAAAAZbmZmZmZMWmZmZbmlZmZGjZGjxMzYMAGYBmxoxsBYbAbGAMzMGD", -- Warcraft Logs raid, all bosses: typical of 783, 82% agree on 26 contested, 2026-09-25
 	},
 	Outlaw = {
-		["Dungeon"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFGPwMbTLD2mBAAAAAMbLzMzwMjZWMzMbDAAAAjBAjZxwQGYWYhWYjBYmBD8AA", -- wowvalor M+ recommended
-		["Raid"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMmZmtZmZmZMmF4BmZbaZw2MAAAAAALLzMzwMzMziZmZbAAAAYmBAjZxwQGYWYhWYjBYmBDMA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFGPwMbTLD2mBAAAAAMbLzMzwMjZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBeA", -- Warcraft Logs M+, all dungeons: typical of 716, 66% agree on 9 contested, 2026-09-25
+		["Raid"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMjZmxsAmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDG", -- Warcraft Logs raid, all bosses: typical of 598, 72% agree on 8 contested, 2026-09-25
 	},
 	Subtlety = {
-		["Dungeon"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYGbLzMzMzMjBjZ2GAAAAGMmFzyADYBsMMhMLYGmZAmxA", -- wowvalor M+ recommended
-		["Raid"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMhMLYGmZAmxA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYGbLzMzMzMjBjZ2GAAAAGMmNzyADYBsMMBmFMDzMAzYA", -- Warcraft Logs M+, all dungeons: typical of 671, 78% agree on 6 contested, 2026-09-25
+		["Raid"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMBmFMDzMAzYA", -- Warcraft Logs raid, all bosses: typical of 739, 71% agree on 2 contested, 2026-09-25
 	},
 	Discipline = {
-		["Dungeon"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmBmZbmtZmZmxMDAAAAAAAAAghZZGMzMDzYmBMNTMAzsghwYWGgxgFAAYMzMjBzAMzMTwM", -- wowvalor M+ recommended
+		["Dungeon"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMGzwMbzYmZmZMzAAAAAAAAAAYYWmBzMzwMmZATzEDwMLYIMmlBYMYBAAGzMzYwMAzMzAmB", -- Warcraft Logs M+, all dungeons: typical of 638, 77% agree on 34 contested, 2026-09-25
+		["Raid"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmBzwMmZbmZmZmZAAAAAAAAAAYGWmBzMzwMmZATz0YwMDAAwsNbLgxmBAgxYmxgZwMDmJYA", -- Warcraft Logs raid, all bosses: typical of 768, 67% agree on 9 contested, 2026-09-25
 	},
 	["Holy Priest"] = {
-		["Dungeon"] = "CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAMzMmlxMjZGDzALzMzMAAAAGmlZYmZmhZMzAYmCgZWwQYMLDwYgFjZWA0MmZMGMDwMzMwA", -- wowvalor M+ recommended
+		["Dungeon"] = "CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYzMzYWGzMmZMMDsMzMzAAAAYYWmhZmZGmxMDgZKAmZBDhxsMAjBWMmZBgZMzYMYGgZmZgB", -- Warcraft Logs M+, all dungeons: typical of 663, 71% agree on 13 contested, 2026-09-25
+		["Raid"] = "CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZWGzMmZMMDzsMzYGAAAAzYWmBzMzwMMDgZqBwMLYIMmlBYMwiZmZBgZMGjhZGgZmZgB", -- Warcraft Logs raid, all bosses: typical of 746, 77% agree on 7 contested, 2026-09-25
 	},
 	Shadow = {
-		["Dungeon"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMjZMAAAAAAAAAAAAYMLzMGbzMmZ2mZGDz2MzYmZGbIDLbz0AMzMDAEgZb22CmNGAYwYmZGz2YGMzgZwA", -- wowvalor M+ recommended
-		["Raid"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMMjZGAAAAAAAAAAAAMLmxMbzMMz2MzYG2mZGzMzYDZGLmpBYmZGAIAz2stEMbMAwgxMzMmtxMYmBzgB", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMjZMAAAAAAAAAAAAYMLzMGbzMmZ2mZGDz2MzYmZGbID2mpxAzMzAABY2mtNwsxAADGzMzY2GzgZGMDGA", -- Warcraft Logs M+, all dungeons: typical of 630, 62% agree on 28 contested, 2026-09-25
+		["Raid"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMz2MGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA", -- Warcraft Logs raid, all bosses: typical of 786, 77% agree on 13 contested, 2026-09-25
 	},
 	Blood = {
-		["Dungeon"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZxMzMzMAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbgsNgNAzYAAAmZAMA", -- wowvalor M+ recommended
-		["Raid"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwYWmZmxMmZmhZZmZmmZxMjxMAAAAAmZmZGmZGzMjZAgZmZGAAADMwMW0YZDklBsBYGzAAAmZwgB", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZxMjZmxAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA", -- Warcraft Logs M+, all dungeons: typical of 702, 75% agree on 4 contested, 2026-09-25
+		["Raid"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMzMMbzMz0MLmZMmxAAAAAmZmZmZmZYGjBAjZmZGAAADMwMW0YZDw2A2AMjZAAAzMwwA", -- Warcraft Logs raid, all bosses: typical of 805, 81% agree on 25 contested, 2026-09-25
 	},
 	["Frost Death Knight"] = {
-		["Dungeon"] = "CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjxYY2mZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEyYBzMmZGYAYYmBgBD", -- wowvalor M+ recommended
+		["Dungeon"] = "CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjZYY2mZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB", -- Warcraft Logs M+, all dungeons: typical of 649, 72% agree on 8 contested, 2026-09-25
+		["Raid"] = "CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjZYY2mZmZmZZmZkZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGAzgB", -- Warcraft Logs raid, all bosses: typical of 705, 69% agree on 8 contested, 2026-09-25
 	},
 	Unholy = {
-		["Dungeon"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMjBzyMzMTz2MzYmZMAAAAAAAAMzYMDAWGmZ2mZGzMjBGYGbassBYbiNMgZAYMzMMYmBDjB", -- wowvalor M+ recommended
-		["Raid"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMDDz2MzMTzmZmZMjBAAAAAAAgZGmZAwyMmZ2mZGjZAbmFDDZgZjhGLAYGAGzMjZAmZmxYA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2MzMTz2MzYmZMAAAAAAAAMPwYYAwyMY2MzYmZMwAzYTjlFAbD2wAmBwMzMzYGMzghxA", -- Warcraft Logs M+, all dungeons: typical of 684, 70% agree on 16 contested, 2026-09-25
+		["Raid"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMGDz2MzMTjZmxYGDAAAAAAAAzDMMGAsMDzsZmxMzYgBmxmGLLA2GsBgZAMzMzMmBzMYmZMA", -- Warcraft Logs raid, all bosses: typical of 656, 69% agree on 11 contested, 2026-09-25
 	},
 	Elemental = {
-		["Dungeon"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzYstYajZmtxyMzMjhFLzMLDjZmFAgBAmZMMMA", -- wowvalor M+ recommended
-		["Raid"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCZWAgZbmZGjtFTYmxYxMzMmZWsMjFzMMzyAAGGAzMGGGA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMz2YZGzMGzysMzsMMmZWAAGAYmxwwA", -- Warcraft Logs M+, all dungeons: typical of 693, 70% agree on 11 contested, 2026-09-25
+		["Raid"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMjxyMzMjhlZZmZZYMzsAAMAwMjhhB", -- Warcraft Logs raid, all bosses: typical of 726, 66% agree on 16 contested, 2026-09-25
 	},
 	Enhancement = {
-		["Dungeon"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbkFYGGawCAz2MmxYZZGbMzsNWmZmZYsMmBAYGGzMMCMzgBjB", -- wowvalor M+ recommended
-		["Raid"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDLkFYGGawCAzyMmxYZZGYmZbsMzMzMGGzAAMDjZGGBmZwgxA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssMjNmZ2GLzMzMMWGzAAMDjZGGBmZwgxA", -- Warcraft Logs M+, all dungeons: typical of 658, 70% agree on 7 contested, 2026-09-25
+		["Raid"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssMjNmZ2YZmZmhhxMAAzwYmxMTgZGMYMA", -- Warcraft Logs raid, all bosses: typical of 666, 69% agree on 10 contested, 2026-09-25
 	},
 	["Restoration Shaman"] = {
-		["Dungeon"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZmZGjZMsAbwMW0YbAZGYDzMY2mZmRzyyMzmZMYZGzMGWmFAAYAMzgZGAGDG", -- wowvalor M+ recommended
+		["Dungeon"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzMjhhFYDmxiGbDgZgNMzgZbmxoZZZmZzMmNWMmZMsMLzAAwAYmBzMAMGMA", -- Warcraft Logs M+, all dungeons: typical of 706, 65% agree on 10 contested, 2026-09-25
+		["Raid"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmBbjZmpZbZmZzMmFWMzMjBzyAAAAzMDmZAgBzA", -- Warcraft Logs raid, all bosses: typical of 793, 72% agree on 10 contested, 2026-09-25
 	},
 	Arcane = {
-		["Dungeon"] = "C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMzsgZQzMGAAAGAwMz0sssMDAEbAAsBzMDbWmxMLzYMzMzMswMzMzMAADAAwAMzAMAYYmZA", -- wowvalor M+ recommended
-		["Raid"] = "C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAAEwMzMLLzMxCAAwMzMjNLzMzsMjxYmZwCzYmZGAgBAAYmZBAMDAGmZG", -- SimulationCraft MID2 profile
+		["Dungeon"] = "C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMmFMDamZGAAAGAwMz0sssMDAgNAA2YMzMsZZGzsMjxMmZGWYmZmZGAgBAAYAmZAzAghZmB", -- Warcraft Logs M+, all dungeons: typical of 712, 70% agree on 7 contested, 2026-09-25
+		["Raid"] = "C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAwMz0sssMDAgNAAAzMDbWmxMLzYMzMzMswMmZmBAYAAAGgZGwMAYYmZA", -- Warcraft Logs raid, all bosses: typical of 830, 74% agree on 6 contested, 2026-09-25
 	},
 	Fire = {
-		["Dungeon"] = "C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGIgZmpZZbbGAgNzMjtZmZmxGAAAAAWMzMzAAAzYMzMzYmZZAYmhwYAzwYA", -- wowvalor M+ recommended
-		["Raid"] = "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMGAAAGAwMz0sstMDAwmZmx2MzMzYBAAAAALmZmZAAgZMmZmZMzsMAMzQGjBMDjB", -- SimulationCraft MID2 profile
+		["Dungeon"] = "C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGAwMz0sstMDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA", -- Warcraft Logs M+, all dungeons: typical of 512, 70% agree on 9 contested, 2026-09-25
+		["Raid"] = "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmlttZAA2MzM2mZmZGAAAAAwiZmZGAAYGjZmZGzMLDAzMwYMgZYMA", -- Warcraft Logs raid, all bosses: typical of 333, 72% agree on 11 contested, 2026-09-25
 	},
 	["Frost Mage"] = {
-		["Dungeon"] = "CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMmZmZmZWMzMzMzMzsMTzMbzCAAAaBAA2AAAAAYbZMzMDmtZMzM2WAAAAzMYmMGwAYA", -- wowvalor M+ recommended
-		["Raid"] = "CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGjZMziZmZmZMDEAAYmZmllZm2AAAAAAgNA2WGzMzAbzYmZYBAAgZ2AmBGwADD", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMmZmZmZWMzMjZMDAAAMzMzyyMTbAAwGAAAYBgtlxMzMY2GGzwCAAAzsBMDjBMDGGA", -- Warcraft Logs M+, all dungeons: typical of 525, 63% agree on 27 contested, 2026-09-25
+		["Raid"] = "CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGzMzMziZmZMjZAAAgZmZWWmZaDAAAAAA2AYbZMzMDmthxMsAAAwMbAzADYGMMA", -- Warcraft Logs raid, all bosses: typical of 654, 75% agree on 26 contested, 2026-09-25
 	},
 	Affliction = {
-		["Dungeon"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMjZGNbmx2MzYWGAAwMzsMLmZ2GDAM2WGYATwMsFYYbAAAYGAAAzMjZMzsNGzYMzMzYYmZGAgBMA", -- wowvalor M+ recommended
-		["Raid"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZhhZmZmlBAAYmZZWmZml5BGAwCMwsY0YGQmNwyAAAwMAAwMDYmZMYGmZMzMGMzMzAAmBG", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWGAAwMzsMLmZ2GDAM2WGYADYG2CMsNAAAMDAAgZmxMmZ2GjZMmZmZMMzMDAwAG", -- Warcraft Logs M+, all dungeons: typical of 597, 65% agree on 15 contested, 2026-09-25
+		["Raid"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAzMLzyMzsMGAwCMwsY0YGAzCYZAAAYGAAYmBzMjZGmZYmxMzYwMzMAAzAD", -- Warcraft Logs raid, all bosses: typical of 712, 75% agree on 30 contested, 2026-09-25
 	},
 	Demonology = {
-		["Dungeon"] = "CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMz2AAAAAAAAGzYYBGYb0CNsYMzYZ2mZmxMAwMjZmxMDwYGzYDAAMmZmxwwyMGwA", -- wowvalor M+ recommended
-		["Raid"] = "CoQAAAAAAAAAAAAAAAAAAAAAAYmxMzoZjZ2mZGzyAAAAAAAAGzYYBGYb0CNsYMGLzyMzMmBAmZMzMzMDgZGzAAAYMzMjhhlZMgB", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMzyAAAAAAAAGzYYBGYbYhGWMmZsMbzMzYGAYmxMzYmBYMjZsBAAGzMzYYYZGDYA", -- Warcraft Logs M+, all dungeons: typical of 653, 73% agree on 9 contested, 2026-09-25
+		["Raid"] = "CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAAAAAgxMGWgB2GWohFjZGLzyMzMmBAmZMzMmZAmZGzMAAAjZmZMMsMjBMA", -- Warcraft Logs raid, all bosses: typical of 717, 77% agree on 11 contested, 2026-09-25
 	},
 	Destruction = {
-		["Dungeon"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCZgthFaswAAAjBDAwMDwYGzMbAAAmZmBAAzwA", -- wowvalor M+ recommended
-		["Raid"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMmZGNLMzmZmZWmFzMzsYMWMDAAmZGzMziNYgZxoxMAmtYjBAAGDM2AAmZwYGzYDAAwMzMAAMGG", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCMw2wCNWYAAgxgBAYmBYMjZmNAAAzMzAAgZYA", -- Warcraft Logs M+, all dungeons: typical of 548, 73% agree on 12 contested, 2026-09-25
+		["Raid"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmZmlZZmZmZxY2WMDAAmxYmZWsADMLGNmBwshNGAAYMAbAAzMYmZMGAAAmZmBAgxwA", -- Warcraft Logs raid, all bosses: typical of 593, 69% agree on 11 contested, 2026-09-25
 	},
 	Brewmaster = {
-		["Dungeon"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDzmtZGjlhltHYbb2wsAAALzy0ysNzyAAABwwGYmBMNGAAwA", -- wowvalor M+ recommended
-		["Raid"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGzMWmxGmZMAAAAAAALLYmwMwMM2MDmZmZY2GzMmZBLb22GzYWAAglZZaZ2mZZAAgAMDbgZGw0YADAYA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDzGzMmZZYZ7B22mNMLAAwysMtMbzsMAAAAG2AzMgpxAAAG", -- Warcraft Logs M+, all dungeons: typical of 698, 64% agree on 4 contested, 2026-09-25
+		["Raid"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGzYGWmxGmZMAAAAAAALLYEzMwMM2YwMzMDz2YmxMLDLb22mtZMLAAwGAAAY2mlmZmZhhNAmZYaMAAgB", -- Warcraft Logs raid, all bosses: typical of 655, 74% agree on 26 contested, 2026-09-25
 	},
 	Mistweaver = {
-		["Dungeon"] = "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZADGwYmZmhZDzwsMTAAAAAEgFbzsNbzMBAAYMAzAGDsIjZA", -- wowvalor M+ recommended
+		["Dungeon"] = "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZADGAzMzMMbYGmlZCAAAAAAWsNz2sNzAAADGDwMgxALyYGA", -- Warcraft Logs M+, all dungeons: typical of 629, 77% agree on 9 contested, 2026-09-25
+		["Raid"] = "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZZbmxCzoZMDYwgxsMzMzwsNYwiJAAAAAAYxyMLz2MDAAMgBYGwYYsIjZA", -- Warcraft Logs raid, all bosses: typical of 711, 74% agree on 13 contested, 2026-09-25
 	},
 	Windwalker = {
-		["Dungeon"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNmZwyMBAswsxMmZmZAAsYmlZbMBBAMjBwMAjlBiZmZzA", -- wowvalor M+ recommended
-		["Raid"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYw2MmhlZGbzAAAAAAAAAAAAsMMaGzAGwMGmZmZY2GmhZZmAAWMz2MDzMzMAA2AQzys0MzMLAYgZGAGLDgB8B", -- SimulationCraft MID2 profile
+		["Dungeon"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYbmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNMDzyMBAswsxMmZmZAAsYmlZbMBAAmxAYGgxyAYmZ2M", -- Warcraft Logs M+, all dungeons: typical of 683, 73% agree on 9 contested, 2026-09-25
+		["Raid"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZY0wMMMgZMMzMzwsNMDzyMBAsYmtxMmZmZAAsYmlZZMBAAMGAzAMWGAzMzmPA", -- Warcraft Logs raid, all bosses: typical of 781, 73% agree on 14 contested, 2026-09-25
 	},
 	Havoc = {
-		["Dungeon"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMz2MmZmxYmMmZAAAAAAAzixsNDzMwMWmZmZYmBzyALzmZMMLaaMzMmxGAAAwAAAAYmBDAAAAD", -- wowvalor M+ recommended
-		["Raid"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYAzMzmxMzMmZmMmZAAAAAAAzyDMmtZYmxyMzYZm5BmZWmZWGjBWmFzYY200wMjhNAAAAAAAAmZwAAAAwA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMz2MmZmZGzkxMDAAAAAAYWMmtZYmBmxyMzMDzMYWGYZ2MjhZhpxMzYYDAAAYAAAAMzgBAAAgB", -- Warcraft Logs M+, all dungeons: typical of 684, 74% agree on 24 contested, 2026-09-25
+		["Raid"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMzmxMzMmZmMmZAAAAAAAzyDMmtZYmBzMWmZMDzMGzyALziZMMbMNmZGDbAAAAAAAAMzgBAAAgB", -- Warcraft Logs raid, all bosses: typical of 791, 58% agree on 27 contested, 2026-09-25
 	},
 	Vengeance = {
-		["Dungeon"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZmMzMYYmZGYGzMmZmZmxgZmZsZmZbMMAAAAAAACYmZsBAAAgBmZmZmt2mZmBAAAAAYA", -- wowvalor M+ recommended
-		["Raid"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAYMzMjZmZkZmZY2MzMjBjZGzYmZGDzYmx2YmtxAAAAAAAABMzM2AAAAwgxMzMzSbzMzAgBAAAgB", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZkZmxwyMzMDMjZGzYmZGDmZmxmZmtxYGAAAAAAAAmZGbAAAAYgZmZmZrtZmZAAAAAAG", -- Warcraft Logs M+, all dungeons: typical of 653, 70% agree on 12 contested, 2026-09-25
+		["Raid"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAYMzMjZmZkZmBziZmZgZMzYGzMzYYmZmxmZmtxAAAAAAAAAmZGbAAAAYwMzMzMbtNzMDAMAAAAG", -- Warcraft Logs raid, all bosses: typical of 612, 76% agree on 11 contested, 2026-09-25
 	},
 	Devourer = {
-		["Dungeon"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzYmxwMAAAAAAAMmthZGAAAAAAAAmxMMzMzMzMzMzYmFzYsolFmZmZ2abmZGADDABMGMmB", -- wowvalor M+ recommended
-		["Raid"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAAWMzMzMzMzMwMAAAAAAALzYMYGAAAAAAAAmxMMmZmZYmZGzsNzYsptFAEwAMjZmZbmZa2mZbmZMjBA", -- SimulationCraft MID2 profile
+		["Dungeon"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMzYmFzYsolFmZmZ2abmZGADDAAGDGzA", -- Warcraft Logs M+, all dungeons: typical of 679, 70% agree on 5 contested, 2026-09-25
+		["Raid"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMmZmZmZmZYmtZGjNttAAADwMmZmtZmpZbmlZmxYGA", -- Warcraft Logs raid, all bosses: typical of 710, 60% agree on 31 contested, 2026-09-25
 	},
 	Devastation = {
-		["Dungeon"] = "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGzYMTjZmpZmZ2mZmZmZmZmZGgZmxYmZZmZgBGD2glxox2AyMIYDzgZGM8AA", -- wowvalor M+ recommended
+		["Dungeon"] = "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGzYMTjZmpZmZ2mZmZmZmZmZGgZmxYmZZmZgBGD2glxox2AYGA2wMYmBDPA", -- Warcraft Logs M+, all dungeons: typical of 647, 70% agree on 11 contested, 2026-09-25
+		["Raid"] = "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMDMYMTjZmpZmx2MzMzMzMzMzAmxMzYmZZmZgBGD2glxox2AYGA2wAzMY4BA", -- Warcraft Logs raid, all bosses: typical of 708, 73% agree on 8 contested, 2026-09-25
 	},
 	Preservation = {
-		["Dungeon"] = "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYmZ2MMzMbPADAAMjZMjxYGhZAAAAmZGZGzMPwsMzMAYGzALgFwMMhsBbGGAzMjB", -- wowvalor M+ recommended
+		["Dungeon"] = "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGzYYMzsZGw2wAAAzYGzMjhZiZmBAAAMzMTGzMjZZMDAMmBWAbgZYCsxYzwMAzMMA", -- Warcraft Logs M+, all dungeons: typical of 639, 69% agree on 10 contested, 2026-09-25
+		["Raid"] = "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAgZMjZMGzImZAAAAmZGZGzMmlZmBAzYGYDsAmhJwmhNDDgZmxA", -- Warcraft Logs raid, all bosses: typical of 829, 71% agree on 10 contested, 2026-09-25
 	},
 	Augmentation = {
-		["Dungeon"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAwMMzAjpGzMzAAAAgZmZMmZWGzMwMMwYGLsQGYGGaELYMzMDAM", -- wowvalor M+ recommended
+		["Dungeon"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAwMMGGjpGzMzAAAAgZmZMmZWGzMwMMwYGLsADMDDNwCGzMzAAD", -- Warcraft Logs M+, all dungeons: typical of 649, 77% agree on 28 contested, 2026-09-25
+		["Raid"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZGMYmZZmZMjZAAAAAAAAgZGjZwYqxMzMAAAAYGzYMzsMmZgZYgxMWYBGYGGagFMzYmBAG", -- Warcraft Logs raid, all bosses: typical of 787, 65% agree on 9 contested, 2026-09-25
 	},
 }
 -- END GENERATED BUILDS
@@ -704,8 +711,8 @@ end
 -- Which saved loadout and which gear scenario go with which boss. The loadout
 -- is the stored build for that boss, by the name in PlanTab.BUILDS (Rob,
 -- 2026-09-23: DjinnisDreamgrove merges into this addon, card 0030).
--- Guardian and Resto have no rows: the guide gives one raid build per hero
--- tree or per mana state, not one per boss, so which fits a boss is Rob's.
+-- Guardian and Resto have no rows: each has one "Raid" build, the typical of
+-- top ranked players over every boss (card 0064).
 -- `scenario` picks the gear plan cell: `st`, `2t`, `3t` (three or more) or
 -- `mplus`. A boss that is none of those cleanly takes `st`. No row says `3t`
 -- yet: that is a sim per spec, not a code change (card 0028).
@@ -726,26 +733,26 @@ PlanTab.BOSSES = {
 		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "Raid: Ula'tek" },
 		-- a lair boss, not a raid one: her id is from BigWigs_MidnightLairs
 		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "st", loadout = "Raid: Nymrissa" },
-		-- One Mythic+ loadout, not one per dungeon (card 0009): Archon's (card 0047),
-		-- a Druid of the Claw build. Rob's own sim on 2026-09-21 had "WS M+"
-		-- 214,785 over "DotC M+" 207,837 on two targets; a dungeon-style sim
-		-- should settle which, and none has run yet.
+		-- One Mythic+ loadout, not one per dungeon (card 0009): the typical build
+		-- of top ranked Feral runs on Warcraft Logs (card 0064).
 		{ boss = "Mythic+, any key",   scenario = "mplus", loadout = "Dungeon" },
 	},
-	-- The scenario is the build's own: Dreamgrove's single target or cleave.
-	-- Balance has no gear plan yet, so it only labels the row.
+	-- The scenario is the build's own: single target or cleave. Balance has no
+	-- gear plan yet, so it only labels the row. Three rows, grouped by what top
+	-- players run on each boss (Warcraft Logs, 2026-09-25, card 0064; Rob chose
+	-- fewer rows over one a boss, for the slots): Elune's Chosen cleave, Elune's
+	-- Chosen on Nek'zali and the Coiled Altar, Keeper of the Grove on the rest.
+	-- update-builds.py pools each row's bosses, so a regroup here moves builds.
 	Balance = {
-		{ boss = "Nek'zali",            id = 3470, scenario = "2t", loadout = "Raid: Nek'Zali, Nymrissa" },
+		{ boss = "Nek'zali",            id = 3470, scenario = "st", loadout = "Raid: Nek'Zali, Altar" },
 		{ boss = "Entombed Sentinels",  id = 3445, scenario = "2t", loadout = "Raid: Cleave" },
 		{ boss = "The Lost Explorers",  id = 3497, scenario = "2t", loadout = "Raid: Cleave" },
 		{ boss = "Vashnik",             id = 3455, scenario = "st", loadout = "Raid: Single Target" },
 		{ boss = "Sszorak",             id = 3420, scenario = "st", loadout = "Raid: Single Target" },
 		{ boss = "The Twin Fangs",      id = 3421, scenario = "2t", loadout = "Raid: Cleave" },
-		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "Raid: Single Target" },
-		-- Ula'tek has no Balance build in the guide; single target is the
-		-- nearest. Uncertain, and Rob's to change.
+		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "Raid: Nek'Zali, Altar" },
 		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "Raid: Single Target" },
-		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "2t", loadout = "Raid: Nek'Zali, Nymrissa" },
+		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "st", loadout = "Raid: Single Target" },
 		{ boss = "Mythic+, any key",   scenario = "mplus", loadout = "Dungeon" },
 	},
 }
@@ -6809,7 +6816,8 @@ end
 -- The names DjinnisDreamgrove 0.6.0 imported, which 0.7.0 renamed. Deleted
 -- only after a box lists them and a click agrees: /dcp tidy's, or the loadout
 -- box's "Delete them" (card 0062). Only a loadout whose own name is on this
--- list, never a tagged "[CP] X" filed under X (0062 review).
+-- list, never a tagged "[CP] X" filed under X (0062 review), except for the
+-- names in RETIRED_TAGGED below.
 PlanTab.RETIRED = {
 	["EC Raid ST"] = true, ["EC Raid Cleave"] = true, ["KotG Raid ST"] = true, ["KotG Raid Cleave"] = true,
 	["EC M+"] = true, ["KotG M+"] = true, ["DotC Raid"] = true, ["EC Raid Default"] = true,
@@ -6827,6 +6835,15 @@ PlanTab.RETIRED = {
 	-- Resto's, until its dungeon build became Archon's "Dungeon" (card 0047)
 	["Dungeon: heal only"] = true,
 }
+-- Rows no top player ran, replaced by Warcraft Logs' (card 0064): Guardian's
+-- and Resto's raid rows became one "Raid", Balance's rows were regrouped. The
+-- addon made these tagged since card 0059, so "[CP] X" is retired too, here
+-- only: a "[CP] " copy of an older name above is not the addon's (0064 review).
+PlanTab.RETIRED_TAGGED = {
+	["Raid: Druid of the Claw"] = true, ["Raid: Elune's Chosen"] = true,
+	["Raid: short on mana"] = true, ["Raid: mana is fine"] = true, ["Raid: Nek'Zali, Nymrissa"] = true,
+}
+for name in pairs(PlanTab.RETIRED_TAGGED) do PlanTab.RETIRED[name] = true end
 
 function PlanTab.say(text)
 	print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. text .. "|r")
@@ -7411,10 +7428,15 @@ function PlanTab.retiredLoadouts(saved, selected)
 	if PlanTab.playerClass() ~= PlanTab.DRUID then return out end
 	local live = PlanTab.BUILDS[playerSpec() or ""] or {}
 	for name, id in pairs(saved or {}) do
-		-- savedLoadoutNames files "[CP] X" under X: only a loadout really
-		-- named X is old (0062 review)
-		if PlanTab.RETIRED[name] and not live[name] and PlanTab.configName(id) == name then
-			out[#out + 1] = { id = id, from = name, delete = true, retired = true, stays = id == selected or nil }
+		-- savedLoadoutNames files "[CP] X" under X, so `from` is the loadout's
+		-- real name, which is what tagNext checks before it deletes (0062
+		-- review). Since card 0064 a tagged one can be retired too, for the
+		-- names in RETIRED_TAGGED only: the addon made "[CP] Raid: Elune's
+		-- Chosen", and no longer makes it.
+		local real = PlanTab.configName(id)
+		if PlanTab.RETIRED[name] and not live[name]
+			and (real == name or PlanTab.RETIRED_TAGGED[name] and real == PlanTab.tag(name)) then
+			out[#out + 1] = { id = id, from = real, delete = true, retired = true, stays = id == selected or nil }
 		end
 	end
 	table.sort(out, function(a, b) return a.from < b.from end)
@@ -7587,18 +7609,18 @@ function PlanTab.offerLoadouts(asked, declined)
 				doubled = doubled or (o.delete and not o.retired) or false
 			end
 		end
-		local lines = { ("%d old loadout%s on this spec, from before this addon tagged its own with \"%s\":"):format(#before, #before == 1 and "" or "s", PlanTab.TAG) }
+		local lines = { ("%d old loadout%s on this spec:"):format(#before, #before == 1 and "" or "s") }
 		for _, o in ipairs(before) do
 			lines[#lines + 1] = ("  %s%s|r  %s|r"):format(WHITE, o.from,
 				o.stays and o.retired and "stays: you are wearing it"
 				or o.stays and "stays: you are wearing it, and a tagged one is there"
-				or o.retired and "|cffff4444deleted: an old Dreamgrove loadout"
+				or o.retired and "|cffff4444deleted: a build this addon no longer makes"
 				or o.delete and "|cffff4444deleted: a tagged one is there"
 				or ("renamed \"" .. o.to .. "\""))
 		end
 		if renames > 0 then lines[#lines + 1] = "Renaming keeps the talents." end
 		if doubled then lines[#lines + 1] = "One whose tagged copy is there already is deleted: the tagged one holds the build." end
-		if retired then lines[#lines + 1] = "The old Dreamgrove loadouts are deleted: this addon no longer makes them, and they use slots." end
+		if retired then lines[#lines + 1] = "Builds this addon no longer makes are deleted: they use slots." end
 		lines[#lines + 1] = "Your other loadouts are not touched."
 		PlanTab.prompt("Djinni's Class Profiles: " .. spec .. " loadouts", lines, {
 			{ label = deletes == 0 and "Tag them" or renames == 0 and "Delete them" or "Tag and delete", onClick = PlanTab.tagOld },
@@ -7686,7 +7708,7 @@ function PlanTab.tidy(confirmed)
 		if o.stays then PlanTab.say(("\"%s\" is the loadout you have selected, so it stays. Pick another, then tidy again."):format(o.from))
 		else doomed[#doomed + 1], todo[#todo + 1] = o.from, o end
 	end
-	if #doomed == 0 then PlanTab.say("No old Dreamgrove loadouts on this spec.") return 0 end
+	if #doomed == 0 then PlanTab.say("No old loadouts from this addon on this spec.") return 0 end
 	if not confirmed then
 		PlanTab.say(("These %d old loadouts would be deleted. Your own loadouts are not touched:"):format(#doomed))
 		for _, name in ipairs(doomed) do print("  " .. name) end
@@ -8404,7 +8426,7 @@ function PlanTab.menuItems(where)
 	add({ text = "Make the planned loadouts", tip = "Offers to create or reset a loadout for every planned build of this spec.", fn = function() PlanTab.offerLoadouts(true) end })
 	add({ text = "Compare talents with the plan", tip = "Lists in chat the build in play beside every planned build of this spec.", fn = PlanTab.sayTalents })
 	if PlanTab.playerClass() == PlanTab.DRUID then
-		add({ text = "Delete old Dreamgrove loadouts", tip = "Lists the loadouts the old DjinnisDreamgrove addon made, then asks before it deletes them. Your own loadouts are not touched.", fn = PlanTab.tidyAsk })
+		add({ text = "Delete old loadouts", tip = "Lists the loadouts this addon or the old DjinnisDreamgrove addon made and no longer makes, then asks before it deletes them. Your own loadouts are not touched.", fn = PlanTab.tidyAsk })
 	end
 	add({ divider = true })
 	add({ title = "Action bars" })
@@ -8470,7 +8492,7 @@ function PlanTab.tidyAsk()
 	if type(n) ~= "number" or n == 0 then return n end
 	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
 	PlanTab.prompt("Djinni's Class Profiles: old loadouts", {
-		("Delete the %d old Dreamgrove loadouts listed in chat?"):format(n),
+		("Delete the %d old loadouts listed in chat?"):format(n),
 		"Your own loadouts are not touched.",
 	}, {
 		{ label = "Delete", onClick = function() PlanTab.tidy(true) end },
@@ -9543,7 +9565,7 @@ function PlanTab.sidebarChecks(check)
 	check(listTest .. ", a folded group keeps its header and drops its rows", names(folded), "[Raid]; [Mythic+]; Dungeon")
 	check(listTest .. ", and says how many it holds", folded[1].count, 9)
 	check(listTest .. ", Guardian's builds with no boss row sit under Other builds",
-		names(PlanTab.sidebarList("Guardian", "raid")), "[Mythic+]; Dungeon; Dungeon: survive more; [Other builds]; Raid: Druid of the Claw; Raid: Elune's Chosen")
+		names(PlanTab.sidebarList("Guardian", "raid")), "[Mythic+]; Dungeon; Dungeon: survive more; [Other builds]; Raid")
 
 	local tickTest = "one tick, on the build in play"
 	check(tickTest, ticked(PlanTab.sidebarList("Feral", "raid", feral["Raid: Twin Fangs"])), "Raid: Twin Fangs")
@@ -10022,10 +10044,16 @@ function PlanTab.tagChecks(check)
 			C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 102 end }  -- Balance
 			-- "WS M+" here is the tagged "[CP] WS M+", filed under its build name: never old (0062 review)
 			local oldSaved = { ["EC M+"] = 11, ["Raid: Vashnik"] = 12, ["KotG Raid ST"] = 13, ["Dungeon"] = 14, ["Rob's"] = 15, ["WS M+"] = 16 }
-			live = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST", [14] = "[CP] Dungeon", [15] = "Rob's", [16] = "[CP] WS M+" }
+			live = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST", [14] = "[CP] Dungeon", [15] = "Rob's", [16] = "[CP] WS M+", [17] = "Rob's DotC M+", [18] = "[CP] Raid: mana is fine" }
 			local seen = {}
 			for _, e in ipairs(kept[12](oldSaved, 11)) do seen[#seen + 1] = e.from .. (e.stays and " stays" or "") end
 			check(d .. ", listed on a druid, a name retired from this spec included, the worn one staying", table.concat(seen, "|"), "EC M+ stays|KotG Raid ST|Raid: Vashnik")
+			-- Card 0064 retires the rows in RETIRED_TAGGED even tagged: savedLoadoutNames files "[CP] X"
+			-- under X, and it is listed by its real name, which tagNext checks before it deletes (0062
+			-- review). "[CP] WS M+" is an older name, and "Rob's DotC M+" not the tag: neither is touched.
+			seen = {}
+			for _, e in ipairs(kept[12]({ ["Raid: mana is fine"] = 18, ["DotC M+"] = 17, ["WS M+"] = 16 }, 11)) do seen[#seen + 1] = e.from end
+			check(d .. ", a tagged row the addon no longer makes is listed by its real name", table.concat(seen, "|"), "[CP] Raid: mana is fine")
 			PlanTab.playerClass = function() return "WARRIOR" end
 			check(d .. ", never on another class", #kept[12](oldSaved, 11), 0)
 			PlanTab.playerClass = function() return PlanTab.DRUID end
@@ -10041,7 +10069,7 @@ function PlanTab.tagChecks(check)
 			PlanTab.later = function(_, fn) pending[#pending + 1] = fn end
 			selected = 11
 			check(d .. ", the box asks about them", PlanTab.offerLoadouts(true), "old")
-			check(d .. ", each shown as deleted, the worn one staying", shown and table.concat(shown.lines, "\n"):find("KotG Raid ST|r  |cffff4444deleted: an old Dreamgrove loadout", 1, true) ~= nil and table.concat(shown.lines, "\n"):find("EC M+|r  stays: you are wearing it|r", 1, true) ~= nil, true)
+			check(d .. ", each shown as deleted, the worn one staying", shown and table.concat(shown.lines, "\n"):find("KotG Raid ST|r  |cffff4444deleted: a build this addon no longer makes", 1, true) ~= nil and table.concat(shown.lines, "\n"):find("EC M+|r  stays: you are wearing it|r", 1, true) ~= nil, true)
 			-- 0062 review: a box of deletes says delete, not rename
 			check(d .. ", a box of deletes is labelled Delete them", shown and shown.buttons[1].label, "Delete them")
 			check(d .. ", and does not speak of renaming", shown and table.concat(shown.lines, "\n"):find("Renaming", 1, true) == nil, true)
@@ -10073,7 +10101,7 @@ function PlanTab.tagChecks(check)
 			PlanTab.offerLoadouts(true)
 			local text = shown and table.concat(shown.lines, "\n") or ""
 			check(d .. ", a mixed box is Tag and delete", shown and shown.buttons[1].label, "Tag and delete")
-			check(d .. ", and says all three things", tostring(text:find("Renaming keeps", 1, true) ~= nil) .. "/" .. tostring(text:find("tagged copy is there already", 1, true) ~= nil) .. "/" .. tostring(text:find("old Dreamgrove loadouts are deleted", 1, true) ~= nil), "true/true/true")
+			check(d .. ", and says all three things", tostring(text:find("Renaming keeps", 1, true) ~= nil) .. "/" .. tostring(text:find("tagged copy is there already", 1, true) ~= nil) .. "/" .. tostring(text:find("Builds this addon no longer makes are deleted", 1, true) ~= nil), "true/true/true")
 			PlanTab.tagOld()
 			drain()
 			check(d .. ", and counts each kind", tostring(saidAny("Tagged 1 of 1 old loadout.")) .. "/" .. tostring(saidAny("Deleted 2 of 2 old loadouts.")), "true/true")
@@ -10244,7 +10272,7 @@ function PlanTab.menuChecks(check)
 		local w = PlanTab.menuItems("window")
 		check(t .. ", Make the planned loadouts", click(w, "Make the planned loadouts"), "offerLoadouts(true)")
 		check(t .. ", Compare talents", click(w, "Compare talents with the plan"), "sayTalents")
-		check(t .. ", Delete old loadouts, on a druid", click(w, "Delete old Dreamgrove loadouts"), "tidyAsk")
+		check(t .. ", Delete old loadouts, on a druid", click(w, "Delete old loadouts"), "tidyAsk")
 		check(t .. ", Offer the saved bars", click(w, "Offer the saved bars"), "offerBars(true)")
 		check(t .. ", Undo bars in the window", click(w, "Undo bars"), "undoBarsAsk")
 		check(t .. ", Save bars for this spec, with no sidebar", click(w, "Save bars for this spec"), "saveBars(false)")
@@ -10287,7 +10315,7 @@ function PlanTab.menuChecks(check)
 
 		class = 6
 		w = PlanTab.menuItems("window")
-		check(t .. ", a Death Knight has no tidy", click(w, "Delete old Dreamgrove loadouts"), "none")
+		check(t .. ", a Death Knight has no tidy", click(w, "Delete old loadouts"), "none")
 		check(t .. ", a Death Knight has no bonus roll verdict", click(w, "Bonus roll worth it here?"), "none")
 		check(t .. ", a Death Knight still has its bars", click(w, "Offer the saved bars"), "offerBars(true)")
 		class = PlanTab.DRUID
@@ -12291,9 +12319,9 @@ local function selfTest()
 		check(markTest .. ", raid rows, one per loadout, the active one marked", table.concat(names, "; "),
 			"Raid: Nek'Zali; Raid: Entombed Sentinels; Raid: Lost Explorers; Raid: Vashnik; Raid: Sszorak; Raid: Twin Fangs=active; Raid: Coiled Altar; Raid: Ula'tek; Raid: Nymrissa")
 		check(markTest .. ", each with its bosses", table.concat((raid[1] or { bosses = {} }).bosses, ", "), "Nek'zali")
-		-- Balance's single target build serves four bosses: one row, all four
+		-- Balance's Keeper of the Grove build serves four bosses: one row, all four
 		local balance = PlanTab.sidebarRows(PlanTab.BOSSES.Balance, "raid", nil, false)
-		check(markTest .. ", a shared build is one row with its bosses", table.concat((balance[3] or { bosses = {} }).bosses, ", "), "Vashnik, Sszorak, The Coiled Altar, Ula'tek")
+		check(markTest .. ", a shared build is one row with its bosses", table.concat((balance[3] or { bosses = {} }).bosses, ", "), "Vashnik, Sszorak, Ula'tek, Nymrissa Wavecaller")
 		local keys = PlanTab.sidebarRows(PlanTab.BOSSES.Feral, "mplus", "Dungeon", false)
 		check(markTest .. ", Mythic+ lists the key loadout only", #keys == 1 and (keys[1].loadout .. "=" .. tostring(keys[1].mark)), "Dungeon=active")
 		-- `or {}`: a list drawn short is one red line here, not a nil-index error that ends the test

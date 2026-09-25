@@ -15,13 +15,25 @@ Blizzard's ReadLoadoutContent reads it and must spend 34 class, 34 spec and 13
 hero points in its own spec, or nothing is written. Each spec's "Dungeon" is
 not Dreamgrove's but a string pinned in PIN below (card 0047), checked the same way.
 
-Every other class (card 0050) gets two builds, keyed by PlanTab.SPECS in the
-Lua, the one list of specs:
+Warcraft Logs first (card 0064; Rob, 2026-09-25: automatic). `python
+wcl-builds.py` writes docs/builds/wcl-builds.json: each spec's typical raid and
+Mythic+ build among top ranked players, and each druid boss's. This script
+reads that file and takes, in order of precedence:
+- a PIN entry, always, because it was put there by hand;
+- every spec's "Dungeon", and "Raid" for every spec with no boss rows (every
+  non-druid, Guardian, Resto): the Warcraft Logs typical;
+- a druid boss row (PlanTab.BOSSES): the typical pooled over every boss its
+  loadout backs, when WCL_MIN_SAMPLE players or more ranked on them. Which
+  boss goes with which row is the Lua's, grouped by what players run.
+The rest (Dreamgrove's) fill in where the logs have too few. A file older than
+WCL_MAX_DAYS stops the run: run wcl-builds.py first.
+
+Where Warcraft Logs has no build, the older sources fill in (card 0050),
+keyed by PlanTab.SPECS in the Lua, the one list of specs:
 - "Dungeon": wowvalor.app's recommendedBuild for Mythic+, the exact build most
   of its top 50 characters of the spec run. It needs a browser user agent.
 - "Raid": SimulationCraft's default profile for the tier (SIMC_TIER), read with
-  `gh api`. SimC keeps none for healers or Evokers, so those specs have no
-  "Raid" and the run lists them rather than stopping. A PIN entry fills one.
+  `gh api`. SimC keeps none for healers or Evokers.
 Archon, Icy Veins and Wowhead all refuse scripts (a human check or a 403), and
 that is not worked around.
 """
@@ -31,7 +43,7 @@ import re
 import subprocess
 import sys
 import urllib.request
-from datetime import date
+from datetime import date, datetime
 
 LUA = "DjinnisClassProfiles.lua"
 BEGIN, END = "-- BEGIN GENERATED BUILDS", "-- END GENERATED BUILDS"
@@ -42,6 +54,12 @@ PAGE = {"Balance": "balance", "Feral": "feral", "Guardian": "guardian", "Resto":
 DRUID = 11  # PlanTab.DRUID: druids keep the Dreamgrove rows above
 SIMC_TIER = "MID2"  # profiles/<tier>/ in simulationcraft/simc; move it with the season
 VALOR = "https://wowvalor.app/en/stats/{cls}/{spec}/m+"
+WCL_JSON = "docs/builds/wcl-builds.json"  # written by wcl-builds.py
+WCL_MAX_DAYS = 14
+WCL_MIN_SAMPLE = 20  # rankings with talents; Feral had 10 on Twin Fangs on 2026-09-25
+# Blizzard's name box takes 30 letters, and the longest mark the addon puts in
+# front ("[CP*] ", "[CP+] ") is 6; the Lua's self-test checks the same.
+NAME_MAX = 24
 BROWSER = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"
 
 # Guide build name -> the loadout names it backs. One build can back several
@@ -52,10 +70,14 @@ PICK = {
     # Named for the fight, not the hero tree (Rob, 2026-09-23: "Raid: Single
     # Target, Raid: Cleave, Raid: AoE ... means much more"). The guide's own
     # comments say which bosses each is for; the boss rows carry that.
+    # Since card 0064 each raid row takes the Warcraft Logs typical of its
+    # bosses; the guide build only fills a row the logs have too few for.
     "Balance": {
-        "Elune's Chosen - Single Target": ["Raid: Single Target"],
+        "Elune's Chosen - Single Target": ["Raid: Nek'Zali, Altar"],
         "Elune's Chosen - Cleave": ["Raid: Cleave"],
-        "Keeper of the Grove - Cleave": ["Raid: Nek'Zali, Nymrissa"],
+        # Keeper of the Grove, which top players run on these four. The guide's
+        # only Keeper build is its cleave one; it fills in only without logs.
+        "Keeper of the Grove - Cleave": ["Raid: Single Target"],
         # Each spec's "Dungeon" is in PIN since card 0047: what players run.
     },
     "Feral": {
@@ -69,50 +91,24 @@ PICK = {
         "Ulatek": ["Raid: Ula'tek"],
         "Nymrissa (Lair)": ["Raid: Nymrissa"],
     },
+    # Guardian and Resto's raid rows ("Raid: Druid of the Claw", "Raid: Elune's
+    # Chosen", "Raid: short on mana", "Raid: mana is fine") became one "Raid"
+    # from Warcraft Logs (Rob, 2026-09-25): no top player ran any of the four.
     "Guardian": {
-        # The guide gives one raid build per hero tree and does not rank them.
-        "DotC Raid": ["Raid: Druid of the Claw"],
-        "EC Raid Default": ["Raid: Elune's Chosen"],
         "Razeless sustain": ["Dungeon: survive more"],
     },
     "Resto": {
-        "Raid w/ mana return": ["Raid: short on mana"],
-        "Raid w/o mana return": ["Raid: mana is fine"],
         "M+ Cat DPS": ["Dungeon: cat damage"],
         "M+ Caster DPS": ["Dungeon: caster damage"],
     },
 }
 
-# Builds no guide publishes, pinned by hand: loadout name -> (string, source).
-# Checked for spec and points like the rest, and never refreshed: copy a new
-# string in when the tree changes (the points check fails loudly when it does).
-# Card 0047: each spec's "Dungeon" is Archon's recommended build for Mythic+,
-# +7 to +21, all dungeons, copied by Rob with Archon's Export button on
-# 2026-09-24. Archon has a human check, so it cannot be fetched here: to
-# refresh, paste the new strings in. The card holds what each changed against
-# Dreamgrove's build it replaced.
-ARCHON = "Archon M+ +7 to +21 #1, 2026-09-24"
-PIN = {
-    "Balance": {
-        # replaced "Elune's Chosen M+"; Elune's Chosen 98.7% of 110,634 runs
-        "Dungeon": ("CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMLMYMLzsMzCzM2YZmlxMjxGGGgx22MDGz2AYCAAAwCzMzMYzwYMAAMzglBA", ARCHON),
-    },
-    "Feral": {
-        # replaced "DOTC", same hero tree. Double-Clawed Rake for Tireless Energy
-        # (card 0047's why), Lycara's Inspiration for Forestwalk, Ursine Vigor for
-        # Innervate, Convoke for Incarnation, Hunger for Battle for Ashamane's Guidance
-        "Dungeon": ("CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", ARCHON),
-    },
-    "Guardian": {
-        # replaced "Razeless", a Druid of the Claw build; Elune's Chosen 99.2% of 177,831 runs
-        "Dungeon": ("CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD", ARCHON),
-    },
-    "Resto": {
-        # replaced "M+ #HealersHeal" ("Dungeon: heal only"): it weaves cat, so the
-        # old name would lie. Wildstalker 88.0% of 78,289 runs.
-        "Dungeon": ("CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsMzMzMLzwMAAAAAAAwAAAAAgZbmtmtZWsxYmBmBoZAAmZAYA", ARCHON),
-    },
-}
+# Builds pinned by hand: spec -> {loadout name: (string, source)}. A pin beats
+# every fetched source. Checked for spec and points like the rest, and never
+# refreshed: copy a new string in when the tree changes (the points check fails
+# loudly when it does). The druids' "Dungeon" pins (Archon's, card 0047) gave
+# way to Warcraft Logs on 2026-09-25 (card 0064); git holds them.
+PIN = {}
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 VAL = {c: i for i, c in enumerate(CHARS)}
@@ -227,6 +223,62 @@ def lua_specs():
     return [(int(i), key, int(cls)) for i, key, cls in rows]
 
 
+def lua_bosses():
+    """PlanTab.BOSSES from the Lua: {spec key: [(encounter id, boss, loadout)]}, raid rows only."""
+    lua = open(LUA, encoding="utf-8").read()
+    block = lua.split("PlanTab.BOSSES = {", 1)[1].split("\n}", 1)[0]
+    out, key = {}, None
+    for line in block.splitlines():
+        m = re.match(r"^\t(\w+) = \{", line)
+        if m:
+            key = m.group(1)
+            out[key] = []
+            continue
+        m = re.search(r'boss = "([^"]+)",\s*id = (\d+),.*loadout = "([^"]+)"', line)
+        if m and key:
+            out[key].append((int(m.group(2)), m.group(1), m.group(3)))
+    return out
+
+
+def wcl_picks():
+    """What wcl-builds.json says each row should be: {spec key: {loadout name: (code, source)}}.
+    "Dungeon" and "Raid" for every spec, and each druid boss row, pooled over the
+    bosses it backs. Stops when the file is missing or older than WCL_MAX_DAYS."""
+    try:
+        with open(WCL_JSON, encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        sys.exit(f"No {WCL_JSON}. Run `python wcl-builds.py` first. Nothing written.")
+    # Only the specs PlanTab.SPECS has now: a dropped spec's old date must not stop every run.
+    data = {k: v for k, v in data.items() if k in {key for _, key, _ in lua_specs()}}
+    ran = min((c["ran"] for spec in data.values() for c in (spec.get("raid"), spec.get("mplus")) if c), default=None)
+    if not ran:
+        sys.exit(f"{WCL_JSON} has no spec the addon knows. Run `python wcl-builds.py` first. Nothing written.")
+    age = (datetime.now() - datetime.strptime(ran[:10], "%Y-%m-%d")).days
+    if age > WCL_MAX_DAYS:
+        sys.exit(f"{WCL_JSON} is {age} days old. Run `python wcl-builds.py` first. Nothing written.")
+    out = {}
+    for key, spec in data.items():
+        rows = out[key] = {}
+        for content, name, what in (("raid", "Raid", "raid, all bosses"), ("mplus", "Dungeon", "M+, all dungeons")):
+            c = spec.get(content)
+            if c and c["sample"] >= WCL_MIN_SAMPLE:
+                p = c["pick"]
+                rows[name] = (p["code"], f"Warcraft Logs {what}: typical of {c['sample']}, {p['agreement']:.0%} agree on {p['contested']} contested, {c['ran'][:10]}")
+    # Boss rows: the typical pooled over the bosses the row backs. Only when the
+    # JSON's bosses are the Lua's now: a row regrouped since the run would
+    # otherwise take the old group's build (0064 review).
+    for key, bosses in lua_bosses().items():
+        for loadout, row in data.get(key, {}).get("rows", {}).items():
+            now = [boss for _, boss, l in bosses if l == loadout]
+            if row["bosses"] != now:
+                print(f"{key} {loadout}: backs {now} now, {row['bosses']} when wcl-builds.py ran. Run it again.", file=sys.stderr)
+            elif row["sample"] >= WCL_MIN_SAMPLE:
+                p = row["pick"]
+                out.setdefault(key, {})[loadout] = (p["code"], f"Warcraft Logs {', '.join(now)}: typical of {row['sample']}, {p['agreement']:.0%} agree on {p['contested']} contested, {row['ran'][:10]}")
+    return out
+
+
 def slug(name):
     return name.lower().replace("'", "").replace(" ", "-")
 
@@ -284,8 +336,22 @@ def checked(spec_name, spec_id, name, code, source, tree):
     return f'\t\t["{name}"] = "{code}", -- {source}'
 
 
-def other_classes(trees, lines):
-    """Every non-druid spec: PIN, else wowvalor's Dungeon and SimC's Raid.
+def from_wcl(key, spec_id, name, picks, tree):
+    """The checked row for a Warcraft Logs build, or None so the next source fills
+    it. A refused one is said, not fatal (0064 review): wcl-builds.py checks points
+    already, so a refusal here means the tree moved since it ran."""
+    pick = picks.get(key, {}).get(name)
+    if not pick:
+        return None
+    try:
+        return checked(key, spec_id, name, *pick, tree)
+    except Refused as e:
+        print(f"Warcraft Logs build refused, the older source used: {e}", file=sys.stderr)
+        return None
+
+
+def other_classes(trees, lines, picks):
+    """Every non-druid spec: PIN, else Warcraft Logs, else wowvalor's Dungeon and SimC's Raid.
     A pinned or Dungeon string that fails the check stops the run. SimC's Raid
     string only drops out, named: SimC keeps some profiles on a stale tree
     (Frost Death Knight's spent 9 class points on 2026-09-24), and one stale
@@ -303,6 +369,10 @@ def other_classes(trees, lines):
         for name, fetcher, source in (("Dungeon", valor_dungeon, "wowvalor M+ recommended"),
                                       ("Raid", simc_raid, f"SimulationCraft {SIMC_TIER} profile")):
             optional = name == "Raid" and name not in pinned
+            wl = None if name in pinned else from_wcl(key, spec_id, name, picks, tree)
+            if wl:
+                rows[name] = wl
+                continue
             if name in pinned:
                 code, source = pinned[name]
             else:
@@ -326,7 +396,7 @@ def other_classes(trees, lines):
                 except Refused as e:
                     sys.exit(f"{e}. Copy a fresh string into PIN.")
         if "Dungeon" not in rows:
-            sys.exit(f"{key}: wowvalor gave no recommended build. Check its page, or PIN one.")
+            sys.exit(f"{key}: neither Warcraft Logs nor wowvalor gave a Mythic+ build. Check them, or PIN one.")
         if "Raid" not in rows:
             no_raid.append(f"{key} ({why_no_raid})")
         lines.append(f"\t{lua_key(key)} = {{")
@@ -339,35 +409,51 @@ def block(trees):
     known = set(SPEC_ID) | {key for _, key, _ in lua_specs()}
     if set(PIN) - known:
         sys.exit(f"PIN names a spec PlanTab.SPECS does not: {sorted(set(PIN) - known)}. Its builds would vanish.")
-    lines = [BEGIN, f'PlanTab.BUILD_SOURCE = "dreamgrove.gg compendiums for druids, wowvalor.app and SimulationCraft for the rest, and the pinned builds in update-builds.py PIN, read {date.today()}"', "PlanTab.BUILDS = {"]
+    picks = wcl_picks()
+    lines = [BEGIN, f'PlanTab.BUILD_SOURCE = "Warcraft Logs top rankings (typical build), dreamgrove.gg compendiums for the druid rows it does not cover, wowvalor.app and SimulationCraft where it has none, and the pinned builds in update-builds.py PIN, read {date.today()}"', "PlanTab.BUILDS = {"]
     for spec in SPEC_ID:
         guide = guide_builds(spec)
-        missing = set(PICK[spec]) - set(guide)
-        if missing:
-            sys.exit(f"{spec}: the guide no longer has {sorted(missing)}. Change PICK, do not guess.")
         tree = next(t for t in trees if t["specId"] == SPEC_ID[spec])
-        lines.append(f"\t{spec} = {{")
-        for source, names in PICK[spec].items():
-            code = guide[source]
-            got, spent = points(code, tree)
-            if got != SPEC_ID[spec] or spent != POINTS:
-                sys.exit(f"{spec} {source}: spec {got}, points {spent}. Not written.")
-            for name in names:
-                assert len(name) <= 30 and '"' not in name, name
-                lines.append(f'\t\t["{name}"] = "{code}", -- {source}')
+        # One row a name, by precedence: PIN, then Warcraft Logs, then the guide.
+        # A dict, so no name can be written twice (0064 review).
+        rows = {}
         for name, (code, source) in PIN.get(spec, {}).items():
-            got, spent = points(code, tree)
-            if got != SPEC_ID[spec] or spent != POINTS:
-                sys.exit(f"{spec} pinned {name}: spec {got}, points {spent}. Copy a fresh string in.")
-            if len(name) > 30 or '"' in name or any(name in n for n in PICK[spec].values()):
-                sys.exit(f"{spec} pinned {name!r}: over 30 letters, a quote, or already a PICK name.")
-            lines.append(f'\t\t["{name}"] = "{code}", -- {source}')
-        # Every spec's boss rows or the M+ reminder load "Dungeon"; a lost PIN
-        # entry must not drop it without a word (0047 review).
-        if not any(line.startswith('\t\t["Dungeon"]') for line in lines[lines.index(f"\t{spec} = {{"):]):
-            sys.exit(f"{spec} has no \"Dungeon\" build. Put its PIN or PICK entry back.")
+            if len(name) > NAME_MAX or '"' in name:
+                sys.exit(f"{spec} pinned {name!r}: over {NAME_MAX} letters, or a quote.")
+            try:
+                rows[name] = checked(spec, SPEC_ID[spec], name, code, source, tree)
+            except Refused as e:
+                sys.exit(f"{e}. Copy a fresh string into PIN.")
+        # A spec with no boss rows (Guardian, Resto) gets one "Raid", the logs' typical
+        # (Rob, 2026-09-25): the guide's raid builds were ones no top player ran.
+        boss_rows = [l for _, _, l in lua_bosses().get(spec, [])]
+        raid = [] if boss_rows else ["Raid"]
+        for name in dict.fromkeys(["Dungeon"] + raid + boss_rows + [n for names in PICK[spec].values() for n in names]):
+            if name not in rows:
+                wl = from_wcl(spec, SPEC_ID[spec], name, picks, tree)
+                if wl:
+                    rows[name] = wl
+        for source, names in PICK[spec].items():
+            if all(name in rows for name in names):
+                continue  # every row it backs has a better source: the guide may drop it
+            if source not in guide:
+                sys.exit(f"{spec}: the guide no longer has {source!r}. Change PICK, do not guess.")
+            try:
+                for name in names:
+                    assert len(name) <= NAME_MAX and '"' not in name, name
+                    rows.setdefault(name, checked(spec, SPEC_ID[spec], name, guide[source], source, tree))
+            except Refused as e:
+                sys.exit(f"{e}. Not written.")
+        # Every spec's boss rows or the M+ reminder load "Dungeon"; a lost source
+        # must not drop it without a word (0047 review).
+        # Nothing else backs these: no row may drop out without a word (0064 review).
+        for name in ["Dungeon"] + raid + boss_rows:
+            if name not in rows:
+                sys.exit(f"{spec} has no {name!r} build: Warcraft Logs had under {WCL_MIN_SAMPLE} rankings and no PICK or PIN fills it. PIN one.")
+        lines.append(f"\t{spec} = {{")
+        lines.extend(rows.values())
         lines.append("\t},")
-    no_raid = other_classes(trees, lines)
+    no_raid = other_classes(trees, lines, picks)
     if no_raid:
         print(f"No Raid build, and no PIN for one: {'; '.join(no_raid)}", file=sys.stderr)
     lines += ["}", END]
