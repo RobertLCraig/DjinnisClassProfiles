@@ -4827,6 +4827,10 @@ function PlanTab.setupStep()
 	if not steps then return "done" end
 	if InCombatLockdown() then steps.waiting = true return "waiting" end
 	steps.waiting = nil
+	-- a spec change or a switch now would collide with a rename in flight, and
+	-- a "busy" loadout step would be dropped: wait for the queue (0059 review)
+	if PlanTab.tagging then steps.afterTag = true return "renaming" end
+	steps.afterTag = nil
 	if steps.spec then
 		if playerSpec() ~= steps.spec then
 			local index = PlanTab.specIndexOf(steps.spec)
@@ -7418,6 +7422,12 @@ function PlanTab.tagOld()
 end
 
 -- The next one of PlanTab.tagging, or the count when they are all done.
+-- A group setup held by the queue goes on once it ends. setupStep itself
+-- waits out combat, as it always has.
+function PlanTab.afterTagging()
+	local steps = PlanTab.pendingSetup
+	if steps and steps.afterTag then PlanTab.later(PlanTab.POLL, PlanTab.setupStep) end
+end
 PlanTab.TAG_TRIES = 8  -- a refused change is tried again this many times, a POLL apart (0059 review)
 function PlanTab.tagNext(again)
 	local t = PlanTab.tagging
@@ -7426,6 +7436,7 @@ function PlanTab.tagNext(again)
 	local o = t.todo[t.i]
 	if not o then
 		PlanTab.tagging = nil
+		PlanTab.afterTagging()
 		PlanTab.say(("Tagged %d old loadout%s."):format(t.done, t.done == 1 and "" or "s"))
 		if PlanTab.redraw then pcall(PlanTab.redraw) end
 		PlanTab.later(1, function() PlanTab.offerLoadouts(true) end)  -- what is still missing or drifted
@@ -7433,7 +7444,8 @@ function PlanTab.tagNext(again)
 	end
 	if InCombatLockdown() then
 		PlanTab.tagging = nil
-		PlanTab.say(("Combat started, so %d old loadout%s were not tagged. Click again after the fight."):format(#t.todo - t.i + 1, #t.todo - t.i + 1 == 1 and "" or "s"))
+		PlanTab.say(("Combat started, so %d old loadout%s were not tagged. After the fight, click %sMore > Make the planned loadouts|r%s, then Tag them."):format(#t.todo - t.i + 1, #t.todo - t.i + 1 == 1 and "" or "s", GOLD, GREY))
+		PlanTab.afterTagging()
 		return
 	end
 	-- the one you are wearing is never deleted, and it may have been picked
@@ -7483,6 +7495,11 @@ function PlanTab.offerLoadouts(asked, declined)
 	if InCombatLockdown() then
 		if asked then PlanTab.say("Not in combat. Try again after the fight.") end  -- a click that says nothing looks broken (0053 review)
 		return "combat"
+	end
+	-- mid-queue every button would answer "Still renaming"; the queue's end offers again (0059 review)
+	if PlanTab.tagging then
+		if asked then PlanTab.say("Still renaming old loadouts. Wait for the count.") end
+		return "renaming"
 	end
 	local spec = playerSpec()
 	local builds = spec and PlanTab.BUILDS[spec]
@@ -9836,6 +9853,39 @@ function PlanTab.tagChecks(check)
 			old = { Dungeon = 1, ["Raid: Vashnik"] = 2 }
 			check(o .. ", the one you are wearing is never deleted", (function() local r = PlanTab.tagOld() drain() return r .. "/" .. table.concat(calls, "|") end)(), "started/rename 1 to [CP] Dungeon")
 			check(o .. ", and it says why", saidAny("you are wearing"), true)
+			-- second 0059 review: a retry checks combat and the worn loadout again too
+			live, calls, said, selected, busyUntil = { [1] = "Dungeon", [2] = "Raid: Vashnik" }, {}, {}, 5, now + 3
+			old = { ["Raid: Vashnik"] = 2 }
+			PlanTab.tagOld()
+			selected = 2
+			drain()
+			check(o .. ", one picked before a retry is not deleted either", table.concat(calls, "|") .. "/" .. tostring(saidAny("wearing now")), "delete 2/true")
+			live, calls, said, selected, busyUntil = { [1] = "Dungeon" }, {}, {}, 5, now + 3
+			old = { Dungeon = 1 }
+			PlanTab.tagOld()
+			InCombatLockdown = function() return true end
+			drain()
+			InCombatLockdown = function() return false end
+			check(o .. ", combat before a retry stops it", #calls .. "/" .. tostring(saidAny("Combat started")), "1/true")
+			-- second 0059 review, finding 1: a group setup waits for the queue, then goes on
+			live, calls, said, busyUntil = { [1] = "Dungeon" }, {}, {}, 0
+			local wasSetup, wasStep, stepped = PlanTab.pendingSetup, PlanTab.setupStep, 0
+			PlanTab.pendingSetup = { loadout = "Dungeon" }
+			PlanTab.tagOld()
+			check(o .. ", a group setup waits for it, its loadout kept", PlanTab.setupStep() .. "/" .. tostring(PlanTab.pendingSetup and PlanTab.pendingSetup.loadout), "renaming/Dungeon")
+			check(o .. ", and so does the loadout offer", wasOffer(true), "renaming")
+			PlanTab.setupStep = function() stepped = stepped + 1 end
+			drain()
+			check(o .. ", the setup goes on when it ends", stepped, 1)
+			live, busyUntil, stepped, selected = { [1] = "Dungeon", [2] = "Raid: Vashnik" }, 0, 0, 5
+			old = { Dungeon = 1, ["Raid: Vashnik"] = 2 }  -- two, so combat meets the second
+			PlanTab.tagOld()
+			InCombatLockdown = function() return true end
+			drain()
+			InCombatLockdown = function() return false end
+			check(o .. ", or when combat stops it", stepped, 1)
+			PlanTab.pendingSetup, PlanTab.setupStep = wasSetup, wasStep
+			selected = 2  -- as the checks below expect
 			PlanTab.offerLoadouts = wasOffer
 			old = { ["Raid: Vashnik"] = 2 }
 			check(offer .. ", but not when the only one left stays", PlanTab.offerLoadouts(true) ~= "old", true)
@@ -9858,7 +9908,8 @@ function PlanTab.tagChecks(check)
 			PlanTab.tagOld()
 			drain()
 			check(o .. ", one the game keeps refusing is said, and it ends", tostring(PlanTab.tagging) .. "/" .. tostring(saidAny("would not rename")), "nil/true")
-			C_ClassTalents.RenameConfig = keptRename			-- 0059 review, finding 2: "Not now" on the renaming leaves Create and Reset reachable
+			C_ClassTalents.RenameConfig = keptRename
+			-- 0059 review, finding 2: "Not now" on the renaming leaves Create and Reset reachable
 			old, calls, shown = { Dungeon = 1 }, {}, nil
 			PlanTab.later = function(_, fn) fn() end
 			check(offer .. ", again", PlanTab.offerLoadouts(true), "old")

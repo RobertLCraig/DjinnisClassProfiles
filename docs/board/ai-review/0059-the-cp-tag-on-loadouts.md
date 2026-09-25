@@ -424,3 +424,88 @@ in-game criterion stays `proves: manual`.
 3. **The worn loadout is read again before each delete.** One picked after the click stays, and chat says so.
 4. **Checks:** `tagChecks` now runs against a timed server model: a change shows `lag` beats after it is sent, and the server is busy one beat past that. New checks: server busy at the click, a slow rename (12 beats), a loadout picked mid-queue, combat mid-queue, a stale poll alone and beside a new queue, the box coming back at the end, a delete that never lands, and the three fences. 14 mutants (the reviewer's five survivors among them) are all caught.
 5. **Not fixed here:** `tidy` still deletes in one frame. That is card 0062.
+
+**2026-09-25, Claude (sixth adversarial review, of f7c5dae and 687b844). Findings: bounce to todo.
+Not moved and not committed; the brief said no commit.**
+
+What was run. `offline-check.lua` under Lua 5.1.5 in the repo (clean tree at 687b844): exit 0, "no
+FAIL lines", `[CP] self-test passed`. A `git archive` copy in `%TEMP%\rev0059f` with the `DjinnisBiS`
+stub, 18 mutations (`%TEMP%\rev0059f\muts.py`). API re-read in `wow-ui-source`: `RenameConfig` and
+`DeleteConfig` answer `success` and nothing else; nothing says "busy". The "You can't do that right
+now" text is not in the Lua source, so it cannot be confirmed from there that each refused retry puts
+up the red error, but Rob saw one for each refused call.
+
+**The three earlier findings are fixed.** (1) A refusal waits a `POLL` and retries the same loadout up
+to `TAG_TRIES`, and each landing gets one more beat: no retry (TAG_TRIES 1), a retry that steps on,
+a retry with no wait, and no extra beat are all caught. (2) `loadoutFence`, `wearSpare` and
+`loadTalents` answer "Still renaming" while `PlanTab.tagging` is set, and removing any one of the three
+is caught. (3) The worn loadout is read again before a delete, and removing that is caught. The last
+review's coverage survivors are all caught now: the stale-poll guard, the combat stop, the end offer,
+giving up after one poll, and a landing counted on any name.
+
+**The queue can end.** Every path out of `tagNext` clears the flag, recurses, or schedules an
+`after` that re-checks `tagging == t`. Retries stop at 8, and a poll gives up after 15 s, so one item
+takes at most about 20 s. The only calls a timer runs outside a `pcall` are `say`,
+`selectedConfigID` (whose own reads are `pcall`ed), `InCombatLockdown`, and a `format` of a name that
+has passed `canRead`. No error was found that leaves `tagging` set. `/dcp test` during a queue is
+safe too: the self-test runs in one frame and puts `PlanTab` back before any real timer fires.
+Removing the end-of-queue clear is caught (11 lines). The end offer runs after the clear, so the
+fence never blocks it, and no step of the queue goes through the fence.
+
+**Finding 1: `setupStep` takes "busy" as "done" and drops the loadout.** It is the one caller that
+reads `loadTalents`' answer, and it goes on to the gear on anything but "loaded" (line 4846), then
+clears `pendingSetup`. Its comment ("the window is open and one line said so") is not true of the new
+"busy". Scenario: Rob clicks Tag them, a group accepts him while the queue runs, and he clicks Set up
+on "Group joined". The spec change goes out through `SwitchToSpecializationByIndex`, which is not
+fenced, while a rename is still in flight. One second after the spec lands, `loadTalents` answers
+"busy" and the gear goes on without the loadout, and nothing tries the loadout again. Chat says only
+"Still renaming old loadouts". A spec change mid-queue also makes the delete re-read ask about the
+new spec's worn loadout, not the old spec's. Fix: in `setupStep`, keep `steps.loadout` on "busy" and
+try again when the queue ends, as "waiting" does for combat; or refuse Set up while `tagging` is set.
+Add a check for it.
+
+**Finding 2 (next to this card, card 0060's code): the fence does not cover a swap in progress, and
+the swap sends two changes in one frame.** `finishLoadouts` clears `PlanTab.q` before
+`swapSelected`, and a swap with no jobs never sets it. For up to 15 s nothing marks the addon busy
+while the switch is polled. More > Make the planned loadouts, then Tag them, passes the fence then,
+and its renames collide with the swap's changes. Worse, `finishSwap` sends `DeleteConfig(old)` and
+then `RenameConfig(new)` in the same frame (lines 7265 and 7271), right after the switch has landed.
+By this card's own live result, the rename is refused and Reset on the worn loadout ends at "Rename it
+in the talent window". `importOne`'s delete-then-import (line 7042 then 7045) is the same kind of pair.
+Card 0062 names only tidy. This wants its own card, or 0060's in-game check should look for it.
+
+**Coverage.** Two mutations survive: the combat stop skipped on a retry (`and not again`), and the
+worn re-read skipped on a retry. The code is right today, but only the first attempt is checked. A
+refused delete that is then picked in the talent window before its retry would go unguarded by any
+check. The server model is also fitted to the code: the lock ends exactly one beat after the name
+reads, and that is the one beat the code waits. So the normal path's "no refusal" holds only for a
+lock of 0.5 s or less after the name updates, and past that the retries carry it (about 3.5 s). The
+model does not model a switch or a spec change as a change in flight.
+
+Lower, not blocking:
+- `offerLoadouts` does not look at `tagging`. The spec-change offer, 2 s after a spec change
+  mid-queue, shows a box whose every button answers "Still renaming".
+- Closing the talent window and clicking Tag them within 0.5 s means `spareOnHide`'s `wearSpare`
+  answers "busy", and the double-clicked build is dropped with only that line.
+- "Combat started ... Click again after the fight" does not say where to click (More > Make the
+  planned loadouts).
+- `C_ClassTalents.RenameConfig = keptRename` has the next comment on the same line (line 9861):
+  harmless, a lost newline.
+
+Security. No new API call, event, or input path. `RenameConfig` and `DeleteConfig` are
+`AllowedWhenUntainted` and get the addon's own ids and names. Weakest point, unchanged: "landed" is
+read from a client-side name, not from the server. Unchecked: nothing new. Leaks: nothing leaves the
+client.
+
+UI surface: chat lines, the offer box, and the talent window. Not looked at: no agent can run the
+client. The in-game criterion stays `proves: manual`.
+
+### 2026-09-25 — second review fixes, v0.48.7
+
+Live result before these fixes (Rob, Feral, 10:47): 10 old loadouts, "Tagged 8" with two "would not rename" in the same second, then "Tagged 2" on a second click. The same-second timing is 0.48.5's cascade (0.48.6 reached the game folder at 10:46:10 and the client was not reloaded), so it confirms the first review's finding 1 rather than testing its fix.
+
+1. **A group setup waits for the queue.** `setupStep` answers "renaming" and keeps its steps while `PlanTab.tagging` is set; `PlanTab.afterTagging` runs it again when the queue ends, whether it finished or combat stopped it. setupStep then waits out combat itself.
+2. **The loadout offer waits too.** Mid-queue `offerLoadouts` answers "renaming" (and says so when asked); the queue's end offers again.
+3. **Checks:** combat and the worn loadout before a retry; the setup held and resumed at the end and after combat; the offer mid-queue. 19 mutants, all caught.
+4. The combat line names the button (`More > Make the planned loadouts`), not a slash command. The comment that lost its line break is fixed.
+5. **Not here:** `finishSwap` and `importOne` send two changes in one frame. That is card 0063. A double-click made with the talent window open is dropped if Tag them starts within 0.5 s of the window closing; chat says "Still renaming", so it is left.
