@@ -3,6 +3,22 @@ needs: 0058
 ---
 # 0059 The "[CP] " tag on every loadout the addon makes
 
+## What I need from you
+
+1. Deploy v0.48.4 (`.\bin\deploy.ps1 -WhatIf -Only DjinnisClassProfiles`, then without `-WhatIf`),
+   `/reload` on a character with loadouts from before the tag, and click "Tag them".
+
+**Pass:**
+- The box lists each old loadout with what happens to it (renamed, or deleted in red).
+- The talent window then shows `[CP] <build>` names with the same talents, and the one you wore is
+  still on.
+- The list beside the talent window shows those builds as saved, not grey.
+
+**Fail:** a loadout lost, the worn one dropped to the starter build, or a Lua error. Move the card
+to `todo/` with what you saw.
+
+**Why it needs you:** no agent can run the game client; every offline check and mutation is green.
+
 ## Why
 
 Card `0050`'s finding: the addon knows its loadouts only by name, so a loadout Rob made and called
@@ -287,3 +303,41 @@ retry too). With nothing else to do it closes, and chat says the old untagged lo
 they are; it does not come back. The minor is closed too: "Tag old loadouts" is checked to reopen
 as an ask even when the login offer was dismissed. `%TEMP%\mut-round4.ps1`: 3 of 3 caught, and
 `mut-round3.ps1` still all red. Offline check exit 0 under 5.1.5 and 5.4.6.
+
+**2026-09-25, Claude (fourth adversarial review, of 1956cea). Clean: to human-review, only the
+in-game criterion is open.**
+
+What was run. `lua offline-check.lua` in the repo (clean tree at 1956cea) under 5.1.5 (the `lua` on
+PATH is now 5.1.5) and 5.4.6 (`%LOCALAPPDATA%\Programs\Lua\bin\lua.exe`): exit 0 both, "no FAIL
+lines", `[CP] self-test passed`, the 20 lines identical and read whole. `mut-round4.ps1` 3 of 3
+caught, `mut-round3.ps1` 8 of 8, `mut0059b.ps1` 8 caught and "no Tag old button" PATTERN MISSING
+(its target was rewritten in round 3; covered by round 3's own). Mine (`%TEMP%\mut-rev0059d.ps1`,
+scratch `rev0059d`): the "left as they are" line dropped (caught), the declined branch removed
+(caught), `declined` also skipping the Create / Reset box (caught 3), each busy retry dropping
+`declined` (both survive; see below). No new API call; the DECISIONS secret and protected-event
+entries do not apply.
+
+Earlier findings: all closed. The third review's box that came back for ever: "Not now" re-offers
+with `declined`, and with nothing missing or drifted line 7479 says so in chat and stops; the check
+at line 9747 clicks it and sees no box. Its minor: "Tag old loadouts" reopening as a login offer is
+pinned by `offerDismissed = { Feral = true }` before the click (round 4 catches it). The first two
+reviews' findings are unchanged since they were closed.
+
+Attacked, held: declined with builds missing still reaches Create / Reset (`declined` only acts in
+the nothing-to-do branch); a later explicit ask with nothing to do shows the renaming again, as it
+should; a spec change between the click and the 0.2 s re-offer marks only the old spec and offers
+the new spec's own box; `room == 0` emptying `missing` falls into the declined line, not a blank box;
+`Tag old loadouts` → `Not now` → the Create box again, which has its own "Not now", so no trap. The
+login path now prints one chat line after its own "Not now"; the player just clicked, so that is
+an answer, not noise.
+
+Lower, not blocking: the two busy-retry survivors are harmless. The first retry is reached only when
+the renaming is not dismissed, where `declined` does nothing; the second only with builds missing,
+and `declined` matters there only if another prompt stays open 3 s and the plan fills meanwhile.
+The card is over the board's 100 lines; pruning its thread is Rob's call.
+
+Security. Unchanged: identity is a name, so a `[CP] X` anyone makes is the addon's; game names pass
+`canRead`; no new event, input path or API call; nothing leaves the client.
+
+UI surface: the two offer boxes and the talent window. Not looked at: no agent can run the client.
+The last criterion stays `proves: manual`; the ask is at the top of the card.
