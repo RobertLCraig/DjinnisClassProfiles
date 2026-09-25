@@ -6504,11 +6504,11 @@ end
 function PlanTab.sidebarClick(row, button)
 	local e = row.element
 	if button == "RightButton" then
-		-- a planned build: save it to the game (Rob, 2026-09-25). Not a header,
-		-- not the player's own, and not one the game would refuse to import.
-		if not e or e.group or e.own then return end
-		if e.warn then PlanTab.say(e.warn) return "refused" end
-		return PlanTab.saveOne(e.loadout)
+		-- a menu, never an action (Rob, 2026-09-25: "right clicks should open
+		-- menus"); a header has none
+		if not e or e.group or not e.loadout then return end
+		if InCombatLockdown() then PlanTab.say("Not in combat. Try again after the fight.") return "combat" end
+		return PlanTab.openRowMenu(row, e)
 	end
 	if not (e and e.group) or InCombatLockdown() then return end
 	local d = db()
@@ -6547,9 +6547,7 @@ function PlanTab.sidebarTip(row)
 	if e.warn then GameTooltip:AddLine(e.warn, 1, 0.3, 0.3, true) end
 	if not e.tick then GameTooltip:AddLine("On the tree: green it adds, red it drops, amber it changes.", 0.8, 0.8, 0.8, true) end
 	GameTooltip:AddLine("Double-click to switch to it.", 0, 1, 0)
-	if not e.own and not e.saved and not e.warn then
-		GameTooltip:AddLine("Right-click to save it to the game as a loadout.", 0, 1, 0, true)
-	end
+	GameTooltip:AddLine("Right-click for a menu.", 0, 1, 0, true)
 	GameTooltip:Show()
 	pcall(PlanTab.showTreeDiff, e.loadout, e.code)  -- card 0034
 end
@@ -7094,7 +7092,11 @@ PlanTab.POLL, PlanTab.GIVE_UP = 0.5, 15
 function PlanTab.whenTalentsClose(fn)
 	local frame = PlayerSpellsFrame
 	if not (frame and frame.HookScript) then return false end
-	if PlanTab.onTalentsClose and PlanTab.onTalentsClose ~= fn then PlanTab.say("This replaces what was waiting for the talent window to close.") end
+	if PlanTab.onTalentsClose and PlanTab.onTalentsClose ~= fn then
+		PlanTab.say("This replaces what was waiting for the talent window to close.")
+		-- the builds waiting to be saved are dropped with it, not made by a later Save (0065 menu review)
+		if PlanTab.onTalentsClose == PlanTab.saveWaited then PlanTab.saveWaiting = nil end
+	end
 	PlanTab.onTalentsClose = fn
 	if not PlanTab.closeHooked then
 		PlanTab.closeHooked = true
@@ -7572,7 +7574,7 @@ function PlanTab.tagNext(again)
 	after(poll)
 end
 
--- One build to the game, from its row's right-click in the list beside the
+-- One build to the game, from its row's menu in the list beside the
 -- talent window (Rob, 2026-09-25: "save them in the addon, and give the user
 -- an option per loadout to save to the game"). Only a MISSING build is made,
 -- through createMissing and its guards. One that is saved and has changed is
@@ -7629,6 +7631,114 @@ function PlanTab.saveOne(name)
 		PlanTab.saveWaiting = nil
 	end
 	return PlanTab.createMissing({ [name] = true })
+end
+
+-- Where a planned build stands on this character: "missing", "drifted",
+-- "saved", "old" (an untagged one from before the tag), or nil when it is not
+-- planned or the game will not list the loadouts yet.
+function PlanTab.rowState(name)
+	local spec = playerSpec()
+	local builds = spec and PlanTab.BUILDS[spec]
+	if not (builds and builds[name]) then return nil end
+	local saved, _, old = PlanTab.savedLoadoutNames()
+	if old and old[name] then return "old" end
+	local missing, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.mayBeShort)
+	if not missing then return nil end
+	for _, n in ipairs(missing) do if n == name then return "missing" end end
+	for _, n in ipairs(drifted) do if n == name then return "drifted" end end
+	return "saved"
+end
+
+-- A row's right-click menu (Rob, 2026-09-25: "right clicks should open menus",
+-- the start of card 0057's build manager). Plain data like menuItems, drawn
+-- by fillMenu. `state` is rowState's answer; the player's own loadouts have none.
+function PlanTab.rowMenuItems(e, state)
+	local name = e.loadout
+	local items = { { title = name } }
+	local function add(item) items[#items + 1] = item end
+	-- the tip by where it stands, not e.saved: an "old" row reads unsaved too (0065 menu review)
+	add({ text = "Wear it", fn = function() PlanTab.loadTalents(name) end,
+		tip = state == "missing" and "Through the spare loadout: it has no loadout of its own."
+			or state == "drifted" and "Switches to your loadout, with your changes. Reset to the plan gives the plan."
+			or "Switches to it, as a double-click does." })
+	if not e.own then
+		if e.warn and state == "missing" then add({ text = "Save to the game", tip = e.warn, disabled = true })
+		elseif state == "missing" then add({ text = "Save to the game", tip = ("Makes the loadout \"%s\" on this character. With the talent window open, it is made when the window closes."):format(PlanTab.tag(name)), fn = function() PlanTab.saveOne(name) end })
+		elseif state == "drifted" then add({ text = "Reset to the plan...", tip = ("\"%s\" has changed from the plan. Asks first: your changes to it are lost."):format(PlanTab.tag(name)), fn = function() PlanTab.resetAsk(name) end })
+		elseif state == "saved" then add({ text = "Saved in the game", tip = ("\"%s\" holds the plan."):format(PlanTab.tag(name)), disabled = true })
+		elseif state == "old" then add({ text = "Save to the game", tip = ("Your loadout \"%s\" is from before the %s tag. Rename it first: More > Make the planned loadouts."):format(name, PlanTab.TAG), disabled = true }) end
+	end
+	local spec = playerSpec()
+	-- not a string the game refuses (0065 menu review)
+	local code = e.code or (not e.warn and spec and PlanTab.buildFor(spec, name) or nil)
+	if code then add({ text = "Export...", tip = "Shows its import string, selected, ready to copy with Ctrl+C.", fn = function() PlanTab.showExport(name, code) end }) end
+	return items
+end
+
+function PlanTab.openRowMenu(owner, e)
+	if not (MenuUtil and MenuUtil.CreateContextMenu) then return nil end
+	local items = PlanTab.rowMenuItems(e, not e.own and PlanTab.rowState(e.loadout) or nil)
+	MenuUtil.CreateContextMenu(owner, function(_, root) PlanTab.fillMenu(root, items) end)
+	return "menu"
+end
+
+-- Reset one drifted build, after asking: it is deleted and made again.
+function PlanTab.resetAsk(name)
+	-- the window's close holds one job, which a Save or a second Reset would
+	-- replace; a reset is rare enough to ask for the window shut (0065 menu review)
+	if PlanTab.talentWindowOpen() then PlanTab.say("Close the talent window first, then choose Reset to the plan.") return "window" end
+	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
+	local spec = playerSpec()
+	PlanTab.prompt("Djinni's Class Profiles: " .. (spec or "") .. " loadouts", {
+		("Reset \"%s\" to the plan?"):format(PlanTab.tag(name)),
+		"Your changes to it are lost.",
+	}, {
+		{ label = "Reset", onClick = PlanTab.askAgain(PlanTab.resetDrifted, spec, { name }) },
+		{ label = "Cancel" },
+	})
+	return "ask"
+end
+
+-- A build's import string in a box, selected for Ctrl+C. Typing in it puts
+-- the string back, so what is copied is always the build. One frame, reused.
+function PlanTab.showExport(name, code)
+	local f = PlanTab.exportFrame
+	if not f then
+		f = CreateFrame("Frame", "DjinnisCPExport", UIParent, "BasicFrameTemplateWithInset")
+		f:SetSize(420, 110)
+		f:SetPoint("TOP", UIParent, "TOP", 0, -180)
+		f:SetMovable(true)
+		f:EnableMouse(true)
+		f:SetFrameStrata("DIALOG")
+		f:SetClampedToScreen(true)
+		f:RegisterForDrag("LeftButton")
+		f:SetScript("OnDragStart", f.StartMoving)
+		f:SetScript("OnDragStop", f.StopMovingOrSizing)
+		f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		f.title:SetPoint("TOP", f, "TOP", 0, -6)
+		f.text = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		f.text:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -34)
+		f.text:SetText("Ctrl+C copies it. Paste it into Blizzard's Import, or share it.")
+		f.box = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
+		f.box:SetSize(376, 22)
+		f.box:SetPoint("TOPLEFT", f, "TOPLEFT", 24, -58)
+		f.box:SetAutoFocus(true)
+		f.box:SetMaxLetters(0)
+		f.box:SetScript("OnEscapePressed", function() f:Hide() end)
+		f.box:SetScript("OnEnterPressed", function() f:Hide() end)
+		f.box:SetScript("OnTextChanged", function(box, user)
+			if user then box:SetText(f.code or "") box:HighlightText() end
+		end)
+		tinsert(UISpecialFrames, "DjinnisCPExport")
+		PlanTab.exportFrame = f
+	end
+	f.code = code
+	f.title:SetText("Export: " .. name)
+	f.box:SetText(code)
+	f:Show()
+	f.box:SetFocus()
+	f.box:HighlightText()
+	return f
 end
 
 -- The talent window shut: every build right-clicked meanwhile, in one queue.
@@ -10368,12 +10478,55 @@ function PlanTab.saveOneChecks(check)
 	check(t .. ", not while old loadouts are being worked through", PlanTab.saveOne(a) .. "/" .. #calls, "renaming/0")
 	PlanTab.tagging = nil
 	PlanTab.loadoutGaps = function() return { a }, {} end
-	-- the right button on a build row saves it; on a header, the player's own, a refused build, or the left button, nothing
-	check(t .. ", right-click on a build row", tostring((PlanTab.sidebarClick({ element = { loadout = a, bosses = {} } }, "RightButton"))) .. "/" .. #calls, "made/1")
-	check(t .. ", right-click on your own loadout does nothing", tostring((PlanTab.sidebarClick({ element = { loadout = "Rob's own", own = true, bosses = {} } }, "RightButton"))) .. "/" .. #calls, "nil/1")
-	check(t .. ", right-click on a header does not fold it", tostring((PlanTab.sidebarClick({ element = { group = "raid", label = "Raid", count = 1 } }, "RightButton"))) .. "/" .. #calls, "nil/1")
-	check(t .. ", right-click on a build the game would refuse says why", tostring((PlanTab.sidebarClick({ element = { loadout = a, bosses = {}, warn = "out of date" } }, "RightButton"))) .. "/" .. #calls .. "/" .. said[#said], "refused/1/out of date")
-	check(t .. ", the left button does not save", tostring((PlanTab.sidebarClick({ element = { loadout = a, bosses = {} } }, "LeftButton"))) .. "/" .. #calls, "nil/1")
+	-- the right button opens a menu and does nothing else (Rob, 2026-09-25: "right clicks should open menus")
+	local keptOpen, opened = PlanTab.openRowMenu, nil
+	PlanTab.openRowMenu = function(_, e) opened = e.loadout return "menu" end
+	check(t .. ", right-click on a build row opens its menu, and makes nothing", tostring((PlanTab.sidebarClick({ element = { loadout = a, bosses = {} } }, "RightButton"))) .. "/" .. tostring(opened) .. "/" .. #calls, "menu/" .. a .. "/0")
+	opened = nil
+	check(t .. ", right-click on a header opens nothing and does not fold it", tostring((PlanTab.sidebarClick({ element = { group = "raid", label = "Raid", count = 1 } }, "RightButton"))) .. "/" .. tostring(opened), "nil/nil")
+	check(t .. ", the left button opens no menu", tostring((PlanTab.sidebarClick({ element = { loadout = a, bosses = {} } }, "LeftButton"))) .. "/" .. tostring(opened), "nil/nil")
+	PlanTab.openRowMenu = keptOpen
+	-- the menu's items follow where the build stands
+	local function labels(e, state)
+		local out = {}
+		for _, item in ipairs(PlanTab.rowMenuItems(e, state)) do out[#out + 1] = (item.title and "#" or "") .. (item.text or item.title) .. (item.disabled and "(off)" or "") end
+		return table.concat(out, "; ")
+	end
+	local row = { loadout = a, bosses = {}, saved = false }
+	check(t .. ", menu of a missing build", labels(row, "missing"), "#" .. a .. "; Wear it; Save to the game; Export...")
+	check(t .. ", menu of a changed build asks before a reset", labels(row, "drifted"), "#" .. a .. "; Wear it; Reset to the plan...; Export...")
+	check(t .. ", menu of a saved build", labels(row, "saved"), "#" .. a .. "; Wear it; Saved in the game(off); Export...")
+	check(t .. ", menu of one from before the tag", labels(row, "old"), "#" .. a .. "; Wear it; Save to the game(off); Export...")
+	check(t .. ", menu of a build the game would refuse: no save, no export", labels({ loadout = a, bosses = {}, warn = "out of date" }, "missing"), "#" .. a .. "; Wear it; Save to the game(off)")
+	check(t .. ", menu of a saved build with a warning still says saved", labels({ loadout = a, bosses = {}, warn = "out of date" }, "saved"), "#" .. a .. "; Wear it; Saved in the game(off)")
+	local function wearTip(state) return PlanTab.rowMenuItems(row, state)[2].tip end
+	check(t .. ", Wear on an old row is not the spare", wearTip("old"):find("spare", 1, true) == nil and wearTip("missing"):find("spare", 1, true) ~= nil, true)
+	check(t .. ", Wear on a changed row says it wears your changes", wearTip("drifted"):find("your changes", 1, true) ~= nil, true)
+	-- where a build stands, read from the saved loadouts
+	PlanTab.loadoutGaps = function() return { a }, { b } end
+	check(t .. ", rowState", table.concat({ PlanTab.rowState(a), PlanTab.rowState(b), PlanTab.rowState("Dungeon"), tostring(PlanTab.rowState("Rob's own")) }, "/"), "missing/drifted/saved/nil")
+	old = { [a] = 7 }
+	check(t .. ", rowState of one from before the tag", PlanTab.rowState(a), "old")
+	old = {}
+	-- Reset asks for the talent window shut: its close holds one job (0065 menu review)
+	open = true
+	check(t .. ", Reset waits for the talent window to be shut", PlanTab.resetAsk(b) .. "/" .. #calls, "window/0")
+	open = false
+	-- a waiting Save replaced by another job is dropped, not made by the next Save (0065 menu review)
+	PlanTab.whenTalentsClose = kept[12]
+	local keptClose, keptSpells = PlanTab.onTalentsClose, PlayerSpellsFrame
+	PlayerSpellsFrame = PlayerSpellsFrame or { HookScript = function() end }
+	PlanTab.onTalentsClose, PlanTab.saveWaiting = PlanTab.saveWaited, { spec = "Feral", names = { [a] = true } }
+	PlanTab.whenTalentsClose(function() end)
+	check(t .. ", a replaced Save is dropped", tostring(PlanTab.saveWaiting), "nil")
+	PlanTab.onTalentsClose, PlayerSpellsFrame = keptClose, keptSpells
+	PlanTab.whenTalentsClose = function(fn) onClose = fn return true end
+	PlanTab.loadoutGaps = function() return { a }, {} end
+	check(t .. ", menu of your own loadout", labels({ loadout = "Rob's own", own = true, bosses = {}, code = "CODE" }, nil), "#Rob's own; Wear it; Export...")
+	local save
+	for _, item in ipairs(PlanTab.rowMenuItems(row, "missing")) do if item.text == "Save to the game" then save = item.fn end end
+	check(t .. ", Save to the game makes that build", tostring(save and save()) .. "/" .. table.concat(calls, "|"), "nil/create " .. a)
+	calls = {}
 	-- nothing offers the loadouts on its own: not at login, not on a spec change (Rob, 2026-09-25)
 	local later = {}
 	PlanTab.later = function(_, fn) later[#later + 1] = fn end
