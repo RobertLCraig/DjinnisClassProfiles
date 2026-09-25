@@ -874,7 +874,8 @@ end
 -- file is editable by hand, and the name rules are myNameProblem's (0057 review).
 function PlanTab.goodMine(name, code)
 	return type(name) == "string" and type(code) == "string" and name ~= "" and #name <= 24
-		and not name:find("|", 1, true) and not name:find("^%[CP") and true or false
+		and not name:find("|", 1, true) and not name:find("^%[CP")
+		and name:sub(-#PlanTab.CLASH) ~= PlanTab.CLASH and true or false
 end
 
 local function setGear(itemName, track, rank)
@@ -7924,8 +7925,17 @@ function PlanTab.myNameProblem(spec, name, except)
 	if name == "" then return "Type a name." end
 	if #name > PlanTab.NAME_MAX then return ("At most %d letters, so its loadout's name fits the game's 30 with the tag."):format(PlanTab.NAME_MAX) end
 	if name:find("|", 1, true) or name:find("^%[CP") then return "Not with a | or a [CP mark in it: those are the addon's." end
-	if (PlanTab.BUILDS[spec or ""] or {})[name] then return ("The plan has a build called \"%s\". Pick another name."):format(name) end
-	if name ~= except and (PlanTab.myBuilds(spec) or {})[name] then return ("You have a build called \"%s\" already."):format(name) end
+	if name:sub(-#PlanTab.CLASH) == PlanTab.CLASH then return ("Not ending in \"%s\": the list marks your own loadouts so."):format(PlanTab.CLASH) end
+	-- capitals aside: Blizzard's switch by name ignores them and takes the
+	-- first match (Blizzard_ClassTalentsFrame.lua:1754), so "dungeon" could
+	-- wear the plan's "Dungeon" (second 0057 review)
+	local low = name:lower()
+	for plan in pairs(PlanTab.BUILDS[spec or ""] or {}) do
+		if plan:lower() == low then return ("The plan has a build called \"%s\". Pick another name."):format(plan) end
+	end
+	for other in pairs(PlanTab.myBuilds(spec) or {}) do
+		if type(other) == "string" and other ~= except and other:lower() == low then return ("You have a build called \"%s\" already."):format(other) end
+	end
 	if spec and spec == playerSpec() then
 		local saved = PlanTab.savedLoadoutNames()
 		local id = saved and saved[name]
@@ -11184,6 +11194,13 @@ function PlanTab.myBuildChecks(check)
 		d.myBuilds.Feral["[CP] Hand"], d.myBuilds.Feral[("x"):rep(30)] = "C", "C"
 		check(t .. ", a name edited in by hand against the rules is not made", tostring(PlanTab.buildsOf("Feral")["[CP] Hand"]) .. "/" .. tostring(PlanTab.buildsOf("Feral")[("x"):rep(30)]), "nil/nil")
 		d.myBuilds.Feral["[CP] Hand"], d.myBuilds.Feral[("x"):rep(30)] = nil, nil
+		-- second 0057 review: capitals aside, and never the mark for your own loadouts
+		check(t .. ", a plan name in other capitals is refused", problem("dUNGEON"):find("The plan has", 1, true) ~= nil, true)
+		check(t .. ", one of yours in other capitals is refused, but not itself on a rename", tostring(problem("MINE"):find("already", 1, true) ~= nil) .. "/" .. problem("MINE", "Mine"), "true/nil")
+		check(t .. ", a name ending in the own-loadout mark is refused", problem("Mine" .. PlanTab.CLASH):find("Not ending", 1, true) ~= nil, true)
+		d.myBuilds.Feral["Mine" .. PlanTab.CLASH] = "C"
+		check(t .. ", and one edited in by hand is not made", tostring(PlanTab.buildsOf("Feral")["Mine" .. PlanTab.CLASH]), "nil")
+		d.myBuilds.Feral["Mine" .. PlanTab.CLASH] = nil
 		-- finding 4: an older tree is a note on yours, and Export stays
 		local older = LOADOUT_ERROR_TREE_CHANGED or "Exported against an older talent tree."
 		local row

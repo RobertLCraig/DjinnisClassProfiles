@@ -72,6 +72,12 @@ loadouts on its own (card `0065`), so it moved to card `0066`.
 
 ## Comments
 
+**2026-09-25, Claude.** Both re-review holes are closed, v0.52.4. `myNameProblem` compares
+names without capitals against the plan's names and yours, leaving out the build being renamed.
+It also refuses a name that ends in `PlanTab.CLASH`, and `goodMine` does the same for a
+hand-edited file. There are four new checks. Breaking each rule on purpose made one check fail.
+The card goes to `human-review/` for Rob's in-game checks, listed in the build comment below.
+
 **2026-09-25, Claude (re-review of c62bec2).** Verdict: **all six findings are fixed; two
 smaller holes remain in the name rules.** The card stays in `ai-review/`. Line numbers are c62bec2's.
 
