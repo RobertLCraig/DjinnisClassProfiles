@@ -245,3 +245,39 @@ Checked: `lua offline-check.lua` under 5.1.5 and 5.4.6, exit 0, no FAIL line; sp
 `%TEMP%\mut-round3.ps1` 8 of 8; the review's `%TEMP%\rev0060c.ps1` 8 of 9. The one left, R9, passes
 `playerSpec()` for `spec`, which is the same value at that moment: an equivalent mutant no check
 can tell apart. `mut0060.ps1` and `mut0059b.ps1` still all red.
+
+**2026-09-25, adversarial review (fourth pass) of 91f8591, 0060's part. To human-review.**
+
+What held. `lua offline-check.lua` at the repo root under Lua 5.4.6 and 5.1.5: exit 0 both, no FAIL
+line, output read whole (19 lines, the same under both). No new API this round. Run by me:
+`%TEMP%\mut0060.ps1` 9 of 9 caught, `%TEMP%\mut-round3.ps1` 8 of 8, `%TEMP%\rev0060c.ps1` 8 of 9. The
+one left, R9 (`playerSpec()` for `spec` in `resetDrifted`), is equivalent: `spec` is
+`playerSpec()` read a few lines earlier in the same call. The third review's findings:
+
+1. *Reset button after a spec change*: closed. The check clicks the box's Reset with the spec
+   switched to 102 and wants `spec changed/0`; R1 is red.
+2. *Create's close*: closed. Create waits, a build deleted in the window and never listed is not
+   made, the rest are, and a spec change in the window makes nothing. R5 and R7 are red.
+3. *The two messages, and "nothing" before the wait*: closed. Both messages are checked (R2, R3
+   red), and `makeLoadouts` now answers `"nothing"` before the fence, so an empty ask with the
+   window open never says "this goes ahead then" (checked; "empty ask waits" red).
+
+My own mutations (`%TEMP%\rev0060d.ps1`, scratch copy), all red: Create's close doing nothing;
+the early `"nothing"` ignoring swaps (a worn `[CP+]` that only needs its name would be dropped);
+the early return removed; `askAgain`'s spec check removed; `askAgain` keeping no names; the name
+filter dropped for Create only; and for Reset only. No survivor.
+
+Code read. The early return comes before `loadoutFence`, so an empty ask in combat is silent
+rather than "fenced"; nothing was going to happen, so that is right. Every path that empties the
+list says why first (`onlyAsked`, the room message, the `holdsPlan` refusals). Minor, not a
+bounce: `whenTalentsClose` compares closures, so clicking the same button twice with the window
+open says "This replaces what was waiting" though it is the same ask.
+
+Security. *Weakest point:* the deferred ask on `OnHide`, which still runs `DeleteConfig` work. It is
+now fenced by the spec, the listed names, combat, and `importOne`'s refusal of the worn id, and each
+of those has a check that goes red without it. *Unchecked:* nothing found on this card's paths. No
+outside input: the build strings are baked in and nothing crosses the network. *Leaks:* nothing.
+Messages go to the local chat frame only.
+
+Not looked at in a client. There is no browser surface and the game cannot be run from here. The
+manual criterion stays open, so the card goes to human-review. Deploy was not touched.
