@@ -1743,6 +1743,7 @@ end
 PlanTab.bonusSource = nil  -- { name, place }: the boss or key, and the instance id it was in
 PlanTab.bonusOnOffer = false  -- true once SPELL_CONFIRMATION_PROMPT is registered
 PlanTab.bonusOffered = nil  -- the roll's spell the verdict was last given for
+PlanTab.BONUS_KEEP = 600  -- seconds a kill kept on the character still names the roll's boss
 
 -- The coins you hold for a roll, or nil when that cannot be read. Currency 0
 -- is Blizzard's "use the fall back" (BonusRollFrame_StartBonusRoll).
@@ -1762,14 +1763,15 @@ function PlanTab.onBonusEvent(event, arg1, arg2, _, _, arg5)
 	-- The verdicts are druid gear: on another class a kill would flash a raid
 	-- warning about loot it cannot use (0049).
 	if not PlanTab.gearHere() then return "not here" end
-	local here, _, _, _, _, _, _, place = GetInstanceInfo()
+	local here, kind, _, _, _, _, _, place = GetInstanceInfo()
 	local bonus = Enum and Enum.ConfirmationPromptUIType and Enum.ConfirmationPromptUIType.BonusRoll
+	local now = time and time() or nil
 	if event == "CHALLENGE_MODE_COMPLETED" then
-		PlanTab.bonusSource = { name = here, place = place }
+		PlanTab.bonusSource = { name = here, place = place, at = now }
 	elseif event == "ENCOUNTER_END" then
 		if not canRead(arg5) or arg5 ~= 1 then return "wipe" end  -- arg5 is success
 		-- the boss name can be a secret, as any string (DECISIONS.md): the place then
-		PlanTab.bonusSource = { name = canRead(arg2) and arg2 or here, place = place }
+		PlanTab.bonusSource = { name = canRead(arg2) and arg2 or here, place = place, at = now }
 	elseif event == "SPELL_CONFIRMATION_PROMPT" then
 		if not bonus or not canRead(arg2) or arg2 ~= bonus then return "other prompt" end
 		-- Blizzard's roll frame ignores a second prompt for the same roll, and
@@ -1781,7 +1783,18 @@ function PlanTab.onBonusEvent(event, arg1, arg2, _, _, arg5)
 		-- the last kill only if it was here: a roll with no kill before it
 		-- must not get the verdict for a raid boss left behind (0054 review)
 		local source = PlanTab.bonusSource
-		return PlanTab.bonusRollVerdict(source and source.place == place and source.name or here, true) or "no source"
+		-- a reload since the kill empties it: the kill is kept on the
+		-- character for that, while it is recent (second 0054 review)
+		local kept = type(DjinnisCPCharDB) == "table" and DjinnisCPCharDB.bonusSource
+		if not source and type(kept) == "table" and kept.at and now and now - kept.at < PlanTab.BONUS_KEEP then source = kept end
+		if source and source.place == place then return PlanTab.bonusRollVerdict(source.name, true) or "no source" end
+		-- A raid's BiS is listed by boss, so the raid's own name finds none:
+		-- no verdict, rather than a NO that keeps a coin a boss was worth.
+		if kind == "raid" then
+			print(GREY .. "[BiS] a bonus roll is offered, but not for which boss (a reload since the kill?). " .. GOLD .. "More > Bonus roll worth it here?|r" .. GREY .. " lists the raid's BiS.|r")
+			return "no boss"
+		end
+		return PlanTab.bonusRollVerdict(here, true) or "no source"
 	elseif event == "SPELL_CONFIRMATION_TIMEOUT" then
 		if canRead(arg1) and arg1 == PlanTab.bonusOffered then PlanTab.bonusOffered = nil end
 		return "timed out"
@@ -1802,6 +1815,7 @@ function PlanTab.onBonusEvent(event, arg1, arg2, _, _, arg5)
 		return nil
 	end
 	PlanTab.bonusOffered = nil  -- a new kill, a new roll
+	if type(DjinnisCPCharDB) == "table" then DjinnisCPCharDB.bonusSource = PlanTab.bonusSource end
 	if not PlanTab.bonusOnOffer then return PlanTab.bonusRollVerdict(PlanTab.bonusSource.name, true) end
 	return "remembered"
 end
@@ -11614,12 +11628,19 @@ function PlanTab.bonusChecks(check)
 	local t = "the bonus roll verdict"
 	-- the real frame holds the offer event: a refusal would leave the verdict
 	-- waiting for an event that never comes (0054 review)
-	check(t .. ", the roll frame holds the offer event", PlanTab.rollFrame and PlanTab.rollFrame:IsEventRegistered("SPELL_CONFIRMATION_PROMPT") and true, true)
+	-- by name, not through ROLL_EVENTS: a name dropped from the list must show (second review)
+	local held = {}
+	for _, event in ipairs({ "SPELL_CONFIRMATION_PROMPT", "SPELL_CONFIRMATION_TIMEOUT", "PLAYER_ENTERING_WORLD", "ENCOUNTER_END" }) do
+		if not (PlanTab.rollFrame and PlanTab.rollFrame:IsEventRegistered(event)) then held[#held + 1] = event end
+	end
+	check(t .. ", the roll frame holds the offer, its end, the loading screen and the kill", table.concat(held, " "), "")
 	local keys = { "gearHere", "bisFrom", "linkFor", "bonusOwned", "bonusSource", "bonusOnOffer", "bonusOffered", "bonusCoins", "planIndex", "planOwned", "carriedLevels" }
-	local kept, keptG = {}, { RaidWarningUtil, PlaySound, print, GetInstanceInfo, Enum, ChatTypeInfo, SOUNDKIT, GetSpellConfirmationPromptsInfo }
+	local kept, keptG = {}, { RaidWarningUtil, PlaySound, print, GetInstanceInfo, Enum, ChatTypeInfo, SOUNDKIT, GetSpellConfirmationPromptsInfo,
+		DjinnisCPCharDB, GetInventoryItemLink, C_Container, C_Item, C_CurrencyInfo }
 	for i, k in ipairs(keys) do kept[i] = PlanTab[k] end
 	local ok, err = pcall(function()
-		local flashed, printed, owned, coins, place, prompts = {}, {}, {}, 3, 2913, {}
+		local flashed, printed, owned, coins, place, prompts, kind = {}, {}, {}, 3, 2913, {}, "raid"
+		DjinnisCPCharDB = {}  -- the kill is kept on the character: not on the real one
 		local found = { { name = "Fang", specs = { "Feral" } }, { name = "Claw", specs = { "Feral" } } }
 		PlanTab.gearHere = function() return true end
 		PlanTab.bisFrom = function(source) return source == "Nek'zali" and found or {} end
@@ -11629,7 +11650,7 @@ function PlanTab.bonusChecks(check)
 		RaidWarningUtil = { AddMessage = function(text) flashed[#flashed + 1] = (text:gsub("\n", " ")) end }
 		PlaySound, ChatTypeInfo, SOUNDKIT = function() end, ChatTypeInfo or { RAID_WARNING = {} }, SOUNDKIT or { RAID_WARNING = 0 }
 		print = function(...) local line = tostring((...)) if line:find("FAIL|r", 1, true) then keptG[3](...) else printed[#printed + 1] = line end end
-		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 16, "Mythic", 20, 0, false, place end
+		GetInstanceInfo = function() return "The Venomous Abyss", kind, 16, "Mythic", 20, 0, false, place end
 		GetSpellConfirmationPromptsInfo = function() return prompts end
 		Enum = setmetatable({ ConfirmationPromptUIType = { BonusRoll = 1 } }, { __index = keptG[5] })
 		PlanTab.bonusSource, PlanTab.bonusOnOffer, PlanTab.bonusOffered = nil, true, nil
@@ -11641,6 +11662,8 @@ function PlanTab.bonusChecks(check)
 		check(t .. ", another prompt says nothing", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 0) .. "/" .. #flashed, "other prompt/0")
 		check(t .. ", the offer gives the verdict for the last boss", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1) .. "/" .. table.concat(flashed, "|"), "YES/Bonus roll: YES Nek'zali")
 		check(t .. ", the same roll again does not flash twice", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1) .. "/" .. #flashed, "shown/1")
+		PlanTab.onBonusEvent("ENCOUNTER_END", 3470, "Nek'zali", 16, 20, 1)
+		check(t .. ", but after the next kill it is a new roll", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1) .. "/" .. #flashed, "YES/2")
 		PlanTab.onBonusEvent("SPELL_CONFIRMATION_TIMEOUT", 99)
 		flashed, owned = {}, { [111] = true }
 		check(t .. ", owned BiS does not count, but the rest does", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1), "YES")
@@ -11652,13 +11675,19 @@ function PlanTab.bonusChecks(check)
 		coins = nil
 		check(t .. ", coins that cannot be read do not stop it", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1), "YES")
 		-- a roll somewhere else must not take the last raid boss's name
-		PlanTab.bonusOffered, place, flashed = nil, 2769, {}
-		check(t .. ", a kill in another place is not the source", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 98, 1) .. "/" .. table.concat(flashed, "|"), "NO/Bonus roll: NO The Venomous Abyss")
-		place = 2913
-		-- a /reload with the roll open: the list at login gives it
-		PlanTab.bonusOffered, flashed, prompts = nil, {}, { { spellID = 97, confirmType = 0 }, { spellID = 99, confirmType = 1, currencyID = 0 } }
-		check(t .. ", a roll open at login gets its verdict", PlanTab.onBonusEvent("PLAYER_ENTERING_WORLD", false, true) .. "/" .. #flashed, "YES/1")
+		-- in a raid the raid's name finds no BiS (it is listed by boss): no verdict, not a false NO (second review)
+		PlanTab.bonusOffered, place, flashed, printed = nil, 2769, {}, {}
+		check(t .. ", a kill in another raid is not the source, and no verdict is given", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 98, 1) .. "/" .. #flashed .. "/" .. tostring(printedAny("not for which boss")), "no boss/0/true")
+		PlanTab.bonusOffered, kind = nil, "party"
+		check(t .. ", in a dungeon the place is the source", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 98, 1) .. "/" .. table.concat(flashed, "|"), "NO/Bonus roll: NO The Venomous Abyss")
+		place, kind = 2913, "raid"
+		-- a /reload with the roll open: the list at login gives it, for the kill kept on the character
+		PlanTab.bonusOffered, PlanTab.bonusSource, flashed, prompts = nil, nil, {}, { { spellID = 97, confirmType = 0 }, { spellID = 99, confirmType = 1, currencyID = 0 } }
+		check(t .. ", a roll open at login gets its verdict for the kill before the reload", PlanTab.onBonusEvent("PLAYER_ENTERING_WORLD", false, true) .. "/" .. table.concat(flashed, "|"), "YES/Bonus roll: YES Nek'zali")
 		check(t .. ", and not twice on the next loading screen", PlanTab.onBonusEvent("PLAYER_ENTERING_WORLD", false, false) .. "/" .. #flashed, "shown/1")
+		PlanTab.bonusOffered = nil
+		DjinnisCPCharDB.bonusSource.at = DjinnisCPCharDB.bonusSource.at - PlanTab.BONUS_KEEP
+		check(t .. ", a kept kill that old names nothing", PlanTab.onBonusEvent("PLAYER_ENTERING_WORLD", false, true) .. "/" .. #flashed, "no boss/1")
 		prompts = {}
 		check(t .. ", no roll open at login says nothing", PlanTab.onBonusEvent("PLAYER_ENTERING_WORLD", false, true) .. "/" .. #flashed, "none open/1")
 		flashed, printed = {}, {}
@@ -11686,6 +11715,24 @@ function PlanTab.bonusChecks(check)
 		check(t .. ", a copy at the planned level is", PlanTab.bonusOwned(111), true)
 		anyCopy = true
 		check(t .. ", an item with no planned level is owned as any copy", PlanTab.bonusOwned(222), true)
+		-- the levels themselves: worn and in the bags, other items and empty slots passed by
+		PlanTab.carriedLevels = kept[11]
+		local worn = { [13] = "|Hitem:111::|h[Fang]|h", [14] = "|Hitem:333::|h[Other]|h" }
+		local bags = { [0] = { "|Hitem:111::|h[Fang]|h", nil, "|Hitem:111:1:|h[Fang]|h" }, [2] = {} }
+		local ilvl = { ["|Hitem:111::|h[Fang]|h"] = 723, ["|Hitem:111:1:|h[Fang]|h"] = 710 }
+		GetInventoryItemLink = function(_, slotID) return worn[slotID] end
+		C_Container = { GetContainerNumSlots = function(bag) return bags[bag] and 3 or 0 end, GetContainerItemLink = function(bag, slot) return bags[bag] and bags[bag][slot] end }
+		C_Item = setmetatable({ GetDetailedItemLevelInfo = function(link) return ilvl[link] end }, { __index = keptG[12] })
+		local got = PlanTab.carriedLevels(111)
+		table.sort(got)
+		check(t .. ", the carried levels are read from what is worn and the bags", table.concat(got, ","), "710,723,723")
+		-- the coins: currency 0 is Blizzard's fall back, 697
+		local askedFor
+		C_CurrencyInfo = { GetCurrencyInfo = function(id) askedFor = id return { quantity = 2 } end }
+		PlanTab.bonusCoins = kept[8]
+		check(t .. ", the coins are read, currency 0 as 697", PlanTab.bonusCoins(0) .. "/" .. tostring(askedFor), "2/697")
+		C_CurrencyInfo = { GetCurrencyInfo = function() error("no") end }
+		check(t .. ", coins that will not read are nil", PlanTab.bonusCoins(0), nil)
 
 		-- the event refused: the kill gives the verdict, as before
 		local asked = {}
@@ -11702,7 +11749,8 @@ function PlanTab.bonusChecks(check)
 		check(t .. ", never off a druid", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1), "not here")
 	end)
 	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
-	RaidWarningUtil, PlaySound, print, GetInstanceInfo, Enum, ChatTypeInfo, SOUNDKIT, GetSpellConfirmationPromptsInfo = unpack(keptG, 1, 8)
+	RaidWarningUtil, PlaySound, print, GetInstanceInfo, Enum, ChatTypeInfo, SOUNDKIT, GetSpellConfirmationPromptsInfo,
+		DjinnisCPCharDB, GetInventoryItemLink, C_Container, C_Item, C_CurrencyInfo = unpack(keptG, 1, 13)
 	check(t .. ", ran", ok or tostring(err), true)
 end
 

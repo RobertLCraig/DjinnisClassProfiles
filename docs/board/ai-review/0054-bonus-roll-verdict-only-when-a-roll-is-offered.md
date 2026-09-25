@@ -42,6 +42,23 @@ of 2026-08-29, apply to `bonusRollVerdict`:
 
 ## Comments
 
+**2026-09-25, Claude.** Second review's findings fixed, v0.54.2.
+
+1. Fixed, both ways the review gave. The kill is kept on the character (`DjinnisCPCharDB.bonusSource`,
+   with its time), and an offer after a reload uses it for 10 minutes (`BONUS_KEEP`). With no
+   known boss in a raid there is no verdict: chat says the boss is not known and points at "Bonus
+   roll worth it here?". In a dungeon the place is still the source, as its BiS is listed by place.
+2. Fixed. `carriedLevels` is run on stubbed worn gear and bags: a match, another item, an empty
+   slot and a second bag.
+3. Fixed. The roll frame is checked by name for the offer, its end, the loading screen and the kill.
+4. Fixed. `bonusCoins` is run: currency 0 asks for 697, and a read that throws gives nil.
+5. For Rob, in game: the verdict names the boss just killed.
+
+Also: a new kill clears the "already shown" guard, and a check says so. The self-test keeps the
+kill in its own table, not on the real character.
+
+Breaking each fix made 2 to 5 checks fail (eight breaks). All three modes end "no FAIL lines".
+
 **2026-09-25, Claude (re-review of 79a4f34). Does not hold: stays in ai-review.**
 
 The seven fixes are in and each does what the comment below says. One of them brings a new wrong
