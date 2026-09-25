@@ -188,3 +188,47 @@ character" stays as built: it is offered while one is left, until "Not now" for 
 Checked: `lua offline-check.lua` under Lua 5.1.5 and 5.4.6, exit 0, no FAIL line. Spec mode 250, 62,
 1467, 73 clean; 102 its usual 8. Mutations (`%TEMP%\mut0059b.ps1`): M09, M14, M17, M20 and five for
 the new code, 9 of 9 caught after one check was added.
+
+**2026-09-25, Claude (second adversarial review, of b566a62's 0059 part). Bounced to todo: one
+finding.**
+
+What was run. `lua offline-check.lua` in the repo (clean tree at b566a62) under Lua 5.4.6 and 5.1.5:
+exit 0 both, "no FAIL lines", 20 lines of output read whole, `[CP] self-test passed`. The builder's
+`%TEMP%\mut0059b.ps1` (scratch copy): 9 of 9 caught, M09 (3), M20, M14, M17, the `oldDismissed`
+removal (3), the missing Tag button, `askAgain` ignoring the spec, `onlyAsked` filtering nothing,
+Create acting on all. `RenameConfig`, `DeleteConfig`, `GetConfigIDsBySpecID` re-read in
+`ClassTalentsDocumentation.lua`: present, `AllowedWhenUntainted`; this commit adds no API call.
+
+Earlier findings, each closed:
+- **Finding 1 (M09): closed.** The check now calls the real `savedLoadoutNames` (`kept[1]`) over a
+  pretend `GetConfigIDsBySpecID` / `GetConfigInfo`: tagged keyed by build, a doubled tag in `twice`,
+  the player's own and a `[CP*] ` spare under their own names, an untagged build name and a recorded
+  `BiS: ` spare in the third return, then the real offer answers "old". M09 goes red.
+- **Finding 2 (the lock-out): closed for the case it named.** "Not now" on the renaming sets
+  `oldDismissed[spec]` and re-offers; with anything missing or drifted the Create / Reset box follows,
+  carrying "Tag old loadouts". Checked by the new lines and by two of the mutations.
+- M14, M17, M20: each now has a check and each mutation goes red. `spareName` / `swapName` replace
+  every hand-joined `SPARE ..` and `SWAP_MARK ..` in the file (grep: none left outside the helpers).
+
+**Finding: declining the renaming can show an empty box.** The second pass of `offerLoadouts` goes
+on to the Create / Reset box whenever `doable`, even with nothing missing or drifted (line 7470 now
+reads `and not doable`). Then `lines` is empty and the buttons are only "Tag old loadouts" and "Not
+now". Probe in `%TEMP%\rev0059b2` (a scratch copy; `loadoutGaps` stubbed to `{}, {}`, saved
+`{ Dungeon = 9 }`, old `{ Dungeon = 1 }`): the first box lists "Dungeon deleted: a tagged one is
+there"; after "Not now" the next box has `lines=0 text=[] buttons=Tag old loadouts,Not now`. That
+state is the path this fix opened: keep an untagged "Raid", click Create, and `[CP] Raid` is made
+beside it. From the next /reload on, every login and spec change offers to delete "Raid", and
+declining leads to a blank box whose "Tag old loadouts" would delete it with no line saying so. The
+same blank box appears when `room == 0` empties `missing`. Fix: when nothing is missing or drifted
+after the renaming is declined, stop there (return "complete" or "dismissed"), and give the second
+box one line naming what "Tag old loadouts" does, delete included. A check for the blank case.
+
+Lower, not blocking: the card is now about 200 lines, twice the board's 100; the thread could be
+cut to the verdicts when this comes back.
+
+Security. Unchanged from the first review: identity is a name, so a `[CP] X` anyone makes is the
+addon's; names from the game pass `canRead` before use; no new event registration; nothing leaves
+the client. The new code adds no input path.
+
+UI surface: the two offer boxes. Not looked at: no agent can run the client. The last criterion
+stays `proves: manual`.
