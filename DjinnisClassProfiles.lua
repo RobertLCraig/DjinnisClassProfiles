@@ -7077,7 +7077,7 @@ function PlanTab.wearSpare(name, code)
 	if PlanTab.swapping then PlanTab.say("Still putting the plan on. Wait for it to say so.") return "busy" end  -- card 0063
 	local saved = PlanTab.savedLoadoutNames()
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
-	local selected, mine, deleted = PlanTab.selectedConfigID(), PlanTab.spareIDs(), 0
+	local selected, mine = PlanTab.selectedConfigID(), PlanTab.spareIDs()
 	local worn = saved[PlanTab.spareName(name)]
 	-- a "[CP*] X" this character did not record (the player's): a second of
 	-- that name would make the switch by name a guess, so it is left to the
@@ -7112,18 +7112,23 @@ function PlanTab.wearSpare(name, code)
 		PlanTab.say(("Close the talent window to put on \"%s\". Its spare loadout is made then."):format(name))
 		return "waiting"
 	end
+	-- the old spare, not worn, is the new one's replace: the queue deletes it,
+	-- waits for the delete to land and only then imports (card 0067; a loop of
+	-- deletes and the import in one frame had the server refuse all but one).
+	-- Worn spares stay until the next is on, so there is one at most; a second,
+	-- left by some fault, goes at the next wear.
+	local old
 	for _, id in pairs(saved) do
-		if mine[id] and id ~= selected and C_ClassTalents.DeleteConfig(id) then deleted, mine[id] = deleted + 1, nil end
+		if mine[id] and id ~= selected and (not old or id < old) then old = id end
 	end
-	-- the list can lag a delete, so a slot just freed is counted here
 	local free = PlanTab.freeLoadoutSlots()
-	if free and free + deleted == 0 then
+	if free and free == 0 and not old then
 		PlanTab.say(("No room for the spare loadout. All %d slots are used, over all your specs. Delete one you do not use."):format(Constants.TraitConsts.MAX_COMBAT_TRAIT_CONFIGS))
 		return "full"
 	end
 	-- the queue waits for the game to allow it and for the server to fill it,
 	-- then finishLoadouts wears it
-	return PlanTab.makeLoadouts({ { name = PlanTab.spareName(name), code = code } }, name) == "started" and "wearing" or "fenced"
+	return PlanTab.makeLoadouts({ { name = PlanTab.spareName(name), code = code, replace = old, oldSpare = old } }, name) == "started" and "wearing" or "fenced"
 end
 
 -- One build to one loadout. `job` is { name, code, replace = config id or nil }.
@@ -7236,6 +7241,9 @@ end
 -- other switch. Answers what it did, for the checks.
 function PlanTab.wearMadeSpare(q)
 	local name = PlanTab.spareName(q.wear)
+	-- the old spare the job replaced is forgotten once it is gone (card 0067)
+	local gone = q.jobs and q.jobs[1] and q.jobs[1].oldSpare
+	if gone and PlanTab.configName(gone) == nil then PlanTab.spareIDs()[gone] = nil end
 	if q.made ~= 1 then return "failed" end  -- stepLoadouts said why
 	-- the config the queue watched, else by name: the list can lag the import
 	local id = q.pendingID
@@ -11040,6 +11048,18 @@ function PlanTab.swapChecks(check)
 		PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } })
 		drain()
 		check(t .. ", a replace whose old one is gone already only imports", table.concat(calls, "|") .. "/" .. tostring(saidAny("Made 1 of 1")), "import [CP] Raid: Vashnik/true")
+
+		-- card 0067: the spare replaces the old one, one change at a time, then is worn
+		local keptHelper, keptSpares = ClassTalentHelper, DjinnisCPCharDB and DjinnisCPCharDB.spares
+		ClassTalentHelper = { SwitchToLoadoutByName = function(n) calls[#calls + 1] = "wear " .. n end }
+		DjinnisCPCharDB = DjinnisCPCharDB or {}
+		DjinnisCPCharDB.spares = { [3] = true, [4] = true }
+		live, calls, said, busyUntil, selected = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon" }, {}, {}, now, 4
+		check(t .. ", the spare starts", PlanTab.wearSpare("Raid: Vashnik", "x"), "wearing")
+		drain()
+		check(t .. ", it replaces the old spare, never the worn one, and nothing is refused", table.concat(calls, "|"), "delete 3|import [CP*] Raid: Vashnik|wear [CP*] Raid: Vashnik")
+		check(t .. ", and the old one is forgotten, the worn one kept", tostring(DjinnisCPCharDB.spares[3]) .. "/" .. tostring(DjinnisCPCharDB.spares[4]), "nil/true")
+		ClassTalentHelper, DjinnisCPCharDB.spares, selected = keptHelper, keptSpares, 9
 
 		-- the fence holds everywhere a loadout changes, and a group setup waits for the swap
 		local held = {}
