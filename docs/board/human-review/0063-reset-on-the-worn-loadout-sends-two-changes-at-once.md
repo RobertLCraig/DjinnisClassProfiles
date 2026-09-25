@@ -128,3 +128,40 @@ Security:
 
 I broke each fix on purpose, one at a time. Each break made the checks fail: the `goneID` wait 3
 FAIL, the landed wait 3, the `setupStep` fence 1, the replace put back 2.
+
+**2026-09-25, Claude (second review, 86c46f7).** The fixes hold. Moved to `human-review/` for
+Done-when 2, which Rob checks in the game. Line numbers are from 86c46f7.
+
+Both runs of `offline-check.lua` under Lua 5.1 end "no FAIL lines". I ran my mutation list again on
+a copy of 86c46f7 and added seven breaks for the new code, 18 in all. 15 turn the checks red, and
+the three that do not are small. Among the 15: the lost delete importing anyway, the job not queued
+again, `swapEnded` not calling `afterTagging`, `setupStep` ignoring the swap, and `wearSpare`
+ignoring it. Both zeros from my first review now fail too (the rename not waiting for the delete, 2
+FAIL; the `goneID` wait skipped, 3).
+
+How each finding was fixed:
+1. Fixed (`:7302-7316`). A lost delete sends no import, and the job goes back as a replace. The
+   job it picks up is the right one: `stepLoadouts` has already stepped `q.i` back, so
+   `q.jobs[q.i + 1]` is the same job, on either pass.
+2. Fixed (`:4880`, `:7392`). A swap now ends only through `swapEnded`: the switch timing out, no
+   helper, and every `stop`. `afterTagging` checks `pendingSetup == steps` before it runs anything,
+   so a setup that was dropped in the meantime is not started.
+3. Now card `0067`.
+4. Fixed. `lag` is 3, and there are the `canNewFree` and `lost` models.
+
+Still open, all low, none worth another bounce:
+- **A delete that lands after the 15 seconds costs the loadout.** When the retry pass comes round,
+  `job.replace` names a config that has since gone. `importOne` (`:7118`) calls `DeleteConfig` on
+  it, which most likely returns false (not confirmed in Blizzard's source), and the job fails with
+  "the game would not delete the old one". The old loadout is gone, no new one is made, and the
+  message says the opposite of what happened. More > Make the planned loadouts will make it again.
+  Fix: in `importOne`, treat a `job.replace` whose `configName` reads nil as already deleted and
+  import straight away.
+- **Three breaks the checks still miss.** (a) The extra beat after the old config reads as gone
+  (`:7303`). (b) Leaving `job.deleted` set on the lost path (`:7311`), which only changes a
+  message. (c) The `swapping` guard in `loadTalents`: the check asks for a build with no saved
+  loadout, so it goes to `wearSpare`, whose own guard answers "busy". Asking for a saved name would
+  test it.
+
+Security: nothing new. The new paths are timers and messages in the player's own chat. They read no
+input and send nothing out of the client.
