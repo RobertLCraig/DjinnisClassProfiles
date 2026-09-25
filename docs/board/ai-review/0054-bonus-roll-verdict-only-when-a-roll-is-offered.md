@@ -42,6 +42,94 @@ of 2026-08-29, apply to `bonusRollVerdict`:
 
 ## Comments
 
+**2026-09-25, Claude (re-review of 79a4f34). Does not hold: stays in ai-review.**
+
+The seven fixes are in and each does what the comment below says. One of them brings a new wrong
+answer, and the new owned-at-level code has no offline proof.
+
+Ran `offline-check.lua`, `250` and `62` on HEAD (`9286940`). All three end "no FAIL lines", output
+read whole. Checked against `wow-ui-source` 12.1.0 (69933): `EventImplementation.lua:389` (payload
+order, currencyID is arg5), `:804` (the login replay runs on every PLAYER_ENTERING_WORLD and reads
+`spellID`, `confirmType`, `currencyID`), `GroupLootFrame.lua:286-303` (same-spell guard, 0 means
+`BONUS_ROLL_REQUIRED_CURRENCY`, no frame at 0 coins), `Constants.lua:186` and `:473`
+(`NUM_TOTAL_EQUIPPED_BAG_SLOTS`, 697), `InstanceDocumentation.lua:115` (8th return is `instanceID`,
+not nilable), `UnitDocumentation.lua:3956` (TIMEOUT payload is spellID first),
+`ContainerDocumentation.lua`, `CurrencyInfoDocumentation.lua`. `GetSpellConfirmationPromptsInfo` is
+not in the generated docs; Blizzard's live code calls it, as the code comment says.
+
+Mutations, on a temp copy:
+
+| Mutation | Result |
+|---|---|
+| owned needs `>` the plan level, not `>=` | caught |
+| lowest planned level, not highest | caught |
+| TIMEOUT does not clear the offered spell | caught |
+| verdict uses `planOwned` again | caught |
+| login scan takes any prompt type | caught |
+| `registerRoll` checks the wrong event | caught |
+| place match removed | caught |
+| no planned level answers false | caught |
+| no coin check | caught |
+| `carriedLevels` returns `{}` | **green** |
+| `carriedLevels` skips the bags | **green** |
+| `carriedLevels` skips worn gear | **green** |
+| `carriedLevels` ignores the item id | **green** |
+| TIMEOUT and PLAYER_ENTERING_WORLD not registered | **green** |
+| `bonusCoins` always nil, or the 0 fallback dropped | **green** |
+| a kill does not clear the offered spell | **green** |
+| secret boss name unguarded | green (said so in the fix comment) |
+
+Findings:
+
+1. **Medium. After a reload or a relog in the raid, the verdict is a false NO.**
+   `DjinnisClassProfiles.lua:1724`, reached from the login scan at `:1728`. A reload empties
+   `bonusSource`, so the verdict is for the instance name. Raid BiS is listed by boss name, so
+   `bisFrom("The Venomous Abyss")` finds nothing. Probed with the real `bisFrom`: it flashes "Bonus
+   roll: NO The Venomous Abyss" and prints "nothing BiS drops from The Venomous Abyss. Keep the
+   coin." Scenario: kill Nek'zali, disconnect or /reload before answering the roll. The addon tells
+   you to keep a coin on a boss that drops two BiS items. Before fix 5 this was a silent miss. Now it
+   is wrong advice. The self-test at `:11357` expects this NO, so it is written in as correct. Fix:
+   in a raid with no source from this instance, give no YES/NO. Say the boss is not known, or keep
+   the source in `DjinnisCPCharDB` at the kill and read it back at PLAYER_ENTERING_WORLD (that is
+   after ADDON_LOADED, so the 2026-09-02 rule holds).
+2. **Medium. Owned-at-level has no offline proof.** `carriedLevels`, `:2567-2583`. The self-test
+   swaps it for a stub (`:11382`). The offline harness has no `C_Container` and no worn items. Four
+   mutations stay green, including "always `{}`". Scenario: a later edit breaks the bag loop. Every
+   planned item then reads not owned, the verdict can never be NO for ownership, and nothing fails.
+   That is acceptance 3 for every item that has a plan level. Fix: one check that gives it worn and
+   bag links (a nil slot, another id, the id at 710 and at 723) and asserts the levels. A probe with
+   exactly that returned `723,723` and did not throw on nil slots, so the code is right today.
+3. **Low. The two new registrations are not checked.** `:1752`. Dropping SPELL_CONFIRMATION_TIMEOUT
+   and PLAYER_ENTERING_WORLD stays green. The DECISIONS rule says confirm each event. Only the offer
+   is confirmed. Scenario: an edit drops PLAYER_ENTERING_WORLD from the list, and fix 5 is gone with
+   no FAIL. Fix: assert in the self-test that `rollFrame` holds all six.
+4. **Low. `bonusCoins` is never run.** `:1689`. The self-test stubs it and the harness has no
+   `C_CurrencyInfo`. Breaking it stays green. Its failure mode is safe (nil means "show it"), so this
+   is a gap, not a bug.
+5. **Low, in-game only.** The source is the last kill. If the client ever sends the prompt before
+   ENCOUNTER_END, the verdict is for the previous boss in the same raid, and the kill after it wipes
+   the guard. Not provable offline. Add to Rob's in-game line: the verdict names the boss just killed.
+
+Asked about and held:
+- The protected-event trap. The handler is set before any registration. A refusal raises no Lua
+  error, so the loop goes on. PLAYER_ENTERING_WORLD is already registered by other frames in this
+  file. A refused TIMEOUT would only keep the guard until the next kill.
+- The PLAYER_ENTERING_WORLD recursion. One level, into the prompt branch, first BonusRoll entry only.
+  The same-spell guard stops a second flash on the next loading screen. A reload resets the guard,
+  which is the point of fix 5.
+- `bonusSource.name` at `:1745` is never nil-indexed. Only the kill and key branches reach it, and
+  both set a table first. The offer path guards with `source and`. The fallback name is `here`.
+- `carriedLevels` does not throw on nil slots, a nil `GetContainerNumSlots`, or a throwing
+  `GetDetailedItemLevelInfo` (pcall). A secret link is dropped by `canRead` before `match`.
+- The bank change is sensible. It errs toward YES, which costs a coin at worst, and items with no
+  plan level still count the bank. One edge for Rob: a bank copy won from a bonus roll is off the
+  roll table, so a YES resting only on it wastes the coin.
+
+Security, three questions:
+- **Weakest point:** finding 1. A lost source turns into a confident NO with a raid warning.
+- **Unchecked path:** `carriedLevels` and `bonusCoins` run only in game. Neither is reached offline.
+- **What it leaks:** nothing. Chat and raid warning are local. Nothing is saved or sent.
+
 **2026-09-25, Claude.** Review findings fixed, v0.53.2.
 
 1. Fixed. The events are registered by `PlanTab.registerRoll(frame)`. The self-test gives it a
