@@ -98,3 +98,24 @@ frame only.
 
 Not looked at in a client: there is no browser surface, and the game cannot be run from here. The
 manual criterion stays open. Deploy was not touched.
+
+
+**2026-09-25, Claude. The first review's findings, fixed in v0.48.1.** Card `0059` landed first
+(v0.48.0), so the swap's new loadout is `[CP+] <build>` now, not `<name> (new)`, and it is renamed
+`[CP] <build>`.
+
+1. **The wait asks again, and never replays.** `makeLoadouts` takes the ask that worked the jobs out
+   (`PlanTab.createMissing` or `PlanTab.resetDrifted`) and runs that when the talent window closes,
+   so a switch made in the window is seen. And `importOne` refuses to delete `job.replace` when it
+   is the loadout you are wearing, whoever asked.
+2. **The four survivors have checks**: the old loadout on again at the end (`finishSwap` now also
+   renames nothing onto its name, which would have made two), a refused delete, combat before the
+   switch, and combat with the window open.
+3. **A rename refused after the old one went is finished by the next Create**: a worn `[CP+] X`
+   with no `[CP] X` is renamed, not made twice. One not worn is replaced by the tagged one.
+4. **A stopped swap is finished only if the worn new loadout still holds the plan**
+   (`PlanTab.holdsPlan`); otherwise it says so and touches nothing.
+
+Checked: `lua offline-check.lua` under Lua 5.1.5, exit 0, no FAIL line. Spec mode 250, 62, 1467, 73
+clean; 102 gives its usual 8. Mutations (`%TEMP%\mut0060.ps1`): the reviewer's four and five more
+for the new code, 9 of 9 caught, after one check was added for an unworn leftover.

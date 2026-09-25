@@ -7031,6 +7031,9 @@ function PlanTab.importOne(job)
 		return false, "this spec's talent data is not loaded yet. Open the talent window once, close it, and try again"
 	end
 	if job.replace then
+		-- whoever asked, and whenever: deleting the loadout you wear drops you to
+		-- the starter build (0060 review, a job worked out before a switch)
+		if job.replace == PlanTab.selectedConfigID() then return false, "it is the loadout you are wearing now, so it is not replaced. Pick another, then click again" end
 		if not C_ClassTalents.DeleteConfig(job.replace) then return false, "the game would not delete the old one" end
 		job.replace, job.deleted = nil, true  -- gone: a retry only imports
 	end
@@ -7062,13 +7065,15 @@ end
 -- Starts the queue. Answers what it did, for the checks. `wear` names the
 -- build a spare is made for (card 0040): finishLoadouts then wears it.
 -- `swaps` are worn loadouts to replace once the queue is done
--- (PlanTab.swapSelected).
-function PlanTab.makeLoadouts(jobs, wear, swaps)
+-- (PlanTab.swapSelected). `again` is the ask that worked the jobs out.
+function PlanTab.makeLoadouts(jobs, wear, swaps, again)
 	local why = PlanTab.loadoutFence(wear ~= nil)
 	-- the talent window open is no reason to make Rob click twice (Rob,
-	-- 2026-09-24): the work waits for the window to close
-	if why and PlanTab.talentWindowOpen() and not InCombatLockdown()
-		and PlanTab.whenTalentsClose(function() PlanTab.makeLoadouts(jobs, wear, swaps) end) then
+	-- 2026-09-24): the work waits for the window to close. It is ASKED again
+	-- then, never replayed: the window is where loadouts are switched, so the
+	-- worn one and every id may have moved (0060 review).
+	if why and again and PlanTab.talentWindowOpen() and not InCombatLockdown()
+		and PlanTab.whenTalentsClose(again) then
 		PlanTab.say("The talent window is open, and a loadout made now would be put on at once. Close it, and this goes ahead then.")
 		return "waiting"
 	end
@@ -7243,7 +7248,13 @@ end
 -- The new one is on: the old one goes, and the new one takes its name.
 function PlanTab.finishSwap(swap, newID)
 	local temp = PlanTab.SWAP_MARK .. swap.name
-	if swap.oldID and swap.oldID ~= newID and PlanTab.selectedConfigID() ~= swap.oldID then
+	if swap.oldID and swap.oldID ~= newID then
+		-- the old one on again: never deleted, and the new one not renamed onto
+		-- its name, which would make two (0060 review)
+		if PlanTab.selectedConfigID() == swap.oldID then
+			PlanTab.say(("\"%s\" is on again, so it is not replaced. Click %sMore > Make the planned loadouts|r%s to try again."):format(PlanTab.tag(swap.name), GOLD, GREY))
+			return "old worn"
+		end
 		local okDelete, deleted = pcall(C_ClassTalents.DeleteConfig, swap.oldID)
 		if not (okDelete and deleted) then
 			PlanTab.say(("\"%s\" holds the plan and is on. The game would not delete the old \"%s\"; delete it in the talent window."):format(temp, swap.name))
@@ -7277,15 +7288,27 @@ function PlanTab.createMissing()
 	local missing = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.mayBeShort)
 	if not missing then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
 	local room = PlanTab.loadoutRoom(saved)
-	local jobs = {}
+	local jobs, swaps, selected = {}, {}, PlanTab.selectedConfigID()
 	for _, name in ipairs(missing) do
-		if room and #jobs >= room then
+		-- a swap stopped after the old one went, at a refused rename (0060
+		-- review): worn, it needs only the name; not worn, it is replaced
+		local temp = saved[PlanTab.SWAP_MARK .. name]
+		if temp and temp == selected then
+			if PlanTab.holdsPlan(temp, builds[name]) then swaps[#swaps + 1] = { name = name, newID = temp }
+			else PlanTab.say(("\"%s%s\" is on and no longer holds the plan, so it is not renamed. Pick another loadout, then click again."):format(PlanTab.SWAP_MARK, name)) end
+		elseif room and #jobs >= room then
 			PlanTab.say(("Room for %d of %d. The rest are worn through the spare loadout: double-click one in the list beside the talent window."):format(room, #missing))
 			break
+		else
+			jobs[#jobs + 1] = { name = PlanTab.tag(name), code = builds[name], replace = temp }
 		end
-		jobs[#jobs + 1] = { name = PlanTab.tag(name), code = builds[name] }
 	end
-	return PlanTab.makeLoadouts(jobs)
+	return PlanTab.makeLoadouts(jobs, nil, swaps, PlanTab.createMissing)
+end
+
+-- Whether saved loadout `id` holds `build`: false when it cannot be read.
+function PlanTab.holdsPlan(id, build)
+	return PlanTab.planDiffers(PlanTab.loadoutString(id), build, PlanTab.mayBeShort(id)) == false
 end
 
 -- "Reset to plan": a drifted loadout is deleted and made again from the stored
@@ -7307,13 +7330,15 @@ function PlanTab.resetDrifted()
 			-- one left by a swap that did not finish is made again from the plan
 			jobs[#jobs + 1] = { name = temp, code = builds[name], replace = saved[temp], swap = swap }
 		elseif saved[PlanTab.SWAP_MARK .. name] and saved[PlanTab.SWAP_MARK .. name] == selected then
-			-- a swap stopped with the new one on: it only needs the old one gone and its name
-			swaps[#swaps + 1] = { name = name, oldID = saved[name], newID = selected }
+			-- a swap stopped with the new one on: it only needs the old one gone and
+			-- its name, if it still holds the plan (0060 review)
+			if PlanTab.holdsPlan(selected, builds[name]) then swaps[#swaps + 1] = { name = name, oldID = saved[name], newID = selected }
+			else PlanTab.say(("\"%s%s\" is on and no longer holds the plan, so \"%s\" is left as it is. Pick another loadout, then click again."):format(PlanTab.SWAP_MARK, name, PlanTab.tag(name))) end
 		else
 			jobs[#jobs + 1] = { name = PlanTab.tag(name), code = builds[name], replace = saved[name] }
 		end
 	end
-	return PlanTab.makeLoadouts(jobs, nil, swaps)
+	return PlanTab.makeLoadouts(jobs, nil, swaps, PlanTab.resetDrifted)
 end
 
 -- The loadouts from before the tag (card 0059), and what becomes of each.
@@ -8610,6 +8635,56 @@ function PlanTab.loadoutChecks(check)
 	check(swapTest .. ", a refused rename is said", printed[#printed]:find("Rename it to \"[CP] Raid: Nek'Zali\"", 1, true) ~= nil, true)
 	check(swapTest .. ", with the plan on", names[selected], "[CP+] Raid: Nek'Zali")
 	names[swapID] = nil
+	-- 0060 review, finding 1: the window is where loadouts are switched, so the
+	-- click is asked again when it closes, never replayed from before
+	api.RenameConfig = function(id, n) calls[#calls + 1] = "rename " .. names[id] .. " to " .. n names[id] = n return true end
+	worn()
+	PlanTab.closeHooked, PlanTab.onTalentsClose, windowOpen, hide = nil, nil, true, nil
+	PlayerSpellsFrame = { IsShown = function() return windowOpen end, HookScript = function(_, _, fn) hide = fn end }
+	PlanTab.resetDrifted()
+	windowOpen, selected = false, 9  -- another loadout put on in the window
+	if hide then hide() end
+	check(swapTest .. ", a switch made in the window is seen on close, not replayed over", table.concat(calls, "|"), "delete [CP] Raid: Nek'Zali|import [CP] Raid: Nek'Zali")
+	names[swapID] = nil
+	worn()
+	check(swapTest .. ", importOne never deletes the worn loadout", tostring((PlanTab.importOne({ name = "[CP] Raid: Nek'Zali", code = nek, replace = 1 }))) .. "/" .. #calls, "false/0")
+	check(swapTest .. ", nor finishSwap, and it renames nothing onto it", PlanTab.finishSwap({ name = "Raid: Nek'Zali", oldID = 1 }, 70) .. "/" .. #calls, "old worn/0")
+	-- finding 2: the delete refused, the combat checks
+	worn()
+	names[70], strings[70], selected = "[CP+] Raid: Nek'Zali", nek, 70
+	local keptDelete = api.DeleteConfig
+	api.DeleteConfig = function() return false end
+	check(swapTest .. ", a refused delete keeps the old one and renames nothing", PlanTab.finishSwap({ name = "Raid: Nek'Zali", oldID = 1 }, 70) .. "/" .. #calls, "old kept/0")
+	check(swapTest .. ", and says the delete was refused", printed[#printed]:find("would not delete", 1, true) ~= nil, true)
+	api.DeleteConfig = keptDelete
+	combat = true
+	check(swapTest .. ", combat before the switch waits for it", PlanTab.swapSelected({ name = "Raid: Nek'Zali", oldID = 1, newID = 70 }) .. "/" .. #calls, "combat/0")
+	windowOpen = true
+	check(swapTest .. ", combat with the window open is fenced, not a wait", PlanTab.resetDrifted() .. "/" .. #calls, "fenced/0")
+	combat, windowOpen = false, false
+	PlanTab.closeHooked, PlanTab.onTalentsClose = nil, nil
+	-- finding 4: a stopped swap whose new one was edited is left
+	strings[70] = sen
+	check(swapTest .. ", a stopped swap that no longer holds the plan is left", PlanTab.resetDrifted() .. "/" .. #calls, "nothing/0")
+	check(swapTest .. ", and says it no longer holds the plan", printed[#printed]:find("no longer holds the plan", 1, true) ~= nil, true)
+	-- finding 3: the rename refused after the old one went; Create only renames
+	-- id 99: the pretend import hands out ids upward from 61
+	names[1], strings[1], names[70], strings[70] = nil, nil, nil, nil
+	names[99], strings[99], selected = "[CP+] Raid: Nek'Zali", nek, 99
+	PlanTab.createMissing()
+	local nekCalls = {}
+	for _, c in ipairs(calls) do if c:find("Nek'Zali", 1, true) then nekCalls[#nekCalls + 1] = c end end
+	check(swapTest .. ", a refused rename is finished by Create, not made twice", table.concat(nekCalls, "|"), "rename [CP+] Raid: Nek'Zali to [CP] Raid: Nek'Zali")
+	-- and one not worn is replaced by the tagged one, not left beside it
+	for id = 61, swapID do names[id], strings[id] = nil, nil end
+	names[99], strings[99], selected, calls = "[CP+] Raid: Nek'Zali", nek, 9, {}
+	PlanTab.createMissing()
+	nekCalls = {}
+	for _, c in ipairs(calls) do if c:find("Nek'Zali", 1, true) then nekCalls[#nekCalls + 1] = c end end
+	check(swapTest .. ", a leftover not worn is replaced by Create", table.concat(nekCalls, "|"), "delete [CP+] Raid: Nek'Zali|import [CP] Raid: Nek'Zali")
+	for id = 61, swapID do names[id], strings[id] = nil, nil end
+	names[99], strings[99] = nil, nil
+	PlayerSpellsFrame = { IsShown = function() return windowOpen end }
 	-- in combat nothing is made
 	worn()
 	combat = true
