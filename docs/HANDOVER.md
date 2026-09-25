@@ -7,7 +7,7 @@
 **Stage:** built, unreleased
 **Category:** addon
 **Status:** v0.48.12, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
-_Last updated: 2026-09-25 (v0.48.0: every loadout the addon makes is named "[CP] <build>", card `0059`; v0.47.0: Djinni's BiS renamed to Djinni's Class Profiles, card `0058`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+_Last updated: 2026-09-25 (v0.48.12: old loadouts are renamed and deleted one at a time, cards `0059`/`0062`; `wcl-builds.py` pulls every spec's top builds from Warcraft Logs, card `0064`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -91,6 +91,12 @@ from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `tree
   loads as that spec and types every slash command, hovers one item and fires a boss kill instead of
   the self-test, which is written for Feral. Run a non-druid id after touching anything spec-keyed.
   **Read its output whole:** a Lua 5.1 load error ("more than 60 upvalues") prints no FAIL line.
+- `wcl.py`, `wcl-builds.py` - **author tooling, never shipped.** A Warcraft Logs v2 API client and
+  a report of each spec's top ranked builds (raid Mythic and M+), card `0064`. `python wcl.py probe`
+  checks the key; `python wcl-builds.py [Class] [--pages N]` writes `docs/builds/wcl-report.md` and
+  `wcl-builds.json`. **It does not change `BUILDS`.** Answers cache in `.cache/wcl/` for 12 h.
+  The key is in `.secrets/warcraftLogsClientSecrets.txt`: gitignored, in `pkgmeta.yaml`'s ignore
+  list, and **never printed or committed**.
 - `Libs/LibDBIcon-1.0/` - the minimap button and, at `LibDBIcon-1.0.lua:508-526`, the runtime
   `AddonCompartmentFrame:RegisterAddon(...)` call that card `0001` turns on. **Read that card before
   touching how the window opens**; the two routes into the addon drawer are mutually exclusive and
@@ -234,6 +240,9 @@ The cards in `human-review/` are one trip to a live client; each lists its own l
 
 Trap (card `0059`): only a loadout named `[CP] <build>` is the addon's. The spare is `[CP*] `, a swap's new one `[CP+] `; always build a name with `PlanTab.tag`, `spareName` or `swapName`. `PlanTab.savedLoadoutNames()` keys a tagged loadout by its BUILD name and returns untagged build-named ones third, so `saved[build]` never finds the player's own "Raid".
 Trap (card `0060`): a make deferred to the talent window's close is re-asked through `PlanTab.askAgain`, never replayed, and `importOne` refuses to delete the worn loadout. Keep both: the window is where loadouts get switched.
+Trap (cards `0059`, `0062`): the server takes one loadout change at a time. A second rename, delete, import or switch in the same frame is refused and no API says it is busy. Send a list through `PlanTab.startTagging`, never a loop; `0063` is Reset still sending two at once.
+Trap: `[IO.File]` in PowerShell resolves a relative path against .NET's current directory, not the shell's. Use absolute paths.
+Next after the in-game checks: `0064` (per-boss druid rows need their own boss's rankings, then Rob picks how `BUILDS` takes these builds; that also settles `0061`), then `0063`.
 Trap: the offline check must pass under Lua 5.1 (`"C:\Program Files (x86)\Lua\5.1\lua.exe"`), which the game runs; which one plain `lua` gives depends on the shell.
 
 Trap: other classes' builds come from wowvalor (`Dungeon`, can move daily, so `--check` goes stale) and SimulationCraft's `SIMC_TIER` profiles (`Raid`, none for healers or Evokers; move `SIMC_TIER` each season), card `0050`. SimC writes free hero keystones as bought; `ungrant` fixes that, do not remove it.
