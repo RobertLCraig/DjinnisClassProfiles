@@ -352,7 +352,9 @@ def main():
                 lines += ["**Ours:**", ""]
                 for name, code in sorted(mine.items()):
                     plus, minus = tree.diff(tree.decode(code), top_picks)
-                    exact = s["_counts"].get(tree.encode(tree.decode(code)), 0)
+                    # compared as picks: decode leaves granted nodes out, so a re-encoded string never matches (2026-09-25)
+                    theirs = tree.decode(code)
+                    exact = sum(s["_counts"][c] for c, d in s["_decoded"].items() if d == theirs)
                     share = f"{exact / s['sample']:.1%} run it exactly" if exact else "no one in the sample runs it exactly"
                     if not plus and not minus:
                         lines.append(f"- `{name}`: the most common build.")
