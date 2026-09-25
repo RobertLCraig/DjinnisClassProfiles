@@ -23,6 +23,7 @@ ignore:
   - .gitignore
   - .claude
   - .agents
+  - .secrets
   # Documentation. CHANGELOG.md is ignored here but still read by manual-changelog
   # below: the packager publishes it to the addon page instead of shipping it.
   - CHANGELOG.md

@@ -8,3 +8,5 @@
 # From the old Class Profiles repository: a prompt file kept locally, and release output.
 /baseprompt.md
 /releases/
+# API keys for author tooling (update-builds.py). Never committed, never shipped.
+.secrets/
