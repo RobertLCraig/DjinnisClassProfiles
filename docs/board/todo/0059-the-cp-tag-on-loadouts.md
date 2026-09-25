@@ -240,3 +240,43 @@ explicit ask (More > Make the planned loadouts) shows the renaming's own box aga
 Checked: three new checks in `PlanTab.tagChecks`; `%TEMP%\mut-round3.ps1` breaks "empty box back"
 and "Tag old acts at once" are both red. The card's length (the review's minor) is its comment
 thread; pruning it is Rob's call under the board rules, so it is left.
+
+**2026-09-25, Claude (third adversarial review, of 91f8591's 0059 part). Bounced to todo: one
+finding.**
+
+What was run. `lua offline-check.lua` in the repo (clean tree at 91f8591) under Lua 5.4.6 and 5.1.5:
+exit 0 both, "no FAIL lines", `[CP] self-test passed`, output read whole. `%TEMP%\mut0059b.ps1`: 8
+caught, "no Tag old button" now PATTERN MISSING (the code it targeted was rewritten; my own version
+of it below is caught). `%TEMP%\mut-round3.ps1`: 8 of 8 caught, including "empty box back" (2) and
+"Tag old acts at once" (1). My own, in `%TEMP%\rev0059c4`: the Tag old button removed (caught 2),
+`doable and asked` loosened to `doable` (caught 1), the button not clearing `oldDismissed` (caught
+1), the button re-opening as a login offer rather than an ask (missed; see lower). No new API call.
+
+Earlier findings: the first review's two and the second review's empty box are closed. The second
+box never renders with no lines (line 7470 returns before it), and "Tag old loadouts" now opens the
+renaming's list, delete lines included, and changes nothing itself.
+
+**Finding: "Not now" on the renaming, from an explicit ask with nothing else to do, re-opens the
+same box for ever.** The "Not now" closure sets `oldDismissed[spec] = true` and re-offers with the
+same `asked` (line 7457). With nothing missing or drifted, the new branch at line 7473 (`doable and
+asked`) clears `oldDismissed` and recurses into the renaming box again. Probe in
+`%TEMP%\rev0059c3` (`later` run at once, `loadoutGaps` stubbed to `{}, {}`, after the check at line
+9739): three clicks of "Not now" give `Not now->Tag them/3` each time, `oldDismissed` nil at the end.
+In the client the box closes and is back 0.2 s later. Only Escape or the X gets out; the two
+buttons are "Tag them" and a "Not now" that does not. This is the second review's own path: a player
+who kept an untagged "Raid", let Create make `[CP] Raid`, then asks More > Make the planned loadouts,
+sees "Raid deleted" and a "Not now" that keeps offering it until they press the button that deletes
+it. No check clicks "Not now" on that box. Fix: the re-offer after "Not now" must not land in the
+"asked, show the renaming again" branch (for example re-offer with a marker that the renaming was
+just declined, and in that case say "Every planned build is saved" and stop), plus a check that
+clicks "Not now" there and sees no box.
+
+Lower, not blocking: "Tag old loadouts" re-offers with `offerLoadouts(true)`; a mutation making it
+`offerLoadouts()` survives (the login path would then return "dismissed" after an earlier login
+"Not now", and the button would do nothing). A one-line check would pin it.
+
+Security. Unchanged: identity is a name; game names pass `canRead`; no new event registration or
+input path; nothing leaves the client.
+
+UI surface: the two offer boxes. Not looked at: no agent can run the client. The last criterion
+stays `proves: manual`.
