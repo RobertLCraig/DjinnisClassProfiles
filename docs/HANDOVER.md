@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.50.0, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
-_Last updated: 2026-09-25 (v0.50.0: nothing offers the planned loadouts on its own; a right-click saves one build, card `0065`. v0.49.0: builds from Warcraft Logs, card `0064`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+**Status:** v0.51.0, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
+_Last updated: 2026-09-25 (v0.51.0: a right-click on a build opens a menu, never acts; nothing offers the loadouts on its own, card `0065`. v0.49.0: builds from Warcraft Logs, card `0064`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -236,18 +236,18 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Trap on `0033`: a key prompt that returns every login while **Apply** does nothing. `0035` waits until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on `0028`, then `.\update-gear-plan.ps1 <ids>`.
 
-The cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.50.0 (deployed 2026-09-25). **Refresh the builds**: `python wcl-builds.py`, then `python update-builds.py` (it stops when the JSON is over 14 days old), then `python wcl-builds.py` again so the report compares the new builds.
+The cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.51.0 (deployed 2026-09-25). **Refresh the builds**: `python wcl-builds.py`, then `python update-builds.py` (it stops when the JSON is over 14 days old), then `python wcl-builds.py` again so the report compares the new builds.
 
 Trap (card `0059`): only a loadout named `[CP] <build>` is the addon's. The spare is `[CP*] `, a swap's new one `[CP+] `; always build a name with `PlanTab.tag`, `spareName` or `swapName`. `PlanTab.savedLoadoutNames()` keys a tagged loadout by its BUILD name and returns untagged build-named ones third, so `saved[build]` never finds the player's own "Raid".
 Trap (card `0060`): a make deferred to the talent window's close is re-asked through `PlanTab.askAgain`, never replayed, and `importOne` refuses to delete the worn loadout. Keep both: the window is where loadouts get switched.
 Trap (cards `0059`, `0062`): the server takes one loadout change at a time. A second rename, delete, import or switch in the same frame is refused and no API says it is busy. Send a list through `PlanTab.startTagging`, never a loop; `0063` is Reset still sending two at once.
 Trap: `[IO.File]` in PowerShell resolves a relative path against .NET's current directory, not the shell's. Use absolute paths.
-Next after the in-game checks: `0061` (Rob picks: drop or zero-hash the three Dreamgrove M+ rows), then `0063`.
+Next after the in-game checks: `0057` (the build manager: your own builds in SavedVariables, then copy, import, rename, delete in the row menu), `0061` (Rob picks), then `0063`.
 Trap: the offline check must pass under Lua 5.1 (`"C:\Program Files (x86)\Lua\5.1\lua.exe"`), which the game runs; which one plain `lua` gives depends on the shell.
 
 Trap (card `0064`): build precedence is PIN, then Warcraft Logs (`wcl-builds.json`), then Dreamgrove, then wowvalor or SimC (`SIMC_TIER`, move it each season). A druid boss row's build is pooled over the bosses its loadout backs in `PlanTab.BOSSES`, so regrouping a row moves builds; run `wcl-builds.py` after. A build name is 24 letters at most (`NAME_MAX`). SimC writes free hero keystones as bought; `ungrant` fixes that, do not remove it.
 Trap: `PlanTab.RETIRED_TAGGED` is the only list whose "[CP] X" copies the addon deletes; a retired name from before the tag (card `0059`) keeps its tagged copy. Retire a dropped build name there.
-Trap (card `0065`): the loadout box opens only when asked (More > Make the planned loadouts, `/dcp loadouts`); login, a spec change and the old-loadout queue offer nothing. A right-click in the sidebar only MAKES a missing build (`PlanTab.saveOne`), never resets one, and with the talent window open the names wait in `PlanTab.saveWaiting`, because `whenTalentsClose` holds one job.
+Trap (card `0065`): Rob's rule, a right-click opens a menu and never acts. The row menu is `PlanTab.rowMenuItems` (plain data, drawn by `fillMenu`); card `0057` adds copy, import, rename and delete to it. The loadout box opens only when asked (More > Make the planned loadouts, `/dcp loadouts`). Save waits in `PlanTab.saveWaiting` while the talent window is open, because `whenTalentsClose` holds one job; Reset refuses with the window open.
 
 ## Blockers / open questions
 - **The `DjinnisBiS` stub is not in the game folder** (checked 2026-09-25). A character that logs in

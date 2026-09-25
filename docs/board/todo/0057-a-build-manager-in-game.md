@@ -54,6 +54,13 @@ string checks and the "what would Set up do" plan are pure and go in the self-te
 
 ## Comments
 
+**2026-09-25, Claude.** The row menu exists (card `0065`, v0.51.0): a right-click in the list
+beside the talent window opens `PlanTab.rowMenuItems`, with Wear it, Save to the game, Reset to the
+plan... and Export.... Rob: "right clicks should open menus... part of the menu I also suggested
+previously about being able to edit/import/export/delete each build". Export is done. Copy, Import,
+Rename and Delete go into that same menu once "your builds" are stored. The "Set up this character"
+button is on hold: Rob parked making loadouts automatically (card `0065`).
+
 **2026-09-24, Claude.** Written from Rob's message. Not started. Prior art to read first:
 `docs/research/talent-loadout-addons.md` (TalentLoadoutsEx's list, ImprovedTalentLoadouts'
 account-wide builds) and `DjinnisClassProfiles` (card `0035`).
