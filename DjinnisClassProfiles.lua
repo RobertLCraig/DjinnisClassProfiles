@@ -8983,6 +8983,7 @@ function PlanTab.applyBars(key, from)
 		c.keysUndo = c.keysUndo or (withKeys and nowKeys or nil)
 	end
 	local placed, skipped = PlanTab.placeBars(layout.slots)
+	layout.from = nil  -- a made layout, loaded once, is offered as any other (card 0051)
 	local keys, refused = 0, {}
 	if withKeys then keys, refused = PlanTab.placeKeys(layout.keys) end
 	c.barsAfter, c.keysAfter = PlanTab.readBars(), PlanTab.readKeys()
@@ -9195,6 +9196,9 @@ function PlanTab.offerBars(asked)
 		if asked then PlanTab.say("No saved layout for " .. (spec or "this spec") .. ". Click " .. GOLD .. "More > Save bars for this spec|r" .. GREY .. " on the character whose bars are right.") end
 		return "none"
 	end
+	-- a made layout (card 0051) is not offered at login until it has been
+	-- loaded once through Load bars, which shows it first (0051 review)
+	if not asked and barsDB()[key].from then return "made" end
 	if not asked and key == PlanTab.barsSeen then return "seen" end
 	if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerBars(asked) end) return "busy" end
 	PlanTab.barsSeen = key
@@ -9273,6 +9277,9 @@ function PlanTab.slotSource(slot, from, to)
 	local fromPage, toPage = PlanTab.FORM_PAGE[from] or 0, PlanTab.FORM_PAGE[to]
 	local fight = toPage or 0
 	if slot > fight and slot <= fight + 12 then return fromPage + slot - fight, "move" end
+	-- a druid that fights in a form: bar 1 is its caster form, a form page
+	-- like the others (0051 review: caster Moonfire became Sundering Roar)
+	if toPage and fight > 0 and slot <= 12 then return slot, "keep" end
 	if slot > 72 and slot <= 120 then
 		-- another class's pages there are its own (a rogue's stealth bar)
 		if not toPage then return slot, "here" end
@@ -9281,28 +9288,57 @@ function PlanTab.slotSource(slot, from, to)
 	return slot, "move"
 end
 
+-- A druid talent that takes the place of a spell the sheet names: its
+-- category is that spell's (0051 review, on Rob's real Feral bars). Keyed
+-- without capitals. The game's own GetBaseSpell covers the rest (api.base).
+PlanTab.BAR_ALIASES = {
+	["frantic frenzy"] = "Feral Frenzy",
+	["incarnation: avatar of ashamane"] = "Berserk",
+	["incarnation: guardian of ursoc"] = "Berserk",
+	["incarnation: chosen of elune"] = "Celestial Alignment",
+}
+
+-- The category of the druid spell `id` in `from`: by its name, a known
+-- stand-in's, or the spell it overrides.
+function PlanTab.categoryOfSpell(from, id, api)
+	local name = api.name(id)
+	local cat = PlanTab.categoryOf(from, name) or PlanTab.categoryOf(from, PlanTab.BAR_ALIASES[(name or ""):lower()])
+	if cat or not api.base then return cat, name end
+	local base = api.base(id)
+	return base and base ~= id and PlanTab.categoryOf(from, api.name(base)) or nil, name
+end
+
 -- `layout`, a `from` druid layout, as `to`'s. `api` answers for this
--- character: name(id), known(id), find(name) a known spell's id, and `here`
--- its bars now. Answers the layout and the skip lines. Pure, for /bis test.
+-- character: name(id), base(id), known(id), find(name) a known spell's id,
+-- and `here` its bars now. A button with nothing to give keeps what it has
+-- (0051 review: a load cleared 41 of Rob's Warlock buttons). Answers the
+-- layout and the lines of buttons left as they are. Pure, for /bis test.
 function PlanTab.translateBars(layout, from, to, api)
 	local slots, skipped = {}, {}
-	local function skip(slot, why) skipped[#skipped + 1] = ("slot %d: %s"):format(slot, why) end
+	local function skip(slot, why)
+		slots[slot] = api.here[slot]
+		skipped[#skipped + 1] = ("slot %d: %s"):format(slot, why)
+	end
 	for slot = 1, PlanTab.BAR_SLOTS do
 		local src, how = PlanTab.slotSource(slot, from, to)
 		local a
 		if PlanTab.barSlot(slot) then
 			if how == "here" then a = api.here[slot] else a = layout.slots[src] end  -- not and/or: an empty slot here is nil
 		end
-		if not a or how == "here" then
+		if how == "here" or not PlanTab.barSlot(slot) then
 			slots[slot] = a
+		elseif not a then
+			slots[slot] = api.here[slot]  -- nothing on the druid's button: this one stays
 		elseif a.type == "macro" or a.type == "flyout" then
-			-- a druid's macro or flyout means nothing to another class
-			if PlanTab.FORM_PAGE[to] then slots[slot] = a else skip(slot, ("the druid's %s %s"):format(a.type, tostring(a.name or a.id))) end
+			-- an account macro is every character's (1 to 120, as findMacro
+			-- reads them); a character macro or a flyout is the druid's own
+			local account = a.type == "macro" and a.index and a.index <= 120
+			if PlanTab.FORM_PAGE[to] or account then slots[slot] = a else skip(slot, ("the druid's %s %s"):format(a.type, tostring(a.name or a.id))) end
 		elseif a.type ~= "spell" then
 			slots[slot] = a  -- an item, a pet or a mount is no class's
 		else
-			local name = api.name(a.id)
-			local cat = how == "move" and PlanTab.categoryOf(from, name)
+			local cat, name
+			if how == "move" then cat, name = PlanTab.categoryOfSpell(from, a.id, api) else name = api.name(a.id) end
 			local cell = cat and PlanTab.BAR_ABILITIES[to] and PlanTab.BAR_ABILITIES[to][cat]
 			if cat and (cell or "") == "" then
 				skip(slot, ("%s is %s, which %s leaves empty"):format(name, PlanTab.BAR_CATEGORIES[cat], to))
@@ -9338,13 +9374,29 @@ function PlanTab.barsApi()
 			return ok and canRead(n) and n or nil
 		end,
 		known = known,
+		base = function(id)
+			local ok, base = pcall(C_Spell.GetBaseSpell, id)
+			return ok and canRead(base) and base or nil
+		end,
+		-- by name the game answers the override (Wither for Immolate); the bar
+		-- reads the base spell back, so the base is stored, or the offer would
+		-- never read "already match" (0051 review)
 		find = function(name)
 			local ok, id = pcall(C_Spell.GetSpellIDForSpellIdentifier, name)
-			if not (ok and canRead(id) and id) then return nil end
-			return known(id) and id or nil
+			if not (ok and canRead(id) and id and known(id)) then return nil end
+			local okBase, base = pcall(C_Spell.GetBaseSpell, id)
+			return okBase and canRead(base) and base or id
 		end,
 		here = PlanTab.readBars(),
 	}
+end
+
+-- The template `spec` copies now: its role's, or Feral while that has no
+-- saved layout. The menu names this one, so it never says one and uses another.
+function PlanTab.templateNow(spec)
+	local from = PlanTab.templateFor(spec)
+	if from and not barsDB()[from] and barsDB().Feral then from = "Feral" end
+	return from
 end
 
 -- /dcp bars from [druid spec], and More > Make bars from your druid's. Saves
@@ -9362,8 +9414,7 @@ function PlanTab.barsFrom(from, confirmed)
 		for key in pairs(PlanTab.FORM_PAGE) do if key:lower() == asked then from = key end end
 		if not from then PlanTab.say("Name a druid spec: Feral, Balance, Guardian or Resto.") return "none" end
 	else
-		from = PlanTab.templateFor(spec)
-		if from and not barsDB()[from] and barsDB().Feral then from = "Feral" end
+		from = PlanTab.templateNow(spec)
 	end
 	if not from or from == spec then PlanTab.say(("%s is the layout the others copy, so there is nothing to make it from."):format(spec)) return "none" end
 	local template = barsDB()[from]
@@ -9389,7 +9440,7 @@ function PlanTab.barsFrom(from, confirmed)
 	local n = 0
 	for _ in pairs(layout.slots) do n = n + 1 end
 	barsDB()[spec] = layout
-	PlanTab.say(("Made the %s layout from your %s bars: %d slots, %d left empty. Hover %sLoad bars: spec|r%s to see it on your bars. Nothing changes until you load it.")
+	PlanTab.say(("Made the %s layout from your %s bars: %d slots, %d buttons left as they are. Hover %sLoad bars: spec|r%s to see it on your bars. Nothing changes until you load it.")
 		:format(spec, from, n, #skipped, GOLD, GREY))
 	for _, line in ipairs(skipped) do print("  " .. line) end
 	PlanTab.barsChanged()
@@ -9443,7 +9494,7 @@ function PlanTab.menuItems(where)
 		add({ text = "Save bars for this build", tip = "Your action bars and key bindings now, kept for the loadout you have selected.", fn = function() PlanTab.saveBars(true, true) end })
 		add({ text = "Undo bars", tip = "Puts back the action bars and key bindings from before the last load.", fn = PlanTab.undoBarsAsk })
 	end
-	local template = PlanTab.templateFor(playerSpec())
+	local template = PlanTab.templateNow(playerSpec())
 	if template then
 		add({ text = ("Make bars from your %s bars"):format(template), tip = "Your druid's layout, each button given this spec's ability for the same job (Bellular's keybinding categories). It is saved as this spec's layout. Nothing changes on your bars until you load it.", fn = function() PlanTab.barsFrom() end })
 	end
@@ -11775,46 +11826,56 @@ function PlanTab.barCategoryChecks(check)
 	local d = db()
 	local keptBars = d.bars
 	local ok, err = pcall(function()
-		PlanTab.BAR_CATEGORIES = { "Combat 1", "Combat 2", "Interrupt", "Taunt/Quick Access" }
+		PlanTab.BAR_CATEGORIES = { "Combat 1", "Combat 2", "Interrupt", "Taunt/Quick Access", "Combat 6", "Combat 9", "Combat 11" }
 		PlanTab.BAR_ABILITIES = {
-			Feral = { "Shred", "Rake", "Skull Bash", "Prowl" },
-			Guardian = { "Mangle", "Thrash", "Skull Bash", "Growl" },
-			Resto = { "Wrath", "Starfire", "", "Prowl" },
-			Destruction = { "Incinerate", "Conflagrate/Shadowburn", "", "" },
+			Feral = { "Shred", "Rake", "Skull Bash", "Prowl", "Feral Frenzy", "Berserk", "Moonfire" },
+			Guardian = { "Mangle", "Thrash", "Skull Bash", "Growl", "Moonfire", "Berserk", "Sundering Roar" },
+			Resto = { "Wrath", "Starfire", "", "Prowl", "Regrowth", "Tranquility", "Wild Growth" },
+			Destruction = { "Incinerate", "Conflagrate/Shadowburn", "", "", "Rain of Fire", "Summon Infernal", "Cataclysm" },
 		}
 		local ids = { Shred = 1, Rake = 2, ["Skull Bash"] = 3, Prowl = 4, ["Cat Form"] = 5, Mangle = 6, Thrash = 7, Growl = 8,
-			Wrath = 9, Starfire = 10, Incinerate = 11, Conflagrate = 12, Shadowburn = 13 }
-		local names = {}
+			Wrath = 9, Starfire = 10, Incinerate = 11, Conflagrate = 12, Shadowburn = 13, ["Feral Frenzy"] = 14, ["Frantic Frenzy"] = 15,
+			Berserk = 16, ["Incarnation: Avatar of Ashamane"] = 17, Moonfire = 18, ["Rain of Fire"] = 19, ["Summon Infernal"] = 20,
+			Regrowth = 21, Tranquility = 22, ["Improved Shred"] = 23, ["Sundering Roar"] = 25, ["Wild Growth"] = 26, Cataclysm = 27 }
+		local names, bases = {}, { [23] = 1 }  -- Improved Shred overrides Shred, as the game's GetBaseSpell says
 		for name, id in pairs(ids) do names[id] = name end
 		local function api(knownNames, here)
 			local known = {}
 			for _, name in ipairs(knownNames) do known[ids[name]] = true end
 			return { name = function(id) return names[id] end, known = function(id) return known[id] or false end,
+				base = function(id) return bases[id] or id end,
 				find = function(name) return known[ids[name]] and ids[name] or nil end, here = here or {} }
 		end
 		local S = function(name) return { type = "spell", id = ids[name] } end
 		local feral = { slots = {
-			[1] = S("Wrath"), [13] = S("Rake"), [14] = { type = "macro", name = "MO Rake" }, [15] = { type = "item", id = 5512 },
-			[73] = S("Shred"), [74] = S("Rake"), [75] = S("Cat Form"), [76] = S("Prowl"), [77] = S("Skull Bash"), [98] = S("Mangle"),
+			[1] = S("Wrath"), [2] = S("Moonfire"), [13] = S("Rake"), [14] = { type = "macro", name = "MO Rake", index = 130 },
+			[15] = { type = "item", id = 5512 }, [16] = { type = "macro", name = "0 - OneButton", index = 3 },
+			[73] = S("Shred"), [74] = S("Rake"), [75] = S("Cat Form"), [76] = S("Prowl"), [77] = S("Skull Bash"),
+			[78] = S("Frantic Frenzy"), [79] = S("Incarnation: Avatar of Ashamane"), [80] = S("Improved Shred"), [98] = S("Mangle"),
 		}, keys = { ["1"] = "ACTIONBUTTON1" } }
 		local function spell(layout, slot) local a = layout.slots[slot] return a and (a.type == "spell" and names[a.id] or a.type) or "-" end
 		local function row(layout, slots) local out = {} for _, s in ipairs(slots) do out[#out + 1] = spell(layout, s) end return table.concat(out, " ") end
 
 		-- a Warlock: bar 1 is the button the cat's Shred shows on
-		local lock, skipped = PlanTab.translateBars(feral, "Feral", "Destruction", api({ "Incinerate", "Shadowburn" }, { [73] = S("Incinerate") }))
-		check(t .. ", each button takes the same job's ability, from the cat page", row(lock, { 1, 2, 3, 4, 5, 13 }), "Incinerate Shadowburn - - - Shadowburn")
+		local lock, skipped = PlanTab.translateBars(feral, "Feral", "Destruction",
+			api({ "Incinerate", "Shadowburn", "Rain of Fire", "Summon Infernal" }, { [73] = S("Incinerate"), [4] = S("Incinerate"), [20] = S("Shadowburn") }))
+		check(t .. ", each button takes the same job's ability, from the cat page", row(lock, { 1, 2, 3, 4, 5, 13 }), "Incinerate Shadowburn - Incinerate - Shadowburn")
+		-- 0051 review: Rob's cat bar holds the talents that replace the sheet's spells
+		check(t .. ", a talent standing in for the sheet's spell finds its job", row(lock, { 6, 7, 8 }), "Rain of Fire Summon Infernal Incinerate")
 		check(t .. ", the rest are listed, each with why", #skipped .. "/" .. tostring(table.concat(skipped, "\n"):find("Prowl is Taunt/Quick Access, which Destruction leaves empty", 1, true) ~= nil)
 			.. "/" .. tostring(table.concat(skipped, "\n"):find("Cat Form: no category", 1, true) ~= nil), "4/true/true")
-		check(t .. ", a druid macro is left out, an item carried", spell(lock, 14) .. "/" .. spell(lock, 15), "-/item")
+		check(t .. ", a button with nothing to give keeps what it has", spell(lock, 4) .. "/" .. spell(lock, 20), "Incinerate/Shadowburn")
+		check(t .. ", a character macro is left out, an account one and an item carried", spell(lock, 14) .. "/" .. spell(lock, 16) .. "/" .. spell(lock, 15), "-/macro/item")
 		check(t .. ", the class's own pages 73 to 120 stay as they are", spell(lock, 73) .. "/" .. spell(lock, 98), "Incinerate/-")
 		check(t .. ", the keys come whole, as a copy", tostring(lock.keys["1"]) .. "/" .. tostring(lock.keys ~= feral.keys), "ACTIONBUTTON1/true")
 		-- a Guardian: the bear page takes the cat page, the other forms stay the druid's
-		local bear = PlanTab.translateBars(feral, "Feral", "Guardian", api({ "Mangle", "Thrash", "Skull Bash", "Growl", "Cat Form", "Shred", "Prowl" }))
-		check(t .. ", a druid's fighting page is its form's", row(bear, { 97, 98, 99, 100, 101 }), "Mangle Thrash Cat Form Growl Skull Bash")
+		local bear = PlanTab.translateBars(feral, "Feral", "Guardian", api({ "Mangle", "Thrash", "Skull Bash", "Growl", "Cat Form", "Shred", "Prowl", "Moonfire", "Berserk" }))
+		check(t .. ", a druid's fighting page is its form's", row(bear, { 97, 98, 99, 100, 101, 102, 103, 104 }), "Mangle Thrash Cat Form Growl Skull Bash Moonfire Berserk Mangle")
 		check(t .. ", its other form pages keep what it knows, and its macros", row(bear, { 73, 74, 14 }), "Shred - macro")
+		check(t .. ", its caster bar is a form page too, not moved", row(bear, { 1, 2 }), "- Moonfire")
 		-- a Resto druid fights on bar 1
-		local tree = PlanTab.translateBars(feral, "Feral", "Resto", api({ "Wrath", "Starfire", "Prowl" }))
-		check(t .. ", Resto fights on bar 1", row(tree, { 1, 2, 4 }), "Wrath Starfire Prowl")
+		local tree = PlanTab.translateBars(feral, "Feral", "Resto", api({ "Wrath", "Starfire", "Prowl", "Regrowth", "Tranquility" }))
+		check(t .. ", Resto fights on bar 1", row(tree, { 1, 2, 4, 6, 7 }), "Wrath Starfire Prowl Regrowth Tranquility")
 
 		-- the command: saved as the spec's layout, and one there asked about first
 		local said, printed, asked = {}, {}, nil
@@ -11830,7 +11891,8 @@ function PlanTab.barCategoryChecks(check)
 		check(t .. ", with no druid layout it says what to save", PlanTab.barsFrom() .. "/" .. tostring(said[#said]:find("No saved Balance layout", 1, true) ~= nil), "none/true")
 		d.bars = { Feral = feral }
 		check(t .. ", with no Balance layout the Warlock copies Feral", PlanTab.barsFrom() .. "/" .. tostring(d.bars.Destruction and d.bars.Destruction.from), "made/Feral")
-		check(t .. ", and the skips are in chat", #printed, 4)
+		check(t .. ", and the skips are in chat", #printed, 6)
+		check(t .. ", and it is not offered at login before it is loaded once", PlanTab.offerBars(), "made")
 		local mine = { slots = {}, saved = "2026-09-24" }
 		d.bars.Destruction = mine
 		check(t .. ", one there already is asked about first", PlanTab.barsFrom() .. "/" .. tostring(d.bars.Destruction == mine), "ask/true")

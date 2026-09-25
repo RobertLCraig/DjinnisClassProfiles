@@ -184,3 +184,26 @@ Security:
 
 The card stays in ai-review. Findings 1 to 3 need fixing before Rob's run, from Feral to his own
 Balance, Guardian and Resto, can show him what the card means.
+
+**2026-09-25, Claude.** Review findings fixed, v0.54.3.
+
+1. Fixed. A druid talent that replaces a spell the sheet names gets that spell's category.
+   `PlanTab.BAR_ALIASES` lists Frantic Frenzy and the three Incarnations. For any other one,
+   the game's `C_Spell.GetBaseSpell` is asked (`api.base`).
+2. Fixed. For a druid that fights in a form (Guardian, Balance), bar 1 is its caster form. It is
+   copied the way the other form pages are, not moved through the categories.
+3. Fixed, with a changed rule. A button with nothing to give keeps what it has now: nothing on the
+   druid's button, a job the target leaves empty, or a spell it does not know. So a load only
+   places spells and never clears one. The chat line says "left as they are". The card's "left
+   empty" is now "left as it is".
+4. Fixed.
+   - An account macro (index 1 to 120) carries to any class. A character macro does not.
+   - The menu names the template actually used (`templateNow`).
+   - A made layout is not offered at login until it has been loaded once. `applyBars` clears
+     its `from` mark.
+5. Partly fixed. A spell found by name is stored as its base spell (`GetBaseSpell`), which is what
+   the bar reads back. Whether a name lookup ignores capitals is still for the game to show.
+
+Breaking each fix made 2 to 5 checks fail (seven breaks). All three modes end "no FAIL lines".
+
+For Rob, in game: after loading, `/dcp bars` should say the bars "already match".
