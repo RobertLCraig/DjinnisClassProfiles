@@ -207,3 +207,120 @@ Balance, Guardian and Resto, can show him what the card means.
 Breaking each fix made 2 to 5 checks fail (seven breaks). All three modes end "no FAIL lines".
 
 For Rob, in game: after loading, `/dcp bars` should say the bars "already match".
+
+**2026-09-25, Claude (second review of 1cc6d99).** Holds. The three findings that blocked it are
+fixed, and on Rob's real Feral layout each target's main cooldown and core ability now lands. What
+is left is small, or can only be checked in game. It moves to human-review.
+
+What I ran:
+- `offline-check.lua`, alone and with 250 and 62. Each ends "no FAIL lines", and I read the whole
+  output.
+- Eleven mutations, on a temp copy with the DjinnisBiS stub beside it:
+  - Eight made 1 to 5 checks fail: the made skip, the caster bar, `skip` keeping `here`, an empty
+    druid button keeping `here`, account macros, the Frantic Frenzy alias, the base fallback, and
+    the Feral fallback in `templateNow`.
+  - Three made none. Two are fixes with no check behind them (finding 4). The third, `find`
+    storing the override instead of the base, cannot be checked offline.
+- The shipped functions, loaded straight from the file, on a copy of Rob's SavedVariables
+  (`DjinnisCPDB.bars` holds Feral, three Feral builds and Destruction), from Feral to
+  Destruction, Guardian, Balance and Resto.
+  - Spell names came from wago.tools `SpellName` and Raidbots `talents.json`, fetched by curl.
+  - Destruction used Rob's saved Destruction layout as `here`. The druid specs have no saved
+    layout, so their `here` was empty.
+  - `known` meant every active talent of the target spec, some baseline spells, and whatever is in
+    `here`. That is generous, so this checks the mapping, not what is talented.
+
+The main cooldowns and core abilities now land:
+- **Destruction:** Rain of Fire at 11 (Frantic Frenzy's button), and Summon Infernal at 32
+  (Incarnation's button). Also Conflagrate 1, Incinerate 2, Cataclysm 3, Shadowburn 5, Chaos Bolt 7,
+  Malevolence 8, Immolate 9, Soul Fire 10 and Spell Lock 12.
+- **Guardian bear page:** Thrash, Mangle, Swipe, Ironfur, Frenzied Regeneration, Convoke, Maul,
+  Lunar Beam, Moonfire at 107 and Skull Bash. Berserk is at 32.
+- **Guardian caster bar:** kept, with Moonfire still at 2 and 9. Nothing on it becomes Sundering
+  Roar.
+- **Balance:** Starfire, Wrath, Starsurge, Sunfire, Convoke, Moonfire, Fury of Elune and Solar Beam
+  on the moonkin page, and Celestial Alignment at 32. Starfall at 119 is found as the right job,
+  Combat 6. It came out "not known" only because my stub had no baseline Starfall.
+- **Resto:** Rejuvenation, Lifebloom, Swiftmend and Tree of Life on bar 1. Regrowth is at 11 and
+  Tranquility at 32.
+- **A load on the maker clears nothing** in any of the four.
+
+Findings:
+
+1. **Keeping what a button has makes duplicates.** A spell stays on its old button wherever the
+   druid's button is empty (9351) or skipped (9339). The translation can place the same spell
+   again somewhere else. On Rob's Destruction layout, 10 spells end up on two or more buttons
+   through this:
+   - Havoc stays at 6 and is also placed at 17.
+   - Conflagrate 1 and 49, Cataclysm 3 and 18, Soul Fire 10 and 61.
+   - Malevolence 8 and 14, and kept at 52.
+   - Also Fear, Dark Pact, Drain Life, Unending Resolve and Soulstone.
+
+   The old key still casts the Warlock spell, so the old habit and the druid one both work. The
+   preview does not show those buttons as changed. This is what the rule Rob chose does. It is his
+   call whether a spell the layout places elsewhere should be dropped from its old button, and
+   listed.
+2. **The chat line undercounts** (9463). It says "13 buttons left as they are" for Destruction.
+   Another 34 keep what they have silently, because the druid's button is empty (9350-9351). The
+   count is only of the skip lines.
+3. **`find` stores the base spell. Rob's own bars suggest the bar may hold the override** (9408).
+   - His saved Destruction layout has Wither (445468) at slot 10, not Immolate. His Feral layout
+     has Incarnation: Avatar of Ashamane (102543) at 32, not Berserk.
+   - So a bar can hold an override id. Blizzard's `TutorialHelper:GetActionButtonBySpellID`
+     matches `GetActionInfo`'s id against the base and the override, both, so the UI does not
+     assume either.
+   - Whether `C_Spell.PickupSpell(Immolate)` then reads back as Immolate or as Wither is still
+     unproved. If it is Wither, slot 9 (and Berserk on the bear page) never matches after a load.
+     The preview stays amber there. Once `from` is cleared, the login offer comes back once a
+     session, saying it "would change 1 slot".
+   - The in-game check is the same as before: load, then `/dcp bars` should say "already match".
+   - Side note: the Blizzard code that resolves a talent that replaces a spell (Ice Cold to Ice
+     Block, in `Blizzard_CooldownBroadcaster.lua`) uses `C_SpellBook.FindBaseSpellByID`, not
+     `C_Spell.GetBaseSpell`. So `api.base` may not cover Incarnation-type talents. The four aliases
+     do cover Rob's.
+4. **Two fixes have no check.** Taking out `layout.from = nil` in `applyBars` (9006), or putting
+   `templateFor` back in the menu (9517), leaves every check passing.
+   - Without the first, a made layout is never offered at login again.
+   - Without the second, the menu names a template it does not use.
+5. **A spell with no readable name, whose base has a category, stops the make (low).**
+   - `categoryOfSpell` can return a category through `api.base` with `name` nil (9327-9328).
+   - Both skip lines then run `("%s is %s ..."):format(name, ...)` (9364, 9369). Lua 5.1 raises
+     "bad argument #1 to 'format' (string expected, got nil)". I reproduced this with the shipped
+     code and a stub.
+   - Nothing is saved, and the error is Lua's. It needs `GetSpellName` to fail on a spell that is
+     on the bar, which is unlikely. `name or ("spell " .. a.id)` fixes it.
+6. **"A load never clears a button" is true for the maker at the time it is made.** The layout is
+   the spec's, for every character.
+   - Loaded on another Warlock, it puts the maker's kept buttons there and clears any button the
+     maker had empty.
+   - The same happens if the maker changes the bars before loading.
+   - This is card 0033's rule for any spec layout, so it is not a defect. It is a wording to keep
+     in mind when telling Rob what the rule promises.
+
+What held:
+- **The made skip.** Only Load bars: spec and an asked `/dcp bars` Apply reach `applyBars` with the
+  spec key, and both clear `from`. A build layout has its own key and never had `from`.
+- **Profiles.** A profile is built by `captureBars`, so `from` is never set on one. Clearing it on a
+  profile writes nil over nil.
+- **Undo.** Undo does not bring `from` back. A made layout that was loaded and then undone is
+  offered at login like any other, which is card 0033's rule.
+- **`api.base` returning an id with no name.** `api.name(base)` is nil, `categoryOf` answers nil,
+  and it falls through to "no category".
+- **The base id in `find`.** A spell with no override gets its own id back
+  (`GetBaseSpell`: "Returns the spellID passed in if there is no override"). The call is `pcall`ed
+  and `canRead`-checked.
+- **`IsSpellKnownOrInSpellBook`** still counts overrides by default.
+- **Items, account macros, and a Warlock's own pages 73-120.**
+- **The caster bar** for Guardian and Balance. Resto still fights on bar 1.
+
+Security:
+1. **Weakest point.** Unchanged: a third party's sheet writes into shipped code. A newline inside a
+   category name would break the file's load, and `offline-check.lua` would catch it. There is no
+   way to inject code.
+2. **Unchecked.** The kept `here` actions come from this character's own bars, and the template
+   from Rob's SavedVariables. Both are trusted and neither is filtered. `/dcp bars from <name>` is
+   still limited to the four druid specs.
+3. **What it leaks.** Nothing leaves the client. The skip lines go only to his own chat.
+
+For Rob: finding 1 is the one to decide. Findings 2, 4 and 5 are small fixes. Finding 3 is the
+`/dcp bars` "already match" check, after loading.
