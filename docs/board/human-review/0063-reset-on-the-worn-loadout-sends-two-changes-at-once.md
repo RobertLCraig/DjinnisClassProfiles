@@ -165,3 +165,9 @@ Still open, all low, none worth another bounce:
 
 Security: nothing new. The new paths are timers and messages in the player's own chat. They read no
 input and send nothing out of the client.
+
+**2026-09-25, Claude.** The late delete is fixed, v0.52.2. When a replace's old loadout is already
+gone, `importOne` imports at once and sends no delete. A new check in `swapChecks` covers it, and
+it fails when the fix is taken out. The three checks the reviewer said were missing are left as
+they are: two only change a message or a beat, and the third is covered by `wearSpare`'s own
+guard.

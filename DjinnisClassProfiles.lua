@@ -7144,9 +7144,15 @@ function PlanTab.importOne(job)
 		-- whoever asked, and whenever: deleting the loadout you wear drops you to
 		-- the starter build (0060 review, a job worked out before a switch)
 		if job.replace == PlanTab.selectedConfigID() then return false, "it is the loadout you are wearing now, so it is not replaced. Pick another, then click again" end
-		if not C_ClassTalents.DeleteConfig(job.replace) then return false, "the game would not delete the old one" end
-		job.goneID, job.replace, job.deleted = job.replace, nil, true  -- gone: a retry only imports
-		return "deleted"
+		-- gone already: a delete that landed after the queue gave up on it (second 0063 review)
+		-- so it is imported now
+		if PlanTab.configName(job.replace) == nil then
+			job.replace, job.deleted = nil, true
+		else
+			if not C_ClassTalents.DeleteConfig(job.replace) then return false, "the game would not delete the old one" end
+			job.goneID, job.replace, job.deleted = job.replace, nil, true  -- gone: a retry only imports
+			return "deleted"
+		end
 	end
 	local ok, err = C_ClassTalents.ImportLoadout(configID, entries, job.name, job.code)
 	if not ok and (not err or err == "") then err = ("the game refused without saying why (%d talents sent)"):format(#entries) end
@@ -10997,6 +11003,11 @@ function PlanTab.swapChecks(check)
 		drain()
 		check(t .. ", nor a rename onto its name in a swap", swap.result .. "/" .. table.concat(calls, "|") .. "/" .. tostring(saidAny("did not go in time")) .. "/" .. tostring(PlanTab.swapping), "old kept/delete 1/true/nil")
 		lost = false
+		-- that delete landing late, before the final pass: the old one is gone, so it is only imported (second 0063 review)
+		live, calls, said, busyUntil = {}, {}, {}, now
+		PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } })
+		drain()
+		check(t .. ", a replace whose old one is gone already only imports", table.concat(calls, "|") .. "/" .. tostring(saidAny("Made 1 of 1")), "import [CP] Raid: Vashnik/true")
 
 		-- the fence holds everywhere a loadout changes, and a group setup waits for the swap
 		local held = {}
