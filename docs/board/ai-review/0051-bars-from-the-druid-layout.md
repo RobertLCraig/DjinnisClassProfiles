@@ -88,3 +88,99 @@ spec, then load it.
 Two things Rob may want to know. A spell the character has not talented is left empty, since the
 game will not give its id; talent first, then make the bars. And Rob's saved Destruction layout is
 only replaced if he says Replace.
+
+**2026-09-25, Claude (review of 56e4111).** Does not hold. The code does what the fixture says, but
+run on Rob's real Feral layout it leaves out each target spec's main cooldown and one core
+ability. It also rewrites the caster bar of Guardian and Balance, which the comment above says it
+leaves alone.
+
+What I ran. `python update-bar-categories.py --check` says Already current. `offline-check.lua`,
+alone and with 250 and 62, ends "no FAIL lines" each time, and I read the whole output. I tried six
+mutations on a temp copy: case-sensitive `categoryOf`, macros dropped for a druid target, only the
+first of "A/B", another class's 73-120 cleared, the Replace question skipped, and an unknown spell
+with no category kept. Each one made 1 to 4 checks fail. I also ran the shipped `translateBars`,
+taken from the file, against a copy of Rob's SavedVariables. Spell names came from Wowhead
+tooltips, and I checked the sheet's cells against Raidbots `talents.json`. I tested Feral to
+Destruction, Guardian, Balance and Resto.
+
+Findings:
+
+1. **The sheet names the base talent, and Rob's bars hold the other one.** The Feral column (line
+   723) has Feral Frenzy for Combat 6 and Berserk for Combat 9. Rob's cat page holds Frantic Frenzy
+   (slot 83) and Incarnation: Avatar of Ashamane (slot 32). Both are real talents, but neither is in
+   any Feral category, so `categoryOf` (9258) finds nothing. For another class they are skipped. For
+   a druid target they are kept only if known (9314). The result on Rob's real layout:
+   - Destruction gets no Rain of Fire and no Summon Infernal anywhere.
+   - The Guardian bear page gets no Moonfire and no Berserk or Incarnation.
+   - Balance gets no Starfall and no Celestial Alignment.
+   - Resto's bar 1 gets no Regrowth and no Tranquility.
+
+   The same thing happens to any choice node or Incarnation Rob plays. Acceptance 1 passes on the
+   fixture but not on his bars. Fix: an alias list in the generator (choice-node partners, and each
+   Incarnation mapped to the spell it replaces), or look up `C_Spell.GetBaseSpell(id)`'s name when
+   the name itself has no category.
+2. **A druid target's caster bar goes through the categories.** `slotSource` (9272-9281) only keeps
+   slots 73-120. For Guardian and Balance, slots 1-12 are caster form, but they fall through to
+   "move" at 9281. So Rob's caster-form Moonfire (slots 2 and 9) becomes Sundering Roar on Guardian
+   and Force of Nature on Balance. Neither of those belongs on the caster bar. This contradicts the
+   build comment's "a druid target's other form pages keep the template's spells it knows".
+3. **A load clears everything the template leaves empty, and the chat does not say so.**
+   `placeBars` (8647) clears any slot the layout has as nil. Rob's saved Destruction layout has 64
+   slots. The translated one leaves 41 of them nil, so a load removes all 41. Most sit where the
+   druid bar is empty (bars 5 and 6, and 169-175). They include Create Healthstone, Soulstone at
+   170, Demonic Gateway, Ritual of Summoning, Channel Demonfire, Shadowfury and his Warlock macros.
+   The chat line says "35 slots, 16 left empty", and the skip list names only druid buttons. Only
+   the amber preview shows the 41. Undo does put them back. Fix: fill a slot the template leaves
+   empty from `api.here`, as 73-120 already are, or at least list what a load will clear.
+4. **Account macros are dropped for another class** (9299-9300). Rob's druid and his Warlock both
+   hold "0 - OneButton", so it is account-wide. The saved `index` can tell an account macro (up to
+   120) from a character one.
+5. **The menu names a template it may not use.** The item says "Make bars from your Balance bars"
+   (9448). With no Balance layout saved, `barsFrom` quietly uses Feral instead (9366). The chat
+   line afterwards does name Feral.
+6. **Not provable here, so check in game.**
+   - `api.find` (9341) passes the sheet's spelling to `GetSpellIDForSpellIdentifier` unchanged:
+     "Incarnation: Tree Of Life" and "Between The Eyes", where the game says "Tree of Life" and
+     "Between the Eyes". The API doc does not say whether a name lookup ignores case.
+   - The same doc says a lookup by name "will always check for an override", so an overridden
+     spell (Immolate under Wither) may come back as the override's id.
+   - `IsSpellKnownOrInSpellBook` counts overrides by default (`includeOverrides` true), so that id
+     passes `known`.
+   - What nobody can tell offline is whether `GetActionInfo` then reports the same id after the
+     load. If it does not, `sameAction` never matches that slot. The preview stays amber and
+     `offerBars` offers the layout at every login and talent change. The check: load, then
+     `/dcp bars` should say "already match".
+   - Placeholder cells ("Res", "Mount", "Poisons", "Weapon Buffs", "Call Pet 1") never resolve and
+     are skipped with a reason, which is harmless.
+7. **The login offer can bypass the preview (minor).** Suppose a spec had no layout before. The
+   next TRAIT_CONFIG_UPDATED or login runs `offerBars`, which shows an Apply prompt for the new
+   layout, with no preview, on every character in that spec. The build comment says it goes on
+   only through Load bars.
+
+What held:
+- The form pages. Bartender4's `StateBar.lua` gives cat bonus bar 1, bear 3 and moonkin 4, on page
+  6 + index. Dominos' `barStates/Standard.lua` agrees, which puts Cat at 73-84, Bear at 97-108 and
+  Moonkin at 109-120. Blizzard's source does not list them.
+- Another class's 73-120 are taken from its bars now.
+- Items, mounts and pets carry over.
+- The Replace question, and the spec-changed guard behind it.
+- The keys are copied, not shared. For Rob the copy is a no-op: his Feral and Destruction layouts
+  hold the same 180 keys.
+- The `from` field is a spec name and nothing reads it back.
+- Every game read in `barsApi` is behind `pcall` and `canRead`.
+- The generator stops on a changed header or a repeated category, and escapes quotes and
+  backslashes.
+
+Security:
+1. **Weakest point.** A third party's public sheet writes into shipped code. Quotes and
+   backslashes are escaped, and `clean()` collapses a newline inside an ability cell. But a
+   category name (`row[3]`) is only stripped at its ends, so a newline inside one would put a raw
+   newline in a Lua string. The file would then not load. `offline-check.lua` would catch that
+   before a release, and there is no way to inject code.
+2. **Unchecked.** `/dcp bars from <name>` is checked against the four druid spec names. The template
+   comes from Rob's own SavedVariables and is trusted. Its keys are bound whole, without a filter.
+3. **What it leaks.** Nothing leaves the client. The skip lines go only to his own chat. The
+   generator makes one GET to docs.google.com with an addon-named user agent.
+
+The card stays in ai-review. Findings 1 to 3 need fixing before Rob's run, from Feral to his own
+Balance, Guardian and Resto, can show him what the card means.
