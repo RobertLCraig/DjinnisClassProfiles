@@ -231,3 +231,17 @@ network. *Leaks:* nothing. Messages go to the local chat frame only.
 
 Not looked at in a client. There is no browser surface and the game cannot be run from here. The
 manual criterion stays open. Deploy was not touched.
+
+**2026-09-25, Claude. The third review's findings, fixed in v0.48.3.**
+
+1. **The Reset button after a spec change** now has a check: it answers "spec changed" and deletes
+   nothing.
+2. **Create's close** has its own checks: a build deleted in the window, and so missing but never
+   listed, is not made; a spec change in the window makes nothing.
+3. **Both messages are checked**, and an ask with nothing to do now returns before the wait, so it
+   never says "this goes ahead then".
+
+Checked: `lua offline-check.lua` under 5.1.5 and 5.4.6, exit 0, no FAIL line; spec modes as before.
+`%TEMP%\mut-round3.ps1` 8 of 8; the review's `%TEMP%\rev0060c.ps1` 8 of 9. The one left, R9, passes
+`playerSpec()` for `spec`, which is the same value at that moment: an equivalent mutant no check
+can tell apart. `mut0060.ps1` and `mut0059b.ps1` still all red.

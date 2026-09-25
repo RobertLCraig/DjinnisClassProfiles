@@ -232,3 +232,11 @@ the client. The new code adds no input path.
 
 UI surface: the two offer boxes. Not looked at: no agent can run the client. The last criterion
 stays `proves: manual`.
+
+**2026-09-25, Claude. The second review's finding, fixed in v0.48.3.** No empty box: when the
+renaming was declined and nothing is missing or drifted, the login offer stays quiet, and an
+explicit ask (More > Make the planned loadouts) shows the renaming's own box again, with its list.
+"Tag old loadouts" on the Create / Reset box now opens that list first and changes nothing itself.
+Checked: three new checks in `PlanTab.tagChecks`; `%TEMP%\mut-round3.ps1` breaks "empty box back"
+and "Tag old acts at once" are both red. The card's length (the review's minor) is its comment
+thread; pruning it is Rob's call under the board rules, so it is left.

@@ -7069,6 +7069,7 @@ end
 -- `swaps` are worn loadouts to replace once the queue is done
 -- (PlanTab.swapSelected). `again` is the ask that worked the jobs out.
 function PlanTab.makeLoadouts(jobs, wear, swaps, again)
+	if #jobs == 0 and not (swaps and #swaps > 0) then return "nothing" end  -- before any wait (third 0060 review)
 	local why = PlanTab.loadoutFence(wear ~= nil)
 	-- the talent window open is no reason to make Rob click twice (Rob,
 	-- 2026-09-24): the work waits for the window to close. It is ASKED again
@@ -7081,7 +7082,6 @@ function PlanTab.makeLoadouts(jobs, wear, swaps, again)
 	end
 	if why then PlanTab.say(why) return "fenced" end
 	if #jobs == 0 then
-		if not (swaps and #swaps > 0) then return "nothing" end
 		for _, swap in ipairs(swaps) do PlanTab.swapSelected(swap) end
 		return "swapping"
 	end
@@ -7467,7 +7467,13 @@ function PlanTab.offerLoadouts(asked)
 		if asked then PlanTab.say(("%d builds have no loadout of their own and no room for one. Double-click them in the list beside the talent window: they are worn through the spare."):format(#missing)) end
 		missing = {}
 	end
-	if #missing == 0 and #drifted == 0 and not doable then
+	if #missing == 0 and #drifted == 0 then
+		-- nothing else to ask: an explicit ask shows the renaming again, the
+		-- login offer stays quiet (second 0059 review: no empty box)
+		if doable and asked then
+			PlanTab.oldDismissed[spec] = nil
+			return PlanTab.offerLoadouts(true)
+		end
 		if asked then PlanTab.say("Every planned " .. spec .. " build is saved, and each one matches the plan.") end
 		return "complete"
 	end
@@ -7486,7 +7492,11 @@ function PlanTab.offerLoadouts(asked)
 		for _, name in ipairs(drifted) do lines[#lines + 1] = "  |cffffb300" .. name .. "|r" end
 		buttons[#buttons + 1] = { label = "Reset to plan", onClick = PlanTab.askAgain(PlanTab.resetDrifted, spec, drifted) }
 	end
-	if doable then buttons[#buttons + 1] = { label = "Tag old loadouts", onClick = PlanTab.tagOld } end
+	-- it opens the renaming's own box, which lists what is renamed and deleted
+	if doable then buttons[#buttons + 1] = { label = "Tag old loadouts", onClick = function()
+		PlanTab.oldDismissed[spec] = nil
+		PlanTab.later(0.2, function() PlanTab.offerLoadouts(true) end)
+	end } end
 	buttons[#buttons + 1] = { label = "Not now", onClick = function() PlanTab.offerDismissed[spec] = true end }
 	PlanTab.prompt("Djinni's Class Profiles: " .. spec .. " loadouts", lines, buttons)
 	return "shown"
@@ -8613,6 +8623,12 @@ function PlanTab.loadoutChecks(check)
 	local resetTest = "Reset to plan deletes a drifted loadout and makes it again"
 	calls, strings[1] = {}, sen
 	check(resetTest .. ", it is offered", PlanTab.offerLoadouts(true) and shown.buttons[2].label, "Reset to plan")
+	-- third 0060 review: a box left open across a spec change resets nothing
+	local wasSpecBox = C_SpecializationInfo
+	C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 102 end }
+	local resetClicked = shown.buttons[2].onClick()
+	C_SpecializationInfo = wasSpecBox
+	check(resetTest .. ", its button after a spec change resets nothing", resetClicked .. "/" .. #calls, "spec changed/0")
 	check(resetTest, PlanTab.resetDrifted(), "started")
 	check(resetTest .. ", delete then import, by name", table.concat(calls, "|"), "delete [CP] Raid: Nek'Zali|import [CP] Raid: Nek'Zali")
 	-- Rob, 2026-09-24, "JUST FIX IT": the one you are wearing is no dead end.
@@ -8702,6 +8718,31 @@ function PlanTab.loadoutChecks(check)
 	if hide then hide() end
 	C_SpecializationInfo = wasSpecAPI
 	check(swapTest .. ", a spec change in the window makes nothing on close", #calls .. "/" .. tostring(printed[#printed]:find("spec changed", 1, true) ~= nil), "0/true")
+	-- third 0060 review: the same guards on Create's close, and the two messages
+	worn()
+	strings[1] = nek  -- Nek'Zali holds its plan, so only the others are missing
+	PlanTab.closeHooked, PlanTab.onTalentsClose, windowOpen, hide = nil, nil, true, nil
+	check(swapTest .. ", Create waits for the window too", PlanTab.createMissing(), "waiting")
+	check(swapTest .. ", and a second ask says it replaces the first", PlanTab.resetDrifted() == "nothing" and PlanTab.createMissing() == "waiting" and table.concat(printed, "\n"):find("replaces what was waiting", 1, true) ~= nil, true)
+	names[1], windowOpen = nil, false  -- Nek'Zali deleted in the window: missing now, but never listed
+	if hide then hide() end
+	check(swapTest .. ", Create on close makes only what it listed", table.concat(calls, "|"):find("Nek'Zali", 1, true), nil)
+	check(swapTest .. ", and the rest it did", #calls > 0, true)
+	for id = 61, swapID do names[id], strings[id] = nil, nil end
+	worn()
+	PlanTab.closeHooked, PlanTab.onTalentsClose, windowOpen, hide = nil, nil, true, nil
+	strings[1] = nek
+	PlanTab.createMissing()
+	C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 102 end }
+	windowOpen = false
+	if hide then hide() end
+	C_SpecializationInfo = wasSpecAPI
+	check(swapTest .. ", Create after a spec change in the window makes nothing", #calls .. "/" .. tostring(printed[#printed]:find("spec changed", 1, true) ~= nil), "0/true")
+	calls = {}
+	check(swapTest .. ", nothing left of what was listed is said", PlanTab.resetDrifted({ ["Not a build"] = true }) .. "/" .. tostring(printed[#printed]:find("Nothing left to do", 1, true) ~= nil), "nothing/true")
+	windowOpen = true
+	check(swapTest .. ", and never promised for later", PlanTab.resetDrifted({ ["Not a build"] = true }) .. "/" .. tostring(printed[#printed]:find("goes ahead then", 1, true) == nil), "nothing/true")
+	windowOpen = false
 	PlanTab.closeHooked, PlanTab.onTalentsClose = nil, nil
 	worn()
 	check(swapTest .. ", importOne never deletes the worn loadout", tostring((PlanTab.importOne({ name = "[CP] Raid: Nek'Zali", code = nek, replace = 1 }))) .. "/" .. #calls, "false/0")
@@ -9690,6 +9731,20 @@ function PlanTab.tagChecks(check)
 			local clicked = shown and shown.buttons[1].onClick()
 			C_SpecializationInfo = wasSpecAPI
 			check(offer .. ", its Create after a spec change makes nothing", clicked, "spec changed")
+			-- second 0059 review: declined, with nothing else to ask, is no empty box
+			local wasGaps = PlanTab.loadoutGaps
+			PlanTab.loadoutGaps = function() return {}, {} end
+			PlanTab.oldDismissed, shown = { Feral = true }, nil
+			check(offer .. ", declined and nothing else to do, the login offer is quiet", PlanTab.offerLoadouts() .. "/" .. tostring(shown), "complete/nil")
+			check(offer .. ", but asking shows the renaming again, with its list", PlanTab.offerLoadouts(true) .. "/" .. tostring(shown and shown.buttons[1].label), "old/Tag them")
+			PlanTab.loadoutGaps = function() return { "Raid: Vashnik" }, {} end
+			PlanTab.oldDismissed, shown, calls = { Feral = true }, nil, {}
+			PlanTab.offerLoadouts(true)
+			local tagButton
+			for _, b in ipairs(shown and shown.buttons or {}) do if b.label == "Tag old loadouts" then tagButton = b end end
+			if tagButton then tagButton.onClick() end
+			check(offer .. ", Tag old loadouts opens the list first and does nothing yet", tostring(shown and shown.buttons[1].label) .. "/" .. #calls, "Tag them/0")
+			PlanTab.loadoutGaps = wasGaps
 			PlanTab.oldDismissed = {}
 
 			-- finding 1: the real listing, not a stand-in
