@@ -173,3 +173,57 @@ name and a recorded id. Unchecked and leaks are unchanged: no network, local cha
 New checks: a leftover that never goes, combat in the list, combat after it, a replace at the cap,
 and a new loadout at the cap. Breaking each fix made 3, 2, 2 and 2 checks fail. All three modes end
 "no FAIL lines".
+
+**2026-09-25, Claude (third review of c6b7af6).** Does not hold: at the slot cap every job now waits
+out the 15 s give-up. Stays in `ai-review/`. Line numbers are at c6b7af6.
+
+Run: `offline-check.lua`, `250` and `62` under Lua 5.1 all end "no FAIL lines", and I read the whole
+output. Then eight probes and nine mutations, on a temp copy only.
+
+1. **:7520, medium. At the cap the queue stalls 15 s after each import.** After an import,
+   `waitThenStep` waits for `CanCreateNewConfig()` to be true. At the cap it stays false, as the code
+   itself says at :7324 and :7339, because the import has just used the freed slot. So the wait only
+   ends at `GIVE_UP`. On the timed server the spare at the cap took 34 ticks against 8 with room.
+   A Reset of two loadouts at the cap took 68 against 16: two stalls. In game that is "Making the
+   spare loadout", then nothing for about 15 s, then the build goes on. A second double-click in that
+   time says "Still making loadouts". The spare's cap path came in v0.53.1. This commit adds Reset
+   to it, where each job adds 15 s. The check "a replace at the cap goes ahead" only reads the calls,
+   so it cannot see this. Fix: at the cap, count ready as populated plus one beat, as the delete wait
+   does. Add a check that counts `now` at the cap against the same run with room.
+2. **:7330 with :7462, low. A wrong message at the cap.** The fence no longer stops a replace at the
+   cap. If the replace's old loadout is already gone and another loadout holds the slot, no call is
+   made. Chat then says `The old "Raid: Vashnik" was deleted and not made again`. This addon deleted
+   nothing. Before this commit the fence said "All N slots are used", which was true. It needs a
+   stale id, so it is rare.
+3. **:7380, low. The swap clause is untested and too strict.** Setting `replaces = true` whatever the
+   swaps are fails no check. The clause is not needed either. A swap whose new loadout must be made has
+   a job with no `replace`, and the loop already catches that. A swap with nothing to make (`newID`
+   set) only renames and deletes. So Reset at the cap with a stopped swap is fenced for no reason.
+4. **Low, wording.** Removing `MINE_WORDS.combat` fails no check. Delete old loadouts (`PlanTab.tidy`)
+   still uses `TAG_WORDS`, so combat there says to click "More > Make the planned loadouts". The
+   right item is "More > Delete old loadouts". That was the same before this commit.
+
+What held:
+- `tidied`: a leftover that never lands is sent once, and `tagging`, `q` and the timers all end.
+  The talent window opening in the beat before the tidied call gives "Close the talent window", with
+  nothing stuck. Its OnHide call tidies once more, but only because the player acted.
+- The combat lines: all three tables take count, s, was/were, GOLD and GREY, for one and for two,
+  with no format error. Only the tag line uses GOLD and GREY. Lua ignores the extra arguments.
+- Mixed jobs at the cap are fenced with no call. A replace of the worn loadout at the cap makes no
+  call, and the old one stays. Reset never sends one, since the worn one goes by swap.
+- `createMissing` never reaches the new path at the cap. `loadoutRoom` (:7696) is 0 there, so it
+  stops before any job. Only `resetDrifted` and `wearSpare` use it.
+- Mutations caught: dropping `not tidied` (3 fail), the fence change (2), the job loop (10), the
+  spare's combat words (2), the "In combat, so" line (2), "was"/"were" (2), and the tidied argument (3).
+
+Security:
+- **Weakest point:** a replace deletes by config id with no name check (:7332). `tagNext` checks the
+  name before it acts, and `importOne` does not. With the stall, a Reset of three at the cap deletes
+  the third id more than 30 s after the click. A loadout renamed in that time is still deleted.
+  Fix: carry the name in the job and skip the delete when `configName` differs.
+- **Unchecked:** the build string goes to Blizzard's header reader, and a bad one is refused before
+  any delete. SavedVariables are trusted. There is no network path.
+- **Leaks:** nothing. Chat is local and names only the player's own loadouts.
+
+No UI surface to screenshot: the change is in the queue. The in-game check is Done-when 2, plus
+Reset and a double-click at 40 of 40 slots, timing how long each takes to finish.
