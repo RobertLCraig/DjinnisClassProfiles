@@ -7424,7 +7424,7 @@ function PlanTab.promptBusy()
 	return PlanTab.promptFrame and PlanTab.promptFrame:IsShown() and true or false
 end
 
-function PlanTab.offerLoadouts(asked)
+function PlanTab.offerLoadouts(asked, declined)
 	if InCombatLockdown() then
 		if asked then PlanTab.say("Not in combat. Try again after the fight.") end  -- a click that says nothing looks broken (0053 review)
 		return "combat"
@@ -7444,7 +7444,7 @@ function PlanTab.offerLoadouts(asked)
 	-- Reset stay reachable while a player keeps an untagged one (0059 review)
 	if doable and not PlanTab.oldDismissed[spec] then
 		if not asked and PlanTab.offerDismissed[spec] then return "dismissed" end
-		if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerLoadouts(asked) end) return "busy" end
+		if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerLoadouts(asked, declined) end) return "busy" end
 		local lines = { ("%d loadout%s made before this addon tagged its own with \"%s\":"):format(#before, #before == 1 and " was" or "s were", PlanTab.TAG) }
 		for _, o in ipairs(before) do
 			lines[#lines + 1] = ("  %s%s|r  %s|r"):format(WHITE, o.from, o.stays and "stays: you are wearing it, and a tagged one is there" or o.delete and "|cffff4444deleted: a tagged one is there" or ("renamed \"" .. o.to .. "\""))
@@ -7454,7 +7454,7 @@ function PlanTab.offerLoadouts(asked)
 			{ label = "Tag them", onClick = PlanTab.tagOld },
 			{ label = "Not now", onClick = function()
 				PlanTab.oldDismissed[spec] = true
-				PlanTab.later(0.2, function() PlanTab.offerLoadouts(asked) end)  -- what is missing or drifted, next
+				PlanTab.later(0.2, function() PlanTab.offerLoadouts(asked, true) end)  -- what is missing or drifted, next
 			end },
 		})
 		return "old"
@@ -7470,15 +7470,18 @@ function PlanTab.offerLoadouts(asked)
 	if #missing == 0 and #drifted == 0 then
 		-- nothing else to ask: an explicit ask shows the renaming again, the
 		-- login offer stays quiet (second 0059 review: no empty box)
-		if doable and asked then
+		-- but not straight after its own "Not now", which would be a box that
+		-- only comes back (third 0059 review)
+		if doable and asked and not declined then
 			PlanTab.oldDismissed[spec] = nil
 			return PlanTab.offerLoadouts(true)
 		end
+		if doable and declined then PlanTab.say("Every planned " .. spec .. " build is saved. Your old untagged loadouts are left as they are.") return "complete" end
 		if asked then PlanTab.say("Every planned " .. spec .. " build is saved, and each one matches the plan.") end
 		return "complete"
 	end
 	if not asked and PlanTab.offerDismissed[spec] then return "dismissed" end
-	if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerLoadouts(asked) end) return "busy" end
+	if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerLoadouts(asked, declined) end) return "busy" end
 	local lines, buttons = {}, {}
 	if #missing > 0 then
 		lines[#lines + 1] = ("%d planned builds are not saved on this character:"):format(#missing)
@@ -9737,8 +9740,14 @@ function PlanTab.tagChecks(check)
 			PlanTab.oldDismissed, shown = { Feral = true }, nil
 			check(offer .. ", declined and nothing else to do, the login offer is quiet", PlanTab.offerLoadouts() .. "/" .. tostring(shown), "complete/nil")
 			check(offer .. ", but asking shows the renaming again, with its list", PlanTab.offerLoadouts(true) .. "/" .. tostring(shown and shown.buttons[1].label), "old/Tag them")
+			-- third 0059 review: its Not now then closes it, and it does not come back
+			local declinedBox = shown
+			shown = nil
+			declinedBox.buttons[2].onClick()
+			check(offer .. ", whose Not now then closes it for good", tostring(shown) .. "/" .. tostring(said[#said]:find("left as they are", 1, true) ~= nil), "nil/true")
 			PlanTab.loadoutGaps = function() return { "Raid: Vashnik" }, {} end
 			PlanTab.oldDismissed, shown, calls = { Feral = true }, nil, {}
+			PlanTab.offerDismissed = { Feral = true }  -- the button is an ask, whatever the login offer was told
 			PlanTab.offerLoadouts(true)
 			local tagButton
 			for _, b in ipairs(shown and shown.buttons or {}) do if b.label == "Tag old loadouts" then tagButton = b end end

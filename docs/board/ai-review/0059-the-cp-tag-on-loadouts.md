@@ -280,3 +280,10 @@ input path; nothing leaves the client.
 
 UI surface: the two offer boxes. Not looked at: no agent can run the client. The last criterion
 stays `proves: manual`.
+
+**2026-09-25, Claude. The third review's finding, fixed in v0.48.4.** "Not now" on the renaming now
+tells the next offer it was declined (`offerLoadouts(asked, declined)`, carried through the busy
+retry too). With nothing else to do it closes, and chat says the old untagged loadouts are left as
+they are; it does not come back. The minor is closed too: "Tag old loadouts" is checked to reopen
+as an ask even when the login offer was dismissed. `%TEMP%\mut-round4.ps1`: 3 of 3 caught, and
+`mut-round3.ps1` still all red. Offline check exit 0 under 5.1.5 and 5.4.6.
