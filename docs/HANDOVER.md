@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.52.4, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
-_Last updated: 2026-09-25 (v0.52.4: your own builds, copy, import, rename and delete in game, card `0057`; Reset and replace send one loadout change at a time, card `0063`. v0.51.0: a right-click on a build opens a menu, never acts; nothing offers the loadouts on its own, card `0065`. v0.49.0: builds from Warcraft Logs, card `0064`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+**Status:** v0.54.2, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
+_Last updated: 2026-09-25 (v0.54.0: another spec's bars from the druid layout, card `0051`. v0.53.x: the bonus roll verdict at the offer, card `0054`; the spare deletes one at a time, card `0067`. v0.52.4: your own builds, card `0057`; one loadout change at a time, card `0063`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -83,6 +83,10 @@ from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `tree
   its rank is `craftingQuality`; a gem family is the name without "Flawless " or "Perfect " and its
   rank is its place ordered by quality then item level. Run it after `update-gear-plan.ps1` adds
   an enchant or gem the table has never seen; `--check` exits 1 when it must be run.
+- `update-bar-categories.py` - **author tooling, never shipped.** Writes `GENERATED BAR
+  CATEGORIES` from Bellular's public keybinding sheet (card `0051`; **it fetches**, CSV, no
+  sign-in). Four spec names come twice in its header, so columns are read by position against
+  `COLUMNS`; a changed header stops the run. `--check` exits 1 when the sheet has moved.
 - `offline-check.lua` - **author tooling, never shipped.** Runs the addon's own the self-test outside
   the game, under plain Lua, by stubbing enough of Blizzard's API to load the file: `lua
   offline-check.lua`, exit code 0 for a pass. **It proves the data and the pure logic and it proves
@@ -236,13 +240,16 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Trap on `0033`: a key prompt that returns every login while **Apply** does nothing. `0035` waits until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on `0028`, then `.\update-gear-plan.ps1 <ids>`.
 
-The cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.52.4 (deployed 2026-09-25). **Refresh the builds**: `python wcl-builds.py`, then `python update-builds.py` (it stops when the JSON is over 14 days old), then `python wcl-builds.py` again so the report compares the new builds.
+The cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.54.2 (deployed 2026-09-25). **Refresh the builds**: `python wcl-builds.py`, then `python update-builds.py` (it stops when the JSON is over 14 days old), then `python wcl-builds.py` again so the report compares the new builds.
 
 Trap (card `0059`): only a loadout named `[CP] <build>` is the addon's. The spare is `[CP*] `, a swap's new one `[CP+] `; always build a name with `PlanTab.tag`, `spareName` or `swapName`. `PlanTab.savedLoadoutNames()` keys a tagged loadout by its BUILD name and returns untagged build-named ones third, so `saved[build]` never finds the player's own "Raid".
 Trap (card `0060`): a make deferred to the talent window's close is re-asked through `PlanTab.askAgain`, never replayed, and `importOne` refuses to delete the worn loadout. Keep both: the window is where loadouts get switched.
-Trap (cards `0059`, `0062`): the server takes one loadout change at a time. A second rename, delete, import or switch in the same frame is refused and no API says it is busy. Send a list through `PlanTab.startTagging`, never a loop; A delete is followed by its import or rename only once it has landed (card `0063`); `wearSpare` still loops, card `0067`.
+Trap (cards `0059`, `0062`): the server takes one loadout change at a time. A second rename, delete, import or switch in the same frame is refused and no API says it is busy. Send a list through `PlanTab.startTagging`, never a loop; A delete is followed by its import or rename only once it has landed (card `0063`); the spare too (card `0067`).
+Trap (card `0067`): at the slot cap `CanCreateNewConfig` never turns true, so `waitThenStep` takes "filled and one beat" as ready there. A replace deletes only a loadout still named as at the click (`replaceName`).
 Trap: `[IO.File]` in PowerShell resolves a relative path against .NET's current directory, not the shell's. Use absolute paths.
-Next after the in-game checks: `0061` (Rob picks), `0067` (the spare's delete loop), `0054`. `0066` (Set up this character) waits for Rob to unpark automatic loadouts.
+Next after the in-game checks: `0061` (Rob picks), `0038` (needs Rob's `taint.log`). `0066` (Set up this character) waits for Rob to unpark automatic loadouts.
+Trap (card `0051`): `placeBars` clears every slot a layout leaves nil. So a made layout copies another class's own pages 73-120 from its bars now (`slotSource` "here"). The druid form pages (`FORM_PAGE`) come from Dominos and Bartender; Blizzard's UI source does not say.
+Trap (card `0054`): the kill is kept on the character (`DjinnisCPCharDB.bonusSource`) for a roll still open after a reload. A raid's BiS is listed by boss, so with no known boss there is no verdict.
 Trap: the offline check must pass under Lua 5.1 (`"C:\Program Files (x86)\Lua\5.1\lua.exe"`), which the game runs; which one plain `lua` gives depends on the shell.
 
 Trap (card `0064`): build precedence is PIN, then Warcraft Logs (`wcl-builds.json`), then Dreamgrove, then wowvalor or SimC (`SIMC_TIER`, move it each season).
