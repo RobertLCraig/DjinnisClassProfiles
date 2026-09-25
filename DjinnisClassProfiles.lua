@@ -4160,9 +4160,40 @@ end
 -- action bars that freeze in combat (card 0002 found ClassCodex doing it).
 -- Rob ran the same call by hand on 2026-09-22: loaded, no frozen bar.
 
--- The saved loadout names for the spec as a set, or nil when the game will
--- not say. Read only, the same two calls Blizzard's frame makes to fill its
--- own dropdown (Blizzard_ClassTalentsFrame.lua, RefreshLoadoutOptions).
+-- The "[CP] " tag (card 0059). Every loadout the addon makes for a build is
+-- named PlanTab.tag(build), so a loadout the player made and called "Raid" is
+-- never read as the addon's, and never replaced. The spare (card 0040) and a
+-- swap's new loadout (card 0060) have their own marks, "[CP*] " and "[CP+] ",
+-- so each is still the addon's and a 24-letter build name fits Blizzard's 30.
+-- No caller builds a loadout name by hand: tag, untag and PlanTab.loadoutKey.
+PlanTab.TAG = "[CP] "
+PlanTab.OLD_SPARE = "BiS: "  -- the spare's mark before the tag, v0.36.0 to v0.47.x
+function PlanTab.tag(build) return PlanTab.TAG .. build end
+-- The build a tagged loadout is for, or nil for any other name.
+function PlanTab.untag(name)
+	if type(name) ~= "string" or name:sub(1, #PlanTab.TAG) ~= PlanTab.TAG then return nil end
+	return name:sub(#PlanTab.TAG + 1)
+end
+
+-- What the addon calls a saved loadout: its build for a tagged one, its own
+-- name for any other, and nil with `true` for one from before the tag. That
+-- is an untagged loadout named exactly as one of `builds`, or a spare this
+-- character made under the old mark: the addon made it, but it is not
+-- tagged, so it is neither the build nor the player's own until it is
+-- renamed (PlanTab.oldLoadouts). Pure, for the checks.
+function PlanTab.loadoutKey(name, id, builds, spares)
+	local build = PlanTab.untag(name)
+	if build then return build end
+	if (builds or {})[name] then return nil, true end
+	if spares and spares[id] and name:sub(1, #PlanTab.OLD_SPARE) == PlanTab.OLD_SPARE then return nil, true end
+	return name
+end
+
+-- The saved loadouts for the spec, or nil when the game will not say. Read
+-- only, the same two calls Blizzard's frame makes to fill its own dropdown
+-- (Blizzard_ClassTalentsFrame.lua, RefreshLoadoutOptions). Keyed by
+-- PlanTab.loadoutKey: a build's name finds its tagged loadout, a player's own
+-- is under its own name, and ones from before the tag are only in `old`.
 function PlanTab.savedLoadoutNames()
 	local spec = C_SpecializationInfo
 	if not (spec and spec.GetSpecialization and C_ClassTalents and C_ClassTalents.GetConfigIDsBySpecID
@@ -4171,18 +4202,22 @@ function PlanTab.savedLoadoutNames()
 	if not ok or not specID then return nil end
 	local okIDs, ids = pcall(C_ClassTalents.GetConfigIDsBySpecID, specID)
 	if not okIDs or type(ids) ~= "table" then return nil end
-	local names, twice = {}, {}
+	local builds, spares = PlanTab.BUILDS[playerSpec() or ""], PlanTab.spareIDs()
+	local names, twice, old = {}, {}, {}
 	for _, id in ipairs(ids) do
 		local okInfo, info = pcall(C_Traits.GetConfigInfo, id)
 		local name = okInfo and info and info.name
-		-- name -> config id; `twice` names held by more than one, which a
+		-- key -> config id; `twice` keys held by more than one, which a
 		-- replace must not guess between (0031 review)
 		if name and canRead(name) then
-			if names[name] then twice[name] = true end
-			names[name] = id
+			local key, before = PlanTab.loadoutKey(name, id, builds, spares)
+			if key then
+				if names[key] then twice[key] = true end
+				names[key] = id
+			elseif before then old[name] = id end
 		end
 	end
-	return names, twice
+	return names, twice, old
 end
 
 -- Hindsight (1.8.9) saves the last pull on each boss with the spec and the
@@ -4259,8 +4294,20 @@ function PlanTab.loadTalents(name)
 		PlanTab.openTalents()
 		return "no helper"
 	end
-	ClassTalentHelper.SwitchToLoadoutByName(name)
+	ClassTalentHelper.SwitchToLoadoutByName(PlanTab.loadoutNameOf(name, saved))
 	return "loaded"
+end
+
+-- The name the game knows a listed loadout by, for the switch by name: the
+-- config's own, which is "[CP] <build>" for a build's (card 0059). When the
+-- game would not list them, a build's is its tag and anything else is as given.
+function PlanTab.loadoutNameOf(key, saved)
+	local id = saved and saved[key]
+	if id then
+		local name = PlanTab.configName(id)
+		if name and canRead(name) then return name end
+	end
+	return (PlanTab.BUILDS[playerSpec() or ""] or {})[key] and PlanTab.tag(key) or key
 end
 
 -- TRAIT_CONFIG_UPDATED is a loadout landing, CONFIG_COMMIT_FAILED is the game
@@ -4947,7 +4994,10 @@ function PlanTab.activeLoadoutName(forSpec)
 	local okInfo, info = pcall(C_Traits.GetConfigInfo, configID)
 	local name = okInfo and info and info.name
 	if not (name and canRead(name)) then return nil end
-	name = PlanTab.spareBuild(name, configID) or name  -- the spare wears a build for it (card 0040)
+	-- the spare wears a build for it (card 0040); a loadout from before the
+	-- tag is nobody's build until it is renamed (card 0059)
+	name = PlanTab.spareBuild(name, configID) or PlanTab.loadoutKey(name, configID, PlanTab.BUILDS[specID and playerSpec() or ""], PlanTab.spareIDs())
+	if not name then return nil end
 	return name, PlanTab.talentsEdited(PlanTab.buildFor(forSpec, name))
 end
 
@@ -5020,16 +5070,9 @@ function PlanTab.simcAppend(profile)
 	local spec = playerSpec()
 	local bosses = spec and PlanTab.BOSSES[spec]
 	if not bosses then return profile end
+	-- by build name, so a tagged "[CP] X" is the build X (card 0059)
 	local saved = {}
-	if C_ClassTalents and C_ClassTalents.GetConfigIDsBySpecID and C_Traits and C_Traits.GetConfigInfo then
-		local okSpec, specID = pcall(C_SpecializationInfo.GetSpecializationInfo, C_SpecializationInfo.GetSpecialization())
-		local okIDs, ids = pcall(C_ClassTalents.GetConfigIDsBySpecID, okSpec and specID or nil)
-		for _, id in ipairs(okIDs and ids or {}) do
-			local okInfo, info = pcall(C_Traits.GetConfigInfo, id)
-			local name = okInfo and info and info.name
-			if name and canRead(name) then saved[name] = true end
-		end
-	end
+	for key in pairs(PlanTab.savedLoadoutNames() or {}) do saved[key] = true end
 	local cells = {}
 	for _, row in ipairs(bosses) do cells[row.loadout] = PlanTab.buildFor(spec, row.loadout) end
 	local lines, missing = PlanTab.simcLines(spec, bosses, saved, cells)
@@ -6250,7 +6293,8 @@ function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded,
 	local own = {}
 	local builds = spec and PlanTab.BUILDS[spec] or {}
 	for name, id in pairs(spec and saved or {}) do
-		if not builds[name] and not PlanTab.spareBuild(name, id) then
+		-- nor a swap's new loadout, which is the addon's until it is renamed (card 0059)
+		if not builds[name] and not PlanTab.spareBuild(name, id) and name:sub(1, #PlanTab.SWAP_MARK) ~= PlanTab.SWAP_MARK then
 			own[#own + 1] = { loadout = name, bosses = {}, icon = PlanTab.OWN_ICON, own = true, code = stringOf and stringOf(id) or nil }
 			if name == active then own[#own].mark = "active" end
 		end
@@ -6861,8 +6905,8 @@ end
 -- Blizzard_ClassTalentImportExport.lua calls OnTraitConfigCreateStarted for
 -- that, which addon code cannot call cleanly). Only loadouts this character
 -- made as spares, by config id, are ever deleted or hidden: a player's own
--- "BiS: M+" is theirs (0040 review).
-PlanTab.SPARE = "BiS: "
+-- "[CP*] M+" is theirs (0040 review). "BiS: " until card 0059.
+PlanTab.SPARE = "[CP*] "
 PlanTab.OWN_ICON = "Interface\\Icons\\INV_Misc_Book_09"
 -- Deleting the selected loadout drops the character to the starter build, so
 -- the spare being worn stays until the next one is on: two slots at most.
@@ -6909,15 +6953,15 @@ function PlanTab.wearSpare(name, code)
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
 	local selected, mine, deleted = PlanTab.selectedConfigID(), PlanTab.spareIDs(), 0
 	local worn = saved[PlanTab.SPARE .. name]
-	-- a "BiS: X" this character did not record (the player's, or made by
-	-- v0.36.0 to v0.37.1): a second of that name would make the switch by
-	-- name a guess, so it is left to the player (second 0040 review)
+	-- a "[CP*] X" this character did not record (the player's): a second of
+	-- that name would make the switch by name a guess, so it is left to the
+	-- player (second 0040 review)
 	-- one this session made that the list had not shown yet is ours after all
 	if worn and not mine[worn] and PlanTab.spareUnlisted[PlanTab.SPARE .. name] then
 		mine[worn], PlanTab.spareUnlisted[PlanTab.SPARE .. name] = true, nil
 	end
 	if worn and not mine[worn] then
-		PlanTab.say(("A loadout called \"%s%s\" is there already, and this addon has no record of making it (versions before 0.38 kept none). Delete or rename it in the talent window, then try again."):format(PlanTab.SPARE, name))
+		PlanTab.say(("A loadout called \"%s%s\" is there already, and this addon has no record of making it. Delete or rename it in the talent window, then try again."):format(PlanTab.SPARE, name))
 		return "taken"
 	end
 	if worn and worn == selected then
@@ -7089,8 +7133,9 @@ function PlanTab.stepLoadouts()
 		q.lastMade = job
 		if stale then q.stale = q.stale + 1 end
 	elseif q.final then
-		print(("%sDjinni's Class Profiles|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, job.name, GREY, tostring(err)))
-		if job.deleted then PlanTab.say(("The old \"%s\" was deleted and not made again. %sMore > Make the planned loadouts|r%s offers to create it."):format(job.name, GOLD, GREY)) end
+		local label = PlanTab.untag(job.name) or job.name
+		print(("%sDjinni's Class Profiles|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, label, GREY, tostring(err)))
+		if job.deleted then PlanTab.say(("The old \"%s\" was deleted and not made again. %sMore > Make the planned loadouts|r%s offers to create it."):format(label, GOLD, GREY)) end
 	else
 		q.retry[#q.retry + 1] = job
 	end
@@ -7110,7 +7155,7 @@ function PlanTab.noteMade(q)
 	if not job then return nil end
 	q.lastMade = nil
 	local id = q.pendingID
-	if not (id and PlanTab.configName(id) == job.name) then id = (PlanTab.savedLoadoutNames() or {})[job.name] end
+	if not (id and PlanTab.configName(id) == job.name) then id = (PlanTab.savedLoadoutNames() or {})[PlanTab.untag(job.name) or job.name] end
 	if job.swap then job.swap.newID = id end  -- the list can lag the import
 	local level = PlanTab.readLevels()
 	if not (id and type(level) == "number" and PlanTab.canRead(level)) then return nil end
@@ -7157,15 +7202,16 @@ end
 -- The loadout you are wearing cannot simply be deleted and made again: with
 -- none selected the game drops you to the starter build. So its reset goes the
 -- long way round (Rob, 2026-09-24: "I DONT CARE, JUST FIX IT!"). The plan is
--- made as "<name> (new)", put on through Blizzard's helper like every other
+-- made as "[CP+] <build>", put on through Blizzard's helper like every other
 -- switch (card 0011), and once it is on, the old one is deleted and the new
--- one takes the name, with C_ClassTalents.RenameConfig, the call behind
--- Blizzard's own rename box (Blizzard_ClassTalentLoadoutEditDialog.lua:56).
--- Answers what it did, for the checks. " (new)" keeps a 24-letter name in 30.
-PlanTab.SWAP_SUFFIX = " (new)"
+-- one takes the build's tagged name, with C_ClassTalents.RenameConfig, the
+-- call behind Blizzard's own rename box (Blizzard_ClassTalentLoadoutEditDialog.lua:56).
+-- Answers what it did, for the checks. "[CP+] " keeps a 24-letter name in 30,
+-- where the tag and " (new)" did not (card 0059).
+PlanTab.SWAP_MARK = "[CP+] "
 
 function PlanTab.swapSelected(swap)
-	local temp = swap.name .. PlanTab.SWAP_SUFFIX
+	local temp = PlanTab.SWAP_MARK .. swap.name
 	local newID = swap.newID
 	if not (newID and PlanTab.configName(newID) == temp) then newID = (PlanTab.savedLoadoutNames() or {})[temp] end
 	if not newID then
@@ -7196,7 +7242,7 @@ end
 
 -- The new one is on: the old one goes, and the new one takes its name.
 function PlanTab.finishSwap(swap, newID)
-	local temp = swap.name .. PlanTab.SWAP_SUFFIX
+	local temp = PlanTab.SWAP_MARK .. swap.name
 	if swap.oldID and swap.oldID ~= newID and PlanTab.selectedConfigID() ~= swap.oldID then
 		local okDelete, deleted = pcall(C_ClassTalents.DeleteConfig, swap.oldID)
 		if not (okDelete and deleted) then
@@ -7204,9 +7250,9 @@ function PlanTab.finishSwap(swap, newID)
 			return "old kept"
 		end
 	end
-	local okName, named = pcall(C_ClassTalents.RenameConfig, newID, swap.name)
+	local okName, named = pcall(C_ClassTalents.RenameConfig, newID, PlanTab.tag(swap.name))
 	if not (okName and named) then
-		PlanTab.say(("\"%s\" holds the plan and is on. Rename it to \"%s\" in the talent window."):format(temp, swap.name))
+		PlanTab.say(("\"%s\" holds the plan and is on. Rename it to \"%s\" in the talent window."):format(temp, PlanTab.tag(swap.name)))
 		return "unnamed"
 	end
 	PlanTab.say(("\"%s\" now holds the plan, and you are wearing it."):format(swap.name))
@@ -7237,7 +7283,7 @@ function PlanTab.createMissing()
 			PlanTab.say(("Room for %d of %d. The rest are worn through the spare loadout: double-click one in the list beside the talent window."):format(room, #missing))
 			break
 		end
-		jobs[#jobs + 1] = { name = name, code = builds[name] }
+		jobs[#jobs + 1] = { name = PlanTab.tag(name), code = builds[name] }
 	end
 	return PlanTab.makeLoadouts(jobs)
 end
@@ -7256,18 +7302,59 @@ function PlanTab.resetDrifted()
 		if twice and twice[name] then
 			PlanTab.say(("Two loadouts are named \"%s\", so neither is replaced. Rename or delete one in the talent window."):format(name))
 		elseif saved[name] == selected then
-			local swap, temp = { name = name, oldID = saved[name] }, name .. PlanTab.SWAP_SUFFIX
+			local swap, temp = { name = name, oldID = saved[name] }, PlanTab.SWAP_MARK .. name
 			swaps[#swaps + 1] = swap
 			-- one left by a swap that did not finish is made again from the plan
 			jobs[#jobs + 1] = { name = temp, code = builds[name], replace = saved[temp], swap = swap }
-		elseif saved[name .. PlanTab.SWAP_SUFFIX] and saved[name .. PlanTab.SWAP_SUFFIX] == selected then
+		elseif saved[PlanTab.SWAP_MARK .. name] and saved[PlanTab.SWAP_MARK .. name] == selected then
 			-- a swap stopped with the new one on: it only needs the old one gone and its name
 			swaps[#swaps + 1] = { name = name, oldID = saved[name], newID = selected }
 		else
-			jobs[#jobs + 1] = { name = name, code = builds[name], replace = saved[name] }
+			jobs[#jobs + 1] = { name = PlanTab.tag(name), code = builds[name], replace = saved[name] }
 		end
 	end
 	return PlanTab.makeLoadouts(jobs, nil, swaps)
+end
+
+-- The loadouts from before the tag (card 0059), and what becomes of each.
+-- `old` and `saved` are PlanTab.savedLoadoutNames()'s third and first. A
+-- build's untagged loadout is renamed "[CP] <build>" and an old spare
+-- "[CP*] <build>": RenameConfig keeps the talents and the slot, and the one
+-- you are wearing stays on. When a tagged one is there already the old one is
+-- deleted instead, but never the one you are wearing. Pure, for the checks.
+function PlanTab.oldLoadouts(old, saved, selected)
+	local out = {}
+	for name, id in pairs(old or {}) do
+		local spare = name:sub(1, #PlanTab.OLD_SPARE) == PlanTab.OLD_SPARE and PlanTab.spareIDs()[id]
+		local to = spare and (PlanTab.SPARE .. name:sub(#PlanTab.OLD_SPARE + 1)) or PlanTab.tag(name)
+		local taken = (saved or {})[spare and to or name] ~= nil
+		out[#out + 1] = { id = id, from = name, to = to, delete = taken or nil, stays = taken and id == selected or nil }
+	end
+	table.sort(out, function(a, b) return a.from < b.from end)
+	return out
+end
+
+-- Renames (or deletes) them, after asking. Answers the count done, or a word.
+function PlanTab.tagOld()
+	local why = PlanTab.loadoutFence(true)
+	if why then PlanTab.say(why) return "fenced" end
+	local saved, _, old = PlanTab.savedLoadoutNames()
+	if not saved then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
+	local done = 0
+	for _, o in ipairs(PlanTab.oldLoadouts(old, saved, PlanTab.selectedConfigID())) do
+		if o.stays then
+			PlanTab.say(("\"%s\" is the loadout you are wearing and \"%s\" is there already, so it stays. Pick another loadout, then click %sMore > Make the planned loadouts|r%s again."):format(o.from, o.to, GOLD, GREY))
+		else
+			local ok, did = pcall(o.delete and C_ClassTalents.DeleteConfig or C_ClassTalents.RenameConfig, o.id, not o.delete and o.to or nil)
+			if ok and did then done = done + 1
+			else PlanTab.say(("The game would not %s \"%s\"."):format(o.delete and "delete" or "rename", o.from)) end
+		end
+	end
+	PlanTab.say(("Tagged %d old loadout%s."):format(done, done == 1 and "" or "s"))
+	if PlanTab.redraw then pcall(PlanTab.redraw) end
+	-- what is still missing or drifted, once the renames have landed
+	PlanTab.later(1, function() PlanTab.offerLoadouts(true) end)
+	return done
 end
 
 -- On login, on a spec change and on /dcp loadouts: what this character is
@@ -7293,7 +7380,25 @@ function PlanTab.offerLoadouts(asked)
 		if asked then PlanTab.say("No stored builds for " .. (spec or "this spec") .. ".") end
 		return "no builds"
 	end
-	local saved = PlanTab.savedLoadoutNames()
+	local saved, _, old = PlanTab.savedLoadoutNames()
+	-- Loadouts from before the tag first (card 0059): until they are renamed
+	-- their builds read as missing, and Create would make each a second time.
+	local before, doable = PlanTab.oldLoadouts(old, saved, PlanTab.selectedConfigID()), false
+	for _, o in ipairs(before) do doable = doable or not o.stays end  -- one that only stays is no question
+	if doable then
+		if not asked and PlanTab.offerDismissed[spec] then return "dismissed" end
+		if PlanTab.promptBusy() then PlanTab.later(3, function() PlanTab.offerLoadouts(asked) end) return "busy" end
+		local lines = { ("%d loadouts were made before this addon tagged its own with \"%s\":"):format(#before, PlanTab.TAG) }
+		for _, o in ipairs(before) do
+			lines[#lines + 1] = ("  %s%s|r  %s|r"):format(WHITE, o.from, o.stays and "stays: you are wearing it, and a tagged one is there" or o.delete and "|cffff4444deleted: a tagged one is there" or ("renamed \"" .. o.to .. "\""))
+		end
+		lines[#lines + 1] = "Renaming keeps the talents. Your other loadouts are not touched."
+		PlanTab.prompt("Djinni's Class Profiles: " .. spec .. " loadouts", lines, {
+			{ label = "Tag them", onClick = PlanTab.tagOld },
+			{ label = "Not now", onClick = function() PlanTab.offerDismissed[spec] = true end },
+		})
+		return "old"
+	end
 	local missing, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.mayBeShort)
 	if not missing then return "unknown" end
 	-- no room: those builds are worn through the spare, so not offered (card 0040)
@@ -8356,7 +8461,7 @@ function PlanTab.loadoutChecks(check)
 
 	local kept = { C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil, InCombatLockdown, PlayerSpellsFrame, print, PlanTab.prompt }
 	local calls, printed, shown, combat, windowOpen, canNew = {}, {}, nil, false, false, 0
-	local names = { [1] = "Raid: Nek'Zali", [3] = "WS M+", [4] = "Rob's own" }
+	local names = { [1] = "[CP] Raid: Nek'Zali", [3] = "WS M+", [4] = "Rob's own" }
 	local strings = { [1] = nek }
 	local selected = 9
 	local api = {
@@ -8436,6 +8541,9 @@ function PlanTab.loadoutChecks(check)
 	check(makeTest .. ", each made loadout's level is noted (card 0055)", #noted, 9)
 	check(makeTest .. ", one import per missing build", #calls, 9)
 	check(makeTest .. ", never the one already saved", table.concat(calls, "|"):find("Nek'Zali", 1, true), nil)
+	local untagged = {}
+	for _, c in ipairs(calls) do if c:sub(1, 12) ~= "import [CP] " then untagged[#untagged + 1] = c end end
+	check(makeTest .. ", each under the tag (card 0059)", table.concat(untagged, "|"), "")
 	check(makeTest .. ", the busy one came back on the second pass", calls[#calls] ~= nil and calls[1] ~= calls[#calls], true)
 	check(makeTest .. ", and says the count", table.concat(printed, "\n"):find("Made 9 of 9", 1, true) ~= nil, true)
 	check(makeTest .. ", the queue is empty after", PlanTab.q, nil)
@@ -8444,7 +8552,7 @@ function PlanTab.loadoutChecks(check)
 	calls, strings[1] = {}, sen
 	check(resetTest .. ", it is offered", PlanTab.offerLoadouts(true) and shown.buttons[2].label, "Reset to plan")
 	check(resetTest, PlanTab.resetDrifted(), "started")
-	check(resetTest .. ", delete then import, by name", table.concat(calls, "|"), "delete Raid: Nek'Zali|import Raid: Nek'Zali")
+	check(resetTest .. ", delete then import, by name", table.concat(calls, "|"), "delete [CP] Raid: Nek'Zali|import [CP] Raid: Nek'Zali")
 	-- Rob, 2026-09-24, "JUST FIX IT": the one you are wearing is no dead end.
 	-- It is made as "<name> (new)", put on, the old one deleted, the new renamed.
 	local swapTest = "Reset to plan swaps the loadout you are wearing"
@@ -8455,12 +8563,12 @@ function PlanTab.loadoutChecks(check)
 	local function wear(n) calls[#calls + 1] = "wear " .. n for id, v in pairs(names) do if v == n then selected = id end end end
 	ClassTalentHelper = { SwitchToLoadoutByName = wear }
 	api.RenameConfig = function(id, n) calls[#calls + 1] = "rename " .. names[id] .. " to " .. n names[id] = n return true end
-	local function worn(id) names[1], strings[1], calls, selected = "Raid: Nek'Zali", sen, {}, id or 1 end
-	local whole = "import Raid: Nek'Zali (new)|wear Raid: Nek'Zali (new)|delete Raid: Nek'Zali|rename Raid: Nek'Zali (new) to Raid: Nek'Zali"
+	local function worn(id) names[1], strings[1], calls, selected = "[CP] Raid: Nek'Zali", sen, {}, id or 1 end
+	local whole = "import [CP+] Raid: Nek'Zali|wear [CP+] Raid: Nek'Zali|delete [CP] Raid: Nek'Zali|rename [CP+] Raid: Nek'Zali to [CP] Raid: Nek'Zali"
 	worn()
 	check(swapTest, PlanTab.resetDrifted(), "started")
 	check(swapTest .. ", made new, worn, old deleted, renamed", table.concat(calls, "|"), whole)
-	check(swapTest .. ", and the plan is the one on", names[selected] .. "/" .. tostring(strings[selected] == nek), "Raid: Nek'Zali/true")
+	check(swapTest .. ", and the plan is the one on", names[selected] .. "/" .. tostring(strings[selected] == nek), "[CP] Raid: Nek'Zali/true")
 	check(swapTest .. ", and it says so", printed[#printed]:find("now holds the plan", 1, true) ~= nil, true)
 	names[swapID] = nil
 	-- the talent window open waits for it to close, and asks for no second click
@@ -8480,27 +8588,27 @@ function PlanTab.loadoutChecks(check)
 	PlayerSpellsFrame = { IsShown = function() return windowOpen end }
 	-- a swap that stopped with the new one on only needs the old one gone and the name
 	worn()
-	names[70], strings[70], selected = "Raid: Nek'Zali (new)", nek, 70
+	names[70], strings[70], selected = "[CP+] Raid: Nek'Zali", nek, 70
 	check(swapTest .. ", a stopped swap is finished", PlanTab.resetDrifted(), "swapping")
-	check(swapTest .. ", without making another", table.concat(calls, "|"), "delete Raid: Nek'Zali|rename Raid: Nek'Zali (new) to Raid: Nek'Zali")
+	check(swapTest .. ", without making another", table.concat(calls, "|"), "delete [CP] Raid: Nek'Zali|rename [CP+] Raid: Nek'Zali to [CP] Raid: Nek'Zali")
 	names[70] = nil
 	-- the switch does not take: the old one is kept, and it says what to do
 	worn()
 	ClassTalentHelper = { SwitchToLoadoutByName = function(n) calls[#calls + 1] = "wear " .. n end }
 	PlanTab.resetDrifted()
-	check(swapTest .. ", a switch that did not take keeps the old one", table.concat(calls, "|"), "import Raid: Nek'Zali (new)|wear Raid: Nek'Zali (new)")
+	check(swapTest .. ", a switch that did not take keeps the old one", table.concat(calls, "|"), "import [CP+] Raid: Nek'Zali|wear [CP+] Raid: Nek'Zali")
 	check(swapTest .. ", and says so", printed[#printed]:find("did not go on", 1, true) ~= nil, true)
 	-- the next click remakes the leftover "(new)" from the plan, then goes on
 	calls, ClassTalentHelper = {}, { SwitchToLoadoutByName = wear }
 	PlanTab.resetDrifted()
-	check(swapTest .. ", a leftover is made again", table.concat(calls, "|"), "delete Raid: Nek'Zali (new)|" .. whole)
+	check(swapTest .. ", a leftover is made again", table.concat(calls, "|"), "delete [CP+] Raid: Nek'Zali|" .. whole)
 	names[swapID] = nil
 	-- the rename refused: the plan is on, and it says to rename it
 	worn()
 	api.RenameConfig = function() return false end
 	PlanTab.resetDrifted()
-	check(swapTest .. ", a refused rename is said", printed[#printed]:find("Rename it to \"Raid: Nek'Zali\"", 1, true) ~= nil, true)
-	check(swapTest .. ", with the plan on", names[selected], "Raid: Nek'Zali (new)")
+	check(swapTest .. ", a refused rename is said", printed[#printed]:find("Rename it to \"[CP] Raid: Nek'Zali\"", 1, true) ~= nil, true)
+	check(swapTest .. ", with the plan on", names[selected], "[CP+] Raid: Nek'Zali")
 	names[swapID] = nil
 	-- in combat nothing is made
 	worn()
@@ -8510,7 +8618,7 @@ function PlanTab.loadoutChecks(check)
 	PlanTab.later, ClassTalentHelper, PlanTab.closeHooked, PlanTab.onTalentsClose = keptLater, keptHelper0, keptHooked, keptClose
 	api.ImportLoadout, api.RenameConfig = function(_, _, name) calls[#calls + 1] = "import " .. name return true end, nil
 	for id = 61, swapID do names[id], strings[id] = nil, nil end
-	names[1], strings[1], calls, selected = "Raid: Nek'Zali", sen, {}, 9
+	names[1], strings[1], calls, selected = "[CP] Raid: Nek'Zali", sen, {}, 9
 
 	-- The card's promise: a string that will not parse, or parses to no talents,
 	-- never costs the old loadout (0031 review: moving the delete up passed).
@@ -8528,8 +8636,8 @@ function PlanTab.loadoutChecks(check)
 	PlanTab.resetDrifted()
 	check(badTest .. ", and a delete that was not made again is said", table.concat(printed, "\n"):find("was deleted and not made again", 1, true) ~= nil, true)
 	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name return true end
-	names[1], calls = "Raid: Nek'Zali", {}
-	names[5], strings[5] = "Raid: Nek'Zali", sen
+	names[1], calls = "[CP] Raid: Nek'Zali", {}
+	names[5], strings[5] = "[CP] Raid: Nek'Zali", sen
 	check(resetTest .. ", never when two loadouts share the name", PlanTab.resetDrifted(), "nothing")
 	check(resetTest .. ", and nothing is deleted then", #calls, 0)
 	names[5], strings[5] = nil, nil
@@ -8552,7 +8660,7 @@ function PlanTab.loadoutChecks(check)
 	check(tidyTest .. ", and only it", table.concat(calls, "|"), "delete WS M+")
 	check(tidyTest .. ", Rob's own is still there", names[4], "Rob's own")
 	-- "Raid: Nek'Zali" is retired from Balance and live on Feral: kept here
-	check(tidyTest .. ", a name retired elsewhere and live here is kept", PlanTab.RETIRED["Raid: Nek'Zali"] and names[1], "Raid: Nek'Zali")
+	check(tidyTest .. ", a name retired elsewhere and live here is kept", PlanTab.RETIRED["Raid: Nek'Zali"] and names[1], "[CP] Raid: Nek'Zali")
 
 	-- Card 0040. The harness answers spec 103 for each of four specs, so the
 	-- two loadouts left count as 8 used.
@@ -8583,30 +8691,30 @@ function PlanTab.loadoutChecks(check)
 	check(spareTest .. ", and makes nothing yet", #calls, 0)
 	windowOpen = false
 	PlanTab.spareOnHide()
-	check(spareTest .. ", made once the window is shut", table.concat(calls, "|"), "import BiS: Raid: Twin Fangs")
-	check(spareTest .. ", then worn through Blizzard's helper", switched[#switched], "BiS: Raid: Twin Fangs")
+	check(spareTest .. ", made once the window is shut", table.concat(calls, "|"), "import [CP*] Raid: Twin Fangs")
+	check(spareTest .. ", then worn through Blizzard's helper", switched[#switched], "[CP*] Raid: Twin Fangs")
 	selected = nextID
 	check(spareTest .. ", and read back as its build", (PlanTab.activeLoadoutName()), "Raid: Twin Fangs")
 	check(spareTest .. ", the one on already is left", PlanTab.loadTalents("Raid: Twin Fangs"), "same")
 	calls = {}
 	check(spareTest, PlanTab.loadTalents("Raid: Vashnik"), "wearing")
-	check(spareTest .. ", the spare being worn is kept until the next is on", table.concat(calls, "|"), "import BiS: Raid: Vashnik")
+	check(spareTest .. ", the spare being worn is kept until the next is on", table.concat(calls, "|"), "import [CP*] Raid: Vashnik")
 	local twinID = selected
 	selected, calls, switched = nextID, {}, {}
-	check(spareTest .. ", going back to the last one is a plain switch", PlanTab.loadTalents("Raid: Twin Fangs") .. "/" .. #calls .. "/" .. tostring(switched[1]), "worn/0/BiS: Raid: Twin Fangs")
+	check(spareTest .. ", going back to the last one is a plain switch", PlanTab.loadTalents("Raid: Twin Fangs") .. "/" .. #calls .. "/" .. tostring(switched[1]), "worn/0/[CP*] Raid: Twin Fangs")
 	selected, calls = twinID, {}
 	PlanTab.loadTalents("Raid: Lost Explorers")
-	check(spareTest .. ", then the one not worn goes", table.concat(calls, "|"), "delete BiS: Raid: Vashnik|import BiS: Raid: Lost Explorers")
-	-- 0040 review: a player's own loadout named "BiS: ..." is theirs
-	names[30], selected, calls = "BiS: M+", nextID, {}
+	check(spareTest .. ", then the one not worn goes", table.concat(calls, "|"), "delete [CP*] Raid: Vashnik|import [CP*] Raid: Lost Explorers")
+	-- 0040 review: a player's own loadout named "[CP*] ..." is theirs
+	names[30], selected, calls = "[CP*] M+", nextID, {}
 	PlanTab.loadTalents("Raid: Sszorak")
-	check(spareTest .. ", a player's own \"BiS: \" loadout is never deleted", names[30], "BiS: M+")
-	check(spareTest .. ", only this addon's spare is", table.concat(calls, "|"), "delete BiS: Raid: Twin Fangs|import BiS: Raid: Sszorak")
+	check(spareTest .. ", a player's own \"[CP*] \" loadout is never deleted", names[30], "[CP*] M+")
+	check(spareTest .. ", only this addon's spare is", table.concat(calls, "|"), "delete [CP*] Raid: Twin Fangs|import [CP*] Raid: Sszorak")
 	-- second 0040 review
-	check(spareTest .. ", a player's \"BiS: \" loadout is not read as a build", (function() selected = 30 return (PlanTab.activeLoadoutName()) end)(), "BiS: M+")
+	check(spareTest .. ", a player's \"[CP*] \" loadout is not read as a build", (function() selected = 30 return (PlanTab.activeLoadoutName()) end)(), "[CP*] M+")
 	selected = nextID
-	names[31], calls = "BiS: Raid: Coiled Altar", {}
-	check(spareTest .. ", a \"BiS: X\" it did not make is not doubled", PlanTab.loadTalents("Raid: Coiled Altar") .. "/" .. #calls, "taken/0")
+	names[31], calls = "[CP*] Raid: Coiled Altar", {}
+	check(spareTest .. ", a \"[CP*] X\" it did not make is not doubled", PlanTab.loadTalents("Raid: Coiled Altar") .. "/" .. #calls, "taken/0")
 	names[31] = nil
 	windowOpen = true
 	check(spareTest .. ", no import while the window is open, whoever asks", (PlanTab.importOne({ name = "x", code = nek })), false)
@@ -8635,7 +8743,7 @@ function PlanTab.loadoutChecks(check)
 	end
 	switched = {}
 	PlanTab.loadTalents("Raid: Ula'tek")
-	check(spareTest .. ", found by the config the queue watched when the list lags", PlanTab.spareIDs()[40] and switched[#switched], "BiS: Raid: Ula'tek")
+	check(spareTest .. ", found by the config the queue watched when the list lags", PlanTab.spareIDs()[40] and switched[#switched], "[CP*] Raid: Ula'tek")
 	api.GetConfigIDsBySpecID, Enum.TraitConfigType, names[40] = keptIDs, keptEnum, nil
 	api.ImportLoadout = function(_, _, name) calls[#calls + 1] = "import " .. name nextID = nextID + 1 names[nextID] = name return true end
 	-- third 0040 review
@@ -8645,7 +8753,7 @@ function PlanTab.loadoutChecks(check)
 	PlanTab.spareOnHide()
 	check(spareTest .. ", a loadout picked in Blizzard's dropdown wins over the waiting one", #calls, 0)
 	check(spareTest .. ", and the wish is gone after the close", PlanTab.spareWanted, nil)
-	names[41], switched = "BiS: Raid: Nymrissa", {}
+	names[41], switched = "[CP*] Raid: Nymrissa", {}
 	check(spareTest .. ", a spare that did not make it is not worn", PlanTab.wearMadeSpare({ wear = "Raid: Nymrissa", made = 0, pendingID = 41 }), "failed")
 	combat = true
 	check(spareTest .. ", a spare made in combat is kept and not worn", PlanTab.wearMadeSpare({ wear = "Raid: Nymrissa", made = 1, pendingID = 41 }) .. "/" .. #switched .. "/" .. tostring(PlanTab.spareIDs()[41]), "combat/0/true")
@@ -8653,7 +8761,7 @@ function PlanTab.loadoutChecks(check)
 	-- the watched id must hold the spare's name, or an unrelated loadout would be recorded (and later deleted)
 	check(spareTest .. ", a watched id with another name is not recorded", PlanTab.wearMadeSpare({ wear = "Raid: Twin Fangs", made = 1, pendingID = 1 }) .. "/" .. tostring(PlanTab.spareIDs()[1]), "unlisted/nil")
 	check(spareTest .. ", and it says so", printed[#printed]:find("does not list it yet", 1, true) ~= nil, true)
-	names[42] = "BiS: Raid: Twin Fangs"  -- the list catches up
+	names[42] = "[CP*] Raid: Twin Fangs"  -- the list catches up
 	check(spareTest .. ", the next ask adopts it rather than calling it someone else's", PlanTab.loadTalents("Raid: Twin Fangs"), "worn")
 	names[41], names[42] = nil, nil
 	-- the queue gave up waiting and the server has not filled it: never worn half made
@@ -9139,16 +9247,17 @@ function PlanTab.sidebarChecks(check)
 	local keptSpares = PlanTab.spareIDs()
 	DjinnisCPCharDB.spares = { [3] = true }  -- config 3 is this addon's spare; 4 is the player's own
 	list = PlanTab.sidebarList("Feral", "raid", mine, "Rob's PvP", nil,
-		{ ["Raid: Nek'Zali"] = 1, ["Rob's PvP"] = 2, ["BiS: Raid: Vashnik"] = 3, ["BiS: M+"] = 4 }, nil, nil, nil,
+		{ ["Raid: Nek'Zali"] = 1, ["Rob's PvP"] = 2, ["[CP*] Raid: Vashnik"] = 3, ["[CP*] M+"] = 4, ["[CP+] Raid: Sszorak"] = 5 }, nil, nil, nil,
 		function(id) return id == 2 and mine or nil end)
-	check(ownTest, names(list):find("; %[Your loadouts%]; BiS: M%+; Rob's PvP$") ~= nil, true)
-	check(ownTest .. ", never the spare", names(list):find("BiS: Raid", 1, true), nil)
+	check(ownTest, names(list):find("; %[Your loadouts%]; Rob's PvP; %[CP%*%] M%+$") ~= nil, true)
+	check(ownTest .. ", never the spare", names(list):find("[CP*] Raid", 1, true), nil)
+	check(ownTest .. ", nor a swap's new loadout (card 0059)", names(list):find("[CP+]", 1, true), nil)
 	check(ownTest .. ", ticked by its own string", ticked(list), "Rob's PvP")
-	check(ownTest .. ", and marked when selected", list[#list].mark, "active")
+	check(ownTest .. ", and marked when selected", list[#list - 1].loadout .. "/" .. tostring(list[#list - 1].mark), "Rob's PvP/active")
 	check(ownTest .. ", none when the game will not list them", names(PlanTab.sidebarList("Feral", "raid")):find("Your loadouts", 1, true), nil)
-	check(ownTest .. ", the spare's build is read from its name", PlanTab.spareBuild("BiS: Raid: Vashnik", 3), "Raid: Vashnik")
+	check(ownTest .. ", the spare's build is read from its name", PlanTab.spareBuild("[CP*] Raid: Vashnik", 3), "Raid: Vashnik")
 	check(ownTest .. ", and no other name", PlanTab.spareBuild("Raid: Vashnik", 3), nil)
-	check(ownTest .. ", nor the player's own \"BiS: \" loadout", PlanTab.spareBuild("BiS: M+", 4), nil)
+	check(ownTest .. ", nor the player's own \"[CP*] \" loadout", PlanTab.spareBuild("[CP*] M+", 4), nil)
 	DjinnisCPCharDB.spares = keptSpares
 
 	-- card 0042: a build with its own action bars says so
@@ -9350,6 +9459,95 @@ function PlanTab.renameChecks(check)
 		check(t .. ", a new character's is copied at its login", account == false and char and DjinnisCPCharDB.madeAt[3] == 81 and said == 2, true)
 	end)
 	DjinnisBiSDB, DjinnisBiSCharDB, DjinnisCPDB, DjinnisCPCharDB, PlanTab.say = kept[1], kept[2], kept[3], kept[4], kept[5]
+	check(t .. ", ran", ok or tostring(err), true)
+end
+
+-- Card 0059: the "[CP] " tag on every loadout the addon makes.
+function PlanTab.tagChecks(check)
+	local t = "the [CP] tag"
+	check(t .. ", tag", PlanTab.tag("Dungeon"), "[CP] Dungeon")
+	check(t .. ", untag", PlanTab.untag("[CP] Dungeon"), "Dungeon")
+	check(t .. ", untag, an untagged name", PlanTab.untag("Dungeon"), nil)
+	check(t .. ", untag, the spare's and the swap's marks are not the tag", tostring(PlanTab.untag("[CP*] Dungeon")) .. "/" .. tostring(PlanTab.untag("[CP+] Dungeon")), "nil/nil")
+	check(t .. ", untag, not a string", PlanTab.untag(nil), nil)
+	-- Blizzard's name box takes 30 letters (Blizzard_ClassTalentLoadoutDialogTemplates.xml:25)
+	local long = {}
+	for spec, builds in pairs(PlanTab.BUILDS) do
+		for name in pairs(builds) do
+			for _, mark in ipairs({ PlanTab.TAG, PlanTab.SPARE, PlanTab.SWAP_MARK }) do
+				if #(mark .. name) > 30 then long[#long + 1] = spec .. ": " .. mark .. name end
+			end
+		end
+	end
+	table.sort(long)
+	check(t .. ", every build's made names fit in 30 letters", table.concat(long, "; "), "")
+
+	local k = "a loadout's key"
+	local builds, spares = { Dungeon = "x" }, { [7] = true }
+	check(k .. ", a tagged one is its build", PlanTab.loadoutKey("[CP] Dungeon", 1, builds, spares), "Dungeon")
+	check(k .. ", a tagged one of no build is still untagged", PlanTab.loadoutKey("[CP] Gone", 1, builds, spares), "Gone")
+	check(k .. ", an untagged one named as a build is from before the tag", table.concat({ tostring(PlanTab.loadoutKey("Dungeon", 1, builds, spares)), tostring(select(2, PlanTab.loadoutKey("Dungeon", 1, builds, spares))) }, "/"), "nil/true")
+	check(k .. ", the player's own is its own name", PlanTab.loadoutKey("Rob's PvP", 1, builds, spares), "Rob's PvP")
+	check(k .. ", an old spare this character made is from before the tag", select(2, PlanTab.loadoutKey("BiS: Dungeon", 7, builds, spares)), true)
+	check(k .. ", a \"BiS: \" loadout it did not make is the player's", PlanTab.loadoutKey("BiS: Dungeon", 8, builds, spares), "BiS: Dungeon")
+
+	local o = "the loadouts from before the tag"
+	local keptSpares = PlanTab.spareIDs()
+	DjinnisCPCharDB.spares = { [7] = true }
+	local ok, err = pcall(function()
+		local list = PlanTab.oldLoadouts({ Dungeon = 1, ["Raid: Vashnik"] = 2, ["BiS: Raid: Sszorak"] = 7 }, { ["Raid: Vashnik"] = 9 }, 5)
+		local seen = {}
+		for _, e in ipairs(list) do seen[#seen + 1] = ("%s>%s%s%s"):format(e.from, e.to, e.delete and " delete" or "", e.stays and " stays" or "") end
+		check(o .. ", renamed, or deleted where a tagged one is there", table.concat(seen, "|"),
+			"BiS: Raid: Sszorak>[CP*] Raid: Sszorak|Dungeon>[CP] Dungeon|Raid: Vashnik>[CP] Raid: Vashnik delete")
+		list = PlanTab.oldLoadouts({ ["Raid: Vashnik"] = 2 }, { ["Raid: Vashnik"] = 9 }, 2)
+		check(o .. ", never the one you are wearing", list[1].stays, true)
+		list = PlanTab.oldLoadouts({ Dungeon = 2 }, {}, 2)
+		check(o .. ", but the one you are wearing is renamed, which keeps it on", tostring(list[1].delete) .. "/" .. tostring(list[1].stays), "nil/nil")
+		check(o .. ", none, nothing", #PlanTab.oldLoadouts(nil, {}, 1), 0)
+
+		-- the offer and the button, against a pretend list
+		local kept = { PlanTab.savedLoadoutNames, PlanTab.selectedConfigID, PlanTab.prompt, PlanTab.promptBusy, PlanTab.say, PlanTab.later, C_ClassTalents, InCombatLockdown, PlanTab.talentWindowOpen, PlanTab.redraw }
+		local ok2, err2 = pcall(function()
+			local calls, shown, said, selected = {}, nil, {}, 5
+			local old = { Dungeon = 1, ["Raid: Vashnik"] = 2 }
+			PlanTab.savedLoadoutNames = function() return { ["Raid: Vashnik"] = 9 }, {}, old end
+			PlanTab.selectedConfigID = function() return selected end
+			PlanTab.prompt = function(_, lines, buttons) shown = { lines = lines, buttons = buttons } end
+			PlanTab.promptBusy = function() return false end
+			PlanTab.say = function(text) said[#said + 1] = text end
+			PlanTab.later = function() end
+			PlanTab.talentWindowOpen = function() return false end
+			PlanTab.redraw = nil
+			InCombatLockdown = function() return false end
+			C_ClassTalents = {
+				RenameConfig = function(id, name) calls[#calls + 1] = "rename " .. id .. " to " .. name return true end,
+				DeleteConfig = function(id) calls[#calls + 1] = "delete " .. id return true end,
+			}
+			local offer = "the offer asks about them first"
+			check(offer, PlanTab.offerLoadouts(true), "old")
+			check(offer .. ", with one button that does it", shown and shown.buttons[1].label, "Tag them")
+			check(offer .. ", and made nothing", #calls, 0)
+			check(offer .. ", naming each", shown and table.concat(shown.lines, "\n"):find("renamed \"[CP] Dungeon\"", 1, true) ~= nil, true)
+			PlanTab.offerDismissed = {}
+			check(o .. ", tagged on the click", PlanTab.tagOld(), 2)
+			table.sort(calls)
+			check(o .. ", renamed and deleted", table.concat(calls, "|"), "delete 2|rename 1 to [CP] Dungeon")
+			calls, selected = {}, 2
+			check(o .. ", the one you are wearing is never deleted", PlanTab.tagOld() .. "/" .. table.concat(calls, "|"), "1/rename 1 to [CP] Dungeon")
+			check(o .. ", and it says why", said[#said - 1]:find("you are wearing", 1, true) ~= nil, true)
+			old = { ["Raid: Vashnik"] = 2 }
+			check(offer .. ", but not when the only one left stays", PlanTab.offerLoadouts(true) ~= "old", true)
+			InCombatLockdown, calls = function() return true end, {}
+			old = { Dungeon = 1 }
+			check(o .. ", never in combat", PlanTab.tagOld() .. "/" .. #calls, "fenced/0")
+		end)
+		PlanTab.savedLoadoutNames, PlanTab.selectedConfigID, PlanTab.prompt, PlanTab.promptBusy, PlanTab.say, PlanTab.later = kept[1], kept[2], kept[3], kept[4], kept[5], kept[6]
+		C_ClassTalents, InCombatLockdown, PlanTab.talentWindowOpen, PlanTab.redraw = kept[7], kept[8], kept[9], kept[10]
+		PlanTab.offerDismissed = {}
+		check(o .. ", the offer ran", ok2 or tostring(err2), true)
+	end)
+	DjinnisCPCharDB.spares = keptSpares
 	check(t .. ", ran", ok or tostring(err), true)
 end
 
@@ -10237,9 +10435,12 @@ local function selfTest()
 		activeString = bString
 		local name, edited = PlanTab.activeLoadoutName("Feral", "st")
 		check(editTest .. ", named and edited on the cell's loadout", name .. "/" .. tostring(edited), "DotC Raid ST */true")
-		loadout = "Raid: Nek'Zali"
+		loadout = "[CP] Raid: Nek'Zali"
 		name, edited = PlanTab.activeLoadoutName("Feral", "st")
-		check(noPlanTest .. ", another loadout of the scenario", name .. "/" .. tostring(edited), "Raid: Nek'Zali/true")
+		check(noPlanTest .. ", another loadout of the scenario", tostring(name) .. "/" .. tostring(edited), "Raid: Nek'Zali/true")
+		-- card 0059: an untagged loadout of a build's name is not the build
+		loadout = "Raid: Nek'Zali"
+		check("an untagged loadout named as a build is not read as the build", PlanTab.activeLoadoutName("Feral", "st"), nil)
 		C_ClassTalents.GetStarterBuildActive, C_ClassTalents.GetLastSelectedSavedConfigID, C_Traits.GetConfigInfo = wasStarter, wasSelected, wasInfo
 	end
 	C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString = wasActiveID, wasGenerate
@@ -10544,7 +10745,7 @@ local function selfTest()
 		PlayerSpellsUtil = { OpenToClassTalentsTab = function() opened = opened + 1 end }
 		local reads = {
 			GetConfigIDsBySpecID = function() return { 1, 2 } end,
-			GetConfigInfo = function(id) return { name = ({ "Raid: Twin Fangs", "DotC Raid ST *" })[id] } end,
+			GetConfigInfo = function(id) return { name = ({ "[CP] Raid: Twin Fangs", "DotC Raid ST *" })[id] } end,
 		}
 		-- an unknown key answers a function that does nothing, so a write call
 		-- from our code is reported by the "reads only" check, not by a crash
@@ -10569,7 +10770,7 @@ local function selfTest()
 		check(missTest .. ", in one line", #printed, 1)
 		local loadTest = "talents button loads a saved loadout through ClassTalentHelper"
 		check(loadTest, PlanTab.loadTalents("Raid: Twin Fangs"), "loaded")
-		check(loadTest .. ", by name", asked, "Raid: Twin Fangs")
+		check(loadTest .. ", by its tagged name (card 0059)", asked, "[CP] Raid: Twin Fangs")
 		check(loadTest .. ", without opening the window", opened, 1)
 		-- The loadout already loaded: the helper cannot change it, so the button
 		-- must say what will, rather than click and do nothing (Rob, 2026-09-22)
@@ -10613,7 +10814,7 @@ local function selfTest()
 			if line.button and line.button.label == "Talents" then line.button.onClick() end
 		end
 		PlanTab.boss = realBoss
-		check("drawn Talents button loads the picked boss's loadout", asked, "Raid: Twin Fangs")
+		check("drawn Talents button loads the picked boss's loadout", asked, "[CP] Raid: Twin Fangs")
 		ClassTalentHelper, PlayerSpellsUtil, C_ClassTalents, C_Traits, print, InCombatLockdown = wasHelper, wasUtil, wasTalents, wasTraits, wasPrint, wasCombat
 	end
 
@@ -12081,6 +12282,7 @@ local function selfTest()
 	PlanTab.menuChecks(check)  -- card 0053
 	PlanTab.levelChecks(check)  -- card 0055
 	PlanTab.renameChecks(check)  -- card 0058
+	PlanTab.tagChecks(check)  -- card 0059
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[CP] self-test passed|r")
