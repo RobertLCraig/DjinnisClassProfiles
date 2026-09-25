@@ -42,6 +42,32 @@ of 2026-08-29, apply to `bonusRollVerdict`:
 
 ## Comments
 
+**2026-09-25, Claude.** Review findings fixed, v0.53.2.
+
+1. Fixed. The events are registered by `PlanTab.registerRoll(frame)`. The self-test gives it a
+   frame that refuses the offer event, and `bonusOnOffer` must come out false. It also checks that
+   the real roll frame holds `SPELL_CONFIRMATION_PROMPT`. The offline stub's `IsEventRegistered`
+   now answers only for events that frame registered.
+2. Fixed, the first way the review gave. `PlanTab.bonusOwned` counts a copy as owned only at or
+   above the plan's item level. It reads worn and bag copies (`carriedLevels`); the bank's cannot be
+   read while it is shut, so a bank copy no longer makes the verdict NO. An item the plan has no
+   level for counts as owned as before, any copy.
+3. Fixed. "Lists the owned one beside the wanted" also counts the flashes.
+4. Fixed. The source keeps the instance id, and the offer uses it only in the same instance.
+   Anywhere else the verdict is for the instance.
+5. Fixed. On `PLAYER_ENTERING_WORLD` the addon reads `GetSpellConfirmationPromptsInfo()`, as
+   Blizzard's own login code does, and gives the verdict for an open bonus roll. On every loading
+   screen, not only a reload: the next point stops a second flash.
+6. Fixed. The verdict is given once per roll spell, until `SPELL_CONFIRMATION_TIMEOUT` or the next
+   kill. With 0 coins nothing flashes, as Blizzard shows no roll. Coins that cannot be read do not
+   stop it.
+7. Fixed. A boss name that is a secret is replaced by the instance name. Not checked offline: the
+   self-test cannot hand this path a secret.
+
+I broke each fix on purpose, one at a time: the offer event not registered 2 FAIL, the level
+ignored 2, no second-flash guard 4, no place match 2, no coin check 3, no login scan 4,
+`bonusOnOffer` hard-coded to true 2. All three modes end "no FAIL lines" with the fixes in.
+
 **2026-09-25, Claude (review of e09a451, 3a2a6de). Does not hold: stays in ai-review.**
 
 Ran `offline-check.lua` and `offline-check.lua 250` on HEAD (`ab17ce1`, which adds 0067 on top and
