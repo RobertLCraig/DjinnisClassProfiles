@@ -187,3 +187,47 @@ Checked as on card `0059` (same commit). New checks: a loadout the prompt never 
 touched on close; a spec change in the window makes nothing; a box's Create after a spec change
 makes nothing. `%TEMP%\mut0060.ps1` still 9 of 9, and removing the spec check or the name filter is
 red (`%TEMP%\mut0059b.ps1`).
+
+**2026-09-25, adversarial review (third pass) of b566a62, 0060's part. Back to todo.**
+
+What held. `lua offline-check.lua` at the repo root under Lua 5.4 and 5.1.5: exit 0 both, no FAIL
+line, output read whole. `%TEMP%\mut0060.ps1` 9 of 9 caught and `%TEMP%\mut0059b.ps1` 9 of 9 caught,
+run by me. `PlayerSpellsFrame` is the frame in `Blizzard_PlayerSpellsFrame.xml:5`; no new API is
+called this round. The second review's findings:
+
+1. *Re-ask wider than the click*: closed in the code. `askAgain` keeps the spec and the listed
+   names, `onlyAsked` filters both asks, the box buttons go through it, and Reset's deferred path
+   has checks for an unlisted edited loadout and a spec change.
+2. *Silence*: closed in the code. Both messages are there.
+
+What broke. The code reads right; the checks do not hold half of it. Mutations in a scratch copy
+(`%TEMP%\rev0060c.ps1`), each run green:
+
+1. **The Reset button's guard is unchecked.** `onClick = function() PlanTab.resetDrifted() end` in
+   `offerLoadouts` survives. A box left open, a spec change, then Reset: deletes and remakes the
+   other spec's drifted loadouts, which nobody was shown. The card says both buttons are guarded;
+   only Create is checked (`its Create after a spec change makes nothing`).
+2. **Create's deferred path is unchecked.** `createMissing` passing the raw `PlanTab.createMissing`
+   as `again` (no spec guard, no names), and dropping `onlyAsked` from `createMissing`, both survive.
+   Every close-path check drives `resetDrifted`. Create with the window open, then a spec change in
+   it, makes the other spec's loadouts, and it can delete an unworn `[CP+]` leftover (`replace =
+   temp`) for a name the box never listed.
+3. Minor. Neither message from the second fix has a check: removing "This replaces what was
+   waiting" or "Nothing left to do" is green. And a box click with nothing left while the window is
+   open says "Nothing left to do", then "Close it, and this goes ahead then", then "Nothing left to
+   do" again on close. `makeLoadouts` could answer `"nothing"` before the fence when there are no
+   jobs and no swaps.
+
+(`askAgain` given `playerSpec()` in place of the click's `spec` also survives, but is equivalent:
+both are read at the click.)
+
+Fix: a Reset-button spec-change check beside the Create one, a Create-with-window-open check that
+changes spec and one that edits an unlisted loadout, and checks on both messages.
+
+Security. *Weakest point:* the deferred Create and the box's Reset. Both are guarded in code, but a
+regression there brings back the second review's harm and no check would see it. *Unchecked:*
+those two paths, as above. No outside input: the build strings are baked in and nothing crosses the
+network. *Leaks:* nothing. Messages go to the local chat frame only.
+
+Not looked at in a client. There is no browser surface and the game cannot be run from here. The
+manual criterion stays open. Deploy was not touched.
