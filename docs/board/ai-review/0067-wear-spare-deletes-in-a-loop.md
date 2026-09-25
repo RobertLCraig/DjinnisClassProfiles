@@ -116,3 +116,42 @@ worn.
 
 There are new checks: the cap with an old spare, four spares, and a recorded id with another name.
 Breaking each fix made 1, 3, 1 and 2 checks fail.
+
+**2026-09-25, Claude (re-review of ab17ce1).** Does not hold: the new leftover path can loop
+forever. Stays in `ai-review/`. Line numbers are at ab17ce1. Both offline checks pass under Lua
+5.1. I reran the five probes, and added six more, on a temp copy.
+
+Held: the cap with an old spare (A: delete, import, wear). The cap with no old spare answers
+`full`. Three leftovers reach two spares, and they stay at two (B). The failure lines name
+`[CP*] Raid: Sszorak` (C, D). The old spare picked mid-queue is not deleted (E). A recorded id with
+another name is never taken.
+
+1. **:7184–7186 with :7777, medium. A leftover that will not go loops forever.** The `after`
+   callback runs whenever the list ends, whether or not the deletes landed. It calls `wearSpare`,
+   which finds the same leftover and starts tagging again. Probe F: the delete is taken but never
+   lands. After 500 ticks it had been deleted 16 times and was still going. Probe F2: the game
+   refuses the delete. 501 calls, still going. Meanwhile `PlanTab.tagging` stays set, so every
+   loadout action answers "Still working through old loadouts". Chat repeats "Deleted 0 of 1
+   leftover spare loadout" and "The game would not delete" until combat or `/reload`. Fix: tidy
+   once per click. Either `after` calls `wearSpare(name, code, true)` and a tidied call skips the
+   extras, or it runs only when `t.gone` equals `#extra`.
+2. **:7782, low. Combat mid-list gives the wrong instruction.** Probe G says "1 old loadout were
+   not done. After the fight, click More > Make the planned loadouts again". That menu never makes
+   spares, and nothing says to double-click the build again. The wording is also wrong ("1 ...
+   were"). Fix: let the words table carry the combat line.
+3. **:7127, low. Combat in the beat between the list's end and `after` gives no word.**
+   `wearSpare` returns `combat` silently. Probe H: chat says only "Deleted 1 of 1 leftover spare
+   loadout", and no spare is made. Fix: say it when called from `after`.
+4. **:7236, low. At the cap the gate cannot tell a busy server from a full one.** So the delete
+   goes into a busy server. Probe A2: `delete 3|refused|delete 3|import|wear`. It recovers through
+   the quiet retry, but a call is refused. In game a silent drop would cost the 15 s give-up.
+5. **The 0063 claim is false (low).** "This also fixes Reset's replace at the cap": Reset goes
+   through `makeLoadouts`, whose `loadoutFence(false)` (:7290, :7050) refuses at 0 free slots
+   before `importOne` runs. Probe I: "All 40 loadout slots are used". Reset at the cap is unchanged.
+   Strike the claim, or pass `anySlots` when every job is a replace.
+6. **Note:** two spares with one name share one key in `savedLoadoutNames` (`:4328`), so one is
+   never seen and never deleted (probe J). I found no path that makes such a pair. This was the
+   same before.
+
+Security: the weakest point from the first pass is closed, because a delete now needs the spare's
+name and a recorded id. Unchecked and leaks are unchanged: no network, local chat only.
