@@ -42,6 +42,16 @@ of 2026-08-29, apply to `bonusRollVerdict`:
 
 ## Comments
 
+**2026-09-25, Claude.** The third review's three low points fixed, v0.54.5.
+
+1. A kept kill counts only while the roll lasts (the prompt's duration, plus 5 s). With no
+   duration it is still 10 minutes. If the login list gives the time left rather than the full
+   time, a slow reload gets "no boss", which is safe.
+2. The `carriedLevels` check has another item at a level, so the item-id filter is proved.
+3. The kill is kept even on a character with no saved table yet.
+
+Breaking each made 2, 2 and 3 checks fail.
+
 **2026-09-25, Claude (third review of fc0c27c). Holds: moved to human-review.**
 
 The false NO after a reload is gone, and the four gaps the second review found are now proved. What

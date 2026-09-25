@@ -1759,7 +1759,7 @@ end
 -- Loot roll ----------------------------------------------------------------
 
 -- The kill, the key and the offer. Answers what it did, for the checks.
-function PlanTab.onBonusEvent(event, arg1, arg2, _, _, arg5)
+function PlanTab.onBonusEvent(event, arg1, arg2, _, arg4, arg5)
 	-- The verdicts are druid gear: on another class a kill would flash a raid
 	-- warning about loot it cannot use (0049).
 	if not PlanTab.gearHere() then return "not here" end
@@ -1786,7 +1786,10 @@ function PlanTab.onBonusEvent(event, arg1, arg2, _, _, arg5)
 		-- a reload since the kill empties it: the kill is kept on the
 		-- character for that, while it is recent (second 0054 review)
 		local kept = type(DjinnisCPCharDB) == "table" and DjinnisCPCharDB.bonusSource
-		if not source and type(kept) == "table" and kept.at and now and now - kept.at < PlanTab.BONUS_KEEP then source = kept end
+		-- no older than the roll lasts (arg4, its duration): a crash can leave an
+		-- older kill of the same raid on disk (third 0054 review)
+		local keep = canRead(arg4) and type(arg4) == "number" and arg4 > 0 and arg4 + 5 or PlanTab.BONUS_KEEP
+		if not source and type(kept) == "table" and kept.at and now and now - kept.at < keep then source = kept end
 		if source and source.place == place then return PlanTab.bonusRollVerdict(source.name, true) or "no source" end
 		-- A raid's BiS is listed by boss, so the raid's own name finds none:
 		-- no verdict, rather than a NO that keeps a coin a boss was worth.
@@ -1807,7 +1810,7 @@ function PlanTab.onBonusEvent(event, arg1, arg2, _, _, arg5)
 		local ok, prompts = pcall(GetSpellConfirmationPromptsInfo)
 		for _, p in ipairs(ok and type(prompts) == "table" and prompts or {}) do
 			if type(p) == "table" and canRead(p.confirmType) and p.confirmType == bonus then
-				return PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", p.spellID, p.confirmType, nil, nil, p.currencyID)
+				return PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", p.spellID, p.confirmType, nil, p.duration, p.currencyID)
 			end
 		end
 		return "none open"
@@ -1815,7 +1818,8 @@ function PlanTab.onBonusEvent(event, arg1, arg2, _, _, arg5)
 		return nil
 	end
 	PlanTab.bonusOffered = nil  -- a new kill, a new roll
-	if type(DjinnisCPCharDB) == "table" then DjinnisCPCharDB.bonusSource = PlanTab.bonusSource end
+	DjinnisCPCharDB = type(DjinnisCPCharDB) == "table" and DjinnisCPCharDB or {}  -- kept even on a first kill (third review)
+	DjinnisCPCharDB.bonusSource = PlanTab.bonusSource
 	if not PlanTab.bonusOnOffer then return PlanTab.bonusRollVerdict(PlanTab.bonusSource.name, true) end
 	return "remembered"
 end
@@ -11767,6 +11771,19 @@ function PlanTab.bonusChecks(check)
 		PlanTab.bonusOffered = nil
 		DjinnisCPCharDB.bonusSource.at = DjinnisCPCharDB.bonusSource.at - PlanTab.BONUS_KEEP
 		check(t .. ", a kept kill that old names nothing", PlanTab.onBonusEvent("PLAYER_ENTERING_WORLD", false, true) .. "/" .. #flashed, "no boss/1")
+		-- third review: no older than the roll lasts, so a crash's older kill is not taken
+		PlanTab.bonusOffered = nil
+		DjinnisCPCharDB.bonusSource.at = time() - 100
+		prompts = { { spellID = 99, confirmType = 1, currencyID = 0, duration = 60 } }
+		check(t .. ", a kept kill older than the roll lasts names nothing", PlanTab.onBonusEvent("PLAYER_ENTERING_WORLD", false, true), "no boss")
+		PlanTab.bonusOffered = nil
+		prompts[1].duration = 180
+		check(t .. ", one within it does", PlanTab.onBonusEvent("PLAYER_ENTERING_WORLD", false, true), "YES")
+		PlanTab.bonusOffered, flashed = nil, { "x" }
+		-- and kept on a character with no table yet
+		DjinnisCPCharDB = nil
+		PlanTab.onBonusEvent("ENCOUNTER_END", 3470, "Nek'zali", 16, 20, 1)
+		check(t .. ", the kill is kept even on a character's first", type(DjinnisCPCharDB) == "table" and DjinnisCPCharDB.bonusSource and DjinnisCPCharDB.bonusSource.name, "Nek'zali")
 		prompts = {}
 		check(t .. ", no roll open at login says nothing", PlanTab.onBonusEvent("PLAYER_ENTERING_WORLD", false, true) .. "/" .. #flashed, "none open/1")
 		flashed, printed = {}, {}
@@ -11798,7 +11815,7 @@ function PlanTab.bonusChecks(check)
 		PlanTab.carriedLevels = kept[11]
 		local worn = { [13] = "|Hitem:111::|h[Fang]|h", [14] = "|Hitem:333::|h[Other]|h" }
 		local bags = { [0] = { "|Hitem:111::|h[Fang]|h", nil, "|Hitem:111:1:|h[Fang]|h" }, [2] = {} }
-		local ilvl = { ["|Hitem:111::|h[Fang]|h"] = 723, ["|Hitem:111:1:|h[Fang]|h"] = 710 }
+		local ilvl = { ["|Hitem:111::|h[Fang]|h"] = 723, ["|Hitem:111:1:|h[Fang]|h"] = 710, ["|Hitem:333::|h[Other]|h"] = 730 }  -- another item at a level: not counted
 		GetInventoryItemLink = function(_, slotID) return worn[slotID] end
 		C_Container = { GetContainerNumSlots = function(bag) return bags[bag] and 3 or 0 end, GetContainerItemLink = function(bag, slot) return bags[bag] and bags[bag][slot] end }
 		C_Item = setmetatable({ GetDetailedItemLevelInfo = function(link) return ilvl[link] end }, { __index = keptG[12] })
