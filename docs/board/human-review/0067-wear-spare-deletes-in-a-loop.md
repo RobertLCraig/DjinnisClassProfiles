@@ -317,3 +317,75 @@ build straight after "Putting on", plus Reset of two at the cap.
 - Security point fixed. A loadout name that is a secret is not compared, and nothing is deleted.
 
 Breaking each fix made 3, 1, 2 and 3 checks fail. All three modes end "no FAIL lines".
+
+**2026-09-25, Claude (fifth review of 539a6be).** Holds, with three low findings. Moved to
+`human-review/`. Line numbers are at 87448ec.
+
+Run: `offline-check.lua`, `250` and `62` under Lua 5.1 all end "no FAIL lines", and I read the whole
+output. Then about 40 probe runs and nine mutations, on a temp copy only.
+
+The questions the fix turns on:
+- `q.lastMade` is set only when `importOne` answers true (:7549). `noteMade` clears it at the start
+  of the next step (:7574), before that step's call. So it is set in every poll after an import, and
+  nil after a delete step or a refused step. The probes follow that: the cap beat runs only after an
+  import, and a refused step at the cap takes the 3 s backoff.
+- The name lookup works for all three job kinds. `untag` strips only `"[CP] "`, so for
+  `"[CP*] X"` and `"[CP+] X"` it answers nil and the key is the full name. `savedLoadoutNames` keys
+  those loadouts by their full name too (`loadoutKey`: not a build, not the old mark, not one of
+  your builds). The spare at the cap takes 8 ticks, as with room. A `[CP+]` replace at the cap
+  takes 8, as with room.
+- If the lookup fails (the list is nil, or never shows the name), the queue waits the full 15 s
+  again: 34 ticks against 8. It needs both no event and no listing, and a loadout that never lists
+  should not be stepped past, so this is right.
+- Retry and final passes at the cap: an import in the final pass takes the cap beat, then the queue
+  ends. A delete that never lands takes two 15 s give-ups, says "did not go", and `PlanTab.q` ends.
+
+1. **:7629 with :7552, low. At the cap the busy server is waited out for about 3 s, not 15.** A
+   refused first step backs off 3 s. Then the final pass sends the delete at once, with no wait, and
+   a second refusal fails the job. Probe: the spare at the cap, server busy at the click. Busy 2 to
+   6 beats (up to 3 s) wears the spare. Busy 7, 8, 10, 14, 20 or 28 beats ends
+   `delete 3|refused|delete 3|refused` and prints "[CP*] Raid: Vashnik failed: the game would not
+   delete the old one". With room, all of those wait and wear the spare. A Reset of two copes with
+   about twice as long, because the second job's refusal adds a second backoff. The new check uses 5
+   beats, just under the limit. The game gives no busy signal at the cap, so this is a trade-off.
+   The in-game check should include it. If it bites, back off before the final pass's refused step
+   as well, up to `GIVE_UP`.
+2. **:7624–7626 and :11620, low. The fill check is untested.** Treat every loadout as filled at
+   :7626 and no check fails. The slow-fill check runs two Resets. The Reset path never reads the
+   fill, so it passes both ways (24 ticks with the fill check, 16 without). The fill check itself
+   works. The spare at the cap with a 4-beat fill is worn after 12 ticks. Without the fill check it
+   says "is made but the server has not filled it in yet". Ignoring `pendingID` in the lookup also
+   fails nothing, because the test server fires no event. Fix: run the slow case on the spare, and
+   check it ends in `wear`. Also, the `"would not delete"` half of the check at :11626 can never be
+   true: that line goes to `print`, not `say`.
+3. **:7411, low. The security guard is untested, and the claim is off.** `importOne` uses the
+   file's own `canRead`, which is always true offline. So removing the guard fails nothing. The
+   entry above says breaking it made 3 checks fail. Fix: call `PlanTab.canRead` there, as the
+   consumable reads do, so a check can hand it a secret.
+
+What held:
+- Busy at the click at the cap for up to 3 s: `delete 3|refused|delete 3|import|wear`. A Reset of
+  two at the cap with the server busy 5, 7 or 10 beats: "Made 2 of 2".
+- With the event and a slow fill, at the cap (12 ticks) and with room (11): the spare is worn.
+- An import refused after the delete lands at the cap: the free slot turns the cap clause off, and
+  the normal wait covers it (`delete 3|import|wear`).
+- Mutations caught: the lookup key without `or job.name` (1 fail), `CAP_BACKOFF` 0 (1), the fourth
+  review's beat after a refused step put back (1). Not caught: no fill check (0), no `pendingID` in
+  the lookup (0), no `canRead` guard (0), no backoff branch, so 15 s again (0), and a 6 s backoff (0).
+- Note, not from this commit: with room and no event, a slow fill is not waited for, and the spare
+  says "not filled". In game `CanCreateNewConfig` covers the fill (the comment at :7584). The test
+  server's does not, so the offline model cannot show it either way.
+
+Security:
+- **Weakest point:** the guard covers `importOne` only. `noteMade` (:7576) and `wearMadeSpare` still
+  compare a loadout name with no `canRead`. A secret name there would throw outside a `pcall` and
+  leave `PlanTab.q` set until `/reload`. Loadout names are not known to be secret, so this is
+  unlikely. The cap lookup also trusts `pendingID` with no name check, so any loadout made while
+  the queue runs is the one watched. That costs only time.
+- **Unchecked:** the build string goes to Blizzard's header reader, and a bad one is refused before
+  any delete. SavedVariables are trusted. There is no network path.
+- **Leaks:** nothing. Chat is local and names only the player's own loadouts.
+
+No UI surface to screenshot. The in-game check is Done-when 2 at 40 of 40. Double-click the next
+build straight after "Putting on", and once more while a loadout change is visibly still going.
+Then Reset of two at the cap, timing each.
