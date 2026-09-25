@@ -72,6 +72,44 @@ loadouts on its own (card `0065`), so it moved to card `0066`.
 
 ## Comments
 
+**2026-09-25, Claude (re-review of c62bec2).** Verdict: **all six findings are fixed; two
+smaller holes remain in the name rules.** The card stays in `ai-review/`. Line numbers are c62bec2's.
+
+What I ran:
+- The three offline runs (plain, `250`, `62`) under Lua 5.1, in a copy of c62bec2. All end "no
+  FAIL lines".
+- My first pass's five tests of the bugs, including the one that gave `[CP] Mine replace 21`, now
+  pass.
+- Thirteen mutations of the new code. Every one went red: the clash filing, the clash table not
+  passed, the shadow guard in `mineLoadout`, both fences, the length and base64 checks (each on its
+  own), `goodMine`'s rules and its length limit, the older-tree note, Export's string on your rows,
+  and the plan winning a name clash.
+- The clash key read everywhere a saved key is used. The active name reads "Mine (your loadout)"
+  when your own "Mine" is worn. Wear on that row switches to "Mine", its real name, through
+  `loadoutNameOf`. It is listed under Your loadouts with its own string, so Copy and Export work.
+  Bars use it as their key, which is consistent.
+
+**Still open**
+
+1. **LOW-MEDIUM. Two build names that differ only in capitals can put on the wrong loadout.**
+   `myNameProblem` (7927, 7928) compares names exactly, capitals included. Blizzard's switch by name
+   ignores capitals and takes the first match in list order
+   (`Blizzard_ClassTalentsFrame.lua:1754`, then `1732`). How it happens: you name a build
+   "dungeon" next to the plan's "Dungeon", or "MINE" next to your "Mine". Wear on "[CP] dungeon"
+   can put on "[CP] Dungeon", and the addon still says it loaded. A test added to the copy accepted
+   both names. *Fix:* in `myNameProblem`, compare `name:lower()` against the plan's names and your
+   builds' names, leaving out `except`.
+2. **LOW. A build can be named with the clash mark, and then Reset replaces your own loadout
+   again.** Neither `myNameProblem` nor `goodMine` (875) refuses a name ending in `PlanTab.CLASH`
+   (4237). How it happens: you have builds "Mine" and "Mine (your loadout)", and a loadout of your
+   own called "Mine" on this character. That loadout is filed as "Mine (your loadout)", which is
+   now a build's key. A test added to the copy got the job `[CP] Mine (your loadout) replace 21`,
+   which deletes your "Mine". Finding 1 of the first pass comes back by a deliberate name. *Fix:*
+   refuse a name ending in `PlanTab.CLASH` in both functions, and add a check.
+
+**Security:** unchanged from the first pass. Both holes are local names you type. Nothing leaves the
+client; the worst is a loadout of your own deleted (2) or the wrong one put on (1).
+
 **2026-09-25, Claude.** Review findings fixed, v0.52.3.
 
 1. Fixed. `loadoutKey` takes your builds. Your own untagged loadout named as one of them is filed
