@@ -230,12 +230,19 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Trap on `0033`: a key prompt that returns every login while **Apply** does nothing. `0035` waits until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on `0028`, then `.\update-gear-plan.ps1 <ids>`.
 
-Forty-three cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.42.0 (deployed 2026-09-24). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`.
+The cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.48.4 (deployed 2026-09-25). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`.
+
+Trap (card `0059`): only a loadout named `[CP] <build>` is the addon's. The spare is `[CP*] `, a swap's new one `[CP+] `; always build a name with `PlanTab.tag`, `spareName` or `swapName`. `PlanTab.savedLoadoutNames()` keys a tagged loadout by its BUILD name and returns untagged build-named ones third, so `saved[build]` never finds the player's own "Raid".
+Trap (card `0060`): a make deferred to the talent window's close is re-asked through `PlanTab.askAgain`, never replayed, and `importOne` refuses to delete the worn loadout. Keep both: the window is where loadouts get switched.
+Trap: the offline check must pass under Lua 5.1 (`"C:\Program Files (x86)\Lua\5.1\lua.exe"`), which the game runs; which one plain `lua` gives depends on the shell.
 
 Trap: other classes' builds come from wowvalor (`Dungeon`, can move daily, so `--check` goes stale) and SimulationCraft's `SIMC_TIER` profiles (`Raid`, none for healers or Evokers; move `SIMC_TIER` each season), card `0050`. SimC writes free hero keystones as bought; `ungrant` fixes that, do not remove it.
 Trap: every druid spec's `Dungeon` is pinned in PIN and never refreshes; Rob copies new strings with Archon's Export button (Mythic+, +7 to +21), card `0047`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
 
 ## Blockers / open questions
+- **The `DjinnisBiS` stub is not in the game folder** (checked 2026-09-25). A character that logs in
+  without it gets no copy of its old saved data. Ask Rob whether every character has logged in since
+  the rename; if not, `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without.
 - **Rob's sims for `0028`**: which loadout each spec uses at 3+ targets, and a Top Gear run per spec per scenario. Nothing else on the board is blocked.
 - **Card `0001` needs Rob in a live client.** Full restart, then three answers: does *Djinni's Class Profiles*
   appear in the minimap addon drawer, does the minimap button appear on the ring, and does hovering

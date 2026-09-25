@@ -1,5 +1,20 @@
 # 0060 "Reset to plan" replaces the loadout you are wearing
 
+## What I need from you
+
+1. With v0.48.4 in the game, wear a `[CP]` loadout whose talents you have changed by hand, then
+   click More > Make the planned loadouts > Reset to plan.
+2. Do it once more with the talent window open, and close the window.
+
+**Pass:**
+- Step 1 ends with one loadout of that name, worn, holding the plan. No `[CP+]` loadout is left.
+- Step 2 does nothing while the window is open, says it waits, and does the same on close.
+
+**Fail:** the starter build, two loadouts of one name, or a Lua error. Move the card to `todo/` with
+what you saw.
+
+**Why it needs you:** no agent can run the game client; every offline check and mutation is green.
+
 ## Why
 
 Rob, 2026-09-24, in a live client: "Dungeon" had drifted and was the loadout he wore. "Reset to
