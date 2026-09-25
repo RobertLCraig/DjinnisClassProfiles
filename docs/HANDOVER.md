@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.48.12, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
-_Last updated: 2026-09-25 (v0.48.12: old loadouts are renamed and deleted one at a time, cards `0059`/`0062`; `wcl-builds.py` pulls every spec's top builds from Warcraft Logs, card `0064`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+**Status:** v0.49.0, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
+_Last updated: 2026-09-25 (v0.49.0: every build comes from Warcraft Logs' top rankings first, card `0064`; Balance's raid rows regrouped, Guardian and Resto one `Raid`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -94,7 +94,7 @@ from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `tree
 - `wcl.py`, `wcl-builds.py` - **author tooling, never shipped.** A Warcraft Logs v2 API client and
   a report of each spec's top ranked builds (raid Mythic and M+), card `0064`. `python wcl.py probe`
   checks the key; `python wcl-builds.py [Class] [--pages N]` writes `docs/builds/wcl-report.md` and
-  `wcl-builds.json`. **It does not change `BUILDS`.** Answers cache in `.cache/wcl/` for 12 h.
+  `wcl-builds.json`. **`update-builds.py` reads that JSON**, so refresh is two commands, in this order. Answers cache in `.cache/wcl/` for 12 h.
   The key is in `.secrets/warcraftLogsClientSecrets.txt`: gitignored, in `pkgmeta.yaml`'s ignore
   list, and **never printed or committed**.
 - `Libs/LibDBIcon-1.0/` - the minimap button and, at `LibDBIcon-1.0.lua:508-526`, the runtime
@@ -236,17 +236,17 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Trap on `0033`: a key prompt that returns every login while **Apply** does nothing. `0035` waits until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on `0028`, then `.\update-gear-plan.ps1 <ids>`.
 
-The cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.48.12 (deployed 2026-09-25). **Refresh the builds** when Dreamgrove updates a guide: `python update-builds.py --check`, then without `--check`.
+The cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.49.0 (deployed 2026-09-25). **Refresh the builds**: `python wcl-builds.py`, then `python update-builds.py` (it stops when the JSON is over 14 days old), then `python wcl-builds.py` again so the report compares the new builds.
 
 Trap (card `0059`): only a loadout named `[CP] <build>` is the addon's. The spare is `[CP*] `, a swap's new one `[CP+] `; always build a name with `PlanTab.tag`, `spareName` or `swapName`. `PlanTab.savedLoadoutNames()` keys a tagged loadout by its BUILD name and returns untagged build-named ones third, so `saved[build]` never finds the player's own "Raid".
 Trap (card `0060`): a make deferred to the talent window's close is re-asked through `PlanTab.askAgain`, never replayed, and `importOne` refuses to delete the worn loadout. Keep both: the window is where loadouts get switched.
 Trap (cards `0059`, `0062`): the server takes one loadout change at a time. A second rename, delete, import or switch in the same frame is refused and no API says it is busy. Send a list through `PlanTab.startTagging`, never a loop; `0063` is Reset still sending two at once.
 Trap: `[IO.File]` in PowerShell resolves a relative path against .NET's current directory, not the shell's. Use absolute paths.
-Next after the in-game checks: `0064` (per-boss druid rows need their own boss's rankings, then Rob picks how `BUILDS` takes these builds; that also settles `0061`), then `0063`.
+Next after the in-game checks: `0061` (Rob picks: drop or zero-hash the three Dreamgrove M+ rows), then `0063`.
 Trap: the offline check must pass under Lua 5.1 (`"C:\Program Files (x86)\Lua\5.1\lua.exe"`), which the game runs; which one plain `lua` gives depends on the shell.
 
-Trap: other classes' builds come from wowvalor (`Dungeon`, can move daily, so `--check` goes stale) and SimulationCraft's `SIMC_TIER` profiles (`Raid`, none for healers or Evokers; move `SIMC_TIER` each season), card `0050`. SimC writes free hero keystones as bought; `ungrant` fixes that, do not remove it.
-Trap: every druid spec's `Dungeon` is pinned in PIN and never refreshes; Rob copies new strings with Archon's Export button (Mythic+, +7 to +21), card `0047`. Guardian and Resto have no boss rows until Rob says which raid build fits which boss.
+Trap (card `0064`): build precedence is PIN, then Warcraft Logs (`wcl-builds.json`), then Dreamgrove, then wowvalor or SimC (`SIMC_TIER`, move it each season). A druid boss row's build is pooled over the bosses its loadout backs in `PlanTab.BOSSES`, so regrouping a row moves builds; run `wcl-builds.py` after. A build name is 24 letters at most (`NAME_MAX`). SimC writes free hero keystones as bought; `ungrant` fixes that, do not remove it.
+Trap: `PlanTab.RETIRED_TAGGED` is the only list whose "[CP] X" copies the addon deletes; a retired name from before the tag (card `0059`) keeps its tagged copy. Retire a dropped build name there.
 
 ## Blockers / open questions
 - **The `DjinnisBiS` stub is not in the game folder** (checked 2026-09-25). A character that logs in
