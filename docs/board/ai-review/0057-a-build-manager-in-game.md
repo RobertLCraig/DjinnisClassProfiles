@@ -72,6 +72,25 @@ loadouts on its own (card `0065`), so it moved to card `0066`.
 
 ## Comments
 
+**2026-09-25, Claude.** Review findings fixed, v0.52.3.
+
+1. Fixed. `loadoutKey` takes your builds. Your own untagged loadout named as one of them is filed
+   as "X (your loadout)", so the build reads missing, Reset has nothing of yours to replace, and
+   the loadout stays under Your loadouts. `savedLoadoutNames` and `activeLoadoutName` pass it.
+2. Fixed. `mineLoadout` finds nothing for a name the plan now uses, so Rename and Delete change
+   only your list. The Delete box says the plan's loadout is not touched.
+3. Fixed. Rename and Delete call `changeFence` first, every time.
+4. Fixed. On your rows, an older tree is a note (`e.note`, amber in the tooltip), not a warning.
+   Your rows always carry their string, so Export stays.
+5. Fixed. There are new checks: rename and delete refused in combat, in the queue, in the renaming
+   and in a swap.
+6. Fixed. The import box and `importProblem` stop at 1000 letters (Blizzard's box's `maxLetters`,
+   `Blizzard_ClassTalentLoadoutImportDialog.xml:38`) and refuse any character outside base64.
+   `PlanTab.goodMine` keeps a hand-edited name that breaks the rules out of the list and the
+   loadout code.
+
+I broke each fix on purpose. Each break made the checks fail (2, 2, 2, 1, 1 and 1 FAIL).
+
 **2026-09-25, Claude (adversarial review of c6f3f46).** Verdict: **bounce**. One high finding, which
 is card `0059`'s trap coming back for your builds, and five smaller ones. The card stays in
 `ai-review/` for now because another session is editing `DjinnisClassProfiles.lua` for `0063`; move

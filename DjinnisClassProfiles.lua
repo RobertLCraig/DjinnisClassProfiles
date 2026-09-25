@@ -865,9 +865,16 @@ function PlanTab.buildsOf(spec)
 	local out = {}
 	for name, code in pairs(plan or {}) do out[name] = code end
 	for name, code in pairs(mine) do
-		if out[name] == nil and type(name) == "string" and type(code) == "string" then out[name] = code end
+		if out[name] == nil and PlanTab.goodMine(name, code) then out[name] = code end
 	end
 	return out
+end
+
+-- One of your builds as the saved file holds it, fit to list and make: the
+-- file is editable by hand, and the name rules are myNameProblem's (0057 review).
+function PlanTab.goodMine(name, code)
+	return type(name) == "string" and type(code) == "string" and name ~= "" and #name <= 24
+		and not name:find("|", 1, true) and not name:find("^%[CP") and true or false
 end
 
 local function setGear(itemName, track, rank)
@@ -4223,11 +4230,17 @@ end
 -- character made under the old mark: the addon made it, but it is not
 -- tagged, so it is neither the build nor the player's own until it is
 -- renamed (PlanTab.oldLoadouts). Pure, for the checks.
-function PlanTab.loadoutKey(name, id, builds, spares)
+-- `mine` is your builds (card 0057): your own untagged loadout named as one
+-- of them is filed under its name and PlanTab.CLASH, never the build's name,
+-- so the build never reads it as its loadout and Reset never replaces it
+-- (0057 review: an alt's own "Mine" was deleted by the build's Reset).
+PlanTab.CLASH = " (your loadout)"
+function PlanTab.loadoutKey(name, id, builds, spares, mine)
 	local build = PlanTab.untag(name)
 	if build then return build end
 	if (builds or {})[name] then return nil, true end
 	if spares and spares[id] and name:sub(1, #PlanTab.OLD_SPARE) == PlanTab.OLD_SPARE then return nil, true end
+	if mine and mine[name] ~= nil then return name .. PlanTab.CLASH end
 	return name
 end
 
@@ -4255,7 +4268,7 @@ function PlanTab.savedLoadoutNames()
 		-- key -> config id; `twice` keys held by more than one, which a
 		-- replace must not guess between (0031 review)
 		if name and canRead(name) then
-			local key, before = PlanTab.loadoutKey(name, id, builds, spares)
+			local key, before = PlanTab.loadoutKey(name, id, builds, spares, PlanTab.myBuilds(playerSpec()))
 			if key then
 				if names[key] then twice[key] = true end
 				names[key] = id
@@ -5057,7 +5070,7 @@ function PlanTab.activeLoadoutName(forSpec)
 	if not (name and canRead(name)) then return nil end
 	-- the spare wears a build for it (card 0040); a loadout from before the
 	-- tag is nobody's build until it is renamed (card 0059)
-	name = PlanTab.spareBuild(name, configID) or PlanTab.loadoutKey(name, configID, PlanTab.BUILDS[specID and playerSpec() or ""], PlanTab.spareIDs())
+	name = PlanTab.spareBuild(name, configID) or PlanTab.loadoutKey(name, configID, PlanTab.BUILDS[specID and playerSpec() or ""], PlanTab.spareIDs(), PlanTab.myBuilds(specID and playerSpec()))
 	if not name then return nil end
 	return name, PlanTab.talentsEdited(PlanTab.buildFor(forSpec, name))
 end
@@ -6356,7 +6369,7 @@ function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded,
 	-- warning, and its menu offers only Rename, Delete and Export.
 	local mine, plan = {}, spec and PlanTab.BUILDS[spec] or {}
 	for name, code in pairs(spec and PlanTab.myBuilds(spec) or {}) do
-		if type(name) == "string" and type(code) == "string" then
+		if PlanTab.goodMine(name, code) then
 			local r = { loadout = name, bosses = {}, icon = PlanTab.MY_ICON, mine = true }
 			if plan[name] then r.shadowed, r.code = true, code
 			elseif PlanTab.loadoutState(name, active, edited) == "match" then r.mark = "active"
@@ -6390,6 +6403,10 @@ function PlanTab.sidebarList(spec, context, live, active, edited, saved, folded,
 			r.saved = saved == nil or saved[r.loadout] ~= nil  -- nil: the game would not say, so no grey
 			r.warn = not r.own and build and problemOf and problemOf(build) or nil
 			if r.shadowed then r.warn = "The plan has a build of this name now, so this one is not made or worn. Rename it." end
+			-- one of yours from an older tree was taken with a note, so it keeps
+			-- Save and Copy; and your own string can always be exported (0057 review)
+			if r.mine and r.warn == (LOADOUT_ERROR_TREE_CHANGED or "Exported against an older talent tree.") then r.note, r.warn = r.warn, nil end
+			if r.mine then r.code = r.code or build end
 			if PlanTab.talentStringsDiffer(live, build) == false and (not ticked or (r.loadout == active and ticked.loadout ~= active)) then
 				ticked = r
 			end
@@ -6606,6 +6623,7 @@ function PlanTab.sidebarTip(row)
 		end
 	end
 	if e.warn then GameTooltip:AddLine(e.warn, 1, 0.3, 0.3, true) end
+	if e.note then GameTooltip:AddLine(e.note, 1, 0.8, 0, true) end
 	if not e.tick then GameTooltip:AddLine("On the tree: green it adds, red it drops, amber it changes.", 0.8, 0.8, 0.8, true) end
 	GameTooltip:AddLine("Double-click to switch to it.", 0, 1, 0)
 	GameTooltip:AddLine("Right-click for a menu.", 0, 1, 0, true)
@@ -7893,6 +7911,7 @@ end
 -- at most NAME_MAX letters, as update-builds.py's, so "[CP+] " and the name
 -- fit the game's 30.
 PlanTab.NAME_MAX = 24
+PlanTab.CODE_MAX = 1000  -- Blizzard's import box's limit
 PlanTab.MINE_WORDS = { done = "Renamed %d of %d loadout%s.", gone = "Deleted %d of %d loadout%s." }
 
 -- Why `name` cannot be one of your builds for `spec`, or nil and the name
@@ -7922,6 +7941,8 @@ end
 function PlanTab.importProblem(code)
 	code = type(code) == "string" and (code:gsub("%s", "")) or ""
 	if code == "" then return "Paste a build string first." end
+	-- Blizzard's own import box stops at 1000, and a string is base64 (0057 review)
+	if #code > PlanTab.CODE_MAX or code:find("[^%w+/=]") then return LOADOUT_ERROR_BAD_STRING or "This string will not parse." end
 	if not ClassTalentImportExportMixin and C_AddOns and C_AddOns.LoadAddOn then pcall(C_AddOns.LoadAddOn, "Blizzard_PlayerSpells") end
 	local ok, why = pcall(PlanTab.buildProblem, code)
 	if not ok then return LOADOUT_ERROR_BAD_STRING or "This string will not parse." end
@@ -7978,7 +7999,7 @@ function PlanTab.importAsk()
 		local why = PlanTab.importProblem(code)
 		if why then PlanTab.say(why) return end
 		PlanTab.askMine("Import a build", "A name for it:", "", function(text) return (PlanTab.addMine(text, code)) end)
-	end, "", 0)
+	end, "", PlanTab.CODE_MAX)
 end
 
 -- Why no loadout may be renamed or deleted now, or nil. Unlike loadoutFence
@@ -7993,7 +8014,9 @@ function PlanTab.changeFence()
 end
 
 -- The config id of this character's loadout of your build `name`, or nil.
+-- None for one the plan has since named: "[CP] X" is then the plan's (0057 review).
 function PlanTab.mineLoadout(name)
+	if (PlanTab.BUILDS[playerSpec() or ""] or {})[name] then return nil end
 	local saved = PlanTab.savedLoadoutNames()
 	local id = saved and saved[name]
 	if id and PlanTab.configName(id) == PlanTab.tag(name) then return id end
@@ -8016,11 +8039,10 @@ function PlanTab.renameMine(from, to)
 	local why, clean = PlanTab.myNameProblem(spec, to, from)
 	if why then return why end
 	if clean == from then return nil, clean end
+	-- always, not only with a loadout here: the queue may be making it now (0057 review)
+	local busy = PlanTab.changeFence()
+	if busy then return busy end
 	local id = PlanTab.mineLoadout(from)
-	if id then
-		local busy = PlanTab.changeFence()
-		if busy then return busy end
-	end
 	mine[clean], mine[from] = mine[from], nil
 	local bars, old, new = db().bars, spec .. " / " .. from, spec .. " / " .. clean
 	if type(bars) == "table" and bars[old] ~= nil and bars[new] == nil then bars[new], bars[old] = bars[old], nil end
@@ -8038,6 +8060,8 @@ function PlanTab.deleteMyAsk(name)
 		lines[#lines + 1] = ("You are wearing \"%s\", so that loadout stays, under Your loadouts."):format(PlanTab.tag(name))
 	elseif id then
 		lines[#lines + 1] = ("Its loadout here, \"%s\", is deleted too."):format(PlanTab.tag(name))
+	elseif (PlanTab.BUILDS[playerSpec() or ""] or {})[name] then
+		lines[#lines + 1] = ("The plan's \"%s\" and its loadout are not touched."):format(name)
 	end
 	lines[#lines + 1] = "Other characters keep their loadout of it. Delete those in the talent window."
 	PlanTab.prompt("Djinni's Class Profiles: your builds", lines, {
@@ -8053,12 +8077,10 @@ function PlanTab.deleteMine(name)
 	local spec = playerSpec()
 	local mine = PlanTab.myBuilds(spec)
 	if not (mine and mine[name] ~= nil) then PlanTab.say(("You have no build called \"%s\"."):format(tostring(name))) return "gone" end
+	local busy = PlanTab.changeFence()  -- always: the queue may be making its loadout now (0057 review)
+	if busy then PlanTab.say(busy) return "busy" end
 	local id = PlanTab.mineLoadout(name)
 	if id == PlanTab.selectedConfigID() then id = nil end  -- never the one you are wearing
-	if id then
-		local busy = PlanTab.changeFence()
-		if busy then PlanTab.say(busy) return "busy" end
-	end
 	mine[name] = nil
 	PlanTab.say(("\"%s\" is deleted from your builds."):format(name))
 	if id then PlanTab.startTagging({ { id = id, from = PlanTab.tag(name), delete = true } }, PlanTab.MINE_WORDS) end
@@ -11132,6 +11154,41 @@ function PlanTab.myBuildChecks(check)
 		d.myBuilds.Feral["Mine 2"], selected = "CODE", 9
 		check(t .. ", and deletes one you are not wearing, one change in the queue", PlanTab.deleteMine("Mine 2") .. "/" .. table.concat(sent, "|"), "deleted/delete [CP] Mine 2")
 		check(t .. ", a second delete finds nothing", PlanTab.deleteMine("Mine 2"), "gone")
+
+		-- 0057 review, finding 1: your own untagged "Mine" (an alt's) is never the build's loadout
+		d.myBuilds.Feral.Mine = "CODE"
+		check(t .. ", your own loadout of a build's name is filed apart", PlanTab.loadoutKey("Mine", 21, plan, {}, d.myBuilds.Feral) .. "/" .. PlanTab.loadoutKey("[CP] Mine", 22, plan, {}, d.myBuilds.Feral), "Mine (your loadout)/Mine")
+		local configs = { [21] = "Mine" }
+		C_ClassTalents.GetConfigIDsBySpecID = function() local ids = {} for id in pairs(configs) do ids[#ids + 1] = id end return ids end
+		C_Traits.GetConfigInfo = function(id) return configs[id] and { name = configs[id] } or nil end
+		PlanTab.savedLoadoutNames = kept[3]
+		local real = PlanTab.savedLoadoutNames() or {}
+		check(t .. ", so the build reads missing and Reset has nothing of yours to replace", tostring(real.Mine) .. "/" .. tostring(real["Mine (your loadout)"]) .. "/" .. tostring(PlanTab.rowState("Mine")), "nil/21/missing")
+		PlanTab.savedLoadoutNames = function() return saved, {}, {} end
+		-- finding 2: one the plan has since named leaves the plan's loadout alone
+		d.myBuilds.Feral.Dungeon, sent, saved, names = "OLD", {}, { Dungeon = 7 }, { [7] = "[CP] Dungeon" }
+		check(t .. ", deleting one the plan has named sends nothing", PlanTab.deleteMine("Dungeon") .. "/" .. #sent .. "/" .. tostring(d.myBuilds.Feral.Dungeon), "deleted/0/nil")
+		d.myBuilds.Feral.Dungeon = "OLD"
+		check(t .. ", nor does renaming it", tostring((PlanTab.renameMine("Dungeon", "Old Dungeon"))) .. "/" .. #sent, "nil/0")
+		-- finding 3 and 5: nothing changes while anything else changes a loadout, loadout or none
+		saved, names = {}, {}
+		local function refused(field)
+			if field == "combat" then combat = true else PlanTab[field] = {} end
+			local r = tostring((PlanTab.renameMine("Mine", "Mine 9"))) ~= "nil" and PlanTab.deleteMine("Mine") == "busy" and d.myBuilds.Feral.Mine ~= nil
+			if field == "combat" then combat = false else PlanTab[field] = nil end
+			return r
+		end
+		check(t .. ", rename and delete wait for combat, the queue, the renaming and a swap", tostring(refused("combat")) .. tostring(refused("q")) .. tostring(refused("tagging")) .. tostring(refused("swapping")), "truetruetruetrue")
+		-- finding 6: the string and the saved file
+		check(t .. ", a string over Blizzard's 1000 or not base64 is refused", tostring((PlanTab.importProblem(("A"):rep(1001)))) ~= "nil" and tostring((PlanTab.importProblem("AB<CD"))) ~= "nil", true)
+		d.myBuilds.Feral["[CP] Hand"], d.myBuilds.Feral[("x"):rep(30)] = "C", "C"
+		check(t .. ", a name edited in by hand against the rules is not made", tostring(PlanTab.buildsOf("Feral")["[CP] Hand"]) .. "/" .. tostring(PlanTab.buildsOf("Feral")[("x"):rep(30)]), "nil/nil")
+		d.myBuilds.Feral["[CP] Hand"], d.myBuilds.Feral[("x"):rep(30)] = nil, nil
+		-- finding 4: an older tree is a note on yours, and Export stays
+		local older = LOADOUT_ERROR_TREE_CHANGED or "Exported against an older talent tree."
+		local row
+		for _, e in ipairs(PlanTab.sidebarList("Feral", "raid", nil, nil, false, {}, nil, nil, function() return older end)) do if e.loadout == "Mine" and e.mine then row = e end end
+		check(t .. ", an older tree is a note on yours, not a warning", tostring(row and row.warn) .. "/" .. tostring(row and row.note == older) .. "/" .. tostring(row and row.code), "nil/true/CODE")
 	end)
 	check(t .. ", ran", ok or tostring(err), true)
 	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
