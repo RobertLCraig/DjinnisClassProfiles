@@ -206,3 +206,6 @@ and 3, and checks for the mixed box and the mixed end line, should be done in th
 5. **Checks** for a mixed box (label, all three lines, both counts), a worn row counting for neither, combat mid-tidy, and an unlanded delete not counted. 11 new mutants caught; the earlier rounds re-run with the new wording, all caught.
 
 Moved to `human-review/`: the open criterion is the in-game one above.
+### 2026-09-25: room hint, v0.48.12
+
+Rob's screenshot, Balance: "4 planned builds are not saved ... Room for 1", buttons "Create 1", "Old loadouts", "Not now". The delete box had been passed over, so Create 1 would have spent the last slot while six old loadouts held the rest. The Create box now adds, when room is short and the old-loadouts rows would delete some: "Old loadouts deletes N, which frees their slots. Do that first, then Create makes M." Worn rows free nothing. Checked, 2 mutants caught.

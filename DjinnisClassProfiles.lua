@@ -7644,6 +7644,12 @@ function PlanTab.offerLoadouts(asked, declined)
 		lines[#lines + 1] = ("%d planned builds are not saved on this character:"):format(#missing)
 		for _, name in ipairs(missing) do lines[#lines + 1] = "  " .. WHITE .. name .. "|r" end
 		if room and room < #missing then lines[#lines + 1] = ("Room for %d. The rest are worn through the spare loadout."):format(room) end
+		-- the old ones this box can delete are the room (Rob, 2026-09-25: Balance, room for 1 of 4, six old ones waiting)
+		local frees = 0
+		for _, o in ipairs(before) do if o.delete and not o.stays then frees = frees + 1 end end
+		if room and room < #missing and frees > 0 then
+			lines[#lines + 1] = ("Old loadouts deletes %d, which frees their slots. Do that first, then Create makes %d."):format(frees, math.min(#missing, room + frees))
+		end
 		-- each button does what its box listed, no more (second 0060 review)
 		buttons[#buttons + 1] = { label = "Create " .. math.min(#missing, room or #missing), onClick = PlanTab.askAgain(PlanTab.createMissing, spec, missing) }
 	end
@@ -10104,6 +10110,13 @@ function PlanTab.tagChecks(check)
 			PlanTab.offerLoadouts(true, true)
 			PlanTab.oldDismissed = {}
 			check(d .. ", and asked, says it once", tostring(saidAny("no room for one")) .. "/" .. tostring(saidAny("no loadout and no room")) .. "/" .. tostring(saidAny("left as they are")), "true/false/true")
+			-- Rob, 2026-09-25: room for 1 of 4, with old ones to delete, says to delete them first
+			PlanTab.loadoutRoom = function() return 1 end
+			PlanTab.loadoutGaps = function() return { "Dungeon", "Raid: Cleave", "Raid: Nek'Zali, Nymrissa", "Raid: Single Target" }, {} end
+			PlanTab.oldDismissed, PlanTab.offerDismissed, shown, selected = { Balance = true }, {}, nil, 11  -- EC M+ worn: it stays and frees nothing
+			PlanTab.offerLoadouts(true)
+			check(d .. ", a short Create box says the old ones are the room", shown and table.concat(shown.lines, "\n"):find("Old loadouts deletes 2, which frees their slots. Do that first, then Create makes 3.", 1, true) ~= nil, true)
+			PlanTab.oldDismissed = {}
 			PlanTab.loadoutRoom, PlanTab.loadoutGaps = wasRoom, wasGaps0
 			PlanTab.playerClass, C_SpecializationInfo = wasClass, wasSpecAPI0
 			PlanTab.retiredLoadouts = function() return {} end
