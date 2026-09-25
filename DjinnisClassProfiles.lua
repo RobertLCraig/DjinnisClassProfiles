@@ -7388,27 +7388,66 @@ function PlanTab.oldLoadouts(old, saved, selected)
 	return out
 end
 
--- Renames (or deletes) them, after asking. Answers the count done, or a word.
+-- Renames (or deletes) them, after asking, ONE AT A TIME. A rename is a
+-- server round trip and the game takes one loadout change in flight: asked
+-- for four at once, it renamed one and refused three with "You can't do that
+-- right now" (Rob, 2026-09-25). There is no busy flag to ask, so each waits
+-- until its config reads the new name (or is gone) before the next.
+-- Answers the count done when it finished at once, else a word.
 function PlanTab.tagOld()
+	if PlanTab.tagging then PlanTab.say("Still renaming. Wait for the count.") return "busy" end
 	local why = PlanTab.loadoutFence(true)
 	if why then PlanTab.say(why) return "fenced" end
 	local saved, _, old = PlanTab.savedLoadoutNames()
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
-	local done = 0
+	local todo = {}
 	for _, o in ipairs(PlanTab.oldLoadouts(old, saved, PlanTab.selectedConfigID())) do
 		if o.stays then
 			PlanTab.say(("\"%s\" is the loadout you are wearing and \"%s\" is there already, so it stays. Pick another loadout, then click %sMore > Make the planned loadouts|r%s again."):format(o.from, o.to, GOLD, GREY))
-		else
-			local ok, did = pcall(o.delete and C_ClassTalents.DeleteConfig or C_ClassTalents.RenameConfig, o.id, not o.delete and o.to or nil)
-			if ok and did then done = done + 1
-			else PlanTab.say(("The game would not %s \"%s\"."):format(o.delete and "delete" or "rename", o.from)) end
-		end
+		else todo[#todo + 1] = o end
 	end
-	PlanTab.say(("Tagged %d old loadout%s."):format(done, done == 1 and "" or "s"))
-	if PlanTab.redraw then pcall(PlanTab.redraw) end
-	-- what is still missing or drifted, once the renames have landed
-	PlanTab.later(1, function() PlanTab.offerLoadouts(true) end)
-	return done
+	local t = { todo = todo, i = 0, done = 0 }
+	PlanTab.tagging = t
+	PlanTab.tagNext()
+	if PlanTab.tagging == t then return "started" end
+	return t.done
+end
+
+-- The next one of PlanTab.tagging, or the count when they are all done.
+function PlanTab.tagNext()
+	local t = PlanTab.tagging
+	if not t then return end
+	t.i = t.i + 1
+	local o = t.todo[t.i]
+	if not o then
+		PlanTab.tagging = nil
+		PlanTab.say(("Tagged %d old loadout%s."):format(t.done, t.done == 1 and "" or "s"))
+		if PlanTab.redraw then pcall(PlanTab.redraw) end
+		PlanTab.later(1, function() PlanTab.offerLoadouts(true) end)  -- what is still missing or drifted
+		return
+	end
+	if InCombatLockdown() then
+		PlanTab.tagging = nil
+		PlanTab.say(("Combat started, so %d old loadout%s were not tagged. Click again after the fight."):format(#t.todo - t.i + 1, #t.todo - t.i + 1 == 1 and "" or "s"))
+		return
+	end
+	local ok, did = pcall(o.delete and C_ClassTalents.DeleteConfig or C_ClassTalents.RenameConfig, o.id, not o.delete and o.to or nil)
+	if not (ok and did) then
+		PlanTab.say(("The game would not %s \"%s\"."):format(o.delete and "delete" or "rename", o.from))
+		return PlanTab.tagNext()
+	end
+	local waited = 0
+	local function poll()
+		if PlanTab.tagging ~= t then return end
+		local name = PlanTab.configName(o.id)
+		local landed = (o.delete and name == nil) or (not o.delete and name == o.to)
+		waited = waited + PlanTab.POLL
+		if landed then t.done = t.done + 1
+		elseif waited < PlanTab.GIVE_UP then return PlanTab.later(PlanTab.POLL, poll)
+		else PlanTab.say(("\"%s\" did not change in time; the next is tried anyway."):format(o.from)) end
+		PlanTab.tagNext()
+	end
+	PlanTab.later(PlanTab.POLL, poll)
 end
 
 -- On login, on a spec change and on /dcp loadouts: what this character is
@@ -9683,7 +9722,7 @@ function PlanTab.tagChecks(check)
 		check(o .. ", none, nothing", #PlanTab.oldLoadouts(nil, {}, 1), 0)
 
 		-- the offer and the button, against a pretend list
-		local kept = { PlanTab.savedLoadoutNames, PlanTab.selectedConfigID, PlanTab.prompt, PlanTab.promptBusy, PlanTab.say, PlanTab.later, C_ClassTalents, InCombatLockdown, PlanTab.talentWindowOpen, PlanTab.redraw }
+		local kept = { PlanTab.savedLoadoutNames, PlanTab.selectedConfigID, PlanTab.prompt, PlanTab.promptBusy, PlanTab.say, PlanTab.later, C_ClassTalents, InCombatLockdown, PlanTab.talentWindowOpen, PlanTab.redraw, PlanTab.configName }
 		local ok2, err2 = pcall(function()
 			local calls, shown, said, selected = {}, nil, {}, 5
 			local old = { Dungeon = 1, ["Raid: Vashnik"] = 2 }
@@ -9692,13 +9731,17 @@ function PlanTab.tagChecks(check)
 			PlanTab.prompt = function(_, lines, buttons) shown = { lines = lines, buttons = buttons } end
 			PlanTab.promptBusy = function() return false end
 			PlanTab.say = function(text) said[#said + 1] = text end
-			PlanTab.later = function() end
+			-- the game as it is: one change in flight, landing a moment later (Rob, 2026-09-25)
+			local live, pending = { [1] = "Dungeon", [2] = "Raid: Vashnik" }, {}
+			PlanTab.configName = function(id) return live[id] end
+			PlanTab.later = function(_, fn) pending[#pending + 1] = fn end
+			local function drain() while #pending > 0 do table.remove(pending, 1)() end end
 			PlanTab.talentWindowOpen = function() return false end
 			PlanTab.redraw = nil
 			InCombatLockdown = function() return false end
 			C_ClassTalents = {
-				RenameConfig = function(id, name) calls[#calls + 1] = "rename " .. id .. " to " .. name return true end,
-				DeleteConfig = function(id) calls[#calls + 1] = "delete " .. id return true end,
+				RenameConfig = function(id, name) calls[#calls + 1] = "rename " .. id .. " to " .. name live[id] = name return true end,
+				DeleteConfig = function(id) calls[#calls + 1] = "delete " .. id live[id] = nil return true end,
 			}
 			local offer = "the offer asks about them first"
 			check(offer, PlanTab.offerLoadouts(true), "old")
@@ -9706,11 +9749,15 @@ function PlanTab.tagChecks(check)
 			check(offer .. ", and made nothing", #calls, 0)
 			check(offer .. ", naming each", shown and table.concat(shown.lines, "\n"):find("renamed \"[CP] Dungeon\"", 1, true) ~= nil, true)
 			PlanTab.offerDismissed = {}
-			check(o .. ", tagged on the click", PlanTab.tagOld(), 2)
+			check(o .. ", tagged on the click, one at a time", PlanTab.tagOld() .. "/" .. #calls, "started/1")
+			check(o .. ", a second click while one is in flight does nothing", PlanTab.tagOld() .. "/" .. #calls, "busy/1")
+			drain()
+			check(o .. ", the next once the first has landed, then the count", #calls .. "/" .. tostring(said[#said]:find("Tagged 2", 1, true) ~= nil), "2/true")
 			table.sort(calls)
 			check(o .. ", renamed and deleted", table.concat(calls, "|"), "delete 2|rename 1 to [CP] Dungeon")
 			calls, selected = {}, 2
-			check(o .. ", the one you are wearing is never deleted", PlanTab.tagOld() .. "/" .. table.concat(calls, "|"), "1/rename 1 to [CP] Dungeon")
+			live[1] = "Dungeon"
+			check(o .. ", the one you are wearing is never deleted", (function() local r = PlanTab.tagOld() drain() return r .. "/" .. table.concat(calls, "|") end)(), "started/rename 1 to [CP] Dungeon")
 			check(o .. ", and it says why", said[#said - 1]:find("you are wearing", 1, true) ~= nil, true)
 			old = { ["Raid: Vashnik"] = 2 }
 			check(offer .. ", but not when the only one left stays", PlanTab.offerLoadouts(true) ~= "old", true)
@@ -9718,6 +9765,18 @@ function PlanTab.tagChecks(check)
 			old = { Dungeon = 1 }
 			check(o .. ", never in combat", PlanTab.tagOld() .. "/" .. #calls, "fenced/0")
 			InCombatLockdown = function() return false end
+			-- a rename the game takes and never shows is waited out, and the rest go on
+			live[1], calls = "Dungeon", {}
+			local keptRename = C_ClassTalents.RenameConfig
+			C_ClassTalents.RenameConfig = function(id, name) calls[#calls + 1] = "rename " .. id return true end
+			PlanTab.tagOld()
+			drain()
+			check(o .. ", one that never lands is waited out and said", tostring(PlanTab.tagging) .. "/" .. tostring(table.concat(said, "\n"):find("did not change in time", 1, true) ~= nil), "nil/true")
+			C_ClassTalents.RenameConfig = function() return false end
+			PlanTab.tagOld()
+			drain()
+			check(o .. ", one the game refuses is said, and it ends", tostring(PlanTab.tagging) .. "/" .. tostring(said[#said - 1]:find("would not rename", 1, true) ~= nil), "nil/true")
+			C_ClassTalents.RenameConfig = keptRename
 			-- 0059 review, finding 2: "Not now" on the renaming leaves Create and Reset reachable
 			old, calls, shown = { Dungeon = 1 }, {}, nil
 			PlanTab.later = function(_, fn) fn() end
@@ -9790,7 +9849,8 @@ function PlanTab.tagChecks(check)
 			C_Traits = wasTraits
 		end)
 		PlanTab.savedLoadoutNames, PlanTab.selectedConfigID, PlanTab.prompt, PlanTab.promptBusy, PlanTab.say, PlanTab.later = kept[1], kept[2], kept[3], kept[4], kept[5], kept[6]
-		C_ClassTalents, InCombatLockdown, PlanTab.talentWindowOpen, PlanTab.redraw = kept[7], kept[8], kept[9], kept[10]
+		C_ClassTalents, InCombatLockdown, PlanTab.talentWindowOpen, PlanTab.redraw, PlanTab.configName = kept[7], kept[8], kept[9], kept[10], kept[11]
+		PlanTab.tagging = nil
 		PlanTab.offerDismissed, PlanTab.oldDismissed = {}, {}
 		check(o .. ", the offer ran", ok2 or tostring(err2), true)
 	end)

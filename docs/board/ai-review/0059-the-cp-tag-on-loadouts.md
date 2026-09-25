@@ -341,3 +341,14 @@ Security. Unchanged: identity is a name, so a `[CP] X` anyone makes is the addon
 
 UI surface: the two offer boxes and the talent window. Not looked at: no agent can run the client.
 The last criterion stays `proves: manual`; the ask is at the top of the card.
+### 2026-09-25 — failed in a live client, fixed in v0.48.5
+
+Rob pressed "Tag them" with 4 old loadouts on Guardian. Each press renamed one. The game said "You can't do that right now" and chat said "The game would not rename" for the rest.
+
+Cause: `tagOld` sent every rename in one frame. The server takes one loadout change at a time and refuses the others (`RenameConfig` returns false). No API says it is busy.
+
+Fix: `tagOld` starts a queue and `PlanTab.tagNext` sends one change, polls `configName` every `PlanTab.POLL` until it lands, then sends the next. A change that never shows is waited out after `PlanTab.GIVE_UP` and said. A refused one is said and skipped. A second click while it runs says "Still renaming". Combat stops the queue.
+
+Checks: `tagChecks` now models one change in flight. Five mutants (all at once, no busy guard, refused stops, never gives up, landed ignores name) are all caught; "never gives up" hangs the check, which fails it.
+
+In-game check again: `/reload`, open the loadout box, press "Tag them" once. All old loadouts should be renamed in turn, about half a second apart, then one "Tagged N old loadouts." line.
