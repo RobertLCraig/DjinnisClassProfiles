@@ -241,3 +241,67 @@ Reset and a double-click at 40 of 40 slots, timing how long each takes to finish
    will not delete a loadout renamed since the click.
 
 Breaking each fix made 3, 2, 2 and 2 checks fail. All three modes end "no FAIL lines".
+
+**2026-09-25, Claude (fourth review of 127aa5a).** Does not hold: at the cap a refused delete is
+now retried after one second and then given up. Stays in `ai-review/`. Line numbers are at fc0c27c,
+which touched only card 0054's code.
+
+Run: `offline-check.lua`, `250` and `62` under Lua 5.1 all end "no FAIL lines", and I read the whole
+output. Then nine probes and six mutations, on a temp copy only.
+
+1. **:7606–7612, medium. At the cap a busy server now fails the job for good.** The cap beat runs
+   after every step, a failed one too, and `stepLoadouts` clears `pendingID` first (:7535). So a
+   delete refused at the cap is tried again two polls later, and the final pass two polls after
+   that. At the cap `importOne` cannot tell busy from full (:7398), so it sends the delete into the
+   busy server both times. Probe P8, the spare at the cap with the server busy at the click: busy
+   for 1 s it recovers, busy for 1.5 s or 2.5 s it ends `delete 3|refused|delete 3|refused` and
+   "Raid: Vashnik failed: the game would not delete the old one". With room, the same three all wear
+   the spare. At 56e4111 all three recover at the cap: the 15 s wait was slow, but it waited out
+   the server. In game this is Done-when 2 at 40 of 40: double-click a build while the last
+   switch is still in flight, and the spare is not made. Fix: take the cap beat only after an
+   import (`q.lastMade` set). After a failed step at the cap, back off several seconds, or keep
+   the old wait.
+2. **:7605–7611 with :8573, low. Without `pendingID`, the cap beat does not wait for the import to
+   fill.** With no id to watch, `populated` stays true, so the queue steps one beat after the new
+   loadout is listed. The Dreamgrove note at :7109 says that is not the finish line. With room,
+   `CanCreateNewConfig` covered the fill. Probe P1/P2, the server filling 3 ticks after the list:
+   two Resets at the cap end `delete 5|refused|delete 5|refused`, and the spare says "is made but
+   the server has not filled it in yet", where room and the event both give "Made 2 of 2" and
+   "Putting on". `pendingID` is nil only when `TRAIT_CONFIG_CREATED` was refused, which the addon
+   says, and that line says "waits longer". At the cap it now waits less. Fix: with no
+   `pendingID`, find the made loadout by name, as `noteMade` does, and ask it.
+3. **:11532–11543, low. The beat is untested.** Stepping at once, with no beat, fails no check.
+   The two-at-cap run then goes `delete 5|refused|delete 5|import`, and the check reads only the
+   ticks. Dropping `populated` from the cap clause fails nothing either, because the timed server
+   is always filled and fires no event. Fix: check the calls of the two-at-cap run, with no
+   "refused". Add a case with the event and a late fill.
+
+What held:
+- `replaceName` on a loadout from before the tag (P4): it is noted from the live name, so an
+  untagged "Raid: Vashnik" is deleted and imported at the cap. The guard never refuses a real Reset.
+- The retry path (P5): a delete taken and never landing is sent again in the final pass, the name
+  still matches, then import, "Made 1 of 1". Renamed during the give-up (P6): one delete only, the
+  renamed loadout is kept, and the job fails with the renamed line. `sentDelete` survives the retry,
+  so "deleted" stays right.
+- A swap with a leftover "[CP+]" at the cap (P7): `delete 5|import|wear|delete 1|rename`, done.
+- With the event, the cap beat waits for the fill: P1 and P2 match the runs with room.
+- `freeLoadoutSlots()` reading 0 mid-queue with room: I found no path. The import goes only after
+  the old one reads gone, and a delete that never lands ends in the give-up, which steps anyway.
+  The only 0 with room is the queue filling the last slot, where the game is full and stepping is
+  right (finding 2 aside).
+- Mutations caught: the rename guard (1 fail), `sentDelete` always true (1), no `replaceName` (1),
+  the cap beat with slots free (2). Not caught: no beat (0), no fill check at the cap (0).
+- `TIDY_WORDS` and the combat-line check hold.
+
+Security:
+- **Weakest point:** the rename guard compares `configName` with no `canRead` (:7411), where
+  `savedLoadoutNames` guards each name. If a loadout name ever came back secret, the compare would
+  throw inside `stepLoadouts`, which is not in a `pcall`, and `PlanTab.q` would stay set: every
+  loadout action says "Still making loadouts" until `/reload`. `noteMade` has the same compare, so
+  this is not new. A reused id with the same name is still not caught, and is negligible.
+- **Unchecked:** the build string goes to Blizzard's header reader, and a bad one is refused before
+  any delete. SavedVariables are trusted. There is no network path.
+- **Leaks:** nothing. Chat is local and names only the player's own loadouts.
+
+No UI surface to screenshot. The in-game check is Done-when 2 at 40 of 40, double-clicking the next
+build straight after "Putting on", plus Reset of two at the cap.
