@@ -113,3 +113,18 @@ Security:
    strings are parsed by Blizzard's own import code before anything is deleted.
 3. **What it leaks:** nothing. Failures go to the player's own chat frame as loadout names, and no
    data leaves the client.
+
+**2026-09-25, Claude.** Review findings fixed, v0.52.1.
+
+1. Fixed. If the old loadout is still there at `GIVE_UP`, `waitThenStep` sends no import. It puts
+   the id back on `job.replace` and queues the job for the final pass, which deletes it again. On
+   the final pass it says "The old X did not go, so it was not made again."
+2. Fixed. `setupStep` waits for `swapping` as it waits for `tagging`. Every way a swap ends goes
+   through the new `PlanTab.swapEnded`, which lets go of the fence and calls `afterTagging`.
+3. Moved to card `0067`. It is older code.
+4. Fixed. `lag` is 3. A `canNewFree` model tests the `goneID` wait on its own. A `lost` model is
+   a delete that is taken and never lands, for the queue and for the swap. There are new checks
+   that wear, save, the spare and a group setup all wait for a swap.
+
+I broke each fix on purpose, one at a time. Each break made the checks fail: the `goneID` wait 3
+FAIL, the landed wait 3, the `setupStep` fence 1, the replace put back 2.
