@@ -1627,43 +1627,91 @@ local function bisFrom(sourceName)
 	return found
 end
 
-local function bonusRollVerdict(sourceName)
-	if not sourceName or sourceName == "" then return end
-	local found = bisFrom(sourceName)
+PlanTab.bisFrom, PlanTab.linkFor = bisFrom, linkFor  -- through PlanTab, so the self-test can hold them (card 0054)
 
-	if #found == 0 then
-		RaidWarningUtil.AddMessage("Bonus roll: NO\n" .. sourceName, ChatTypeInfo["RAID_WARNING"])
-		print(GREY .. "[BiS] nothing BiS drops from " .. sourceName .. ". Keep the coin.|r")
-		return
-	end
-
-	RaidWarningUtil.AddMessage("Bonus roll: YES\n" .. sourceName, ChatTypeInfo["RAID_WARNING"])
-	PlaySound(SOUNDKIT.RAID_WARNING)
-	print(GOLD .. "[BiS] worth a coin at " .. sourceName .. ":|r")
+-- `found` split into what you still want and what you own (card 0054: an item
+-- won from a bonus roll leaves your bonus roll table, so an owned one cannot
+-- make a coin worth it). An item with no harvested link has no id to check,
+-- and counts as wanted. Pure, with `owned(id)` given.
+function PlanTab.bonusSplit(found, owned)
+	local want, have = {}, {}
 	for _, entry in ipairs(found) do
-		print("   " .. (linkFor(entry.name) or entry.name)
-			.. GREEN .. "  " .. table.concat(entry.specs, ", ") .. "|r")
+		local link = PlanTab.linkFor(entry.name)
+		local id = link and canRead(link) and tonumber(link:match("item:(%d+)"))
+		if id and owned(id) then have[#have + 1] = entry else want[#want + 1] = entry end
 	end
+	return want, have
 end
+
+-- The verdict for a place or a boss. `offered` is the game offering the roll
+-- (SPELL_CONFIRMATION_PROMPT): then it flashes and sounds. Without it, it is
+-- "Bonus roll here?", a question about the place, and owned items are marked,
+-- not left out. Answers "YES" or "NO", for the checks.
+function PlanTab.bonusRollVerdict(sourceName, offered)
+	if not sourceName or sourceName == "" then return end
+	local want, have = PlanTab.bonusSplit(PlanTab.bisFrom(sourceName), PlanTab.planOwned)
+	local line = function(entry, mark)
+		print("   " .. (linkFor(entry.name) or entry.name) .. GREEN .. "  " .. table.concat(entry.specs, ", ") .. "|r" .. (mark or ""))
+	end
+	if #want == 0 then
+		if offered then RaidWarningUtil.AddMessage("Bonus roll: NO\n" .. sourceName, ChatTypeInfo["RAID_WARNING"]) end
+		if #have > 0 then
+			print(GREY .. "[BiS] you own every BiS item from " .. sourceName .. ". Keep the coin.|r")
+			for _, entry in ipairs(have) do line(entry, GREY .. "  owned|r") end
+		else
+			print(GREY .. "[BiS] nothing BiS drops from " .. sourceName .. ". Keep the coin.|r")
+		end
+		return "NO"
+	end
+	if offered then
+		RaidWarningUtil.AddMessage("Bonus roll: YES\n" .. sourceName, ChatTypeInfo["RAID_WARNING"])
+		PlaySound(SOUNDKIT.RAID_WARNING)
+	end
+	print(GOLD .. "[BiS] worth a coin at " .. sourceName .. ":|r")
+	for _, entry in ipairs(want) do line(entry) end
+	if not offered then for _, entry in ipairs(have) do line(entry, GREY .. "  owned|r") end end
+	return "YES"
+end
+
+-- Card 0054: since a mid-season hotfix a bonus roll is offered only on a boss
+-- you can still loot this week, so the verdict waits for the offer, the
+-- event behind Blizzard's own BonusRollFrame (Blizzard_Game/Mainline/
+-- EventImplementation.lua, HandleSpellConfirmationPrompt). A kill or a
+-- finished key only names the source. If the game refuses the event (the
+-- protected-event trap in the workspace's DECISIONS.md) the verdict falls
+-- back to the kill, as before.
+PlanTab.bonusSource = nil
+PlanTab.bonusOnOffer = false  -- true once SPELL_CONFIRMATION_PROMPT is registered
 
 -- Loot roll ----------------------------------------------------------------
 
-local roll = CreateFrame("Frame")
-roll:RegisterEvent("START_LOOT_ROLL")
-roll:RegisterEvent("CHALLENGE_MODE_COMPLETED")
-roll:RegisterEvent("ENCOUNTER_END")
-roll:SetScript("OnEvent", function(_, event, arg1, arg2, _, _, success)
+-- The kill, the key and the offer. Answers what it did, for the checks.
+function PlanTab.onBonusEvent(event, arg1, arg2, _, _, success)
 	-- The verdicts are druid gear: on another class a kill would flash a raid
 	-- warning about loot it cannot use (0049).
-	if not PlanTab.gearHere() then return end
+	if not PlanTab.gearHere() then return "not here" end
 	if event == "CHALLENGE_MODE_COMPLETED" then
-		bonusRollVerdict((GetInstanceInfo()))
-		return
+		PlanTab.bonusSource = (GetInstanceInfo())
+	elseif event == "ENCOUNTER_END" then
+		if success ~= 1 then return "wipe" end
+		PlanTab.bonusSource = arg2  -- the boss name
+	elseif event == "SPELL_CONFIRMATION_PROMPT" then
+		local bonus = Enum and Enum.ConfirmationPromptUIType and Enum.ConfirmationPromptUIType.BonusRoll
+		if not bonus or arg2 ~= bonus then return "other prompt" end
+		return PlanTab.bonusRollVerdict(PlanTab.bonusSource or (GetInstanceInfo()), true) or "no source"
+	else
+		return nil
 	end
-	if event == "ENCOUNTER_END" then
-		if success == 1 then bonusRollVerdict(arg2) end  -- arg2 is the boss name
-		return
-	end
+	if not PlanTab.bonusOnOffer then return PlanTab.bonusRollVerdict(PlanTab.bonusSource, true) end
+	return "remembered"
+end
+
+local roll = CreateFrame("Frame")
+-- handler first, each event on its own, and the offer verified: a refused
+-- event is silent in 12.1 (the workspace's DECISIONS.md, 2026-08-21)
+roll:SetScript("OnEvent", function(_, event, arg1, arg2, arg3, arg4, arg5)
+	if event ~= "START_LOOT_ROLL" then PlanTab.onBonusEvent(event, arg1, arg2, arg3, arg4, arg5) return end
+	if not PlanTab.gearHere() then return end
 
 	local link = GetLootRollItemLink and GetLootRollItemLink(arg1)
 	if not link or not canRead(link) then return end
@@ -1689,6 +1737,11 @@ roll:SetScript("OnEvent", function(_, event, arg1, arg2, _, _, success)
 		print(GREY .. "[BiS] pass|r " .. link)
 	end
 end)
+roll:RegisterEvent("START_LOOT_ROLL")
+roll:RegisterEvent("CHALLENGE_MODE_COMPLETED")
+roll:RegisterEvent("ENCOUNTER_END")
+roll:RegisterEvent("SPELL_CONFIRMATION_PROMPT")
+PlanTab.bonusOnOffer = roll:IsEventRegistered("SPELL_CONFIRMATION_PROMPT") and true or false
 
 -- What you are wearing -------------------------------------------------------
 --
@@ -11078,6 +11131,58 @@ function PlanTab.swapChecks(check)
 	C_ClassTalents, C_Traits, ClassTalentImportExportMixin, ExportUtil, PlayerUtil, InCombatLockdown = unpack(keptG, 1, 6)
 end
 
+-- Card 0054: the bonus roll verdict waits for the game's offer, and owned
+-- BiS does not make it YES.
+function PlanTab.bonusChecks(check)
+	local t = "the bonus roll verdict"
+	local keys = { "gearHere", "bisFrom", "linkFor", "planOwned", "bonusSource", "bonusOnOffer" }
+	local kept, keptG = {}, { RaidWarningUtil, PlaySound, print, GetInstanceInfo, Enum, ChatTypeInfo, SOUNDKIT }
+	for i, k in ipairs(keys) do kept[i] = PlanTab[k] end
+	local ok, err = pcall(function()
+		local flashed, printed, owned = {}, {}, {}
+		local found = { { name = "Fang", specs = { "Feral" } }, { name = "Claw", specs = { "Feral" } } }
+		PlanTab.gearHere = function() return true end
+		PlanTab.bisFrom = function(source) return source == "Nek'zali" and found or {} end
+		PlanTab.linkFor = function(name) return ({ Fang = "|Hitem:111::|h[Fang]|h", Claw = "|Hitem:222::|h[Claw]|h" })[name] end
+		PlanTab.planOwned = function(id) return owned[id] or false end
+		RaidWarningUtil = { AddMessage = function(text) flashed[#flashed + 1] = (text:gsub("\n", " ")) end }
+		PlaySound, ChatTypeInfo, SOUNDKIT = function() end, ChatTypeInfo or { RAID_WARNING = {} }, SOUNDKIT or { RAID_WARNING = 0 }
+		print = function(...) local line = tostring((...)) if line:find("FAIL|r", 1, true) then keptG[3](...) else printed[#printed + 1] = line end end
+		GetInstanceInfo = function() return "The Venomous Abyss" end
+		Enum = setmetatable({ ConfirmationPromptUIType = { BonusRoll = 1 } }, { __index = keptG[5] })
+		PlanTab.bonusSource, PlanTab.bonusOnOffer = nil, true
+		local function printedAny(text) return table.concat(printed, "\n"):find(text, 1, true) ~= nil end
+
+		check(t .. ", a kill only remembers the boss", PlanTab.onBonusEvent("ENCOUNTER_END", 3470, "Nek'zali", 16, 20, 1) .. "/" .. #flashed .. "/" .. tostring(PlanTab.bonusSource), "remembered/0/Nek'zali")
+		check(t .. ", a wipe is not a source", PlanTab.onBonusEvent("ENCOUNTER_END", 3471, "Vashnik", 16, 20, 0) .. "/" .. tostring(PlanTab.bonusSource), "wipe/Nek'zali")
+		check(t .. ", another prompt says nothing", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 0) .. "/" .. #flashed, "other prompt/0")
+		check(t .. ", the offer gives the verdict for the last boss", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1) .. "/" .. table.concat(flashed, "|"), "YES/Bonus roll: YES Nek'zali")
+		flashed, owned = {}, { [111] = true }
+		check(t .. ", owned BiS does not count, but the rest does", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1), "YES")
+		flashed, printed, owned = {}, {}, { [111] = true, [222] = true }
+		check(t .. ", all of it owned is NO, and it says so", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1) .. "/" .. table.concat(flashed, "|") .. "/" .. tostring(printedAny("you own every BiS item")), "NO/Bonus roll: NO Nek'zali/true")
+		flashed, printed = {}, {}
+		check(t .. ", the place question marks owned items and does not flash", PlanTab.bonusRollVerdict("Nek'zali") .. "/" .. #flashed .. "/" .. tostring(printedAny("owned")), "NO/0/true")
+		owned = { [111] = true }
+		printed = {}
+		check(t .. ", and lists the owned one beside the wanted", PlanTab.bonusRollVerdict("Nek'zali") .. "/" .. #printed, "YES/3")
+		PlanTab.linkFor = function() return nil end
+		owned = { [111] = true, [222] = true }
+		check(t .. ", an item with no link is counted as wanted", PlanTab.bonusRollVerdict("Nek'zali"), "YES")
+		flashed = {}
+		PlanTab.bonusSource = nil
+		check(t .. ", a finished key names the dungeon", PlanTab.onBonusEvent("CHALLENGE_MODE_COMPLETED") .. "/" .. tostring(PlanTab.bonusSource), "remembered/The Venomous Abyss")
+		-- the event refused: the kill gives the verdict, as before
+		PlanTab.bonusOnOffer = false
+		check(t .. ", without the offer event the kill gives it", PlanTab.onBonusEvent("ENCOUNTER_END", 3470, "Nek'zali", 16, 20, 1) .. "/" .. #flashed, "YES/1")
+		PlanTab.gearHere = function() return false end
+		check(t .. ", never off a druid", PlanTab.onBonusEvent("SPELL_CONFIRMATION_PROMPT", 99, 1), "not here")
+	end)
+	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
+	RaidWarningUtil, PlaySound, print, GetInstanceInfo, Enum, ChatTypeInfo, SOUNDKIT = unpack(keptG, 1, 7)
+	check(t .. ", ran", ok or tostring(err), true)
+end
+
 -- Card 0057: your builds. The list, the name and string checks, and what
 -- Rename and Delete send, against pretend loadouts. The boxes need the game.
 function PlanTab.myBuildChecks(check)
@@ -13968,6 +14073,7 @@ local function selfTest()
 	PlanTab.saveOneChecks(check)  -- card 0065
 	PlanTab.swapChecks(check)  -- card 0063
 	PlanTab.myBuildChecks(check)  -- card 0057
+	PlanTab.bonusChecks(check)  -- card 0054
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[CP] self-test passed|r")
@@ -14160,7 +14266,7 @@ SlashCmdList.DJINNISCP = function(msg)
 	msg = msg:match("^%s*(.-)%s*$")
 	if msg == "" then DjinnisClassProfiles_Toggle()
 	elseif msg == "here" and not PlanTab.gearHere() then PlanTab.say("The BiS list is druid gear, so there is no verdict for this class.")
-	elseif msg == "here" then bonusRollVerdict((GetInstanceInfo()))
+	elseif msg == "here" then PlanTab.bonusRollVerdict((GetInstanceInfo()))
 	elseif msg == "test" then PlanTab.runSelfTest()
 	elseif msg == "talents" then PlanTab.sayTalents()
 	elseif msg == "loadouts" then PlanTab.offerLoadouts(true)
