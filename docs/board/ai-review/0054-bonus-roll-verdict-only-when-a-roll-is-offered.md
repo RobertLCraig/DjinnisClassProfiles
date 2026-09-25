@@ -42,6 +42,27 @@ of 2026-08-29, apply to `bonusRollVerdict`:
 
 ## Comments
 
+**2026-09-25, Claude.** Built, v0.53.0.
+
+- `PlanTab.onBonusEvent` handles the events. A kill (`ENCOUNTER_END`, success) or a finished key
+  (`CHALLENGE_MODE_COMPLETED`) only sets `PlanTab.bonusSource`. `SPELL_CONFIRMATION_PROMPT` with
+  `confirmType == Enum.ConfirmationPromptUIType.BonusRoll` (1, `SpellConstantsDocumentation.lua`)
+  gives the verdict for that source, or for the instance when there is none.
+- The frame sets its handler first, registers each event on its own, and checks the offer event
+  with `IsEventRegistered` (`PlanTab.bonusOnOffer`). If the game refuses it, the kill gives the
+  verdict as before, so nothing goes silent.
+- `PlanTab.bonusSplit` puts owned items (`planOwned` on the id from the harvested link) apart. All
+  owned is NO, with "you own every BiS item". An item with no link has no id to check, so it
+  counts as wanted.
+- "Bonus roll here?" (`/dcp here`) never flashes, and it lists owned items marked "owned".
+- The `difficultyID` and `displayItemID` in the payload are not used: the source is the boss name,
+  as before.
+- `PlanTab.bonusChecks` holds 12 checks. Breaking the fix three ways made 5, 2 and 2 fail.
+
+The in-game acceptance line is still Rob's: kill a boss already looted this week, and no verdict
+shows. If the verdict comes at the kill and not at the offer, the game refused the event and the
+fallback is running.
+
 **2026-09-24, Claude.** Written from the clippings page. Not started. `SPELL_CONFIRMATION_PROMPT` and
 its payload are read from `wow-ui-source` on branch `live`; whether 12.1 protects the event is not
 known offline.
