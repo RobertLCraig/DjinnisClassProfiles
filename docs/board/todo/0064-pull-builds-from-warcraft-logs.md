@@ -2,14 +2,15 @@
 
 ## What I need from you
 
-1. Read the Warcraft Logs API terms in a browser. Say whether a personal script that reads rankings
-   and ships build strings in a published addon is allowed.
-2. Create an API client at https://www.warcraftlogs.com/api/clients/ (logged in to Warcraft Logs).
-3. Put the id and secret in two Windows user environment variables, `WCL_CLIENT_ID` and
-   `WCL_CLIENT_SECRET`. Never in the repo: this folder is git and Syncthing-replicated.
+Rob, 2026-09-25: the addon is for his own use and is not to be published, so the terms question is
+about personal use only. He already has a client, **PersonalSelfImprovementAIBot** (client id
+`01a0c2df-a16b-7247-8c60-9d3b0a52824b`). Its secret is not on this machine.
 
-Nothing below starts until 1 says yes.
+1. Put that client's secret in a Windows user environment variable, `WCL_CLIENT_SECRET`, and its id in
+   `WCL_CLIENT_ID`. Never in the repo or in chat: this folder is git and Syncthing-replicated.
 
+   Or, instead: say the Regenesis site's client may be used. Its id and secret are already in
+   `C:\Dev\Regenesis\.env` (gitignored). It shares its rate limit with the guild site's own pulls.
 ## Why
 
 Rob, 2026-09-25: "I would really like to find a way to automate pulling those builds. As there is
