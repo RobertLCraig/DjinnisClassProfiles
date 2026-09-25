@@ -305,3 +305,15 @@ Security:
 
 No UI surface to screenshot. The in-game check is Done-when 2 at 40 of 40, double-clicking the next
 build straight after "Putting on", plus Reset of two at the cap.
+
+**2026-09-25, Claude.** Fourth review's findings fixed, v0.54.4.
+
+1. Fixed. The short cap wait runs only after an import. After a refused step at the cap, the next
+   try waits `CAP_BACKOFF` (3 s).
+2. Fixed. With no event to name it, the made loadout is found by name, and the cap wait needs it
+   filled (`IsConfigPopulated`).
+3. Fixed. The test server can now fill a loadout late (`slow`). New checks: nothing refused for two
+   Resets at the cap, a slow fill waited for, and a server busy at the click waited out.
+- Security point fixed. A loadout name that is a secret is not compared, and nothing is deleted.
+
+Breaking each fix made 3, 1, 2 and 3 checks fail. All three modes end "no FAIL lines".

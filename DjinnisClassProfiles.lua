@@ -7403,6 +7403,8 @@ function PlanTab.importOne(job)
 		-- "deleted" only if this queue sent the delete: an id gone for another
 		-- reason was not ours to report (third 0067 review)
 		local now = PlanTab.configName(job.replace)
+		-- a name that is a secret cannot be compared (DECISIONS.md): not deleted
+		if not canRead(now) then return false, "the game will not show the old loadout's name now" end
 		if now == nil then
 			job.replace, job.deleted = nil, job.sentDelete
 		else
@@ -7428,6 +7430,7 @@ function PlanTab.importOne(job)
 end
 
 PlanTab.POLL, PlanTab.GIVE_UP = 0.5, 15
+PlanTab.CAP_BACKOFF = 3  -- seconds before a refused step is tried again at the slot cap
 
 -- Runs `fn` once the talent window closes, and answers true, or false when
 -- the window cannot be watched. One hook for the session; the last ask wins.
@@ -7607,8 +7610,21 @@ function PlanTab.waitThenStep()
 		-- at the slot cap it stays false: the import took the slot the delete
 		-- freed. Then filled and one beat more is ready, as after a delete; the
 		-- wait was 15 s a job (third 0067 review).
+		-- Only after an import, and for the loadout it made, found by name when
+		-- no event named it. After a refused step the server may still be busy,
+		-- so the next try waits CAP_BACKOFF (fourth 0067 review).
 		if okPop and populated and not (okNew and canNew) and PlanTab.freeLoadoutSlots() == 0 then
-			if q.capBeat == gen then okNew, canNew = true, true else q.capBeat = gen end
+			local job = q.lastMade
+			if job then
+				local id = q.pendingID or (PlanTab.savedLoadoutNames() or {})[PlanTab.untag(job.name) or job.name]
+				local okFill, filled = false, false
+				if id then okFill, filled = pcall(C_ClassTalents.IsConfigPopulated, id) end
+				if okFill and filled then
+					if q.capBeat == gen then okNew, canNew = true, true else q.capBeat = gen end
+				end
+			elseif q.waited >= PlanTab.CAP_BACKOFF then
+				okNew, canNew = true, true
+			end
 		end
 		if (okPop and populated and okNew and canNew) or q.waited >= PlanTab.GIVE_UP then PlanTab.stepLoadouts()
 		else PlanTab.later(PlanTab.POLL, poll) end
@@ -11428,7 +11444,7 @@ function PlanTab.swapChecks(check)
 		-- never makes; `canNewFree` a CanCreateNewConfig blind to one in flight.
 		local live, pending, due, calls, said, now, busyUntil, lag, nextID, selected = {}, {}, {}, {}, {}, 0, 0, 3, 20, 9
 		-- `cap`: the slot limit, nil for room enough; at it the game will make none (0067 review)
-		local lost, canNewFree, cap = false, false, nil
+		local lost, canNewFree, cap, slow, filledAt = false, false, nil, 0, {}  -- `slow`: beats a made loadout takes to fill after it is listed
 		local function used() local n = 0 for _ in pairs(live) do n = n + 1 end return n end
 		local function change(id, to)
 			if now < busyUntil then calls[#calls + 1] = "refused" return false end
@@ -11441,7 +11457,7 @@ function PlanTab.swapChecks(check)
 			local n = 0
 			while #pending > 0 and n < 500 do
 				now, n = now + 1, n + 1
-				for k, d in pairs(due) do if now >= d.at then live[d.id] = d.to due[k] = nil end end
+				for k, d in pairs(due) do if now >= d.at then live[d.id] = d.to filledAt[d.id] = now + slow due[k] = nil end end
 				local run = pending
 				pending = {}
 				for _, fn in ipairs(run) do fn() end
@@ -11465,7 +11481,7 @@ function PlanTab.swapChecks(check)
 			GetActiveConfigID = function() return 50 end,
 			GetTraitTreeForSpec = function() return 77 end,
 			CanCreateNewConfig = function() return canNewFree or (now >= busyUntil and not (cap and used() >= cap)) end,
-			IsConfigPopulated = function() return true end,
+			IsConfigPopulated = function(id) return now >= (filledAt[id] or 0) end,
 			DeleteConfig = function(id) calls[#calls + 1] = "delete " .. id return change(id, nil) end,
 			RenameConfig = function(id, name) calls[#calls + 1] = "rename " .. id .. " to " .. name return change(id, name) end,
 			ImportLoadout = function(_, _, name)
@@ -11592,6 +11608,18 @@ function PlanTab.swapChecks(check)
 		local withRoom = twoTicks()
 		cap = 2
 		check(t .. ", two replaces at the cap take no longer than with room", atCap <= withRoom + 2, true)
+		-- fourth 0067 review: the beat itself, a slow fill, and a busy server at the cap
+		twoTicks()
+		check(t .. ", and nothing is refused at the cap", table.concat(calls, "|"), "delete 2|import [CP] Raid: Vashnik|delete 5|import [CP] Raid: Cleave")
+		slow = 4
+		twoTicks()
+		check(t .. ", a loadout slow to fill is waited for, found by name", table.concat(calls, "|") .. "/" .. tostring(saidAny("Made 2 of 2")), "delete 2|import [CP] Raid: Vashnik|delete 5|import [CP] Raid: Cleave/true")
+		slow = 0
+		DjinnisCPCharDB.spares = { [3] = true, [4] = true }
+		live, calls, said, busyUntil, selected = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon" }, {}, {}, now + 5, 4
+		PlanTab.wearSpare("Raid: Vashnik", "x")
+		drain()
+		check(t .. ", a server busy at the click at the cap is waited out", calls[#calls] .. "/" .. tostring(saidAny("would not delete")), "wear [CP*] Raid: Vashnik/false")
 		-- an id gone for another reason, and no slot: the message must not say this queue deleted it
 		live, calls, said, busyUntil = { [4] = "[CP*] Dungeon", [7] = "Rob's own" }, {}, {}, now
 		PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } })
