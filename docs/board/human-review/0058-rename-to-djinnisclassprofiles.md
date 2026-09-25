@@ -1,5 +1,29 @@
 # 0058 Rename the addon to DjinnisClassProfiles, and tag its loadouts "[CP]"
 
+## What I need from you
+
+**One trip to the game to see the old saved data arrive.**
+
+0. If any character has not logged in since the rename, put the stub back in the game first: it is
+   not in the AddOns folder now. `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then
+   without `-WhatIf`.
+1. Restart the game fully. On a character that has not logged in since the rename: chat says
+   "Djinni's BiS is now Djinni's Class Profiles, and your saved data is copied over."
+2. The window has that character's saved bars, profiles, gear targets and sim imports. The minimap
+   button is where it was.
+3. `/reload`: no message this time.
+4. `/dump C_AddOns.GetAddOnOptionalDependencies("DjinnisClassProfiles")` shows `DjinnisBiS`.
+5. The add-on list shows "Djinni's BiS (old saved data)", not marked out of date. Leave it on until
+   every character has logged in once, then turn it off.
+6. Log in once on the `958357#1` account. Afterwards its `SavedVariables\DjinnisClassProfiles.lua`
+   still holds `DjinnisClassProfilesDB` (compare with `C:\Dev\WoWAddons\.wtf-backup-2026-09-24\`).
+7. A data bar that showed the old "DjinnisBiS" broker: add "DjinnisClassProfiles" again.
+
+Pass is every step doing what it says. Fail is a missing message, missing data, or a second message
+after `/reload`. Say which step on this card.
+
+**Why it needs you:** the add-on loader and the saved-data files are only in a live client.
+
 ## Why
 
 Rob, 2026-09-24, on card `0050`'s tag question: "I dont like using BiS because it litterally means
@@ -78,15 +102,6 @@ Rob, 2026-09-24: "want to fulyl merge and rename. sure push into the DjinnisClas
 
 Checks: `PlanTab.renameChecks` (copy, deep, once, a new character's at its login, the message).
 `%TEMP%\mut0058.py` has 7 breaks, all red. Both Luas green; all 36 non-druid specs pass.
-
-## What I need from you
-
-After `/reload` (a full restart is safer: the folder list changed):
-1. Chat says "Djinni's BiS is now Djinni's Class Profiles, and your saved data is copied over."
-2. Open the window from the minimap button. Pass: your saved bars profiles, gear targets and sim
-   imports are all there.
-3. The add-on list shows "Djinni's BiS (old saved data)". Leave it on until every character you play
-   has logged in once, then turn it off.
 
 **2026-09-24, Claude (adversarial review of 905b395, 1535c6e, 3b16a73 and workspace 2c91b52). Back
 to todo: the old name is still on screen, the wiring that does the copy is unchecked, and the
@@ -451,3 +466,47 @@ FAIL line.
 Still true from the third review: the stub is not in the game folder (only `DjinnisClassProfiles`
 v0.47.3 is). If any character has not logged in since the rename, deploy it
 (`C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS` first).
+
+**2026-09-25, Claude (fourth adversarial review, of fb6c3e2). Clean. To `human-review/` for the one
+trip to a live client (the in-game criterion is `proves: manual`), which is where this board's clean
+cards wait. The in-game list is now under `## What I need from you`, at the top.**
+
+How I tried it: a scratch copy from `git archive HEAD` (`%TEMP%\revfb6\DjinnisClassProfiles`, with a
+copy of the stub beside it), my own list `%TEMP%\revfb6\revmut.py`, then the builder's `mut0058.py`.
+One run at a time. Nothing ran on the real files except `lua offline-check.lua`. The game folder was
+read only (folder names and the deployed `.toc`).
+
+Each earlier finding:
+- Third review 1 (the reader looser than the client): **closed.** A comma dropped, a semicolon, a tab,
+  a dotted name, a leading digit and a space-joined OptionalDeps are each red with the "not a Lua name"
+  line. A repeated `SavedVariablesPerCharacter: DjinnisBiSDB` above the stub's real line, a repeated
+  account name below it, and `DjinnisCPDB` repeated on the new `.toc`'s character line are each red.
+  The new `.toc`'s account list split over two lines, which the client accepts, and a trailing comma
+  stay green, as they should.
+- Third review 2 (the stub's Interface): **closed.** `110200`, the line removed, and the main `.toc`
+  bumped to `120105` with the stub left behind are each red. Trailing spaces stay green.
+- Third review 3 (HANDOVER said no remote): **closed.** Lines 254 and 279 say the repository is public
+  and `bis` is merged; `git log master..bis` is empty. Line 9 agrees.
+- Every earlier review's findings stay closed (the builder's 35 in `mut0058.py`: 35 red).
+
+What held:
+- `lua offline-check.lua` on the real files: exit 0. I read the whole output (19 lines): no load
+  error, no FAIL line. Lua 5.4.6 only; no 5.1 is on this machine's path this run.
+- My 16 mutations: 13 red where they should be, 3 green where the client accepts the line.
+- The code comments' sources hold in `wow-ui-source`: `Blizzard_AuctionHouseUI_Mainline.toc:6-7`
+  repeats `SavedVariablesPerCharacter`, and `AddonList.lua` has the `INTERFACE_VERSION` reason.
+
+Two notes, not findings (both fail loud, never silent):
+- `list()`'s Lua-name rule also runs on `OptionalDeps`, where an add-on folder name may carry `-` or
+  `.`. Adding such a dependency later would go red for a line the client accepts.
+- The Interface compare is an exact string. A main `.toc` with two versions (`120100, 120105`) would
+  red a stub on `120100` that the client still loads.
+
+Security, where the card produced code (this commit is the check and a doc):
+1. *Weakest point:* still the `.toc` lines, now read as the client reads them, repeats and commas
+   included.
+2. *Unchecked:* nothing left that this card owns. What the client does at login is item 1 above.
+3. *Leaks:* nothing new. `master` is 3 commits ahead of the public `origin`; HANDOVER now says what
+   is committed here goes public once pushed.
+
+**No browser, no game client.** The surface is the game's add-on loader and saved-data files.
