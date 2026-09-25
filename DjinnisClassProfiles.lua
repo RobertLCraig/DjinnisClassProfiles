@@ -6501,8 +6501,15 @@ end
 
 -- One click on a header folds it; a double-click on a build switches to it
 -- through PlanTab.loadTalents, and nothing else here writes (the card).
-function PlanTab.sidebarClick(row)
+function PlanTab.sidebarClick(row, button)
 	local e = row.element
+	if button == "RightButton" then
+		-- a planned build: save it to the game (Rob, 2026-09-25). Not a header,
+		-- not the player's own, and not one the game would refuse to import.
+		if not e or e.group or e.own then return end
+		if e.warn then PlanTab.say(e.warn) return "refused" end
+		return PlanTab.saveOne(e.loadout)
+	end
 	if not (e and e.group) or InCombatLockdown() then return end
 	local d = db()
 	if type(d.sidebarFolded) ~= "table" then d.sidebarFolded = {} end
@@ -6528,7 +6535,7 @@ function PlanTab.sidebarTip(row)
 	GameTooltip:AddLine(e.loadout, 1, 1, 1)
 	if #e.bosses > 0 then GameTooltip:AddLine(table.concat(e.bosses, ", "), 0.7, 0.7, 0.7, true) end
 	if e.tick then GameTooltip:AddLine("This is the build in play.", 0, 1, 0) end
-	if not e.saved then GameTooltip:AddLine("No loadout of its own on this character. Double-click wears it through the spare loadout, \"" .. PlanTab.spareName(e.loadout) .. "\".", 1, 0.7, 0, true) end
+	if not e.saved and not e.own then GameTooltip:AddLine("Not saved in the game. Double-click wears it through the spare loadout, \"" .. PlanTab.spareName(e.loadout) .. "\".", 1, 0.7, 0, true) end
 	if e.own then GameTooltip:AddLine("Your own loadout. The plan has no build of this name.", 0.7, 0.7, 0.7, true) end
 	if e.bars then
 		GameTooltip:AddLine("Has its own action bars. Switching to it offers them.", 0.4, 0.8, 1, true)
@@ -6540,6 +6547,9 @@ function PlanTab.sidebarTip(row)
 	if e.warn then GameTooltip:AddLine(e.warn, 1, 0.3, 0.3, true) end
 	if not e.tick then GameTooltip:AddLine("On the tree: green it adds, red it drops, amber it changes.", 0.8, 0.8, 0.8, true) end
 	GameTooltip:AddLine("Double-click to switch to it.", 0, 1, 0)
+	if not e.own and not e.saved and not e.warn then
+		GameTooltip:AddLine("Right-click to save it to the game as a loadout.", 0, 1, 0, true)
+	end
 	GameTooltip:Show()
 	pcall(PlanTab.showTreeDiff, e.loadout, e.code)  -- card 0034
 end
@@ -6582,10 +6592,13 @@ function PlanTab.sidebarRow(row, e)
 		row.bosses:SetWordWrap(false)
 		row:SetHighlightTexture("Interface\\FriendsFrame\\UI-FriendsFrame-HighlightBar-Blue", "ADD")
 		row:GetHighlightTexture():SetAlpha(0.4)
-		row:RegisterForClicks("LeftButtonUp")  -- as TalentLoadoutsEx's frames/list.xml, not left to a default
+		-- as TalentLoadoutsEx's frames/list.xml, not left to a default; the right button saves a build
+		row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 		row:SetScript("OnClick", PlanTab.sidebarClick)
-		row:SetScript("OnDoubleClick", function(self)
-			if self.element and self.element.loadout then PlanTab.loadTalents(self.element.loadout) end
+		-- the left button only: OnDoubleClick fires for the right too, and a quick
+		-- double right-click would wear the build as well as save it (0065 review)
+		row:SetScript("OnDoubleClick", function(self, button)
+			if button == "LeftButton" and self.element and self.element.loadout then PlanTab.loadTalents(self.element.loadout) end
 		end)
 		row:SetScript("OnEnter", PlanTab.sidebarTip)
 		row:SetScript("OnLeave", PlanTab.sidebarTipOff)
@@ -7488,10 +7501,9 @@ end
 -- The next one of PlanTab.tagging, or the count when they are all done.
 -- A group setup held by the queue goes on once it ends. setupStep itself
 -- waits out combat, as it always has.
--- Answers true when a setup goes on, so the queue's end does not also offer
--- the loadout box: a Create clicked while the setup's change is in flight
--- would be refused, and after a spec change the box is for the spec left
--- (third 0059 review). The timer runs it only if nothing ran it meanwhile.
+-- Answers true when a setup goes on. The queue's end once offered the loadout
+-- box unless it did (third 0059 review); since card 0065 it offers nothing.
+-- The timer runs it only if nothing ran it meanwhile.
 function PlanTab.afterTagging()
 	local steps = PlanTab.pendingSetup
 	if not (steps and steps.afterTag) then return false end
@@ -7508,14 +7520,13 @@ function PlanTab.tagNext(again)
 	local o = t.todo[t.i]
 	if not o then
 		PlanTab.tagging = nil
-		local setup = PlanTab.afterTagging()
+		PlanTab.afterTagging()
 		-- by what was asked, so a run the game refused says 0 of what it was (0062 review)
 		local renames, deletes = 0, 0
 		for _, q in ipairs(t.todo) do if q.delete then deletes = deletes + 1 else renames = renames + 1 end end
 		if renames > 0 then PlanTab.say(("Tagged %d of %d old loadout%s."):format(t.done, renames, renames == 1 and "" or "s")) end
 		if deletes > 0 then PlanTab.say(("Deleted %d of %d old loadout%s."):format(t.gone, deletes, deletes == 1 and "" or "s")) end
 		if PlanTab.redraw then pcall(PlanTab.redraw) end
-		if not setup then PlanTab.later(1, function() PlanTab.offerLoadouts(true) end) end  -- what is still missing or drifted
 		return
 	end
 	if InCombatLockdown() then
@@ -7561,10 +7572,81 @@ function PlanTab.tagNext(again)
 	after(poll)
 end
 
--- On login, on a spec change and on /dcp loadouts: what this character is
--- missing or has drifted, with one button per fix. Nothing is made without a
--- click. "Not now" holds for this spec until the next /reload. Answers what
--- it did, for the checks.
+-- One build to the game, from its row's right-click in the list beside the
+-- talent window (Rob, 2026-09-25: "save them in the addon, and give the user
+-- an option per loadout to save to the game"). Only a MISSING build is made,
+-- through createMissing and its guards. One that is saved and has changed is
+-- never overwritten from a right-click (0065 review: a player's own edits,
+-- lost to a click meant as a menu); the box's Reset asks first. With the
+-- talent window open, which is where the list is, the names wait together
+-- and are made once it shuts: the window's close holds one job, and a second
+-- click must not replace the first (0065 review). Answers what it did.
+PlanTab.saveWaiting = nil  -- { spec =, names = { [build] = true } }
+
+function PlanTab.saveOne(name)
+	if InCombatLockdown() then PlanTab.say("Not in combat. Try again after the fight.") return "combat" end
+	if PlanTab.tagging then PlanTab.say("Still working through old loadouts. Wait for the count.") return "renaming" end
+	local spec = playerSpec()
+	local builds = spec and PlanTab.BUILDS[spec]
+	if not (builds and builds[name]) then PlanTab.say(("\"%s\" is not a planned %s build."):format(tostring(name), spec or "")) return "not planned" end
+	local saved, _, old = PlanTab.savedLoadoutNames()
+	-- an untagged "X" from before the tag reads as missing: making "[CP] X"
+	-- would hold the build twice, and the next tag pass deletes the player's
+	-- "X" as a double (0065 review)
+	if old and old[name] then
+		PlanTab.say(("Your loadout \"%s\" is from before the %s tag. Click More > Make the planned loadouts to rename it first."):format(name, PlanTab.TAG))
+		return "old"
+	end
+	local missing, drifted = PlanTab.loadoutGaps(builds, saved, PlanTab.loadoutString, PlanTab.mayBeShort)
+	if not missing then PlanTab.say("The game will not list this spec's loadouts yet. Try again in a moment.") return "unknown" end
+	for _, n in ipairs(drifted) do
+		if n == name then
+			PlanTab.say(("\"%s\" is saved, but no longer holds the plan. To reset it, click More > Make the planned loadouts."):format(PlanTab.tag(name)))
+			return "drifted"
+		end
+	end
+	local isMissing = false
+	for _, n in ipairs(missing) do isMissing = isMissing or n == name end
+	if not isMissing then
+		PlanTab.say(("\"%s\" is saved in the game already, and holds the plan."):format(PlanTab.tag(name)))
+		return "saved"
+	end
+	local w = PlanTab.saveWaiting
+	local waiting = w and w.spec == spec and w.names or {}
+	local count = 0
+	for _ in pairs(waiting) do count = count + 1 end
+	if PlanTab.loadoutRoom(saved) and PlanTab.loadoutRoom(saved) <= count then
+		PlanTab.say(("No free loadout slot, so \"%s\" was not saved. Delete a loadout in the talent window, or with More > Delete old loadouts, then try again. Double-click still wears it through the spare."):format(name))
+		return "full"
+	end
+	if PlanTab.talentWindowOpen() then
+		waiting[name] = true
+		PlanTab.saveWaiting = { spec = spec, names = waiting }
+		if PlanTab.whenTalentsClose(PlanTab.saveWaited) then
+			PlanTab.say(("\"%s\" is saved when the talent window closes (%d waiting)."):format(name, count + 1))
+			return "waiting"
+		end
+		PlanTab.saveWaiting = nil
+	end
+	return PlanTab.createMissing({ [name] = true })
+end
+
+-- The talent window shut: every build right-clicked meanwhile, in one queue.
+function PlanTab.saveWaited()
+	local w = PlanTab.saveWaiting
+	PlanTab.saveWaiting = nil
+	if not w then return "nothing" end
+	if playerSpec() ~= w.spec then
+		PlanTab.say(("The spec changed while the talent window was open, so nothing was saved for %s. Right-click again."):format(w.spec or "the old spec"))
+		return "spec changed"
+	end
+	return PlanTab.createMissing(w.names)
+end
+
+-- On /dcp loadouts and More > Make the planned loadouts, never on its own
+-- (Rob, 2026-09-25): what this character is missing or has drifted, with one
+-- button per fix. Nothing is made without a click. "Not now" holds for this
+-- spec until the next /reload. Answers what it did, for the checks.
 PlanTab.offerDismissed = {}
 PlanTab.oldDismissed = {}  -- card 0059's "Not now" on the renaming, per spec, for the session
 
@@ -7579,7 +7661,7 @@ function PlanTab.offerLoadouts(asked, declined)
 		if asked then PlanTab.say("Not in combat. Try again after the fight.") end  -- a click that says nothing looks broken (0053 review)
 		return "combat"
 	end
-	-- mid-queue every button would answer "Still renaming"; the queue's end offers again (0059 review)
+	-- mid-queue every button would answer "Still renaming" (0059 review)
 	if PlanTab.tagging then
 		if asked then PlanTab.say("Still working through old loadouts. Wait for the count.") end
 		return "renaming"
@@ -7670,7 +7752,7 @@ function PlanTab.offerLoadouts(asked, declined)
 		local frees = 0
 		for _, o in ipairs(before) do if o.delete and not o.stays then frees = frees + 1 end end
 		if room and room < #missing and frees > 0 then
-			lines[#lines + 1] = ("Old loadouts deletes %d, which frees their slots. Do that first, then Create makes %d."):format(frees, math.min(#missing, room + frees))
+			lines[#lines + 1] = ("Old loadouts deletes %d, which frees their slots. Do that first, then open this again: Create makes %d."):format(frees, math.min(#missing, room + frees))
 		end
 		-- each button does what its box listed, no more (second 0060 review)
 		buttons[#buttons + 1] = { label = "Create " .. math.min(#missing, room or #missing), onClick = PlanTab.askAgain(PlanTab.createMissing, spec, missing) }
@@ -7720,15 +7802,12 @@ function PlanTab.tidy(confirmed)
 	return PlanTab.startTagging(todo)
 end
 
--- TRAIT_CONFIG_CREATED names the config the queue waits on. A spec change
--- (ours only: the event fires for party members too) offers again.
+-- TRAIT_CONFIG_CREATED names the config the queue waits on.
 function PlanTab.onLoadoutEvent(event, arg)
 	if event == "TRAIT_CONFIG_CREATED" then
 		if PlanTab.q and type(arg) == "table" and Enum.TraitConfigType and arg.type == Enum.TraitConfigType.Combat then
 			PlanTab.q.pendingID = arg.ID
 		end
-	elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
-		if canRead(arg) and arg == "player" then PlanTab.later(2, PlanTab.offerLoadouts) end
 	elseif event == "TRAIT_CONFIG_UPDATED" then
 		-- a build or a spec landed: its bars, if it has others (card 0033)
 		PlanTab.later(1, PlanTab.offerBars)
@@ -7737,21 +7816,21 @@ end
 
 -- Handler first, then each event verified: a refused one is silent in 12.1
 -- (DECISIONS.md). Without TRAIT_CONFIG_CREATED the queue still waits, on
--- CanCreateNewConfig alone. The login offer waits five seconds, because the
--- talent configs are not listed at once.
+-- CanCreateNewConfig alone. Nothing offers the planned loadouts on its own
+-- any more (Rob, 2026-09-25: "park loading all loadouts automatically"): each
+-- build is saved to the game from its row's right-click, or all of them from
+-- More > Make the planned loadouts.
 function PlanTab.armLoadouts()
 	local watcher = CreateFrame("Frame")
 	watcher:SetScript("OnEvent", function(_, ...) PlanTab.onLoadoutEvent(...) end)
 	local refused = {
 		TRAIT_CONFIG_CREATED = "making loadouts waits longer between each.",
-		PLAYER_SPECIALIZATION_CHANGED = "a spec change does not offer the missing builds. Click More > Make the planned loadouts.",
 		TRAIT_CONFIG_UPDATED = "a build change does not offer its action bars. Click More > Offer the saved bars.",
 	}
-	for _, event in ipairs({ "TRAIT_CONFIG_CREATED", "PLAYER_SPECIALIZATION_CHANGED", "TRAIT_CONFIG_UPDATED" }) do
+	for _, event in ipairs({ "TRAIT_CONFIG_CREATED", "TRAIT_CONFIG_UPDATED" }) do
 		watcher:RegisterEvent(event)
 		if not watcher:IsEventRegistered(event) then PlanTab.say("Could not register " .. event .. ", so " .. refused[event]) end
 	end
-	PlanTab.later(5, PlanTab.offerLoadouts)
 	PlanTab.later(8, PlanTab.offerBars)
 end
 
@@ -9917,7 +9996,7 @@ function PlanTab.tagChecks(check)
 			check(o .. ", nor wears one", PlanTab.loadTalents("Raid: Vashnik") .. "/" .. PlanTab.wearSpare("Dungeon", "x"), "busy/busy")
 			drain()
 			check(o .. ", the next once the first has landed, then the count", #calls .. "/" .. tostring(saidAny("Tagged 1 of 1") and saidAny("Deleted 1 of 1")), "2/true")
-			check(o .. ", and the box comes back for what is left", reopened, true)
+			check(o .. ", and no box comes on its own after (card 0065)", reopened, nil)
 			table.sort(calls)
 			check(o .. ", renamed and deleted", table.concat(calls, "|"), "delete 2|rename 1 to [CP] Dungeon")
 			-- the server busy with something else at the click: waited for, not skipped
@@ -10004,7 +10083,7 @@ function PlanTab.tagChecks(check)
 			PlanTab.pendingSetup, reopened = { loadout = "Dungeon" }, false
 			PlanTab.tagOld()
 			drain()
-			check(o .. ", a setup it did not hold is left alone, and the box comes", stepped .. "/" .. tostring(reopened), "0/true")
+			check(o .. ", a setup it did not hold is left alone, and no box comes (card 0065)", stepped .. "/" .. tostring(reopened), "0/false")
 			live, busyUntil, stepped = { [1] = "Dungeon" }, 0, 0
 			PlanTab.pendingSetup = { loadout = "Dungeon", afterTag = true }
 			PlanTab.tagOld()
@@ -10143,7 +10222,7 @@ function PlanTab.tagChecks(check)
 			PlanTab.loadoutGaps = function() return { "Dungeon", "Raid: Cleave", "Raid: Nek'Zali, Nymrissa", "Raid: Single Target" }, {} end
 			PlanTab.oldDismissed, PlanTab.offerDismissed, shown, selected = { Balance = true }, {}, nil, 11  -- EC M+ worn: it stays and frees nothing
 			PlanTab.offerLoadouts(true)
-			check(d .. ", a short Create box says the old ones are the room", shown and table.concat(shown.lines, "\n"):find("Old loadouts deletes 2, which frees their slots. Do that first, then Create makes 3.", 1, true) ~= nil, true)
+			check(d .. ", a short Create box says the old ones are the room", shown and table.concat(shown.lines, "\n"):find("Old loadouts deletes 2, which frees their slots. Do that first, then open this again: Create makes 3.", 1, true) ~= nil, true)
 			PlanTab.oldDismissed = {}
 			PlanTab.loadoutRoom, PlanTab.loadoutGaps = wasRoom, wasGaps0
 			PlanTab.playerClass, C_SpecializationInfo = wasClass, wasSpecAPI0
@@ -10229,6 +10308,82 @@ function PlanTab.tagChecks(check)
 	end)
 	DjinnisCPCharDB.spares = keptSpares
 	check(t .. ", ran", ok or tostring(err), true)
+end
+
+-- Card 0065: one build saved to the game from its row, and nothing offered on its own.
+function PlanTab.saveOneChecks(check)
+	local t = "save one build"
+	local kept = { PlanTab.createMissing, PlanTab.resetDrifted, PlanTab.loadoutGaps, PlanTab.savedLoadoutNames, PlanTab.say, InCombatLockdown, PlanTab.tagging, C_SpecializationInfo, PlanTab.later,
+		PlanTab.loadoutRoom, PlanTab.talentWindowOpen, PlanTab.whenTalentsClose, PlanTab.saveWaiting }
+	local calls, said, old, room, open, onClose = {}, {}, {}, 5, false, nil
+	PlanTab.createMissing = function(only)
+		local names = {}
+		for n in pairs(only) do names[#names + 1] = n end
+		table.sort(names)
+		calls[#calls + 1] = "create " .. table.concat(names, "+")
+		return "made"
+	end
+	PlanTab.resetDrifted = function() calls[#calls + 1] = "reset" return "made" end
+	PlanTab.savedLoadoutNames = function() return {}, {}, old end
+	PlanTab.say = function(text) said[#said + 1] = text end
+	PlanTab.loadoutRoom = function() return room end
+	PlanTab.talentWindowOpen = function() return open end
+	PlanTab.whenTalentsClose = function(fn) onClose = fn return true end
+	PlanTab.saveWaiting = nil
+	InCombatLockdown = function() return false end
+	PlanTab.tagging = nil
+	C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }  -- Feral
+	local feral = PlanTab.BUILDS.Feral
+	local a, b, c = "Raid: Nek'Zali", "Raid: Vashnik", "Raid: Sszorak"
+	PlanTab.loadoutGaps = function() return { a, c, "Raid: Twin Fangs" }, { b } end
+	check(t .. ", a missing one is made, that one only", PlanTab.saveOne(a) .. "/" .. table.concat(calls, "|"), "made/create " .. a)
+	calls = {}
+	-- 0065 review: a player's edits are never lost to a right-click
+	check(t .. ", a changed one is not overwritten", PlanTab.saveOne(b) .. "/" .. #calls, "drifted/0")
+	check(t .. ", one saved and on plan is said, not made", PlanTab.saveOne("Dungeon") .. "/" .. #calls, "saved/0")
+	check(t .. ", a name the plan does not have is refused", PlanTab.saveOne("Rob's own") .. "/" .. #calls, "not planned/0")
+	old = { [a] = 7 }
+	check(t .. ", an untagged one from before the tag is not made twice", PlanTab.saveOne(a) .. "/" .. #calls, "old/0")
+	old = {}
+	room = 0
+	check(t .. ", no room says it was not saved", PlanTab.saveOne(a) .. "/" .. #calls .. "/" .. tostring(said[#said]:find("was not saved", 1, true) ~= nil), "full/0/true")
+	room = 5
+	-- the talent window open: the names wait together, and are made in one queue when it shuts (0065 review)
+	open = true
+	check(t .. ", with the talent window open it waits", PlanTab.saveOne(a) .. "/" .. #calls, "waiting/0")
+	check(t .. ", a second one waits with it, not over it", PlanTab.saveOne(c) .. "/" .. tostring(said[#said]:find("2 waiting", 1, true) ~= nil), "waiting/true")
+	room = 2
+	check(t .. ", room counts the ones waiting", PlanTab.saveOne("Raid: Twin Fangs") .. "/" .. #calls, "full/0")
+	room, open = 5, false
+	check(t .. ", both made when the window shuts", onClose() .. "/" .. table.concat(calls, "|") .. "/" .. tostring(PlanTab.saveWaiting), "made/create " .. a .. "+" .. c .. "/nil")
+	calls = {}
+	PlanTab.saveWaiting = { spec = "Balance", names = { [a] = true } }
+	check(t .. ", a spec change while waiting makes nothing", PlanTab.saveWaited() .. "/" .. #calls, "spec changed/0")
+	PlanTab.loadoutGaps = function() return nil end
+	check(t .. ", a list the game will not give is said", PlanTab.saveOne(a), "unknown")
+	InCombatLockdown = function() return true end
+	check(t .. ", not in combat", PlanTab.saveOne(a) .. "/" .. #calls, "combat/0")
+	InCombatLockdown = function() return false end
+	PlanTab.tagging = { todo = {} }
+	check(t .. ", not while old loadouts are being worked through", PlanTab.saveOne(a) .. "/" .. #calls, "renaming/0")
+	PlanTab.tagging = nil
+	PlanTab.loadoutGaps = function() return { a }, {} end
+	-- the right button on a build row saves it; on a header, the player's own, a refused build, or the left button, nothing
+	check(t .. ", right-click on a build row", tostring((PlanTab.sidebarClick({ element = { loadout = a, bosses = {} } }, "RightButton"))) .. "/" .. #calls, "made/1")
+	check(t .. ", right-click on your own loadout does nothing", tostring((PlanTab.sidebarClick({ element = { loadout = "Rob's own", own = true, bosses = {} } }, "RightButton"))) .. "/" .. #calls, "nil/1")
+	check(t .. ", right-click on a header does not fold it", tostring((PlanTab.sidebarClick({ element = { group = "raid", label = "Raid", count = 1 } }, "RightButton"))) .. "/" .. #calls, "nil/1")
+	check(t .. ", right-click on a build the game would refuse says why", tostring((PlanTab.sidebarClick({ element = { loadout = a, bosses = {}, warn = "out of date" } }, "RightButton"))) .. "/" .. #calls .. "/" .. said[#said], "refused/1/out of date")
+	check(t .. ", the left button does not save", tostring((PlanTab.sidebarClick({ element = { loadout = a, bosses = {} } }, "LeftButton"))) .. "/" .. #calls, "nil/1")
+	-- nothing offers the loadouts on its own: not at login, not on a spec change (Rob, 2026-09-25)
+	local later = {}
+	PlanTab.later = function(_, fn) later[#later + 1] = fn end
+	PlanTab.onLoadoutEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
+	local offered = false
+	for _, fn in ipairs(later) do offered = offered or fn == PlanTab.offerLoadouts end
+	check(t .. ", a spec change offers nothing", #later .. "/" .. tostring(offered), "0/false")
+	check(t .. ", and the builds used here are planned Feral builds", feral[a] ~= nil and feral[c] ~= nil, true)
+	PlanTab.createMissing, PlanTab.resetDrifted, PlanTab.loadoutGaps, PlanTab.savedLoadoutNames, PlanTab.say, InCombatLockdown, PlanTab.tagging, C_SpecializationInfo, PlanTab.later,
+		PlanTab.loadoutRoom, PlanTab.talentWindowOpen, PlanTab.whenTalentsClose, PlanTab.saveWaiting = unpack(kept, 1, 13)
 end
 
 function PlanTab.menuChecks(check)
@@ -12963,6 +13118,7 @@ local function selfTest()
 	PlanTab.levelChecks(check)  -- card 0055
 	PlanTab.renameChecks(check)  -- card 0058
 	PlanTab.tagChecks(check)  -- card 0059
+	PlanTab.saveOneChecks(check)  -- card 0065
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[CP] self-test passed|r")
