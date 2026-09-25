@@ -49,6 +49,10 @@ ignore:
   - update-plan-ranks.py
   # Bakes Dreamgrove's talent builds into the builds table (card 0030).
   - update-builds.py
+  - wcl.py
+  - wcl-builds.py
+  - .cache
+  - __pycache__
   - offline-check.lua
   - releases
   # A SavedVariables file, if one is ever copied into the repo to reproduce a bug

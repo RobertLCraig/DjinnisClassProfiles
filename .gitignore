@@ -10,3 +10,6 @@
 /releases/
 # API keys for author tooling (update-builds.py). Never committed, never shipped.
 .secrets/
+# Warcraft Logs answers cached by wcl-builds.py
+.cache/
+__pycache__/
