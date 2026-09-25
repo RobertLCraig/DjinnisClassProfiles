@@ -42,6 +42,96 @@ of 2026-08-29, apply to `bonusRollVerdict`:
 
 ## Comments
 
+**2026-09-25, Claude (third review of fc0c27c). Holds: moved to human-review.**
+
+The false NO after a reload is gone, and the four gaps the second review found are now proved. What
+is left is Low: one rare wrong boss, two test gaps and a safe miss.
+
+Ran `offline-check.lua`, `250` and `62` on the committed code (a `git archive` of `fc0c27c`; the
+Lua is unchanged at HEAD `62559af`). All three end "no FAIL lines", output read whole. The working
+tree had another session's uncommitted edit to `DjinnisClassProfiles.lua`, so the runs and mutations
+used the archive, not the tree. Checked against `wow-ui-source` 12.1.0 (69933): `DjinnisCPCharDB` is
+this addon's `SavedVariablesPerCharacter` (`.toc` line 9, and offline-check's 0058 check reads it).
+Saved variables are in place before PLAYER_ENTERING_WORLD, and ENCOUNTER_END can only come later, so
+the 2026-09-02 rule holds. `time()` is a plain Lua global Blizzard's own Mainline code calls
+(`ChatFrameOverrides.lua:535`). `GetInstanceInfo` (`InstanceDocumentation.lua:103`) has no secret
+returns. Its `instanceType` values in Blizzard's code are "none", "party", "raid", "scenario",
+"pvp" and "arena". Open world is "none", with the continent as the instance. Delves are scenarios.
+Nymrissa Wavecaller, the one BiS source outside the eight, is a lair boss inside the raid (`:5802`),
+so "raid" covers her.
+
+Mutations, on a temp copy of the archive:
+
+| Mutation | Result |
+|---|---|
+| no time limit on the kept kill | 3 FAIL, caught |
+| `<=` for `<` at the limit | 3 FAIL, caught |
+| the kill not written to the character | 4 FAIL, caught |
+| the kept kill never read | 5 FAIL, caught |
+| the kill written without its time | 4 FAIL, caught |
+| "no boss" never, or always | 5 and 2 FAIL, caught |
+| "no boss" says nothing in chat | 2 FAIL, caught |
+| the kept kill's place not checked | 3 FAIL, caught |
+| `carriedLevels` returns `{}`, skips bags, skips worn gear | 2 FAIL each, caught |
+| `bonusCoins` always nil, or no 0 fallback | 2 FAIL each, caught |
+| TIMEOUT, PLAYER_ENTERING_WORLD or ENCOUNTER_END not registered | 2 FAIL each, caught |
+| a kill does not clear the offered spell | 2 FAIL, caught |
+| the self-test throws right after the swap | 2 FAIL, caught, and the table comes back |
+| `carriedLevels` ignores the item id | **green** |
+| a finished key saved without its time | green (harmless, see 4) |
+| the kept kill used even with a kill this session | green (same table, no change) |
+| the self-test leaves the fake table in place | green: the outer net puts the real one back |
+
+Findings:
+
+1. **Low. A crash can name the boss before this one.** `DjinnisClassProfiles.lua:1789`. Saved
+   variables reach disk only at a reload or a logout. Kill Nek'zali, /reload, kill Entombed
+   Sentinels, crash with the roll open, log back in within 10 minutes. The file still holds
+   Nek'zali, in the same raid and inside `BONUS_KEEP`, so the verdict is for Nek'zali. That is a
+   YES or NO for the wrong loot table. Whether a roll survives a crash is not known offline. Fix, if
+   wanted: bound it by the roll's own time left (`duration`, arg4 of the prompt and `p.duration` in
+   the login list) instead of a flat 600 s.
+2. **Low. The id filter in `carriedLevels` is not proved.** `:2644`. The fixture's other item
+   (`|Hitem:333::|h[Other]|h`, `:11720`) has no level in `ilvl` (`:11722`), so it is dropped even
+   with the id test gone. Scenario: a later edit drops the id test, any worn item at 723 makes every
+   planned item "owned", and the verdict turns NO. Fix: give 333 a level in `ilvl`. A probe with 999
+   there still returns `710,723,723` on the real code.
+3. **Low, a safe miss.** `:1818` writes only when `DjinnisCPCharDB` is already a table. It is made
+   lazily (`madeAt`, `spareIDs`, `applyBars`, or the 0058 copy). On a druid with none of those, the
+   kill is not kept, and a reload with the roll open gives "no boss", not a verdict. The failure is
+   silence, not wrong advice. Fix: `DjinnisCPCharDB = DjinnisCPCharDB or {}` at the write. That is
+   safe there: ENCOUNTER_END is always after ADDON_LOADED.
+4. **Note.** A finished key's time (`:1770`) is not proved. It does not matter today: in a dungeon,
+   the fallback is the place, which has the same name.
+5. **Note, true before this card.** Outside a raid or dungeon ("none", "scenario") the fallback is
+   still the place name (`:1797`). No BiS source is an open-world boss today, so nothing is wrong
+   now. If one is added, give the place verdict only for "party". The boss-name mismatch is small:
+   `bisFrom` matches substrings both ways, so "Nek'zali the Soulcoiler" finds "Nek'zali". Only a name
+   where neither holds the other misses.
+
+Asked about and held:
+- **The self-test swap.** Everything runs inside one slash call. WoW does not deliver events in
+  the middle of Lua, and nothing called inside fires one, so nothing else can write the real table
+  while it is swapped. The swap is inside the `pcall` (`:11643`), and the restore after it cannot
+  throw (`:11753`). Under that, `runSelfTest` (`:14895`) deep-copies both saved tables first, and
+  `restoreSaved` (`:14817`) puts the real table and its contents back even if the check's own
+  restore is removed. Two mutations above show both layers.
+- **Growth.** One key, `bonusSource`, overwritten on each kill with three fields. It never grows.
+  It is only written on a druid (the `gearHere` gate comes first).
+- **The fallback when `bonusOnOffer` is false.** The kill is written first, then the verdict is
+  given at the kill as before. The login scan answers "no list", and the kept kill is never read.
+- **Stale data.** A kill from last week, or from another raid, is refused by the time and the place.
+- **Secret values.** The name is `canRead`-guarded before it is kept. The place, kind and `time()`
+  are not secret-annotated. What comes back from the saved file is plain Lua.
+
+Security, three questions:
+- **Weakest point:** the flat 10 minutes as a stand-in for "this roll's kill" (finding 1).
+- **Unchecked path:** only a live client can show the save and read across a real /reload, and
+  whether a roll outlives a crash. Rob's in-game line: /reload with the roll open after a kill, and
+  the verdict names that boss.
+- **What it leaks:** the boss name, instance id and time of the last kill now sit in the
+  character's saved variables on disk. They stay local and are never sent. Nothing else changed.
+
 **2026-09-25, Claude.** Second review's findings fixed, v0.54.2.
 
 1. Fixed, both ways the review gave. The kill is kept on the character (`DjinnisCPCharDB.bonusSource`,
