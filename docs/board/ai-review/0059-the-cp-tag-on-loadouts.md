@@ -352,3 +352,75 @@ Fix: `tagOld` starts a queue and `PlanTab.tagNext` sends one change, polls `conf
 Checks: `tagChecks` now models one change in flight. Five mutants (all at once, no busy guard, refused stops, never gives up, landed ignores name) are all caught; "never gives up" hangs the check, which fails it.
 
 In-game check again: `/reload`, open the loadout box, press "Tag them" once. All old loadouts should be renamed in turn, about half a second apart, then one "Tagged N old loadouts." line.
+
+**2026-09-25, Claude (fifth adversarial review, of f7c5dae only). Findings: bounce to todo. Not
+moved and not committed; the brief said no commit.**
+
+What was run. `offline-check.lua` under Lua 5.1.5 in the repo (clean tree at f7c5dae): exit 0, "no
+FAIL lines". A `git archive` copy in `%TEMP%\rev0059e` with the `DjinnisBiS` stub, probes spliced
+into `tagChecks` (`probe.lua`, `patch.py`) and six mutations (`muts.sh`). API re-read in
+`wow-ui-source` (09b9db794): `RenameConfig` / `DeleteConfig` return `success`, nothing says "busy"
+(`CanChangeTalents` is about staged changes, `CanEditTalents` about switching). `TraitConfigInfo.name`
+is a plain string and no `C_Secrets` predicate covers traits, so the name comparison in the poll
+cannot throw on a secret.
+
+**The stuck queue held.** Every path out of `tagNext` either clears `PlanTab.tagging`, recurses, or
+schedules a poll, and every poll either reschedules or calls `tagNext`. `/reload` wipes the flag;
+the rest are then offered on the next login. A loadout deleted by the player before its turn is
+refused, said, skipped; one deleted while its rename is in flight reads nil, is waited out for 15 s,
+said, and the queue goes on. `configName` is `pcall`ed. No stuck state found.
+
+**Finding 1: one refusal empties the whole queue in the same frame, which is the bug this commit
+fixes.** The refused branch (line 7435) says it and calls `tagNext` at once, with no wait, so the
+next one is sent while the same change is still in flight and is refused too. Probe A (server busy
+at the click, free a moment later): `refused 1|refused 2`, "Tagged 0 old loadouts." Probe A2 (the
+new name reads before the server lets go, by one poll): `rename 1|refused 3|refused 2`, "Tagged 1
+old loadout." That is Rob's live result exactly. It happens whenever "landed" (a client-side name
+read, line 7443) comes before the server's one-change lock clears, which no source confirms either
+way, and on any click while another change is in flight: a spec change (the login offer appears 2 s
+after it), a loadout the player just picked, the addon's own Create or swap. Fix: on a refusal, wait
+`POLL` and retry the same one, a few times, before skipping it; and wait one extra `POLL` after a
+landing before sending the next. A check whose fake refuses while locked (A2's model).
+
+**Finding 2: nothing else waits for the queue.** `loadoutFence` checks `PlanTab.q`, not
+`PlanTab.tagging` (probe B: fence nil while tagging), and `wearSpare` checks only `q`. So while it
+runs, Create / Reset to plan (from the new spec's offer after a spec change), a double-click in the
+list beside the talent window (a build not renamed yet reads missing, so it goes through the spare:
+import, delete, rename), the Talents button (a loadout switch), or `/dcp tidy yes` all send changes
+that collide with a rename in flight, and each collision feeds Finding 1. Create during the queue
+also makes `[CP] X` for a build whose old `X` is about to be renamed to `[CP] X`: two of one name.
+Fix: `loadoutFence` and `wearSpare` say "Still renaming" while `PlanTab.tagging` is set.
+
+**Finding 3: "never the worn one" is checked at the click, not at the delete.** The queue now spans
+seconds (up to 15 s per item). Probe C: the player picks the untagged "Raid: Vashnik" in the talent
+window after the click; the queue still deletes it (`rename 1 to [CP] Dungeon|delete 2`, selected
+= 2), which drops them to the starter build. Rare, but it is the one loss the card promises never
+happens. Fix: `tagNext` re-reads `selectedConfigID()` before a delete and skips it with the
+"stays" line.
+
+**Coverage.** My mutations: giving up after one poll (M6), no combat stop inside `tagNext` (M1),
+no stale-poll guard (M2), no re-offer at the end (M3), a delete landing on any name (M4) all
+**survive**; only "a refused one leaves `tagging` set" is caught. M6 matters: the fake lands every
+change before the first poll, so nothing proves a slow landing is waited for, which is the point of
+the fix. A check where the name appears on the third poll would pin it.
+
+Spec change mid-queue: config ids are per loadout, so the id renamed is still the loadout that was
+listed, not another spec's. The risk is the spec change itself being a change in flight (Finding 1).
+
+Lower, not blocking: `tidy`'s delete loop (line 7578) still sends every delete in one frame, the
+same refusal on a druid with more than one old Dreamgrove loadout. Pre-existing, not this commit.
+
+Security. No new API call, event or input path; `RenameConfig` / `DeleteConfig` are
+`AllowedWhenUntainted` and get the addon's own ids and names. Weakest point: "landed" is inferred
+from a client-side name read, not from the server. Nothing leaves the client.
+
+UI surface: chat lines and the talent window. Not looked at: no agent can run the client. The
+in-game criterion stays `proves: manual`.
+
+### 2026-09-25 — review fixes, v0.48.6
+
+1. **A refusal now waits and tries again.** `tagNext` retries the same loadout up to `PlanTab.TAG_TRIES` (8) times, a `POLL` apart, before it says "would not". After each change lands it waits one more beat before the next, so the normal case sends no change the server must refuse.
+2. **Nothing else changes a loadout while the queue runs.** `loadoutFence` (Create, Reset, tidy, the spare), `wearSpare` and `loadTalents` (double-click, the Talents button) answer "Still renaming old loadouts" while `PlanTab.tagging` is set.
+3. **The worn loadout is read again before each delete.** One picked after the click stays, and chat says so.
+4. **Checks:** `tagChecks` now runs against a timed server model: a change shows `lag` beats after it is sent, and the server is busy one beat past that. New checks: server busy at the click, a slow rename (12 beats), a loadout picked mid-queue, combat mid-queue, a stale poll alone and beside a new queue, the box coming back at the end, a delete that never lands, and the three fences. 14 mutants (the reviewer's five survivors among them) are all caught.
+5. **Not fixed here:** `tidy` still deletes in one frame. That is card 0062.
