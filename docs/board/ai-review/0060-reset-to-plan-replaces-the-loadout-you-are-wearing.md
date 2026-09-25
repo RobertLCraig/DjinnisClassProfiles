@@ -172,3 +172,18 @@ crosses the network. *Leaks:* nothing. Messages go to the local chat frame only.
 
 Not looked at in a client. There is no browser surface and the game cannot be run from here. The
 manual criterion stays open. Deploy was not touched.
+
+**2026-09-25, Claude. The second review's findings, fixed in v0.48.2.**
+
+1. **The close runs only what the click agreed to, on its spec.** `PlanTab.askAgain(fn, spec,
+   names)` keeps the spec and the build names the box listed. On close it says so and makes nothing
+   if the spec changed, and `createMissing(only)` / `resetDrifted(only)` touch only those names. A
+   `[CP]` loadout edited in the window, which the box never listed, is left alone. The Create and
+   Reset buttons use the same, so a box left open does only what it listed.
+2. **Nothing left is said** ("Nothing left to do: what was listed has changed since."), and a second
+   deferred ask says it replaces the first.
+
+Checked as on card `0059` (same commit). New checks: a loadout the prompt never listed is not
+touched on close; a spec change in the window makes nothing; a box's Create after a spec change
+makes nothing. `%TEMP%\mut0060.ps1` still 9 of 9, and removing the spec check or the name filter is
+red (`%TEMP%\mut0059b.ps1`).

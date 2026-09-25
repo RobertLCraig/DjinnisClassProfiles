@@ -167,3 +167,24 @@ player's own chat.
 UI surface: the "Tag them" box, the renamed loadouts in Blizzard's talent window, and the sidebar.
 In-game only; no agent can run the client, so the last criterion stays `proves: manual` and
 unticked.
+
+**2026-09-25, Claude. The review's findings, fixed in v0.48.2.**
+
+1. **The real listing is checked.** `PlanTab.tagChecks` now runs the real `savedLoadoutNames` over a
+   pretend game list: tagged loadouts keyed by build, a tagged name held twice, the player's own and
+   a `[CP*] ` spare under their own names, an untagged build name and a recorded `BiS: ` spare in the
+   third return, and the real offer then asks "Tag them" (the review's M09 is red, 3 lines).
+2. **"Not now" on the renaming skips only the renaming**, for the session and spec
+   (`PlanTab.oldDismissed`), and goes straight on to the Create / Reset box, which then carries a
+   "Tag old loadouts" button. So a player can keep an untagged "Raid" and still reach Create and
+   Reset. Create then makes `[CP] Raid` beside it: a slot, not a clash.
+
+Also, from the lower notes: `PlanTab.spareName` and `PlanTab.swapName` replace every hand-joined
+spare and swap name (13 places); "1 loadout was made" reads right; and checks now cover M14
+(`noteMade` finding a made loadout by its build when the watched id is lost), M17 (wearing by the tag
+when the game will not list) and M20 (the /simc export reading the real keys). "Offered once per
+character" stays as built: it is offered while one is left, until "Not now" for the session.
+
+Checked: `lua offline-check.lua` under Lua 5.1.5 and 5.4.6, exit 0, no FAIL line. Spec mode 250, 62,
+1467, 73 clean; 102 its usual 8. Mutations (`%TEMP%\mut0059b.ps1`): M09, M14, M17, M20 and five for
+the new code, 9 of 9 caught after one check was added.
