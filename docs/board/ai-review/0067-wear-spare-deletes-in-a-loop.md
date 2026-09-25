@@ -155,3 +155,21 @@ another name is never taken.
 
 Security: the weakest point from the first pass is closed, because a delete now needs the spare's
 name and a recorded id. Unchecked and leaks are unchanged: no network, local chat only.
+
+**2026-09-25, Claude.** Re-review findings fixed, v0.53.3.
+
+1. Fixed. Leftovers are tidied once per click. The call after the tidy run passes `tidied`, and
+   that call skips the extras. A leftover whose delete never lands is sent once, and the queue ends.
+2. Fixed. Each words table carries its own combat line, with "was" or "were". The spare's says to
+   double-click the build again. Your builds' says to rename or delete in the talent window.
+3. Fixed. Combat in the beat after the tidy says "In combat, so X was not put on".
+4. Not fixed. At the cap the game gives no signal that tells a busy server from a full one. The
+   quiet retry recovers, so the cost is one refused call.
+5. Fixed, not struck. `makeLoadouts` skips the slot count when every job is a replace and there is
+   no swap: each replace deletes before it imports. Reset of a loadout you are not wearing now
+   works at the cap. A swap (Reset on the worn one) still needs a free slot for its new loadout.
+6. Noted only, as the review says.
+
+New checks: a leftover that never goes, combat in the list, combat after it, a replace at the cap,
+and a new loadout at the cap. Breaking each fix made 3, 2, 2 and 2 checks fail. All three modes end
+"no FAIL lines".

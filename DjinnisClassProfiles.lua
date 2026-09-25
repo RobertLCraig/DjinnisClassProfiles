@@ -7206,7 +7206,9 @@ function PlanTab.spareOnHide()
 end
 
 -- Answers what it did, for the checks.
-function PlanTab.wearSpare(name, code)
+-- `tidied` is the call after the leftovers' run: it does not tidy again, so
+-- a leftover that will not go cannot loop (second 0067 review).
+function PlanTab.wearSpare(name, code, tidied)
 	if InCombatLockdown() then return "combat" end
 	if PlanTab.q then PlanTab.say("Still making loadouts. Wait for the count.") return "busy" end
 	if PlanTab.tagging then PlanTab.say("Still working through old loadouts. Wait for the count.") return "busy" end  -- 0059 review
@@ -7263,10 +7265,13 @@ function PlanTab.wearSpare(name, code)
 	table.sort(spares)
 	local old, extra = spares[1], {}
 	for i = 2, #spares do extra[#extra + 1] = { id = spares[i], from = PlanTab.configName(spares[i]), delete = true } end
-	if #extra > 0 then
+	if #extra > 0 and not tidied then
 		PlanTab.startTagging(extra, PlanTab.SPARE_WORDS, function()
 			for _, o in ipairs(extra) do if PlanTab.configName(o.id) == nil then mine[o.id] = nil end end
-			PlanTab.wearSpare(name, code)
+			-- combat in the beat before this: said, or the spare just never came
+			if PlanTab.wearSpare(name, code, true) == "combat" then
+				PlanTab.say(("In combat, so \"%s\" was not put on. Double-click it again after the fight."):format(name))
+			end
 		end)
 		return "tidying"
 	end
@@ -7370,7 +7375,11 @@ end
 -- (PlanTab.swapSelected). `again` is the ask that worked the jobs out.
 function PlanTab.makeLoadouts(jobs, wear, swaps, again)
 	if #jobs == 0 and not (swaps and #swaps > 0) then return "nothing" end  -- before any wait (third 0060 review)
-	local why = PlanTab.loadoutFence(wear ~= nil)
+	-- a replace frees its own slot before it imports, so all replaces need no
+	-- free one; a swap's new loadout does (second 0067 review)
+	local replaces = not (swaps and #swaps > 0)
+	for _, job in ipairs(jobs) do if not job.replace then replaces = false end end
+	local why = PlanTab.loadoutFence(wear ~= nil or replaces)
 	-- the talent window open is no reason to make Rob click twice (Rob,
 	-- 2026-09-24): the work waits for the window to close. It is ASKED again
 	-- then, never replayed: the window is where loadouts are switched, so the
@@ -7817,8 +7826,11 @@ end
 -- deletes in `gone`. Answers the count when it finished at once, else a word.
 -- `words` are the two count lines, PlanTab.TAG_WORDS unless given.
 -- `after` runs once the list is done, a beat on, unless combat stopped it.
-PlanTab.TAG_WORDS = { done = "Tagged %d of %d old loadout%s.", gone = "Deleted %d of %d old loadout%s." }
-PlanTab.SPARE_WORDS = { done = "Renamed %d of %d spare loadout%s.", gone = "Deleted %d of %d leftover spare loadout%s." }
+-- `combat` takes the count left, "s" or "", "was" or "were", then GOLD and GREY.
+PlanTab.TAG_WORDS = { done = "Tagged %d of %d old loadout%s.", gone = "Deleted %d of %d old loadout%s.",
+	combat = "Combat started, so %d old loadout%s %s not done. After the fight, click %sMore > Make the planned loadouts|r%s again." }
+PlanTab.SPARE_WORDS = { done = "Renamed %d of %d spare loadout%s.", gone = "Deleted %d of %d leftover spare loadout%s.",
+	combat = "Combat started, so %d leftover spare loadout%s %s not deleted. Double-click the build again after the fight." }
 function PlanTab.startTagging(todo, words, after)
 	local t = { todo = todo, i = 0, done = 0, gone = 0, words = words or PlanTab.TAG_WORDS, after = after }
 	PlanTab.tagging = t
@@ -7862,7 +7874,8 @@ function PlanTab.tagNext(again)
 	end
 	if InCombatLockdown() then
 		PlanTab.tagging = nil
-		PlanTab.say(("Combat started, so %d old loadout%s were not done. After the fight, click %sMore > Make the planned loadouts|r%s again."):format(#t.todo - t.i + 1, #t.todo - t.i + 1 == 1 and "" or "s", GOLD, GREY))
+		local left = #t.todo - t.i + 1
+		PlanTab.say((t.words.combat or PlanTab.TAG_WORDS.combat):format(left, left == 1 and "" or "s", left == 1 and "was" or "were", GOLD, GREY))
 		PlanTab.afterTagging()
 		return
 	end
@@ -8083,7 +8096,8 @@ end
 -- fit the game's 30.
 PlanTab.NAME_MAX = 24
 PlanTab.CODE_MAX = 1000  -- Blizzard's import box's limit
-PlanTab.MINE_WORDS = { done = "Renamed %d of %d loadout%s.", gone = "Deleted %d of %d loadout%s." }
+PlanTab.MINE_WORDS = { done = "Renamed %d of %d loadout%s.", gone = "Deleted %d of %d loadout%s.",
+	combat = "Combat started, so %d loadout%s %s not changed. Rename or delete it in the talent window after the fight." }
 
 -- Why `name` cannot be one of your builds for `spec`, or nil and the name
 -- trimmed. `except` is the build being renamed. A name the plan uses would
@@ -11227,6 +11241,14 @@ function PlanTab.swapChecks(check)
 		DjinnisCPCharDB.spares = { [3] = true, [4] = true }
 		live, calls, said, busyUntil, selected, cap = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon" }, {}, {}, now, 4, 2
 		check(t .. ", with every slot used the old spare still makes the room", PlanTab.wearSpare("Raid: Vashnik", "x") .. "/" .. (function() drain() return table.concat(calls, "|") end)(), "wearing/delete 3|import [CP*] Raid: Vashnik|wear [CP*] Raid: Vashnik")
+		local keptConstants = Constants
+		Constants = Constants or { TraitConsts = { MAX_COMBAT_TRAIT_CONFIGS = 2 } }  -- the fence's line names the cap
+		-- and a replace (Reset to plan) at the cap, which the fence once refused (second 0067 review)
+		live, calls, said, busyUntil, selected = { [2] = "[CP] Raid: Vashnik", [4] = "[CP*] Dungeon" }, {}, {}, now, 4
+		check(t .. ", a replace at the cap goes ahead", PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } }) .. "/" .. (function() drain() return table.concat(calls, "|") end)(), "started/delete 2|import [CP] Raid: Vashnik")
+		live, calls, said = { [2] = "[CP] Raid: Vashnik", [4] = "[CP*] Dungeon" }, {}, {}
+		check(t .. ", a new one at the cap does not", PlanTab.makeLoadouts({ { name = "[CP] Raid: Cleave", code = "x" } }) .. "/" .. #calls, "fenced/0")
+		Constants = keptConstants
 		cap = nil
 		-- leftovers go first, one at a time, then the spare
 		DjinnisCPCharDB.spares = { [3] = true, [4] = true, [5] = true, [6] = true }
@@ -11241,6 +11263,33 @@ function PlanTab.swapChecks(check)
 		PlanTab.wearSpare("Raid: Vashnik", "x")
 		drain()
 		check(t .. ", a recorded id with another name is never deleted", table.concat(calls, "|"), "import [CP*] Raid: Vashnik|wear [CP*] Raid: Vashnik")
+		-- second 0067 review: a leftover that never goes is tried once a click, not for ever
+		DjinnisCPCharDB.spares = { [3] = true, [4] = true, [5] = true }
+		live, calls, said, busyUntil, selected, lost = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon", [5] = "[CP*] Raid: Cleave" }, {}, {}, now, 4, true
+		PlanTab.wearSpare("Raid: Vashnik", "x")
+		drain()
+		local fives = 0
+		for _, c in ipairs(calls) do if c == "delete 5" then fives = fives + 1 end end
+		check(t .. ", a leftover that never goes is tried once, and the queue ends", fives .. "/" .. tostring(PlanTab.tagging) .. "/" .. tostring(PlanTab.q) .. "/" .. #pending, "1/nil/nil/0")
+		lost = false
+		-- combat in the middle of the leftovers: the spare's own words
+		local combat, keptSay = false, PlanTab.say
+		InCombatLockdown = function() return combat end
+		DjinnisCPCharDB.spares = { [3] = true, [4] = true, [5] = true, [6] = true }
+		live, calls, said, busyUntil = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon", [5] = "[CP*] Raid: Cleave", [6] = "[CP*] Raid" }, {}, {}, now
+		PlanTab.wearSpare("Raid: Vashnik", "x")
+		PlanTab.later(0, function() combat = true end)
+		drain()
+		check(t .. ", combat among the leftovers says what to do", tostring(saidAny("1 leftover spare loadout was not deleted. Double-click")), "true")
+		-- combat in the beat after the leftovers: said, not silent
+		combat = false
+		DjinnisCPCharDB.spares = { [3] = true, [4] = true, [5] = true }
+		live, calls, said, busyUntil = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon", [5] = "[CP*] Raid: Cleave" }, {}, {}, now
+		PlanTab.say = function(text) keptSay(text) if text:find("leftover spare", 1, true) then combat = true end end
+		PlanTab.wearSpare("Raid: Vashnik", "x")
+		drain()
+		check(t .. ", combat before the spare is made says so", tostring(saidAny("In combat, so \"Raid: Vashnik\" was not put on")), "true")
+		PlanTab.say, combat = keptSay, false
 		ClassTalentHelper, DjinnisCPCharDB.spares, selected = keptHelper, keptSpares, 9
 
 		-- the fence holds everywhere a loadout changes, and a group setup waits for the swap
