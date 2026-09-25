@@ -432,3 +432,22 @@ Rob's list, after the fix:
 6. Log in once on the `958357#1` account. Afterwards its `SavedVariables\DjinnisClassProfiles.lua`
    still holds `DjinnisClassProfilesDB` (compare with the backup).
 7. A data bar that showed the old "DjinnisBiS" broker: add "DjinnisClassProfiles" again.
+
+**2026-09-25, Claude. The third review's findings, fixed. No addon code changed, so no version bump.**
+
+1. **The `.toc` reader reads lists as the client does** (`offline-check.lua`, the card 0058 block).
+   A repeated directive adds to the first instead of replacing it. A list splits on commas only,
+   each name is trimmed, and a name that is not a Lua name prints its own FAIL line.
+2. **The stub's `## Interface` must equal the main `.toc`'s.**
+3. **HANDOVER** says the repository is public and that `bis` is fully merged (`git log master..bis`
+   is empty).
+
+Mutations, in a scratch copy (`%TEMP%\mut0058c`), each against the review's case: the comma
+dropped from the account list, 2 FAIL lines; a stub `SavedVariablesPerCharacter: DjinnisBiSDB`
+line above the real one, 1; the stub on `Interface: 110200`, 1. The account list split over two
+`## SavedVariables:` lines, which the client accepts, stays green (0). The real files: exit 0, no
+FAIL line.
+
+Still true from the third review: the stub is not in the game folder (only `DjinnisClassProfiles`
+v0.47.3 is). If any character has not logged in since the rename, deploy it
+(`C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS` first).

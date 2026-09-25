@@ -251,8 +251,9 @@ Trap: every druid spec's `Dungeon` is pinned in PIN and never refreshes; Rob cop
   longer reports a change that is only a moved date. The panel shows the stamp it was generated
   with, so staleness is on screen rather than in somebody's memory. **The BiS list above it still
   has no such tool** and is still hand-maintained from method.gg and Icy Veins.
-- **No GitHub remote and never published.** `WoWAddons#0004` is the remote question for the
-  workspace. Publishing is a separate call.
+- **The repository is public** (github.com/RobertLCraig/DjinnisClassProfiles, since the `0058`
+  merge), so everything committed here is public once pushed. The addon itself is not yet released
+  to CurseForge or anywhere else; that is a separate call.
 - **Season-scoped data.** Nothing here records who refreshes it or when.
 
 ## How to pick up
@@ -275,7 +276,8 @@ Trap: every druid spec's `Dungeon` is pinned in PIN and never refreshes; Rob cop
 - **Gaps:** no `README.md`, no `PRD.md`, no `DATA-MODEL.md`, no `DECISIONS.md`.
 
 ## Branch status
-One branch, `master`. Clean. No remote, so "unpushed" is not a meaningful count here.
+`master` tracks `origin/master` on the public remote (github.com/RobertLCraig/DjinnisClassProfiles).
+`bis` is the pre-rename branch, already fully merged into `master`; kept only as a marker.
 
 ## Session log
 - **2026-09-23, later** Four fresh reviewers bounced `0031` to `0034`; fixed at v0.33.0, one commit each.

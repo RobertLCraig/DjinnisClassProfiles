@@ -446,21 +446,31 @@ end
 do
 	-- A .toc's directives, read as the client reads them: "## Name: value"
 	-- lines only, so a name in a comment or in another field does not count.
+	-- A repeated directive adds to the first, as the client's does
+	-- (Blizzard_AuctionHouseUI_Mainline.toc declares SavedVariablesPerCharacter twice).
 	local function directives(text)
 		local out, seenOther, late = {}, false, nil
 		for line in text:gmatch("[^\r\n]*") do
 			local name, value = line:match("^## ([%w%-]+):%s*(.-)%s*$")
 			if name then
-				out[name] = value
+				out[name] = out[name] and (out[name] .. "," .. value) or value
 				if seenOther then late = late or line end
 			elseif line ~= "" then seenOther = true end
 		end
 		return out, late
 	end
-	-- a comma list as a sorted string, so "B, A" and "A,B" read the same
+	-- A comma list as a sorted string, so "B, A" and "A,B" read the same.
+	-- Commas only, as every list in Blizzard's own .toc files: "A B" is one
+	-- name that is not a Lua name, and the check says so rather than reading two.
 	local function list(value)
 		local names = {}
-		for name in (value or ""):gmatch("[^,%s]+") do names[#names + 1] = name end
+		for name in ((value or "") .. ","):gmatch("([^,]*),") do
+			name = name:match("^%s*(.-)%s*$")
+			if name ~= "" then
+				if not name:match("^[%a_][%w_]*$") then print("|cffff0000FAIL|r a .toc list names \"" .. name .. "\", which is not a Lua name (card 0058)") end
+				names[#names + 1] = name
+			end
+		end
 		table.sort(names)
 		return table.concat(names, ",")
 	end
@@ -484,6 +494,10 @@ do
 		file:close()
 		expect("the stub's account saved data", list(stub.SavedVariables), "DjinnisBiSDB")
 		expect("the stub's character saved data", list(stub.SavedVariablesPerCharacter), "DjinnisBiSCharDB")
+		-- An old Interface is not loadable while the version check is on
+		-- (Blizzard_AddOnList/AddonList.lua, INTERFACE_VERSION), and the stub stays
+		-- in the game until every character has logged in, across a patch bump.
+		expect("the stub's Interface", stub.Interface, toc.Interface)
 		if stub.LoadOnDemand and stub.LoadOnDemand ~= "0" then print("|cffff0000FAIL|r the stub is load-on-demand, so it is not loaded by login (card 0058)") end
 		if stubLate then print("|cffff0000FAIL|r a stub .toc directive after other lines: " .. stubLate) end
 		for _, name in ipairs({ "DjinnisBiSDB", "DjinnisBiSCharDB" }) do
