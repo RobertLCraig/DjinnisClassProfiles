@@ -27,12 +27,30 @@ to save to the game".
   no longer offers it on a spec change. The end of the old-loadout queue (`tagNext`) no longer
   opens it either. The box is still there on demand: More > Make the planned loadouts, or
   `/dcp loadouts`.
-- `PlanTab.saveOne(name)`: a missing build goes through `createMissing` and a drifted one through
-  `resetDrifted`, each for that one name only. So the same guards apply: room, the spare, the
-  talent window, and one change in flight. A build that is saved and on plan is only said.
+- `PlanTab.saveOne(name)` makes a missing build through `createMissing`, for that name only. A
+  saved build is only described, whether it holds the plan or not.
 - The sidebar row takes the right button (`sidebarClick(row, button)`). It does nothing on the
-  player's own loadouts or on group headers. The tooltip names the right-click.
-- `PlanTab.saveOneChecks`: 11 checks.
+  player's own loadouts or on group headers. On a row with a warning, it says the warning. The
+  tooltip names the right-click on unsaved rows.
+- `PlanTab.saveOneChecks`: 22 checks.
+
+## Comments
+
+### 2026-09-25: review fixes
+
+A fresh reviewer found 3 bugs and 2 risks. All five are fixed:
+- **Several right-clicks now wait together.** With the talent window open, each build is added to
+  `PlanTab.saveWaiting`. `saveWaited` makes them all in one queue when the window closes. Before
+  this, the window's single close slot kept only the last click.
+- **OnDoubleClick takes the left button only.** A double right-click also wore the build.
+- **An untagged "X" from before the tag is refused**, with a pointer to the box. Before, a second
+  "[CP] X" was made, and the next tag pass deleted the player's "X".
+- **A changed saved build is never reset from a right-click.** It is only described; the box's Reset
+  asks first.
+- **No room is said plainly**, counting the builds already waiting.
+
+Stale wording about the box coming back was fixed too. Left as a nit: with two loadouts of one
+name, `loadoutGaps` reads only one.
 
 ## Done when
 
