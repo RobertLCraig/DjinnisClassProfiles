@@ -119,6 +119,8 @@ No browser surface. Rob checks it in game: the existing manual line, plus: the a
 other features working (the new registration sits mid-file), and the verdict comes at the offer, not at
 the kill.
 
+**2026-09-25, Claude.** Built, v0.53.0.
+
 - `PlanTab.onBonusEvent` handles the events. A kill (`ENCOUNTER_END`, success) or a finished key
   (`CHALLENGE_MODE_COMPLETED`) only sets `PlanTab.bonusSource`. `SPELL_CONFIRMATION_PROMPT` with
   `confirmType == Enum.ConfirmationPromptUIType.BonusRoll` (1, `SpellConstantsDocumentation.lua`)

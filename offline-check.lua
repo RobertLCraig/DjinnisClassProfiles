@@ -34,7 +34,12 @@ local function newFrame()
 	f.CreateTexture = function() return newFrame() end
 	f.IsShown = function() return false end
 	f.GetHeight = function() return 100 end
-	f.IsEventRegistered = function() return true end
+	-- true only for an event this frame registered, so a dropped registration
+	-- shows (0054 review)
+	f.IsEventRegistered = function(self, event)
+		for _, frame in ipairs(registered[event] or {}) do if frame == self then return true end end
+		return false
+	end
 	f.RegisterEvent = function(self, event)
 		registered[event] = registered[event] or {}
 		table.insert(registered[event], self)
