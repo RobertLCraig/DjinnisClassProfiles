@@ -97,3 +97,22 @@ Security:
 No UI surface to screenshot: the change is in the queue. The in-game check is still Done-when 2,
 plus: at 40 of 40 slots, double-click an unsaved build that has an old spare, and see whether it is
 worn.
+
+**2026-09-25, Claude.** Review findings fixed, v0.53.1.
+
+1. Fixed. `importOne` asks `CanCreateNewConfig` just before the import, not before a replace's
+   delete. Before the delete it waits only for a busy server: a false answer with free slots.
+   With every slot used, the delete goes ahead and frees the slot. This also fixes Reset's
+   replace at the cap (card `0063`).
+2. Fixed. With more than one spare that is not worn, the extra ones are deleted first through
+   `startTagging`, one at a time. That queue now takes an `after` function, run a beat after the
+   list ends. The spare is then asked for again, and replaces the last old one. The dead ids are
+   forgotten.
+3. Fixed. A job carries `oldName`. The two failure lines name the old spare and leave out the menu
+   hint.
+4. Security point fixed. A spare is taken only through `spareBuild`: its name must start with
+   `[CP*] ` and its id must be recorded. A recorded id whose loadout has another name is never
+   deleted.
+
+There are new checks: the cap with an old spare, four spares, and a recorded id with another name.
+Breaking each fix made 1, 3, 1 and 2 checks fail.

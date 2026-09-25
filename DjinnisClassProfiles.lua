@@ -7168,11 +7168,24 @@ function PlanTab.wearSpare(name, code)
 	-- the old spare, not worn, is the new one's replace: the queue deletes it,
 	-- waits for the delete to land and only then imports (card 0067; a loop of
 	-- deletes and the import in one frame had the server refuse all but one).
-	-- Worn spares stay until the next is on, so there is one at most; a second,
-	-- left by some fault, goes at the next wear.
-	local old
-	for _, id in pairs(saved) do
-		if mine[id] and id ~= selected and (not old or id < old) then old = id end
+	-- Worn spares stay until the next is on, so there is one at most. More,
+	-- left by some fault, are deleted first through the renaming's queue, one
+	-- at a time, and the spare is asked for again once it ends (0067 review:
+	-- a leftover otherwise held a slot for good). Only a loadout named as a
+	-- spare is ever taken, never a recorded id alone (spareBuild).
+	local spares = {}
+	for key, id in pairs(saved) do
+		if PlanTab.spareBuild(key, id) and id ~= selected then spares[#spares + 1] = id end
+	end
+	table.sort(spares)
+	local old, extra = spares[1], {}
+	for i = 2, #spares do extra[#extra + 1] = { id = spares[i], from = PlanTab.configName(spares[i]), delete = true } end
+	if #extra > 0 then
+		PlanTab.startTagging(extra, PlanTab.SPARE_WORDS, function()
+			for _, o in ipairs(extra) do if PlanTab.configName(o.id) == nil then mine[o.id] = nil end end
+			PlanTab.wearSpare(name, code)
+		end)
+		return "tidying"
 	end
 	local free = PlanTab.freeLoadoutSlots()
 	if free and free == 0 and not old then
@@ -7181,7 +7194,7 @@ function PlanTab.wearSpare(name, code)
 	end
 	-- the queue waits for the game to allow it and for the server to fill it,
 	-- then finishLoadouts wears it
-	return PlanTab.makeLoadouts({ { name = PlanTab.spareName(name), code = code, replace = old, oldSpare = old } }, name) == "started" and "wearing" or "fenced"
+	return PlanTab.makeLoadouts({ { name = PlanTab.spareName(name), code = code, replace = old, oldSpare = old, oldName = old and PlanTab.configName(old) } }, name) == "started" and "wearing" or "fenced"
 end
 
 -- One build to one loadout. `job` is { name, code, replace = config id or nil }.
@@ -7210,9 +7223,6 @@ function PlanTab.importOne(job)
 	local treeID = C_ClassTalents.GetTraitTreeForSpec(current) or (info and info.treeIDs and info.treeIDs[1])
 	if not treeID then return false, "no talent tree for this spec yet" end
 	local stale = not IE.IsHashEmpty(IE, treeHash) and not IE.HashEquals(IE, treeHash, C_Traits.GetTreeHash(treeID))
-	if not C_ClassTalents.CanCreateNewConfig() then
-		return false, "the game will not make a loadout now (one is still in flight, or all slots are full)"
-	end
 	local entries = IE.ConvertToImportLoadoutEntryInfo(IE, configID, treeID, IE.ReadLoadoutContent(IE, stream, treeID))
 	if #entries == 0 then
 		return false, "this spec's talent data is not loaded yet. Open the talent window once, close it, and try again"
@@ -7221,6 +7231,11 @@ function PlanTab.importOne(job)
 		-- whoever asked, and whenever: deleting the loadout you wear drops you to
 		-- the starter build (0060 review, a job worked out before a switch)
 		if job.replace == PlanTab.selectedConfigID() then return false, "it is the loadout you are wearing now, so it is not replaced. Pick another, then click again" end
+		-- a busy server is waited for; all slots used is not a wait, since the
+		-- delete frees one (0067 review)
+		if not C_ClassTalents.CanCreateNewConfig() and PlanTab.freeLoadoutSlots() ~= 0 then
+			return false, "the game will not change a loadout now (one is still in flight)"
+		end
 		-- gone already: a delete that landed after the queue gave up on it (second 0063 review)
 		-- so it is imported now
 		if PlanTab.configName(job.replace) == nil then
@@ -7230,6 +7245,11 @@ function PlanTab.importOne(job)
 			job.goneID, job.replace, job.deleted = job.replace, nil, true  -- gone: a retry only imports
 			return "deleted"
 		end
+	end
+	-- asked before the import only, not before a replace's delete: with every
+	-- slot used it answers false, and the delete is what frees the slot (0067 review)
+	if not C_ClassTalents.CanCreateNewConfig() then
+		return false, "the game will not make a loadout now (one is still in flight, or all slots are full)"
 	end
 	local ok, err = C_ClassTalents.ImportLoadout(configID, entries, job.name, job.code)
 	if not ok and (not err or err == "") then err = ("the game refused without saying why (%d talents sent)"):format(#entries) end
@@ -7345,7 +7365,9 @@ function PlanTab.stepLoadouts()
 	elseif q.final then
 		local label = PlanTab.untag(job.name) or job.name
 		print(("%sDjinni's Class Profiles|r |cffff4444%s failed:|r %s%s|r"):format(GOLD, label, GREY, tostring(err)))
-		if job.deleted then PlanTab.say(("The old \"%s\" was deleted and not made again. %sMore > Make the planned loadouts|r%s offers to create it."):format(label, GOLD, GREY)) end
+		-- the spare's old one is another build's, and the menu never makes spares (0067 review)
+		if job.deleted and job.oldSpare then PlanTab.say(("The old spare \"%s\" was deleted, and the new one was not made. Double-click the build again."):format(job.oldName or "?"))
+		elseif job.deleted then PlanTab.say(("The old \"%s\" was deleted and not made again. %sMore > Make the planned loadouts|r%s offers to create it."):format(label, GOLD, GREY)) end
 	else
 		q.retry[#q.retry + 1] = job
 	end
@@ -7395,7 +7417,7 @@ function PlanTab.waitThenStep()
 			q.i = q.i + 1
 			if job then
 				job.replace, job.deleted, job.goneID = job.goneID, nil, nil
-				if q.final then PlanTab.say(("The old \"%s\" did not go, so it was not made again."):format(PlanTab.untag(job.name) or job.name))
+				if q.final then PlanTab.say(("The old \"%s\" did not go, so it was not made again."):format(job.oldName or PlanTab.untag(job.name) or job.name))
 				else q.retry[#q.retry + 1] = job end
 			end
 			q.goneID = nil
@@ -7711,9 +7733,11 @@ end
 -- Runs a list through the queue: renames counted in `done`, old Dreamgrove
 -- deletes in `gone`. Answers the count when it finished at once, else a word.
 -- `words` are the two count lines, PlanTab.TAG_WORDS unless given.
+-- `after` runs once the list is done, a beat on, unless combat stopped it.
 PlanTab.TAG_WORDS = { done = "Tagged %d of %d old loadout%s.", gone = "Deleted %d of %d old loadout%s." }
-function PlanTab.startTagging(todo, words)
-	local t = { todo = todo, i = 0, done = 0, gone = 0, words = words or PlanTab.TAG_WORDS }
+PlanTab.SPARE_WORDS = { done = "Renamed %d of %d spare loadout%s.", gone = "Deleted %d of %d leftover spare loadout%s." }
+function PlanTab.startTagging(todo, words, after)
+	local t = { todo = todo, i = 0, done = 0, gone = 0, words = words or PlanTab.TAG_WORDS, after = after }
 	PlanTab.tagging = t
 	PlanTab.tagNext()
 	if PlanTab.tagging == t then return "started" end
@@ -7749,6 +7773,8 @@ function PlanTab.tagNext(again)
 		if renames > 0 then PlanTab.say(t.words.done:format(t.done, renames, renames == 1 and "" or "s")) end
 		if deletes > 0 then PlanTab.say(t.words.gone:format(t.gone, deletes, deletes == 1 and "" or "s")) end
 		if PlanTab.redraw then pcall(PlanTab.redraw) end
+		-- a beat on, so the server is free for what comes next
+		if t.after then PlanTab.later(PlanTab.POLL, t.after) end
 		return
 	end
 	if InCombatLockdown() then
@@ -10977,7 +11003,9 @@ function PlanTab.swapChecks(check)
 		-- look the same (0063 review). `lost` is a change the game takes and
 		-- never makes; `canNewFree` a CanCreateNewConfig blind to one in flight.
 		local live, pending, due, calls, said, now, busyUntil, lag, nextID, selected = {}, {}, {}, {}, {}, 0, 0, 3, 20, 9
-		local lost, canNewFree = false, false
+		-- `cap`: the slot limit, nil for room enough; at it the game will make none (0067 review)
+		local lost, canNewFree, cap = false, false, nil
+		local function used() local n = 0 for _ in pairs(live) do n = n + 1 end return n end
 		local function change(id, to)
 			if now < busyUntil then calls[#calls + 1] = "refused" return false end
 			if lost then return true end
@@ -11005,14 +11033,14 @@ function PlanTab.swapChecks(check)
 			return out
 		end
 		PlanTab.talentWindowOpen = function() return false end
-		PlanTab.freeLoadoutSlots = function() return 5 end
+		PlanTab.freeLoadoutSlots = function() return cap and math.max(0, cap - used()) or 5 end
 		PlanTab.readLevels = function() return nil end
 		PlanTab.redraw, PlanTab.q, PlanTab.swapping, PlanTab.tagging = nil, nil, nil, nil
 		InCombatLockdown = function() return false end
 		C_ClassTalents = {
 			GetActiveConfigID = function() return 50 end,
 			GetTraitTreeForSpec = function() return 77 end,
-			CanCreateNewConfig = function() return canNewFree or now >= busyUntil end,
+			CanCreateNewConfig = function() return canNewFree or (now >= busyUntil and not (cap and used() >= cap)) end,
 			IsConfigPopulated = function() return true end,
 			DeleteConfig = function(id) calls[#calls + 1] = "delete " .. id return change(id, nil) end,
 			RenameConfig = function(id, name) calls[#calls + 1] = "rename " .. id .. " to " .. name return change(id, name) end,
@@ -11112,6 +11140,24 @@ function PlanTab.swapChecks(check)
 		drain()
 		check(t .. ", it replaces the old spare, never the worn one, and nothing is refused", table.concat(calls, "|"), "delete 3|import [CP*] Raid: Vashnik|wear [CP*] Raid: Vashnik")
 		check(t .. ", and the old one is forgotten, the worn one kept", tostring(DjinnisCPCharDB.spares[3]) .. "/" .. tostring(DjinnisCPCharDB.spares[4]), "nil/true")
+		-- 0067 review: every slot used, the old spare is the room
+		DjinnisCPCharDB.spares = { [3] = true, [4] = true }
+		live, calls, said, busyUntil, selected, cap = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon" }, {}, {}, now, 4, 2
+		check(t .. ", with every slot used the old spare still makes the room", PlanTab.wearSpare("Raid: Vashnik", "x") .. "/" .. (function() drain() return table.concat(calls, "|") end)(), "wearing/delete 3|import [CP*] Raid: Vashnik|wear [CP*] Raid: Vashnik")
+		cap = nil
+		-- leftovers go first, one at a time, then the spare
+		DjinnisCPCharDB.spares = { [3] = true, [4] = true, [5] = true, [6] = true }
+		live, calls, said, busyUntil, selected = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon", [5] = "[CP*] Raid: Cleave", [6] = "[CP*] Raid" }, {}, {}, now, 4
+		check(t .. ", leftover spares are deleted first", PlanTab.wearSpare("Raid: Vashnik", "x"), "tidying")
+		drain()
+		check(t .. ", one at a time, then the spare replaces the last old one", table.concat(calls, "|"), "delete 5|delete 6|delete 3|import [CP*] Raid: Vashnik|wear [CP*] Raid: Vashnik")
+		check(t .. ", and only the worn one is left recorded", tostring(DjinnisCPCharDB.spares[3]) .. tostring(DjinnisCPCharDB.spares[4]) .. tostring(DjinnisCPCharDB.spares[5]) .. tostring(DjinnisCPCharDB.spares[6]), "niltruenilnil")
+		-- a loadout recorded as a spare but named otherwise is never deleted
+		DjinnisCPCharDB.spares = { [3] = true, [4] = true }
+		live, calls, said, busyUntil, selected = { [3] = "Rob's own", [4] = "[CP*] Dungeon" }, {}, {}, now, 4
+		PlanTab.wearSpare("Raid: Vashnik", "x")
+		drain()
+		check(t .. ", a recorded id with another name is never deleted", table.concat(calls, "|"), "import [CP*] Raid: Vashnik|wear [CP*] Raid: Vashnik")
 		ClassTalentHelper, DjinnisCPCharDB.spares, selected = keptHelper, keptSpares, 9
 
 		-- the fence holds everywhere a loadout changes, and a group setup waits for the swap
