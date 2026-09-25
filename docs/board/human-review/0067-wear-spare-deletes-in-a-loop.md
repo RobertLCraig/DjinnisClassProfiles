@@ -389,3 +389,13 @@ Security:
 No UI surface to screenshot. The in-game check is Done-when 2 at 40 of 40. Double-click the next
 build straight after "Putting on", and once more while a loadout change is visibly still going.
 Then Reset of two at the cap, timing each.
+
+**2026-09-25, Claude.** Fifth review's low points, v0.54.6.
+
+- Point 2 fixed. A new check makes the spare at the cap with a slow fill. Taking out the fill wait
+  now fails 2 checks. The check that could never be true is gone.
+- Point 3 fixed. The guard uses `PlanTab.canRead`, and a check hands it a secret name. Taking the
+  guard out now fails 2 checks. The earlier comment's "3 checks" for the security point was wrong:
+  that fix was not broken on purpose then.
+- Point 1 left as it is. At the cap the game gives no busy signal, so the queue waits 3 s and
+  then tries again. The in-game check above covers it.

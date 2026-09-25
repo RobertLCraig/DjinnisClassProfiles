@@ -7408,7 +7408,7 @@ function PlanTab.importOne(job)
 		-- reason was not ours to report (third 0067 review)
 		local now = PlanTab.configName(job.replace)
 		-- a name that is a secret cannot be compared (DECISIONS.md): not deleted
-		if not canRead(now) then return false, "the game will not show the old loadout's name now" end
+		if not PlanTab.canRead(now) then return false, "the game will not show the old loadout's name now" end
 		if now == nil then
 			job.replace, job.deleted = nil, job.sentDelete
 		else
@@ -11623,7 +11623,22 @@ function PlanTab.swapChecks(check)
 		live, calls, said, busyUntil, selected = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon" }, {}, {}, now + 5, 4
 		PlanTab.wearSpare("Raid: Vashnik", "x")
 		drain()
-		check(t .. ", a server busy at the click at the cap is waited out", calls[#calls] .. "/" .. tostring(saidAny("would not delete")), "wear [CP*] Raid: Vashnik/false")
+		check(t .. ", a server busy at the click at the cap is waited out", calls[#calls], "wear [CP*] Raid: Vashnik")
+		-- fifth review: the spare's fill is read at the cap, and worn once filled
+		slow = 4
+		DjinnisCPCharDB.spares = { [3] = true, [4] = true }
+		live, calls, said, busyUntil = { [3] = "[CP*] Raid: Sszorak", [4] = "[CP*] Dungeon" }, {}, {}, now
+		PlanTab.wearSpare("Raid: Vashnik", "x")
+		drain()
+		check(t .. ", a spare slow to fill at the cap is waited for, then worn", calls[#calls] .. "/" .. tostring(saidAny("not filled it in")), "wear [CP*] Raid: Vashnik/false")
+		slow = 0
+		-- a secret old name is never compared, and nothing is deleted
+		local keptCanRead = PlanTab.canRead
+		PlanTab.canRead = function(v) return v ~= "[CP] Raid: Vashnik" end
+		live, calls = { [2] = "[CP] Raid: Vashnik", [4] = "[CP*] Dungeon" }, {}
+		local okSecret, why = PlanTab.importOne({ name = "[CP] Raid: Vashnik", code = "x", replace = 2, replaceName = "[CP] Raid: Vashnik" })
+		PlanTab.canRead = keptCanRead
+		check(t .. ", a secret old name is not deleted", tostring(okSecret) .. "/" .. #calls .. "/" .. tostring(why):sub(1, 20), "false/0/the game will not sh")
 		-- an id gone for another reason, and no slot: the message must not say this queue deleted it
 		live, calls, said, busyUntil = { [4] = "[CP*] Dungeon", [7] = "Rob's own" }, {}, {}, now
 		PlanTab.makeLoadouts({ { name = "[CP] Raid: Vashnik", code = "x", replace = 2 } })
