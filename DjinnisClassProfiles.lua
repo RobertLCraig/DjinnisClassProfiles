@@ -8563,19 +8563,21 @@ function PlanTab.offerLoadouts(asked, declined)
 end
 
 -- /dcp tidy lists the old DjinnisDreamgrove names on this spec, and the
--- "[CP]" loadouts no build names any more (card 0066); /dcp tidy yes deletes
--- them. The selected one stays. Answers the count and the list, with its
--- spec. Every class: the retired names are druids' only, and
+-- "[CP]" loadouts no build names any more (card 0066); the box's Delete
+-- deletes them. The selected one stays. Answers the count and the list, with
+-- its spec. Every class: the retired names are druids' only, and
 -- retiredLoadouts keeps to that (0049 review).
--- `asked` is a list tidy(false) answered: the box's Delete runs exactly
--- that one, never a list worked out again at the click (0066 review: with
--- the box open a spec change deleted loadouts chat never showed).
+-- `asked` is a list tidy(false) answered. The box's Delete deletes only what
+-- is on it AND still on a list worked out at the click: 0066 review, a spec
+-- change with the box open deleted loadouts chat never showed; second
+-- review, a build made again under the old name with the box open lost its
+-- new loadout. tidy(true) alone is for the checks: no command reaches it.
 function PlanTab.tidy(confirmed, asked)
 	local why = PlanTab.loadoutFence(true)  -- it frees slots, so never fenced by them (0039 review)
 	if why then PlanTab.say(why) return 0 end
-	if confirmed and asked then
-		if playerSpec() ~= asked.spec then PlanTab.say("The spec changed since that question, so nothing was deleted.") return "spec" end
-		return PlanTab.startTagging(asked.todo, PlanTab.TIDY_WORDS)
+	if confirmed and asked and playerSpec() ~= asked.spec then
+		PlanTab.say("The spec changed since that question, so nothing was deleted.")
+		return "spec"
 	end
 	local saved = PlanTab.savedLoadoutNames()
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet.") return 0 end
@@ -8583,6 +8585,17 @@ function PlanTab.tidy(confirmed, asked)
 	local found, listed = PlanTab.retiredLoadouts(saved, selected), {}
 	for _, o in ipairs(found) do listed[o.id] = true end
 	for _, o in ipairs(PlanTab.orphanLoadouts(saved, selected, listed)) do found[#found + 1] = o end
+	if confirmed and asked then
+		local still, todo = {}, {}
+		for _, o in ipairs(found) do if not o.stays then still[o.id] = o.from end end
+		for _, o in ipairs(asked.todo) do
+			if still[o.id] == o.from then todo[#todo + 1] = o
+			elseif o.id == selected then PlanTab.say(("\"%s\" is the loadout you have selected now, so it stays."):format(o.from))
+			else PlanTab.say(("\"%s\" changed since that question, so it is not deleted."):format(o.from)) end
+		end
+		if #todo == 0 then return 0 end
+		return PlanTab.startTagging(todo, PlanTab.TIDY_WORDS)
+	end
 	local doomed, todo, orphans = {}, {}, false
 	for _, o in ipairs(found) do
 		if o.stays then PlanTab.say(("\"%s\" is the loadout you have selected, so it stays. Pick another, then click %sDelete old loadouts|r%s again."):format(o.from, GOLD, GREY))
@@ -9626,9 +9639,10 @@ end
 
 -- Delete old loadouts as a click: tidy lists them, then this asks.
 function PlanTab.tidyAsk()
+	-- first, so a second click with the box open lists nothing new (second 0066 review)
+	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
 	local n, asked = PlanTab.tidy(false)
 	if type(n) ~= "number" or n == 0 then return n end
-	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
 	PlanTab.prompt("Djinni's Class Profiles: old loadouts", {
 		("Delete the %d old loadout%s listed in chat?"):format(n, n == 1 and "" or "s"),
 		"Loadouts you named yourself are not touched.",
@@ -12119,6 +12133,23 @@ function PlanTab.orphanChecks(check)
 		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 102 end }
 		buttons[1].onClick()
 		check(t .. ", and nothing after a spec change", tostring(started) .. "/" .. tostring(table.concat(said, "\n"):find("spec changed since that question", 1, true) ~= nil), "nil/true")
+		-- second 0066 review: a build made again under the old name with the box open keeps its loadout
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }
+		started = nil
+		PlanTab.tidyAsk()
+		PlanTab.buildsOf = function() return { Raid = "code", ["My M+"] = "code", ["Old Name"] = "code" } end
+		buttons[1].onClick()
+		check(t .. ", one given a build again since the question stays", ids() .. "/" .. tostring(table.concat(said, "\n"):find("\"[CP] Old Name\" changed since that question", 1, true) ~= nil), "6 7 5/true")
+		-- and the click is fenced as the list was: in combat, or with a change running
+		started = nil
+		PlanTab.loadoutFence = function() return "busy" end
+		buttons[1].onClick()
+		check(t .. ", the click is fenced too", started, nil)
+		PlanTab.loadoutFence = function() return nil end
+		-- a second click with the box open lists nothing new
+		PlanTab.promptBusy = function() return true end
+		local before = #printed
+		check(t .. ", a second click with the box open asks to answer it first", PlanTab.tidyAsk() .. "/" .. (#printed - before), "busy/0")
 	end)
 	d.myBuilds = keptMine
 	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
@@ -12318,6 +12349,9 @@ function PlanTab.menuChecks(check)
 		calls = {}
 		wasSlash("tidy")
 		check(t .. ", typed tidy asks first", table.concat(calls, " "), "tidyAsk")
+		calls = {}
+		wasSlash("tidy yes")
+		check(t .. ", and so does tidy yes (second 0066 review)", table.concat(calls, " "), "tidyAsk")
 
 		local w = PlanTab.menuItems("window")
 		check(t .. ", Make the planned loadouts", click(w, "Make the planned loadouts"), "offerLoadouts(true)")
@@ -15217,7 +15251,7 @@ SlashCmdList.DJINNISCP = function(msg)
 	elseif msg == "talents" then PlanTab.sayTalents()
 	elseif msg == "loadouts" then PlanTab.offerLoadouts(true)
 	elseif msg == "tidy" then PlanTab.tidyAsk()
-	elseif msg == "tidy yes" then PlanTab.tidy(true)
+	elseif msg == "tidy yes" then PlanTab.tidyAsk()  -- lists and asks, as the menu does (second 0066 review)
 	elseif msg == "bars" or msg:find("^bars ") then PlanTab.barsCommand(msg:sub(6))
 	else listBySource(msg) end
 end

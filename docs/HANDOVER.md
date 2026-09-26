@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.54.8, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
+**Status:** v0.54.11, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
 _Last updated: 2026-09-25 (v0.54.0: another spec's bars from the druid layout, card `0051`. v0.53.x: the bonus roll verdict at the offer, card `0054`; the spare deletes one at a time, card `0067`. v0.52.4: your own builds, card `0057`; one loadout change at a time, card `0063`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria

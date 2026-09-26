@@ -3,7 +3,7 @@ needs: 0057
 ---
 # 0066 Set up this character: one button that brings its loadouts in line with the list
 
-## Try this in game (v0.54.9)
+## Try this in game (v0.54.11)
 
 On your main, rename one of your builds (right-click its row). Log on to an alt of the same class
 and spec. Click **More > Delete old loadouts**. Chat lists "[CP] old name  (no build is called old
@@ -279,3 +279,17 @@ output. As before, `250` and `62` stop tidy at "The game will not list this spec
 
 Mutation and probe scripts: `%TEMP%\dcp66r2_mut.py` and `%TEMP%\dcp66r2_probe.py`, run against the
 temp copy `%TEMP%\dcp66r2`. The copy was put back after each run. Addon code untouched.
+### 2026-09-26: second review fixes, v0.54.11
+
+- **Finding 1.** `/dcp tidy yes` now goes through `tidyAsk`: it lists, warns and asks, as the menu
+  does. No command reaches `tidy(true)` without a list.
+- **Finding 2.** The click deletes only what is on the list chat showed AND on a list worked out at
+  the click. A loadout given a build again, renamed, or worn since the question is left, and chat
+  says which.
+- **Finding 3.** New check: the click is fenced (combat, a change running) as the list was.
+- **Finding 5.** `tidyAsk` checks for an open box first, so a second click prints no new list.
+- **Finding 6.** `HANDOVER.md` and the heading above say v0.54.11.
+- **Finding 4, not fixed here.** `tagNext` does not recheck the spec during a run. It is older than
+  this card and is shared by every queue; left for a card of its own if Rob wants it.
+- **Checked.** All three offline modes pass. Four breaks (`tidy yes` deleting at once, no
+  intersection at the click, the click not fenced, the open-box check late) each fail 1 check.
