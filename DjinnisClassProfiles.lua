@@ -7115,8 +7115,9 @@ end
 --     TRAIT_CONFIG_CREATED and applies it), so nothing is made while it is up;
 --   * the tree comes from the spec, not the active config, which lags a switch;
 --   * an empty entry list is a loadout with no talents, refused in silence.
--- The addon touches a name only if it is in PlanTab.BUILDS (make, replace) or
--- PlanTab.RETIRED (delete, on request). Rob's own loadouts are never touched.
+-- The addon touches a name only if it is a build (make, replace), in
+-- PlanTab.RETIRED, or a "[CP] X" no build names (delete, on request, card
+-- 0066). Rob's own loadouts are never touched.
 
 -- The names DjinnisDreamgrove 0.6.0 imported, which 0.7.0 renamed. Deleted
 -- only after a box lists them and a click agrees: /dcp tidy's, or the loadout
@@ -7142,8 +7143,10 @@ PlanTab.RETIRED = {
 }
 -- Rows no top player ran, replaced by Warcraft Logs' (card 0064): Guardian's
 -- and Resto's raid rows became one "Raid", Balance's rows were regrouped. The
--- addon made these tagged since card 0059, so "[CP] X" is retired too, here
--- only: a "[CP] " copy of an older name above is not the addon's (0064 review).
+-- addon made these tagged since card 0059, so "[CP] X" is retired too. The
+-- 0064 review kept a "[CP] " copy of an older name above; since card 0066
+-- (Rob, 2026-09-26) tidy lists every "[CP] X" no build names, so such a copy
+-- goes too. The loadout box still lists only the rows here.
 PlanTab.RETIRED_TAGGED = {
 	["Raid: Druid of the Claw"] = true, ["Raid: Elune's Chosen"] = true,
 	["Raid: short on mana"] = true, ["Raid: mana is fine"] = true, ["Raid: Nek'Zali, Nymrissa"] = true,
@@ -8561,28 +8564,42 @@ end
 
 -- /dcp tidy lists the old DjinnisDreamgrove names on this spec, and the
 -- "[CP]" loadouts no build names any more (card 0066); /dcp tidy yes deletes
--- them. The selected one stays. Answers the count. Every class: the retired
--- names are druids' only, and retiredLoadouts keeps to that (0049 review).
-function PlanTab.tidy(confirmed)
+-- them. The selected one stays. Answers the count and the list, with its
+-- spec. Every class: the retired names are druids' only, and
+-- retiredLoadouts keeps to that (0049 review).
+-- `asked` is a list tidy(false) answered: the box's Delete runs exactly
+-- that one, never a list worked out again at the click (0066 review: with
+-- the box open a spec change deleted loadouts chat never showed).
+function PlanTab.tidy(confirmed, asked)
 	local why = PlanTab.loadoutFence(true)  -- it frees slots, so never fenced by them (0039 review)
 	if why then PlanTab.say(why) return 0 end
+	if confirmed and asked then
+		if playerSpec() ~= asked.spec then PlanTab.say("The spec changed since that question, so nothing was deleted.") return "spec" end
+		return PlanTab.startTagging(asked.todo, PlanTab.TIDY_WORDS)
+	end
 	local saved = PlanTab.savedLoadoutNames()
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet.") return 0 end
 	local selected = PlanTab.selectedConfigID()
 	local found, listed = PlanTab.retiredLoadouts(saved, selected), {}
 	for _, o in ipairs(found) do listed[o.id] = true end
 	for _, o in ipairs(PlanTab.orphanLoadouts(saved, selected, listed)) do found[#found + 1] = o end
-	local doomed, todo = {}, {}
+	local doomed, todo, orphans = {}, {}, false
 	for _, o in ipairs(found) do
-		if o.stays then PlanTab.say(("\"%s\" is the loadout you have selected, so it stays. Pick another, then tidy again."):format(o.from))
-		else doomed[#doomed + 1], todo[#todo + 1] = o.orphan and ("%s  (no build is called %s now)"):format(o.from, o.orphan) or o.from, o end
+		if o.stays then PlanTab.say(("\"%s\" is the loadout you have selected, so it stays. Pick another, then click %sDelete old loadouts|r%s again."):format(o.from, GOLD, GREY))
+		else
+			doomed[#doomed + 1], todo[#todo + 1] = o.orphan and ("%s  (no plan build or build of yours is called %s now)"):format(o.from, o.orphan) or o.from, o
+			orphans = orphans or o.orphan ~= nil
+		end
 	end
 	if #doomed == 0 then PlanTab.say("No old loadouts from this addon on this spec.") return 0 end
 	if not confirmed then
-		PlanTab.say(("These %d old loadouts would be deleted. Your own loadouts are not touched:"):format(#doomed))
+		PlanTab.say(("%d old loadout%s would be deleted. Loadouts you named yourself are not touched:"):format(#doomed, #doomed == 1 and "" or "s"))
 		for _, name in ipairs(doomed) do print("  " .. name) end
+		-- 0066 review: with the saved builds lost, each of yours reads as gone,
+		-- and its loadout is the last copy of its talents
+		if orphans then PlanTab.say("If one of these is a build you still use, click Cancel: its loadout may be the only copy of its talents.") end
 		PlanTab.say("Click Delete in the box that opens to delete them.")
-		return #doomed
+		return #doomed, { spec = playerSpec(), todo = todo }
 	end
 	-- one at a time, through the renaming's queue: the server takes one change
 	-- in flight, and all six at once deleted one (Rob, 2026-09-25, card 0062)
@@ -9544,7 +9561,7 @@ function PlanTab.menuItems(where)
 	-- card 0057: the other ways in are a row's right-click menu
 	add({ text = "Import a build...", tip = "Paste a build string and name it. It becomes one of your builds, on every character of the class.", fn = PlanTab.importAsk })
 	add({ text = "Copy the talents in play...", tip = "Keeps the talents you have on now as one of your builds, under a name you type.", fn = PlanTab.copyLiveAsk })
-	add({ text = "Delete old loadouts", tip = "Lists the [CP] loadouts no build uses any more (a build renamed or deleted, or one the old DjinnisDreamgrove addon made), then asks before it deletes them. Your own loadouts are not touched.", fn = PlanTab.tidyAsk })
+	add({ text = "Delete old loadouts", tip = "Lists the loadouts this addon made that no build uses any more (a build renamed or deleted), and on a druid the old DjinnisDreamgrove addon's, then asks before it deletes them. Loadouts you named yourself are not touched.", fn = PlanTab.tidyAsk })
 	add({ divider = true })
 	add({ title = "Action bars" })
 	add({ text = "Offer the saved bars", tip = "Offers the action bars and keys saved for this build, or for this spec.", fn = function() PlanTab.offerBars(true) end })
@@ -9609,14 +9626,14 @@ end
 
 -- Delete old loadouts as a click: tidy lists them, then this asks.
 function PlanTab.tidyAsk()
-	local n = PlanTab.tidy(false)
+	local n, asked = PlanTab.tidy(false)
 	if type(n) ~= "number" or n == 0 then return n end
 	if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
 	PlanTab.prompt("Djinni's Class Profiles: old loadouts", {
-		("Delete the %d old loadouts listed in chat?"):format(n),
-		"Your own loadouts are not touched.",
+		("Delete the %d old loadout%s listed in chat?"):format(n, n == 1 and "" or "s"),
+		"Loadouts you named yourself are not touched.",
 	}, {
-		{ label = "Delete", onClick = function() PlanTab.tidy(true) end },
+		{ label = "Delete", onClick = function() PlanTab.tidy(true, asked) end },
 		{ label = "Cancel" },
 	})
 	return "ask"
@@ -10129,7 +10146,7 @@ function PlanTab.loadoutChecks(check)
 	check(tidyTest .. ", not with the talent window open", PlanTab.tidy(true), 0)
 	windowOpen, selected = false, 3
 	check(tidyTest .. ", never the selected one", PlanTab.tidy(true), 0)
-	check(tidyTest .. ", and says why", table.concat(printed, "\n"):find("so it stays. Pick another, then tidy again", 1, true) ~= nil, true)
+	check(tidyTest .. ", and says why", table.concat(printed, "\n"):find("so it stays. Pick another, then click", 1, true) ~= nil, true)
 	check(tidyTest .. ", nothing deleted by either", #calls, 0)
 	selected = 9
 	-- 0039 review: tidy frees slots, so the slot cap never fences it (3 loadouts x 4 specs = 12)
@@ -11175,7 +11192,8 @@ function PlanTab.tagChecks(check)
 			check(d .. ", listed on a druid, a name retired from this spec included, the worn one staying", table.concat(seen, "|"), "EC M+ stays|KotG Raid ST|Raid: Vashnik")
 			-- Card 0064 retires the rows in RETIRED_TAGGED even tagged: savedLoadoutNames files "[CP] X"
 			-- under X, and it is listed by its real name, which tagNext checks before it deletes (0062
-			-- review). "[CP] WS M+" is an older name, and "Rob's DotC M+" not the tag: neither is touched.
+			-- review). "[CP] WS M+" is an older name, and "Rob's DotC M+" not the tag: retiredLoadouts
+			-- lists neither. Tidy deletes "[CP] WS M+" as an orphan since card 0066, checked below.
 			seen = {}
 			for _, e in ipairs(kept[12]({ ["Raid: mana is fine"] = 18, ["DotC M+"] = 17, ["WS M+"] = 16 }, 11)) do seen[#seen + 1] = e.from end
 			check(d .. ", a tagged row the addon no longer makes is listed by its real name", table.concat(seen, "|"), "[CP] Raid: mana is fine")
@@ -12035,9 +12053,11 @@ end
 -- against pretend loadouts. Nothing is deleted here; the queue has its own.
 function PlanTab.orphanChecks(check)
 	local t = "old loadouts no build names"
-	local keys = { "buildsOf", "configName", "savedLoadoutNames", "selectedConfigID", "loadoutFence", "retiredLoadouts", "say", "startTagging" }
+	local keys = { "buildsOf", "configName", "savedLoadoutNames", "selectedConfigID", "loadoutFence", "retiredLoadouts", "say", "startTagging", "prompt", "promptBusy" }
 	local kept, keptG = {}, { C_SpecializationInfo, print }
 	for i, k in ipairs(keys) do kept[i] = PlanTab[k] end
+	local d = db()
+	local keptMine = d.myBuilds
 	local ok, err = pcall(function()
 		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }
 		local real = { [1] = "[CP] Raid", [2] = "[CP] Old Name", [3] = "Mine", [4] = "[CP] My M+", [5] = "[CP] Worn Out", [6] = "[CP] Listed" }
@@ -12054,6 +12074,10 @@ function PlanTab.orphanChecks(check)
 		check(t .. ", one listed already is not listed twice", list(0, { [6] = true }):find("Listed", 1, true), nil)
 		PlanTab.buildsOf = function() return nil end
 		check(t .. ", with no builds read, nothing is listed", list(0), "")
+		-- 0066 review: the real buildsOf and goodMine decide what is deleted
+		PlanTab.buildsOf, d.myBuilds = kept[1], { Feral = { ["My M+"] = "code" } }
+		check(t .. ", one of your builds, read the real way, is kept", list(0):find("My M+", 1, true), nil)
+		d.myBuilds = keptMine
 		PlanTab.buildsOf = function() return { Raid = "code", ["My M+"] = "code" } end
 
 		-- tidy lists them with why, and deletes only on yes
@@ -12066,13 +12090,37 @@ function PlanTab.orphanChecks(check)
 		PlanTab.retiredLoadouts = function() return { { id = 6, from = "[CP] Listed", delete = true, retired = true } } end
 		PlanTab.startTagging = function(todo) started = todo return "started" end
 		check(t .. ", tidy counts them with the old Dreamgrove ones", PlanTab.tidy(false), 3)
-		check(t .. ", and says why each goes", table.concat(printed, "\n"):find("[CP] Old Name  (no build is called Old Name now)", 1, true) ~= nil, true)
+		check(t .. ", and says why each goes", table.concat(printed, "\n"):find("[CP] Old Name  (no plan build or build of yours is called Old Name now)", 1, true) ~= nil, true)
+		check(t .. ", and warns a lost build of yours would go too", table.concat(said, "\n"):find("only copy of its talents", 1, true) ~= nil, true)
 		check(t .. ", and deletes nothing unasked", started, nil)
+		local function ids()
+			local out = {}
+			for _, o in ipairs(started or {}) do out[#out + 1] = o.id .. (o.delete and "" or " not a delete") end
+			return table.concat(out, " ")
+		end
 		PlanTab.tidy(true)
-		local ids = {}
-		for _, o in ipairs(started or {}) do ids[#ids + 1] = o.id .. (o.delete and "" or " not a delete") end
-		check(t .. ", on yes each is a delete, the worn one left out", table.concat(ids, " "), "6 2 5")
+		check(t .. ", on yes each is a delete", ids(), "6 2 5")
+		-- 0066 review: an orphan you are wearing goes through tidy too, and stays
+		started = nil
+		PlanTab.selectedConfigID = function() return 5 end
+		check(t .. ", an orphan you are wearing stays", PlanTab.tidy(false) .. "/" .. tostring(table.concat(said, "\n"):find("\"[CP] Worn Out\" is the loadout you have selected", 1, true) ~= nil), "2/true")
+		PlanTab.tidy(true)
+		check(t .. ", and is not deleted", ids(), "6 2")
+		-- 0066 review: Delete runs the list chat showed, never one worked out at the click
+		local buttons
+		PlanTab.promptBusy, PlanTab.prompt = function() return false end, function(_, _, b) buttons = b end
+		started = nil
+		PlanTab.tidyAsk()
+		PlanTab.selectedConfigID = function() return 1 end
+		real[7], saved.Late = "[CP] Late", 7
+		buttons[1].onClick()
+		check(t .. ", Delete runs the list chat showed", ids(), "6 2")
+		started = nil
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 102 end }
+		buttons[1].onClick()
+		check(t .. ", and nothing after a spec change", tostring(started) .. "/" .. tostring(table.concat(said, "\n"):find("spec changed since that question", 1, true) ~= nil), "nil/true")
 	end)
+	d.myBuilds = keptMine
 	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
 	C_SpecializationInfo, print = keptG[1], keptG[2]
 	check(t .. ", ran", ok or tostring(err), true)

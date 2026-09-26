@@ -10,8 +10,8 @@ and spec. Click **More > Delete old loadouts**. Chat lists "[CP] old name  (no b
 name now)". Click **Delete** in the box. The old loadout goes, one at a time. Then click **More >
 Make the planned loadouts** to make the new name.
 
-Pass: only "[CP]" loadouts are listed, never the one you are wearing, and nothing goes before the
-click.
+Pass: no loadout you named yourself is listed, never the one you are wearing, and nothing goes
+before the click.
 
 ## Why
 
@@ -171,3 +171,20 @@ reaches it.
 
 Mutation harness and probes: `%TEMP%\dcp66_mut.py`, `%TEMP%\dcp66_probe.py` on the temp copy
 `%TEMP%\dcp66`. Addon code untouched.
+
+### 2026-09-26: review fixes, v0.54.10
+
+- **Finding 1, the defect.** `tidy(false)` answers its list and spec. The box's Delete runs exactly
+  that list (`tidy(true, asked)`), and refuses if the spec changed. `tagNext` still checks the name
+  and the worn one before each delete.
+- **Finding 2.** New checks: an orphan you are wearing goes through `tidy` and stays.
+- **Finding 3.** New check through the real `buildsOf` and `goodMine`, with one of your builds in
+  `DjinnisCPDB.myBuilds`.
+- **Finding 4.** Each orphan now reads "(no plan build or build of yours is called X now)". When
+  any is listed, chat adds: "If one of these is a build you still use, click Cancel".
+- **Finding 5.** On purpose: Rob picked every "[CP]" loadout no build uses (2026-09-26), which
+  answers the 0062 and 0064 reasoning. The code comments and `HANDOVER.md` now say so.
+- **Finding 6.** Tip and chat say "Loadouts you named yourself"; "1 old loadout" is singular; the
+  stay line names Delete old loadouts. The pass line above is fixed.
+- **Checked.** All three offline modes pass. Four breaks (the click works the list out again, no spec
+  guard, tidy's worn guard off, `goodMine` refusing spaces) fail 2, 1, 4 and 1 checks.
