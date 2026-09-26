@@ -78,11 +78,11 @@ shows it: the new loadout should say `same`.
 
 ## Acceptance
 
-- [ ] WHEN a planned build has no loadout of its name on this character, THE ADDON SHALL offer to create it, and SHALL create nothing without a click.
-- [ ] WHEN a loadout named for a build has drifted, THE ADDON SHALL offer "Reset to plan", which deletes and re-imports it, and SHALL NOT call `CommitConfig`, `LoadConfig`, `PurchaseRank` or `SetSelection`.
-- [ ] WHEN the selected loadout is the one to replace, THE ADDON SHALL say so and wait, because deleting the worn loadout drops to the starter build.
-- [ ] IN combat, or with the talent window open, THE ADDON SHALL refuse and say why.
-- [ ] In a client: no frozen action bar after creating, replacing and switching builds, then one pull on a dummy.
+- [x] WHEN a planned build has no loadout of its name on this character, THE ADDON SHALL offer to create it, and SHALL create nothing without a click.
+- [x] WHEN a loadout named for a build has drifted, THE ADDON SHALL offer "Reset to plan", which deletes and re-imports it, and SHALL NOT call `CommitConfig`, `LoadConfig`, `PurchaseRank` or `SetSelection`.
+- [x] WHEN the selected loadout is the one to replace, THE ADDON SHALL say so and wait, because deleting the worn loadout drops to the starter build.
+- [x] IN combat, or with the talent window open, THE ADDON SHALL refuse and say why.
+- [x] In a client: no frozen action bar after creating, replacing and switching builds, then one pull on a dummy.
 
 ## Comments
 
@@ -193,3 +193,7 @@ Security: unchanged from the first pass. The decode is pure, there is no outside
 delete is behind a click.
 
 Verdict: CLEAN. Acceptance is in-game only, so the card goes to human-review next.
+
+**2026-09-26** **Passed in a client** (Rob, v0.54.8, on his second druid, Aggra): "0031 seems to be
+working okay". The screenshot shows the "[CP] Raid: ..." loadouts in the talent dropdown beside his
+own "M+" and "Raid - Wildstalker - General", and "Made 10 of 10" in chat.

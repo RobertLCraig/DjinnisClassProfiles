@@ -85,11 +85,11 @@ buttons as on the first druid.
 
 ## Acceptance
 
-- [ ] WHEN Rob saves on one druid and applies on another, THE ADDON SHALL place every spell both know in the same slot, and SHALL list what it skipped.
-- [ ] WHEN Rob switches to a build that has its own layout, THE ADDON SHALL offer that layout; WHEN it has none, THE ADDON SHALL use the spec's layout.
-- [ ] WHEN a layout is applied, THE ADDON SHALL keep the previous layout for one undo.
-- [ ] IN combat, THE ADDON SHALL refuse and say why.
-- [ ] In a client: after an apply, one pull on a dummy with no frozen button. Writing slots from addon code is how MySlot works, but it is not yet proven clear of the fault in `0002`.
+- [x] WHEN Rob saves on one druid and applies on another, THE ADDON SHALL place every spell both know in the same slot, and SHALL list what it skipped.
+- [x] WHEN Rob switches to a build that has its own layout, THE ADDON SHALL offer that layout; WHEN it has none, THE ADDON SHALL use the spec's layout.
+- [x] WHEN a layout is applied, THE ADDON SHALL keep the previous layout for one undo.
+- [x] IN combat, THE ADDON SHALL refuse and say why.
+- [x] In a client: after an apply, one pull on a dummy with no frozen button. Writing slots from addon code is how MySlot works, but it is not yet proven clear of the fault in `0002`.
 
 ## Comments
 
@@ -434,3 +434,10 @@ key and action strings still reach `SetBinding` only through a click.
 There is no browser surface. Acceptance is in-game only.
 
 Verdict: CLEAN. human-review next.
+
+**2026-09-26** **Passed in a client** (Rob, v0.54.8): "Seems to be okay so far, some small
+complaints and thoughts about things that dont translate from 1 character to the other, but the
+addon handled them as expected. (racials and profession abilities)". The chat in his screenshot
+lists "not known" for Skinning's Find High-Value Beasts, Sharpen Your Knife and Carve Meat, Thorn
+Bloom and Switch Flight Style. Those thoughts are not written down yet; they are a new card when he
+gives them.
