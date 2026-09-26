@@ -188,3 +188,94 @@ Mutation harness and probes: `%TEMP%\dcp66_mut.py`, `%TEMP%\dcp66_probe.py` on t
   stay line names Delete old loadouts. The pass line above is fixed.
 - **Checked.** All three offline modes pass. Four breaks (the click works the list out again, no spec
   guard, tidy's worn guard off, `goodMine` refusing spaces) fail 2, 1, 4 and 1 checks.
+
+### 2026-09-26, second adversarial review of 897fe17: bounced, it stays in ai-review
+
+**Verdict: the box is fixed, and another way in still deletes a list chat never showed.** That
+second way is `/dcp tidy yes`. The fix also brought in one narrow new hole of its own.
+
+**Offline check:** Feral, `250` and `62` each end "no FAIL lines", with no load error in the whole
+output. As before, `250` and `62` stop tidy at "The game will not list this spec's loadouts yet".
+
+**Findings**
+
+1. **Defect: `/dcp tidy yes` deletes a list worked out when it is typed, and it prints none of
+   it.** `DjinnisClassProfiles.lua:15220` calls `PlanTab.tidy(true)` with no `asked`, so tidy works
+   the list out again (`:8580-8585`) and hands it straight to `startTagging` (`:8606`). Chat shows
+   only the stay lines and then "Deleted 3 of 3 old loadouts". Probe P4 did this on the temp copy:
+   nothing was printed, and ids 6, 2 and 5 went.
+   This is finding 1 again, reached by a second way in. Card 0066 widened what it can delete.
+   Before, it could delete about six Dreamgrove names, on druids only. Now it can delete every
+   "[CP] X" orphan, on every class. The fix's safety line ("If one of these is a build you still
+   use, click Cancel") never shows on this path. Now take finding 4's case, where saved data is
+   lost. There, `/dcp tidy yes` deletes the loadout of every build of yours on that spec, and each
+   may be the last copy of its talents. There is no list, no box and no warning.
+   Nothing in game tells the player about `tidy yes`, but the slash command still works. Fix: make
+   `tidy yes` call `tidyAsk`, or drop it. Either way, `tidy(true)` without `asked` should no longer
+   delete anything.
+
+2. **New with the fix: a loadout that stops being an orphan while the box is open is still
+   deleted.** The box runs the list it was given (`:8576-8578`). `tagNext` checks only the name and
+   the worn loadout (`:8023`, `:8029`). Nothing checks whether a build names it now. Scenario, probe
+   P1: chat lists "[CP] Old Name (no plan build or build of yours is called Old Name now)". With the
+   box still open, the player keeps it by making a build called "Old Name". They can do that with
+   Import a build, Copy the talents in play, or a rename. All three use `askFrame`, not the prompt,
+   so the open box does not block them. `myNameProblem` (`:8262-8265`) refuses a name only when an
+   untagged loadout has it, so "[CP] Old Name" does not stop the new build. Then the player clicks
+   Delete. `orphanLoadouts` would now list only 5, but 6, 2 and 5 are deleted, and 2 is the loadout
+   of a live build.
+   Before the fix, the list was worked out again at the click, so 2 was kept. The build string is
+   saved in `myBuilds`, so Make the planned loadouts can make the loadout again. Any hand edits in
+   it are lost. Fix: at the click, work the list out again and delete only the entries that are on
+   both lists. That keeps finding 1's fix, and a loadout can only drop off the list, never be added.
+
+3. **Check gap: nothing checks the fence on the box's Delete.** Mutant M4 applied `loadoutFence`
+   only when there was no `asked`, and every mode still passed. The fence itself works. Probe P3
+   ran the real `loadoutFence`, with `tagging`, `q` or `swapping` set, or in combat, at the click.
+   Each time nothing was deleted, the queue already running was left alone, and chat said why. But
+   no check stops a change from removing the fence. Without it, `startTagging` would overwrite a
+   running `PlanTab.tagging`.
+
+4. **Low, and older than this card: a spec change during the queue.** `tagNext` never checks the
+   spec, and `selectedConfigID` (`:7189`) reads the current spec's worn loadout. Scenario: the list
+   is made on Feral, and the player then puts on "[CP] C", which is on the list. They click Delete
+   and switch to Guardian while the queue runs. Each delete takes about a second (`POLL` 0.5, plus
+   one beat), so ten orphans take about ten seconds. Once the switch lands, "[CP] C" is checked
+   against Guardian's worn loadout, and deleted. It is the loadout Feral was wearing. Fix: store
+   the spec in `t` and stop the queue when it changes, the way combat stops it.
+
+5. **Wording, minor.** Run Delete old loadouts a second time with the box still open (probe P2).
+   Chat prints a fresh list and "Click Delete in the box that opens". Then it says "Answer the open
+   question first". The box that is open still holds the older list. `tidyAsk` should check
+   `promptBusy` before `tidy(false)` prints anything (`:9629-9631`). The older list does no harm
+   here: the loadout picked since was kept by `tagNext`.
+
+6. **Docs, minor.** `docs/HANDOVER.md:9` still says v0.54.8. The card's "Try this in game" heading
+   says v0.54.9.
+
+**What held**
+
+- **Finding 1, for the box.** Delete runs the list `tidy(false)` answered (M1 and M3 each fail 2
+  checks). A spec change refuses it (M2 fails 1), and so does a nil `asked.spec` (M9 fails 1). A
+  worn loadout is never in `asked` (M8 fails 1). Spec away and back (P8) runs the same list, and
+  that is correct: it is the same spec's loadouts.
+- **Stale entries are skipped by `tagNext`.** A listed loadout renamed or deleted before the click
+  (P7) is skipped, and chat says so. So is one put on before the click (P6). Combat after the first
+  delete stops the queue and says how many are left (P5).
+- **Finding 2.** A worn orphan now goes through `tidy` (M7 fails 4). `tagNext`'s worn guard is
+  checked (M5 fails 2), and so is its name guard (M6 fails 1).
+- **Finding 3.** The real `buildsOf` and `goodMine` are checked (M10 fails 1). Untagged loadouts
+  are still never listed (M12 fails 22).
+- **Finding 4.** Each orphan line and the warning are checked (M11 fails 1), on the box path.
+- **Finding 5.** The comments at `:7118-7120`, `:7146-7149` and `:11195-11196`, and
+  `HANDOVER.md:258`, now state the new rule.
+- **Finding 6.** The tip, the singular, the stay line and the pass line are fixed. "Loadouts you
+  named yourself" is true now, and it covers a "[CP] X" edited by hand.
+- **The card's counts match:** the four breaks it names fail 2, 1, 4 and 1.
+- **API, checked against `wow-ui-source` (live):** `DeleteConfig` returns `success` as a bool.
+  `GetLastSelectedSavedConfigID` takes a spec id and may return nil. Blizzard's own frame sets it
+  per spec (`Blizzard_ClassTalentsFrame.lua:655`), which is why finding 4 exists. This fix registers
+  no new events and reads no new unit or resource values.
+
+Mutation and probe scripts: `%TEMP%\dcp66r2_mut.py` and `%TEMP%\dcp66r2_probe.py`, run against the
+temp copy `%TEMP%\dcp66r2`. The copy was put back after each run. Addon code untouched.
