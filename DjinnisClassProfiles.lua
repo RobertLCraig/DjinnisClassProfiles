@@ -12140,6 +12140,13 @@ function PlanTab.orphanChecks(check)
 		PlanTab.buildsOf = function() return { Raid = "code", ["My M+"] = "code", ["Old Name"] = "code" } end
 		buttons[1].onClick()
 		check(t .. ", one given a build again since the question stays", ids() .. "/" .. tostring(table.concat(said, "\n"):find("\"[CP] Old Name\" changed since that question", 1, true) ~= nil), "6 7 5/true")
+		-- third 0066 review: one put on since the question stays, and chat says why
+		started = nil
+		PlanTab.tidyAsk()
+		PlanTab.selectedConfigID = function() return 5 end
+		buttons[1].onClick()
+		check(t .. ", one put on since the question stays", ids() .. "/" .. tostring(table.concat(said, "\n"):find("\"[CP] Worn Out\" is the loadout you have selected now", 1, true) ~= nil), "6 7/true")
+		PlanTab.selectedConfigID = function() return 1 end
 		-- and the click is fenced as the list was: in combat, or with a change running
 		started = nil
 		PlanTab.loadoutFence = function() return "busy" end
