@@ -293,3 +293,63 @@ temp copy `%TEMP%\dcp66r2`. The copy was put back after each run. Addon code unt
   this card and is shared by every queue; left for a card of its own if Rob wants it.
 - **Checked.** All three offline modes pass. Four breaks (`tidy yes` deleting at once, no
   intersection at the click, the click not fenced, the open-box check late) each fail 1 check.
+
+### 2026-09-26, third adversarial review of c2abd18: holds, moved to human-review
+
+**Verdict: it holds.** Findings 1, 2, 3 and 5 of the second review are fixed. No way was found to
+delete a loadout chat did not list, a live build's loadout, a loadout you named, or the worn one.
+The fix broke nothing found.
+
+**Offline check:** Feral, `250` and `62` each end "no FAIL lines", and the whole output has no load
+error. As before, `250` and `62` stop tidy at "The game will not list this spec's loadouts yet".
+
+**Findings (none bounce it)**
+
+1. **Low, the same kind as finding 4: a build given the old name during the run.** The click now
+   checks the list again, but the run does not. `tagNext` checks only the name and the worn one
+   (`DjinnisClassProfiles.lua:8023`, `:8029`). `addMine` (`:8288`) is not fenced by a running
+   queue, though `renameMine` and `deleteMine` are (`changeFence`). Scenario: ten orphans are
+   listed and Delete is clicked. During the ten seconds the run takes, the player imports a build
+   called "Old Name". Its "[CP] Old Name" is still deleted. The build string is kept, so
+   right-clicking it makes the loadout again. Only hand edits in the old loadout are lost, and that
+   loadout was one they had just agreed to delete. Left with finding 4, for the same card if Rob
+   wants one.
+2. **Check gap, harmless: the "worn now" branch at the click is never run.** `:8593` ("is the
+   loadout you have selected now, so it stays") and the `not o.stays` filter at `:8590` go
+   unchecked. M3 (put the worn one back into the click's list) and M6 (match by id only, not
+   name) both pass every mode. Each has a backup in `tagNext`. M3 with `tagNext`'s worn guard off
+   fails 2 checks, and M6 with its name guard off fails 1. So the worn one and a renamed one are
+   still never deleted. Only the wording is unchecked.
+3. **Out of scope, older than this card:** the loadout box's "Delete them" (`:8498`,
+   `PlanTab.tagOld`) still works out its list at the click. That list is `beforeTag`: druids' old
+   Dreamgrove names, plus untagged loadouts named exactly as a plan build. Card 0066 did not widen
+   it, because orphans are not in `beforeTag`.
+
+**What held**
+
+- **Second review, finding 1.** `/dcp tidy yes` goes to `tidyAsk` (`:15254`). No command reaches
+  `tidy(true)` without `asked`. The only other callers are the checks. M1 (`tidy yes` deletes at
+  once) fails 1 check.
+- **Second review, finding 2.** At the click the list is worked out again, and only entries on
+  both lists, with the same id and the same name, are deleted (`:8588-8598`). The rule only takes
+  entries away, never adds one. M2 (no intersection) fails 1. M10 (the click runs the list worked
+  out at the click) fails 2. M11 (the box's Delete with no `asked`) fails 3. M7 (no spec check)
+  fails 1.
+- **Second review, finding 3.** The fence runs before the spec check and the list (`:8576`). M4
+  (the click not fenced) fails 1.
+- **Second review, finding 5.** `promptBusy` comes before `tidy(false)` (`:9643`). M5 (the check
+  late) fails 1.
+- **The card's counts match:** each of the four breaks it names fails 1 check.
+- **What can be deleted:** an entry is deleted only if it was listed in chat, is still an orphan
+  or a retired name at the click, is not worn, and still has its listed name just before its
+  delete. A name the game cuts short cannot pass for an orphan: the longest plan build is 24
+  letters ("Raid: Entombed Sentinels"), and `goodMine` caps yours at 24. Spec keys are unique
+  across classes ("Frost Mage", "Frost Death Knight"), so one class's builds never hide or expose
+  another's.
+- **API, checked against `wow-ui-source` (live):** `DeleteConfig` returns `success` as a bool.
+  `GetLastSelectedSavedConfigID(specID)` may return nil, and Blizzard's frame clears it when it is
+  invalid (`Blizzard_ClassTalentsFrame.lua:236-243`). This fix adds no events and no unit or
+  resource reads.
+
+Mutation script: `%TEMP%\dcp66r3_mut.py`, run on the temp copy `%TEMP%\dcp66r3`. The copy was put
+back after the run. Addon code untouched. In-game pass still waits on Rob (see "Try this in game").
