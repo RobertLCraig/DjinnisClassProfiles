@@ -7903,6 +7903,27 @@ function PlanTab.retiredLoadouts(saved, selected)
 	return out
 end
 
+-- The "[CP] X" loadouts on this spec that no build names any more: one of
+-- your builds renamed or deleted on another character, or a plan build the
+-- builds update dropped (card 0066; Rob, 2026-09-26: the clean-up part only,
+-- nothing made). Tagged ones only, so a loadout of the player's own is never
+-- listed. The worn one stays. `skip` is config ids listed already, for the
+-- retired ones. Pure, for the checks.
+function PlanTab.orphanLoadouts(saved, selected, skip)
+	local out = {}
+	local spec = playerSpec()
+	local live = spec and PlanTab.buildsOf(spec)
+	if not live then return out end  -- no builds read: nothing can be called an orphan
+	for key, id in pairs(saved or {}) do
+		local real = PlanTab.configName(id)
+		if live[key] == nil and not (skip or {})[id] and real == PlanTab.tag(key) then
+			out[#out + 1] = { id = id, from = real, delete = true, orphan = key, stays = id == selected or nil }
+		end
+	end
+	table.sort(out, function(a, b) return a.from < b.from end)
+	return out
+end
+
 -- What the box lists and "Tag them" does: the untagged ones, then the old
 -- Dreamgrove ones.
 function PlanTab.beforeTag(old, saved, selected)
@@ -8538,23 +8559,23 @@ function PlanTab.offerLoadouts(asked, declined)
 	return "shown"
 end
 
--- /dcp tidy lists the old DjinnisDreamgrove names on this spec, and
--- /dcp tidy yes deletes them. The selected one stays. Answers the count.
+-- /dcp tidy lists the old DjinnisDreamgrove names on this spec, and the
+-- "[CP]" loadouts no build names any more (card 0066); /dcp tidy yes deletes
+-- them. The selected one stays. Answers the count. Every class: the retired
+-- names are druids' only, and retiredLoadouts keeps to that (0049 review).
 function PlanTab.tidy(confirmed)
-	-- RETIRED names are ones this addon made on druids. On another class a
-	-- loadout of that name is the player's own, so tidy leaves it (0049 review).
-	if PlanTab.playerClass() ~= PlanTab.DRUID then
-		PlanTab.say("Nothing to tidy: the old loadouts were only ever made on druids.")
-		return "not druid"
-	end
 	local why = PlanTab.loadoutFence(true)  -- it frees slots, so never fenced by them (0039 review)
 	if why then PlanTab.say(why) return 0 end
 	local saved = PlanTab.savedLoadoutNames()
 	if not saved then PlanTab.say("The game will not list this spec's loadouts yet.") return 0 end
+	local selected = PlanTab.selectedConfigID()
+	local found, listed = PlanTab.retiredLoadouts(saved, selected), {}
+	for _, o in ipairs(found) do listed[o.id] = true end
+	for _, o in ipairs(PlanTab.orphanLoadouts(saved, selected, listed)) do found[#found + 1] = o end
 	local doomed, todo = {}, {}
-	for _, o in ipairs(PlanTab.retiredLoadouts(saved, PlanTab.selectedConfigID())) do
+	for _, o in ipairs(found) do
 		if o.stays then PlanTab.say(("\"%s\" is the loadout you have selected, so it stays. Pick another, then tidy again."):format(o.from))
-		else doomed[#doomed + 1], todo[#todo + 1] = o.from, o end
+		else doomed[#doomed + 1], todo[#todo + 1] = o.orphan and ("%s  (no build is called %s now)"):format(o.from, o.orphan) or o.from, o end
 	end
 	if #doomed == 0 then PlanTab.say("No old loadouts from this addon on this spec.") return 0 end
 	if not confirmed then
@@ -9523,9 +9544,7 @@ function PlanTab.menuItems(where)
 	-- card 0057: the other ways in are a row's right-click menu
 	add({ text = "Import a build...", tip = "Paste a build string and name it. It becomes one of your builds, on every character of the class.", fn = PlanTab.importAsk })
 	add({ text = "Copy the talents in play...", tip = "Keeps the talents you have on now as one of your builds, under a name you type.", fn = PlanTab.copyLiveAsk })
-	if PlanTab.playerClass() == PlanTab.DRUID then
-		add({ text = "Delete old loadouts", tip = "Lists the loadouts this addon or the old DjinnisDreamgrove addon made and no longer makes, then asks before it deletes them. Your own loadouts are not touched.", fn = PlanTab.tidyAsk })
-	end
+	add({ text = "Delete old loadouts", tip = "Lists the [CP] loadouts no build uses any more (a build renamed or deleted, or one the old DjinnisDreamgrove addon made), then asks before it deletes them. Your own loadouts are not touched.", fn = PlanTab.tidyAsk })
 	add({ divider = true })
 	add({ title = "Action bars" })
 	add({ text = "Offer the saved bars", tip = "Offers the action bars and keys saved for this build, or for this spec.", fn = function() PlanTab.offerBars(true) end })
@@ -11188,8 +11207,9 @@ function PlanTab.tagChecks(check)
 			live, calls, said, selected = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST", [14] = "[CP] Dungeon", [16] = "[CP] WS M+" }, {}, {}, 99
 			check(d .. ", tidy yes starts the queue", PlanTab.tidy(true), "started")
 			drain()
-			check(d .. ", and deletes all three, none refused", #calls .. "/" .. tostring(saidAny("Deleted 3 of 3 old loadouts")) .. "/" .. tostring(saidAny("would not")), "3/true/false")
-			check(d .. ", and the tagged one filed under an old name is still there", live[16], "[CP] WS M+")
+			-- card 0066: "[CP] WS M+" names no Balance build now, so it goes too
+			check(d .. ", and deletes all four, none refused", #calls .. "/" .. tostring(saidAny("Deleted 4 of 4 old loadouts")) .. "/" .. tostring(saidAny("would not")), "4/true/false")
+			check(d .. ", the tagged one no build names among them", live[16], nil)
 			-- second 0062 review: one renamed while the queue runs is left
 			live, calls, said, busyUntil = { [11] = "EC M+", [12] = "Raid: Vashnik", [13] = "KotG Raid ST" }, {}, {}, 0
 			PlanTab.tidy(true)
@@ -12011,6 +12031,53 @@ function PlanTab.barCategoryChecks(check)
 	check(t .. ", ran", ok or tostring(err), true)
 end
 
+-- Card 0066: Delete old loadouts lists the "[CP]" loadouts no build names,
+-- against pretend loadouts. Nothing is deleted here; the queue has its own.
+function PlanTab.orphanChecks(check)
+	local t = "old loadouts no build names"
+	local keys = { "buildsOf", "configName", "savedLoadoutNames", "selectedConfigID", "loadoutFence", "retiredLoadouts", "say", "startTagging" }
+	local kept, keptG = {}, { C_SpecializationInfo, print }
+	for i, k in ipairs(keys) do kept[i] = PlanTab[k] end
+	local ok, err = pcall(function()
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }
+		local real = { [1] = "[CP] Raid", [2] = "[CP] Old Name", [3] = "Mine", [4] = "[CP] My M+", [5] = "[CP] Worn Out", [6] = "[CP] Listed" }
+		local saved = { Raid = 1, ["Old Name"] = 2, Mine = 3, ["My M+"] = 4, ["Worn Out"] = 5, Listed = 6 }
+		PlanTab.buildsOf = function() return { Raid = "code", ["My M+"] = "code" } end
+		PlanTab.configName = function(id) return real[id] end
+		local function list(sel, skip)
+			local out = {}
+			for _, o in ipairs(PlanTab.orphanLoadouts(saved, sel, skip)) do out[#out + 1] = o.from .. (o.stays and " stays" or "") end
+			return table.concat(out, "|")
+		end
+		check(t .. ", only tagged ones no build names, the worn one staying", list(5, { [6] = true }), "[CP] Old Name|[CP] Worn Out stays")
+		check(t .. ", a plan build and one of yours are kept, and your own untagged one", list(5, { [6] = true }):find("Raid", 1, true) == nil and list(5):find("Mine", 1, true) == nil, true)
+		check(t .. ", one listed already is not listed twice", list(0, { [6] = true }):find("Listed", 1, true), nil)
+		PlanTab.buildsOf = function() return nil end
+		check(t .. ", with no builds read, nothing is listed", list(0), "")
+		PlanTab.buildsOf = function() return { Raid = "code", ["My M+"] = "code" } end
+
+		-- tidy lists them with why, and deletes only on yes
+		local said, printed, started = {}, {}, nil
+		PlanTab.say = function(text) said[#said + 1] = text end
+		print = function(...) local line = tostring((...)) if line:find("FAIL|r", 1, true) then keptG[2](...) else printed[#printed + 1] = line end end
+		PlanTab.savedLoadoutNames = function() return saved, {}, {} end
+		PlanTab.selectedConfigID = function() return 1 end
+		PlanTab.loadoutFence = function() return nil end
+		PlanTab.retiredLoadouts = function() return { { id = 6, from = "[CP] Listed", delete = true, retired = true } } end
+		PlanTab.startTagging = function(todo) started = todo return "started" end
+		check(t .. ", tidy counts them with the old Dreamgrove ones", PlanTab.tidy(false), 3)
+		check(t .. ", and says why each goes", table.concat(printed, "\n"):find("[CP] Old Name  (no build is called Old Name now)", 1, true) ~= nil, true)
+		check(t .. ", and deletes nothing unasked", started, nil)
+		PlanTab.tidy(true)
+		local ids = {}
+		for _, o in ipairs(started or {}) do ids[#ids + 1] = o.id .. (o.delete and "" or " not a delete") end
+		check(t .. ", on yes each is a delete, the worn one left out", table.concat(ids, " "), "6 2 5")
+	end)
+	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
+	C_SpecializationInfo, print = keptG[1], keptG[2]
+	check(t .. ", ran", ok or tostring(err), true)
+end
+
 -- Card 0057: your builds. The list, the name and string checks, and what
 -- Rename and Delete send, against pretend loadouts. The boxes need the game.
 function PlanTab.myBuildChecks(check)
@@ -12250,7 +12317,7 @@ function PlanTab.menuChecks(check)
 
 		class = 6
 		w = PlanTab.menuItems("window")
-		check(t .. ", a Death Knight has no tidy", click(w, "Delete old loadouts"), "none")
+		check(t .. ", a Death Knight can delete old loadouts too (card 0066)", click(w, "Delete old loadouts"), "tidyAsk")
 		check(t .. ", a Death Knight has no bonus roll verdict", click(w, "Bonus roll worth it here?"), "none")
 		check(t .. ", a Death Knight still has its bars", click(w, "Offer the saved bars"), "offerBars(true)")
 		class = PlanTab.DRUID
@@ -12362,7 +12429,8 @@ function PlanTab.specChecks(check)
 		check("every spec, a Death Knight walks no journal", PlanTab.harvestPools(), "not druid")
 		check("every spec, a Death Knight gets no loot card", select(2, PlanTab.lootCardModel()), "not druid")
 		check("every spec, a Death Knight sends KeystoneLoot nothing", PlanTab.sendToKeystoneLoot(), "not druid")
-		check("every spec, a Death Knight's loadouts are never tidied", PlanTab.tidy(false), "not druid")
+		-- card 0066: tidy is for every class, but the old Dreamgrove names stay druids' only
+		check("every spec, a Death Knight's own loadout of an old Dreamgrove name is never tidied", #PlanTab.retiredLoadouts({ ["WS M+"] = 1 }, 0), 0)
 	end)
 	PlanTab.playerClass = wasClass
 	if not ok then check("every spec, the Death Knight checks ran", err, nil) end
@@ -14903,6 +14971,7 @@ local function selfTest()
 	PlanTab.myBuildChecks(check)  -- card 0057
 	PlanTab.bonusChecks(check)  -- card 0054
 	PlanTab.barCategoryChecks(check)  -- card 0051
+	PlanTab.orphanChecks(check)  -- card 0066
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[CP] self-test passed|r")
