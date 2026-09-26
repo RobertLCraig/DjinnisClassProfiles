@@ -336,3 +336,16 @@ For Rob: finding 1 is the one to decide. Findings 2, 4 and 5 are small fixes. Fi
   one check.
 - **Left for Rob.** Finding 1 (doubled spells from the keep rule) is his call. Finding 3 is the
   in-game check: load, then `/dcp bars` should say "already match".
+### v0.54.8: no spell on two buttons (Rob's pick on finding 1, 2026-09-26)
+
+- **The rule.** A button kept from this character's bars is cleared when its spell is placed on
+  another button by the layout. Spells are matched by the base spell, so a kept Wither goes when
+  Immolate is placed.
+- **Not touched.** The class's own pages (73-120 for a non-druid) are never cleared, and a spell
+  there does not clear a kept button. Two kept buttons with the same spell both stay.
+- **Chat.** "N buttons keep what they have now, and M are cleared because their spell moves to
+  another button."
+- **Checked.** All three offline modes pass. Three breaks (no clearing, no base match, own pages
+  counted as placed) fail 4, 2 and 3 checks.
+- **In game.** Make the Destruction layout again (`/dcp bars from`), hover **Load bars: spec**,
+  and look for Havoc, Conflagrate and Malevolence on one button each.

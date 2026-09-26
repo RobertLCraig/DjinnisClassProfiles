@@ -9331,13 +9331,15 @@ end
 -- `layout`, a `from` druid layout, as `to`'s. `api` answers for this
 -- character: name(id), base(id), known(id), find(name) a known spell's id,
 -- and `here` its bars now. A button with nothing to give keeps what it has
--- (0051 review: a load cleared 41 of Rob's Warlock buttons). Answers the
--- layout, the lines of buttons with no match, and how many buttons keep
--- what they have in all. Pure, for /bis test.
+-- (0051 review: a load cleared 41 of Rob's Warlock buttons), unless its
+-- spell is placed on another button: Rob's pick, so no spell is on two
+-- (second review: 10 Warlock spells doubled). Answers the layout, the lines
+-- of buttons with no match, how many buttons keep what they have, and how
+-- many of those were cleared. Pure, for /bis test.
 function PlanTab.translateBars(layout, from, to, api)
-	local slots, skipped, kept = {}, {}, 0
+	local slots, skipped, stay, own = {}, {}, {}, {}
 	local function skip(slot, why)
-		slots[slot] = api.here[slot]
+		slots[slot], stay[slot] = api.here[slot], true
 		skipped[#skipped + 1] = ("slot %d: %s"):format(slot, why)
 	end
 	for slot = 1, PlanTab.BAR_SLOTS do
@@ -9347,10 +9349,9 @@ function PlanTab.translateBars(layout, from, to, api)
 			if how == "here" then a = api.here[slot] else a = layout.slots[src] end  -- not and/or: an empty slot here is nil
 		end
 		if how == "here" or not PlanTab.barSlot(slot) then
-			slots[slot] = a
+			slots[slot], own[slot] = a, true
 		elseif not a then
-			slots[slot] = api.here[slot]  -- nothing on the druid's button: this one stays
-			if slots[slot] then kept = kept + 1 end
+			slots[slot], stay[slot] = api.here[slot], true  -- nothing on the druid's button: this one stays
 		elseif a.type == "macro" or a.type == "flyout" then
 			-- an account macro is every character's (1 to 120, as findMacro
 			-- reads them); a character macro or a flyout is the druid's own
@@ -9377,12 +9378,29 @@ function PlanTab.translateBars(layout, from, to, api)
 			end
 		end
 	end
+	-- a kept spell placed on another button is cleared. By the base spell:
+	-- the bar can hold the override (Wither) where the layout has Immolate
+	local function spellKey(a)
+		if not (a and a.type == "spell" and a.id) then return nil end
+		return api.base and api.base(a.id) or a.id
+	end
+	local placed = {}
+	for slot, a in pairs(slots) do
+		local k = not stay[slot] and not own[slot] and spellKey(a)
+		if k then placed[k] = true end
+	end
+	local kept, cleared = 0, 0
+	for slot in pairs(stay) do
+		local k = spellKey(slots[slot])
+		if k and placed[k] then slots[slot], cleared = nil, cleared + 1
+		elseif slots[slot] then kept = kept + 1 end
+	end
 	local keys
 	if type(layout.keys) == "table" then
 		keys = {}
 		for key, action in pairs(layout.keys) do keys[key] = action end
 	end
-	return { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil, from = from }, skipped, kept + #skipped
+	return { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil, from = from }, skipped, kept, cleared
 end
 
 -- The game's answers for translateBars, for this character.
@@ -9459,13 +9477,13 @@ function PlanTab.barsFrom(from, confirmed)
 		})
 		return "ask"
 	end
-	local layout, skipped, kept = PlanTab.translateBars(template, from, spec, PlanTab.barsApi())
+	local layout, skipped, kept, cleared = PlanTab.translateBars(template, from, spec, PlanTab.barsApi())
 	local n = 0
 	for _ in pairs(layout.slots) do n = n + 1 end
 	barsDB()[spec] = layout
 	-- every kept button is counted, not only the listed ones (0051 review: 13 said, 47 kept)
-	PlanTab.say(("Made the %s layout from your %s bars: %d slots. %d buttons keep what they have now; the %d with no match are below. Hover %sLoad bars: spec|r%s to see it on your bars. Nothing changes until you load it.")
-		:format(spec, from, n, kept, #skipped, GOLD, GREY))
+	PlanTab.say(("Made the %s layout from your %s bars: %d slots. %d buttons keep what they have now, and %d are cleared because their spell moves to another button. The %d with no match are below. Hover %sLoad bars: spec|r%s to see it on your bars. Nothing changes until you load it.")
+		:format(spec, from, n, kept, cleared, #skipped, GOLD, GREY))
 	for _, line in ipairs(skipped) do print("  " .. line) end
 	PlanTab.barsChanged()
 	return "made"
@@ -11900,8 +11918,8 @@ function PlanTab.barCategoryChecks(check)
 		local ids = { Shred = 1, Rake = 2, ["Skull Bash"] = 3, Prowl = 4, ["Cat Form"] = 5, Mangle = 6, Thrash = 7, Growl = 8,
 			Wrath = 9, Starfire = 10, Incinerate = 11, Conflagrate = 12, Shadowburn = 13, ["Feral Frenzy"] = 14, ["Frantic Frenzy"] = 15,
 			Berserk = 16, ["Incarnation: Avatar of Ashamane"] = 17, Moonfire = 18, ["Rain of Fire"] = 19, ["Summon Infernal"] = 20,
-			Regrowth = 21, Tranquility = 22, ["Improved Shred"] = 23, ["Sundering Roar"] = 25, ["Wild Growth"] = 26, Cataclysm = 27 }
-		local names, bases = {}, { [23] = 1 }  -- Improved Shred overrides Shred, as the game's GetBaseSpell says
+			Regrowth = 21, Tranquility = 22, ["Improved Shred"] = 23, ["Sundering Roar"] = 25, ["Wild Growth"] = 26, Cataclysm = 27, Wither = 28 }
+		local names, bases = {}, { [23] = 1, [28] = 11 }  -- Improved Shred overrides Shred, Wither Incinerate, as the game's GetBaseSpell says
 		for name, id in pairs(ids) do names[id] = name end
 		local function api(knownNames, here)
 			local known = {}
@@ -11921,15 +11939,20 @@ function PlanTab.barCategoryChecks(check)
 		local function row(layout, slots) local out = {} for _, s in ipairs(slots) do out[#out + 1] = spell(layout, s) end return table.concat(out, " ") end
 
 		-- a Warlock: bar 1 is the button the cat's Shred shows on
-		local lock, skipped, keptN = PlanTab.translateBars(feral, "Feral", "Destruction",
-			api({ "Incinerate", "Shadowburn", "Rain of Fire", "Summon Infernal" }, { [73] = S("Incinerate"), [4] = S("Incinerate"), [20] = S("Shadowburn") }))
-		check(t .. ", each button takes the same job's ability, from the cat page", row(lock, { 1, 2, 3, 4, 5, 13 }), "Incinerate Shadowburn - Incinerate - Shadowburn")
+		local lock, skipped, keptN, clearedN = PlanTab.translateBars(feral, "Feral", "Destruction",
+			api({ "Incinerate", "Shadowburn", "Rain of Fire", "Summon Infernal" }, { [73] = S("Incinerate"), [4] = S("Incinerate"), [20] = S("Cataclysm"), [21] = S("Wither"), [99] = S("Cataclysm") }))
+		check(t .. ", each button takes the same job's ability, from the cat page", row(lock, { 1, 2, 3, 4, 5, 13 }), "Incinerate Shadowburn - - - Shadowburn")
 		-- 0051 review: Rob's cat bar holds the talents that replace the sheet's spells
 		check(t .. ", a talent standing in for the sheet's spell finds its job", row(lock, { 6, 7, 8 }), "Rain of Fire Summon Infernal Incinerate")
 		check(t .. ", the rest are listed, each with why", #skipped .. "/" .. tostring(table.concat(skipped, "\n"):find("Prowl is Taunt/Quick Access, which Destruction leaves empty", 1, true) ~= nil)
 			.. "/" .. tostring(table.concat(skipped, "\n"):find("Cat Form: no category", 1, true) ~= nil), "4/true/true")
-		check(t .. ", a button with nothing to give keeps what it has", spell(lock, 4) .. "/" .. spell(lock, 20), "Incinerate/Shadowburn")
-		check(t .. ", and every kept button is counted, listed or not", keptN, #skipped + 1)
+		check(t .. ", a button with nothing to give keeps what it has", spell(lock, 20), "Cataclysm")
+		-- Rob's pick after the second review: no spell on two buttons
+		check(t .. ", unless its spell is placed on another button", spell(lock, 4), "-")
+		check(t .. ", matched by the base spell, so Wither goes as Incinerate does", spell(lock, 21), "-")
+		check(t .. ", and the class's own pages are never cleared", spell(lock, 73), "Incinerate")
+		check(t .. ", nor clear a kept button (Cataclysm is on 99 as well)", spell(lock, 99) .. "/" .. spell(lock, 20), "Cataclysm/Cataclysm")
+		check(t .. ", both are counted", keptN .. "/" .. clearedN, "1/2")
 		-- 0051 review: a job found by the base spell, for a spell with no name
 		bases[99] = 4
 		local _, nameless = PlanTab.translateBars({ slots = { [73] = { type = "spell", id = 99 } } }, "Feral", "Destruction", api({}))
