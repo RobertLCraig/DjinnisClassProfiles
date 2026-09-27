@@ -370,29 +370,29 @@ local STAT_TARGET = {
 -- the string the talent import box takes; nothing here applies it.
 --
 -- BEGIN GENERATED GEAR PLAN
-local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-23"
+local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-27"
 local GEAR_PLAN = {
 	Feral = {
 		["st"] = {
-			report = "ttktB9kVE77x2zkadhVgPn", simmed = "2026-09-21", dps = 176492,
-			loadout = "DotC Raid ST *",
-			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWAzGMmZwMmFmZmxYmZGAAAAAAgBAAAgZWmlZmZAALgZGgFmhBAAwMbYA",
+			report = "fvUMHsToDSNBRPcb6RqBR9", simmed = "2026-09-27", dps = 194320,
+			loadout = "Active",
+			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWAzGMmZwMmlZmZmxYGzAAAAAAYgBAAAgZWmlZmZAALgZGgFGMAAAmZDD",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
-				neck      = "id=251142,gem_id=240983,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Pendant of Malefic Fury
+				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
 				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
 				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
-				wrist     = "id=251135,bonus_id=12849/13440/6652/13695/13662/12699,gem_id=240908,ilevel=318", -- Fury-fletched Armlets
+				wrist     = "id=251135,gem_id=240908,bonus_id=12849/13440/6652/13695/13662/12699,ilevel=318", -- Fury-fletched Armlets
 				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
 				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
 				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
-				feet      = "id=272240,enchant_id=8018,bonus_id=6652/13662/12835,ilevel=298", -- Miststalker's Striders
-				finger1   = "id=251093,enchant_id=7967,gem_id=240894,bonus_id=13440/6652/13668/12699/12798,ilevel=276", -- Omission of Light
-				finger2   = "id=251194,enchant_id=7966,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
-				trinket1  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
-				trinket2  = "id=270166,bonus_id=6652/13334/12843,ilevel=311", -- Vashnik's Sanguine Rancor
-				main_hand = "id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,ilevel=308", -- Abyssal Broodfiend's Bardiche
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12849,ilevel=318", -- Breakwater Boots
+				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
+				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
+				trinket1  = "id=270166,bonus_id=6652/13334/12843,ilevel=311", -- Vashnik's Sanguine Rancor
+				trinket2  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
+				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
 			},
 		},
 		["3t"] = {
@@ -13167,8 +13167,12 @@ local function selfTest()
 	check(editTest .. ", two real hashes that differ say nothing", PlanTab.talentStringsDiffer(aString:sub(1, 4) .. "B" .. aString:sub(6), aString), nil)
 
 	-- The planned build is the cell's own string (Option A), never the saved
-	-- loadout: aString above IS the Feral st cell's, so the helper must hand
-	-- back that literal. A cell without one has no planned build.
+	-- loadout. The st cell is pinned to aString and "DotC Raid ST *" down to
+	-- the end of the activeLoadoutName block, so a new Top Gear run does not
+	-- break these. A cell without a string has no planned build.
+	-- no new locals here: this function is at Lua 5.1's 200 limit
+	GEAR_PLAN.Feral.st.was = { GEAR_PLAN.Feral.st.talents, GEAR_PLAN.Feral.st.loadout }
+	GEAR_PLAN.Feral.st.talents, GEAR_PLAN.Feral.st.loadout = aString, "DotC Raid ST *"
 	local noPlanTest = "a cell without talents marks nothing"
 	do
 		local planned, plannedFor = PlanTab.plannedTalents("Feral", "st")
@@ -13236,6 +13240,8 @@ local function selfTest()
 	end
 	C_ClassTalents.GetActiveConfigID, C_Traits.GenerateImportString = wasActiveID, wasGenerate
 	InCombatLockdown, PlanTab.lastEdited = wasCombat, wasLast
+	GEAR_PLAN.Feral.st.talents, GEAR_PLAN.Feral.st.loadout = unpack(GEAR_PLAN.Feral.st.was)
+	GEAR_PLAN.Feral.st.was = nil
 
 	-- The /simc export (card 0018). Names are the real Feral plan's, so a plan
 	-- edit that drops one of them fails here rather than in a Raidbots run.
