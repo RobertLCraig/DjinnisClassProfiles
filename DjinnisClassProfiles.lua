@@ -2038,9 +2038,17 @@ end
 -- `worn` is wornFromLink's table plus `ilvl` and `sockets`, or nil for a bare
 -- slot. A slot the plan leaves empty is "ok": the only one is the off hand
 -- under a two-hander, and nothing can be worn there anyway.
+-- A worn piece above the plan's item level came after the sim, which never saw
+-- it, so the plan cannot ask for it to come off (card 0071: on 2026-09-27 the
+-- popup asked Rob to swap a 334 staff for a 308). Its enchant and gems are
+-- still judged. Item level only: it will sometimes keep a worse piece on.
+local function outranks(entry, worn)
+	return (entry and worn and worn.ilvl and entry.ilvl and worn.ilvl > entry.ilvl) or false
+end
+
 local function slotState(entry, worn)
 	if not entry then return "ok" end
-	if not worn or not planMatches(entry, worn.id, worn.ilvl) then return "change" end
+	if not worn or not (planMatches(entry, worn.id, worn.ilvl) or outranks(entry, worn)) then return "change" end
 	-- "lesser" is a lower rank of the right enchant or gem: not wrong, and
 	-- reported after anything that is.
 	local enchant = entry.enchant and PlanTab.rankState("enchant", entry.enchant, worn.enchant) or "ok"
@@ -5695,6 +5703,9 @@ function PlanTab.wrongHere(row, active, edited, plan, worn, buffs)
 		end
 		table.sort(wrong.change)
 		table.sort(wrong.fix)
+		for slot, entry in pairs(PlanTab.entries(plan, worn)) do
+			if outranks(entry, worn[slot]) then wrong.stale = plan.simmed or "?" break end
+		end
 	end
 	if not wrong.loadout and #wrong.change == 0 and #wrong.fix == 0 and #wrong.buffs == 0 then return nil end
 	return wrong
@@ -5928,6 +5939,9 @@ function PlanTab.setupPopup(place, row, spec, wrong)
 		else
 			lines[#lines + 1] = ("%s%s|r   %scannot check (12.1 hides this aura)|r"):format(GOLD, b.label, GREY)
 		end
+	end
+	if wrong.stale then
+		lines[#lines + 1] = ("%sGear plan from %s. You have upgraded since: rerun Top Gear.|r"):format(GREY, wrong.stale)
 	end
 	local buttons = {}
 	if wrong.loadout then
@@ -12937,6 +12951,11 @@ local function selfTest()
 		slotState(full, wornAs("|Hitem:251194:7967:240894::::|h[x]|h", 276, 1)), "change")
 	check(changeTest .. ", lower track", slotState(full, wornAs(good, 263, 1)), "change")
 	check(changeTest .. ", bare slot", slotState(full, nil), "change")
+	-- Card 0071: Rob's 334 staff against a plan's 308 bardiche.
+	check(changeTest .. ", not when the worn piece outranks the plan",
+		slotState(full, wornAs("|Hitem:273783:7967:240894::::|h[x]|h", 334, 1)), "ok")
+	check(changeTest .. ", an outranking piece still needs the planned enchant",
+		slotState(full, wornAs("|Hitem:273783::240894::::|h[x]|h", 334, 1)), "enchant")
 	local enchantTest = "slot state is enchant when enchant differs"
 	check(enchantTest .. ", none",
 		slotState(full, wornAs("|Hitem:251093::240894::::|h[x]|h", 276, 1)), "enchant")

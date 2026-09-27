@@ -36,6 +36,21 @@ Not in scope: comparing stats or sim value. Item level is a blunt test and will 
 worse piece through. The worn piece was won or crafted after the sim, and Rob picked it. That is the
 right default.
 
+## What was built, v0.54.12, 2026-09-27
+
+Rob, mid-raid: "do it for me please".
+
+- `outranks(entry, worn)` beside `slotState`: the worn item level is above the planned one.
+  `slotState` no longer says `change` for such a slot. Every gear check routes through `slotState`
+  (slot glows, bag glows, the Plan tab, the popup, Equip all), so all of them go quiet on it at once.
+- Its enchant and gems are still judged against the plan, so a bare ring still asks for one.
+- `PlanTab.wrongHere` sets `wrong.stale` to the plan's `simmed` date when any slot outranks, and
+  `PlanTab.setupPopup` adds one grey line: `Gear plan from <date>. You have upgraded since: rerun
+  Top Gear.` It only shows when the popup is already up for something else.
+- Two offline checks: a 334 piece against a 308 plan is `ok`, and without its enchant is `enchant`.
+  `lua offline-check.lua` passes.
+- Not checked: the popup in a live client.
+
 ## Done when
 
 With Rob's gear from the 2026-09-27 SimC export and today's `GEAR_PLAN`:
