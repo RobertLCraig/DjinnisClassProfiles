@@ -98,3 +98,11 @@ Undo bars and check it is gone. Also look at the chat lines for a same-named mac
 No version bump and no deploy: neither is in the card's Plan.
 
 **2026-09-28** The loop moved this card from in-progress/ to human-review/ WITHOUT trying it. All 1 of its open acceptance criteria say proves: manual, so there is nothing left an unattended session could close and starting one would change nothing. Each open criterion names what to look at and what a pass is: tick what passes and move the card on, or say what failed and move it back to todo/.
+
+**2026-09-29** Moved to `ai-review/` by an attended agent under Rob's rule that human-review holds
+only what he must decide. No reviewer has read this card's code: `git log` shows the build
+(`3655baf`), a count fix (`3d76035`), then the loop's move straight from `in-progress/` to
+`human-review/` (`0aa1193`). The code writes macros (`CreateMacro`) and deletes them on undo
+(`PlanTab.deleteMade`), so it needs the adversarial pass before Rob loads it. After the review, write
+`## What I need from you` from the builder's "Left open" paragraph above, and say whether the build
+has been deployed to the game folder, because the builder did not bump the version or deploy.
