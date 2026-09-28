@@ -30,7 +30,7 @@ closing "passed / failed" line.
 ## Acceptance
 
 - [x] A run that swaps a global, a `C_` field and a PlanTab field and then throws leaves all three as they were, and says so. proves: `offline-check.lua` "the self-test net"
-- [x] The self-test leaves no Blizzard value swapped. proves: `offline-check.lua` (the net would print a FAIL line naming it)
+- [ ] The self-test leaves no Blizzard value swapped. proves: `offline-check.lua` (the net would print a FAIL line naming it). UNTICKED 2026-09-29: the seventh review showed the net writes back and counts as "swapped" a secret the run never touched, because `same()` in `PlanTab.restore` answers false for "cannot compare" as for "changed". So a FAIL line here does not mean a swap, and nothing in the offline check reads that line. Still so at HEAD.
 - [x] No self-test item in More. proves: self-test `menuChecks`
 - [x] Mutation: the net's restore removed turns the offline check red (`%TEMP%\mut0053.py`, "self-test net off").
 - [ ] In game: `/reload` first (the old run is still in effect). Then `/djbis test`, close the Reload box with Later, open and close the talent window twice. It works. Then click Reload now. proves: manual (Rob)
@@ -430,3 +430,10 @@ spellbook, then the talent window, twice each: both work. **More > Make the plan
 its box. **More > Offer the saved bars** still knows your layouts. Then click **Reload now**.
 
 **2026-09-24** The reviewer returned this card and its finding is the last review entry at the bottom of ## Direction. The loop moved it from todo/ to human-review/ because it has bounced 5 times between todo and ai-review, which is the limit, so it is waiting on a person. THE BUILDER COULD NOT ACT ON THAT FINDING. A reviewer never unticks a criterion - it is forbidden from editing acceptance at all - so the card came back with 0 of 0 criteria still ticked, every session found nothing open to do, and the loop promoted it again on the boxes. Untick what the reviewer disproved and move it back to todo/, or say here why the finding is wrong.
+
+**2026-09-29** Done as the entry above asks, by an attended agent under Rob's rule that
+human-review holds only what he must decide. Both findings of the seventh review stand at HEAD:
+`PlanTab.restore`'s `put` still counts any value `same()` cannot compare as a swap and writes it back
+(finding 1), and no source check guards the `==` form (finding 2). Acceptance 2 is unticked with the
+reason beside it. Owed: count a refused compare apart from a swap, add the left-alone run and the
+source check the review describes, then back to `ai-review/`. The in-game criterion stays Rob's.
