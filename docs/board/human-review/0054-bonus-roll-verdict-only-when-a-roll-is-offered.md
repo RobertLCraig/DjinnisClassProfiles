@@ -1,5 +1,21 @@
 # 0054 The bonus roll verdict only when the game offers a roll, and only for BiS not owned
 
+## What I need from you
+
+**Check the bonus roll verdict on your next raid night, on a druid.** It changes the "Bonus roll:
+YES/NO" line: it now waits for the game's bonus roll prompt, and leaves out BiS you already own.
+
+1. Kill a boss you have not looted this week, with a bonus roll coin. Pass: when the roll prompt
+   appears, the verdict appears, and it names that boss.
+2. Kill a boss you have already looted this week. Pass: no verdict at all.
+3. Kill a boss, then `/reload` while the roll prompt is still up. Pass: the verdict comes back and
+   still names that boss.
+
+**Fail:** a verdict with no roll offered, the wrong boss named, or a YES for an item you already
+own. Say which step on this card and move it to `todo/`.
+
+**Why it needs you:** only a live raid kill fires the prompt; the offline checks cover the rest.
+
 ## Why
 
 Rob asked on 2026-09-24 whether the WoW clippings page helps
