@@ -142,3 +142,12 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
   failure shows "not known" or a grey line, never an id or a trace. **Not fixed, for you to weigh:**
   a red gear row's tooltip is the base item, not the planned item level, and the tab does not
   redraw itself when you swap talents or gear while it is open.
+
+**2026-09-29** Attended unblock pass. The looks no longer match the addon in the game folder
+(v0.54.12), so they cannot be run as written. Step 2 expects nine bosses marked 1 or 2 targets:
+`PlanTab.BOSSES.Feral` now has ten rows (nine bosses including Nymrissa, plus Mythic+), each with
+its own `Raid: <boss>` build since card `0030`, and a `3t` scenario exists since card `0028`.
+Step 6 expects "no 2 target plan yet", and Feral's `2t` cell has been filled since commit
+`09c637c` (2026-09-28). Step 1 uses `/bis`, which is `/dcp` since the rename (card `0058`).
+Rewriting the steps is an agent's job, so this goes to `todo/`: rewrite them against the deployed
+version, then return the card to `human-review/`. The build is not in question.
