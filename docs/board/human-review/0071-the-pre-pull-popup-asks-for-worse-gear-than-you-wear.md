@@ -1,5 +1,25 @@
 # 0071 The pre-pull popup asks for worse gear than you wear
 
+## What I need from you
+
+**One look in the game, v0.54.13.** `/reload` first.
+
+1. Next raid night as Feral, when the pre-pull popup comes up, read every gear line on it.
+
+Pass is all of:
+- no line asks you to put on a piece with a lower item level than the one you wear
+- if you have won a piece since 2026-09-28 that beats the plan's, one grey line says
+  `Gear plan from 2026-09-28. You have upgraded since: rerun Top Gear.`
+- if you have not, there is no such line
+- the Augment rune line still shows when you have no rune
+- Equip all takes off nothing better than what goes on
+
+Fail is any of those not true. Say which on this card.
+
+**Why it needs you:** the popup only draws in a live client. The Feral st, 2t and M+ plans were
+resimmed on 2026-09-28 from your own gear, so the exact popup from Coiled Altar cannot come back.
+The rule itself is covered by the offline check.
+
 ## Why
 
 Rob, 2026-09-27, on heroic Coiled Altar, with a screenshot of the popup: "This was originally
@@ -59,3 +79,35 @@ With Rob's gear from the 2026-09-27 SimC export and today's `GEAR_PLAN`:
 2. It shows the stale-plan line with the date `2026-09-21`.
 3. The Augment rune line still shows when there is no rune.
 4. After a fresh `update-gear-plan.ps1` run, the stale-plan line is gone.
+
+## Comments
+
+**2026-09-29** Adversarial review, unattended. Two defects found and fixed in v0.54.13. Moved to
+`human-review/` for the one look above.
+
+What was attacked:
+- The rule. `outranks` made to return false: both of the build's checks went red. They can fail.
+- **Defect 1, fixed.** An outranking piece was still asked for the plan's gems, counted against the
+  planned piece's sockets. A newer ring with no socket stayed on the popup as "gem" for good, and
+  nothing could fix it. Every Feral ring in the plan has a gem, so this was live. Now another item is
+  judged on the sockets it has. An empty socket still asks for a gem. The planned piece is judged as
+  before.
+- **Defect 2, fixed.** The stale line also showed when you raised the planned piece itself with
+  crests. The plan is still right then, and a rerun changes nothing. Now only a different item sets it.
+- The stale line had no check. Three added: another item above, the planned item raised, a lower item.
+- Rings swapped between fingers: `PlanTab.entries` pairs them first, and an outranking ring is `ok`
+  either way round. Holds.
+- Equip all and the bag glows read the same `change` marks, so they go quiet with the popup. Holds.
+- Criterion 2 as written cannot be met now: the st, 2t and M+ cells were resimmed on 2026-09-28. No
+  boss row uses the 3t cell, so its old date never reaches the popup.
+- Not fixed, latent: a plan with a one-hander and an off hand, against a worn two-hander above it,
+  still asks for the off hand, and equipping that takes the two-hander off. No druid plan has an
+  off hand today. Worth a card if a Balance or Restoration plan gets one.
+- Offline check passes, as Feral and as spec 250.
+
+Security. Weakest point: the item level read. A level the client has not cached is nil, and nil never
+outranks, so the popup falls back to asking, which is the old behaviour. Unchecked input: none from
+outside. Every value is the player's own gear from the game's item links. It leaks nothing. There is
+no network call and no chat output.
+
+No browser: this is a game popup. No agent can run the client, so the look is the ask above.

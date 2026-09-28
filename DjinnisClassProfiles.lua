@@ -2089,7 +2089,15 @@ local function slotState(entry, worn)
 	if (worn.sockets or 0) > #gems then return "gem" end
 	-- A gem the plan never listed is no worse than none, so only a planned gem
 	-- can be the wrong one.
-	local gem = PlanTab.gemMatch(entry.gems, gems)
+	local planned = entry.gems or {}
+	-- Another item that outranks the plan is judged on the sockets it has: the
+	-- planned ring's gem cannot go in a ring with no socket (0071 review).
+	if worn.id ~= entry.id and worn.sockets and #planned > worn.sockets then
+		local some = {}
+		for i = 1, worn.sockets do some[i] = planned[i] end
+		planned = some
+	end
+	local gem = PlanTab.gemMatch(planned, gems)
 	if gem == "gem" then return "gem" end
 	return (enchant == "lesser" or gem == "lesser") and "lesser" or "ok"
 end
@@ -5772,7 +5780,9 @@ function PlanTab.wrongHere(row, active, edited, plan, worn, buffs)
 		table.sort(wrong.fix)
 		table.sort(wrong.upgrade)
 		for slot, entry in pairs(PlanTab.entries(plan, worn)) do
-			if outranks(entry, worn[slot]) then wrong.stale = plan.simmed or "?" break end
+			-- Another item only. The planned piece raised with crests is still the plan.
+			local on = worn[slot]
+			if outranks(entry, on) and on.id ~= entry.id then wrong.stale = plan.simmed or "?" break end
 		end
 	end
 	if not wrong.loadout and #wrong.change == 0 and #wrong.fix == 0 and #wrong.upgrade == 0 and #wrong.buffs == 0 then return nil end
@@ -13195,6 +13205,22 @@ local function selfTest()
 		slotState(full, wornAs("|Hitem:273783:7967:240894::::|h[x]|h", 334, 1)), "ok")
 	check(changeTest .. ", an outranking piece still needs the planned enchant",
 		slotState(full, wornAs("|Hitem:273783::240894::::|h[x]|h", 334, 1)), "enchant")
+	check(changeTest .. ", an outranking piece with no socket is not asked for the planned gem",
+		slotState(full, wornAs("|Hitem:273783:7967:::::|h[x]|h", 334, 0)), "ok")
+	check(changeTest .. ", an outranking piece with an empty socket still wants a gem",
+		slotState(full, wornAs("|Hitem:273783:7967:::::|h[x]|h", 334, 1)), "gem")
+	check(changeTest .. ", the planned piece with no socket still wants its gem",
+		slotState(full, wornAs("|Hitem:251093:7967:::::|h[x]|h", 276, 0)), "gem")
+	do -- the popup's stale-plan line: another item above the plan, not a crest upgrade
+		local stalePlan = { simmed = "2026-09-21", slots = { main_hand = parsePlanLine("id=268215,ilevel=308") } }
+		local staleOf = function(on)
+			local w = PlanTab.wrongHere({ loadout = "A" }, "B", nil, stalePlan, { main_hand = on })
+			return w and w.stale
+		end
+		check("the popup says the plan is old when another item outranks it", staleOf({ id = 273783, ilvl = 334, gems = {} }), "2026-09-21")
+		check("the popup does not say the plan is old for the planned item raised", staleOf({ id = 268215, ilvl = 321, gems = {} }), nil)
+		check("the popup does not say the plan is old for a lower item", staleOf({ id = 273783, ilvl = 300, gems = {} }), nil)
+	end
 	-- 2026-09-28: Top Gear spent Rob's crests; the worn piece is the right one, lower
 	check("slot state is upgrade when the sim upgraded the worn piece",
 		slotState(parsePlanLine("id=251093,enchant_id=7967,gem_id=240894,ilevel=286,upgrade=3445/60"), wornAs(good, 276, 1)), "upgrade")
