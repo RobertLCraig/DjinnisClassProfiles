@@ -8285,7 +8285,8 @@ end
 
 -- A build's import string in a box, selected for Ctrl+C. Typing in it puts
 -- the string back, so what is copied is always the build. One frame, reused.
-function PlanTab.showExport(name, code)
+-- `note` replaces the line above the box (card 0069's bars string).
+function PlanTab.showExport(name, code, note)
 	local f = PlanTab.exportFrame
 	if not f then
 		f = CreateFrame("Frame", "DjinnisCPExport", UIParent, "BasicFrameTemplateWithInset")
@@ -8302,7 +8303,6 @@ function PlanTab.showExport(name, code)
 		f.title:SetPoint("TOP", f, "TOP", 0, -6)
 		f.text = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 		f.text:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -34)
-		f.text:SetText("Ctrl+C copies it. Paste it into Blizzard's Import, or share it.")
 		f.box = CreateFrame("EditBox", nil, f, "InputBoxTemplate")
 		f.box:SetSize(376, 22)
 		f.box:SetPoint("TOPLEFT", f, "TOPLEFT", 24, -58)
@@ -8318,6 +8318,7 @@ function PlanTab.showExport(name, code)
 	end
 	f.code = code
 	f.title:SetText("Export: " .. name)
+	f.text:SetText(note or "Ctrl+C copies it. Paste it into Blizzard's Import, or share it.")
 	f.box:SetText(code)
 	f:Show()
 	f.box:SetFocus()
@@ -9111,7 +9112,8 @@ function PlanTab.captureBars()
 	-- No keys read is a failed read, not a wish to unbind every key, ESCAPE
 	-- and movement too (0033 review): the layout then leaves keys alone.
 	if k == 0 then keys = nil end
-	return { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil }, n, k
+	-- the class goes in an exported string's header (card 0069)
+	return { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil, class = PlanTab.playerClass() }, n, k
 end
 
 -- Named profiles (card 0037, Rob 2026-09-23): a layout under a name of his,
@@ -9179,6 +9181,149 @@ function PlanTab.deleteProfile(name)
 	PlanTab.profilesDB()[stored] = nil
 	PlanTab.say(("Deleted the %s profile."):format(stored))
 	return true
+end
+
+-- A profile as one string, a backup kept outside the game (card 0069). The
+-- string is "DCP1:" and then base64 (PlanTab.B64, standard bit order) of an
+-- Adler-32 checksum in hex and the fields. A field is its length, ":", and a
+-- value: "n" a number, "s" a string, "t" or "f", or empty for nil. The fields
+-- are the class id, the name, the date saved, then "S" and 8 per slot, and
+-- "K" and 2 per key. Nothing else is in it: it is not for sharing.
+PlanTab.LAYOUT_TAG = "DCP1:"
+
+function PlanTab.checksum(text)
+	local a, b = 1, 0
+	for i = 1, #text do
+		a = (a + text:byte(i)) % 65521
+		b = (b + a) % 65521
+	end
+	return ("%04x%04x"):format(b, a)
+end
+
+function PlanTab.toB64(text)
+	local out = {}
+	for i = 1, #text, 3 do
+		local x, y, z = text:byte(i, i + 2)
+		local n = x * 65536 + (y or 0) * 256 + (z or 0)
+		for k, shift in ipairs({ 262144, 4096, 64, 1 }) do
+			local c = math.floor(n / shift) % 64 + 1
+			out[#out + 1] = (k == 3 and not y or k == 4 and not z) and "=" or B64:sub(c, c)
+		end
+	end
+	return table.concat(out)
+end
+
+-- nil for anything that is not whole base64
+function PlanTab.fromB64(code)
+	if #code == 0 or #code % 4 ~= 0 or code:find("[^%w+/=]") or code:find("=[^=]") then return nil end
+	local out = {}
+	for i = 1, #code, 4 do
+		local n, pad = 0, 0
+		for j = i, i + 3 do
+			local ch = code:sub(j, j)
+			if ch == "=" then pad = pad + 1 end
+			n = n * 64 + (ch == "=" and 0 or B64:find(ch, 1, true) - 1)
+		end
+		out[#out + 1] = string.char(math.floor(n / 65536), math.floor(n / 256) % 256, n % 256):sub(1, 3 - pad)
+	end
+	return table.concat(out)
+end
+
+function PlanTab.packValue(v)
+	local t = type(v)
+	local s = t == "number" and "n" .. v or t == "string" and "s" .. v or t == "boolean" and (v and "t" or "f") or ""
+	return #s .. ":" .. s
+end
+
+-- The values in `text`, and how many (a nil is a hole), or nil.
+function PlanTab.unpackValues(text)
+	local out, n, pos = {}, 0, 1
+	while pos <= #text do
+		local len, from = text:match("^(%d+):()", pos)
+		len = tonumber(len)
+		if not len or from + len - 1 > #text then return nil end
+		local s = text:sub(from, from + len - 1)
+		local tag, rest = s:sub(1, 1), s:sub(2)
+		n, pos = n + 1, from + len
+		if tag == "n" then
+			out[n] = tonumber(rest)
+			if not out[n] then return nil end
+		elseif tag == "s" then out[n] = rest
+		elseif s == "t" or s == "f" then out[n] = s == "t"
+		elseif s ~= "" then return nil end
+	end
+	return out, n
+end
+
+function PlanTab.layoutString(name, layout, class)
+	local parts = {}
+	local function put(...)
+		for i = 1, select("#", ...) do parts[#parts + 1] = PlanTab.packValue((select(i, ...))) end
+	end
+	put(class, name, layout.saved)
+	for slot, a in pairs(layout.slots or {}) do put("S", slot, a.type, a.id, a.name, a.index, a.body, a.icon, a.char) end
+	for key, action in pairs(layout.keys or {}) do put("K", key, action) end
+	local body = table.concat(parts)
+	return PlanTab.LAYOUT_TAG .. PlanTab.toB64(PlanTab.checksum(body) .. body)
+end
+
+-- The name and layout in a string from layoutString, or nil and why. Taken
+-- whole or not at all: a damaged string, or one for another class, is refused.
+function PlanTab.readLayoutString(code)
+	code = type(code) == "string" and canRead(code) and (code:gsub("%s", "")) or ""
+	local bad = "That is not a whole bars string from this addon. Copy it again, all of it."
+	local tag = PlanTab.LAYOUT_TAG
+	if code:sub(1, #tag) ~= tag then return nil, bad end
+	local text = PlanTab.fromB64(code:sub(#tag + 1))
+	if not text or #text < 8 or PlanTab.checksum(text:sub(9)) ~= text:sub(1, 8) then return nil, bad end
+	local v, n = PlanTab.unpackValues(text:sub(9))
+	if not v or type(v[2]) ~= "string" or v[2] == "" or #v[2] > 40 or v[2]:find("|", 1, true) then return nil, bad end
+	if v[1] == nil or v[1] ~= PlanTab.playerClass() then
+		return nil, "That string is for another class. Import it on a character of the class it was saved on."
+	end
+	local layout, i = { slots = {}, saved = v[3], class = v[1] }, 4
+	while i <= n do
+		local slot = v[i + 1]
+		if v[i] == "S" and i + 8 <= n and type(slot) == "number" and slot % 1 == 0 and slot >= 1 and slot <= PlanTab.BAR_SLOTS and type(v[i + 2]) == "string" then
+			layout.slots[slot] = { type = v[i + 2], id = v[i + 3], name = v[i + 4], index = v[i + 5], body = v[i + 6], icon = v[i + 7], char = v[i + 8] }
+			i = i + 9
+		elseif v[i] == "K" and type(v[i + 1]) == "string" and type(v[i + 2]) == "string" then
+			layout.keys = layout.keys or {}
+			layout.keys[v[i + 1]] = v[i + 2]
+			i = i + 3
+		else
+			return nil, bad
+		end
+	end
+	return v[2], layout
+end
+
+-- Export in a profile's menu: its string in a box, for Ctrl+C.
+function PlanTab.exportProfile(name)
+	local stored = PlanTab.findProfile(name or "")
+	if not stored then PlanTab.say(("No profile called \"%s\"."):format(tostring(name))) return nil end
+	local layout = PlanTab.profilesDB()[stored]
+	-- a profile saved before card 0069 has no class: the one exporting it is the best guess
+	local code = PlanTab.layoutString(stored, layout, layout.class or PlanTab.playerClass())
+	PlanTab.showExport(stored .. " (action bars)", code, "Ctrl+C copies it. Keep it in a text file. More > Import a profile puts it back.")
+	return code
+end
+
+-- Saves the profile in `code` under its own name, replacing one of that name.
+-- Only saved: Load stays a separate click. Answers the name, or nil.
+function PlanTab.importProfile(code)
+	local name, layout = PlanTab.readLayoutString(code)
+	if not name then PlanTab.say(layout) return nil end
+	local stored = PlanTab.findProfile(name)
+	PlanTab.profilesDB()[stored or name] = layout
+	PlanTab.say(("%s the %s profile from the string. Nothing on your bars changed: %sMore > Profile: %s > Load|r%s puts it on.")
+		:format(stored and "Replaced" or "Saved", stored or name, GOLD, stored or name, GREY))
+	return stored or name
+end
+
+function PlanTab.importProfileAsk()
+	return PlanTab.askName("Djinni's Class Profiles: import bars", "Paste a bars string from Export with Ctrl+V. It is saved as a profile, and nothing changes on your bars.",
+		PlanTab.importProfile, "", 0)
 end
 
 function PlanTab.sameBars(a, b)
@@ -9762,11 +9907,13 @@ function PlanTab.menuItems(where)
 		add({ text = ("Make bars from your %s bars"):format(template), tip = "Your druid's layout, each button given this spec's ability for the same job (Bellular's keybinding categories). It is saved as this spec's layout. Nothing changes on your bars until you load it.", fn = function() PlanTab.barsFrom() end })
 	end
 	add({ text = "Save bars as a profile...", tip = "Keeps your action bars and key bindings now under a name. A profile loads on any character and any spec.", fn = PlanTab.askProfileName })
+	add({ text = "Import a profile...", tip = "Paste a string from a profile's Export. It is saved as a profile; Load puts it on your bars.", fn = PlanTab.importProfileAsk })
 	local names = PlanTab.profileNames()
 	if #names == 0 then add({ text = "No profiles yet", disabled = true }) end
 	for _, name in ipairs(names) do
 		add({ text = ("Profile: %s"):format(name), tip = ("Saved %s."):format(PlanTab.profilesDB()[name].saved or "on an unknown day"), sub = {
 			{ text = "Load", tip = "Puts this profile on this character. Undo bars puts the old bars back.", fn = function() PlanTab.loadProfile(name) end },
+			{ text = "Export", tip = "Shows this profile as one string, macros too, to copy and keep outside the game.", fn = function() PlanTab.exportProfile(name) end },
 			{ text = "Delete", tip = "Asks first.", fn = function() PlanTab.deleteProfileAsk(name) end },
 		} })
 	end
@@ -10948,6 +11095,68 @@ function PlanTab.barChecks(check)
 	check(macroOldTest .. ", and no difference said", said():find("differs", 1, true), nil)
 	CreateMacro, DeleteMacro = keptMacro[1], keptMacro[2]
 	GetMacroInfo = function(i) return macros[i] end
+
+	-- Card 0069: a profile as one string, kept outside the game. Only
+	-- PlanTab's own functions are swapped, and put back even on a throw.
+	do
+		local keptX = { db().barProfiles, PlanTab.showExport, PlanTab.playerClass, PlanTab.applyBars, PlanTab.placeBars }
+		local okX, errX = pcall(function()
+			local function same(a, b)
+				if type(a) ~= "table" or type(b) ~= "table" then return a == b end
+				for k, v in pairs(a) do if not same(v, b[k]) then return false end end
+				for k in pairs(b) do if a[k] == nil then return false end end
+				return true
+			end
+			local layout = { saved = "2026-09-29", keys = { Q = "ACTIONBUTTON2", ["SHIFT-1"] = "MULTIACTIONBAR1BUTTON1" }, slots = {
+				[1] = { type = "spell", id = 5221 },
+				[3] = { type = "macro", name = "Cat: it", index = 121, body = "#showtooltip\n/cast [form:2] Prowl; Cat Form|r 7:x", icon = 132089, char = true },
+				[4] = { type = "macro", name = "Old", index = 2 },
+				[9] = { type = "item", id = 211880 },
+				[20] = { type = "macro", name = "Mark", index = 1, body = "/cast Mark", icon = "Interface\\Icons\\X", char = false },
+				[150] = { type = "summonpet", id = "BattlePet-0-000012345678" },
+			} }
+			db().barProfiles = { ["Main bars"] = layout }
+			PlanTab.playerClass = function() return 11 end
+			local shownCode, applied = nil, 0
+			PlanTab.showExport = function(_, code) shownCode = code end
+			PlanTab.applyBars = function() applied = applied + 1 return "applied" end
+			PlanTab.placeBars = function() applied = applied + 1 return 0, {}, { made = {}, notes = {} } end
+
+			local exportTest = "export gives one string for a layout"
+			local code = PlanTab.exportProfile("main bars")
+			check(exportTest .. ", shown in the box", type(code) == "string" and code == shownCode, true)
+			check(exportTest .. ", one line, no spaces", type(code) == "string" and #code > 20 and code:find("%s") == nil, true)
+
+			local roundTest = "export then import gives the same layout"
+			db().barProfiles = {}
+			check(roundTest .. ", saved under its name", PlanTab.importProfile(code), "Main bars")
+			local back = db().barProfiles["Main bars"] or {}
+			check(roundTest .. ", every slot, macro bodies and icons too", same(back.slots, layout.slots), true)
+			check(roundTest .. ", the keys", same(back.keys, layout.keys), true)
+			check(roundTest .. ", no keys stays no keys", PlanTab.importProfile(PlanTab.layoutString("K", { slots = {} }, 11) or "") and db().barProfiles.K.keys, nil)
+
+			check("import saves and does not apply", applied, 0)
+
+			local badTest = "a damaged string is refused and nothing is saved"
+			db().barProfiles = {}
+			local mid = math.floor(#(code or "") / 2)
+			local flipped = (code or ""):sub(1, mid - 1) .. ((code or ""):sub(mid, mid) == "A" and "B" or "A") .. (code or ""):sub(mid + 1)
+			check(badTest .. ", one letter changed", PlanTab.importProfile(flipped), nil)
+			-- a change that still parses, a spell id one off: only the checksum sees it
+			local text = PlanTab.fromB64 and PlanTab.fromB64((code or ""):sub(6)) or ""
+			local oneOff = PlanTab.LAYOUT_TAG and PlanTab.LAYOUT_TAG .. PlanTab.toB64((text:gsub("n5221", "n5222"))) or ""
+			check(badTest .. ", a changed number that still reads", text:find("n5221", 1, true) ~= nil and PlanTab.importProfile(oneOff), nil)
+			check(badTest .. ", cut short", PlanTab.importProfile((code or ""):sub(1, -5)), nil)
+			check(badTest .. ", not one of ours", PlanTab.importProfile("hello there"), nil)
+			PlanTab.playerClass = function() return 1 end
+			check(badTest .. ", another class", PlanTab.importProfile(code), nil)
+			check(badTest .. ", and nothing was saved", next(db().barProfiles), nil)
+			PlanTab.playerClass = function() return 11 end
+			check(badTest .. ", with spaces and line breaks from a text file it still reads", PlanTab.importProfile(" " .. (code or ""):sub(1, 30) .. "\n" .. (code or ""):sub(31) .. "\n"), "Main bars")
+		end)
+		db().barProfiles, PlanTab.showExport, PlanTab.playerClass, PlanTab.applyBars, PlanTab.placeBars = keptX[1], keptX[2], keptX[3], keptX[4], keptX[5]
+		check("card 0069's checks ran to the end", okX and "yes" or tostring(errX), "yes")
+	end
 
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]
