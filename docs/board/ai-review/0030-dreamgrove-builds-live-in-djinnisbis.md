@@ -55,3 +55,14 @@ saved. Card `0031` makes them.
 - [ ] WHEN a boss row has a `talents` string, THE ADDON SHALL treat it as the planned build for that boss.
 - [ ] `/bis test` covers `plannedTalents` for a boss row with and without its own string.
 - [ ] The build decodes to 34 class, 34 spec and 13 hero points for every row (`choices.py` check, carried over).
+
+## Comments
+
+**2026-09-29** Attended unblock pass. This card was built at v0.26.0 (commits `6a0ec78` and
+`c986b4b`) and put in `human-review/` without an adversarial review: it has no review entry and
+no `## What I need from you`. Three of its four criteria are checks an agent can run (the
+generator's refusal, the offline self-test, the 34 / 34 / 13 decode). Only the Plan tab look
+needs a client, and its expectation is stale: Balance's rows are `Raid: Nek'Zali, Altar` and
+`Raid: Cleave` since card `0064` regrouped them, not one `Raid: <boss>` a boss. So it goes to
+`ai-review/`. The reviewer names each criterion's proving check, and writes a current in-game ask
+if the card then needs Rob.
