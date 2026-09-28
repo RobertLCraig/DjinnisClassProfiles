@@ -1,5 +1,21 @@
 # 0063 Reset on the worn loadout sends two loadout changes in one frame
 
+## What I need from you
+
+**Reset the loadout you are wearing, once, in game.**
+
+1. Wear a `[CP]` loadout, change one talent by hand and apply it, so it no longer matches the plan.
+2. Close the talent window. Open the window from the minimap button, click **More > Make the
+   planned loadouts**, then **Reset to plan**.
+
+**Pass:** chat says the loadout now holds the plan, you are still wearing it under the same name,
+and there is one loadout of that name.
+
+**Fail:** "You can't do that right now", "Rename it in the talent window", a `[CP+]` loadout left
+over, or the starter build. Say what you saw on this card and move it to `todo/`.
+
+**Why it needs you:** only the live server refuses a second change in flight; offline it is a model.
+
 ## Why
 
 The second 0059 review, 2026-09-25. The server takes one loadout change in flight and refuses the
