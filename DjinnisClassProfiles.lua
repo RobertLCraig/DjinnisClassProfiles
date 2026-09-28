@@ -370,13 +370,13 @@ local STAT_TARGET = {
 -- the string the talent import box takes; nothing here applies it.
 --
 -- BEGIN GENERATED GEAR PLAN
-local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-27"
+local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-28"
 local GEAR_PLAN = {
 	Feral = {
 		["st"] = {
-			report = "fvUMHsToDSNBRPcb6RqBR9", simmed = "2026-09-27", dps = 194320,
-			loadout = "Active",
-			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWAzGMmZwMmlZmZmxYGzAAAAAAYgBAAAgZWmlZmZAALgZGgFGMAAAmZDD",
+			report = "8ZhVuHnvmry1xjnLJPCDLA", simmed = "2026-09-28", dps = 188617,
+			loadout = "[CP] Raid: Nek'Zali",
+			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALghhxMDmxsMmZmxYGDAAAAAADMAAAAAAz2MLmtZW2AzMALmZYAAMzAgB",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
@@ -390,7 +390,29 @@ local GEAR_PLAN = {
 				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12849,ilevel=318", -- Breakwater Boots
 				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
 				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
-				trinket1  = "id=270166,bonus_id=6652/13334/12843,ilevel=311", -- Vashnik's Sanguine Rancor
+				trinket1  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
+				trinket2  = "id=273796,bonus_id=12843/13440/6652/12699,ilevel=311", -- Vile Vial of Volatile Venom
+				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
+			},
+		},
+		["2t"] = {
+			report = "6Kh4JYSKDaVL7tZPHt1GyV", simmed = "2026-09-28", dps = 255178,
+			loadout = "[CP] Raid: Lost Explorers",
+			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZMzGzMzMGz2yYZsMzMzYmBAAAgFwsBjZGMjZZmZmZMmxMAAAAAAADAAAAAwsNziZZmtNwMDwiZwAAYmBAD",
+			slots = {
+				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
+				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
+				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
+				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
+				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
+				wrist     = "id=251135,gem_id=240908,bonus_id=12849/13440/6652/13695/13662/12699,ilevel=318", -- Fury-fletched Armlets
+				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
+				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12849,ilevel=318", -- Breakwater Boots
+				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
+				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
+				trinket1  = "id=250228,bonus_id=13440/6652/12699/12843,ilevel=311", -- Resonant Bellowstone
 				trinket2  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
 				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
 			},
@@ -418,25 +440,25 @@ local GEAR_PLAN = {
 			},
 		},
 		["mplus"] = {
-			report = "ttC3zNmZSvC7C2XQNSe6Bi", simmed = "2026-09-22", dps = 224577,
-			loadout = "WS M+",
-			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYBMbGeAzMYGziZmZmlxMPwMAAAAAAADAAAAAwsMziZZmlNwMDwCDGAAzMAYA",
+			report = "oRjwNxSNenLzjB5SecDnK1", simmed = "2026-09-28", dps = 241837,
+			loadout = "Dungeon (new)",
+			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYBMbGeAzMYGziZmZmlxMMAAAAAAGYAAAAYmlZZmZGAwCMzMALMYAAAMzGGA",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
 				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
-				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
+				chest     = "id=239048,enchant_id=7987,bonus_id=13440/6652/13662/12699/12846,ilevel=321", -- Vest of Reverent Adoration
 				wrist     = "id=251135,gem_id=240908,bonus_id=12849/13440/6652/13695/13662/12699,ilevel=318", -- Fury-fletched Armlets
 				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
 				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
 				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
-				feet      = "id=272240,enchant_id=8018,bonus_id=6652/13662/12835,ilevel=298", -- Miststalker's Striders
-				finger1   = "id=272147,bonus_id=6652/13668/12838,enchant_id=7967,gem_id=240908,ilevel=308", -- Colubrine Band
-				finger2   = "id=268249,gem_id=240888,bonus_id=6652/13668/13333/12841/13696,enchant_id=7967,ilevel=305", -- Vile Alchemist's Band
-				trinket1  = "id=250228,bonus_id=13440/6652/12699/12843,ilevel=311", -- Resonant Bellowstone
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12849,ilevel=318", -- Breakwater Boots
+				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
+				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
+				trinket1  = "id=270174,bonus_id=6652/13334/12843,ilevel=311", -- Idol of the Howling Nexus
 				trinket2  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
-				main_hand = "id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,ilevel=308", -- Abyssal Broodfiend's Bardiche
+				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
 			},
 		},
 	},
@@ -9918,11 +9940,13 @@ function PlanTab.loadoutChecks(check)
 	missing, drifted = PlanTab.loadoutGaps(builds, { A = 1, B = 2 }, function() return nil end)
 	check(gapTest .. ", one that cannot be read is not drifted", #drifted, 0)
 	check(gapTest .. ", nothing said when the game will not list them", PlanTab.loadoutGaps(builds, nil, nil), nil)
-	-- The gear cell's "WS M+" is a client export of the loadout made from
-	-- Dreamgrove's "WS M+": same talents, but Dreamgrove marks five granted
+	-- The 2026-09-22 gear cell's "WS M+" was a client export of the loadout made
+	-- from Dreamgrove's "WS M+": same talents, but Dreamgrove marks five granted
 	-- nodes and the export does not. Compared as text, every fresh import drifted.
+	-- Kept as a literal, so a new Top Gear run does not change this test.
 	local dreamgrove = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAAEAMLzs0sMzyGYmBYhBDAgZGAMA"
-	check(gapTest .. ", a fresh import of a build is not drifted", PlanTab.talentStringsDiffer(GEAR_PLAN.Feral.mplus.talents, dreamgrove), false)
+	local wsExport = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYBMbGeAzMYGziZmZmlxMPwMAAAAAAADAAAAAwsMziZZmlNwMDwCDGAAzMAYA"
+	check(gapTest .. ", a fresh import of a build is not drifted", PlanTab.talentStringsDiffer(wsExport, dreamgrove), false)
 	check(gapTest .. ", a string that is not base64 cannot be compared", PlanTab.talentStringsDiffer(nek, nek:sub(1, 40) .. "!"), nil)
 	-- node number, ranks and choice, as Blizzard's own reader decodes them (second review)
 	local key = PlanTab.nodeKey(dreamgrove)

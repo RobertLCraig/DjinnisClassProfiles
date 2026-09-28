@@ -187,7 +187,10 @@ function Read-Plan {
 
     # The loadout's own name, and the string the game's import box takes. simc
     # blanks the header of the one it sims, so match on that and keep the raw.
-    $loadout = $data.simbot.meta.rawFormData.optimize.talentLoadouts | Where-Object { $_.string -eq $talents } | Select-Object -First 1
+    # Raidbots lists the input's own talents first as "Active"; when a saved
+    # loadout has the same string, its name is the one worth keeping.
+    $loadout = $data.simbot.meta.rawFormData.optimize.talentLoadouts | Where-Object { $_.string -eq $talents } |
+        Sort-Object -Stable { $_.name -eq 'Active' } | Select-Object -First 1
     $loadoutName = if ($loadout) { [string]$loadout.name } else { '' }
     if ($loadout -and $loadout.rawString -match '^[A-Za-z0-9+/]+$') { $talents = $loadout.rawString }
     $talents = Repair-TalentHeader $talents $data.simbot.meta.rawFormData.optimize.talentLoadouts
