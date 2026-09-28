@@ -66,7 +66,7 @@ one thing Myslot still does for Rob that this addon does not.
 
 **2026-09-28**
 RESULT: partial
-TESTS: +18 new checks in `PlanTab.barChecks`, all green
+TESTS: +19 new checks in `PlanTab.barChecks`, all green
 TOUCHED: DjinnisClassProfiles.lua
 OUT-OF-SCOPE: none
 
