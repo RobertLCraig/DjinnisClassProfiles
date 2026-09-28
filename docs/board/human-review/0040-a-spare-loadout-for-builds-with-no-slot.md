@@ -38,10 +38,12 @@ route cards `0002` and `0011` rule out.
 
 ## What I need from you
 
-1. `/reload` (v0.38.2). Open the talent window as Feral. Double-click `Raid: Vashnik` (grey,
+The spare is named `[CP*] <build>` now, not `BiS: <build>` (card `0059`).
+
+1. `/reload`. Open the talent window as Feral. Double-click `Raid: Vashnik` (grey,
    `spare`). Pass: chat says to close the talent window. Close it. Pass: chat says "Making the
    spare loadout" and then "Putting on", and the talents change.
-2. Open the talent window. Pass: the tree is the full Vashnik build, and `BiS: Raid: Vashnik` is
+2. Open the talent window. Pass: the tree is the full Vashnik build, and `[CP*] Raid: Vashnik` is
    in the dropdown.
 3. Do this with five spare builds in a row, checking the tree each time. A half-filled tree would
    come and go, so one good pass proves little.
@@ -49,6 +51,9 @@ route cards `0002` and `0011` rule out.
    shut. Pass: it is worn in one step.
 5. Go back to the build before. Pass: a plain switch, no "Making" line.
 6. After a pull: action bars update in combat (no frozen buttons, card `0011`).
+
+Fail: a half-filled tree, "You can't do that right now", frozen bars, or a loadout of yours deleted.
+Say which step on this card.
 
 ## Acceptance
 
