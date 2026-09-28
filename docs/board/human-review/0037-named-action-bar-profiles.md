@@ -32,12 +32,16 @@ named profiles, saved under a name of his and loadable on any spec.
 
 ## What I need from you
 
-1. `/djbis bars save Main`. Pass: chat says how many slots and keys were saved.
-2. `/djbis bars list`. Pass: `Main` with today's date.
-3. On another character or spec: `/djbis bars load main`. Pass: the bars change, and a list names
+The command is `/dcp` now (renamed from `/djbis` by card `0058`).
+
+1. `/dcp bars save Main`. Pass: chat says how many slots and keys were saved.
+2. `/dcp bars list`. Pass: `Main` with today's date.
+3. On another character or spec: `/dcp bars load main`. Pass: the bars change, and a list names
    what was skipped.
-4. `/djbis bars undo`. Pass: the old bars are back.
-5. `/djbis bars delete Main`, then `/djbis bars list`. Pass: it is gone.
+4. `/dcp bars undo`. Pass: the old bars are back.
+5. `/dcp bars delete Main`, then `/dcp bars list`. Pass: it is gone.
+
+Fail: any step that does not do what it says. Say which step on this card.
 
 ## Acceptance
 
