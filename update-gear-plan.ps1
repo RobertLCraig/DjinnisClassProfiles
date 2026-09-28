@@ -181,6 +181,23 @@ function Read-Plan {
         }
         $above = $null
     }
+    # A piece Top Gear upgraded with crests (Raidbots' "Upgrade selected to max
+    # affordable") carries upgrade=<currency>/<amount>[/...], or upgrade=0 when
+    # Raidbots gave no cost. Matched on id and bonus ids, which the upgrade changes.
+    $upgraded = @{}
+    foreach ($list in $data.simbot.meta.rawFormData.optimize.allGear.Values) {
+        foreach ($item in @($list)) {
+            if (-not $item.upgraded) { continue }
+            $cost = @($item.upgradeCost | ForEach-Object { '{0}/{1}' -f [int]$_.currencyId, [int]$_.amount }) -join '/'
+            $upgraded["$($item.id)|$($item.bonus_id)"] = if ($cost) { $cost } else { '0' }
+        }
+    }
+    foreach ($slot in @($gear.Keys)) {
+        $key = '{0}|{1}' -f [regex]::Match($gear[$slot].Line, '(?:^|,)id=(\d+)').Groups[1].Value,
+            [regex]::Match($gear[$slot].Line, 'bonus_id=([\d/]+)').Groups[1].Value
+        if ($upgraded.ContainsKey($key)) { $gear[$slot].Line += ",upgrade=$($upgraded[$key])" }
+    }
+
     if ($gear.Count -lt 10 -or -not $talents) {
         throw "Report ${Id}: found $($gear.Count) gear slots and $(if ($talents) { 'a' } else { 'no' }) talent string for $winner in input.txt. Nothing written."
     }

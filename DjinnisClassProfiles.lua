@@ -374,46 +374,46 @@ local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-28"
 local GEAR_PLAN = {
 	Feral = {
 		["st"] = {
-			report = "8ZhVuHnvmry1xjnLJPCDLA", simmed = "2026-09-28", dps = 188617,
+			report = "oA8fNBFEW5ohjrypdVpvgr", simmed = "2026-09-28", dps = 196480,
 			loadout = "[CP] Raid: Nek'Zali",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALghhxMDmxsMmZmxYGDAAAAAADMAAAAAAz2MLmtZW2AzMALmZYAAMzAgB",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
+				back      = "id=193763,bonus_id=13440/6652/13662/12699/12846,ilevel=321,upgrade=3445/60", -- Fireproof Drape
 				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
-				wrist     = "id=251135,gem_id=240908,bonus_id=12849/13440/6652/13695/13662/12699,ilevel=318", -- Fury-fletched Armlets
-				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
-				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
-				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
-				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12849,ilevel=318", -- Breakwater Boots
+				wrist     = "id=251135,gem_id=240908,bonus_id=13440/6652/13695/13662/12699/12854,ilevel=334,upgrade=3446/100", -- Fury-fletched Armlets
+				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12838,ilevel=308,upgrade=3444/40", -- Sash of the Forlorn Vessel
+				legs      = "id=271527,enchant_id=8159,bonus_id=6652/13693/13698/1555/12838,ilevel=308,upgrade=0", -- Enigmatic Dreamwatcher's Leggings
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
 				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
-				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
-				trinket1  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
-				trinket2  = "id=273796,bonus_id=12843/13440/6652/12699,ilevel=311", -- Vile Vial of Volatile Venom
+				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
+				trinket1  = "id=270166,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/60", -- Vashnik's Sanguine Rancor
+				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
 				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
 			},
 		},
 		["2t"] = {
-			report = "6Kh4JYSKDaVL7tZPHt1GyV", simmed = "2026-09-28", dps = 255178,
+			report = "h6WGSGH2CRi27f2GfbmvE7", simmed = "2026-09-28", dps = 265710,
 			loadout = "[CP] Raid: Lost Explorers",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZMzGzMzMGz2yYZsMzMzYmBAAAgFwsBjZGMjZZmZmZMmxMAAAAAAADAAAAAwsNziZZmtNwMDwiZwAAYmBAD",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
+				back      = "id=193763,bonus_id=13440/6652/13662/12699/12846,ilevel=321,upgrade=3445/60", -- Fireproof Drape
 				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
-				wrist     = "id=251135,gem_id=240908,bonus_id=12849/13440/6652/13695/13662/12699,ilevel=318", -- Fury-fletched Armlets
-				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
-				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
-				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
-				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12849,ilevel=318", -- Breakwater Boots
+				wrist     = "id=251135,gem_id=240908,bonus_id=13440/6652/13695/13662/12699/12854,ilevel=334,upgrade=3446/100", -- Fury-fletched Armlets
+				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12838,ilevel=308,upgrade=3444/40", -- Sash of the Forlorn Vessel
+				legs      = "id=271527,enchant_id=8159,bonus_id=6652/13693/13698/1555/12838,ilevel=308,upgrade=0", -- Enigmatic Dreamwatcher's Leggings
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
 				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
-				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
-				trinket1  = "id=250228,bonus_id=13440/6652/12699/12843,ilevel=311", -- Resonant Bellowstone
-				trinket2  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
+				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
+				trinket1  = "id=250228,bonus_id=13440/6652/12699/12846,ilevel=321,upgrade=3445/60", -- Resonant Bellowstone
+				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
 				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
 			},
 		},
@@ -440,24 +440,24 @@ local GEAR_PLAN = {
 			},
 		},
 		["mplus"] = {
-			report = "oRjwNxSNenLzjB5SecDnK1", simmed = "2026-09-28", dps = 241837,
+			report = "muhQr2una5762CxPQN5P19", simmed = "2026-09-28", dps = 252103,
 			loadout = "Dungeon (new)",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYBMbGeAzMYGziZmZmlxMMAAAAAAGYAAAAYmlZZmZGAwCMzMALMYAAAMzGGA",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
+				back      = "id=193763,bonus_id=13440/6652/13662/12699/12846,ilevel=321,upgrade=3445/60", -- Fireproof Drape
 				chest     = "id=239048,enchant_id=7987,bonus_id=13440/6652/13662/12699/12846,ilevel=321", -- Vest of Reverent Adoration
-				wrist     = "id=251135,gem_id=240908,bonus_id=12849/13440/6652/13695/13662/12699,ilevel=318", -- Fury-fletched Armlets
-				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
-				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
-				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
-				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12849,ilevel=318", -- Breakwater Boots
+				wrist     = "id=251135,gem_id=240908,bonus_id=13440/6652/13695/13662/12699/12854,ilevel=334,upgrade=3446/100", -- Fury-fletched Armlets
+				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12838,ilevel=308,upgrade=3444/40", -- Sash of the Forlorn Vessel
+				legs      = "id=271527,enchant_id=8159,bonus_id=6652/13693/13698/1555/12838,ilevel=308,upgrade=0", -- Enigmatic Dreamwatcher's Leggings
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
 				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
-				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
-				trinket1  = "id=270174,bonus_id=6652/13334/12843,ilevel=311", -- Idol of the Howling Nexus
-				trinket2  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
+				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
+				trinket1  = "id=270174,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/60", -- Idol of the Howling Nexus
+				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
 				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
 			},
 		},
@@ -1951,7 +1951,9 @@ local function idList(text)
 end
 
 -- "id=1,enchant_id=2,gem_id=3/4,bonus_id=5/6,ilevel=300" -> a plan entry, or
--- nil for a line with no item id on it.
+-- nil for a line with no item id on it. `upgrade=3445/60` marks a piece the sim
+-- upgraded with crests: currency id and amount pairs, or `upgrade=0` when
+-- Raidbots did not say what it costs.
 local function parsePlanLine(line)
 	local field = {}
 	for key, value in (line or ""):gmatch("([%a_]+)=([%d/]+)") do field[key] = value end
@@ -1962,15 +1964,19 @@ local function parsePlanLine(line)
 		enchant = tonumber(field.enchant_id),
 		gems = idList(field.gem_id),
 		bonus = idList(field.bonus_id),
+		upgrade = field.upgrade and idList(field.upgrade) or nil,
 	}
 end
 
 -- Item id AND item level, never the name: the same id drops on every track,
 -- and the Champion copy of a Myth plan piece is not the piece the sim chose.
 -- A level the client has not cached yet reads as no match, not as a match.
+-- A piece the plan upgrades with crests is the right piece at a lower level too.
+-- ponytail: any lower copy counts, even one whose track cannot reach the plan's
+-- level; compare upgrade tracks if a spare low copy ever gets picked.
 local function planMatches(entry, id, ilvl)
 	return entry ~= nil and id ~= nil and ilvl ~= nil
-		and entry.id == id and entry.ilvl == ilvl
+		and entry.id == id and (entry.ilvl == ilvl or (entry.upgrade ~= nil and entry.ilvl ~= nil and ilvl < entry.ilvl))
 end
 
 local function planMatchesLink(entry, link)
@@ -2070,6 +2076,10 @@ end
 
 local function slotState(entry, worn)
 	if not entry then return "ok" end
+	-- the piece already on, which the sim upgraded with crests: keep it, spend
+	if entry.upgrade and worn and worn.id == entry.id and worn.ilvl and entry.ilvl and worn.ilvl < entry.ilvl then
+		return "upgrade"
+	end
 	if not worn or not (planMatches(entry, worn.id, worn.ilvl) or outranks(entry, worn)) then return "change" end
 	-- "lesser" is a lower rank of the right enchant or gem: not wrong, and
 	-- reported after anything that is.
@@ -4401,8 +4411,8 @@ local SLOT_BUTTONS = {
 }
 -- "lesser" is a quiet grey: a lower rank of the right thing is fine, and Rob
 -- said so (2026-09-22). It is there to be seen, not to nag.
-local MARK_COLOUR = { change = { 1, 0.15, 0.15 }, enchant = { 1, 0.7, 0 }, gem = { 1, 0.7, 0 }, lesser = { 0.6, 0.6, 0.6 } }
-local MARK_LABEL = { change = "", enchant = "enchant", gem = "gem", lesser = "rank" }
+local MARK_COLOUR = { change = { 1, 0.15, 0.15 }, enchant = { 1, 0.7, 0 }, gem = { 1, 0.7, 0 }, lesser = { 0.6, 0.6, 0.6 }, upgrade = { 1, 0.7, 0 } }
+local MARK_LABEL = { change = "", enchant = "enchant", gem = "gem", lesser = "rank", upgrade = "upgrade" }
 local LOCATION_WORD = { bags = "in your bags", bank = "in the bank", missing = "not owned" }
 local PLAN_STRIP_H = 44
 
@@ -5230,6 +5240,33 @@ function PlanTab.enchantName(id)
 	return PlanTab.rankName("enchant", id)
 end
 
+-- An entry's `upgrade` pairs as "60 Hero Mistcrest, 20 Myth Mistcrest", or
+-- "crests" when Raidbots did not give the cost.
+function PlanTab.upgradeCost(upgrade)
+	local parts = {}
+	for i = 1, #(upgrade or {}) - 1, 2 do
+		local info = C_CurrencyInfo and C_CurrencyInfo.GetCurrencyInfo and C_CurrencyInfo.GetCurrencyInfo(upgrade[i])
+		parts[#parts + 1] = ("%d %s"):format(upgrade[i + 1], info and info.name or ("currency " .. upgrade[i]))
+	end
+	return #parts > 0 and table.concat(parts, ", ") or "crests"
+end
+
+-- Every marked slot's crest cost added up per currency, as one flat
+-- { id, amount, id, amount, ... } list in currency id order. Pure.
+function PlanTab.crestTotal(marks)
+	local sum, ids, flat = {}, {}, {}
+	for _, mark in pairs(marks or {}) do
+		local up = (mark.state == "upgrade" or mark.state == "change") and mark.entry.upgrade or {}
+		for i = 1, #up - 1, 2 do
+			if not sum[up[i]] then ids[#ids + 1] = up[i] end
+			sum[up[i]] = (sum[up[i]] or 0) + up[i + 1]
+		end
+	end
+	table.sort(ids)
+	for _, id in ipairs(ids) do flat[#flat + 1] = id; flat[#flat + 1] = sum[id] end
+	return flat
+end
+
 -- One line saying what the plan wants in this slot and where that is.
 local function planLineFor(mark)
 	local entry = mark.entry
@@ -5249,10 +5286,13 @@ local function planLineFor(mark)
 		local _, _, lesser = PlanTab.gemMatch(entry.gems, mark.worn.gems)
 		for _, pair in ipairs(lesser) do parts[#parts + 1] = PlanTab.rankName("gem", pair[2]) end
 		return "Plan: fine. " .. table.concat(parts, ", ") .. " is on; a higher rank exists"
+	elseif mark.state == "upgrade" then
+		return ("Plan: upgrade to %d, %s"):format(entry.ilvl, PlanTab.upgradeCost(entry.upgrade))
 	end
 	local inBank = C_Item.GetItemCount(entry.id, true, false, true, true) - C_Item.GetItemCount(entry.id)
-	return ("Plan: %s (%d), %s"):format(itemName(entry.id), entry.ilvl,
-		LOCATION_WORD[planLocation(planItemInBags(entry), inBank)])
+	return ("Plan: %s (%d), %s%s"):format(itemName(entry.id), entry.ilvl,
+		LOCATION_WORD[planLocation(planItemInBags(entry), inBank)],
+		entry.upgrade and (", then upgrade: " .. PlanTab.upgradeCost(entry.upgrade)) or "")
 end
 
 -- The Plan tab ----------------------------------------------------------------
@@ -5593,6 +5633,10 @@ function PlanTab.lines(forSpec)
 				onClick = function() PlanTab.equip(mark.entry, slotID) end } or nil,
 		}
 	end
+	local crests = PlanTab.crestTotal(marks)
+	if #crests > 0 then
+		lines[#lines + 1] = { text = ("   %sCrests to spend: %s|r"):format(GOLD, PlanTab.upgradeCost(crests)) }
+	end
 	if #inBags > 0 then
 		lines[#lines + 1] = { text = ("   %s%d of these can go on from here.|r"):format(GREY, #inBags),
 			button = { label = "Equip all", tip = "Equip every planned piece in your bags, and in the bank while it is open.",
@@ -5709,7 +5753,7 @@ end
 -- and no loadout in play.
 function PlanTab.wrongHere(row, active, edited, plan, worn, buffs)
 	if not row then return nil end
-	local wrong = { change = {}, fix = {}, marks = {}, buffs = buffs or {} }
+	local wrong = { change = {}, fix = {}, upgrade = {}, marks = {}, buffs = buffs or {} }
 	if PlanTab.loadoutState(row.loadout, active, edited) == "mismatch" then
 		wrong.loadout = active .. (edited and " (edited)" or "")
 		-- The right loadout by name, the wrong build inside it: loading that name
@@ -5721,15 +5765,17 @@ function PlanTab.wrongHere(row, active, edited, plan, worn, buffs)
 		wrong.marks = slotStates(plan, worn)
 		for slotID, mark in pairs(wrong.marks) do
 			if mark.state == "change" then wrong.change[#wrong.change + 1] = slotID
-			elseif mark.state == "enchant" or mark.state == "gem" then wrong.fix[#wrong.fix + 1] = slotID end
+			elseif mark.state == "enchant" or mark.state == "gem" then wrong.fix[#wrong.fix + 1] = slotID
+			elseif mark.state == "upgrade" then wrong.upgrade[#wrong.upgrade + 1] = slotID end
 		end
 		table.sort(wrong.change)
 		table.sort(wrong.fix)
+		table.sort(wrong.upgrade)
 		for slot, entry in pairs(PlanTab.entries(plan, worn)) do
 			if outranks(entry, worn[slot]) then wrong.stale = plan.simmed or "?" break end
 		end
 	end
-	if not wrong.loadout and #wrong.change == 0 and #wrong.fix == 0 and #wrong.buffs == 0 then return nil end
+	if not wrong.loadout and #wrong.change == 0 and #wrong.fix == 0 and #wrong.upgrade == 0 and #wrong.buffs == 0 then return nil end
 	return wrong
 end
 
@@ -5953,6 +5999,9 @@ function PlanTab.setupPopup(place, row, spec, wrong)
 			term = missing[1] and PlanTab.searchTerm("gem", missing[1])
 		end
 		clicks[#lines] = PlanTab.searchClick(term)
+	end
+	for _, slotID in ipairs(wrong.upgrade or {}) do
+		lines[#lines + 1] = ("%s%s|r   %s%s|r"):format(GOLD, PLAN_SLOT_LABEL[slotID] or "?", AMBER, (planLineFor(wrong.marks[slotID]):gsub("^Plan: ", "")))
 	end
 	for _, b in ipairs(wrong.buffs or {}) do
 		if b.state == "missing" then
@@ -13146,6 +13195,29 @@ local function selfTest()
 		slotState(full, wornAs("|Hitem:273783:7967:240894::::|h[x]|h", 334, 1)), "ok")
 	check(changeTest .. ", an outranking piece still needs the planned enchant",
 		slotState(full, wornAs("|Hitem:273783::240894::::|h[x]|h", 334, 1)), "enchant")
+	-- 2026-09-28: Top Gear spent Rob's crests; the worn piece is the right one, lower
+	check("slot state is upgrade when the sim upgraded the worn piece",
+		slotState(parsePlanLine("id=251093,enchant_id=7967,gem_id=240894,ilevel=286,upgrade=3445/60"), wornAs(good, 276, 1)), "upgrade")
+	check("slot state is upgrade, unknown cost too",
+		slotState(parsePlanLine("id=251093,ilevel=286,upgrade=0"), wornAs(good, 276, 1)), "upgrade")
+	check("slot state is upgrade, not once it is done",
+		slotState(parsePlanLine("id=251093,enchant_id=7967,gem_id=240894,ilevel=276,upgrade=3445/60"), wornAs(good, 276, 1)), "ok")
+	check("slot state is upgrade, not without the mark",
+		slotState(parsePlanLine("id=251093,ilevel=286"), wornAs(good, 276, 1)), "change")
+	check("slot state is upgrade, a lower copy in the bags is the planned piece",
+		planMatches(parsePlanLine("id=251093,ilevel=286,upgrade=0"), 251093, 276), true)
+	check("slot state is upgrade, a higher copy is not",
+		planMatches(parsePlanLine("id=251093,ilevel=286,upgrade=0"), 251093, 289), false)
+	check("upgrade cost names each currency",
+		PlanTab.upgradeCost({ 3445, 60, 3446, 20 }):match("^60 .-, 20 ") ~= nil, true)
+	check("upgrade cost unknown says crests", PlanTab.upgradeCost({ 0 }), "crests")
+	check("crest total adds up per currency", table.concat(PlanTab.crestTotal({
+		{ state = "upgrade", entry = { upgrade = { 3446, 100 } } },
+		{ state = "upgrade", entry = { upgrade = { 3445, 60 } } },
+		{ state = "change", entry = { upgrade = { 3445, 40 } } },
+		{ state = "enchant", entry = { upgrade = { 3445, 999 } } },
+		{ state = "upgrade", entry = { upgrade = { 0 } } },
+	}), ","), "3445,100,3446,100")
 	local enchantTest = "slot state is enchant when enchant differs"
 	check(enchantTest .. ", none",
 		slotState(full, wornAs("|Hitem:251093::240894::::|h[x]|h", 276, 1)), "enchant")
@@ -13842,7 +13914,8 @@ local function selfTest()
 		-- buy" says nothing. Deleting either drawn row passed every check above.
 		local wasWornLink, wasLevel, wasBoss = GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, PlanTab.boss
 		GetInventoryItemLink = function(_, slotID) return slotID == 9 and "|Hitem:251135::240907::::|h[x]|h" or nil end
-		C_Item.GetDetailedItemLevelInfo = function() return 318 end
+		-- worn at the plan's own level, so a crest upgrade in the live plan is not the story here
+		C_Item.GetDetailedItemLevelInfo = function() return tonumber(GEAR_PLAN.Feral.st.slots.wrist:match("ilevel=(%d+)")) end
 		PlanTab.boss = "Nek'zali"
 		local rows, header, upgrade = PlanTab.lines("Feral"), nil, nil
 		for i, line in ipairs(rows) do
@@ -13917,7 +13990,8 @@ local function selfTest()
 		-- and its button with Auctionator, neither without.
 		local wasWornLink, wasLevel, wasBoss = GetInventoryItemLink, C_Item.GetDetailedItemLevelInfo, PlanTab.boss
 		GetInventoryItemLink = function(_, slotID) return slotID == 9 and "|Hitem:251135::240894::::|h[x]|h" or nil end
-		C_Item.GetDetailedItemLevelInfo = function() return 318 end
+		-- worn at the plan's own level, so a crest upgrade in the live plan is not the story here
+		C_Item.GetDetailedItemLevelInfo = function() return tonumber(GEAR_PLAN.Feral.st.slots.wrist:match("ilevel=(%d+)")) end
 		PlanTab.boss = "Nek'zali"
 		local function totalRow()
 			for _, line in ipairs(PlanTab.lines("Feral")) do
