@@ -349,3 +349,10 @@ For Rob: finding 1 is the one to decide. Findings 2, 4 and 5 are small fixes. Fi
   counted as placed) fail 4, 2 and 3 checks.
 - **In game.** Make the Destruction layout again (`/dcp bars from`), hover **Load bars: spec**,
   and look for Havoc, Conflagrate and Malevolence on one button each.
+
+**2026-09-29** Moved to `ai-review/` by an attended agent under Rob's rule that human-review holds
+only what he must decide. The second review passed v0.54.3. v0.54.7 (findings 2, 4, 5) and v0.54.8
+(a kept button is cleared when its spell moves, Rob's pick of 2026-09-26) came after it and no
+reviewer has read them. v0.54.8 is new behaviour: it clears buttons. Review both, then write the
+missing `## What I need from you` from the two in-game checks above (load, then `/dcp bars` says
+"already match"; the Destruction layout has Havoc, Conflagrate and Malevolence on one button each).
