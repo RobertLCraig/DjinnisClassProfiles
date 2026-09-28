@@ -169,3 +169,11 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
   is deployed at 0.14.0. The four looks at the top of the card are Rob's, so this goes to
   `human-review/` and not `done/`.
 - 2026-09-21 Claude, from Rob's first screenshots at 0.15.1 (`![sheet](../attachments/0005-2026-09-21-1.png)`): the strip said "7 slots to fix" and Rob said it was unclear what to do. Fixed under card `0007`: the strip now says "Click for the list" and opens the Plan tab, which names each slot. **Still open here:** in the screenshot the "gem" label shows on the wrist, but no red glow is easy to see on the six slots that hold a wrong item. Chonky's item bars may sit over the glow. Rob to say whether he can see red rings on neck, back, waist, feet, one ring and one trinket.
+
+**2026-09-29** Attended unblock pass. Step 3 no longer matches the addon in the game folder
+(v0.54.12). It expects the strip to say there is no gear plan for 2 targets, and Feral's `2t` cell
+has been filled since commit `09c637c` (report `h6WGSGH2CRi27f2GfbmvE7`, 2026-09-28). The button
+also cycles 1, 2, 3+ targets, Mythic+ since card `0028`. Rewriting the steps is an agent's job
+(read the code, as the `0029` review did), so this goes to `todo/`: rewrite the looks against the
+deployed version, carry the red-ring question in the entry above into them, then return the card
+to `human-review/`. The build itself is not in question.
