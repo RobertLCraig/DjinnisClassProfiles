@@ -209,3 +209,10 @@ Moved to `human-review/`: the open criterion is the in-game one above.
 ### 2026-09-25: room hint, v0.48.12
 
 Rob's screenshot, Balance: "4 planned builds are not saved ... Room for 1", buttons "Create 1", "Old loadouts", "Not now". The delete box had been passed over, so Create 1 would have spent the last slot while six old loadouts held the rest. The Create box now adds, when room is short and the old-loadouts rows would delete some: "Old loadouts deletes N, which frees their slots. Do that first, then Create makes M." Worn rows free nothing. Checked, 2 mutants caught.
+
+**2026-09-29** Moved to `ai-review/` by an attended agent under Rob's rule that human-review holds
+only what he must decide. The second review bounced the card and named what it needed to pass; the
+builder fixed that in v0.48.11, added the room hint in v0.48.12, and moved the card on itself, so no
+reviewer has read either. Review both. Then refresh the ask: since card `0065` a spec change no
+longer opens the box, so it is **More > Make the planned loadouts** only, and since card `0066`
+**More > Delete old loadouts** lists these too.
