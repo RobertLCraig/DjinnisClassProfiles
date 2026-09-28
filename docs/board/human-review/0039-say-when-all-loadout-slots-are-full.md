@@ -24,9 +24,15 @@ vague reason.
 
 ## What I need from you
 
-1. With all slots full, `/djbis loadouts`, click Create. Pass: the "All 40 loadout slots" line,
-   at once, and no "Making" line.
-2. Delete loadouts to make 3 free slots. Create again. Pass: "Made 3 of 3".
+1. With all slots full, open the BiS window, click **More > Make the planned loadouts**, then
+   Create. Pass: the "All 40 loadout slots" line, at once, and no "Making" line.
+2. With all slots full, **More > Delete old loadouts**. Pass: it still lists, and Delete deletes.
+3. Delete loadouts to make 5 free slots, with no spare loadout (`[CP*] ...`) on the character.
+   Create again. Pass: "Made 3 of 3", or fewer if fewer builds are missing. Two slots always stay
+   free for the spare (card `0040`, `PlanTab.loadoutRoom`), which is why 5 and not 3.
+
+Fail: a "Making" line at the cap, Delete old loadouts refused at the cap, or fewer made than free
+slots. Say which step on this card.
 
 ## Acceptance
 
