@@ -110,3 +110,11 @@ time, so an old report link may also stop opening.
   the report id is not in the broker text.
   Not proved here, only in a client: that the line moves on the events, the tooltip on the row,
   the amber on screen. Items 5 and 6 under "What I need from you" are the review's additions.
+
+**2026-09-29** Attended unblock pass. Two looks no longer match the addon in the game folder
+(v0.54.12). Look 3 dates the plan 2026-09-21, and Feral's `st` cell was re-simmed 2026-09-28
+(commit `09c637c`), so its line turns amber after 2026-10-12, not 2026-10-05. Look 4 expects
+plain "BiS" on 2 targets because that cell is empty. It has been filled since the same commit, so
+the line shows a count there. Rewriting the looks is an agent's job, so this goes to `todo/`:
+rewrite them against the deployed version, then return the card to `human-review/`. The build is
+not in question.
