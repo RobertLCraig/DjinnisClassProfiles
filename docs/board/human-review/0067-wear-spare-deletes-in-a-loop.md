@@ -1,5 +1,24 @@
 # 0067 The spare deletes old spares in a loop, then imports in the same frame
 
+## What I need from you
+
+**Wear three unsaved builds through the spare, in game, once with room and once with every slot
+used.** A grey row marked `spare` in the list beside the talent window is a build with no loadout
+of its own.
+
+1. Open the talent window, double-click a grey `spare` build, and close the window when chat asks.
+   Do this for three different builds, starting the next straight after chat says "Putting on".
+2. Use every slot (40 over all your specs), then do step 1 again.
+
+**Pass:** each build is worn through `[CP*] <build>`, one spare loadout at a time, and chat never
+says "You can't do that right now" or "would not delete the old one".
+
+**Fail:** either of those lines, two leftover `[CP*]` loadouts, or a loadout you named deleted. Say
+which step on this card and move it to `todo/`. At the cap the queue waits only about 3 s for a busy
+server (the fifth review's point 1), so a failure in step 2 alone is that trade-off showing.
+
+**Why it needs you:** only the live server refuses a second change in flight; offline it is a model.
+
 ## Why
 
 Card `0063`'s review, 2026-09-25. `PlanTab.wearSpare` deletes every old spare this character made
