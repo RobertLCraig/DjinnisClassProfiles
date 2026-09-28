@@ -117,3 +117,5 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
 
 Rewriting the looks is an agent's job, so this goes to `todo/`: rewrite them against the deployed
 version, then return the card to `human-review/`.
+
+**2026-09-29** The loop moved this card from todo/ to human-review/ WITHOUT trying it: every acceptance criterion on it is ticked and it has never been through ai-review/, so nothing is left that a session could close. If the work is done, move it to ai-review/ for its review. If it is not, untick or add the criterion that is still open and move it back to todo/.
