@@ -74,3 +74,14 @@ the 0064 sample runs any of the three exactly. The choice for Rob is the one abo
 2. **Drop the three rows**, leaving each spec its `Dungeon`. That frees 3 slots.
 
 Recommend 2: the logs say nobody at the top plays them, and slots are short on druids.
+
+**2026-09-29** **Decided:** option 2, drop the three rows (Guardian `Dungeon: survive more`, Resto
+`Dungeon: cat damage` and `Dungeon: caster damage`), leaving each spec its Warcraft Logs `Dungeon`.
+Settled by an attended agent under Rob's rule that human-review holds only what he must decide: it
+follows Rob's own ruling of 2026-09-25 on card `0064`, that Guardian and Resto take the logs' typical
+build because "the guide's raid builds were ones no top player ran" (the comment above
+`boss_rows` in `update-builds.py`), and none of the three is run exactly by anyone in the `0064`
+sample. It is undone by one line each in `PICK`, and Rob can keep any of them as one of his own
+builds (card `0057`). Work: remove the three from `PICK` in `update-builds.py`, run it, check
+`--check` passes and no BUILDS string has a non-zero hash. An existing `[CP]` loadout of those names
+is then listed by More > Delete old loadouts (card `0066`), which asks first.
