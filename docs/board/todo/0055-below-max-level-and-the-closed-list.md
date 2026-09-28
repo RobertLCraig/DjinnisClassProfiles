@@ -28,7 +28,7 @@ Rob, 2026-09-24, on a level 81 Warlock:
 
 ## Acceptance
 
-- [x] Part of the plan is the plan below the cap, and not at it; an added node or another choice is still drifted. proves: self-test "below the level cap, part of the plan is the plan"
+- [ ] Part of the plan is the plan below the cap, and not at it; an added node or another choice is still drifted. proves: self-test "below the level cap, part of the plan is the plan". UNTICKED 2026-09-29: the seventh review showed `talentsEdited` can read `PlanTab.belowCap()` instead of the loadout's own level with every check green, and `mayBeShort(nil)` below the cap has no check. Neither check exists in the file today.
 - [x] The tab is placed when the list is closed. proves: self-test "sidebar stays closed, the tab is placed when the list is closed"
 - [x] "Show the build list" is in the window menu only while the list is closed. proves: self-test `menuChecks`
 - [x] Mutations: level trim off, the cap ignored in gaps, more ranks allowed, another choice allowed, the tab not placed, no menu item. Each turns the offline check red (`%TEMP%\mut0053.py`).
@@ -446,3 +446,10 @@ the list is beside it, or its "Builds" tab is. At 82, **Make** offers to reset t
 81, **Compare** calls them different, and the popup or Plan tab marks the one in play "(edited)".
 
 **2026-09-24** The reviewer returned this card and its finding is the last review entry at the bottom of ## Direction. The loop moved it from todo/ to human-review/ because it has bounced 6 times between todo and ai-review, which is the limit, so it is waiting on a person. THE BUILDER COULD NOT ACT ON THAT FINDING. A reviewer never unticks a criterion - it is forbidden from editing acceptance at all - so the card came back with 0 of 0 criteria still ticked, every session found nothing open to do, and the loop promoted it again on the boxes. Untick what the reviewer disproved and move it back to todo/, or say here why the finding is wrong.
+
+**2026-09-29** Done as the entry above asks, by an attended agent under Rob's rule that
+human-review holds only what he must decide. The seventh review's two findings still stand at HEAD:
+no check in `DjinnisClassProfiles.lua` calls `mayBeShort(nil)`, and none reads `talentsEdited` at 82
+on a loadout noted at 81 (the `mayBeShort` checks in `PlanTab.levelChecks` test `mayBeShort`
+alone). The code itself holds, per that review. Acceptance 1 is unticked with the reason beside it.
+Owed: the two checks the review names, then back to `ai-review/`. The in-game criterion stays Rob's.
