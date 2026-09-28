@@ -72,6 +72,12 @@ loadouts on its own (card `0065`), so it moved to card `0066`.
 
 ## Comments
 
+**2026-09-29** Moved to `ai-review/` by an attended agent under Rob's rule that human-review holds
+only what he must decide. The last review (of c62bec2, just below) kept the card in `ai-review/`
+for two holes in the name rules. The builder closed them in v0.52.4 and moved the card to
+`human-review/` itself, so no reviewer has read the fix. Review v0.52.4, then write the missing
+`## What I need from you` from "What Rob looks at in game" in the v0.52.0 entry.
+
 **2026-09-25, Claude.** Both re-review holes are closed, v0.52.4. `myNameProblem` compares
 names without capitals against the plan's names and yours, leaving out the build being renamed.
 It also refuses a name that ends in `PlanTab.CLASH`, and `goodMine` does the same for a
