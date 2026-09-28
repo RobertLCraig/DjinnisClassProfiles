@@ -96,3 +96,5 @@ Left open: the manual criterion. Rob, on a second druid with a character macro i
 Load bars, then check the macro is on the bar, works, and is in the character tab of `/macro`. Then
 Undo bars and check it is gone. Also look at the chat lines for a same-named macro with other text.
 No version bump and no deploy: neither is in the card's Plan.
+
+**2026-09-28** The loop moved this card from in-progress/ to human-review/ WITHOUT trying it. All 1 of its open acceptance criteria say proves: manual, so there is nothing left an unattended session could close and starting one would change nothing. Each open criterion names what to look at and what a pass is: tick what passes and move the card on, or say what failed and move it back to todo/.
