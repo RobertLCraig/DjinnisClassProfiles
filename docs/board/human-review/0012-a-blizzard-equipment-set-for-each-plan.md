@@ -142,12 +142,18 @@ and `(INVSLOT_TABARD)`, then `GetEquipmentSetID(name)`, then `SaveEquipmentSet(i
   is selected in the pane, because `PaperDollFrame_ClearIgnoredSlots` is what clears the
   drawing and we call only the API under it.
 
+**2026-09-29** Attended unblock pass. The ask said to deploy with `deploy.ps1 -Only DjinnisBiS`.
+That folder is the rename stub since card `0058`, so the command would have deployed the stub and
+not this addon. The ask now says `/reload`, because the game folder holds v0.54.12, and `/bis` is
+`/dcp`. The set names and chat lines were checked against `PlanTab.setName` and `saveSet` and
+still read as the steps say.
+
 ## What I need from you
 
-Seven looks in the game, none of which an agent can take. Deploy with `.\bin\deploy.ps1 -Only DjinnisBiS`
-from the workspace root, then on the Feral druid:
+Seven looks in the game, none of which an agent can take. The game folder already holds this
+build (v0.54.12), so type `/reload` and then, on the Feral druid:
 
-1. With a planned piece in the bags, open `/bis`, Plan tab, press Equip all. Two seconds later
+1. With a planned piece in the bags, open `/dcp`, Plan tab, press Equip all. Two seconds later
    the chat line should read "Saved as equipment set DBiS Feral ST". Open the character sheet's
    equipment manager: the set is there with the Feral icon, and shirt and tabard are greyed out.
 2. Hover a planned item in the bag. The tooltip should say "Equipment Sets: DBiS Feral ST".
