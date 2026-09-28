@@ -198,3 +198,13 @@ and the tab says all is well.
   the compare is sound**: the saved loadout has drifted from the simmed build, the headers agree,
   and no re-baking of the baked string is needed. Card `0029` carries the button that was offering
   to fix it by loading the same drifted loadout back.
+
+**2026-09-29** Attended unblock pass. Item 4 is answered by the entry above. The other steps no
+longer match the addon in the game folder (v0.54.12), so they cannot be run as written. Steps 1
+to 3 load `DotC Raid ST *`, and step 5 uses `WS Raid Most Bosses`; both are on
+`PlanTab.RETIRED`. Step 5's premise has gone: it relies on Nek'zali sharing a loadout that has no
+cell of its own, and since card `0030` every Feral boss row has its own build (`Raid: Nek'Zali`),
+looked up through `PlanTab.buildFor`. Since card `0059` the addon's own loadouts are named
+`[CP] <build>`, and `/bis` is `/dcp` since card `0058`. Rewriting the steps is an agent's job, so
+this goes to `todo/`: rewrite them against the deployed version, then return the card to
+`human-review/`. The build is not in question.
