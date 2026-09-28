@@ -8690,12 +8690,26 @@ local function trimmed(text)
 	return type(text) == "string" and canRead(text) and text:match("^%s*(.-)%s*$") or nil
 end
 
+-- The number of account macros and of character macros; character macros
+-- start after the account ones (Blizzard_MacroUI.lua's macroBase).
+function PlanTab.macroCaps()
+	local consts = Constants and Constants.MacroConsts or {}
+	return consts.MAX_ACCOUNT_MACROS or 120, consts.MAX_CHARACTER_MACROS or 30
+end
+
 -- What sits in one slot, as { type, id } or { type = "macro", name, index }.
+-- A macro also carries its body, icon and kind, so a character without it
+-- can be given it (card 0068). A layout saved before that has none of them.
 function PlanTab.readSlot(slot)
 	if not C_ActionBar.HasAction(slot) then return nil end
 	local kind, id = GetActionInfo(slot)
 	if not (canRead(kind) and canRead(id)) or not kind then return nil end
-	if kind == "macro" then return { type = kind, name = trimmed(C_ActionBar.GetActionText(slot)), index = id } end
+	if kind == "macro" then
+		local _, icon, body = GetMacroInfo(id)
+		return { type = kind, name = trimmed(C_ActionBar.GetActionText(slot)), index = id,
+			body = type(body) == "string" and canRead(body) and body or nil, icon = canRead(icon) and icon or nil,
+			char = type(id) == "number" and id > PlanTab.macroCaps() }
+	end
 	return { type = kind, id = id }
 end
 
@@ -8719,7 +8733,7 @@ local function findMacro(name, index)
 	-- Account macros from 1, character ones from 121 (Blizzard_MacroUI.lua's
 	-- macroBase): 1 to account + character missed every character macro.
 	local account, character = GetNumMacros()
-	local base = Constants and Constants.MacroConsts and Constants.MacroConsts.MAX_ACCOUNT_MACROS or 120
+	local base = PlanTab.macroCaps()
 	for i = 1, account do
 		if trimmed(GetMacroInfo(i)) == name then return i end
 	end
@@ -8741,12 +8755,65 @@ local function findFlyout(id)
 	return nil
 end
 
--- Puts one action on the cursor, or answers why not.
-local function pickUp(action)
+-- Card 0068: a layout's macro this character lacks, made as the kind it was
+-- saved as. CreateMacro(name, icon, body, perCharacter) is Myslot's call
+-- (Myslot.lua, FindOrCreateMacro); Blizzard_MacroIconSelector.lua:109 makes
+-- the same one. Full is a skip, never the other kind: a character macro made
+-- account-wide would reach every class. With no `ctx` it is a dry run, and
+-- answers nil and no reason for a macro it would make.
+function PlanTab.makeMacro(action, ctx)
+	local accountCap, charCap = PlanTab.macroCaps()
+	local account, character = GetNumMacros()
+	if (action.char and character or account) >= (action.char and charCap or accountCap) then
+		return nil, ("no free %s macro slot for %s"):format(action.char and "character" or "account", action.name)
+	end
+	if not ctx then return nil end
+	local index = CreateMacro(action.name, action.icon or 134400, action.body, action.char or nil)
+	if not (canRead(index) and index) then return nil, "the game would not make macro " .. action.name end
+	ctx.made[#ctx.made + 1] = { name = action.name, body = action.body }
+	return index
+end
+
+-- A same-named macro with other text is placed and left alone; the
+-- difference is said once per macro (card 0068).
+function PlanTab.noteMacro(action, index, ctx)
+	if not action.body or ctx.noted[action.name] then return end
+	local _, _, body = GetMacroInfo(index)
+	body = trimmed(body)
+	if body and body ~= trimmed(action.body) then
+		ctx.noted[action.name] = true
+		ctx.notes[#ctx.notes + 1] = ("macro %s: yours differs from the layout's, so yours is placed and not changed. Yours: %s. The layout's: %s.")
+			:format(action.name, (body:gsub("\r?\n", " ; ")), (trimmed(action.body):gsub("\r?\n", " ; ")))
+	end
+end
+
+-- Undo deletes the macros an apply made, newest first, and only one still
+-- holding the text it was made with (card 0068). Answers how many.
+function PlanTab.deleteMade(made)
+	local n = 0
+	for i = #(made or {}), 1, -1 do
+		local index = findMacro(made[i].name)
+		if index then
+			local _, _, body = GetMacroInfo(index)
+			if trimmed(body) == trimmed(made[i].body) then DeleteMacro(index) n = n + 1 end
+		end
+	end
+	return n
+end
+
+-- Puts one action on the cursor, or answers why not. `ctx` is placeBars'
+-- record of macros made and differences seen; without it nothing is made.
+local function pickUp(action, ctx)
 	if action.type == "spell" then C_Spell.PickupSpell(action.id)
 	elseif action.type == "macro" then
 		local index = findMacro(action.name, action.index)
+		if not index and action.body then
+			local why
+			index, why = PlanTab.makeMacro(action, ctx)
+			if not index then return why end  -- nil: a dry run, and it would be made
+		end
 		if not index then return "no macro named " .. tostring(action.name) end
+		if ctx then PlanTab.noteMacro(action, index, ctx) end
 		PickupMacro(index)
 	elseif action.type == "item" then C_Item.PickupItem(action.id)
 	elseif action.type == "flyout" then
@@ -8763,9 +8830,10 @@ end
 
 -- Makes this character's bars `layout`: each slot that differs is cleared and
 -- refilled, an empty one in the layout is cleared, and one whose action cannot
--- be picked up here keeps what it has. Returns placed, and the skip lines.
+-- be picked up here keeps what it has. Returns placed, the skip lines, and
+-- the macros made and differences seen ({ made, notes }).
 function PlanTab.placeBars(layout)
-	local placed, skipped = 0, {}
+	local placed, skipped, ctx = 0, {}, { made = {}, notes = {}, noted = {} }
 	for slot = 1, PlanTab.BAR_SLOTS do
 		local want, have = layout[slot], PlanTab.barSlot(slot) and PlanTab.readSlot(slot) or nil
 		if PlanTab.barSlot(slot) and not sameAction(want, have) then
@@ -8773,7 +8841,7 @@ function PlanTab.placeBars(layout)
 				PickupAction(slot)
 				ClearCursor()
 			else
-				local why = pickUp(want)
+				local why = pickUp(want, ctx)
 				if why then
 					skipped[#skipped + 1] = ("slot %d: %s"):format(slot, why)
 				else
@@ -8784,7 +8852,7 @@ function PlanTab.placeBars(layout)
 			end
 		end
 	end
-	return placed, skipped
+	return placed, skipped, ctx
 end
 
 -- How many slots applying `layout` would change here, not counting what this
@@ -9061,13 +9129,18 @@ function PlanTab.applyBars(key, from)
 	local withKeys = type(layout.keys) == "table" and next(layout.keys) ~= nil  -- none before v0.32.0; empty is never obeyed
 	local now, nowKeys = PlanTab.readBars(), PlanTab.readKeys()
 	if not (c.barsUndo and c.barsAfter and PlanTab.sameBars(now, c.barsAfter) and PlanTab.sameKeys(nowKeys, c.keysAfter or {})) then
-		c.barsUndo, c.keysUndo = now, withKeys and nowKeys or nil
+		-- a macro an earlier apply made is part of these bars now, so undo keeps it
+		c.barsUndo, c.keysUndo, c.macrosMade = now, withKeys and nowKeys or nil, nil
 	else
 		-- a spec layout without keys, then a build's with them: the kept undo
 		-- needs the keys from before this apply too (third review)
 		c.keysUndo = c.keysUndo or (withKeys and nowKeys or nil)
 	end
-	local placed, skipped = PlanTab.placeBars(layout.slots)
+	local placed, skipped, macros = PlanTab.placeBars(layout.slots)
+	for _, m in ipairs(macros.made) do
+		c.macrosMade = c.macrosMade or {}
+		c.macrosMade[#c.macrosMade + 1] = m
+	end
 	layout.from = nil  -- a made layout, loaded once, is offered as any other (card 0051)
 	local keys, refused = 0, {}
 	if withKeys then keys, refused = PlanTab.placeKeys(layout.keys) end
@@ -9077,6 +9150,8 @@ function PlanTab.applyBars(key, from)
 	PlanTab.say(("Applied the %s layout: %d slots and %d keys changed, %d skipped. %sUndo bars|r%s puts the old ones back.")
 		:format(key, placed, keys, #skipped, GOLD, GREY))
 	for _, line in ipairs(skipped) do print("  " .. line) end
+	if #macros.made > 0 then print(("  %d macro%s made; Undo bars deletes them."):format(#macros.made, #macros.made == 1 and "" or "s")) end
+	for _, line in ipairs(macros.notes) do print("  " .. line) end
 	PlanTab.barsChanged()
 	return "applied"
 end
@@ -9109,12 +9184,14 @@ function PlanTab.undoBars()
 	if why then PlanTab.say(why) return "fenced" end
 	local undo = DjinnisCPCharDB and DjinnisCPCharDB.barsUndo
 	if not undo then PlanTab.say("Nothing to undo on this character.") return "none" end
-	local keysUndo = DjinnisCPCharDB.keysUndo
-	DjinnisCPCharDB.barsUndo, DjinnisCPCharDB.keysUndo = nil, nil
+	local keysUndo, made = DjinnisCPCharDB.keysUndo, DjinnisCPCharDB.macrosMade
+	DjinnisCPCharDB.barsUndo, DjinnisCPCharDB.keysUndo, DjinnisCPCharDB.macrosMade = nil, nil, nil
 	DjinnisCPCharDB.barsAfter, DjinnisCPCharDB.keysAfter = nil, nil
 	local placed, skipped = PlanTab.placeBars(undo)
 	local keys = keysUndo and PlanTab.placeKeys(keysUndo) or 0
-	PlanTab.say(("The bars and keys are back as they were: %d slots and %d keys changed, %d skipped."):format(placed, keys, #skipped))
+	local deleted = PlanTab.deleteMade(made)  -- after the bars, which no longer hold them
+	PlanTab.say(("The bars and keys are back as they were: %d slots and %d keys changed, %d skipped%s."):format(placed, keys, #skipped,
+		deleted > 0 and (", %d macro%s the load made deleted"):format(deleted, deleted == 1 and "" or "s") or ""))
 	PlanTab.barsChanged()
 	return "undone"
 end
@@ -10700,6 +10777,95 @@ function PlanTab.barChecks(check)
 	check(ghostTest .. ", the real frames too, none added", tostring(PlanTab.ghosts == keptGhosts) .. "/" .. #PlanTab.ghosts, "true/" .. keptPool)
 	check(ghostTest .. ", and no preview left up", PlanTab.ghostKey, nil)
 
+	-- Card 0068: a layout carries its macros. The game's macros as the mock
+	-- holds them: name, icon and body by index, a made one in the first free
+	-- index of its kind, and a delete closes the gap, as in the game.
+	local keptMacro = { CreateMacro, DeleteMacro }
+	local icons, bodies, madeCalls = {}, {}, 0
+	GetMacroInfo = function(i) if macros[i] then return macros[i], icons[i], bodies[i] end end
+	CreateMacro = function(name, icon, body, perCharacter)
+		madeCalls = madeCalls + 1
+		local from, to = perCharacter and 121 or 1, perCharacter and 150 or 120
+		for i = from, to do
+			if not macros[i] then macros[i], icons[i], bodies[i] = name, icon, body return i end
+		end
+	end
+	DeleteMacro = function(i)
+		local to = i > 120 and 150 or 120
+		for j = i, to do macros[j], icons[j], bodies[j] = macros[j + 1], icons[j + 1], bodies[j + 1] end
+	end
+	local function applyMacro(slots)
+		db().bars, DjinnisCPCharDB, printed, madeCalls = { Macro = { slots = slots } }, nil, {}, 0
+		return PlanTab.applyBars("Macro")
+	end
+	local said = function() return table.concat(printed, "\n") end
+	local catBody = "#showtooltip\n/cast Prowl"
+
+	-- the first druid: a character macro in 3, an account macro in 4
+	bars, known = {}, {}
+	macros, icons, bodies = { [1] = "Mark", [121] = "Cat it" }, { [1] = 136078, [121] = 132089 }, { [1] = "/cast Mark", [121] = catBody }
+	bars[3] = { type = "macro", name = "Cat it", index = 121 }
+	bars[4] = { type = "macro", name = "Mark", index = 1 }
+	local macroSaveTest = "a saved macro slot keeps its body and icon"
+	PlanTab.saveBars(false)
+	local s3, s4 = db().bars.Feral and db().bars.Feral.slots[3] or {}, db().bars.Feral and db().bars.Feral.slots[4] or {}
+	check(macroSaveTest, tostring(s3.body) .. "/" .. tostring(s3.icon), catBody .. "/132089")
+	check(macroSaveTest .. ", a character macro as one", s3.char, true)
+	check(macroSaveTest .. ", an account macro as one", s4.char, false)
+	local saved = s3
+
+	-- the second druid has no such macro
+	local macroMakeTest = "apply makes a missing macro and places it"
+	bars, macros, icons, bodies = {}, { [121] = "Other" }, { [121] = 1 }, { [121] = "/dance" }
+	applyMacro({ [3] = saved })
+	check(macroMakeTest, bars[3] and bars[3].index, 122)
+	check(macroMakeTest .. ", with the saved body and icon", tostring(bodies[122]) .. "/" .. tostring(icons[122]), catBody .. "/132089")
+	check(macroMakeTest .. ", as a character macro", macros[122], "Cat it")
+	bars = {}
+	applyMacro({ [3] = saved, [5] = saved })
+	check(macroMakeTest .. ", once for two slots", tostring(madeCalls) .. "/" .. tostring(bars[5] and bars[5].index), "0/122")
+	bars, macros, icons, bodies = {}, {}, {}, {}
+	check(macroMakeTest .. ", and a macro to make counts as a change, without making it", PlanTab.barsDiffer({ [3] = saved }) .. "/" .. madeCalls, "1/0")
+
+	local macroKeepTest = "a same-named macro is never overwritten"
+	bars, macros, icons, bodies = {}, { [121] = "Cat it" }, { [121] = 7 }, { [121] = "/cast Rake" }
+	applyMacro({ [3] = saved })
+	check(macroKeepTest, tostring(bodies[121]) .. "/" .. madeCalls, "/cast Rake/0")
+	check(macroKeepTest .. ", the existing one is placed", bars[3] and bars[3].index, 121)
+	check(macroKeepTest .. ", and the difference is said", said():find("Cat it", 1, true) ~= nil and said():find("/cast Rake", 1, true) ~= nil, true)
+
+	local macroFullTest = "full macro slots skip the slot and say why"
+	bars, macros, icons, bodies = { [3] = { type = "spell", id = 1 } }, {}, {}, {}
+	for i = 121, 150 do macros[i] = "M" .. i end
+	applyMacro({ [3] = saved })
+	check(macroFullTest, tostring(bars[3] and bars[3].id) .. "/" .. madeCalls, "1/0")
+	check(macroFullTest .. ", in chat", said():find("slot 3: no free character macro slot for Cat it", 1, true) ~= nil, true)
+
+	local macroUndoTest = "undo deletes only the macros apply made"
+	bars, macros, icons, bodies = {}, { [121] = "Mine" }, { [121] = 1 }, { [121] = "/mine" }
+	applyMacro({ [3] = saved })
+	macros[123] = "Later"  -- made by hand after the apply
+	PlanTab.undoBars()
+	check(macroUndoTest, tostring(macros[121]) .. "/" .. tostring(macros[122]) .. "/" .. tostring(macros[123]), "Mine/Later/nil")
+	check(macroUndoTest .. ", and the slot is empty again", bars[3], nil)
+	bars, macros, icons, bodies = {}, { [121] = "Mine" }, { [121] = 1 }, { [121] = "/mine" }
+	applyMacro({ [3] = saved })
+	bodies[122] = "/cast Rake"  -- the made one, edited by hand since
+	PlanTab.undoBars()
+	check(macroUndoTest .. ", and never one edited since", macros[122], "Cat it")
+
+	local macroOldTest = "an old layout with no macro body still applies"
+	local old = { type = "macro", name = "Cat it", index = 121 }
+	bars, macros, icons, bodies = {}, {}, {}, {}
+	applyMacro({ [3] = old })
+	check(macroOldTest .. ", skipped when missing, as before", tostring(bars[3]) .. "/" .. madeCalls .. "/" .. tostring(said():find("slot 3: no macro named Cat it", 1, true) ~= nil), "nil/0/true")
+	macros[121] = "Cat it"
+	applyMacro({ [3] = old })
+	check(macroOldTest .. ", placed by name when there", bars[3] and bars[3].index, 121)
+	check(macroOldTest .. ", and no difference said", said():find("differs", 1, true), nil)
+	CreateMacro, DeleteMacro = keptMacro[1], keptMacro[2]
+	GetMacroInfo = function(i) return macros[i] end
+
 	C_ActionBar, GetActionInfo, PickupAction, PlaceAction = kept[1], kept[2], kept[3], kept[4]
 	GetCursorInfo, ClearCursor, C_Spell, C_Item = kept[5], kept[6], kept[7], kept[8]
 	PickupMacro, GetMacroInfo, GetNumMacros, InCombatLockdown, print = kept[9], kept[10], kept[11], kept[12], kept[13]
@@ -12057,7 +12223,7 @@ function PlanTab.barCategoryChecks(check)
 		for _, item in ipairs(PlanTab.menuItems("window")) do menuText = menuText or (item.text and item.text:match("^Make bars from your %a+ bars$")) end
 		check(t .. ", the menu names the template it will use", menuText, "Make bars from your Feral bars")
 		local keptChar = DjinnisCPCharDB
-		PlanTab.placeBars, PlanTab.placeKeys = function() return 0, {} end, function() return 0, {} end
+		PlanTab.placeBars, PlanTab.placeKeys = function() return 0, {}, { made = {}, notes = {} } end, function() return 0, {} end
 		PlanTab.readBars, PlanTab.readKeys, PlanTab.barsFence = function() return {} end, function() return {} end, function() return nil end
 		PlanTab.applyBars("Destruction")
 		DjinnisCPCharDB = keptChar

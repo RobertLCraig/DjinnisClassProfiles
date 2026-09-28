@@ -27,12 +27,12 @@ one thing Myslot still does for Rob that this addon does not.
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] WHEN a layout is saved and a slot holds a macro, THE ADDON SHALL store its name, body, icon and whether it is an account or a character macro. proves: `a saved macro slot keeps its body and icon`
-- [ ] WHEN a layout is applied and no macro has that name, THE ADDON SHALL make it (a character macro as a character macro) and place it. proves: `apply makes a missing macro and places it`
-- [ ] WHEN a macro with that name exists and its body differs, THE ADDON SHALL place the existing one and list the difference in chat. proves: `a same-named macro is never overwritten`
-- [ ] WHEN the macro slots are full, THE ADDON SHALL skip the slot and say so, as it does now. proves: `full macro slots skip the slot and say why`
-- [ ] WHEN undo runs after an apply that made macros, THE ADDON SHALL delete only the macros that apply made. proves: `undo deletes only the macros apply made`
-- [ ] WHEN a layout saved before this card is applied, THE ADDON SHALL behave as today (name lookup, skip if missing). proves: `an old layout with no macro body still applies`
+- [x] WHEN a layout is saved and a slot holds a macro, THE ADDON SHALL store its name, body, icon and whether it is an account or a character macro. proves: `a saved macro slot keeps its body and icon`
+- [x] WHEN a layout is applied and no macro has that name, THE ADDON SHALL make it (a character macro as a character macro) and place it. proves: `apply makes a missing macro and places it`
+- [x] WHEN a macro with that name exists and its body differs, THE ADDON SHALL place the existing one and list the difference in chat. proves: `a same-named macro is never overwritten`
+- [x] WHEN the macro slots are full, THE ADDON SHALL skip the slot and say so, as it does now. proves: `full macro slots skip the slot and say why`
+- [x] WHEN undo runs after an apply that made macros, THE ADDON SHALL delete only the macros that apply made. proves: `undo deletes only the macros apply made`
+- [x] WHEN a layout saved before this card is applied, THE ADDON SHALL behave as today (name lookup, skip if missing). proves: `an old layout with no macro body still applies`
 - [ ] WHEN Rob applies a layout with a character macro on a second character of that class, THE MACRO SHALL appear on the bar and work. proves: manual
 <!-- AC:END -->
 
@@ -63,3 +63,36 @@ one thing Myslot still does for Rob that this addon does not.
 ## Comments
 
 **2026-09-26** Raised from the Myslot question. Nothing is built yet.
+
+**2026-09-28**
+RESULT: partial
+TESTS: +18 new checks in `PlanTab.barChecks`, all green
+TOUCHED: DjinnisClassProfiles.lua
+OUT-OF-SCOPE: none
+
+Built. `readSlot` keeps each macro's `body`, `icon` and `char` (true or false), each read through
+`canRead`. `pickUp` makes a missing macro through `PlanTab.makeMacro` only when the slot has a
+body; `CreateMacro(name, icon, body, perCharacter)` is Myslot's call (`FindOrCreateMacro`), and
+Blizzard's icon selector makes the same one. A full kind is a skip, never the other kind: a
+character macro made account-wide would reach every class. A same-named macro with other text is
+placed, left alone, and one chat line per macro shows both texts (`PlanTab.noteMacro`). The made
+macros go in `DjinnisCPCharDB.macrosMade`; undo deletes them after the bars go back, newest first,
+and only one that still holds the text it was made with (`PlanTab.deleteMade`). When apply starts a
+fresh undo, `macrosMade` is cleared, because those macros are part of the bars undo puts back.
+`barsDiffer` counts a macro it would make as a change, without making it.
+
+Watched red first: 11 of the new checks failed for the reason each criterion names. Three passed
+before the code and are guards on today's behaviour, which is what their criteria ask: the old
+layout's two checks, and "the existing one is placed". Two mutants run after green (no body check on
+undo, no full check) each turned their checks red.
+
+Re-examined one existing test: the `0051` check's stub of `placeBars` returned the old two values;
+it now returns the third, `{ made, notes }`, as the real one does.
+
+Offline check under Lua 5.1: self-test passed. Its one FAIL line is this worktree, not this card:
+`../DjinnisBiS` is not beside the worktree. There is no PHP here, so `pest` and `pint` do not apply.
+
+Left open: the manual criterion. Rob, on a second druid with a character macro in the layout:
+Load bars, then check the macro is on the bar, works, and is in the character tab of `/macro`. Then
+Undo bars and check it is gone. Also look at the chat lines for a same-named macro with other text.
+No version bump and no deploy: neither is in the card's Plan.
