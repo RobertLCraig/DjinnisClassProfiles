@@ -30,18 +30,18 @@ Death Knight, a Shaman, Hunters, Rogues, Monks and a Demon Hunter (from SavedIns
 
 ## What I need from you
 
-On one alt that is not a druid (the Death Knight, say), after `/reload`:
-1. Open the talent window. Pass: the list beside it shows, titled "Blood builds" (your own
-   loadouts) or "No stored builds for Blood yet". Stored builds come with card `0050`. Fail: a Lua
-   error, or no list.
-2. `/djbis bars save`. Pass: it says the bars are saved for your spec. Then `/djbis bars undo` works.
+On one alt that is not a druid (the Death Knight, say), after `/reload`. The command is `/dcp` now
+(renamed from `/djbis` by card `0058`):
+1. Open the talent window. Pass: the list beside it shows, with that spec's stored builds (card
+   `0050` gave every spec a "Dungeon", and most a "Raid"). Fail: a Lua error, or no list.
+2. `/dcp bars save`. Pass: it says the bars are saved for your spec. Then `/dcp bars undo` works.
 3. Hover any piece of gear. Pass: no "BiS" or "Not BiS" line.
-4. `/djbis here`. Pass: one line saying the BiS list is druid gear.
+4. `/dcp here`. Pass: one line saying the BiS list is druid gear.
 5. Open the character sheet. Pass: the strip under it says "Gear plans are for druids only, for
    now." and has no scenario button.
 6. On your next loot roll: no glow on the item's icon, and no "[BiS]" line in chat.
-7. Type `/djbis`, then open the Plan tab. Pass: one line, "Gear plans are for druids only, for
-   now.", and no scenario buttons above it.
+7. Open the window from the minimap button, then the Plan tab. Pass: one line, "Gear plans are for
+   druids only, for now.", and no scenario buttons above it.
 
 ## Comments
 
