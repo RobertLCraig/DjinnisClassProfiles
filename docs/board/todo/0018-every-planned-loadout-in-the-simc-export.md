@@ -121,6 +121,15 @@ What it saves: one paste instead of one per build, for Rob's own runs and for "C
   placed after its checksum line. The evidence is issue 47 (the author says loadout addons append
   after it) and that TLM's users get their loadouts simmed; look (d) below settles it.
 
+**2026-09-29** Attended unblock pass. The looks no longer match the addon in the game folder
+(v0.54.12), so they cannot be run as written. Look (a) expects the block to start
+`# Djinni's BiS plan (Feral)`; the code writes `# Djinni's Class Profiles plan (Feral)` since the
+rename (card `0058`). Looks (b) to (d) name `WS Raid Coiled Altar` and `WS M+`, both on
+`PlanTab.RETIRED`; the rows are `Raid: Coiled Altar` and `Dungeon` now, and the pair is marked
+`(CP plan)`, not `(DBiS plan)`. Rewriting the looks is an agent's job, so this goes to `todo/`:
+rewrite them against the deployed version, then return the card to `human-review/`. The build is
+not in question.
+
 ## What I need from you
 
 - (a) `/simc` on Feral: the `# Djinni's BiS plan (Feral): boss -> loadout` block is now the last
