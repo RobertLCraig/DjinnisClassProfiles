@@ -52,20 +52,31 @@ string, so a 2-target boss has gear but no planned build, and there is no cell a
 
 ## What I need from you
 
-Four Raidbots Top Gear runs per spec Rob plays, one per scenario, each on the loadout that
-scenario should use. The 2-target cells have gear today but no build: re-bake them on the right
-loadout. For the 3+ runs, the loadout name to sim on (none in `BOSSES` today is a 3+ build).
-Then `.\update-gear-plan.ps1 <report ids>` and a `/reload`.
+**Which Feral bosses, if any, should use the 3+ targets plan, and which other specs do you want
+simmed?** Feral's four plans are all baked now: single target, 2 targets and Mythic+ on
+2026-09-28 (commit `09c637c`), 3+ targets on 2026-09-23. No boss row is marked 3+ targets, so
+that plan is reached only from the strip's button.
 
-In a client, after `/reload`, two looks. Neither is proven offline; the frames are stubs there.
+1. **3+ bosses.** Name the bosses, and each named row is marked 3+ targets, so the Plan tab and
+   the setup prompt hand you the 3+ gear for that fight. Or say none, and nothing changes. I
+   recommend none until you know a fight is mostly 3+ targets: nothing on disk says which fights
+   are, and a wrongly marked row hands you the wrong gear list.
+2. **Other specs.** For each spec you want a gear plan for (Balance, Guardian, Restoration): one
+   Raidbots Top Gear run per scenario on the loadout the Plan tab names, then
+   `.\update-gear-plan.ps1 <report links>` and `/reload`. Or say Feral only, and this part closes.
+3. **One look in the game, after `/reload`.** Open the character sheet outside an instance and
+   press the strip's scenario button from 1 target. It reads 2 targets, 3+ targets, Mythic+,
+   1 target. In a raid it reads 1, 2, 3+, 1. The Plan tab shows four content buttons, with
+   "Raid - 3+ targets" third, and "3+ targets" fits the strip's button.
 
-- Open the character sheet outside an instance and press the strip's scenario button from
-  1 target: it should read 2 targets, 3+ targets, Mythic+, 1 target. In a raid: 1, 2, 3+, 1.
-  The Plan tab's row of content buttons should show four, with "Raid - 3+ targets" third.
-- With 3+ targets picked and no 3t cell baked, the strip should say "No 3+ targets gear plan
-  for Feral yet" and the Plan tab, once a `BOSSES` row says `scenario = "3t"`, should draw
-  "No 3+ targets gear plan yet. Run a Raidbots Top Gear sim on 3+ targets" and nothing else
-  under "2. Gear to change". No slot glows, no bag glows, until a report is baked.
+**Pass:** the look reads as written, and 1 and 2 are answered.
+
+**Fail:** the cycle, the buttons or the label differ. Say what you saw in `## Comments`.
+
+**Why it needs you.** Which fights your raid treats as 3+ targets, and which specs are worth your
+Raidbots time, are yours. The look is a frame in a game client.
+
+Paste-ready: `**2026-MM-DD** **Decided:** 3+ bosses: none. Other specs: Feral only.`
 
 ## Comments
 
@@ -124,3 +135,8 @@ In a client, after `/reload`, two looks. Neither is proven offline; the frames a
   "3+ targets" on it, which is one glyph wider than "2 targets" was.
 
 - 2026-09-23 Claude: Feral `3t` cell baked from report `r4XdLNcxvUod46NbgqQrMP` (Patchwerk, 3 bosses, 5 min). Two Dreamgrove builds were simmed; Wildstalker won at 300,916 dps against Druid of the Claw at 277,227. Loadout name `WS Raid 3T`. No boss row is `3t` yet: Rob picks which. The bake script now splices the game's talent header onto a website build (`Repair-TalentHeader`), since a blank header would make the addon's edited-compare refuse it.
+
+**2026-09-29** Attended unblock pass. The ask is rewritten to what is still open. Feral's `2t`
+and `mplus` cells were re-baked on their own loadouts in commit `09c637c` (`[CP] Raid: Lost
+Explorers`, `Dungeon (new)`), so "re-bake the 2-target cells" is done for Feral. The old second
+look, the empty-`3t` message, cannot be seen on Feral any more, because its `3t` cell is baked.
