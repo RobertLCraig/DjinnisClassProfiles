@@ -2,10 +2,11 @@
 
 ## What I need from you
 
-One trip to the game, v0.49.0:
+One trip to the game, v0.49.0 or later:
 
 1. `/reload`.
-2. As Balance, Guardian and Resto, one at a time: the loadout box should list the retired rows
+2. As Balance, Guardian and Resto, one at a time, open the loadout box with **More > Make the
+   planned loadouts** (since card `0065` it no longer opens by itself). It should list the retired rows
    (`[CP] Raid: Elune's Chosen`, `Raid: Druid of the Claw`, `Raid: short on mana`,
    `Raid: mana is fine`, `Raid: Nek'Zali, Nymrissa`, whichever you have) as "deleted: a build this
    addon no longer makes". Click **Delete them**, wait for the count, then **Create**.
@@ -17,6 +18,10 @@ One trip to the game, v0.49.0:
 5. Feral: the raid rows are now mostly Wildstalker. The stat targets were simmed on other builds.
 
 Pass: each spec's planned loadouts are made with no error, and the rows load.
+
+Fail: a Lua error, a loadout of yours listed for deletion, or a triangle on any other row. Say which
+spec and step on this card.
+
 ## Why
 
 Rob, 2026-09-25: "I would really like to find a way to automate pulling those builds. As there is
