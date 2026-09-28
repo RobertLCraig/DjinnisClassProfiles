@@ -202,3 +202,13 @@ unless the order of bosses is not fixed.
   `canRead` before a compare; it leaks nothing, nothing leaves the client. **Browser:** none, this
   is a game frame, and the ten looks above are what a client must answer, so the card goes to
   `human-review/`, not `done/`.
+
+**2026-09-29** Attended unblock pass. The steps no longer match the addon in the game folder
+(v0.54.12), so they cannot be run as written. Steps 1 and 5 name `WS Raid Most Bosses` and
+`DotC Raid ST *`. Both are on `PlanTab.RETIRED` and may already be deleted from the client. Since
+card `0030` every Feral boss row has its own build (`Raid: Nek'Zali`, `Raid: Entombed
+Sentinels`), and since card `0059` the addon's own loadouts are named `[CP] <build>`. Step 10
+uses `/djbis test`, which went with the rename (card `0058`); the command is `/dcp test`.
+Rewriting the steps is an agent's job (read the code, as the `0029` review did), so this goes to
+`todo/`: rewrite them against the deployed version, then return the card to `human-review/`. The
+build is not in question.
