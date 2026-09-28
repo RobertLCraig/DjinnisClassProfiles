@@ -437,3 +437,5 @@ human-review holds only what he must decide. Both findings of the seventh review
 (finding 1), and no source check guards the `==` form (finding 2). Acceptance 2 is unticked with the
 reason beside it. Owed: count a refused compare apart from a swap, add the left-alone run and the
 source check the review describes, then back to `ai-review/`. The in-game criterion stays Rob's.
+
+**2026-09-29** The reviewer returned this card and its finding is the last review entry at the bottom of ## Direction. The loop moved it from todo/ to human-review/ because it has bounced 5 times between todo and ai-review, which is the limit, so it is waiting on a person. THE BUILDER COULD NOT ACT ON THAT FINDING. A reviewer reopens every criterion it reports unmet, and the reviews that sent this card back named no criterion they disproved, so it came back with 0 of 0 criteria still ticked, every session found nothing open to do, and the loop promoted it again on the boxes. Add or reopen the criterion the finding breaks and move it back to todo/, or say here why the finding is wrong.
