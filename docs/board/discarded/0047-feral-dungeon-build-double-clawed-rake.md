@@ -445,6 +445,15 @@ Not findings:
   Step 3 of the ask is the check for it.
 - The card is about 400 lines, over the board's 100. Most of it is the review thread.
 
+**2026-09-29** Superseded by card `0064`, so discarded. Checked by an attended agent under Rob's rule
+that human-review holds only what he must decide. The four Archon `Dungeon` pins this card built are
+gone: `update-builds.py` has `PIN = {}`, and its comment says they "gave way to Warcraft Logs on
+2026-09-25 (card 0064)". Every druid `Dungeon` is now the Warcraft Logs typical build, so the ask
+above ("matches Archon's recommended +7 to +21 tree") can no longer pass or fail. Rob's question is
+still answered: `docs/builds/wcl-report.md`, Feral Mythic+ (681 rankings), says `Dungeon` is the
+typical build and Double-Clawed Rake is taken by 90%, Tireless Energy by 11%. Whether each spec's
+`Dungeon` loads in game is card `0064`'s step 2 and 3.
+
 Step 4 (look at it in a browser) does not apply. No browser surface: there is no browser and no
 game client. The only UI effects are four stored talent strings, one retired loadout name and one
 label in `/djbis talents`. The in-game check is Rob's, above.
