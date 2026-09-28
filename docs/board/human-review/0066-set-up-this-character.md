@@ -3,15 +3,21 @@ needs: 0057
 ---
 # 0066 Set up this character: one button that brings its loadouts in line with the list
 
-## Try this in game (v0.54.11)
+## What I need from you
+
+**Try Delete old loadouts once in game (v0.54.11 or later).** The last criterion, "Parked", is not a
+question: you parked it on 2026-09-26 and it waits for you to unpark card `0065`.
 
 On your main, rename one of your builds (right-click its row). Log on to an alt of the same class
 and spec. Click **More > Delete old loadouts**. Chat lists "[CP] old name  (no build is called old
 name now)". Click **Delete** in the box. The old loadout goes, one at a time. Then click **More >
 Make the planned loadouts** to make the new name.
 
-Pass: no loadout you named yourself is listed, never the one you are wearing, and nothing goes
+**Pass:** no loadout you named yourself is listed, never the one you are wearing, and nothing goes
 before the click.
+
+**Fail:** a loadout you named deleted or listed, the worn one deleted, or "You can't do that right
+now". Say what you saw on this card and move it to `todo/`.
 
 ## Why
 
