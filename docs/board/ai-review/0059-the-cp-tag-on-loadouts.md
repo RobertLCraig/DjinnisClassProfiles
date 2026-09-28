@@ -608,3 +608,9 @@ The third review found nothing blocking. Its two findings are fixed:
 5. The empty `C:\Dev\WoWAddons\DjinnisClassProfiles.lua` the review saw was made by a builder's debug step at 10:44 and is deleted.
 
 Moved to `human-review/`: the fixes are small and every one is pinned by a mutant; the open criterion is the in-game one above.
+
+**2026-09-29** Moved to `ai-review/` by an attended agent under Rob's rule that human-review holds
+only what he must decide. The seventh review recommended a bounce; the builder fixed its findings in
+v0.48.8 and moved the card on itself, so no reviewer has read v0.48.8. Review it. Then refresh the
+ask: since card `0065` the loadout box no longer opens at `/reload`, so step 1 must say
+**More > Make the planned loadouts**, and the game folder holds v0.54.12, not v0.48.8.
