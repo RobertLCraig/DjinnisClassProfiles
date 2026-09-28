@@ -219,6 +219,15 @@ a loot row (`Blizzard_EncounterJournal`) and copy its sizes rather than guessing
   `SetItemButtonQuality` swallows a bad link silently, so a row shows no border rather than an
   error; nothing else is caught and nothing is printed.
 
+**2026-09-29** Attended unblock pass. The looks no longer match the addon in the game folder
+(v0.54.12), so they cannot be run as written. The opening line says to run
+`deploy.ps1 -Only DjinnisBiS`. That folder is now the rename stub (card `0058`), so the command
+would deploy the stub and not this addon, and the game folder already holds v0.54.12. Look 7
+expects three content buttons, and there are four since card `0028` ("Raid - 3+ targets"). Every
+`/bis` is `/dcp` since the rename. Rewriting the looks is an agent's job, so this goes to `todo/`:
+rewrite them against the deployed version, then return the card to `human-review/`. The build is
+not in question.
+
 ## What I need from you
 
 One screenshot each, in a live client, after `deploy.ps1 -Only DjinnisBiS`:
