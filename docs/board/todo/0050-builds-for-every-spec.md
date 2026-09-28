@@ -191,3 +191,13 @@ No client here. Scripts: `%TEMP%\rv_decode.py`, `rv_foreign.py`, `rv_valor_all.p
 **2026-09-24, Rob answered the tag question.** A tag, and it is `[CP] `, not `BiS `: "BiS" means best
 in slot, which a talent loadout cannot be. The addon is renamed to DjinnisClassProfiles, everything
 kept (card `0058`), and the tag goes in with that rename.
+
+**2026-09-29** **Decided:** option 1, a tag in the game name, and the tag is `[CP] ` (Rob's answer of
+2026-09-24 above, recorded as the answer by an attended agent, because it was written as a comment
+and so never moved the card). The tag is built on card `0059`. What is still owed here, from the
+review above: finding 3 (`other_classes` in `update-builds.py` does not check a pinned name's length
+or quotes, as the druid path does with `NAME_MAX`), and finding 4 (add one spec whose `Dungeon` marks
+another spec's hero keystone as granted, say Beast Mastery, to the in-game check). Finding 1 is now
+a fallback only: Warcraft Logs comes before wowvalor since card `0064`, but `valor_dungeon` still
+takes `recommendedBuild` as it stands. Finding 2 is the tag. Rewrite `## What I need from you` for
+`/dcp` and the tagged names once those are done.
