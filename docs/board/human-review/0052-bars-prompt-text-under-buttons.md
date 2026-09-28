@@ -25,7 +25,8 @@ only while no line wraps. Both of those lines wrap at 380 wide.
 
 ## What I need from you
 
-`/reload`, then `/djbis bars save` on a spec that already has a saved layout. Pass: the question
+`/reload`, then `/dcp bars save` (the command was `/djbis` before card `0058`) on a spec that
+already has a saved layout. Pass: the question
 and "It is used for every ..." sit above Replace and Cancel, with a gap. Fail: any text touches a
 button.
 
