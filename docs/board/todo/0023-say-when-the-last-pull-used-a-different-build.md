@@ -182,6 +182,15 @@ knows if it was the build or the play.
   prints and the only text drawn is the spec name after its class prefix.
   Not seen in a client; the looks below stand.
 
+**2026-09-29** Attended unblock pass. The steps no longer match the addon in the game folder
+(v0.54.12), so they cannot be run as written. Step 3 pulls on `DotC Raid ST *` and step 5 on
+`WS Raid Most Bosses`; both are on `PlanTab.RETIRED`. Step 5's premise has gone: it relies on
+Nek'zali sharing a loadout that has no cell of its own, and since card `0030` every Feral boss row
+has its own build (`Raid: Nek'Zali`). Step 1 describes the saved pulls of 2026-09-22, and `/bis`
+is `/dcp` since card `0058`. Rewriting the steps is an agent's job, so this goes to `todo/`:
+rewrite them against the deployed version, then return the card to `human-review/`. The build is
+not in question.
+
 ## What I need from you
 
 With Hindsight loaded, as Feral:
