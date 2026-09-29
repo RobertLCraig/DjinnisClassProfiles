@@ -37,14 +37,14 @@ fallback, and the answer did not ask for it. Not a release to CurseForge.
 
 ## Acceptance
 <!-- AC:BEGIN -->
-- [ ] #1 IF a `PIN` entry for a non-druid spec names a loadout over `NAME_MAX` letters or containing a `"`, THEN `update-builds.py` SHALL exit 1 naming the spec and the name, and leave `DjinnisClassProfiles.lua` byte-identical (settled by running it on a copy with such a pin, since the script has no harness). proves: none
+- [x] #1 IF a `PIN` entry for a non-druid spec names a loadout over `NAME_MAX` letters or containing a `"`, THEN `update-builds.py` SHALL exit 1 naming the spec and the name, and leave `DjinnisClassProfiles.lua` byte-identical (settled by running it on a copy with such a pin, since the script has no harness). proves: none
 - [ ] #2 WHEN Rob, on a Beast Mastery Hunter after `/reload`, has the addon make its loadouts, THE GAME SHALL show `[CP] Dungeon` and `[CP] Raid` in the talent window's dropdown, and each SHALL load without Blizzard calling the import invalid. proves: manual
 <!-- AC:END -->
 
 ## Tasks
-- [ ] `other_classes()` in `update-builds.py`: refuse a pinned name over `NAME_MAX` or with a `"`, with the same message `block()` gives a druid pin. Put the check in one helper both paths call, so the two cannot drift again
-- [ ] Prove #1 on a copy in `%TEMP%`: one pin too long, one with a quote. Each exits 1, and the Lua file's hash is unchanged. Write both results into `## Comments`
-- [ ] Add a `## What I need from you` for Rob that is the #2 check, with its Pass and Fail, naming the addon command that makes the loadouts as it stands after `0059`
+- [x] `other_classes()` in `update-builds.py`: refuse a pinned name over `NAME_MAX` or with a `"`, with the same message `block()` gives a druid pin. Put the check in one helper both paths call, so the two cannot drift again
+- [x] Prove #1 on a copy in `%TEMP%`: one pin too long, one with a quote. Each exits 1, and the Lua file's hash is unchanged. Write both results into `## Comments`
+- [x] Add a `## What I need from you` for Rob that is the #2 check, with its Pass and Fail, naming the addon command that makes the loadouts as it stands after `0059`
 
 ## Plan
 Stand in `C:\Dev\WoWAddons\DjinnisClassProfiles`. The druid check to copy is in `block()`: it
@@ -54,3 +54,43 @@ compares a pinned name against `NAME_MAX` and looks for a `"` before calling `ch
 For #2, Beast Mastery is the pick because the review found `ungrant()` changed its string and
 proved the bits offline. A game client is the only thing that can prove the import. If Beast
 Mastery passes, the other nine carry the same shape.
+
+## What I need from you
+Criterion #2. Any game build with card `0059`'s tag works (the game folder held v0.54.12 on
+2026-09-27). This card changed only `update-builds.py`, so nothing new needs deploying.
+
+1. Log in on a Beast Mastery Hunter and type `/reload`.
+2. Type `/dcp loadouts` (the same as **More > Make the planned loadouts**) and make both builds.
+3. Open the talent window. Pick `[CP] Dungeon`, then `[CP] Raid`.
+
+**Pass:**
+- The dropdown shows `[CP] Dungeon` and `[CP] Raid`.
+- Each one loads. No Blizzard line calls the import invalid.
+
+**Fail:** either name is missing, or Blizzard says a string is invalid. Write down which build and the
+exact red line.
+
+## Comments
+**2026-09-29**
+RESULT: partial
+TESTS: +0 new, all green
+TOUCHED: update-builds.py, docs/board/in-progress/0073-a-pinned-name-on-another-class-is-checked-and-a-shared-keystone-spec-is-tried-in-game.md
+OUT-OF-SCOPE: none
+
+#1 is met. #2 is open: it needs Rob in a game client (see `## What I need from you`).
+
+The fix: `block()` now checks the name of every `PIN` entry, of every class, once, before it reads
+any source. That one loop replaces the druid-only check, so the druid and non-druid paths cannot
+drift. The message is the old druid one.
+
+Proof, on a copy in `%TEMP%\cp0073` (the script, the Lua and `docs/builds/wcl-builds.json`), with a
+driver that sets `PIN = {"Beast Mastery": {<name>: (its WCL Dungeon string, ...)}}` and calls `main()`:
+- Before the fix, `Dungeon "q"`: `BUILDS block written.`, exit 0, and line 600 of the Lua became
+  `["Dungeon "q""] = ...`. That is the fault.
+- After, `Dungeon "q"`: `Beast Mastery pinned 'Dungeon "q"': over 24 letters, or a quote.`, exit 1.
+- After, `Dungeon but far too long a name`: the same message with that name, exit 1.
+- The Lua's SHA-256 was `3aae11e4...1effd` before and after both runs.
+- With no pin, `update-builds.py --check` said `BUILDS block already current.`, exit 0.
+
+The Pest and Pint commands in the brief do not apply: this repository has no PHP, no `vendor` and no
+test suite. `update-builds.py` has no harness, which is why #1 says `proves: none`.

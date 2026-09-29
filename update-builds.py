@@ -409,6 +409,12 @@ def block(trees):
     known = set(SPEC_ID) | {key for _, key, _ in lua_specs()}
     if set(PIN) - known:
         sys.exit(f"PIN names a spec PlanTab.SPECS does not: {sorted(set(PIN) - known)}. Its builds would vanish.")
+    # Every class's pins, before any is written: a quote in a name is a Lua file
+    # the game will not load (0050 review, card 0073).
+    for spec, pins in PIN.items():
+        for name in pins:
+            if len(name) > NAME_MAX or '"' in name:
+                sys.exit(f"{spec} pinned {name!r}: over {NAME_MAX} letters, or a quote.")
     picks = wcl_picks()
     lines = [BEGIN, f'PlanTab.BUILD_SOURCE = "Warcraft Logs top rankings (typical build), dreamgrove.gg compendiums for the druid rows it does not cover, wowvalor.app and SimulationCraft where it has none, and the pinned builds in update-builds.py PIN, read {date.today()}"', "PlanTab.BUILDS = {"]
     for spec in SPEC_ID:
@@ -418,8 +424,6 @@ def block(trees):
         # A dict, so no name can be written twice (0064 review).
         rows = {}
         for name, (code, source) in PIN.get(spec, {}).items():
-            if len(name) > NAME_MAX or '"' in name:
-                sys.exit(f"{spec} pinned {name!r}: over {NAME_MAX} letters, or a quote.")
             try:
                 rows[name] = checked(spec, SPEC_ID[spec], name, code, source, tree)
             except Refused as e:
