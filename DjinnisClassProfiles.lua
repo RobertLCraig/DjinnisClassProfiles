@@ -6137,18 +6137,31 @@ function PlanTab.onSetupEvent(event, id, name, _, _, success)
 	end
 end
 
--- The combat log turns itself on inside a dungeon or a raid, so a key is logged
--- from its first pull, not from when somebody remembers /combatlog. It is never
--- turned off here: a log that stops at the door loses the loot and the next key.
+-- The combat log turns on at the door of a dungeon or a raid and off on the way
+-- out, so each run is its own file (the game names each one by its start time)
+-- rather than one file for the whole night. Off only on leaving an instance:
+-- logging switched on by hand in the open world is left alone. A ghost running
+-- back from an outside graveyard has not left, so the file is not cut there.
 -- LoggingCombat is the call Blizzard's own /combatlog makes (SlashCommands.lua).
--- Blizzard prints its own "Combat being logged" line, so nothing is said here.
+-- Blizzard prints its own line for each change, so nothing is said here.
 function PlanTab.autoCombatLog()
+	if not LoggingCombat then return nil end
 	local _, kind = GetInstanceInfo()
-	if (kind == "party" or kind == "raid") and LoggingCombat and not LoggingCombat() then
-		LoggingCombat(true)
-		return true
+	local inside = kind == "party" or kind == "raid"
+	if not inside then
+		local dead = UnitIsDeadOrGhost and UnitIsDeadOrGhost("player")
+		if canRead(dead) and dead then return nil end
 	end
-	return false
+	local was = PlanTab.logInside
+	PlanTab.logInside = inside
+	if inside and not LoggingCombat() then
+		LoggingCombat(true)
+		return "on"
+	elseif was and not inside and LoggingCombat() then
+		LoggingCombat(false)
+		return "off"
+	end
+	return nil
 end
 
 function PlanTab.armSetupWatch()
@@ -12817,16 +12830,30 @@ end
 
 function PlanTab.combatLogChecks(check)
 	local t = "the combat log in instances"
-	local keptInfo, keptLog, on = GetInstanceInfo, LoggingCombat, false
+	local keptInfo, keptLog, keptDead, keptInside = GetInstanceInfo, LoggingCombat, UnitIsDeadOrGhost, PlanTab.logInside
+	local on, kind, dead = false, "none", false
 	LoggingCombat = function(v) if v ~= nil then on = v end return on end
-	for _, c in ipairs({ { "none", false }, { "scenario", false }, { "party", true }, { "raid", true } }) do
-		on = false
-		GetInstanceInfo = function() return "Somewhere", c[1] end
-		check(t .. ", " .. c[1], tostring(PlanTab.autoCombatLog()) .. "/" .. tostring(on), tostring(c[2]) .. "/" .. tostring(c[2]))
+	GetInstanceInfo = function() return "Somewhere", kind end
+	UnitIsDeadOrGhost = function() return dead end
+	PlanTab.logInside = nil
+	-- one night, zone by zone: what the call returns, then whether the log is on
+	for _, c in ipairs({
+		{ "none", false, "nil/false", "a city at login does nothing" },
+		{ "scenario", false, "nil/false", "a delve does nothing" },
+		{ "party", false, "on/true", "into a dungeon turns it on" },
+		{ "party", false, "nil/true", "a loading screen inside changes nothing" },
+		{ "none", true, "nil/true", "a ghost at an outside graveyard keeps the file" },
+		{ "party", false, "nil/true", "back inside, the same file" },
+		{ "none", false, "off/false", "out of the dungeon turns it off" },
+		{ "raid", false, "on/true", "into a raid is a new file" },
+		{ "none", false, "off/false", "and out again ends it" },
+	}) do
+		kind, dead = c[1], c[2]
+		check(t .. ", " .. c[4], tostring(PlanTab.autoCombatLog()) .. "/" .. tostring(on), c[3])
 	end
 	on = true
-	check(t .. ", already on is left alone", PlanTab.autoCombatLog(), false)
-	GetInstanceInfo, LoggingCombat = keptInfo, keptLog
+	check(t .. ", logging turned on by hand in the open world is left alone", tostring(PlanTab.autoCombatLog()) .. "/" .. tostring(on), "nil/true")
+	GetInstanceInfo, LoggingCombat, UnitIsDeadOrGhost, PlanTab.logInside = keptInfo, keptLog, keptDead, keptInside
 end
 
 function PlanTab.menuChecks(check)
