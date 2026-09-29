@@ -94,3 +94,5 @@ driver that sets `PIN = {"Beast Mastery": {<name>: (its WCL Dungeon string, ...)
 
 The Pest and Pint commands in the brief do not apply: this repository has no PHP, no `vendor` and no
 test suite. `update-builds.py` has no harness, which is why #1 says `proves: none`.
+
+**2026-09-29** The loop moved this card from in-progress/ to human-review/ WITHOUT trying it. All 1 of its open acceptance criteria say proves: manual, so there is nothing left an unattended session could close and starting one would change nothing. Each open criterion names what to look at and what a pass is: tick what passes and move the card on, or say what failed and move it back to todo/.
