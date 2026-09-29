@@ -540,7 +540,7 @@ end
 -- WHEN to pick the build (Rob, 2026-09-23), and are the ones DjinnisDreamgrove
 -- 0.7.0 imported, so a loadout made there is the same loadout here. Card 0030.
 -- BEGIN GENERATED BUILDS
-PlanTab.BUILD_SOURCE = "Warcraft Logs top rankings (typical build), dreamgrove.gg compendiums for the druid rows it does not cover, wowvalor.app and SimulationCraft where it has none, and the pinned builds in update-builds.py PIN, read 2026-09-25"
+PlanTab.BUILD_SOURCE = "Warcraft Logs top rankings (typical build), dreamgrove.gg compendiums for the druid rows it does not cover, wowvalor.app and SimulationCraft where it has none, and the pinned builds in update-builds.py PIN, read 2026-09-29"
 PlanTab.BUILDS = {
 	Balance = {
 		["Dungeon"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhBjZZmlZWYmxGLzsMmZM2wwAM22mZwY2GATAAAAWMzMzMYzwYMAAMzglBA", -- Warcraft Logs M+, all dungeons: typical of 669, 79% agree on 6 contested, 2026-09-25
@@ -563,13 +563,10 @@ PlanTab.BUILDS = {
 	Guardian = {
 		["Dungeon"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD", -- Warcraft Logs M+, all dungeons: typical of 710, 79% agree on 6 contested, 2026-09-25
 		["Raid"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZGjZMDAAAAAYGbzAW2mZwY2GATAAAAbYmBYxMYAbW2GgZGAD", -- Warcraft Logs raid, all bosses: typical of 623, 77% agree on 10 contested, 2026-09-25
-		["Dungeon: survive more"] = "CgGA8cL7tpvige+kkmGM9zUPWDAAAAAAAAAAAgZmxswMjZWMLzMPwMLLDMbGGNRzMziZmZmlZm5BMAAAAAgZsYAAAAomZZWmZmBAwCmBwiZwAzCAgZ2gB", -- Razeless sustain
 	},
 	Resto = {
 		["Dungeon"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmNjNbzAAAAAAAAAAgFDNbzw0MDwsYmZmZxwDMAAAAAMAAzAAAAAgZbmtmtZWsxMzMYmZD0MAAzMAMA", -- Warcraft Logs M+, all dungeons: typical of 609, 69% agree on 24 contested, 2026-09-25
 		["Raid"] = "CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALGa2MjpZGgZZmZmZYYGAAAAAGAAAAAAAwsNzSz2Mb2YMzMYGY0MAAzMAMA", -- Warcraft Logs raid, all bosses: typical of 719, 65% agree on 8 contested, 2026-09-25
-		["Dungeon: cat damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsN8AMzsMjNbzAAAAAAAAAAgtBNbGmmZMDmFzMzMLzwDYAAAAAAAwAWWGLYamZZAAMbzs1sNziNGzMwMLY0MAAzMAMA", -- M+ Cat DPS
-		["Dungeon: caster damage"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmZZMjZmxsNz8AwsMjNbzAAAAAAAAAAgNDNbzMmmZAmFmZmZxwDAAAAAgBAYGwyyYBTzMLDAgZbmtmtZWsxYmZwMbY0MAAzMAMA", -- M+ Caster DPS
 	},
 	Arms = {
 		["Dungeon"] = "CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGmZbZmZmZYGzMAAAAAGLzMwEGLbDsAGwMMBmBbgZGGGMLzsNAzMAYGGA", -- Warcraft Logs M+, all dungeons: typical of 679, 74% agree on 4 contested, 2026-09-25
@@ -11193,7 +11190,19 @@ function PlanTab.sidebarChecks(check)
 	check(listTest .. ", a folded group keeps its header and drops its rows", names(folded), "[Raid]; [Mythic+]; Dungeon")
 	check(listTest .. ", and says how many it holds", folded[1].count, 9)
 	check(listTest .. ", Guardian's builds with no boss row sit under Other builds",
-		names(PlanTab.sidebarList("Guardian", "raid")), "[Mythic+]; Dungeon; Dungeon: survive more; [Other builds]; Raid")
+		names(PlanTab.sidebarList("Guardian", "raid")), "[Mythic+]; Dungeon; [Other builds]; Raid")
+	-- card 0074: the Dreamgrove M+ variants carried a stale tree hash and would not load
+	check(listTest .. ", Resto keeps one Dungeon and no guide variants",
+		names(PlanTab.sidebarList("Resto", "raid")), "[Mythic+]; Dungeon; [Other builds]; Raid")
+	local stale = {}
+	for spec, builds in pairs(PlanTab.BUILDS) do
+		for name, code in pairs(builds) do
+			local c26 = PlanTab.B64:find(code:sub(26, 26), 1, true)
+			if code:sub(5, 25) ~= ("A"):rep(21) or not c26 or (c26 - 1) % 4 ~= 0 then stale[#stale + 1] = spec .. " " .. name end
+		end
+	end
+	table.sort(stale)
+	check("every build string has an empty tree hash", table.concat(stale, "; "), "")
 
 	local tickTest = "one tick, on the build in play"
 	check(tickTest, ticked(PlanTab.sidebarList("Feral", "raid", feral["Raid: Twin Fangs"])), "Raid: Twin Fangs")

@@ -94,13 +94,10 @@ PICK = {
     # Guardian and Resto's raid rows ("Raid: Druid of the Claw", "Raid: Elune's
     # Chosen", "Raid: short on mana", "Raid: mana is fine") became one "Raid"
     # from Warcraft Logs (Rob, 2026-09-25): no top player ran any of the four.
-    "Guardian": {
-        "Razeless sustain": ["Dungeon: survive more"],
-    },
-    "Resto": {
-        "M+ Cat DPS": ["Dungeon: cat damage"],
-        "M+ Caster DPS": ["Dungeon: caster damage"],
-    },
+    # Their guide M+ variants went too (card 0074): no top player ran them, and
+    # the guide's tree hash was stale, so the game refused them.
+    "Guardian": {},
+    "Resto": {},
 }
 
 # Builds pinned by hand: spec -> {loadout name: (string, source)}. A pin beats
