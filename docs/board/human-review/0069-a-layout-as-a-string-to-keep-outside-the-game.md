@@ -84,3 +84,5 @@ into a text file. On another character of the class: More > Import a profile...,
 that chat says Saved and nothing on the bars moved. Then More > Profile: X > Load. Check that the
 bars, the keys and any character macro match. Also check that a long string (many macros) pastes
 whole into the box. The offline check cannot see a frame.
+
+**2026-09-29** The loop moved this card from in-progress/ to human-review/ WITHOUT trying it. All 1 of its open acceptance criteria say proves: manual, so there is nothing left an unattended session could close and starting one would change nothing. Each open criterion names what to look at and what a pass is: tick what passes and move the card on, or say what failed and move it back to todo/.
