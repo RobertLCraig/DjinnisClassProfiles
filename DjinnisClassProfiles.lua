@@ -6114,6 +6114,7 @@ function PlanTab.onSetupEvent(event, id, name, _, _, success)
 		-- the last visit: walking back in set up wrong is what the card is for
 		PlanTab.lastKill, PlanTab.popupClosed, PlanTab.buffsWanted = nil, nil, nil
 		PlanTab.later(2, PlanTab.checkSetup)  -- as EnhanceQoL does: the instance is not readable at once
+		PlanTab.later(2, PlanTab.autoCombatLog)
 	elseif event == "READY_CHECK" or event == "CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN" then
 		PlanTab.buffsWanted = true  -- from here to the pull the consumables are on the list (card 0017)
 		return PlanTab.checkSetup()
@@ -6134,6 +6135,20 @@ function PlanTab.onSetupEvent(event, id, name, _, _, success)
 		-- during its own event's dispatch, and checkSetup re-asks it anyway.
 		PlanTab.later(2, PlanTab.checkSetup)
 	end
+end
+
+-- The combat log turns itself on inside a dungeon or a raid, so a key is logged
+-- from its first pull, not from when somebody remembers /combatlog. It is never
+-- turned off here: a log that stops at the door loses the loot and the next key.
+-- LoggingCombat is the call Blizzard's own /combatlog makes (SlashCommands.lua).
+-- Blizzard prints its own "Combat being logged" line, so nothing is said here.
+function PlanTab.autoCombatLog()
+	local _, kind = GetInstanceInfo()
+	if (kind == "party" or kind == "raid") and LoggingCombat and not LoggingCombat() then
+		LoggingCombat(true)
+		return true
+	end
+	return false
 end
 
 function PlanTab.armSetupWatch()
@@ -12800,6 +12815,20 @@ function PlanTab.myBuildChecks(check)
 	d.myBuilds, d.bars = keptMine, keptBars
 end
 
+function PlanTab.combatLogChecks(check)
+	local t = "the combat log in instances"
+	local keptInfo, keptLog, on = GetInstanceInfo, LoggingCombat, false
+	LoggingCombat = function(v) if v ~= nil then on = v end return on end
+	for _, c in ipairs({ { "none", false }, { "scenario", false }, { "party", true }, { "raid", true } }) do
+		on = false
+		GetInstanceInfo = function() return "Somewhere", c[1] end
+		check(t .. ", " .. c[1], tostring(PlanTab.autoCombatLog()) .. "/" .. tostring(on), tostring(c[2]) .. "/" .. tostring(c[2]))
+	end
+	on = true
+	check(t .. ", already on is left alone", PlanTab.autoCombatLog(), false)
+	GetInstanceInfo, LoggingCombat = keptInfo, keptLog
+end
+
 function PlanTab.menuChecks(check)
 	local t = "every command has a button"
 	local names = { "offerLoadouts", "sayTalents", "tidyAsk", "offerBars", "undoBarsAsk", "askProfileName",
@@ -15594,6 +15623,7 @@ local function selfTest()
 	PlanTab.bonusChecks(check)  -- card 0054
 	PlanTab.barCategoryChecks(check)  -- card 0051
 	PlanTab.orphanChecks(check)  -- card 0066
+	PlanTab.combatLogChecks(check)  -- card 0076
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[CP] self-test passed|r")
