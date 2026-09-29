@@ -201,3 +201,4 @@ another spec's hero keystone as granted, say Beast Mastery, to the in-game check
 a fallback only: Warcraft Logs comes before wowvalor since card `0064`, but `valor_dungeon` still
 takes `recommendedBuild` as it stands. Finding 2 is the tag. Rewrite `## What I need from you` for
 `/dcp` and the tagged names once those are done.
+**2026-09-29** Carried forward by an attended session: `0073` A pinned name on another class is checked, and a shared-keystone spec is tried in game.
