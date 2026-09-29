@@ -85,3 +85,5 @@ sample. It is undone by one line each in `PICK`, and Rob can keep any of them as
 builds (card `0057`). Work: remove the three from `PICK` in `update-builds.py`, run it, check
 `--check` passes and no BUILDS string has a non-zero hash. An existing `[CP]` loadout of those names
 is then listed by More > Delete old loadouts (card `0066`), which asks first.
+
+**2026-09-29** Carried forward by an attended session: `0074` Drop the three Dreamgrove Mythic+ variants that will not load.
