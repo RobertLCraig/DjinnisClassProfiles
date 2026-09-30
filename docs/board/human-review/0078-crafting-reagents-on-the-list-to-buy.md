@@ -14,8 +14,10 @@ planned crafted piece that is neither worn (at any item level) nor in the bags o
 AH, the Auctionator price and the Auctionator list take them like gems. The search is by name, so it
 finds every quality of a reagent; the price is the first quality's. v0.59.1: the Auctionator list carries each count, through Auctionator's ConvertToSearchString, exact for a reagent only.
 
+v0.59.2: Rob found in game that Hunter's Ritual Stone goes on blacksmithing weapons only (Darkmoon Sigil: Hunt is weapons too). The plan's cloak takes Arcanoweave Lining instead, the best armor embellishment in a local SimC run (Arcanoweave on both: +2.49 ST / +3.01 M+, against +2.84 / +3.50 claimed for the stone). The four Feral cells' dps are scaled by that. Uncertain: whether two Arcanoweave Linings may be worn; SimC's own MID2 Feral profile wears two.
+
 Checks in `selfTest` (`PlanTab.craftChecks`): 11 lines for the two pieces, Tantalum counted twice,
-one of each embellishment, nothing when worn at another item level or held. Broken on purpose once
+Arcanoweave Lining counted twice, nothing when worn at another item level or held. Broken on purpose once
 (embellishments dropped) and three checks failed.
 
 Uncertain: whether Wowhead's list has every required slot right. A reagent slot that takes one of

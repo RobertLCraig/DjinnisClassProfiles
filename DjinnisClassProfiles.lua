@@ -374,14 +374,14 @@ local GEAR_PLAN_SOURCE = "Raidbots Top Gear 2026-09-28, then local SimC 2026-09-
 local GEAR_PLAN = {
 	Feral = {
 		["st"] = {
-			report = "local SimC", simmed = "2026-09-30", dps = 204781,
+			report = "local SimC", simmed = "2026-09-30", dps = 204084,
 			loadout = "[CP] Raid: Nek'Zali",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALghhxMDmxsMmZmxYGDAAAAAADMAAAAAAz2MLmtZW2AzMALmZYAAMzAgB",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=239656,bonus_id=8793/8960/12214/13771/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Hunter's Ritual Stone)
+				back      = "id=239656,bonus_id=8793/8960/12214/12384/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Arcanoweave Lining)
 				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
 				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
 				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
@@ -396,14 +396,14 @@ local GEAR_PLAN = {
 			},
 		},
 		["2t"] = {
-			report = "local SimC", simmed = "2026-09-30", dps = 277089,
+			report = "local SimC", simmed = "2026-09-30", dps = 276146,
 			loadout = "[CP] Raid: Lost Explorers",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZMzGzMzMGz2yYZsMzMzYmBAAAgFwsBjZGMjZZmZmZMmxMAAAAAAADAAAAAwsNziZZmtNwMDwiZwAAYmBAD",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=239656,bonus_id=8793/8960/12214/13771/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Hunter's Ritual Stone)
+				back      = "id=239656,bonus_id=8793/8960/12214/12384/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Arcanoweave Lining)
 				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
 				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
 				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
@@ -418,14 +418,14 @@ local GEAR_PLAN = {
 			},
 		},
 		["3t"] = {
-			report = "local SimC", simmed = "2026-09-30", dps = 319656,
+			report = "local SimC", simmed = "2026-09-30", dps = 318568,
 			loadout = "WS Raid 3T",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAAEAMLzs0sMzyGYmBYhBDAgZGAMA",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=239656,bonus_id=8793/8960/12214/13771/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Hunter's Ritual Stone)
+				back      = "id=239656,bonus_id=8793/8960/12214/12384/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Arcanoweave Lining)
 				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
 				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
 				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
@@ -440,14 +440,14 @@ local GEAR_PLAN = {
 			},
 		},
 		["mplus"] = {
-			report = "local SimC", simmed = "2026-09-30", dps = 205697,
+			report = "local SimC", simmed = "2026-09-30", dps = 204723,
 			loadout = "Dungeon (new)",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYBMbGeAzMYGziZmZmlxMMAAAAAAGYAAAAYmlZZmZGAwCMzMALMYAAAMzGGA",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=239656,bonus_id=8793/8960/12214/13771/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Hunter's Ritual Stone)
+				back      = "id=239656,bonus_id=8793/8960/12214/12384/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Arcanoweave Lining)
 				chest     = "id=239048,enchant_id=7987,bonus_id=13440/6652/13662/12699/12846,ilevel=321", -- Vest of Reverent Adoration
 				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
 				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
@@ -541,9 +541,9 @@ PlanTab.CRAFTED = {
 	},
 }
 -- Embellishment bonus id on a plan line (simc embellishment_data.inc) to the
--- reagent that puts it there.
+-- reagent that puts it there. Hunter's Ritual Stone (13771) is not here: it
+-- goes on blacksmithing weapons only, whatever SimC lets a cloak carry.
 PlanTab.EMBELLISHMENT = {
-	[13771] = { 273059, 1, "Hunter's Ritual Stone" },
 	[12384] = { 240166, 1, "Arcanoweave Lining" },
 }
 PlanTab.REAGENT_NAME = {}
@@ -12914,7 +12914,7 @@ end
 function PlanTab.craftChecks(check)
 	local t = "crafting reagents to buy"
 	local plan = { slots = {
-		back = parsePlanLine("id=239656,bonus_id=8793/13771/12497,ilevel=331"),
+		back = parsePlanLine("id=239656,bonus_id=8793/12384/12497,ilevel=331"),
 		wrist = parsePlanLine("id=244576,bonus_id=8793/12384/12497,ilevel=331"),
 	} }
 	local function said(list)
@@ -12925,10 +12925,9 @@ function PlanTab.craftChecks(check)
 	local list = PlanTab.shoppingList(plan, {})
 	local byId = {}
 	for _, w in ipairs(list) do byId[w.id] = w end
-	check(t .. ", both pieces, 10 reagents, 2 embellishments", #list, 11)
+	check(t .. ", both pieces, 10 reagents, 1 embellishment", #list, 10)
 	check(t .. ", Tantalum is in both recipes", byId[251283] and byId[251283].count, 2)
-	check(t .. ", the cloak's Hunter's Ritual Stone", byId[273059] and byId[273059].count, 1)
-	check(t .. ", the bracers' Arcanoweave Lining", byId[240166] and byId[240166].count, 1)
+	check(t .. ", Arcanoweave Lining for each piece", byId[240166] and byId[240166].count, 2)
 	check(t .. ", every one has a search term", PlanTab.searchTerm("item", 238511), "Void-Tempered Leather")
 	-- Worn at another item level, or in the bags: nothing more to buy.
 	check(t .. ", the cloak worn at 324 needs nothing", said(PlanTab.shoppingList({ slots = { back = plan.slots.back } }, { back = { id = 239656, ilvl = 324, gems = {} } })), "")
