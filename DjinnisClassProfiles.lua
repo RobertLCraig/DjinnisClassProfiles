@@ -9811,6 +9811,7 @@ PlanTab.BAR_ALIASES = {
 	["incarnation: guardian of ursoc"] = "Berserk",
 	["incarnation: chosen of elune"] = "Celestial Alignment",
 	["tiger dash"] = "Dash",  -- card 0082: the talent that replaces Dash
+	["raze"] = "Maul",  -- card 0082: SimulationCraft midnight, Maul is not ready while Raze is talented
 }
 
 -- The category of the druid spell `id` in `from`: by its name, a known
@@ -10554,10 +10555,15 @@ PlanTab.JOB_SPEC = {
 		-- Rob, 2026-10-01: "I normally have growl on alt+2 (I tried having it
 		-- on 2 before, but some builds require use of 2 for things like
 		-- raze/sundering roar, [and] I was prone to growling at things I
-		-- shouldnt". So Growl takes Alt+2, Combat 10's (Convoke, not on his
-		-- Guardian bars) has none ("" is none), Mangle keeps 1 and Thrash 4.
+		-- shouldnt". So Growl takes Alt+2, Mangle keeps 1 and Thrash 4.
+		-- Convoke (Combat 10, Feral's Alt+2) takes Shift+Q, Feral Frenzy's
+		-- key in Feral, both big cooldowns: Rob, "shift q works sure".
 		["Class 7 (Raid Defensive)"] = "MULTIACTIONBAR6BUTTON9", ["Taunt/Quick Access"] = "ACTIONBUTTON8",
-		["Combat 10"] = "", ["Combat 1"] = "ACTIONBUTTON1", ["Combat 2"] = "ACTIONBUTTON4",
+		["Combat 10"] = "ACTIONBUTTON11", ["Combat 1"] = "ACTIONBUTTON1", ["Combat 2"] = "ACTIONBUTTON4",
+		-- Moonfire (the sheet's Combat 6, Shift+Q) keeps T, its key in Feral
+		-- and on Rob's Guardian bars: one spell, one key. Sundering Roar
+		-- (Combat 11, Feral's T) takes 2, where Rob's builds put it.
+		["Combat 6"] = "ACTIONBUTTON6", ["Combat 11"] = "ACTIONBUTTON2",
 	},
 	-- Rob, 2026-09-30: the casters keep their core keys, "Sunfire/Moonfire,
 	-- Wrath, Starfire ... the keys I expect to press as part of my core
@@ -13498,14 +13504,14 @@ function PlanTab.barJobChecks(check)
 	api.find = function(name) return (name == "Mangle" or name == "Thrash" or name == "Recuperate") and 1 or nil end
 	local need = PlanTab.jobPlan({ { frame = "a", slot = 97, binding = "ACTIONBUTTON1" }, { frame = "b", slot = 100, binding = "ACTIONBUTTON4" },
 		{ frame = "c", slot = 99, binding = "ACTIONBUTTON3" }, { frame = "d", slot = 110, binding = "MULTIACTIONBAR3BUTTON3" },
-		{ frame = "e", slot = 111, binding = "MULTIACTIONBAR6BUTTON6" }, { frame = "f", slot = 98, binding = "ACTIONBUTTON2" } },
-		"Guardian", { [98] = S("Mangle"), [99] = S("Mangle") }, api)
+		{ frame = "e", slot = 111, binding = "MULTIACTIONBAR6BUTTON6" }, { frame = "f", slot = 145, binding = "MULTIACTIONBAR5BUTTON1" } },
+		"Guardian", { [145] = S("Mangle"), [99] = S("Mangle") }, api)
 	check(t .. ", an empty key names the spell that belongs there",
 		("%s %s/%s %s/%s"):format(tostring(need[1].job), tostring(need[1].need), tostring(need[1].needKnown), tostring(need[2].need), tostring(need[2].needKnown)),
 		"nil Mangle/true Thrash/true")
 	check(t .. ", a key holding another job names its own spell, not learned is said",
 		("%s/%s/%s"):format(tostring(need[3].state), tostring(need[3].need), tostring(need[3].needKnown)), "move/Swipe/false")
-	check(t .. ", Rob's extras and items too, and a key no job has (Guardian's 2, the build's own) names nothing",
+	check(t .. ", Rob's extras and items too, and a key no job has (bar 6) names nothing",
 		("%s/%s %s/%s %s/%s"):format(tostring(need[4].need), tostring(need[4].needKnown), tostring(need[5].need), tostring(need[5].needKnown), tostring(need[6].need), tostring(need[6].state)),
 		"Recuperate/true Healthstone/true nil/move")
 	check(t .. ", on its own key it names nothing", tostring(PlanTab.jobPlan({ { frame = "a", slot = 97, binding = "ACTIONBUTTON1" } }, "Guardian", { [97] = S("Mangle") }, api)[1].need), "nil")
@@ -13522,9 +13528,31 @@ function PlanTab.barJobChecks(check)
 		end
 	end
 	-- Rob, 2026-10-01: Shift+3 is Prowl in every spec, Guardian's Growl on Alt+2
-	check(t .. ", Guardian: Growl on Alt+2, Mangle keeps 1, Thrash 4, Convoke none",
+	check(t .. ", Guardian: Growl on Alt+2, Mangle keeps 1, Thrash 4, Convoke Shift+Q",
 		table.concat({ PlanTab.jobHome("Guardian", "Taunt/Quick Access"), PlanTab.jobHome("Guardian", "Combat 1"), PlanTab.jobHome("Guardian", "Combat 2"),
-			tostring(PlanTab.jobHome("Guardian", "Combat 10")) }, " "), "ACTIONBUTTON8 ACTIONBUTTON1 ACTIONBUTTON4 nil")
+			tostring(PlanTab.jobHome("Guardian", "Combat 10")) }, " "), "ACTIONBUTTON8 ACTIONBUTTON1 ACTIONBUTTON4 ACTIONBUTTON11")
+	check(t .. ", Guardian's Moonfire keeps T, Sundering Roar takes 2",
+		PlanTab.jobHome("Guardian", "Combat 6") .. " " .. PlanTab.jobHome("Guardian", "Combat 11"), "ACTIONBUTTON6 ACTIONBUTTON2")
+	-- no key holds two jobs in any spec (Convoke and Moonfire both wanted Shift+Q)
+	local twice = true
+	for _, spec in ipairs({ "Feral", "Guardian", "Balance", "Resto" }) do
+		local seen, column = {}, PlanTab.BAR_ABILITIES[spec]
+		for i, job in ipairs(PlanTab.BAR_CATEGORIES) do
+			local home = (column[i] or "") ~= "" and PlanTab.jobHome(spec, job)
+			if home and seen[home] then twice = spec .. ": " .. seen[home] .. " and " .. job .. " on " .. home end
+			if home then seen[home] = job end
+		end
+		for job in pairs(PlanTab.JOB_BUTTONS) do
+			local home = not PlanTab.categoryOf(spec, job) and PlanTab.BAR_ABILITIES[spec] and PlanTab.jobHome(spec, job)
+			local isCat = false
+			for _, c in ipairs(PlanTab.BAR_CATEGORIES) do isCat = isCat or c == job end
+			if home and not isCat and seen[home] then twice = spec .. ": " .. seen[home] .. " and " .. job .. " on " .. home end
+			if home and not isCat then seen[home] = job end
+		end
+	end
+	check(t .. ", no key holds two jobs in any druid spec", twice, true)
+	names[21] = "Raze"
+	check(t .. ", Raze does Maul's job", tostring(PlanTab.jobOf("Guardian", { type = "spell", id = 21 }, api)), "Combat 3")
 	check(t .. ", Prowl on Shift+3's button in every spec",
 		("%s %s %s %s %s"):format(select(2, PlanTab.jobFor("Guardian", "MULTIACTIONBAR6BUTTON9", {})), select(2, PlanTab.jobFor("Feral", "MULTIACTIONBAR6BUTTON9", {})),
 			select(2, PlanTab.jobFor("Balance", "MULTIACTIONBAR6BUTTON9", {})), select(2, PlanTab.jobFor("Resto", "MULTIACTIONBAR6BUTTON9", {})),

@@ -102,3 +102,13 @@ Open: Growl's key in Guardian. Feral / Dungeon and Resto have Growl on the bear 
 **2026-10-01, Rob:** "I think I normally have growl on alt+2 (I tried having it on 2 before, but 1. some builds require use of 2 for things like raze/sundering roar, 2. I was prone to growling at things I shouldnt!" Then: "that does then mean convoke needs to go somewhere on builds that take convoke?" and "I dont just need you to agree with me. I need you to argue the case against where relevant too".
 
 **2026-10-01, Claude.** v0.63.5. `JOB_SPEC.Guardian`: Taunt/Quick Access (Growl) on `ACTIONBUTTON8` (Alt+2); Combat 1 (Mangle) on `ACTIONBUTTON1`, Combat 2 (Thrash) on `ACTIONBUTTON4`, where both are now; Combat 10 (Convoke) none until Rob picks. Guardian's bear page has 2 (slot 98) and Shift+Q (slot 107) empty; Alt+2 (slot 104) was empty too. Open: Convoke's key in Guardian, and whether key 2 floats by build (Rob's practice) or gets one job (the system's aim).
+
+**2026-10-01, Rob:** "1. what does that replace in feral and resto? 2. if sundering roar goes on T where does moonfire go? (which is on t in guardian and feral) - I think I am open to moving it.. 3. shift q works sure I think there used to be an extra defensive that went there but no longer."
+
+**2026-10-01, Claude.** v0.63.6.
+- Convoke (Guardian Combat 10) on Shift+Q (`ACTIONBUTTON11`).
+- That clashed: the sheet's Guardian Combat 6 is Moonfire, whose Feral key is Shift+Q. Proposed and built, for Rob to overrule: Moonfire keeps T in Guardian, as in Feral and on his Guardian bars (one spell, one key beats one category, one key). Sundering Roar (Combat 11, Feral's T) takes 2, where his builds already put it.
+- `BAR_ALIASES.raze = "Maul"`: SimulationCraft midnight `sc_druid.cpp` makes Maul not ready while Raze is talented.
+- New check: no key holds two jobs in any druid spec. It caught the Moonfire and Convoke clash when the Moonfire line is removed.
+- Answer to 1, from his bars: Alt+2 on the Feral and Resto bear pages holds Skull Bash, whose job key is Shift+E, and Shift+E is empty on both. Balance's bear page already has Growl on Alt+2. Shift+Q on the Feral and Resto bear pages holds Frenzied Regeneration (Guardian: Alt+Q), likely the "extra defensive" Rob remembers.
+- Limit: the overlay judges a form page by the spec's own jobs, so Growl on a Feral or Resto bear page has no job to show. Moving it there is by hand, or part of the form-page normalising.
