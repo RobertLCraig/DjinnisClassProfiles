@@ -112,3 +112,27 @@ Open: Growl's key in Guardian. Feral / Dungeon and Resto have Growl on the bear 
 - New check: no key holds two jobs in any druid spec. It caught the Moonfire and Convoke clash when the Moonfire line is removed.
 - Answer to 1, from his bars: Alt+2 on the Feral and Resto bear pages holds Skull Bash, whose job key is Shift+E, and Shift+E is empty on both. Balance's bear page already has Growl on Alt+2. Shift+Q on the Feral and Resto bear pages holds Frenzied Regeneration (Guardian: Alt+Q), likely the "extra defensive" Rob remembers.
 - Limit: the overlay judges a form page by the spec's own jobs, so Growl on a Feral or Resto bear page has no job to show. Moving it there is by hand, or part of the form-page normalising.
+
+**2026-10-01, Rob:** "when you recomend a change / move, I need you to tell me what was already there, not just what you want to move there. 1 sounds good. kick should always be on shift+E. 2. agree. 3. what normally goes there? I think it was a guardian only defensive from TWW doesnt matter anymore, Shift Q on feral is feral frenzy by the looks of it"
+
+**2026-10-01, Claude.** Decided: Growl on Alt+2 in every spec's bear form; the interrupt on Shift+E on every page it is on; Moonfire keeps T and Sundering Roar takes 2 in Guardian. The by-hand moves, each with what the target key holds now (read from SavedVariables 2026-10-01):
+
+| Spec, page | Move | Target key now holds |
+|---|---|---|
+| Feral, bear | Skull Bash Alt+2 to Shift+E | empty |
+| Feral, bear | Growl 2 to Alt+2 | Skull Bash (moving out); 2 is then empty |
+| Resto, bear | Skull Bash Alt+2 to Shift+E | empty |
+| Resto, bear | Growl 2 to Alt+2 | Skull Bash (moving out); 2 is then empty |
+| Resto, cat | Skull Bash Alt+2 to Shift+E | empty; Alt+2 is then empty |
+| Resto, moonkin | Skull Bash Alt+3 to Shift+E | empty; Alt+3 is then free for Lifebloom |
+| Balance, moonkin | Solar Beam Alt+3 to Shift+E | empty; Alt+3 is then free for Lunar Eclipse |
+| Balance, cat | Solar Beam Alt+2 to Shift+E | empty |
+| Balance, caster (bar 1) | Solar Beam Alt+3 to Shift+E | **Rejuvenation**: open, where it goes |
+| Balance, bear | Growl on Alt+2 already | - |
+| Guardian | Skull Bash on Shift+E (bear), the Kick macro (cat) already | - |
+
+Not moved: Resto's caster Shift+E holds Incapacitating Roar; Resto has no interrupt out of form.
+
+Withdrawn: moving Frenzied Regeneration to Alt+Q in Feral and Resto. Alt+Q is bar 7 button 1 (slot 157), which does not change with form, and holds Survival Instincts on Feral, Nature's Swiftness on Resto, nothing on Balance, Frenzied Regeneration on Guardian. The move would have pushed Survival Instincts and Nature's Swiftness out in every form. Frenzied Regeneration stays on Shift+Q on the Feral and Resto bear pages (Feral's cat Shift+Q is Frantic Frenzy); Guardian keeps it on Alt+Q, an accepted exception.
+
+Rob's old Guardian Shift+Q defensive: likely Rage of the Sleeper, which SimulationCraft names 22 times on branch `thewarwithin` and 0 on `midnight`.
