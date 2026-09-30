@@ -10550,9 +10550,14 @@ PlanTab.JOB_SPEC = {
 		["Combat 8"] = "ACTIONBUTTON9", ["Combat 3"] = "ACTIONBUTTON10",
 		-- Rob, 2026-10-01: "really S3 should be growl? when everywhere else
 		-- its shadowmeld/prowl?" Bellular's Guardian column has Growl in
-		-- Taunt/Quick Access and Prowl in Class 7; Prowl takes Shift+3, and
-		-- Growl has no key until Rob picks one ("" is none)
-		["Class 7 (Raid Defensive)"] = "MULTIACTIONBAR6BUTTON9", ["Taunt/Quick Access"] = "",
+		-- Taunt/Quick Access and Prowl in Class 7; Prowl takes Shift+3.
+		-- Rob, 2026-10-01: "I normally have growl on alt+2 (I tried having it
+		-- on 2 before, but some builds require use of 2 for things like
+		-- raze/sundering roar, [and] I was prone to growling at things I
+		-- shouldnt". So Growl takes Alt+2, Combat 10's (Convoke, not on his
+		-- Guardian bars) has none ("" is none), Mangle keeps 1 and Thrash 4.
+		["Class 7 (Raid Defensive)"] = "MULTIACTIONBAR6BUTTON9", ["Taunt/Quick Access"] = "ACTIONBUTTON8",
+		["Combat 10"] = "", ["Combat 1"] = "ACTIONBUTTON1", ["Combat 2"] = "ACTIONBUTTON4",
 	},
 	-- Rob, 2026-09-30: the casters keep their core keys, "Sunfire/Moonfire,
 	-- Wrath, Starfire ... the keys I expect to press as part of my core
@@ -13473,7 +13478,7 @@ function PlanTab.barJobChecks(check)
 		"Feral", { [73] = S("Shred"), [74] = S("Shred") }, api)
 	check(t .. ", on its Feral button is right, elsewhere it moves, empty has no job",
 		("%s %s/%s %s"):format(tostring(plan[1].state), tostring(plan[2].state), tostring(plan[2].want), tostring(plan[3].state)), "right move/ACTIONBUTTON2 nil")
-	local bear = PlanTab.jobPlan({ { frame = "a", slot = 98, binding = "ACTIONBUTTON2" } }, "Guardian", { [98] = S("Mangle") }, api)
+	local bear = PlanTab.jobPlan({ { frame = "a", slot = 97, binding = "ACTIONBUTTON1" } }, "Guardian", { [97] = S("Mangle") }, api)
 	check(t .. ", each spec's own ability for the job", bear[1].job .. "/" .. tostring(bear[1].state), "Combat 1/right")
 	local moon = PlanTab.jobPlan({ { frame = "a", slot = 111, binding = "ACTIONBUTTON3" } }, "Balance", { [111] = S("Wrath") }, api)
 	check(t .. ", Balance keeps Wrath on 3 (Rob, 2026-09-30)", moon[1].job .. "/" .. tostring(moon[1].state), "Combat 1/right")
@@ -13491,19 +13496,19 @@ function PlanTab.barJobChecks(check)
 	check(t .. ", and Maul goes to Alt+4's button", tostring(tank[4].want), "ACTIONBUTTON10")
 	-- Rob, 2026-10-01: the spell that belongs on a key, shown on it
 	api.find = function(name) return (name == "Mangle" or name == "Thrash" or name == "Recuperate") and 1 or nil end
-	local need = PlanTab.jobPlan({ { frame = "a", slot = 98, binding = "ACTIONBUTTON2" }, { frame = "b", slot = 97, binding = "ACTIONBUTTON1" },
-		{ frame = "c", slot = 99, binding = "ACTIONBUTTON3" }, { frame = "d", slot = 100, binding = "MULTIACTIONBAR3BUTTON3" },
-		{ frame = "e", slot = 101, binding = "MULTIACTIONBAR6BUTTON6" }, { frame = "f", slot = 102, binding = "MULTIACTIONBAR5BUTTON1" } },
-		"Guardian", { [97] = S("Mangle"), [99] = S("Mangle") }, api)
+	local need = PlanTab.jobPlan({ { frame = "a", slot = 97, binding = "ACTIONBUTTON1" }, { frame = "b", slot = 100, binding = "ACTIONBUTTON4" },
+		{ frame = "c", slot = 99, binding = "ACTIONBUTTON3" }, { frame = "d", slot = 110, binding = "MULTIACTIONBAR3BUTTON3" },
+		{ frame = "e", slot = 111, binding = "MULTIACTIONBAR6BUTTON6" }, { frame = "f", slot = 98, binding = "ACTIONBUTTON2" } },
+		"Guardian", { [98] = S("Mangle"), [99] = S("Mangle") }, api)
 	check(t .. ", an empty key names the spell that belongs there",
 		("%s %s/%s %s/%s"):format(tostring(need[1].job), tostring(need[1].need), tostring(need[1].needKnown), tostring(need[2].need), tostring(need[2].needKnown)),
 		"nil Mangle/true Thrash/true")
 	check(t .. ", a key holding another job names its own spell, not learned is said",
 		("%s/%s/%s"):format(tostring(need[3].state), tostring(need[3].need), tostring(need[3].needKnown)), "move/Swipe/false")
-	check(t .. ", Rob's extras and items too, and a key no job has names nothing",
-		("%s/%s %s/%s %s"):format(tostring(need[4].need), tostring(need[4].needKnown), tostring(need[5].need), tostring(need[5].needKnown), tostring(need[6].need)),
-		"Recuperate/true Healthstone/true nil")
-	check(t .. ", on its own key it names nothing", tostring(PlanTab.jobPlan({ { frame = "a", slot = 98, binding = "ACTIONBUTTON2" } }, "Guardian", { [98] = S("Mangle") }, api)[1].need), "nil")
+	check(t .. ", Rob's extras and items too, and a key no job has (Guardian's 2, the build's own) names nothing",
+		("%s/%s %s/%s %s/%s"):format(tostring(need[4].need), tostring(need[4].needKnown), tostring(need[5].need), tostring(need[5].needKnown), tostring(need[6].need), tostring(need[6].state)),
+		"Recuperate/true Healthstone/true nil/move")
+	check(t .. ", on its own key it names nothing", tostring(PlanTab.jobPlan({ { frame = "a", slot = 97, binding = "ACTIONBUTTON1" } }, "Guardian", { [97] = S("Mangle") }, api)[1].need), "nil")
 	check(t .. ", Balance's key 3 wants Wrath", select(2, PlanTab.jobFor("Balance", "ACTIONBUTTON3", api)), "Wrath")
 	api.find = nil
 	check(t .. ", Feral keeps its own", PlanTab.jobHome("Feral", "Combat 4") .. "/" .. tostring(PlanTab.jobHome("Feral", nil)), "ACTIONBUTTON7/nil")
@@ -13516,11 +13521,14 @@ function PlanTab.barJobChecks(check)
 			if not (binding == "" or binding:match("^ACTIONBUTTON%d+$") or binding:match("^MULTIACTIONBAR%dBUTTON%d+$")) then every = job end
 		end
 	end
-	-- Rob, 2026-10-01: Shift+3 is Prowl in every spec, Guardian's Growl has no key yet
-	check(t .. ", Prowl on Shift+3's button in every spec, Growl nowhere yet",
+	-- Rob, 2026-10-01: Shift+3 is Prowl in every spec, Guardian's Growl on Alt+2
+	check(t .. ", Guardian: Growl on Alt+2, Mangle keeps 1, Thrash 4, Convoke none",
+		table.concat({ PlanTab.jobHome("Guardian", "Taunt/Quick Access"), PlanTab.jobHome("Guardian", "Combat 1"), PlanTab.jobHome("Guardian", "Combat 2"),
+			tostring(PlanTab.jobHome("Guardian", "Combat 10")) }, " "), "ACTIONBUTTON8 ACTIONBUTTON1 ACTIONBUTTON4 nil")
+	check(t .. ", Prowl on Shift+3's button in every spec",
 		("%s %s %s %s %s"):format(select(2, PlanTab.jobFor("Guardian", "MULTIACTIONBAR6BUTTON9", {})), select(2, PlanTab.jobFor("Feral", "MULTIACTIONBAR6BUTTON9", {})),
 			select(2, PlanTab.jobFor("Balance", "MULTIACTIONBAR6BUTTON9", {})), select(2, PlanTab.jobFor("Resto", "MULTIACTIONBAR6BUTTON9", {})),
-			tostring(PlanTab.jobHome("Guardian", "Taunt/Quick Access"))), "Prowl Prowl Prowl Prowl nil")
+			tostring(select(2, PlanTab.jobFor("Guardian", "ACTIONBUTTON8", {})))), "Prowl Prowl Prowl Prowl Growl")
 	check(t .. ", Guardian's Prowl is called Prowl", PlanTab.jobShort("Class 7 (Raid Defensive)", "Guardian") .. "/" .. PlanTab.jobShort("Class 7 (Raid Defensive)", "Feral"), "Prowl/Raid")
 	for job, binding in pairs(PlanTab.JOB_BUTTONS) do
 		if not (binding:match("^ACTIONBUTTON%d+$") or binding:match("^MULTIACTIONBAR%dBUTTON%d+$")) then every = job end
