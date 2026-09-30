@@ -9955,11 +9955,160 @@ function PlanTab.barsFrom(from, confirmed)
 	return "made"
 end
 
--- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo | from [spec]]
+-- Every build of a spec on the same buttons (card 0079) -----------------------
+-- Rob, 2026-09-30: the abilities he set up on his Dungeon build were missing
+-- on his other Feral builds, and he spent a whole fight dragging them onto
+-- his bars. His three older raid layouts still held the Feral bars from
+-- before he moved 45 or so buttons. So: the bars on screen now become every
+-- build's layout of the spec, and each build keeps only its talent swaps.
+
+-- The spell ids a layout's slots place, as a set.
+function PlanTab.layoutSpells(slots)
+	local set = {}
+	for _, a in pairs(slots or {}) do
+		if a.type == "spell" and a.id then set[a.id] = true end
+	end
+	return set
+end
+
+-- `master` with `own`'s talent swaps kept. A swap is a button where both
+-- hold a spell and own's spell is nowhere on master: Berserk where master
+-- has Incarnation, Tiger Dash where it has Dash. A spell master has on
+-- another button moved there, so master's button wins. Everything else, the
+-- keys too, is master's. Pure. Answers the layout, the swaps kept
+-- ({ slot, id, instead }) and own's spells the result no longer places.
+function PlanTab.matchLayout(master, own)
+	local slots, swaps, onMaster = {}, {}, PlanTab.layoutSpells(master.slots)
+	local ownSlots = type(own) == "table" and type(own.slots) == "table" and own.slots or {}
+	for slot, a in pairs(master.slots or {}) do
+		local o = ownSlots[slot]
+		if a.type == "spell" and o and o.type == "spell" and o.id ~= a.id and not onMaster[o.id] then
+			slots[slot] = { type = "spell", id = o.id }
+			swaps[#swaps + 1] = { slot = slot, id = o.id, instead = a.id }
+		else
+			local copy = {}
+			for k, v in pairs(a) do copy[k] = v end
+			slots[slot] = copy
+		end
+	end
+	table.sort(swaps, function(x, y) return x.slot < y.slot end)
+	local placed, lost, seen = PlanTab.layoutSpells(slots), {}, {}
+	for _, o in pairs(ownSlots) do
+		if o.type == "spell" and o.id and not placed[o.id] and not seen[o.id] then
+			seen[o.id] = true
+			lost[#lost + 1] = o.id
+		end
+	end
+	table.sort(lost)
+	local keys
+	if type(master.keys) == "table" then
+		keys = {}
+		for k, v in pairs(master.keys) do keys[k] = v end
+	end
+	return { slots = slots, keys = keys, saved = master.saved, class = master.class }, swaps, lost
+end
+
+-- The saved build layouts of `spec`, sorted, but not `except`.
+function PlanTab.buildBarKeys(spec, except)
+	local out, prefix = {}, spec .. " / "
+	for key in pairs(barsDB()) do
+		if key:sub(1, #prefix) == prefix and key ~= except then out[#out + 1] = key end
+	end
+	table.sort(out)
+	return out
+end
+
+function PlanTab.spellLabel(id)
+	local ok, name = pcall(C_Spell.GetSpellName, id)
+	return ok and canRead(name) and name or ("spell " .. tostring(id))
+end
+
+-- More > Make every <spec> build use these bars, and /dcp bars match. Asks
+-- first: it rewrites account-wide layouts. `expect` is the spec asked about.
+-- The layouts it replaces are kept for one Put back (matchUndo).
+function PlanTab.matchBuildBars(confirmed, expect)
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return "fenced" end
+	local spec = playerSpec()
+	if not spec then PlanTab.say("The game has not said which spec you are in yet.") return "none" end
+	if expect and spec ~= expect then PlanTab.say("The spec changed since that question, so nothing was matched.") return "none" end
+	local build = PlanTab.activeLoadoutName()
+	local mine = build and (spec .. " / " .. build) or nil
+	local others = PlanTab.buildBarKeys(spec, mine)
+	if not confirmed then
+		if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
+		local names = {}
+		for _, key in ipairs(others) do names[#names + 1] = key:sub(#spec + 4) end
+		PlanTab.prompt("Djinni's Class Profiles: action bars", {
+			("Make every %s build use the bars and keys you have now?"):format(spec),
+			#names > 0 and ("The %s layout and %d build layout%s (%s) take them. Each build keeps only its own talent swaps on the same button."):format(spec, #names, #names == 1 and "" or "s", table.concat(names, ", "))
+				or ("The %s layout takes them. No other build has a layout of its own."):format(spec),
+			"More > Put back the build bars undoes this.",
+		}, {
+			{ label = "Match", onClick = function() PlanTab.matchBuildBars(true, spec) end },
+			{ label = "Cancel" },
+		})
+		return "ask"
+	end
+	local master = PlanTab.captureBars()
+	local undo = { spec = spec, saved = master.saved, layouts = {} }
+	undo.layouts[spec] = barsDB()[spec] or false
+	barsDB()[spec] = master
+	if mine and barsDB()[mine] then
+		undo.layouts[mine] = barsDB()[mine]
+		barsDB()[mine] = (PlanTab.matchLayout(master, nil))
+	end
+	local lines = {}
+	for _, key in ipairs(others) do
+		local old = barsDB()[key]
+		undo.layouts[key] = old
+		local layout, swaps, lost = PlanTab.matchLayout(master, old)
+		barsDB()[key] = layout
+		local kept = {}
+		for _, s in ipairs(swaps) do kept[#kept + 1] = ("%s for %s"):format(PlanTab.spellLabel(s.id), PlanTab.spellLabel(s.instead)) end
+		local gone = {}
+		for _, id in ipairs(lost) do gone[#gone + 1] = PlanTab.spellLabel(id) end
+		lines[#lines + 1] = ("  %s: %s%s"):format(key:sub(#spec + 4),
+			#kept > 0 and ("keeps " .. table.concat(kept, ", ")) or "no talent swaps",
+			#gone > 0 and ("; no longer on its bars: " .. table.concat(gone, ", ")) or "")
+	end
+	db().matchUndo = undo
+	PlanTab.barsSeen = nil  -- offer the matched layout at the next build switch
+	PlanTab.say(("Every %s build now uses these bars: the %s layout%s and %d other build%s. Each one loads when you switch to it. %sMore > Put back the build bars|r%s undoes this.")
+		:format(spec, spec, mine and barsDB()[mine] and (", " .. build) or "", #others, #others == 1 and "" or "s", GOLD, GREY))
+	for _, line in ipairs(lines) do print(line) end
+	PlanTab.barsChanged()
+	return "matched"
+end
+
+function PlanTab.canUnmatch()
+	local u = db().matchUndo
+	return type(u) == "table" and u.spec == playerSpec()
+end
+
+-- Puts back the layouts the last match replaced. Only on its spec, so the
+-- menu item a Guardian sees never undoes a Feral match.
+function PlanTab.unmatchBuildBars()
+	if not PlanTab.canUnmatch() then PlanTab.say("No match to put back for this spec.") return "none" end
+	local u, n = db().matchUndo, 0
+	for key, layout in pairs(u.layouts) do
+		barsDB()[key] = layout or nil
+		n = n + 1
+	end
+	db().matchUndo = nil
+	PlanTab.barsSeen = nil
+	PlanTab.say(("Put back %d %s layout%s from before the match. Your bars on screen are not changed."):format(n, u.spec, n == 1 and "" or "s"))
+	PlanTab.barsChanged()
+	return "unmatched"
+end
+
+-- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo | from [spec] | match | unmatch]
 function PlanTab.barsCommand(rest)
 	local verb, name = rest:match("^(%S+)%s+(.+)$")
 	if rest == "save" then PlanTab.saveBars(false)
 	elseif rest == "save build" then PlanTab.saveBars(true)
+	elseif rest == "match" then PlanTab.matchBuildBars()
+	elseif rest == "unmatch" then PlanTab.unmatchBuildBars()
 	elseif rest == "from" then PlanTab.barsFrom()
 	elseif verb == "from" then PlanTab.barsFrom(name)
 	elseif verb == "save" then PlanTab.saveProfile(name)
@@ -9999,6 +10148,13 @@ function PlanTab.menuItems(where)
 		add({ text = "Save bars for this spec", tip = "Your action bars and key bindings now, kept for every build of this spec that has none of its own.", fn = function() PlanTab.saveBars(false, true) end })
 		add({ text = "Save bars for this build", tip = "Your action bars and key bindings now, kept for the loadout you have selected.", fn = function() PlanTab.saveBars(true, true) end })
 		add({ text = "Undo bars", tip = "Puts back the action bars and key bindings from before the last load.", fn = PlanTab.undoBarsAsk })
+	end
+	-- card 0079
+	if playerSpec() then
+		add({ text = ("Make every %s build use these bars"):format(playerSpec()), tip = "Your action bars and key bindings now become the layout of every build of this spec. Each build keeps only its own talent swaps on the same button (Berserk for Incarnation). Asks first.", fn = function() PlanTab.matchBuildBars() end })
+	end
+	if PlanTab.canUnmatch() then
+		add({ text = "Put back the build bars", tip = "The build layouts of this spec as they were before the last match. Your bars on screen are not changed.", fn = PlanTab.unmatchBuildBars })
 	end
 	local template = PlanTab.templateNow(playerSpec())
 	if template then
@@ -12523,6 +12679,92 @@ end
 
 -- Card 0051: a druid layout as another spec's, on a fixture Master Sheet,
 -- and the generated one's shape.
+-- Card 0079: every build of a spec on the same buttons.
+function PlanTab.barMatchChecks(check)
+	local t = "every build on the same buttons"
+	local S = function(id) return { type = "spell", id = id } end
+	local master = { slots = { [1] = S(10), [2] = S(20), [3] = { type = "item", id = 5 }, [4] = S(30), [5] = { type = "macro", name = "M", index = 3 } },
+		keys = { ["1"] = "ACTIONBUTTON1" }, saved = "2026-09-30", class = 11 }
+	-- 1: a talent swap. 2: a spell master has on 4, an old place. 3: a spell
+	-- over master's item. 6: a spell on a button master leaves empty.
+	local own = { slots = { [1] = S(11), [2] = S(30), [3] = S(40), [4] = S(30), [6] = S(50) }, keys = { ["1"] = "ACTIONBUTTON9", ["2"] = "X" } }
+	local layout, swaps, lost = PlanTab.matchLayout(master, own)
+	local function at(slot) local a = layout.slots[slot] return a and (a.type == "spell" and tostring(a.id) or a.type) or "-" end
+	check(t .. ", a talent swap on the same button is kept", at(1) .. "/" .. #swaps .. "/" .. tostring(swaps[1] and swaps[1].instead), "11/1/10")
+	check(t .. ", a spell master has elsewhere follows master", at(2) .. "/" .. at(4), "20/30")
+	check(t .. ", master's item and macro stay", at(3) .. "/" .. at(5), "item/macro")
+	check(t .. ", a button master leaves empty is empty", at(6), "-")
+	check(t .. ", own's spells no longer placed are listed", table.concat(lost, ","), "40,50")
+	check(t .. ", the keys are master's, as a copy", tostring(layout.keys["1"]) .. "/" .. tostring(layout.keys["2"]) .. "/" .. tostring(layout.keys ~= master.keys), "ACTIONBUTTON1/nil/true")
+	layout.slots[2].id = 99
+	check(t .. ", the slots are copies, so master never changes", master.slots[2].id, 20)
+	check(t .. ", no own layout is a copy of master", (PlanTab.matchLayout(master, nil)).slots[1].id, 10)
+
+	local keys = { "barsFence", "activeLoadoutName", "promptBusy", "prompt", "say", "captureBars", "barsChanged", "barsSeen" }
+	local kept, keptG = {}, { C_SpecializationInfo, C_Spell, print }
+	for i, k in ipairs(keys) do kept[i] = PlanTab[k] end
+	local d = db()
+	local keptBars, keptUndo = d.bars, d.matchUndo
+	local ok, err = pcall(function()
+		local shown, busy, said = nil, false, ""
+		PlanTab.barsFence = function() return nil end
+		PlanTab.activeLoadoutName = function() return "Dungeon" end
+		PlanTab.promptBusy = function() return busy end
+		PlanTab.prompt = function(_, lines, buttons) shown = { lines = lines, buttons = buttons } end
+		PlanTab.say = function(text) said = said .. text end
+		PlanTab.captureBars = function()
+			local c = {}
+			for k, v in pairs(master.slots) do c[k] = v end
+			return { slots = c, keys = { ["1"] = "ACTIONBUTTON1" }, saved = "2026-09-30" }, 5, 1
+		end
+		PlanTab.barsChanged = function() end
+		local printed = {}
+		print = function(...)  -- a check's FAIL line still reaches the real print
+			local line = tostring((...))
+			if line:find("FAIL", 1, true) then keptG[3](...) else printed[#printed + 1] = line end
+		end
+		C_Spell = { GetSpellName = function(id) return "Spell" .. id end }
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }
+		local oldRaid = { slots = { [1] = S(11), [7] = S(70) } }
+		local oldSpec, oldGuardian = { slots = {} }, { slots = {} }
+		d.bars = { Feral = oldSpec, ["Feral / Dungeon"] = { slots = {} }, ["Feral / Raid"] = oldRaid, ["Guardian / Dungeon"] = oldGuardian }
+		d.matchUndo = nil
+
+		busy = true
+		check(t .. ", waits while another question is up", PlanTab.matchBuildBars(), "busy")
+		busy = false
+		check(t .. ", asks first", PlanTab.matchBuildBars() .. "/" .. tostring(d.bars["Feral / Raid"] == oldRaid), "ask/true")
+		check(t .. ", and names the other builds", tostring(shown and shown.lines[2]:find("(Raid)", 1, true) ~= nil), "true")
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 104 end }
+		check(t .. ", a stale Match matches nothing", PlanTab.matchBuildBars(true, "Feral") .. "/" .. tostring(d.bars["Feral / Raid"] == oldRaid), "none/true")
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }
+		shown.buttons[1].onClick()
+		check(t .. ", Match gives the spec and every build master's buttons", tostring(d.bars.Feral.slots[2] and d.bars.Feral.slots[2].id) .. "/"
+			.. tostring(d.bars["Feral / Dungeon"].slots[2] and d.bars["Feral / Dungeon"].slots[2].id) .. "/" .. tostring(d.bars["Feral / Raid"].slots[2] and d.bars["Feral / Raid"].slots[2].id), "20/20/20")
+		check(t .. ", each build keeps its swap and loses its old places", tostring(d.bars["Feral / Raid"].slots[1].id) .. "/" .. tostring(d.bars["Feral / Raid"].slots[7]), "11/nil")
+		check(t .. ", another spec's builds are not touched", tostring(d.bars["Guardian / Dungeon"] == oldGuardian), "true")
+		check(t .. ", the chat names what a build kept and lost", tostring(said:find("Every Feral build", 1, true) ~= nil) .. table.concat(printed, "|"),
+			"true  Raid: keeps Spell11 for Spell10; no longer on its bars: Spell70")
+		check(t .. ", Put back shows in the menu", tostring(PlanTab.canUnmatch()), "true")
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 104 end }
+		check(t .. ", but not on another spec", tostring(PlanTab.canUnmatch()) .. "/" .. PlanTab.unmatchBuildBars(), "false/none")
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }
+		check(t .. ", Put back restores each layout", PlanTab.unmatchBuildBars() .. "/" .. tostring(d.bars["Feral / Raid"] == oldRaid) .. "/" .. tostring(d.bars.Feral == oldSpec) .. "/" .. tostring(d.matchUndo), "unmatched/true/true/nil")
+
+		-- a spec with no layout: Put back removes the one the match made
+		d.bars = { ["Feral / Raid"] = oldRaid }
+		PlanTab.activeLoadoutName = function() return nil end
+		PlanTab.matchBuildBars(true, "Feral")
+		check(t .. ", with no build selected the spec layout still takes the bars", tostring(d.bars.Feral ~= nil) .. "/" .. tostring(d.bars["Feral / Raid"].slots[1].id), "true/11")
+		PlanTab.unmatchBuildBars()
+		check(t .. ", and Put back leaves no spec layout where there was none", tostring(d.bars.Feral), "nil")
+	end)
+	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
+	C_SpecializationInfo, C_Spell, print = keptG[1], keptG[2], keptG[3]
+	d.bars, d.matchUndo = keptBars, keptUndo
+	check(t .. ", ran without error", ok and true or err, true)
+end
+
 function PlanTab.barCategoryChecks(check)
 	local t = "bars from the druid layout"
 	local whole = true
@@ -15775,6 +16017,7 @@ local function selfTest()
 	PlanTab.myBuildChecks(check)  -- card 0057
 	PlanTab.bonusChecks(check)  -- card 0054
 	PlanTab.barCategoryChecks(check)  -- card 0051
+	PlanTab.barMatchChecks(check)  -- card 0079
 	PlanTab.orphanChecks(check)  -- card 0066
 	PlanTab.combatLogChecks(check)  -- card 0076
 	PlanTab.craftChecks(check)  -- card 0078
