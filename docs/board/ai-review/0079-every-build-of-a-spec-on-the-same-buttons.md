@@ -61,3 +61,5 @@ Lua 5.4 stops at line 14171 (`unpack`, from commit 417b207 on 2026-09-27); that 
 ## Comments
 
 **2026-09-30, Rob.** "That's not really what I'm going for... more being able to compare and pick between them." Card `0080` is that. This one stays in: its Put back is shared with `0080`, and a whole-spec match is still one click.
+
+**2026-09-30 22:30, after the heroic raid.** The "no saved layout" gap under Uncertain bit in use. Nymrissa, Entombed Sentinels and Vashnik have no build layout, so their builds loaded the 09-24 spec layout, which holds neither Berserk nor Feral Frenzy; the load cleared those buttons. Match was not run (the 09-23 raid layouts are unchanged). Full read of the saved layouts: SecondBrain `outputs/2026-09-30 Feral saved bars review`. A macro naming both spells of a talent choice would fill a swap button in every build.
