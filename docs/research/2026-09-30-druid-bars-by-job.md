@@ -91,13 +91,13 @@ Each job's key on Feral, then what would move in each other spec. Bellular names
 | Job | Guardian ability (Bellular) | Now on | Would go to |
 |---|---|---|---|
 | Combat 1 | Mangle | not on bars 1/4/7 (Bar 1 (Cat)) | **2** |
-| Combat 2 | Thrash | 4 | **1** — now holds macro: Druid - Mangle |
-| Combat 3 | Maul | not on the bars | **Alt+3** — now holds Lunar Beam |
-| Combat 4 | Frenzied Regeneration | Alt+Q | **Alt+1** — now holds Survival Instincts |
-| Combat 5 | Ironfur | not on bars 1/4/7 (Bottom left (bar 2)) | **5** — now holds Barkskin |
+| Combat 2 | Thrash | 4 | **1** - now holds macro: Druid - Mangle |
+| Combat 3 | Maul | not on the bars | **Alt+3** - now holds Lunar Beam |
+| Combat 4 | Frenzied Regeneration | Alt+Q | **Alt+1** - now holds Survival Instincts |
+| Combat 5 | Ironfur | not on bars 1/4/7 (Bottom left (bar 2)) | **5** - now holds Barkskin |
 | Combat 6 | Moonfire | not on bars 1/4/7 (Bar 1) | **Shift+Q** |
 | Combat 7 | Swipe | 3 | ✓ same |
-| Combat 8 | Lunar Beam | Alt+3 | **Alt+4** — now holds Ursol's Vortex |
+| Combat 8 | Lunar Beam | Alt+3 | **Alt+4** - now holds Ursol's Vortex |
 | Combat 9 | Berserk | Alt+S | ✓ same |
 | Combat 10 | Convoke the Spirits | not on the bars | **Alt+2** |
 | Class 1 (Movement) | Stampeding Roar | Shift+V | ✓ same |
@@ -106,28 +106,28 @@ Each job's key on Feral, then what would move in each other spec. Bellular names
 | Self-Heal 4 (Emergency/Overflow) | Heart of the Wild | Z | ✓ same |
 | Class 5 (Purge) | Soothe | Shift+R | ✓ same |
 | Class 8 (Lust/BRes) | Rebirth | Alt+D | ✓ same |
-| Personal Defensive 1 | Barkskin | 5 | **Alt+W** — now holds macro: Druid - Fur |
-| Personal Defensive 2 | Survival Instincts | Alt+1 | **Alt+Q** — now holds Frenzied Regeneration |
+| Personal Defensive 1 | Barkskin | 5 | **Alt+W** - now holds macro: Druid - Fur |
+| Personal Defensive 2 | Survival Instincts | Alt+1 | **Alt+Q** - now holds Frenzied Regeneration |
 | Movement Ability | Dash | V | ✓ same |
 | CC 2 | Typhoon | not on bars 1/4/7 (Bottom right (bar 3)) | **Shift+D** |
 | Interrupt | Skull Bash | Shift+E | ✓ same |
 | Immune/Spell Immune/Movement | Wild Charge | Alt+E | ✓ same |
-| Taunt/Quick Access | Growl | not on bars 1/4/7 (page 2) | **Shift+3** — now holds Prowl |
+| Taunt/Quick Access | Growl | not on bars 1/4/7 (page 2) | **Shift+3** - now holds Prowl |
 
 ### Balance: what would move to match Feral
 
 | Job | Balance ability (Bellular) | Now on | Would go to |
 |---|---|---|---|
-| Combat 1 | Wrath | 3 | **2** — now holds Moonfire |
-| Combat 2 | Starfire | not on the bars | **1** — now holds Sunfire |
-| Combat 3 | Moonfire | 2 | **Alt+3** — now holds Solar Beam |
-| Combat 4 | Sunfire | 1, 4 | **Alt+1** — now holds Thorn Bloom |
-| Combat 5 | Starsurge | not on bars 1/4/7 (Bar 1) | **5** — now holds Fury of Elune |
-| Combat 6 | Starfall | not on bars 1/4/7 (page 2) | **Shift+Q** — now holds Lunar Eclipse |
-| Combat 7 | Lunar Eclipse | Shift+Q | **3** — now holds Wrath |
-| Combat 8 | Fury of Elune | 5 | **Alt+4** — now holds Soothe |
-| Combat 9 | Celestial Alignment | not on the bars | **Alt+S** — now holds macro: Druid - CA/Trink |
-| Combat 10 | Convoke the Spirits | not on bars 1/4/7 (page 2) | **Alt+2** — now holds Incapacitating Roar |
+| Combat 1 | Wrath | 3 | **2** - now holds Moonfire |
+| Combat 2 | Starfire | not on the bars | **1** - now holds Sunfire |
+| Combat 3 | Moonfire | 2 | **Alt+3** - now holds Solar Beam |
+| Combat 4 | Sunfire | 1, 4 | **Alt+1** - now holds Thorn Bloom |
+| Combat 5 | Starsurge | not on bars 1/4/7 (Bar 1) | **5** - now holds Fury of Elune |
+| Combat 6 | Starfall | not on bars 1/4/7 (page 2) | **Shift+Q** - now holds Lunar Eclipse |
+| Combat 7 | Lunar Eclipse | Shift+Q | **3** - now holds Wrath |
+| Combat 8 | Fury of Elune | 5 | **Alt+4** - now holds Soothe |
+| Combat 9 | Celestial Alignment | not on the bars | **Alt+S** - now holds macro: Druid - CA/Trink |
+| Combat 10 | Convoke the Spirits | not on bars 1/4/7 (page 2) | **Alt+2** - now holds Incapacitating Roar |
 | Class 1 (Movement) | Stampeding Roar | Shift+V | ✓ same |
 | Class 3 (Tag) | Entangling Roots | not on bars 1/4/7 (Bottom right (bar 3)) | **Alt+F** |
 | Self-Heal 1 | Regrowth | not on bars 1/4/7 (Bottom right (bar 3)) | **Shift+1** |
@@ -135,7 +135,7 @@ Each job's key on Feral, then what would move in each other spec. Bellular names
 | Class 5 (Purge) | Soothe | Alt+4 | **Shift+R** |
 | Class 8 (Lust/BRes) | Rebirth | Alt+D | ✓ same |
 | Personal Defensive 1 | Barkskin | not on bars 1/4/7 (page 2) | **Alt+W** |
-| Personal Defensive 2 | — (no Balance ability) | not on the bars | leave Alt+Q free |
+| Personal Defensive 2 | - (no Balance ability) | not on the bars | leave Alt+Q free |
 | Movement Ability | Dash | V | ✓ same |
 | CC 2 | Typhoon | not on bars 1/4/7 (page 2) | **Shift+D** |
 | Interrupt | Solar Beam | Alt+3 | **Shift+E** |
@@ -146,27 +146,27 @@ Each job's key on Feral, then what would move in each other spec. Bellular names
 
 | Job | Resto ability (Bellular) | Now on | Would go to |
 |---|---|---|---|
-| Combat 1 | Wrath | 3 | **2** — now holds Moonfire |
-| Combat 2 | Starfire | not on the bars | **1** — now holds Sunfire |
-| Combat 3 | Moonfire | 2 | **Alt+3** — now holds Tranquility |
+| Combat 1 | Wrath | 3 | **2** - now holds Moonfire |
+| Combat 2 | Starfire | not on the bars | **1** - now holds Sunfire |
+| Combat 3 | Moonfire | 2 | **Alt+3** - now holds Tranquility |
 | Combat 4 | Sunfire | 1 | **Alt+1** |
-| Combat 5 | Rejuvenation | not on the bars | **5** — now holds Cat Form |
+| Combat 5 | Rejuvenation | not on the bars | **5** - now holds Cat Form |
 | Combat 6 | Regrowth | not on bars 1/4/7 (Bottom right (bar 3)) | **Shift+Q** |
-| Combat 7 | Lifebloom | not on the bars | **3** — now holds Wrath |
-| Combat 8 | Swiftmend | not on the bars | **Alt+4** — now holds Soothe |
+| Combat 7 | Lifebloom | not on the bars | **3** - now holds Wrath |
+| Combat 8 | Swiftmend | not on the bars | **Alt+4** - now holds Soothe |
 | Combat 9 | Tranquility | Alt+3 | **Alt+S** |
 | Combat 10 | Incarnation: Tree Of Life | Alt+2 | ✓ same |
 | Class 1 (Movement) | Stampeding Roar | Shift+V | ✓ same |
-| Class 3 (Tag) | Entangling Roots | Alt+A | **Alt+F** — now holds Revitalize |
-| Self-Heal 1 | Nature's Swiftness | Alt+Q | **Shift+1** — now holds macro: EnhanceQoLHealthMacro |
+| Class 3 (Tag) | Entangling Roots | Alt+A | **Alt+F** - now holds Revitalize |
+| Self-Heal 1 | Nature's Swiftness | Alt+Q | **Shift+1** - now holds macro: EnhanceQoLHealthMacro |
 | Self-Heal 4 (Emergency/Overflow) | Heart of the Wild | Z | ✓ same |
 | Class 5 (Purge) | Soothe | Alt+4 | **Shift+R** |
 | Class 8 (Lust/BRes) | Rebirth | Alt+D | ✓ same |
 | Personal Defensive 1 | Barkskin | not on bars 1/4/7 (page 2) | **Alt+W** |
-| Personal Defensive 2 | — (no Resto ability) | not on the bars | leave Alt+Q free — now holds Nature's Swiftness |
+| Personal Defensive 2 | - (no Resto ability) | not on the bars | leave Alt+Q free - now holds Nature's Swiftness |
 | Movement Ability | Dash | V | ✓ same |
 | CC 2 | Typhoon | not on bars 1/4/7 (Bottom right (bar 3)) | **Shift+D** |
-| Interrupt | — (no Resto ability) | not on the bars | leave Shift+E free — now holds Incapacitating Roar |
+| Interrupt | - (no Resto ability) | not on the bars | leave Shift+E free - now holds Incapacitating Roar |
 | Immune/Spell Immune/Movement | Wild Charge | not on bars 1/4/7 (Bottom left (bar 2)) | **Alt+E** |
 | Taunt/Quick Access | Prowl | not on the bars | **Shift+3** |
 
@@ -178,8 +178,8 @@ Every spell or item on the bars of two or more specs. A plain key is on the spec
 |---|---|---|---|---|---|
 | Barkskin | page 2 (no key), Alt+W | 5 | page 2 (no key), Bottom left (bar 2) (no key) | page 2 (no key), Bottom left (bar 2) (no key) | **no** |
 | Carve Meat | Right bar 2 (bar 5) (NUMPAD4) | Right bar 2 (bar 5) (no key) | Right bar 2 (bar 5) (no key), Bar 8 (NUMPAD8) | Right bar 2 (bar 5) (no key) | **no** |
-| Cat Form | Bar 1 bar (5) | — | — | 5 | **no** |
-| Convoke the Spirits | page 2 (no key), Alt+2 | — | page 2 (no key), Bottom left (bar 2) (no key) | Alt+2, page 2 (no key), Bottom left (bar 2) (no key) | **no** |
+| Cat Form | Bar 1 bar (5) | - | - | 5 | **no** |
+| Convoke the Spirits | page 2 (no key), Alt+2 | - | page 2 (no key), Bottom left (bar 2) (no key) | Alt+2, page 2 (no key), Bottom left (bar 2) (no key) | **no** |
 | Dash | V | V, Prowl bar (1) | V, Prowl bar (1) | V, Prowl bar (2) | **no** |
 | Entangling Roots | Alt+F | Alt+A, Prowl bar (Alt+1) | Bottom right (bar 3) (no key) | Alt+A | **no** |
 | Ferocious Bite | page 2 (no key), Alt+1 | Cat bar (4) | Cat bar (2) | Cat bar (Alt+1) | **no** |
@@ -189,7 +189,7 @@ Every spell or item on the bars of two or more specs. A plain key is on the spec
 | Heart of the Wild | Z | Bar 1 bar (Alt+1), Z | Z | Z, Moonkin bar (Alt+1) | **no** |
 | Incapacitating Roar | Shift+W | Bar 1 bar (Alt+2), Shift+W | Bar 1 bar (Alt+2), Bear bar (Alt+1), Alt+2 | Shift+E, Bear bar (Alt+1), Moonkin bar (Alt+2) | **no** |
 | Innervate | Bar 1 bar (Alt+2) | Bar 1 bar (1) | Bottom left (bar 2) (no key) | X | **no** |
-| Ironfur | — | Bottom left (bar 2) (no key) | Bear bar (T) | Bear bar (5) | **no** |
+| Ironfur | - | Bottom left (bar 2) (no key) | Bear bar (T) | Bear bar (5) | **no** |
 | Moonfire | Bar 1 bar (2), Bar 1 bar (Alt+3) | Bar 1 bar (2), Moonkin bar (2) | 2 | 2, Moonkin bar (2) | **no** |
 | Potent Healing Potion | Shift+2 | Bottom right (bar 3) (no key) | Bottom right (bar 3) (no key) | Bottom right (bar 3) (no key) | **no** |
 | Prowl | Prowl bar (Shift+E), Shift+3 | Bottom right (bar 3) (no key), Prowl bar (Shift+E), Shift+3 | Cat bar (Alt+4), Prowl bar (Shift+E) | Prowl bar (Shift+E) | **no** |
@@ -197,41 +197,41 @@ Every spell or item on the bars of two or more specs. A plain key is on the spec
 | Rebirth | Alt+D | Alt+D, Right bar 2 (bar 5) (NUMPAD3) | Alt+D | Alt+D | **no** |
 | Recuperate | C | C | C, Bottom right (bar 3) (Shift+4) | C | **no** |
 | Regrowth | Bar 1 bar (4), Shift+1 | Bottom right (bar 3) (no key), Shift+1 | Bottom right (bar 3) (no key) | Bottom right (bar 3) (no key) | **no** |
-| Revive | — | page 2 (no key), Alt+G | Alt+G | Alt+G | **no** |
+| Revive | - | page 2 (no key), Alt+G | Alt+G | Alt+G | **no** |
 | Rip | page 2 (no key), Alt+3 | Cat bar (Alt+1) | Cat bar (Alt+3) | Cat bar (5) | **no** |
 | Sharpen Your Knife | Right bar 2 (bar 5) (NUMPAD3) | Right bar 2 (bar 5) (no key) | Right bar 2 (bar 5) (no key) | Right bar 2 (bar 5) (no key) | **no** |
-| Shred | 2 | Cat bar (2) | Cat bar (T) | — | **no** |
-| Skull Bash | Bar 1 bar (Shift+E), Shift+E, Bear bar (Alt+2) | Shift+E, Moonkin bar (Alt+2) | — | Cat bar (Alt+2), Bear bar (Alt+2), Moonkin bar (Alt+3) | **no** |
+| Shred | 2 | Cat bar (2) | Cat bar (T) | - | **no** |
+| Skull Bash | Bar 1 bar (Shift+E), Shift+E, Bear bar (Alt+2) | Shift+E, Moonkin bar (Alt+2) | - | Cat bar (Alt+2), Bear bar (Alt+2), Moonkin bar (Alt+3) | **no** |
 | Soothe | Shift+R | Bar 1 bar (Alt+4), Moonkin bar (Alt+3), Shift+R | Bar 1 bar (Alt+4), Bear bar (Alt+3), Alt+4 | Alt+4, Cat bar (Alt+3), Moonkin bar (Alt+4) | **no** |
 | Stampeding Roar | Shift+V | Shift+V, Prowl bar (2) | page 2 (no key), Shift+V, Prowl bar (2), Bear bar (Shift+Q) | Shift+V, Prowl bar (3) | **no** |
 | Starfire | Bar 1 bar (Shift+Q) | Bar 1 bar (4) | Bar 1 bar (4) | Moonkin bar (4) | **no** |
-| Starsurge | — | — | Bar 1 bar (T), page 2 (no key), Bottom left (bar 2) (no key) | Moonkin bar (5) | **no** |
+| Starsurge | - | - | Bar 1 bar (T), page 2 (no key), Bottom left (bar 2) (no key) | Moonkin bar (5) | **no** |
 | Sunfire | Bar 1 bar (1), Moonkin bar (1), Moonkin bar (2) | Bar 1 bar (Alt+3), Moonkin bar (1) | 1, 4 | 1, Moonkin bar (1) | **no** |
-| Survival Instincts | Alt+Q | page 2 (no key), Alt+1 | — | — | **no** |
-| Swipe | 3 | 3 | Cat bar (3) | — | **no** |
+| Survival Instincts | Alt+Q | page 2 (no key), Alt+1 | - | - | **no** |
+| Swipe | 3 | 3 | Cat bar (3) | - | **no** |
 | Thorn Bloom | Shift+A | Shift+A | Alt+1 | Bottom right (bar 3) (no key) | **no** |
 | Typhoon | Shift+D, Prowl bar (T) | Bottom right (bar 3) (no key) | page 2 (no key), Bottom right (bar 3) (no key), Prowl bar (T) | Bottom right (bar 3) (no key) | **no** |
 | Ursol's Vortex | Alt+R | Alt+4 | Bar 1 bar (Shift+Q), Bottom left (bar 2) (no key), Alt+R | page 2 (no key), Bottom left (bar 2) (no key) | **no** |
 | Wild Charge | page 2 (no key), Alt+E | page 2 (no key), Bottom left (bar 2) (no key), Alt+E | Alt+E | Bottom left (bar 2) (no key) | **no** |
 | Wrath | Bar 1 bar (3) | Bar 1 bar (3), Moonkin bar (3) | Bar 1 bar (3), 3 | 3, Moonkin bar (3) | **no** |
-| companion 264058 | Bar 8 (NUMPADDECIMAL, Shift+\) | — | Bar 8 (no key) | Bar 8 (no key) | **no** |
-| item 134020 | Bar 8 (no key) | Bar 8 (NUMPAD0) | — | Bar 8 (no key) | **no** |
-| item 156833 | Bar 8 (no key) | Bar 8 (no key) | — | Bar 8 (NUMPAD0) | **no** |
-| macro: 0 - OneButton | Prowl bar (1), Prowl bar (2), Prowl bar (3), Prowl bar (4), Bear bar (1), Bear bar (3), Bear bar (4) | Cat bar (3) | — | 4, Cat bar (1), Cat bar (2), Cat bar (3), Cat bar (4) | **no** |
-| macro: Druid - Moonfire | T, Alt+T | Bar 1 bar (T), Cat bar (T), T | Bar 1 bar (2) | — | **no** |
+| companion 264058 | Bar 8 (NUMPADDECIMAL, Shift+\) | - | Bar 8 (no key) | Bar 8 (no key) | **no** |
+| item 134020 | Bar 8 (no key) | Bar 8 (NUMPAD0) | - | Bar 8 (no key) | **no** |
+| item 156833 | Bar 8 (no key) | Bar 8 (no key) | - | Bar 8 (NUMPAD0) | **no** |
+| macro: 0 - OneButton | Prowl bar (1), Prowl bar (2), Prowl bar (3), Prowl bar (4), Bear bar (1), Bear bar (3), Bear bar (4) | Cat bar (3) | - | 4, Cat bar (1), Cat bar (2), Cat bar (3), Cat bar (4) | **no** |
+| macro: Druid - Moonfire | T, Alt+T | Bar 1 bar (T), Cat bar (T), T | Bar 1 bar (2) | - | **no** |
 | summonpet BattlePet-0-00000928664F | Bar 8 (NUMPAD8) | Bar 8 (NUMPAD9) | Bar 8 (no key) | Bar 8 (no key) | **no** |
-| summonpet BattlePet-0-0000109502EE | — | Bar 8 (NUMPAD7) | Right bar 2 (bar 5) (no key) | — | **no** |
-| Find High-Value Beasts | Right bar 2 (bar 5) (NUMPAD2) | Right bar 2 (bar 5) (NUMPAD2) | — | — | yes |
-| Fleeting Light's Potential (damage potion) | Alt+A | — | Alt+A | — | yes |
+| summonpet BattlePet-0-0000109502EE | - | Bar 8 (NUMPAD7) | Right bar 2 (bar 5) (no key) | - | **no** |
+| Find High-Value Beasts | Right bar 2 (bar 5) (NUMPAD2) | Right bar 2 (bar 5) (NUMPAD2) | - | - | yes |
+| Fleeting Light's Potential (damage potion) | Alt+A | - | Alt+A | - | yes |
 | Mark of the Wild | Right bar 2 (bar 5) (NUMPAD1) | Right bar 2 (bar 5) (NUMPAD1) | Right bar 2 (bar 5) (NUMPAD1) | Right bar 2 (bar 5) (NUMPAD1) | yes |
-| Remove Corruption | — | Bottom right (bar 3) (no key) | Bottom right (bar 3) (no key) | — | yes |
-| Switch Flight Style | Bar 8 (NUMPAD0) | — | Bar 8 (NUMPAD0) | — | yes |
-| item 6948 | Moonkin bar (Shift+E) | Moonkin bar (Shift+E) | — | — | yes |
-| item 85500 | — | Bar 8 (NUMPADDECIMAL, Shift+\) | — | Bar 8 (NUMPADDECIMAL, Shift+\) | yes |
-| macro: Druid - Innervat | X | X | X | — | yes |
-| macro: Druid -ProwlMeld | — | — | Bottom right (bar 3) (no key) | Bottom right (bar 3) (no key) | yes |
-| macro: TSMMacro | — | Bar 8 (\) | Bar 8 (\) | Bar 8 (\) | yes |
-| summonpet BattlePet-0-00000F7A34C9 | Bar 8 (NUMPAD9) | — | Bar 8 (NUMPAD9) | — | yes |
+| Remove Corruption | - | Bottom right (bar 3) (no key) | Bottom right (bar 3) (no key) | - | yes |
+| Switch Flight Style | Bar 8 (NUMPAD0) | - | Bar 8 (NUMPAD0) | - | yes |
+| item 6948 | Moonkin bar (Shift+E) | Moonkin bar (Shift+E) | - | - | yes |
+| item 85500 | - | Bar 8 (NUMPADDECIMAL, Shift+\) | - | Bar 8 (NUMPADDECIMAL, Shift+\) | yes |
+| macro: Druid - Innervat | X | X | X | - | yes |
+| macro: Druid -ProwlMeld | - | - | Bottom right (bar 3) (no key) | Bottom right (bar 3) (no key) | yes |
+| macro: TSMMacro | - | Bar 8 (\) | Bar 8 (\) | Bar 8 (\) | yes |
+| summonpet BattlePet-0-00000F7A34C9 | Bar 8 (NUMPAD9) | - | Bar 8 (NUMPAD9) | - | yes |
 
 ## Every ability button, by spec
 
@@ -287,34 +287,34 @@ A job in brackets is on the layout but not on bars 1, 4 or 7.
 | Combat 4 | 4 | Bar 1 #7 [Alt+1] | Bar 7 #1 [Alt+Q] | Bar 1 #1 [1], Bar 1 #4 [4] | Bar 1 #1 [1] | no |
 | Combat 5 | Q | Bar 1 #5 [5] | (Bottom left (bar 2)) | (Bar 1) | (Bar 1 (Bear)) | no |
 | Combat 6 | E | Bar 1 #11 [Shift+Q] | (Bar 1) | (page 2) | (Bottom right (bar 3)) | no |
-| Combat 7 | R | Bar 1 #3 [3] | Bar 1 #3 [3] | Bar 1 #11 [Shift+Q] | — | no |
-| Combat 8 | F | Bar 1 #10 [Alt+4] | Bar 1 #9 [Alt+3] | Bar 1 #5 [5] | — | no |
-| Combat 9 | S1 | Bar 4 #8 [Alt+S] | Bar 4 #8 [Alt+S] | — | Bar 1 #9 [Alt+3] | no |
-| Combat 10 | S2 | Bar 1 #8 [Alt+2] | — | (page 2) | Bar 1 #8 [Alt+2] | no |
-| Combat 11 | S3 | (Bar 1) | — | — | (Bottom left (bar 2)) | no |
-| Combat 12 | S4 | (page 2) | — | — | (page 2) | no |
+| Combat 7 | R | Bar 1 #3 [3] | Bar 1 #3 [3] | Bar 1 #11 [Shift+Q] | - | no |
+| Combat 8 | F | Bar 1 #10 [Alt+4] | Bar 1 #9 [Alt+3] | Bar 1 #5 [5] | - | no |
+| Combat 9 | S1 | Bar 4 #8 [Alt+S] | Bar 4 #8 [Alt+S] | - | Bar 1 #9 [Alt+3] | no |
+| Combat 10 | S2 | Bar 1 #8 [Alt+2] | - | (page 2) | Bar 1 #8 [Alt+2] | no |
+| Combat 11 | S3 | (Bar 1) | - | - | (Bottom left (bar 2)) | no |
+| Combat 12 | S4 | (page 2) | - | - | (page 2) | no |
 | Class 1 (Movement) | SQ | Bar 4 #6 [Shift+V] | Bar 4 #6 [Shift+V] | Bar 4 #6 [Shift+V] | Bar 4 #6 [Shift+V] | yes |
 | Class 3 (Tag) | SR | Bar 4 #10 [Alt+F] | Bar 4 #7 [Alt+A] | (Bottom right (bar 3)) | Bar 4 #7 [Alt+A] | no |
-| Class 4 (Special) | SF | — | — | (Bottom left (bar 2)) | — | no |
+| Class 4 (Special) | SF | - | - | (Bottom left (bar 2)) | - | no |
 | Self-Heal 1 | C1 | Bar 7 #7 [Shift+1] | Bar 7 #7 [Shift+1] | (Bottom right (bar 3)) | Bar 7 #1 [Alt+Q] | no |
-| Self-Heal 2 | C2 | (Bar 1 (Bear)) | — | (Bottom left (bar 2)) | (Bar 1 (Bear)) | no |
+| Self-Heal 2 | C2 | (Bar 1 (Bear)) | - | (Bottom left (bar 2)) | (Bar 1 (Bear)) | no |
 | Self-Heal 3 (Overflow) | C3 | (Bar 1) | (Bar 1) | (Bottom left (bar 2)) | Bar 4 #2 [X] | no |
 | Self-Heal 4 (Emergency/Overflow) | C4 | Bar 4 #1 [Z] | Bar 4 #1 [Z] | Bar 4 #1 [Z] | Bar 4 #1 [Z] | yes |
 | Class 5 (Purge) | CQ | Bar 7 #10 [Shift+R] | Bar 7 #10 [Shift+R] | Bar 1 #10 [Alt+4] | Bar 1 #10 [Alt+4] | no |
-| Class 6 (Dispel) | CE | — | (Bottom right (bar 3)) | (Bottom right (bar 3)) | (Bottom right (bar 3)) | no |
-| Class 7 (Raid Defensive) | CR | — | Bar 7 #9 [Shift+3] | — | — | no |
+| Class 6 (Dispel) | CE | - | (Bottom right (bar 3)) | (Bottom right (bar 3)) | (Bottom right (bar 3)) | no |
+| Class 7 (Raid Defensive) | CR | - | Bar 7 #9 [Shift+3] | - | - | no |
 | Class 8 (Lust/BRes) | CF | Bar 4 #9 [Alt+D] | Bar 4 #9 [Alt+D] | Bar 4 #9 [Alt+D] | Bar 4 #9 [Alt+D] | yes |
 | Personal Defensive 1 | Z | Bar 7 #2 [Alt+W] | Bar 1 #5 [5] | (page 2) | (page 2) | no |
-| Personal Defensive 2 | SZ | Bar 7 #1 [Alt+Q] | Bar 1 #7 [Alt+1] | — | — | no |
+| Personal Defensive 2 | SZ | Bar 7 #1 [Alt+Q] | Bar 1 #7 [Alt+1] | - | - | no |
 | Movement Ability | X | Bar 4 #12 [V] | Bar 4 #12 [V] | Bar 4 #12 [V] | Bar 4 #12 [V] | yes |
-| CC | C | (Bar 1) | — | — | — | no |
+| CC | C | (Bar 1) | - | - | - | no |
 | CC 2 | SC | Bar 4 #5 [Shift+D] | (Bottom right (bar 3)) | (page 2) | (Bottom right (bar 3)) | no |
 | Interrupt | V | Bar 1 #12 [Shift+E] | Bar 1 #12 [Shift+E] | Bar 1 #9 [Alt+3] | (Bar 1 (Cat)) | no |
 | Buff | CZ | (Right bar 2 (bar 5)) | (Right bar 2 (bar 5)) | (Right bar 2 (bar 5)) | (Right bar 2 (bar 5)) | no |
-| Res | CX | — | Bar 4 #11 [Alt+G] | Bar 4 #11 [Alt+G] | Bar 4 #11 [Alt+G] | no |
+| Res | CX | - | Bar 4 #11 [Alt+G] | Bar 4 #11 [Alt+G] | Bar 4 #11 [Alt+G] | no |
 | Immune/Spell Immune/Movement | CC | Bar 7 #3 [Alt+E] | Bar 7 #3 [Alt+E] | Bar 7 #3 [Alt+E] | (Bottom left (bar 2)) | no |
 | Taunt/Quick Access | CV | Bar 7 #9 [Shift+3] | (page 2) | (Bar 1 (Cat)) | (Bar 1 (Prowl)) | no |
-| PvP 3 | AC | — | — | — | (Bottom right (bar 3)) | no |
-| Stance 1 | F1 | — | (Bar 1 (Cat)) | — | — | no |
-| Stance 2 | F2 | (Bar 1) | — | — | Bar 1 #5 [5] | no |
-| Stance 4 | F4 | — | — | (Bar 1) | — | no |
+| PvP 3 | AC | - | - | - | (Bottom right (bar 3)) | no |
+| Stance 1 | F1 | - | (Bar 1 (Cat)) | - | - | no |
+| Stance 2 | F2 | (Bar 1) | - | - | Bar 1 #5 [5] | no |
+| Stance 4 | F4 | - | - | (Bar 1) | - | no |

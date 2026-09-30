@@ -35,7 +35,7 @@ rows = []
 for name, per in table.items():
     if len(per) < 2:
         continue
-    cells = [", ".join(per.get(s, [])) or "—" for s, _ in MAIN]
+    cells = [", ".join(per.get(s, [])) or "-" for s, _ in MAIN]
     present = [tuple(sorted(per[s])) for s, _ in MAIN if s in per]
     same = "yes" if len(set(present)) == 1 else "**no**"
     rows.append((same != "yes", name, cells, same))

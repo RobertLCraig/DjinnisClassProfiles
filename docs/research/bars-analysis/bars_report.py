@@ -82,7 +82,7 @@ for c in A["cats"]:
         continue
     cells = []
     for h in where:
-        cells.append(", ".join("%s [%s]" % (bname(x), ", ".join(keys.get(x, [])) or "-") if not x.startswith("(") else x for x in h) or "—")
+        cells.append(", ".join("%s [%s]" % (bname(x), ", ".join(keys.get(x, [])) or "-") if not x.startswith("(") else x for x in h) or "-")
     main = [tuple(h) for h in where if h and not h[0].startswith("(")]
     same = "yes" if len(set(main)) == 1 and len(main) == sum(1 for l in MAIN if A["druid"][c][A["layouts"][l]["spec"]]) else "no"
     print("| %s | %s | %s | %s |" % (c, A["bell_key"].get(c, ""), " | ".join(cells), same))

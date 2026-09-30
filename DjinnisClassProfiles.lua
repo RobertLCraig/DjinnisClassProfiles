@@ -9810,6 +9810,7 @@ PlanTab.BAR_ALIASES = {
 	["incarnation: avatar of ashamane"] = "Berserk",
 	["incarnation: guardian of ursoc"] = "Berserk",
 	["incarnation: chosen of elune"] = "Celestial Alignment",
+	["tiger dash"] = "Dash",  -- card 0082: the talent that replaces Dash
 }
 
 -- The category of the druid spell `id` in `from`: by its name, a known
@@ -10500,13 +10501,200 @@ function PlanTab.compareItems()
 	return out
 end
 
--- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo | from [spec] | match | unmatch | compare <build>]
+-- Each button's job, drawn on the real bars (card 0082) ----------------------
+-- Rob, 2026-09-30: one job on one key in every druid spec, Feral the model
+-- for every job (his answer B), and "yes" to an overlay to review it on. The
+-- job is Bellular's category (BAR_ABILITIES) or, for his own extras, the
+-- spell itself. Where each job belongs is the button it has on his Feral
+-- bars (docs/research/2026-09-30-druid-bars-by-job.md). Keys are the same
+-- in every spec, so a button's binding names where a job sits.
+PlanTab.JOB_BUTTONS = {
+	["Combat 1"] = "ACTIONBUTTON2", ["Combat 2"] = "ACTIONBUTTON1", ["Combat 3"] = "ACTIONBUTTON9",
+	["Combat 4"] = "ACTIONBUTTON7", ["Combat 5"] = "ACTIONBUTTON5", ["Combat 6"] = "ACTIONBUTTON11",
+	["Combat 7"] = "ACTIONBUTTON3", ["Combat 8"] = "ACTIONBUTTON10", ["Combat 9"] = "MULTIACTIONBAR3BUTTON8",
+	["Combat 10"] = "ACTIONBUTTON8", ["Combat 11"] = "ACTIONBUTTON6", ["Interrupt"] = "ACTIONBUTTON12",
+	["Class 1 (Movement)"] = "MULTIACTIONBAR3BUTTON6", ["Class 3 (Tag)"] = "MULTIACTIONBAR3BUTTON10",
+	["Self-Heal 1"] = "MULTIACTIONBAR6BUTTON7", ["Self-Heal 3 (Overflow)"] = "MULTIACTIONBAR3BUTTON2",
+	["Self-Heal 4 (Emergency/Overflow)"] = "MULTIACTIONBAR3BUTTON1", ["Class 5 (Purge)"] = "MULTIACTIONBAR6BUTTON10",
+	["Class 8 (Lust/BRes)"] = "MULTIACTIONBAR3BUTTON9", ["Personal Defensive 1"] = "MULTIACTIONBAR6BUTTON2",
+	["Personal Defensive 2"] = "MULTIACTIONBAR6BUTTON1", ["Movement Ability"] = "MULTIACTIONBAR3BUTTON12",
+	["CC 2"] = "MULTIACTIONBAR3BUTTON5", ["Res"] = "MULTIACTIONBAR3BUTTON11",
+	["Immune/Spell Immune/Movement"] = "MULTIACTIONBAR6BUTTON3", ["Taunt/Quick Access"] = "MULTIACTIONBAR6BUTTON9",
+	["Buff"] = "MULTIACTIONBAR4BUTTON1",
+	-- not in Bellular's list: items, and Rob's own extras, each its own job
+	["Healthstone"] = "MULTIACTIONBAR6BUTTON6", ["Damage Potion"] = "MULTIACTIONBAR3BUTTON7",
+	["Recuperate"] = "MULTIACTIONBAR3BUTTON3", ["Incapacitating Roar"] = "MULTIACTIONBAR6BUTTON8",
+	["Ursol's Vortex"] = "MULTIACTIONBAR6BUTTON4", ["Thorn Bloom"] = "MULTIACTIONBAR6BUTTON11",
+}
+PlanTab.ITEM_JOBS = { [5512] = "Healthstone", [245898] = "Damage Potion" }
+-- a short name drawn on the button; a Combat job is C and its number
+PlanTab.JOB_SHORT = {
+	["Class 1 (Movement)"] = "Roar", ["Class 3 (Tag)"] = "Roots", ["Self-Heal 1"] = "Heal1",
+	["Self-Heal 3 (Overflow)"] = "Heal3", ["Self-Heal 4 (Emergency/Overflow)"] = "Heal4", ["Class 5 (Purge)"] = "Purge",
+	["Class 8 (Lust/BRes)"] = "BRes", ["Personal Defensive 1"] = "Def1", ["Personal Defensive 2"] = "Def2",
+	["Movement Ability"] = "Move", ["CC 2"] = "CC2", ["Interrupt"] = "Kick", ["Res"] = "Res",
+	["Immune/Spell Immune/Movement"] = "Move2", ["Taunt/Quick Access"] = "Taunt", ["Buff"] = "Buff",
+	["Healthstone"] = "Stone", ["Damage Potion"] = "DPot", ["Recuperate"] = "Recup",
+	["Incapacitating Roar"] = "Incap", ["Ursol's Vortex"] = "Vortex", ["Thorn Bloom"] = "Thorn",
+}
+-- bar button name -> its binding's prefix (Blizzard_ActionBar/Shared/MultiActionBars.xml buttonType)
+PlanTab.BUTTON_BINDING = {
+	ActionButton = "ACTIONBUTTON", MultiBarBottomLeftButton = "MULTIACTIONBAR1BUTTON",
+	MultiBarBottomRightButton = "MULTIACTIONBAR2BUTTON", MultiBarRightButton = "MULTIACTIONBAR3BUTTON",
+	MultiBarLeftButton = "MULTIACTIONBAR4BUTTON", MultiBar5Button = "MULTIACTIONBAR5BUTTON",
+	MultiBar6Button = "MULTIACTIONBAR6BUTTON", MultiBar7Button = "MULTIACTIONBAR7BUTTON",
+}
+
+function PlanTab.jobShort(job)
+	return job and (job:match("^Combat (%d+)$") and "C" .. job:match("^Combat (%d+)$") or PlanTab.JOB_SHORT[job] or job) or nil
+end
+
+-- The job of what a slot holds, for `spec`, or nil. `api` is barsApi's
+-- name/base, plus macroSpell(index). A macro's job is its spell's.
+function PlanTab.jobOf(spec, action, api)
+	if not action then return nil end
+	if action.type == "item" then return PlanTab.ITEM_JOBS[action.id] end
+	local id = action.type == "spell" and action.id or action.type == "macro" and api.macroSpell and api.macroSpell(action.index) or nil
+	if not id then return nil end
+	local cat, name = PlanTab.categoryOfSpell(spec, id, api)
+	if cat then return PlanTab.BAR_CATEGORIES[cat] end
+	if name and PlanTab.JOB_BUTTONS[name] then return name end
+	return nil
+end
+
+-- One entry per button: its job, and "right" (on its Feral button), "move"
+-- (it belongs on `want`), or nil (no job). Pure. `buttons` is { frame,
+-- slot, binding }, `slots` the bars now.
+function PlanTab.jobPlan(buttons, spec, slots, api)
+	local plan = {}
+	for _, b in ipairs(buttons) do
+		local job = PlanTab.jobOf(spec, slots[b.slot], api)
+		local want = job and PlanTab.JOB_BUTTONS[job]
+		plan[#plan + 1] = { frame = b.frame, slot = b.slot, binding = b.binding, job = job, want = want,
+			state = want and (want == b.binding and "right" or "move") or nil }
+	end
+	return plan
+end
+
+-- Every shown bar button, its slot and its binding (as ghostButtons, plus
+-- the binding).
+function PlanTab.jobButtons()
+	local ui, out = PlanTab.ghostUI, {}
+	for _, prefix in ipairs(ui.names()) do
+		for i = 1, 12 do
+			local b = ui.button(prefix .. i)
+			local shownNow = b and b:IsVisible()
+			local slot = shownNow and ui.canRead(shownNow) and b.action
+			local binding = PlanTab.BUTTON_BINDING[prefix]
+			if binding and ui.canRead(slot) and type(slot) == "number" then out[#out + 1] = { frame = b, slot = slot, binding = binding .. i } end
+		end
+	end
+	return out
+end
+
+PlanTab.jobLabels = {}
+
+function PlanTab.keyFor(binding)
+	local ok, key = pcall(GetBindingKey, binding)
+	if not (ok and canRead(key) and key) then return "no key" end
+	return (key:gsub("SHIFT%-", "Shift+"):gsub("CTRL%-", "Ctrl+"):gsub("ALT%-", "Alt+"))
+end
+
+function PlanTab.drawJobs()
+	for _, g in ipairs(PlanTab.jobLabels) do g:Hide() end
+	if not PlanTab.jobsOn or InCombatLockdown() then return 0 end
+	local spec = playerSpec()
+	if not spec then return 0 end
+	local ui = PlanTab.ghostUI
+	local top = ui.top():GetEffectiveScale()
+	if not ui.canRead(top) then return 0 end
+	local api = PlanTab.barsApi()
+	api.macroSpell = function(index)
+		local ok, id = pcall(GetMacroSpell, index)
+		return ok and canRead(id) and id or nil
+	end
+	local plan = PlanTab.jobPlan(PlanTab.jobButtons(), spec, api.here, api)
+	local n = 0
+	for _, p in ipairs(plan) do
+		if p.job then
+			n = n + 1
+			local g = PlanTab.jobLabels[n]
+			if not g then
+				g = ui.make()
+				g:SetFrameStrata("DIALOG")
+				g.back = g:CreateTexture(nil, "BACKGROUND")
+				g.back:SetPoint("TOPLEFT")
+				g.back:SetPoint("TOPRIGHT")
+				g.back:SetHeight(15)
+				g.back:SetColorTexture(0, 0, 0, 0.75)
+				g.text = g:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+				g.text:SetPoint("TOP", 0, -1)
+				g.to = g:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+				g.to:SetPoint("BOTTOM", 0, 1)
+				PlanTab.jobLabels[n] = g
+			end
+			local l, b, w, h = p.frame:GetRect()
+			local scale = p.frame:GetEffectiveScale()
+			if ui.canRead(l) and l and ui.canRead(scale) then
+				local s = scale / top
+				g:ClearAllPoints()
+				g:SetPoint("BOTTOMLEFT", ui.top(), "BOTTOMLEFT", l * s, b * s)
+				g:SetSize(w * s, h * s)
+				g.text:SetText(PlanTab.jobShort(p.job))
+				if p.state == "right" then
+					g.text:SetTextColor(0.2, 1, 0.2)
+					g.to:SetText("")
+				else
+					g.text:SetTextColor(1, 0.6, 0)
+					g.to:SetText("to " .. PlanTab.keyFor(p.want))
+					g.to:SetTextColor(1, 0.6, 0)
+				end
+				g:Show()
+			end
+		end
+	end
+	return n
+end
+
+-- More > Show jobs on the bars. Redrawn when the bars, the form or the spec
+-- change; gone in combat.
+function PlanTab.toggleJobs(on)
+	if on == nil then on = not PlanTab.jobsOn end
+	PlanTab.jobsOn = on or nil
+	local f = PlanTab.jobFrame
+	if not f then
+		f = CreateFrame("Frame")
+		f:SetScript("OnEvent", function(_, event)
+			if event == "PLAYER_REGEN_DISABLED" then
+				for _, g in ipairs(PlanTab.jobLabels) do g:Hide() end
+			elseif not PlanTab.jobWait then
+				PlanTab.jobWait = true
+				PlanTab.later(0.2, function() PlanTab.jobWait = nil pcall(PlanTab.drawJobs) end)
+			end
+		end)
+		PlanTab.jobFrame = f
+	end
+	for _, event in ipairs({ "ACTIONBAR_SLOT_CHANGED", "UPDATE_SHAPESHIFT_FORM", "ACTIONBAR_PAGE_CHANGED", "UPDATE_BONUS_ACTIONBAR",
+		"PLAYER_SPECIALIZATION_CHANGED", "PLAYER_REGEN_ENABLED", "PLAYER_REGEN_DISABLED", "UPDATE_BINDINGS" }) do
+		if on then pcall(f.RegisterEvent, f, event) else pcall(f.UnregisterEvent, f, event) end
+	end
+	local n = PlanTab.drawJobs()
+	if on then
+		PlanTab.say(("Jobs on your bars: %d buttons. Green: on its Feral key. Amber: it belongs on the key shown. More > Hide jobs turns it off."):format(n))
+	else
+		PlanTab.say("Jobs on your bars: off.")
+	end
+	return n
+end
+
+-- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo | from [spec] | match | unmatch | compare <build> | jobs]
 function PlanTab.barsCommand(rest)
 	local verb, name = rest:match("^(%S+)%s+(.+)$")
 	if rest == "save" then PlanTab.saveBars(false)
 	elseif rest == "save build" then PlanTab.saveBars(true)
 	elseif rest == "match" then PlanTab.matchBuildBars()
 	elseif rest == "unmatch" then PlanTab.unmatchBuildBars()
+	elseif rest == "jobs" then PlanTab.toggleJobs()
 	elseif verb == "compare" then
 		local spec = playerSpec()
 		local key = spec and (name:lower() == spec:lower() and spec or (spec .. " / " .. name))
@@ -10555,6 +10743,8 @@ function PlanTab.menuItems(where)
 	if playerSpec() then
 		add({ text = ("Make every %s build use these bars"):format(playerSpec()), tip = "Your action bars and key bindings now become the layout of every build of this spec. Each build keeps only its own talent swaps on the same button (Berserk for Incarnation). Asks first.", fn = function() PlanTab.matchBuildBars() end })
 	end
+	-- card 0082
+	add({ text = PlanTab.jobsOn and "Hide jobs on the bars" or "Show jobs on the bars", tip = "Writes each button's job on it (C1 is Combat 1, Kick the interrupt). Green: on its Feral key. Amber: it belongs on the key shown.", fn = function() PlanTab.toggleJobs() end })
 	-- card 0080
 	local compare = PlanTab.compareItems()
 	if #compare > 0 then
@@ -13169,6 +13359,48 @@ function PlanTab.barMatchChecks(check)
 	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
 	C_SpecializationInfo, C_Spell, print = keptG[1], keptG[2], keptG[3]
 	d.bars, d.matchUndo = keptBars, keptUndo
+	check(t .. ", ran without error", ok and true or err, true)
+end
+
+-- Card 0082: each button's job, drawn on the real bars.
+function PlanTab.barJobChecks(check)
+	local t = "jobs on the bars"
+	check(t .. ", short names", table.concat({ PlanTab.jobShort("Combat 3"), PlanTab.jobShort("Interrupt"), PlanTab.jobShort("Personal Defensive 2"), tostring(PlanTab.jobShort(nil)) }, " "), "C3 Kick Def2 nil")
+	local ids = { Shred = 1, Rip = 2, Mangle = 3, Recuperate = 4, ["Frantic Frenzy"] = 5, ["Tiger Dash"] = 6, Nothing = 7, Wrath = 8 }
+	local names = {}
+	for name, id in pairs(ids) do names[id] = name end
+	local api = { name = function(id) return names[id] end, macroSpell = function(index) return index == 50 and 2 or nil end }
+	local S = function(name) return { type = "spell", id = ids[name] } end
+	check(t .. ", a spell's job is its Bellular category", PlanTab.jobOf("Feral", S("Shred"), api), "Combat 1")
+	check(t .. ", a macro's job is its spell's", PlanTab.jobOf("Feral", { type = "macro", name = "M", index = 50 }, api), "Combat 3")
+	check(t .. ", a macro with no spell has none", tostring(PlanTab.jobOf("Feral", { type = "macro", name = "M", index = 51 }, api)), "nil")
+	check(t .. ", a known item's job", PlanTab.jobOf("Feral", { type = "item", id = 5512 }, api) .. "/" .. tostring(PlanTab.jobOf("Feral", { type = "item", id = 1 }, api)), "Healthstone/nil")
+	check(t .. ", Rob's own extras are jobs by name", PlanTab.jobOf("Guardian", S("Recuperate"), api), "Recuperate")
+	check(t .. ", a talent standing in for the sheet's spell", PlanTab.jobOf("Feral", S("Frantic Frenzy"), api) .. "/" .. PlanTab.jobOf("Feral", S("Tiger Dash"), api), "Combat 6/Movement Ability")
+	check(t .. ", nothing known has no job", tostring(PlanTab.jobOf("Feral", S("Nothing"), api)) .. "/" .. tostring(PlanTab.jobOf("Feral", nil, api)), "nil/nil")
+	local plan = PlanTab.jobPlan({ { frame = "a", slot = 74, binding = "ACTIONBUTTON2" }, { frame = "b", slot = 73, binding = "ACTIONBUTTON1" }, { frame = "c", slot = 75, binding = "ACTIONBUTTON3" } },
+		"Feral", { [73] = S("Shred"), [74] = S("Shred") }, api)
+	check(t .. ", on its Feral button is right, elsewhere it moves, empty has no job",
+		("%s %s/%s %s"):format(tostring(plan[1].state), tostring(plan[2].state), tostring(plan[2].want), tostring(plan[3].state)), "right move/ACTIONBUTTON2 nil")
+	local bear = PlanTab.jobPlan({ { frame = "a", slot = 98, binding = "ACTIONBUTTON2" } }, "Guardian", { [98] = S("Mangle") }, api)
+	check(t .. ", each spec's own ability for the job", bear[1].job .. "/" .. tostring(bear[1].state), "Combat 1/right")
+	local moon = PlanTab.jobPlan({ { frame = "a", slot = 111, binding = "ACTIONBUTTON3" } }, "Balance", { [111] = S("Wrath") }, api)
+	check(t .. ", Balance's Wrath belongs on Shred's key", moon[1].job .. "/" .. tostring(moon[1].want), "Combat 1/ACTIONBUTTON2")
+	local every = true
+	for job, binding in pairs(PlanTab.JOB_BUTTONS) do
+		if not (binding:match("^ACTIONBUTTON%d+$") or binding:match("^MULTIACTIONBAR%dBUTTON%d+$")) then every = job end
+	end
+	check(t .. ", every job's button is a binding name", every, true)
+	local keptDraw, keptSay, keptOn = PlanTab.drawJobs, PlanTab.say, PlanTab.jobsOn
+	local ok, err = pcall(function()
+		PlanTab.drawJobs, PlanTab.say = function() return 3 end, function() end
+		PlanTab.jobsOn = nil
+		PlanTab.toggleJobs()
+		local on = PlanTab.jobsOn
+		PlanTab.toggleJobs()
+		check(t .. ", the menu item turns it on, then off", tostring(on) .. "/" .. tostring(PlanTab.jobsOn), "true/nil")
+	end)
+	PlanTab.drawJobs, PlanTab.say, PlanTab.jobsOn = keptDraw, keptSay, keptOn
 	check(t .. ", ran without error", ok and true or err, true)
 end
 
@@ -16566,6 +16798,7 @@ local function selfTest()
 	PlanTab.barMatchChecks(check)  -- card 0079
 	PlanTab.barCompareChecks(check)  -- card 0080
 	PlanTab.barOnlyChecks(check)  -- card 0081
+	PlanTab.barJobChecks(check)  -- card 0082
 	PlanTab.orphanChecks(check)  -- card 0066
 	PlanTab.combatLogChecks(check)  -- card 0076
 	PlanTab.craftChecks(check)  -- card 0078

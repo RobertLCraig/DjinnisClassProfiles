@@ -53,12 +53,12 @@ for spec in OTHERS:
         target = model[c]
         if now == [target]:
             state = "same key already"
-            print("| %s | %s | %s | ✓ same |" % (c, ability or "—", keys.get(target, "-")))
+            print("| %s | %s | %s | ✓ same |" % (c, ability or "-", keys.get(target, "-")))
             continue
         where = ", ".join(keys.get(b, b) for b in now) or (("not on bars 1/4/7 (" + elsewhere[0] + ")") if elsewhere else "not on the bars")
         taken = grid.get(target)
-        clash = (" — now holds " + taken["what"]) if taken and c not in taken["cats"] else ""
+        clash = (" - now holds " + taken["what"]) if taken and c not in taken["cats"] else ""
         if not ability:
-            print("| %s | — (no %s ability) | %s | leave %s free%s |" % (c, spec, where, keys.get(target, "-"), clash))
+            print("| %s | - (no %s ability) | %s | leave %s free%s |" % (c, spec, where, keys.get(target, "-"), clash))
         else:
             print("| %s | %s | %s | **%s**%s |" % (c, ability, where, keys.get(target, "-"), clash))

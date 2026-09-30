@@ -43,3 +43,9 @@ Dash, Innervate). Each spec also carries its own copy of the cat, bear and moonk
 <!-- AC:END -->
 
 ## Comments
+
+**2026-09-30, Rob.** 1: "B (Although Guardian is for the most part setup relatively well for me, so would need to review any changes)". 2: "yes" to the overlay.
+
+**2026-09-30, Claude.** Overlay built, v0.63.0. More > Show jobs on the bars (`/dcp bars jobs`). Each Blizzard bar button with a job gets its short name (C1 to C11, Kick, Def1, Heal4 and so on): green when it sits on its Feral button, amber with "to <key>" when it belongs elsewhere. The job table is `PlanTab.JOB_BUTTONS`, read off Feral / Dungeon: the 27 Bellular jobs Rob has a key for, plus Healthstone, Damage Potion and his own extras (Recuperate, Incapacitating Roar, Ursol's Vortex, Thorn Bloom). A macro counts as its spell (`GetMacroSpell`, which Blizzard's own `ActionButtonOverrides.lua` calls; it is not in the API docs). Redrawn on bar, form, spec and binding changes; hidden in combat. Tiger Dash joins `BAR_ALIASES` as Dash. Checks: `PlanTab.barJobChecks`, 14 lines; six mutations each made 1 to 2 fail.
+
+Next: Rob reviews each spec with the overlay on (Guardian first, as he asked), says which amber ones are wrong, and the table changes to suit. Then each spec's layout is made from the table, Guardian's only after he has seen its changes.
