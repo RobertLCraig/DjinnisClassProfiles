@@ -53,3 +53,7 @@ Next: Rob reviews each spec with the overlay on (Guardian first, as he asked), s
 **2026-09-30, Rob, Guardian review with the overlay (screenshots):** "keep Frenzied Regeneration on Alt+Q, keep Survival Instincts on Alt+1, keep Lunar Beam on Alt+3".
 
 **2026-09-30, Claude.** v0.63.1. `PlanTab.JOB_SPEC.Guardian` holds those three (Combat 4 on Alt+Q, Personal Defensive 2 on Alt+1, Combat 8 on Alt+3), read through `PlanTab.jobHome`. That takes Rip's key (Alt+3, Combat 3) from Maul, so **Maul goes to Alt+4** (Combat 8's Feral key, free once Ursol's Vortex moves to Alt+R): proposed, for Rob to confirm. Also fixed from the screenshots: a job with no short name drew its whole name ("Class 7 (Raid Defensive)"); every Bellular job now has one, and a job with no agreed key is grey with no "to". Three more mutations each made 1 to 2 checks fail.
+
+**2026-09-30, Rob, on Balance:** the overlay's moves for Sunfire, Moonfire, Wrath and Starfire are the keys of his core rotation, "not sure I could deal with moving" them. Given two choices he picked the casters keeping their core keys; "starfire is on 4".
+
+**2026-09-30, Claude.** v0.63.2. `PlanTab.JOB_SPEC.Balance` and `.Resto`: Sunfire 1 (Combat 4), Moonfire 2 (Combat 3), Wrath 3 (Combat 1), Starfire 4 (Combat 2). Combat 7 (Lunar Eclipse, Lifebloom) then takes Alt+3, Rip's Feral key, which Moonfire leaves: proposed, for Rob to confirm with the overlay. Every other job still follows Feral.

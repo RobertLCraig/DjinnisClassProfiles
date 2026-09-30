@@ -10549,6 +10549,18 @@ PlanTab.JOB_SPEC = {
 		["Combat 4"] = "MULTIACTIONBAR6BUTTON1", ["Personal Defensive 2"] = "ACTIONBUTTON7",
 		["Combat 8"] = "ACTIONBUTTON9", ["Combat 3"] = "ACTIONBUTTON10",
 	},
+	-- Rob, 2026-09-30: the casters keep their core keys, "Sunfire/Moonfire,
+	-- Wrath, Starfire ... the keys I expect to press as part of my core
+	-- rotation"; "starfire is on 4". Combat 7 (Lunar Eclipse, Lifebloom)
+	-- then takes Alt+3, Rip's Feral key, which Moonfire no longer needs.
+	Balance = {
+		["Combat 1"] = "ACTIONBUTTON3", ["Combat 2"] = "ACTIONBUTTON4", ["Combat 3"] = "ACTIONBUTTON2",
+		["Combat 4"] = "ACTIONBUTTON1", ["Combat 7"] = "ACTIONBUTTON9",
+	},
+	Resto = {
+		["Combat 1"] = "ACTIONBUTTON3", ["Combat 2"] = "ACTIONBUTTON4", ["Combat 3"] = "ACTIONBUTTON2",
+		["Combat 4"] = "ACTIONBUTTON1", ["Combat 7"] = "ACTIONBUTTON9",
+	},
 }
 
 -- Where `job` belongs for `spec`: the spec's own choice, else Feral's.
@@ -13406,7 +13418,10 @@ function PlanTab.barJobChecks(check)
 	local bear = PlanTab.jobPlan({ { frame = "a", slot = 98, binding = "ACTIONBUTTON2" } }, "Guardian", { [98] = S("Mangle") }, api)
 	check(t .. ", each spec's own ability for the job", bear[1].job .. "/" .. tostring(bear[1].state), "Combat 1/right")
 	local moon = PlanTab.jobPlan({ { frame = "a", slot = 111, binding = "ACTIONBUTTON3" } }, "Balance", { [111] = S("Wrath") }, api)
-	check(t .. ", Balance's Wrath belongs on Shred's key", moon[1].job .. "/" .. tostring(moon[1].want), "Combat 1/ACTIONBUTTON2")
+	check(t .. ", Balance keeps Wrath on 3 (Rob, 2026-09-30)", moon[1].job .. "/" .. tostring(moon[1].state), "Combat 1/right")
+	check(t .. ", the casters' core keys", table.concat({ PlanTab.jobHome("Balance", "Combat 2"), PlanTab.jobHome("Resto", "Combat 3"),
+		PlanTab.jobHome("Resto", "Combat 4"), PlanTab.jobHome("Balance", "Combat 7"), PlanTab.jobHome("Balance", "Interrupt") }, " "),
+		"ACTIONBUTTON4 ACTIONBUTTON2 ACTIONBUTTON1 ACTIONBUTTON9 ACTIONBUTTON12")
 	-- Rob's Guardian keeps (2026-09-30)
 	local gid = { ["Frenzied Regeneration"] = 11, ["Survival Instincts"] = 12, ["Lunar Beam"] = 13, Maul = 14 }
 	for name, id in pairs(gid) do names[id] = name end
