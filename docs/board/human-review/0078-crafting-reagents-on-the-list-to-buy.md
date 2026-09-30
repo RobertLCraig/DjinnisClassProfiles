@@ -16,6 +16,8 @@ finds every quality of a reagent; the price is the first quality's. v0.59.1: the
 
 v0.59.2: Rob found in game that Hunter's Ritual Stone goes on blacksmithing weapons only (Darkmoon Sigil: Hunt is weapons too). The plan's cloak takes Arcanoweave Lining instead, the best armor embellishment in a local SimC run (Arcanoweave on both: +2.49 ST / +3.01 M+, against +2.84 / +3.50 claimed for the stone). The four Feral cells' dps are scaled by that. Uncertain: whether two Arcanoweave Linings may be worn; SimC's own MID2 Feral profile wears two.
 
+v0.59.3: each recipe also lists its missive, the item that sets the crafted stats: Thalassian Missive of the Peerless (crit/mastery) on the cloak, of the Feverflare (haste/mastery) on the bracers. Local SimC put all six pairs on each piece within 0.1% of each other, so these are SimC's defaults kept, not a real gain.
+
 Checks in `selfTest` (`PlanTab.craftChecks`): 11 lines for the two pieces, Tantalum counted twice,
 Arcanoweave Lining counted twice, nothing when worn at another item level or held. Broken on purpose once
 (embellishments dropped) and three checks failed.

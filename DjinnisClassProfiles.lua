@@ -534,10 +534,14 @@ PlanTab.CRAFTED = {
 	[239656] = { -- Adherent's Silken Shroud, tailoring recipe 1228950
 		{ 251691, 5, "Embroidery Floss" }, { 251283, 1, "Tormented Tantalum" }, { 239198, 6, "Arcanoweave Bolt" },
 		{ 239201, 6, "Sunfire Silk Bolt" }, { 243602, 3, "Radiant Shard" },
+		-- The missive sets the crafted stats; the plan line's crafted_stats=49/32. Every
+		-- pair simmed within 0.1% of the others (2026-09-30), so a cheaper one is fine.
+		{ 245789, 1, "Thalassian Missive of the Peerless" }, -- crit and mastery
 	},
 	[244576] = { -- Silvermoon Agent's Deflectors, leatherworking recipe 1237514
 		{ 251283, 1, "Tormented Tantalum" }, { 238511, 100, "Void-Tempered Leather" }, { 238513, 50, "Void-Tempered Scales" },
 		{ 244633, 1, "Infused Scalewoven Hide" }, { 244635, 1, "Sin'dorei Armor Banding" },
+		{ 245783, 1, "Thalassian Missive of the Feverflare" }, -- haste and mastery, crafted_stats=49/36
 	},
 }
 -- Embellishment bonus id on a plan line (simc embellishment_data.inc) to the
@@ -12925,7 +12929,7 @@ function PlanTab.craftChecks(check)
 	local list = PlanTab.shoppingList(plan, {})
 	local byId = {}
 	for _, w in ipairs(list) do byId[w.id] = w end
-	check(t .. ", both pieces, 10 reagents, 1 embellishment", #list, 10)
+	check(t .. ", both pieces, 10 reagents, 2 missives, 1 embellishment", #list, 12)
 	check(t .. ", Tantalum is in both recipes", byId[251283] and byId[251283].count, 2)
 	check(t .. ", Arcanoweave Lining for each piece", byId[240166] and byId[240166].count, 2)
 	check(t .. ", every one has a search term", PlanTab.searchTerm("item", 238511), "Void-Tempered Leather")
