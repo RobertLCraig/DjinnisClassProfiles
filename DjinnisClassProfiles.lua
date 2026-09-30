@@ -440,7 +440,7 @@ local GEAR_PLAN = {
 			},
 		},
 		["mplus"] = {
-			report = "local SimC", simmed = "2026-09-30", dps = 204723,
+			report = "local SimC", simmed = "2026-09-30", dps = 203335,
 			loadout = "Dungeon (new)",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYBMbGeAzMYGziZmZmlxMMAAAAAAGYAAAAYmlZZmZGAwCMzMALMYAAAMzGGA",
 			slots = {
@@ -456,7 +456,7 @@ local GEAR_PLAN = {
 				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
 				finger1   = "id=272147,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
 				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
-				trinket1  = "id=270174,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/60", -- Idol of the Howling Nexus
+				trinket1  = "id=250259,bonus_id=12854/13440/42/12699,ilevel=334,upgrade=3446/100", -- Sapling of the Dawnroot: the Idol at 321 sims only +0.3% M+ (2026-09-30 14:19 export), not worth its crests
 				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
 				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
 			},
