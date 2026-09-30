@@ -8354,6 +8354,8 @@ function PlanTab.rowMenuItems(e, state)
 		add({ text = "Delete...", tip = "Asks first. Deletes your build, and its loadout on this character unless you are wearing it.", fn = function() PlanTab.deleteMyAsk(name) end })
 	end
 	if code then add({ text = "Export...", tip = "Shows its import string, selected, ready to copy with Ctrl+C.", fn = function() PlanTab.showExport(name, code) end }) end
+	-- card 0080
+	if e.bars and spec then add({ text = "Compare its bars with yours", tip = "Its buttons over yours, where they differ. Click one to take it.", fn = function() PlanTab.compareStart(spec .. " / " .. name) end }) end
 	return items
 end
 
@@ -10097,18 +10099,392 @@ function PlanTab.unmatchBuildBars()
 	end
 	db().matchUndo = nil
 	PlanTab.barsSeen = nil
-	PlanTab.say(("Put back %d %s layout%s from before the match. Your bars on screen are not changed."):format(n, u.spec, n == 1 and "" or "s"))
+	PlanTab.say(("Put back %d %s layout%s as they were before. Your bars on screen are not changed."):format(n, u.spec, n == 1 and "" or "s"))
 	PlanTab.barsChanged()
 	return "unmatched"
 end
 
--- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo | from [spec] | match | unmatch]
+-- Compare a build's bars with yours, and pick (card 0080) ---------------------
+-- Rob, 2026-09-30, on 0079's match: "not really what I'm going for... more
+-- being able to compare and pick between them". His picks: on the real bars,
+-- and a pick goes only to the builds he ticks. A saved layout's buttons show
+-- over his bars where they differ, as 0046's preview, but clickable: a click
+-- takes that build's action onto his bar, a shift-click keeps his own. Both
+-- are picks, drawn green. Save picks to... writes only the picked buttons
+-- into the layouts he ticks. More > Put back the build bars undoes a save.
+
+PlanTab.compareGhosts = {}
+
+-- The ghosts compare mode draws: a button where `theirs` differs from `now`,
+-- or one picked. Pure, for the checks. `picks` is slot -> { action }.
+function PlanTab.comparePlan(theirs, buttons, now, picks)
+	local plan = {}
+	for _, b in ipairs(buttons) do
+		local slot = b.slot
+		if PlanTab.barSlot(slot) then
+			local pick = picks[slot]
+			if pick or not sameAction(theirs[slot], now[slot]) then
+				plan[#plan + 1] = { frame = b.frame, slot = slot, entry = pick and (pick.action or nil) or theirs[slot], picked = pick ~= nil }
+			end
+		end
+	end
+	return plan
+end
+
+function PlanTab.actionLabel(a)
+	if not a then return "nothing" end
+	if a.type == "spell" then return PlanTab.spellLabel(a.id) end
+	if a.type == "macro" then return "macro " .. tostring(a.name) end
+	if a.type == "item" then
+		local ok, name = pcall(C_Item.GetItemNameByID, a.id)
+		return ok and canRead(name) and name or ("item " .. tostring(a.id))
+	end
+	return a.type .. " " .. tostring(a.id)
+end
+
+function PlanTab.copyAction(a)
+	if not a then return nil end
+	local c = {}
+	for k, v in pairs(a) do c[k] = v end
+	return c
+end
+
+-- Starts comparing with the saved layout `key`. Answers how many buttons differ.
+function PlanTab.compareStart(key)
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return "fenced" end
+	local layout = key and barsDB()[key]
+	if not (layout and type(layout.slots) == "table") then PlanTab.say(("No saved %s layout."):format(tostring(key))) return "none" end
+	local c = PlanTab.compare
+	if not (c and c.key == key) then
+		PlanTab.compare = { key = key, spec = playerSpec(), picks = {}, orig = {} }
+	end
+	local n = PlanTab.drawCompare()
+	PlanTab.comparePanel()
+	PlanTab.say(("Comparing your bars with %s. Amber: its button, where yours differs. Click one to take it, Shift-click to keep yours.")
+		:format(key))
+	return n
+end
+
+-- A click on a ghost. Takes theirs onto the bar, or with `keepMine` marks
+-- yours as the pick. On a picked ghost it undoes that pick.
+function PlanTab.compareTake(slot, keepMine)
+	local c = PlanTab.compare
+	if not c then return "none" end
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return "fenced" end
+	if c.picks[slot] then
+		if c.orig[slot] ~= nil and not sameAction(c.orig[slot] or nil, PlanTab.readSlot(slot)) then
+			local back = c.orig[slot] or nil
+			if back then
+				if pickUp(back, { made = {}, notes = {}, noted = {} }) then PlanTab.say("Could not put yours back on that button.") return "failed" end
+				PlaceAction(slot)
+			else
+				PickupAction(slot)
+			end
+			ClearCursor()
+		end
+		c.picks[slot], c.orig[slot] = nil, nil
+		PlanTab.drawCompare()
+		PlanTab.comparePanel()
+		return "unpicked"
+	end
+	local mine = PlanTab.readSlot(slot)
+	if keepMine then
+		c.picks[slot] = { action = PlanTab.copyAction(mine) or false }
+	else
+		local theirs = (barsDB()[c.key] or { slots = {} }).slots[slot]
+		if theirs then
+			local failed = pickUp(theirs, { made = {}, notes = {}, noted = {} })
+			if failed then PlanTab.say(("Cannot take it: %s."):format(failed)) return "failed" end
+			PlaceAction(slot)
+		else
+			PickupAction(slot)
+		end
+		ClearCursor()
+		c.orig[slot] = PlanTab.copyAction(mine) or false
+		c.picks[slot] = { action = PlanTab.copyAction(theirs) or false }
+	end
+	PlanTab.drawCompare()
+	PlanTab.comparePanel()
+	return keepMine and "kept" or "taken"
+end
+
+-- Every pick taken back: each button as it was when compare mode started.
+function PlanTab.compareRevert()
+	local c = PlanTab.compare
+	if not c then return 0 end
+	local n = 0
+	for slot in pairs(c.picks) do
+		if PlanTab.compareTake(slot) == "unpicked" then n = n + 1 end
+	end
+	return n
+end
+
+function PlanTab.compareStop()
+	PlanTab.compare = nil
+	for _, g in ipairs(PlanTab.compareGhosts) do g:Hide() end
+	if PlanTab.compareFrame then PlanTab.compareFrame:Hide() end
+	if PlanTab.compareTicks then PlanTab.compareTicks:Hide() end
+end
+
+function PlanTab.comparePickCount()
+	local n = 0
+	for _ in pairs(PlanTab.compare and PlanTab.compare.picks or {}) do n = n + 1 end
+	return n
+end
+
+-- Where picks may go: this build's layout (made from the bars now if it has
+-- none), the spec's, then every other build layout of the spec. Each is
+-- { key, label, new }.
+function PlanTab.compareTargets(spec, build)
+	local out, bars = {}, barsDB()
+	local mine = build and (spec .. " / " .. build) or nil
+	if mine then
+		out[#out + 1] = { key = mine, label = build .. " (this build)" .. (bars[mine] and "" or ": a new layout, all your bars now"), new = not bars[mine] }
+	end
+	if bars[spec] then out[#out + 1] = { key = spec, label = spec .. " (every build with no bars of its own)" } end
+	for _, key in ipairs(PlanTab.buildBarKeys(spec, mine)) do out[#out + 1] = { key = key, label = key:sub(#spec + 4) } end
+	return out
+end
+
+-- Writes the picks into each layout of `keys` (a list of target keys, as
+-- compareTargets). A target marked new takes all the bars now. The layouts
+-- replaced are kept for More > Put back the build bars. Answers how many.
+function PlanTab.compareSave(keys)
+	local c = PlanTab.compare
+	if not c then return 0 end
+	local spec = playerSpec()
+	if not spec or spec ~= c.spec then PlanTab.say("The spec changed since compare mode started, so nothing was saved.") return 0 end
+	local targets = {}
+	for _, t in ipairs(PlanTab.compareTargets(spec, PlanTab.activeLoadoutName())) do targets[t.key] = t end
+	local undo, n, names = { spec = spec, layouts = {} }, 0, {}
+	for _, key in ipairs(keys) do
+		local t = targets[key]
+		if t then
+			local old = barsDB()[key]
+			undo.layouts[key] = old or false
+			local layout
+			if t.new or not old then
+				layout = (PlanTab.captureBars())
+			else
+				layout = { slots = {}, keys = old.keys, saved = date and date("%Y-%m-%d") or old.saved, class = old.class }
+				for slot, a in pairs(old.slots or {}) do layout.slots[slot] = a end
+				for slot, p in pairs(c.picks) do layout.slots[slot] = PlanTab.copyAction(p.action or nil) end
+			end
+			barsDB()[key] = layout
+			n = n + 1
+			names[#names + 1] = key == spec and spec or key:sub(#spec + 4)
+		end
+	end
+	if n == 0 then PlanTab.say("No build was ticked, so nothing was saved.") return 0 end
+	db().matchUndo = undo
+	PlanTab.barsSeen = nil
+	PlanTab.say(("Saved %d pick%s to %s. %sMore > Put back the build bars|r%s undoes this.")
+		:format(PlanTab.comparePickCount(), PlanTab.comparePickCount() == 1 and "" or "s", table.concat(names, ", "), GOLD, GREY))
+	PlanTab.barsChanged()
+	return n
+end
+
+-- The ghosts over the real bars. Our own frames on UIParent, as 0046's.
+function PlanTab.drawCompare()
+	for _, g in ipairs(PlanTab.compareGhosts) do g:Hide() end
+	local c = PlanTab.compare
+	if not c or InCombatLockdown() then return 0 end
+	local layout = barsDB()[c.key]
+	if not layout then return 0 end
+	local ui = PlanTab.ghostUI
+	local top = ui.top():GetEffectiveScale()
+	if not ui.canRead(top) then return 0 end
+	local plan = PlanTab.comparePlan(layout.slots or {}, PlanTab.ghostButtons(), PlanTab.readBars(), c.picks)
+	for i, p in ipairs(plan) do
+		local g = PlanTab.compareGhosts[i]
+		if not g then
+			g = ui.make()
+			g:SetFrameStrata("DIALOG")
+			g:EnableMouse(true)
+			g.edge = g:CreateTexture(nil, "BACKGROUND")
+			g.edge:SetAllPoints()
+			g.icon = g:CreateTexture(nil, "ARTWORK")
+			g.icon:SetPoint("TOPLEFT", 3, -3)
+			g.icon:SetPoint("BOTTOMRIGHT", -3, 3)
+			g:SetScript("OnMouseUp", function(self, button)
+				if button == "LeftButton" and self.slot then
+					GameTooltip:Hide()
+					PlanTab.compareTake(self.slot, IsShiftKeyDown())
+				end
+			end)
+			g:SetScript("OnEnter", function(self) PlanTab.compareTip(self) end)
+			g:SetScript("OnLeave", function() GameTooltip:Hide() end)
+			PlanTab.compareGhosts[i] = g
+		end
+		g.slot, g.picked = p.slot, p.picked
+		local l, b, w, h = p.frame:GetRect()
+		local scale = p.frame:GetEffectiveScale()
+		if ui.canRead(l) and l and ui.canRead(scale) then
+			local s = scale / top
+			g:ClearAllPoints()
+			g:SetPoint("BOTTOMLEFT", ui.top(), "BOTTOMLEFT", l * s, b * s)
+			g:SetSize(w * s, h * s)
+			if p.picked then g.edge:SetColorTexture(0.2, 0.9, 0.2, 1) else g.edge:SetColorTexture(1, 0.6, 0, 1) end
+			local icon = PlanTab.ghostIcon(p.entry)
+			if icon then g.icon:SetTexture(icon) else g.icon:SetColorTexture(0.05, 0.05, 0.05, 0.9) end
+			g:Show()
+		end
+	end
+	return #plan
+end
+
+function PlanTab.compareTip(g)
+	local c = PlanTab.compare
+	if not (c and g.slot) then return end
+	local theirs = (barsDB()[c.key] or { slots = {} }).slots[g.slot]
+	GameTooltip:SetOwner(g, "ANCHOR_TOP")
+	if g.picked then
+		local p = c.picks[g.slot]
+		GameTooltip:AddLine("Picked: " .. PlanTab.actionLabel(p and p.action or nil), 0.2, 0.9, 0.2)
+		GameTooltip:AddLine("Click to undo this pick.", 0, 1, 0)
+	else
+		GameTooltip:AddLine(c.key:match("[^/]+$"):match("^%s*(.-)$") .. ": " .. PlanTab.actionLabel(theirs), 1, 0.6, 0)
+		GameTooltip:AddLine("Yours: " .. PlanTab.actionLabel(PlanTab.readSlot(g.slot)), 1, 1, 1)
+		GameTooltip:AddLine("Click: take theirs. Shift-click: keep yours.", 0, 1, 0, true)
+	end
+	GameTooltip:Show()
+end
+
+-- The small window that says compare mode is on. Dragged like the prompt;
+-- closed in combat, when the ghosts would sit over buttons being pressed.
+function PlanTab.comparePanel()
+	local c = PlanTab.compare
+	local f = PlanTab.compareFrame
+	if not f then
+		f = CreateFrame("Frame", "DjinnisCPCompare", UIParent, "BasicFrameTemplateWithInset")
+		f:SetSize(400, 118)
+		f:SetPoint("TOP", UIParent, "TOP", 0, -120)
+		f:SetMovable(true)
+		f:EnableMouse(true)
+		f:SetFrameStrata("DIALOG")
+		f:SetClampedToScreen(true)
+		f:RegisterForDrag("LeftButton")
+		f:SetScript("OnDragStart", f.StartMoving)
+		f:SetScript("OnDragStop", f.StopMovingOrSizing)
+		f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		f.title:SetPoint("TOP", f, "TOP", 0, -6)
+		f.text = f:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		f.text:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -32)
+		f.text:SetWidth(368)
+		f.text:SetJustifyH("LEFT")
+		local labels = { { "Save picks to...", function() PlanTab.compareTicksShow() end },
+			{ "Put mine back", function() PlanTab.compareRevert() end }, { "Done", PlanTab.compareStop } }
+		for i, spec in ipairs(labels) do
+			local button = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+			button:SetSize(120, PlanTab.SIZE.button)
+			button:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 16 + (i - 1) * 126, 12)
+			button:SetText(spec[1])
+			button:SetScript("OnClick", spec[2])
+		end
+		if f.CloseButton then f.CloseButton:SetScript("OnClick", PlanTab.compareStop) end
+		f:SetScript("OnEvent", PlanTab.compareStop)
+		f:RegisterEvent("PLAYER_REGEN_DISABLED")
+		PlanTab.compareFrame = f
+	end
+	if not c then f:Hide() return f end
+	f.title:SetText("Compare bars: " .. c.key)
+	local n = PlanTab.comparePickCount()
+	f.text:SetText(("Amber: %s's button, where yours differs. Click takes it, Shift-click keeps yours. Green: picked (%d).")
+		:format(c.key:match("[^/]+$"):match("^%s*(.-)$"), n))
+	f:Show()
+	return f
+end
+
+-- Save picks to...: one tick per target, then Save. This build is ticked to
+-- start with, nothing else (Rob: only the builds he ticks).
+function PlanTab.compareTicksShow()
+	local c = PlanTab.compare
+	if not c then return end
+	if PlanTab.comparePickCount() == 0 then PlanTab.say("Nothing picked yet. Click an amber icon first.") return end
+	local spec = playerSpec()
+	local targets = PlanTab.compareTargets(spec or c.spec, PlanTab.activeLoadoutName())
+	local f = PlanTab.compareTicks
+	if not f then
+		f = CreateFrame("Frame", "DjinnisCPCompareTicks", UIParent, "BasicFrameTemplateWithInset")
+		f:SetWidth(360)
+		f:SetMovable(true)
+		f:EnableMouse(true)
+		f:SetFrameStrata("FULLSCREEN_DIALOG")
+		f:SetClampedToScreen(true)
+		f:RegisterForDrag("LeftButton")
+		f:SetScript("OnDragStart", f.StartMoving)
+		f:SetScript("OnDragStop", f.StopMovingOrSizing)
+		f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		f.title:SetPoint("TOP", f, "TOP", 0, -6)
+		f.title:SetText("Save picks to")
+		f.boxes = {}
+		f.save = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+		f.save:SetSize(120, PlanTab.SIZE.button)
+		f.save:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 16, 12)
+		f.save:SetText("Save")
+		f.cancel = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+		f.cancel:SetSize(120, PlanTab.SIZE.button)
+		f.cancel:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 142, 12)
+		f.cancel:SetText("Cancel")
+		f.cancel:SetScript("OnClick", function() f:Hide() end)
+		PlanTab.compareTicks = f
+	end
+	f:ClearAllPoints()
+	f:SetPoint("TOP", PlanTab.compareFrame or UIParent, "BOTTOM", 0, -4)
+	for i, t in ipairs(targets) do
+		local box = f.boxes[i]
+		if not box then
+			box = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
+			box:SetSize(24, 24)
+			box:SetPoint("TOPLEFT", f, "TOPLEFT", 14, -28 - (i - 1) * 26)
+			box.label = box:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+			box.label:SetPoint("LEFT", box, "RIGHT", 4, 0)
+			box.label:SetWidth(300)
+			box.label:SetJustifyH("LEFT")
+			f.boxes[i] = box
+		end
+		box.key = t.key
+		box.label:SetText(t.label)
+		box:SetChecked(i == 1 and t.key ~= c.key or false)
+		box:Show()
+	end
+	for i = #targets + 1, #f.boxes do f.boxes[i]:Hide() end
+	f.save:SetScript("OnClick", function()
+		local keys = {}
+		for i = 1, #targets do if f.boxes[i]:GetChecked() then keys[#keys + 1] = f.boxes[i].key end end
+		f:Hide()
+		PlanTab.compareSave(keys)
+	end)
+	f:SetHeight(28 + #targets * 26 + 16 + PlanTab.SIZE.button + 12)
+	f:Show()
+end
+
+-- The layouts compare mode can open for this spec, for the menus.
+function PlanTab.compareItems()
+	local spec = playerSpec()
+	if not spec then return {} end
+	local out, build = {}, PlanTab.activeLoadoutName()
+	local keys = PlanTab.buildBarKeys(spec, build and (spec .. " / " .. build) or nil)
+	if barsDB()[spec] then table.insert(keys, 1, spec) end
+	for _, key in ipairs(keys) do
+		out[#out + 1] = { text = key == spec and spec .. " (the spec's)" or key:sub(#spec + 4), tip = "Shows its buttons over yours where they differ. Click one to take it.", fn = function() PlanTab.compareStart(key) end }
+	end
+	return out
+end
+
+-- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo | from [spec] | match | unmatch | compare <build>]
 function PlanTab.barsCommand(rest)
 	local verb, name = rest:match("^(%S+)%s+(.+)$")
 	if rest == "save" then PlanTab.saveBars(false)
 	elseif rest == "save build" then PlanTab.saveBars(true)
 	elseif rest == "match" then PlanTab.matchBuildBars()
 	elseif rest == "unmatch" then PlanTab.unmatchBuildBars()
+	elseif verb == "compare" then
+		local spec = playerSpec()
+		local key = spec and (name:lower() == spec:lower() and spec or (spec .. " / " .. name))
+		PlanTab.compareStart(key)
 	elseif rest == "from" then PlanTab.barsFrom()
 	elseif verb == "from" then PlanTab.barsFrom(name)
 	elseif verb == "save" then PlanTab.saveProfile(name)
@@ -10153,8 +10529,13 @@ function PlanTab.menuItems(where)
 	if playerSpec() then
 		add({ text = ("Make every %s build use these bars"):format(playerSpec()), tip = "Your action bars and key bindings now become the layout of every build of this spec. Each build keeps only its own talent swaps on the same button (Berserk for Incarnation). Asks first.", fn = function() PlanTab.matchBuildBars() end })
 	end
+	-- card 0080
+	local compare = PlanTab.compareItems()
+	if #compare > 0 then
+		add({ text = "Compare your bars with...", tip = "Another build's bars over yours, where they differ. Click to take a button, then save your picks to the builds you tick.", sub = compare })
+	end
 	if PlanTab.canUnmatch() then
-		add({ text = "Put back the build bars", tip = "The build layouts of this spec as they were before the last match. Your bars on screen are not changed.", fn = PlanTab.unmatchBuildBars })
+		add({ text = "Put back the build bars", tip = "The build layouts of this spec as they were before the last match or Save picks. Your bars on screen are not changed.", fn = PlanTab.unmatchBuildBars })
 	end
 	local template = PlanTab.templateNow(playerSpec())
 	if template then
@@ -12761,6 +13142,104 @@ function PlanTab.barMatchChecks(check)
 	end)
 	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
 	C_SpecializationInfo, C_Spell, print = keptG[1], keptG[2], keptG[3]
+	d.bars, d.matchUndo = keptBars, keptUndo
+	check(t .. ", ran without error", ok and true or err, true)
+end
+
+-- Card 0080: compare a build's bars with yours, and pick.
+function PlanTab.barCompareChecks(check)
+	local t = "compare bars and pick"
+	local S = function(id) return { type = "spell", id = id } end
+	local plan = PlanTab.comparePlan({ [1] = S(10), [2] = S(20), [130] = S(99) },
+		{ { frame = "a", slot = 1 }, { frame = "b", slot = 2 }, { frame = "c", slot = 3 }, { frame = "d", slot = 4 }, { frame = "e", slot = 130 } },
+		{ [1] = S(10), [2] = S(21), [3] = S(30) }, { [4] = { action = S(40) } })
+	local got = {}
+	for _, p in ipairs(plan) do got[#got + 1] = p.slot .. "=" .. (p.entry and p.entry.id or "-") .. (p.picked and "*" or "") end
+	check(t .. ", a ghost only where theirs differs, or picked, never the skyriding page", table.concat(got, " "), "2=20 3=- 4=40*")
+
+	local names = { "barsFence", "activeLoadoutName", "say", "captureBars", "barsChanged", "barsSeen", "drawCompare", "comparePanel", "compare" }
+	local kept, keptG = {}, { C_ActionBar, GetActionInfo, PickupAction, PlaceAction, GetCursorInfo, ClearCursor, C_Spell, C_SpecializationInfo, IsShiftKeyDown }
+	for i, k in ipairs(names) do kept[i] = PlanTab[k] end
+	local d = db()
+	local keptBars, keptUndo = d.bars, d.matchUndo
+	local ok, err = pcall(function()
+		local bars, cursor, known, fence, said = {}, nil, { [20] = true, [21] = true, [30] = true, [50] = true }, nil, ""
+		C_ActionBar = {
+			HasAction = function(slot) return bars[slot] ~= nil end,
+			GetActionText = function() return nil end,
+			HasVehicleActionBar = function() return false end,
+			HasOverrideActionBar = function() return false end,
+		}
+		GetActionInfo = function(slot) local a = bars[slot] if a then return a.type, a.id end end
+		PickupAction = function(slot) cursor, bars[slot] = bars[slot], nil end
+		PlaceAction = function(slot) bars[slot], cursor = cursor, bars[slot] end
+		GetCursorInfo = function() return cursor and cursor.type end
+		ClearCursor = function() cursor = nil end
+		C_Spell = { PickupSpell = function(id) if known[id] then cursor = S(id) end end, GetSpellName = function(id) return "Spell" .. id end }
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }
+		PlanTab.barsFence = function() return fence end
+		PlanTab.activeLoadoutName = function() return "Dungeon" end
+		PlanTab.say = function(text) said = said .. text end
+		PlanTab.captureBars = function()
+			local c = {}
+			for k, v in pairs(bars) do c[k] = v end
+			return { slots = c, saved = "now" }, 0, 0
+		end
+		PlanTab.barsChanged, PlanTab.drawCompare, PlanTab.comparePanel = function() end, function() return 0 end, function() end
+		local raid = { slots = { [2] = S(20), [3] = S(31), [6] = S(60) } }
+		local dungeon = { slots = { [1] = S(10), [2] = S(21), [3] = S(30), [5] = S(50) }, keys = { A = "B" } }
+		local twin = { slots = { [2] = S(22) } }
+		d.bars = { ["Feral / Raid"] = raid, ["Feral / Dungeon"] = dungeon, ["Feral / Twin"] = twin }
+		d.matchUndo = nil
+		bars = { [1] = S(10), [2] = S(21), [3] = S(30), [5] = S(50) }
+
+		PlanTab.compareStart("Feral / Raid")
+		check(t .. ", starts on a saved layout", PlanTab.compare and PlanTab.compare.key, "Feral / Raid")
+		check(t .. ", a click takes theirs onto the bar", PlanTab.compareTake(2) .. "/" .. bars[2].id .. "/" .. PlanTab.compare.picks[2].action.id, "taken/20/20")
+		check(t .. ", a click on a pick puts yours back", PlanTab.compareTake(2) .. "/" .. bars[2].id .. "/" .. tostring(PlanTab.compare.picks[2]), "unpicked/21/nil")
+		check(t .. ", Shift-click keeps yours and changes nothing", PlanTab.compareTake(3, true) .. "/" .. bars[3].id .. "/" .. PlanTab.compare.picks[3].action.id, "kept/30/30")
+		check(t .. ", theirs empty clears the button", PlanTab.compareTake(5) .. "/" .. tostring(bars[5]) .. "/" .. tostring(PlanTab.compare.picks[5].action), "taken/nil/false")
+		check(t .. ", a spell not known is not taken, and not picked", PlanTab.compareTake(6) .. "/" .. tostring(PlanTab.compare.picks[6]), "failed/nil")
+		fence = "Not in combat."
+		check(t .. ", nothing in combat", PlanTab.compareTake(2) .. "/" .. bars[2].id, "fenced/21")
+		fence = nil
+		PlanTab.compareTake(2)
+		local targets = {}
+		for _, x in ipairs(PlanTab.compareTargets("Feral", "Dungeon")) do targets[#targets + 1] = x.key .. (x.new and "+" or "") end
+		check(t .. ", the targets: this build first, then the others", table.concat(targets, ", "), "Feral / Dungeon, Feral / Raid, Feral / Twin")
+
+		check(t .. ", saves only to the ticked builds", PlanTab.compareSave({ "Feral / Dungeon" }) .. "/" .. tostring(d.bars["Feral / Twin"] == twin), "1/true")
+		local dg = d.bars["Feral / Dungeon"].slots
+		check(t .. ", only the picked buttons change", ("%s %s %s %s"):format(dg[1].id, dg[2].id, dg[3].id, tostring(dg[5])), "10 20 30 nil")
+		check(t .. ", its keys stay", d.bars["Feral / Dungeon"].keys.A, "B")
+		check(t .. ", the old layout is not changed in place", dungeon.slots[2].id .. "/" .. dungeon.slots[5].id, "21/50")
+		check(t .. ", Put back undoes the save", PlanTab.unmatchBuildBars() .. "/" .. tostring(d.bars["Feral / Dungeon"] == dungeon), "unmatched/true")
+		check(t .. ", nothing ticked saves nothing", PlanTab.compareSave({}) .. "/" .. tostring(d.matchUndo), "0/nil")
+
+		d.bars["Feral / Dungeon"] = nil
+		local newTarget
+		for _, x in ipairs(PlanTab.compareTargets("Feral", "Dungeon")) do if x.new then newTarget = x.key end end
+		PlanTab.compareSave({ "Feral / Dungeon" })
+		check(t .. ", a build with no layout gets all the bars now", tostring(newTarget) .. "/" .. tostring(d.bars["Feral / Dungeon"] and d.bars["Feral / Dungeon"].saved), "Feral / Dungeon/now")
+		PlanTab.unmatchBuildBars()
+		check(t .. ", and Put back removes it again", tostring(d.bars["Feral / Dungeon"]), "nil")
+
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 104 end }
+		said = ""
+		check(t .. ", another spec saves nothing, and says why", PlanTab.compareSave({ "Feral / Raid" }) .. "/" .. tostring(d.bars["Feral / Raid"] == raid) .. "/" .. tostring(said:find("spec changed", 1, true) ~= nil), "0/true/true")
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }
+
+		check(t .. ", Put mine back undoes every pick", PlanTab.compareRevert() .. "/" .. bars[2].id .. "/" .. tostring(bars[5] and bars[5].id), "3/21/50")
+		local items = {}
+		for _, item in ipairs(PlanTab.compareItems()) do items[#items + 1] = item.text end
+		check(t .. ", the menu lists the other builds, not this one", table.concat(items, ", "), "Raid, Twin")
+		local rowItems = {}
+		for _, item in ipairs(PlanTab.rowMenuItems({ loadout = "Raid", bosses = {}, own = true, bars = true }, nil)) do rowItems[#rowItems + 1] = item.text or "" end
+		check(t .. ", a row with bars has Compare in its menu", table.concat(rowItems, "|"):find("Compare its bars with yours", 1, true) ~= nil, true)
+	end)
+	PlanTab.compareStop()
+	for i, k in ipairs(names) do PlanTab[k] = kept[i] end
+	C_ActionBar, GetActionInfo, PickupAction, PlaceAction, GetCursorInfo, ClearCursor, C_Spell, C_SpecializationInfo, IsShiftKeyDown = (table.unpack or unpack)(keptG, 1, 9)
 	d.bars, d.matchUndo = keptBars, keptUndo
 	check(t .. ", ran without error", ok and true or err, true)
 end
@@ -16018,6 +16497,7 @@ local function selfTest()
 	PlanTab.bonusChecks(check)  -- card 0054
 	PlanTab.barCategoryChecks(check)  -- card 0051
 	PlanTab.barMatchChecks(check)  -- card 0079
+	PlanTab.barCompareChecks(check)  -- card 0080
 	PlanTab.orphanChecks(check)  -- card 0066
 	PlanTab.combatLogChecks(check)  -- card 0076
 	PlanTab.craftChecks(check)  -- card 0078

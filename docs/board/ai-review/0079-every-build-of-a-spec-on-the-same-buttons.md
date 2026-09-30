@@ -59,3 +59,5 @@ Lua 5.4 stops at line 14171 (`unpack`, from commit 417b207 on 2026-09-27); that 
 <!-- AC:END -->
 
 ## Comments
+
+**2026-09-30, Rob.** "That's not really what I'm going for... more being able to compare and pick between them." Card `0080` is that. This one stays in: its Put back is shared with `0080`, and a whole-spec match is still one click.
