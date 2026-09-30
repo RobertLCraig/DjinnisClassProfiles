@@ -525,6 +525,33 @@ function PlanTab.rankName(kind, id)
 	return ("%s (rank %d of %d)"):format(row[1], row[2], row[3])
 end
 
+-- Reagents for the crafted pieces the plan asks for, from Wowhead's "Created
+-- by" listing, read 2026-09-30. Rob crafts neither (engineering and skinning),
+-- so he buys these for a crafting order. Names are kept so the list reads and
+-- searches before the client has cached the items; the AH search by name finds
+-- every quality of a reagent. { item id, count, name }.
+PlanTab.CRAFTED = {
+	[239656] = { -- Adherent's Silken Shroud, tailoring recipe 1228950
+		{ 251691, 5, "Embroidery Floss" }, { 251283, 1, "Tormented Tantalum" }, { 239198, 6, "Arcanoweave Bolt" },
+		{ 239201, 6, "Sunfire Silk Bolt" }, { 243602, 3, "Radiant Shard" },
+	},
+	[244576] = { -- Silvermoon Agent's Deflectors, leatherworking recipe 1237514
+		{ 251283, 1, "Tormented Tantalum" }, { 238511, 100, "Void-Tempered Leather" }, { 238513, 50, "Void-Tempered Scales" },
+		{ 244633, 1, "Infused Scalewoven Hide" }, { 244635, 1, "Sin'dorei Armor Banding" },
+	},
+}
+-- Embellishment bonus id on a plan line (simc embellishment_data.inc) to the
+-- reagent that puts it there.
+PlanTab.EMBELLISHMENT = {
+	[13771] = { 273059, 1, "Hunter's Ritual Stone" },
+	[12384] = { 240166, 1, "Arcanoweave Lining" },
+}
+PlanTab.REAGENT_NAME = {}
+for _, list in pairs(PlanTab.CRAFTED) do
+	for _, r in ipairs(list) do PlanTab.REAGENT_NAME[r[1]] = r[3] end
+end
+for _, r in pairs(PlanTab.EMBELLISHMENT) do PlanTab.REAGENT_NAME[r[1]] = r[3] end
+
 -- "lesser" when `worn` is a lower rank of `planned`'s family, "ok" when it is
 -- the same or a higher rank, "wrong" otherwise or when either id is unknown.
 function PlanTab.rankState(kind, planned, worn)
@@ -2173,12 +2200,24 @@ end
 -- Third return: the upgrades, the same shape, for a lower rank of the right
 -- enchant or gem that is on. Those are never "to buy"; Rob may have chosen
 -- the cheaper rank on purpose.
-function PlanTab.shoppingList(plan, wornBySlot)
-	local count, better, unworn = { enchant = {}, gem = {} }, { enchant = {}, gem = {} }, 0
+-- A planned crafted piece (PlanTab.CRAFTED) that is neither worn nor `held`
+-- adds its reagents and embellishment as kind "item". `held(entry)` is
+-- PlanTab.holding in game; nil means nothing is held.
+function PlanTab.shoppingList(plan, wornBySlot, held)
+	local count, better, unworn = { enchant = {}, gem = {}, item = {} }, { enchant = {}, gem = {} }, 0
+	local function add(r) count.item[r[1]] = (count.item[r[1]] or 0) + r[2] end
 	for slot, entry in pairs(plan and PlanTab.entries(plan, wornBySlot) or {}) do
 		local worn = wornBySlot[slot]
 		if not worn or not planMatches(entry, worn.id, worn.ilvl) then
 			unworn = unworn + 1
+			local craft = PlanTab.CRAFTED[entry.id]
+			-- Worn at another item level is still crafted: nothing to buy.
+			if craft and not (worn and worn.id == entry.id) and not (held and held(entry)) then
+				for _, r in ipairs(craft) do add(r) end
+				for _, b in ipairs(entry.bonus or {}) do
+					if PlanTab.EMBELLISHMENT[b] then add(PlanTab.EMBELLISHMENT[b]) end
+				end
+			end
 		else
 			if entry.enchant then
 				local state = PlanTab.rankState("enchant", entry.enchant, worn.enchant)
@@ -2196,7 +2235,7 @@ function PlanTab.shoppingList(plan, wornBySlot)
 			for id, n in pairs(byId) do list[#list + 1] = { kind = kind, id = id, count = n } end
 		end
 		table.sort(list, function(a, b)
-			if a.kind ~= b.kind then return a.kind < b.kind end  -- "enchant" sorts first
+			if a.kind ~= b.kind then return a.kind < b.kind end  -- "enchant", "gem", then "item"
 			return a.id < b.id
 		end)
 		return list
@@ -4692,6 +4731,7 @@ end
 function PlanTab.searchTerm(kind, id)
 	-- Not `a and b or c`: an enchant id nobody named would fall through to an
 	-- ITEM lookup by the enchant's id and search the house for a stranger.
+	if kind == "item" then return PlanTab.REAGENT_NAME[id] end
 	local row = PlanTab.RANK[kind][id]
 	if row then return row[1] end
 	if kind == "enchant" then return nil end
@@ -4738,7 +4778,7 @@ end
 -- ponytail: price enchants when PlanTab.RANK carries the scroll item id.
 function PlanTab.priceOf(kind, id)
 	local api = PlanTab.auctionator()
-	if not api or kind ~= "gem" then return nil end
+	if not api or kind == "enchant" then return nil end
 	local ok, price = pcall(api.GetAuctionPriceByItemID, "DjinnisClassProfiles", id)
 	return ok and type(price) == "number" and price or nil
 end
@@ -5677,8 +5717,11 @@ function PlanTab.lines(forSpec)
 
 	lines[#lines + 1] = { text = "" }
 	lines[#lines + 1] = { text = GOLD .. "3. To buy|r" }
-	local list, unworn, better = PlanTab.shoppingList(plan, worn)
-	local function nameOf(kind, id) return PlanTab.rankName(kind, id) end
+	local list, unworn, better = PlanTab.shoppingList(plan, worn, PlanTab.holding)
+	local function nameOf(kind, id)
+		if kind == "item" then return PlanTab.REAGENT_NAME[id] or ("item " .. id) end
+		return PlanTab.rankName(kind, id)
+	end
 	local function searchRows(items, colour)
 		local texts, total, unpriced = PlanTab.pricedLines(items, nameOf)
 		for i, text in ipairs(texts) do
@@ -12860,6 +12903,31 @@ function PlanTab.pinPlanFixture()
 	return function() cell.slots.back, cell.slots.wrist, cell.parsed = wasBack, wasWrist, nil end
 end
 
+-- Card 0078: a planned crafted piece puts its reagents on the list to buy.
+function PlanTab.craftChecks(check)
+	local t = "crafting reagents to buy"
+	local plan = { slots = {
+		back = parsePlanLine("id=239656,bonus_id=8793/13771/12497,ilevel=331"),
+		wrist = parsePlanLine("id=244576,bonus_id=8793/12384/12497,ilevel=331"),
+	} }
+	local function said(list)
+		local out = {}
+		for _, w in ipairs(list) do out[#out + 1] = w.kind .. ":" .. w.id .. "x" .. w.count end
+		return table.concat(out, " ")
+	end
+	local list = PlanTab.shoppingList(plan, {})
+	local byId = {}
+	for _, w in ipairs(list) do byId[w.id] = w end
+	check(t .. ", both pieces, 10 reagents, 2 embellishments", #list, 11)
+	check(t .. ", Tantalum is in both recipes", byId[251283] and byId[251283].count, 2)
+	check(t .. ", the cloak's Hunter's Ritual Stone", byId[273059] and byId[273059].count, 1)
+	check(t .. ", the bracers' Arcanoweave Lining", byId[240166] and byId[240166].count, 1)
+	check(t .. ", every one has a search term", PlanTab.searchTerm("item", 238511), "Void-Tempered Leather")
+	-- Worn at another item level, or in the bags: nothing more to buy.
+	check(t .. ", the cloak worn at 324 needs nothing", said(PlanTab.shoppingList({ slots = { back = plan.slots.back } }, { back = { id = 239656, ilvl = 324, gems = {} } })), "")
+	check(t .. ", held pieces need nothing", said(PlanTab.shoppingList(plan, {}, function() return true end)), "")
+end
+
 function PlanTab.combatLogChecks(check)
 	local t = "the combat log in instances"
 	local keptInfo, keptLog, keptDead, keptInside = GetInstanceInfo, LoggingCombat, UnitIsDeadOrGhost, PlanTab.logInside
@@ -15690,6 +15758,7 @@ local function selfTest()
 	PlanTab.barCategoryChecks(check)  -- card 0051
 	PlanTab.orphanChecks(check)  -- card 0066
 	PlanTab.combatLogChecks(check)  -- card 0076
+	PlanTab.craftChecks(check)  -- card 0078
 
 	C_SpecializationInfo, db().statContext = wasSpecForTest, keptContextForTest
 	print(failed == 0 and (GREEN .. "[CP] self-test passed|r")
