@@ -84,3 +84,5 @@ What this means for the job keys:
 **2026-10-01, Rob:** Resto keeps Lifebloom on Alt+3 as a backup to Left click, for a target that is not on a raid frame. Combat 7 on Alt+3 is now agreed for Resto (Balance's Lunar Eclipse still to confirm). No code change: v0.63.2 already has it.
 
 **2026-10-01, Rob:** Cenarion Ward on Alt+Shift+Left looked like a missing bind, but he cannot find the spell in talents or the spellbook. **Claude:** it is gone in Midnight. SimulationCraft's druid module names `cenarion_ward` 19 times on branch `thewarwithin` and 0 times on `midnight`, which still models Lifebloom, Ironbark and Wild Growth. The Alt+Shift+Left binds in the `Druid` and `Whispylydia` Clique profiles are dead. Nothing to add. Alt+Shift+Left is free on Bloodfeather.
+
+**2026-10-01, Rob:** "Remove corruption gets replaced with natures cure when in resto spec." **Claude:** so wheel up is not a clash. The game swaps the spell by spec, so both Clique entries cast the dispel that spec has. The earlier "worth a look in game" is withdrawn. Nothing to change.
