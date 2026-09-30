@@ -8337,6 +8337,11 @@ function PlanTab.rowMenuItems(e, state)
 		tip = state == "missing" and "Through the spare loadout: it has no loadout of its own."
 			or state == "drifted" and "Switches to your loadout, with your changes. Reset to the plan gives the plan."
 			or "Switches to it, as a double-click does." }) end
+	-- card 0081, Rob 2026-09-30: "a way to apply just a build, or just the bars"
+	if not e.shadowed then
+		add({ text = "Wear talents only", tip = "Switches the talents, and does not offer its action bars.", fn = function() PlanTab.wearTalentsOnly(name) end })
+		add({ text = "Load bars only", tip = "Puts its action bars and keys on, or the spec's when it has none of its own. The talents stay as they are. Undo bars puts yours back.", fn = function() PlanTab.loadBarsOnly(name) end })
+	end
 	if not e.own then
 		if e.warn and state == "missing" then add({ text = "Save to the game", tip = e.warn, disabled = true })
 		elseif state == "missing" then add({ text = "Save to the game", tip = ("Makes the loadout \"%s\" on this character. With the talent window open, it is made when the window closes."):format(PlanTab.tag(name)), fn = function() PlanTab.saveOne(name) end })
@@ -8357,6 +8362,27 @@ function PlanTab.rowMenuItems(e, state)
 	-- card 0080
 	if e.bars and spec then add({ text = "Compare its bars with yours", tip = "Its buttons over yours, where they differ. Click one to take it.", fn = function() PlanTab.compareStart(spec .. " / " .. name) end }) end
 	return items
+end
+
+-- Card 0081. The offer after a switch asks only about a layout not yet
+-- offered (offerBars' barsSeen), so marking the build's as seen first keeps
+-- it quiet. Answers what loadTalents did.
+function PlanTab.wearTalentsOnly(name)
+	local spec = playerSpec()
+	local key = spec and PlanTab.barsKey(spec, name)
+	if key then PlanTab.barsSeen = key end
+	return PlanTab.loadTalents(name)
+end
+
+-- The build's own layout, else the spec's; the talents are not touched.
+function PlanTab.loadBarsOnly(name)
+	local spec = playerSpec()
+	local key = spec and PlanTab.barsKey(spec, name)
+	if not key then
+		PlanTab.say(("No saved bars for %s, nor for %s. Save bars first."):format(name, spec or "this spec"))
+		return "none"
+	end
+	return PlanTab.applyBars(key)
 end
 
 function PlanTab.openRowMenu(owner, e)
@@ -12581,12 +12607,12 @@ function PlanTab.saveOneChecks(check)
 		return table.concat(out, "; ")
 	end
 	local row = { loadout = a, bosses = {}, saved = false }
-	check(t .. ", menu of a missing build", labels(row, "missing"), "#" .. a .. "; Wear it; Save to the game; Copy to your builds...; Export...")
-	check(t .. ", menu of a changed build asks before a reset", labels(row, "drifted"), "#" .. a .. "; Wear it; Reset to the plan...; Copy to your builds...; Export...")
-	check(t .. ", menu of a saved build", labels(row, "saved"), "#" .. a .. "; Wear it; Saved in the game(off); Copy to your builds...; Export...")
-	check(t .. ", menu of one from before the tag", labels(row, "old"), "#" .. a .. "; Wear it; Save to the game(off); Copy to your builds...; Export...")
-	check(t .. ", menu of a build the game would refuse: no save, no export", labels({ loadout = a, bosses = {}, warn = "out of date" }, "missing"), "#" .. a .. "; Wear it; Save to the game(off)")
-	check(t .. ", menu of a saved build with a warning still says saved", labels({ loadout = a, bosses = {}, warn = "out of date" }, "saved"), "#" .. a .. "; Wear it; Saved in the game(off)")
+	check(t .. ", menu of a missing build", labels(row, "missing"), "#" .. a .. "; Wear it; Wear talents only; Load bars only; Save to the game; Copy to your builds...; Export...")
+	check(t .. ", menu of a changed build asks before a reset", labels(row, "drifted"), "#" .. a .. "; Wear it; Wear talents only; Load bars only; Reset to the plan...; Copy to your builds...; Export...")
+	check(t .. ", menu of a saved build", labels(row, "saved"), "#" .. a .. "; Wear it; Wear talents only; Load bars only; Saved in the game(off); Copy to your builds...; Export...")
+	check(t .. ", menu of one from before the tag", labels(row, "old"), "#" .. a .. "; Wear it; Wear talents only; Load bars only; Save to the game(off); Copy to your builds...; Export...")
+	check(t .. ", menu of a build the game would refuse: no save, no export", labels({ loadout = a, bosses = {}, warn = "out of date" }, "missing"), "#" .. a .. "; Wear it; Wear talents only; Load bars only; Save to the game(off)")
+	check(t .. ", menu of a saved build with a warning still says saved", labels({ loadout = a, bosses = {}, warn = "out of date" }, "saved"), "#" .. a .. "; Wear it; Wear talents only; Load bars only; Saved in the game(off)")
 	local function wearTip(state) return PlanTab.rowMenuItems(row, state)[2].tip end
 	check(t .. ", Wear on an old row is not the spare", wearTip("old"):find("spare", 1, true) == nil and wearTip("missing"):find("spare", 1, true) ~= nil, true)
 	check(t .. ", Wear on a changed row says it wears your changes", wearTip("drifted"):find("your changes", 1, true) ~= nil, true)
@@ -12610,7 +12636,7 @@ function PlanTab.saveOneChecks(check)
 	PlanTab.onTalentsClose, PlayerSpellsFrame = keptClose, keptSpells
 	PlanTab.whenTalentsClose = function(fn) onClose = fn return true end
 	PlanTab.loadoutGaps = function() return { a }, {} end
-	check(t .. ", menu of your own loadout", labels({ loadout = "Rob's own", own = true, bosses = {}, code = "CODE" }, nil), "#Rob's own; Wear it; Copy to your builds...; Export...")
+	check(t .. ", menu of your own loadout", labels({ loadout = "Rob's own", own = true, bosses = {}, code = "CODE" }, nil), "#Rob's own; Wear it; Wear talents only; Load bars only; Copy to your builds...; Export...")
 	local save
 	for _, item in ipairs(PlanTab.rowMenuItems(row, "missing")) do if item.text == "Save to the game" then save = item.fn end end
 	check(t .. ", Save to the game makes that build", tostring(save and save()) .. "/" .. table.concat(calls, "|"), "nil/create " .. a)
@@ -13146,6 +13172,47 @@ function PlanTab.barMatchChecks(check)
 	check(t .. ", ran without error", ok and true or err, true)
 end
 
+-- Card 0081: talents only, or bars only, from a build's menu.
+function PlanTab.barOnlyChecks(check)
+	local t = "talents only or bars only"
+	local names = { "loadTalents", "applyBars", "say", "barsSeen" }
+	local kept, keptSpec = {}, C_SpecializationInfo
+	for i, k in ipairs(names) do kept[i] = PlanTab[k] end
+	local d = db()
+	local keptBars = d.bars
+	local ok, err = pcall(function()
+		local calls = {}
+		PlanTab.loadTalents = function(n) calls[#calls + 1] = "talents(" .. n .. ")" return "switched" end
+		PlanTab.applyBars = function(k) calls[#calls + 1] = "bars(" .. k .. ")" return "applied" end
+		PlanTab.say = function() end
+		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return 103 end }
+		d.bars = { Feral = { slots = {} }, ["Feral / Raid"] = { slots = {} } }
+		PlanTab.barsSeen = nil
+		check(t .. ", talents only switches and marks its bars as offered", PlanTab.wearTalentsOnly("Raid") .. "/" .. table.concat(calls, " ") .. "/" .. tostring(PlanTab.barsSeen), "switched/talents(Raid)/Feral / Raid")
+		PlanTab.barsSeen = nil
+		PlanTab.wearTalentsOnly("Dungeon")
+		check(t .. ", a build with no bars marks the spec's", PlanTab.barsSeen, "Feral")
+		calls = {}
+		check(t .. ", bars only loads the build's own and no talents", PlanTab.loadBarsOnly("Raid") .. "/" .. table.concat(calls, " "), "applied/bars(Feral / Raid)")
+		calls = {}
+		check(t .. ", or the spec's when it has none", PlanTab.loadBarsOnly("Dungeon") .. "/" .. table.concat(calls, " "), "applied/bars(Feral)")
+		d.bars = {}
+		calls = {}
+		check(t .. ", nothing saved loads nothing", PlanTab.loadBarsOnly("Dungeon") .. "/" .. #calls, "none/0")
+		-- offerBars really keeps quiet on a key marked seen
+		d.bars = { ["Feral / Raid"] = { slots = {} } }
+		local keptActive, keptFence = PlanTab.activeLoadoutName, PlanTab.barsFence
+		PlanTab.activeLoadoutName, PlanTab.barsFence = function() return "Raid" end, function() return nil end
+		PlanTab.barsSeen = "Feral / Raid"
+		local okOffer, answer = pcall(PlanTab.offerBars)
+		PlanTab.activeLoadoutName, PlanTab.barsFence = keptActive, keptFence
+		check(t .. ", and the offer after the switch stays quiet", okOffer and answer or tostring(answer), "seen")
+	end)
+	for i, k in ipairs(names) do PlanTab[k] = kept[i] end
+	C_SpecializationInfo, d.bars = keptSpec, keptBars
+	check(t .. ", ran without error", ok and true or err, true)
+end
+
 -- Card 0080: compare a build's bars with yours, and pick.
 function PlanTab.barCompareChecks(check)
 	local t = "compare bars and pick"
@@ -13550,7 +13617,7 @@ function PlanTab.myBuildChecks(check)
 			for _, item in ipairs(PlanTab.rowMenuItems(e, state)) do out[#out + 1] = item.text or ("#" .. item.title) end
 			return table.concat(out, "; ")
 		end
-		check(t .. ", the menu of one of yours", labels({ loadout = "Mine", bosses = {}, mine = true }, "missing"), "#Mine; Wear it; Save to the game; Copy to your builds...; Rename...; Delete...; Export...")
+		check(t .. ", the menu of one of yours", labels({ loadout = "Mine", bosses = {}, mine = true }, "missing"), "#Mine; Wear it; Wear talents only; Load bars only; Save to the game; Copy to your builds...; Rename...; Delete...; Export...")
 		check(t .. ", the menu of one the plan has named: no wear, no save", labels({ loadout = "Dungeon", bosses = {}, mine = true, shadowed = true, code = "OLD" }, nil), "#Dungeon; Copy to your builds...; Rename...; Delete...; Export...")
 		d.myBuilds.Feral.Dungeon, d.myBuilds.Feral[5] = nil, nil
 
@@ -16498,6 +16565,7 @@ local function selfTest()
 	PlanTab.barCategoryChecks(check)  -- card 0051
 	PlanTab.barMatchChecks(check)  -- card 0079
 	PlanTab.barCompareChecks(check)  -- card 0080
+	PlanTab.barOnlyChecks(check)  -- card 0081
 	PlanTab.orphanChecks(check)  -- card 0066
 	PlanTab.combatLogChecks(check)  -- card 0076
 	PlanTab.craftChecks(check)  -- card 0078
