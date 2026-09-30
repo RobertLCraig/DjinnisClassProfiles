@@ -12,7 +12,7 @@ Plan tab's "3. To buy" listed only enchants and gems.
 line's embellishment bonus id to its reagent. `PlanTab.shoppingList` adds them as kind `item` for a
 planned crafted piece that is neither worn (at any item level) nor in the bags or open bank. Search
 AH, the Auctionator price and the Auctionator list take them like gems. The search is by name, so it
-finds every quality of a reagent; the price is the first quality's.
+finds every quality of a reagent; the price is the first quality's. v0.59.1: the Auctionator list carries each count, through Auctionator's ConvertToSearchString, exact for a reagent only.
 
 Checks in `selfTest` (`PlanTab.craftChecks`): 11 lines for the two pieces, Tantalum counted twice,
 one of each embellishment, nothing when worn at another item level or held. Broken on purpose once

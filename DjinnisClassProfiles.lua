@@ -4815,6 +4815,13 @@ function PlanTab.sendToAuctionator(list)
 	local terms, skipped = {}, 0
 	for _, want in ipairs(list) do
 		local term = PlanTab.searchTerm(want.kind, want.id)
+		-- With the quantity Auctionator's list says how many to buy. Exact for a
+		-- reagent only: a gem or scroll carries more than the family name.
+		if term and api.ConvertToSearchString then
+			local ok, s = pcall(api.ConvertToSearchString, "DjinnisClassProfiles",
+				{ searchString = term, isExact = want.kind == "item", quantity = want.count })
+			if ok and type(s) == "string" then term = s end
+		end
 		if term then terms[#terms + 1] = term else skipped = skipped + 1 end
 	end
 	-- Nothing named yet would replace the last good list with an empty one (0025 review).
@@ -12926,6 +12933,15 @@ function PlanTab.craftChecks(check)
 	-- Worn at another item level, or in the bags: nothing more to buy.
 	check(t .. ", the cloak worn at 324 needs nothing", said(PlanTab.shoppingList({ slots = { back = plan.slots.back } }, { back = { id = 239656, ilvl = 324, gems = {} } })), "")
 	check(t .. ", held pieces need nothing", said(PlanTab.shoppingList(plan, {}, function() return true end)), "")
+	-- Auctionator gets the count with each term.
+	local keptA, sent = Auctionator, nil
+	Auctionator = { API = { v1 = {
+		ConvertToSearchString = function(_, term) return ("%s|%s|%s"):format(term.searchString, tostring(term.isExact), term.quantity) end,
+		CreateShoppingList = function(_, _, terms) sent = terms end,
+	} } }
+	PlanTab.sendToAuctionator({ { kind = "gem", id = 240888, count = 2 }, { kind = "item", id = 238511, count = 100 } })
+	Auctionator = keptA
+	check(t .. ", Auctionator gets the quantity", sent and table.concat(sent, " "), "Quick Peridot|false|2 Void-Tempered Leather|true|100")
 end
 
 function PlanTab.combatLogChecks(check)
