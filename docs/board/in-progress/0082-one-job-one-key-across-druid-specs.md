@@ -86,3 +86,9 @@ What this means for the job keys:
 **2026-10-01, Rob:** Cenarion Ward on Alt+Shift+Left looked like a missing bind, but he cannot find the spell in talents or the spellbook. **Claude:** it is gone in Midnight. SimulationCraft's druid module names `cenarion_ward` 19 times on branch `thewarwithin` and 0 times on `midnight`, which still models Lifebloom, Ironbark and Wild Growth. The Alt+Shift+Left binds in the `Druid` and `Whispylydia` Clique profiles are dead. Nothing to add. Alt+Shift+Left is free on Bloodfeather.
 
 **2026-10-01, Rob:** "Remove corruption gets replaced with natures cure when in resto spec." **Claude:** so wheel up is not a clash. The game swaps the spell by spec, so both Clique entries cast the dispel that spec has. The earlier "worth a look in game" is withdrawn. Nothing to change.
+
+**2026-10-01, Rob:** "the thing missing from your overlay in general I think is what spell should be there if that spell isnt currently on my bars" (after asking what goes on 2 in Guardian: nothing, the bear page's key 2 is empty; the plan puts Mangle there).
+
+**2026-10-01, Claude.** v0.63.3. `PlanTab.jobFor(spec, binding, api)` names the job whose key a button is, and that spec's spell for it (Rob's extras and items by their own name). `jobPlan` adds `need` when the button does not hold that job; `drawJobs` writes it across the middle of the button: blue when learned, grey when not in this build. An empty key now gets a label too (its job in blue on top). 5 checks; 3 of 4 mutations fail the test, the fourth (`drawJobs` skipping empty buttons) is drawing code only a client runs.
+
+In-game check: Guardian bear page, key 2 reads C1 over "Mangle" in blue. A key with a spell of the wrong job shows amber on top, "to <key>" at the bottom and the right spell in the middle; the three lines must stay readable on Rob's button size.

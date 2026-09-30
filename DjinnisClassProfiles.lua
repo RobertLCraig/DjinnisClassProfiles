@@ -10592,16 +10592,50 @@ function PlanTab.jobOf(spec, action, api)
 	return nil
 end
 
+-- The job whose key `binding` is in `spec`, the spell that does it there and
+-- whether this character knows it; nil for a key no job has. Rob,
+-- 2026-10-01: "what spell should be there if that spell isnt currently on my
+-- bars" (his Guardian key 2 was empty; Mangle belongs there). Pure.
+function PlanTab.jobFor(spec, binding, api)
+	local extras, bellular = {}, {}
+	for _, job in ipairs(PlanTab.BAR_CATEGORIES) do bellular[job] = true end
+	for job in pairs(PlanTab.JOB_BUTTONS) do
+		if not bellular[job] then extras[#extras + 1] = job end
+	end
+	table.sort(extras)
+	local column = PlanTab.BAR_ABILITIES[spec] or {}
+	for i, job in ipairs(PlanTab.BAR_CATEGORIES) do
+		if PlanTab.jobHome(spec, job) == binding and (column[i] or "") ~= "" then
+			for alt in column[i]:gmatch("[^/]+") do
+				if api.find and api.find(alt) then return job, alt, true end
+			end
+			return job, column[i], false
+		end
+	end
+	for _, job in ipairs(extras) do
+		if PlanTab.jobHome(spec, job) == binding then
+			local item = false
+			for _, name in pairs(PlanTab.ITEM_JOBS) do item = item or name == job end
+			return job, job, item or (api.find and api.find(job) and true) or false
+		end
+	end
+	return nil
+end
+
 -- One entry per button: its job, and "right" (on its Feral button), "move"
--- (it belongs on `want`), or nil (no job). Pure. `buttons` is { frame,
--- slot, binding }, `slots` the bars now.
+-- (it belongs on `want`), or nil (no job). `need` is the spell that belongs
+-- on the button when what it holds is not that job (`needKnown`: learned).
+-- Pure. `buttons` is { frame, slot, binding }, `slots` the bars now.
 function PlanTab.jobPlan(buttons, spec, slots, api)
 	local plan = {}
 	for _, b in ipairs(buttons) do
 		local job = PlanTab.jobOf(spec, slots[b.slot], api)
 		local want = PlanTab.jobHome(spec, job)
-		plan[#plan + 1] = { frame = b.frame, slot = b.slot, binding = b.binding, job = job, want = want,
+		local p = { frame = b.frame, slot = b.slot, binding = b.binding, job = job, want = want,
 			state = want and (want == b.binding and "right" or "move") or nil }
+		local home, name, known = PlanTab.jobFor(spec, b.binding, api)
+		if home and home ~= job then p.need, p.needJob, p.needKnown = name, home, known end
+		plan[#plan + 1] = p
 	end
 	return plan
 end
@@ -10646,7 +10680,7 @@ function PlanTab.drawJobs()
 	local plan = PlanTab.jobPlan(PlanTab.jobButtons(), spec, api.here, api)
 	local n = 0
 	for _, p in ipairs(plan) do
-		if p.job then
+		if p.job or p.need then
 			n = n + 1
 			local g = PlanTab.jobLabels[n]
 			if not g then
@@ -10661,6 +10695,15 @@ function PlanTab.drawJobs()
 				g.text:SetPoint("TOP", 0, -1)
 				g.to = g:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 				g.to:SetPoint("BOTTOM", 0, 1)
+				-- the spell that belongs here, across the middle, two lines at most
+				g.need = g:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+				g.need:SetPoint("LEFT", 1, 0)
+				g.need:SetPoint("RIGHT", -1, 0)
+				g.need:SetMaxLines(2)
+				g.needBack = g:CreateTexture(nil, "BORDER")
+				g.needBack:SetPoint("TOPLEFT", g.need, "TOPLEFT", -1, 1)
+				g.needBack:SetPoint("BOTTOMRIGHT", g.need, "BOTTOMRIGHT", 1, -1)
+				g.needBack:SetColorTexture(0, 0, 0, 0.75)
 				PlanTab.jobLabels[n] = g
 			end
 			local l, b, w, h = p.frame:GetRect()
@@ -10670,8 +10713,15 @@ function PlanTab.drawJobs()
 				g:ClearAllPoints()
 				g:SetPoint("BOTTOMLEFT", ui.top(), "BOTTOMLEFT", l * s, b * s)
 				g:SetSize(w * s, h * s)
-				g.text:SetText(PlanTab.jobShort(p.job))
-				if p.state == "right" then
+				g.text:SetText(PlanTab.jobShort(p.job or p.needJob))
+				g.need:SetText(p.need or "")
+				g.needBack:SetShown(p.need ~= nil)
+				-- blue: learned, put it here; grey: not learned in this build
+				if p.needKnown then g.need:SetTextColor(0.4, 0.8, 1) else g.need:SetTextColor(0.7, 0.7, 0.7) end
+				if not p.job then
+					g.text:SetTextColor(0.4, 0.8, 1)
+					g.to:SetText("")
+				elseif p.state == "right" then
 					g.text:SetTextColor(0.2, 1, 0.2)
 					g.to:SetText("")
 				elseif not p.state then  -- a job with no key agreed yet: grey, no "to"
@@ -10713,7 +10763,7 @@ function PlanTab.toggleJobs(on)
 	end
 	local n = PlanTab.drawJobs()
 	if on then
-		PlanTab.say(("Jobs on your bars: %d buttons. Green: on its Feral key. Amber: it belongs on the key shown. More > Hide jobs turns it off."):format(n))
+		PlanTab.say(("Jobs on your bars: %d buttons. Green: on its key. Amber: it belongs on the key shown. Blue across the middle: the spell that belongs on this key (grey: not learned). More > Hide jobs turns it off."):format(n))
 	else
 		PlanTab.say("Jobs on your bars: off.")
 	end
@@ -13431,6 +13481,23 @@ function PlanTab.barJobChecks(check)
 	check(t .. ", Guardian keeps Frenzied Regeneration, Survival Instincts and Lunar Beam where Rob has them",
 		("%s %s %s"):format(tostring(tank[1].state), tostring(tank[2].state), tostring(tank[3].state)), "right right right")
 	check(t .. ", and Maul goes to Alt+4's button", tostring(tank[4].want), "ACTIONBUTTON10")
+	-- Rob, 2026-10-01: the spell that belongs on a key, shown on it
+	api.find = function(name) return (name == "Mangle" or name == "Thrash" or name == "Recuperate") and 1 or nil end
+	local need = PlanTab.jobPlan({ { frame = "a", slot = 98, binding = "ACTIONBUTTON2" }, { frame = "b", slot = 97, binding = "ACTIONBUTTON1" },
+		{ frame = "c", slot = 99, binding = "ACTIONBUTTON3" }, { frame = "d", slot = 100, binding = "MULTIACTIONBAR3BUTTON3" },
+		{ frame = "e", slot = 101, binding = "MULTIACTIONBAR6BUTTON6" }, { frame = "f", slot = 102, binding = "MULTIACTIONBAR5BUTTON1" } },
+		"Guardian", { [97] = S("Mangle"), [99] = S("Mangle") }, api)
+	check(t .. ", an empty key names the spell that belongs there",
+		("%s %s/%s %s/%s"):format(tostring(need[1].job), tostring(need[1].need), tostring(need[1].needKnown), tostring(need[2].need), tostring(need[2].needKnown)),
+		"nil Mangle/true Thrash/true")
+	check(t .. ", a key holding another job names its own spell, not learned is said",
+		("%s/%s/%s"):format(tostring(need[3].state), tostring(need[3].need), tostring(need[3].needKnown)), "move/Swipe/false")
+	check(t .. ", Rob's extras and items too, and a key no job has names nothing",
+		("%s/%s %s/%s %s"):format(tostring(need[4].need), tostring(need[4].needKnown), tostring(need[5].need), tostring(need[5].needKnown), tostring(need[6].need)),
+		"Recuperate/true Healthstone/true nil")
+	check(t .. ", on its own key it names nothing", tostring(PlanTab.jobPlan({ { frame = "a", slot = 98, binding = "ACTIONBUTTON2" } }, "Guardian", { [98] = S("Mangle") }, api)[1].need), "nil")
+	check(t .. ", Balance's key 3 wants Wrath", select(2, PlanTab.jobFor("Balance", "ACTIONBUTTON3", api)), "Wrath")
+	api.find = nil
 	check(t .. ", Feral keeps its own", PlanTab.jobHome("Feral", "Combat 4") .. "/" .. tostring(PlanTab.jobHome("Feral", nil)), "ACTIONBUTTON7/nil")
 	local long = true
 	for _, job in ipairs(PlanTab.BAR_CATEGORIES) do if #PlanTab.jobShort(job) > 6 then long = job end end
