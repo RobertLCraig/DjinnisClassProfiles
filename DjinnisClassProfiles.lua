@@ -10548,6 +10548,11 @@ PlanTab.JOB_SPEC = {
 	Guardian = {
 		["Combat 4"] = "MULTIACTIONBAR6BUTTON1", ["Personal Defensive 2"] = "ACTIONBUTTON7",
 		["Combat 8"] = "ACTIONBUTTON9", ["Combat 3"] = "ACTIONBUTTON10",
+		-- Rob, 2026-10-01: "really S3 should be growl? when everywhere else
+		-- its shadowmeld/prowl?" Bellular's Guardian column has Growl in
+		-- Taunt/Quick Access and Prowl in Class 7; Prowl takes Shift+3, and
+		-- Growl has no key until Rob picks one ("" is none)
+		["Class 7 (Raid Defensive)"] = "MULTIACTIONBAR6BUTTON9", ["Taunt/Quick Access"] = "",
 	},
 	-- Rob, 2026-09-30: the casters keep their core keys, "Sunfire/Moonfire,
 	-- Wrath, Starfire ... the keys I expect to press as part of my core
@@ -10565,8 +10570,11 @@ PlanTab.JOB_SPEC = {
 
 -- Where `job` belongs for `spec`: the spec's own choice, else Feral's.
 function PlanTab.jobHome(spec, job)
-	return job and ((PlanTab.JOB_SPEC[spec] or {})[job] or PlanTab.JOB_BUTTONS[job]) or nil
+	local home = job and ((PlanTab.JOB_SPEC[spec] or {})[job] or PlanTab.JOB_BUTTONS[job]) or nil
+	return home ~= "" and home or nil
 end
+-- a spec whose sheet column puts another spell in a job: its own short name
+PlanTab.JOB_SHORT_SPEC = { Guardian = { ["Class 7 (Raid Defensive)"] = "Prowl" } }
 -- bar button name -> its binding's prefix (Blizzard_ActionBar/Shared/MultiActionBars.xml buttonType)
 PlanTab.BUTTON_BINDING = {
 	ActionButton = "ACTIONBUTTON", MultiBarBottomLeftButton = "MULTIACTIONBAR1BUTTON",
@@ -10575,8 +10583,8 @@ PlanTab.BUTTON_BINDING = {
 	MultiBar6Button = "MULTIACTIONBAR6BUTTON", MultiBar7Button = "MULTIACTIONBAR7BUTTON",
 }
 
-function PlanTab.jobShort(job)
-	return job and (job:match("^Combat (%d+)$") and "C" .. job:match("^Combat (%d+)$") or PlanTab.JOB_SHORT[job] or job) or nil
+function PlanTab.jobShort(job, spec)
+	return job and ((PlanTab.JOB_SHORT_SPEC[spec] or {})[job] or job:match("^Combat (%d+)$") and "C" .. job:match("^Combat (%d+)$") or PlanTab.JOB_SHORT[job] or job) or nil
 end
 
 -- The job of what a slot holds, for `spec`, or nil. `api` is barsApi's
@@ -10713,7 +10721,7 @@ function PlanTab.drawJobs()
 				g:ClearAllPoints()
 				g:SetPoint("BOTTOMLEFT", ui.top(), "BOTTOMLEFT", l * s, b * s)
 				g:SetSize(w * s, h * s)
-				g.text:SetText(PlanTab.jobShort(p.job or p.needJob))
+				g.text:SetText(PlanTab.jobShort(p.job or p.needJob, spec))
 				g.need:SetText(p.need or "")
 				g.needBack:SetShown(p.need ~= nil)
 				-- blue: learned, put it here; grey: not learned in this build
@@ -13505,9 +13513,15 @@ function PlanTab.barJobChecks(check)
 	local every = true
 	for _, homes in pairs(PlanTab.JOB_SPEC) do
 		for job, binding in pairs(homes) do
-			if not (binding:match("^ACTIONBUTTON%d+$") or binding:match("^MULTIACTIONBAR%dBUTTON%d+$")) then every = job end
+			if not (binding == "" or binding:match("^ACTIONBUTTON%d+$") or binding:match("^MULTIACTIONBAR%dBUTTON%d+$")) then every = job end
 		end
 	end
+	-- Rob, 2026-10-01: Shift+3 is Prowl in every spec, Guardian's Growl has no key yet
+	check(t .. ", Prowl on Shift+3's button in every spec, Growl nowhere yet",
+		("%s %s %s %s %s"):format(select(2, PlanTab.jobFor("Guardian", "MULTIACTIONBAR6BUTTON9", {})), select(2, PlanTab.jobFor("Feral", "MULTIACTIONBAR6BUTTON9", {})),
+			select(2, PlanTab.jobFor("Balance", "MULTIACTIONBAR6BUTTON9", {})), select(2, PlanTab.jobFor("Resto", "MULTIACTIONBAR6BUTTON9", {})),
+			tostring(PlanTab.jobHome("Guardian", "Taunt/Quick Access"))), "Prowl Prowl Prowl Prowl nil")
+	check(t .. ", Guardian's Prowl is called Prowl", PlanTab.jobShort("Class 7 (Raid Defensive)", "Guardian") .. "/" .. PlanTab.jobShort("Class 7 (Raid Defensive)", "Feral"), "Prowl/Raid")
 	for job, binding in pairs(PlanTab.JOB_BUTTONS) do
 		if not (binding:match("^ACTIONBUTTON%d+$") or binding:match("^MULTIACTIONBAR%dBUTTON%d+$")) then every = job end
 	end

@@ -92,3 +92,9 @@ What this means for the job keys:
 **2026-10-01, Claude.** v0.63.3. `PlanTab.jobFor(spec, binding, api)` names the job whose key a button is, and that spec's spell for it (Rob's extras and items by their own name). `jobPlan` adds `need` when the button does not hold that job; `drawJobs` writes it across the middle of the button: blue when learned, grey when not in this build. An empty key now gets a label too (its job in blue on top). 5 checks; 3 of 4 mutations fail the test, the fourth (`drawJobs` skipping empty buttons) is drawing code only a client runs.
 
 In-game check: Guardian bear page, key 2 reads C1 over "Mangle" in blue. A key with a spell of the wrong job shows amber on top, "to <key>" at the bottom and the right spell in the middle; the three lines must stay readable on Rob's button size.
+
+**2026-10-01, Rob:** "really S3 should be growl? when everywhere else its shadowmeld/prowl?"
+
+**2026-10-01, Claude.** v0.63.4. Bellular's Guardian column puts Growl in Taunt/Quick Access (Feral, Balance and Resto have Prowl there) and Prowl in Class 7. Rob's bars already agree with him: slot 165 (Shift+3) is Prowl on Guardian / Dungeon and Feral / Dungeon; Balance and Resto have a `Druid -ProwlMeld` macro. `JOB_SPEC.Guardian` now sends Class 7 (Prowl) to `MULTIACTIONBAR6BUTTON9` and gives Taunt/Quick Access (Growl) no key (`""`, which `jobHome` reads as none). `JOB_SHORT_SPEC` draws Guardian's Class 7 as "Prowl". 2 checks, 3 mutations each fail the test.
+
+Open: Growl's key in Guardian. Feral / Dungeon and Resto have Growl on the bear page's key 2 (slot 98); Guardian / Dungeon has it on slot 14 (bar 1, page 2), which Rob does not see in bear form. That bears on the Mangle question: Growl on bear key 2 as in the other specs would keep Mangle on 1.
