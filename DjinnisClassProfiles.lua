@@ -370,91 +370,91 @@ local STAT_TARGET = {
 -- the string the talent import box takes; nothing here applies it.
 --
 -- BEGIN GENERATED GEAR PLAN
-local GEAR_PLAN_SOURCE = "Raidbots Top Gear, written 2026-09-28"
+local GEAR_PLAN_SOURCE = "Raidbots Top Gear 2026-09-28, then local SimC 2026-09-30 (vault, crafted, ring enchant)"
 local GEAR_PLAN = {
 	Feral = {
 		["st"] = {
-			report = "oA8fNBFEW5ohjrypdVpvgr", simmed = "2026-09-28", dps = 196480,
+			report = "local SimC", simmed = "2026-09-30", dps = 204781,
 			loadout = "[CP] Raid: Nek'Zali",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALghhxMDmxsMmZmxYGDAAAAAADMAAAAAAz2MLmtZW2AzMALmZYAAMzAgB",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=193763,bonus_id=13440/6652/13662/12699/12846,ilevel=321,upgrade=3445/60", -- Fireproof Drape
+				back      = "id=239656,bonus_id=8793/8960/12214/13771/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Hunter's Ritual Stone)
 				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
-				wrist     = "id=251135,gem_id=240908,bonus_id=13440/6652/13695/13662/12699/12854,ilevel=334,upgrade=3446/100", -- Fury-fletched Armlets
+				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
 				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
 				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12838,ilevel=308,upgrade=3444/40", -- Sash of the Forlorn Vessel
 				legs      = "id=271527,enchant_id=8159,bonus_id=6652/13693/13698/1555/12838,ilevel=308,upgrade=0", -- Enigmatic Dreamwatcher's Leggings
 				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
-				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
+				finger1   = "id=272147,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
 				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
-				trinket1  = "id=270166,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/60", -- Vashnik's Sanguine Rancor
+				trinket1  = "id=250259,bonus_id=12854/13440/42/12699,ilevel=334,upgrade=3446/100", -- Sapling of the Dawnroot
 				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
 				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
 			},
 		},
 		["2t"] = {
-			report = "h6WGSGH2CRi27f2GfbmvE7", simmed = "2026-09-28", dps = 265710,
+			report = "local SimC", simmed = "2026-09-30", dps = 277089,
 			loadout = "[CP] Raid: Lost Explorers",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZMzGzMzMGz2yYZsMzMzYmBAAAgFwsBjZGMjZZmZmZMmxMAAAAAAADAAAAAwsNziZZmtNwMDwiZwAAYmBAD",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=193763,bonus_id=13440/6652/13662/12699/12846,ilevel=321,upgrade=3445/60", -- Fireproof Drape
+				back      = "id=239656,bonus_id=8793/8960/12214/13771/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Hunter's Ritual Stone)
 				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
-				wrist     = "id=251135,gem_id=240908,bonus_id=13440/6652/13695/13662/12699/12854,ilevel=334,upgrade=3446/100", -- Fury-fletched Armlets
+				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
 				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
 				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12838,ilevel=308,upgrade=3444/40", -- Sash of the Forlorn Vessel
 				legs      = "id=271527,enchant_id=8159,bonus_id=6652/13693/13698/1555/12838,ilevel=308,upgrade=0", -- Enigmatic Dreamwatcher's Leggings
 				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
-				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
+				finger1   = "id=272147,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
 				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
-				trinket1  = "id=250228,bonus_id=13440/6652/12699/12846,ilevel=321,upgrade=3445/60", -- Resonant Bellowstone
+				trinket1  = "id=250259,bonus_id=12854/13440/42/12699,ilevel=334,upgrade=3446/100", -- Sapling of the Dawnroot
 				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
 				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
 			},
 		},
 		["3t"] = {
-			report = "r4XdLNcxvUod46NbgqQrMP", simmed = "2026-09-22", dps = 300916,
+			report = "local SimC", simmed = "2026-09-30", dps = 319656,
 			loadout = "WS Raid 3T",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAAEAMLzs0sMzyGYmBYhBDAgZGAMA",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=193763,bonus_id=12843/13440/6652/13662/12699,ilevel=311", -- Fireproof Drape
+				back      = "id=239656,bonus_id=8793/8960/12214/13771/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Hunter's Ritual Stone)
 				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
-				wrist     = "id=268240,bonus_id=6652/13696/13662/13333/12838,ilevel=308", -- Restless Spirit Shackles
+				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
 				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
 				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
 				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
 				feet      = "id=272240,enchant_id=8018,bonus_id=6652/13662/12835,ilevel=298", -- Miststalker's Striders
-				finger1   = "id=251194,enchant_id=7966,gem_id=240908,bonus_id=12843/13440/6652/13668/12699,ilevel=311", -- Lightwarden's Bind
+				finger1   = "id=272147,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
 				finger2   = "id=268249,gem_id=240888,bonus_id=6652/13668/13333/12841/13696,ilevel=305", -- Vile Alchemist's Band
-				trinket1  = "id=270166,bonus_id=6652/13334/12843,ilevel=311", -- Vashnik's Sanguine Rancor
+				trinket1  = "id=250259,bonus_id=12854/13440/42/12699,ilevel=334,upgrade=3446/100", -- Sapling of the Dawnroot
 				trinket2  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
 				main_hand = "id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,ilevel=308", -- Abyssal Broodfiend's Bardiche
 			},
 		},
 		["mplus"] = {
-			report = "muhQr2una5762CxPQN5P19", simmed = "2026-09-28", dps = 252103,
+			report = "local SimC", simmed = "2026-09-30", dps = 205697,
 			loadout = "Dungeon (new)",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYBMbGeAzMYGziZmZmlxMMAAAAAAGYAAAAYmlZZmZGAwCMzMALMYAAAMzGGA",
 			slots = {
 				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
 				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
 				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=193763,bonus_id=13440/6652/13662/12699/12846,ilevel=321,upgrade=3445/60", -- Fireproof Drape
+				back      = "id=239656,bonus_id=8793/8960/12214/13771/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Hunter's Ritual Stone)
 				chest     = "id=239048,enchant_id=7987,bonus_id=13440/6652/13662/12699/12846,ilevel=321", -- Vest of Reverent Adoration
-				wrist     = "id=251135,gem_id=240908,bonus_id=13440/6652/13695/13662/12699/12854,ilevel=334,upgrade=3446/100", -- Fury-fletched Armlets
+				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
 				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
 				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12838,ilevel=308,upgrade=3444/40", -- Sash of the Forlorn Vessel
 				legs      = "id=271527,enchant_id=8159,bonus_id=6652/13693/13698/1555/12838,ilevel=308,upgrade=0", -- Enigmatic Dreamwatcher's Leggings
 				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
-				finger1   = "id=272147,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
+				finger1   = "id=272147,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
 				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
 				trinket1  = "id=270174,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/60", -- Idol of the Howling Nexus
 				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
@@ -12847,6 +12847,19 @@ function PlanTab.myBuildChecks(check)
 	d.myBuilds, d.bars = keptMine, keptBars
 end
 
+-- The rank, shopping list and KeystoneLoot checks were written against the
+-- 2026-09-28 plan: its wrist carries the gem they test, and its back is the one
+-- the pretend KeystoneLoot refuses. They pin those two lines so a new plan does
+-- not break them. Returns the undo.
+function PlanTab.pinPlanFixture()
+	local cell = GEAR_PLAN.Feral.st
+	local wasBack, wasWrist = cell.slots.back, cell.slots.wrist
+	cell.slots.back = "id=193763,bonus_id=13440/6652/13662/12699/12846,ilevel=321"
+	cell.slots.wrist = "id=251135,gem_id=240908,bonus_id=13440/6652/13695/13662/12699/12854,ilevel=334"
+	cell.parsed = nil
+	return function() cell.slots.back, cell.slots.wrist, cell.parsed = wasBack, wasWrist, nil end
+end
+
 function PlanTab.combatLogChecks(check)
 	local t = "the combat log in instances"
 	local keptInfo, keptLog, keptDead, keptInside = GetInstanceInfo, LoggingCombat, UnitIsDeadOrGhost, PlanTab.logInside
@@ -14201,6 +14214,7 @@ local function selfTest()
 		ClassTalentHelper, PlayerSpellsUtil, C_ClassTalents, C_Traits, print, InCombatLockdown = wasHelper, wasUtil, wasTalents, wasTraits, wasPrint, wasCombat
 	end
 
+	PlanTab.unpinPlan = PlanTab.pinPlanFixture()  -- to the end of the KeystoneLoot block
 	-- ranks: a lower rank of the right enchant or gem is "lesser", never wrong
 	do
 		local rankTest = "a lower rank of the planned gem or enchant is lesser, not wrong"
@@ -14426,6 +14440,7 @@ local function selfTest()
 		check(sendTest .. ", a refusal is shown", said[#said] and said[#said]:find("refused AddFavorite", 1, true) ~= nil, true)
 		db().keystoneLoot, KeystoneLootAPI, print, PlanTab.boss = wasRecord, wasKL, wasPrint, wasBoss
 	end
+	PlanTab.unpinPlan()
 
 	-- The tab AS DRAWN (0007 review): the checks above prove the tables, and a
 	-- tab that drew mismatch in green, or no loadout at all, passed every one.

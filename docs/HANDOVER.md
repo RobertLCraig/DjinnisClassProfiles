@@ -6,7 +6,7 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.57.0, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
+**Status:** v0.58.0, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
 _Last updated: 2026-09-25 (v0.54.0: another spec's bars from the druid layout, card `0051`. v0.53.x: the bonus roll verdict at the offer, card `0054`; the spare deletes one at a time, card `0067`. v0.52.4: your own builds, card `0057`; one loadout change at a time, card `0063`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
 
 ## Goal & success criteria
@@ -240,7 +240,7 @@ deploy, which proves the data and the pure logic and **no frame**.
 ## What's next (in order)
 **`docs/board/` owns this.** Trap on `0033`: a key prompt that returns every login while **Apply** does nothing. `0035` waits until `0031` and `0033` pass in a client. Rob's own work: the Raidbots sims on `0028`, then `.\update-gear-plan.ps1 <ids>`.
 
-The cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.57.0 (deployed 2026-09-30). **Refresh the builds**: `python wcl-builds.py`, then `python update-builds.py` (it stops when the JSON is over 14 days old), then `python wcl-builds.py` again so the report compares the new builds.
+The cards in `human-review/` are one trip to a live client; each lists its own looks. Type `/reload` first: the game folder holds v0.58.0 (deployed 2026-09-30). **Refresh the builds**: `python wcl-builds.py`, then `python update-builds.py` (it stops when the JSON is over 14 days old), then `python wcl-builds.py` again so the report compares the new builds.
 
 Trap (card `0059`): only a loadout named `[CP] <build>` is the addon's. The spare is `[CP*] `, a swap's new one `[CP+] `; always build a name with `PlanTab.tag`, `spareName` or `swapName`. `PlanTab.savedLoadoutNames()` keys a tagged loadout by its BUILD name and returns untagged build-named ones third, so `saved[build]` never finds the player's own "Raid".
 Trap (card `0060`): a make deferred to the talent window's close is re-asked through `PlanTab.askAgain`, never replayed, and `importOne` refuses to delete the worn loadout. Keep both: the window is where loadouts get switched.
@@ -255,6 +255,7 @@ Trap: the offline check must pass under Lua 5.1 (`"C:\Program Files (x86)\Lua\5.
 Trap (card `0064`): build precedence is PIN, then Warcraft Logs (`wcl-builds.json`), then Dreamgrove, then wowvalor or SimC (`SIMC_TIER`, move it each season).
 Trap: a druid boss row's build is pooled over the bosses its loadout backs in `PlanTab.BOSSES`, so regrouping a row moves builds; run `wcl-builds.py` after. A build name is 24 letters at most (`NAME_MAX`).
 Trap: SimC writes free hero keystones as bought; `ungrant` fixes that, do not remove it.
+Trap (2026-09-30): the four Feral `GEAR_PLAN` cells were written from a local SimC run, not Raidbots (`report = "local SimC"`): the Sapling from the vault, a crafted cloak and bracers at an assumed 331, the missing ring enchant. The next `update-gear-plan.ps1` run for a cell replaces it, which is right. The self-test's rank, shopping and KeystoneLoot checks pin the 2026-09-28 back and wrist through `PlanTab.pinPlanFixture`; never make them read the live plan. The local SimC is described in the SecondBrain vault output `2026-09-30 Great Vault pick for Feral`.
 Trap (card `0066`): Delete old loadouts (`tidy`) deletes every "[CP] X" whose X no build names (`orphanLoadouts`), so `buildsOf` decides what is deleted. The box's Delete runs the list `tidy(false)` answered, never a fresh one. `RETIRED_TAGGED` now only feeds the loadout box.
 Trap (card `0057`): your builds are `DjinnisCPDB.myBuilds[spec]`. Read a spec's builds through `PlanTab.buildsOf(spec)` (the plan's, then yours), never `PlanTab.BUILDS[spec]`. The exceptions are `loadoutKey`'s before-the-tag rule and the sidebar's plan rows. Your own untagged loadout named as one of your builds is keyed `X` .. `PlanTab.CLASH`, so a build never reads it as its loadout. Rename and Delete go through `changeFence` and `startTagging`.
 Trap (card `0063`): a swap holds `PlanTab.swapping` until `swapEnded`. Anything that changes a loadout checks it, as it checks `q` and `tagging`.
