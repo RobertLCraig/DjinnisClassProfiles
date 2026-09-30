@@ -57,3 +57,26 @@ Next: Rob reviews each spec with the overlay on (Guardian first, as he asked), s
 **2026-09-30, Rob, on Balance:** the overlay's moves for Sunfire, Moonfire, Wrath and Starfire are the keys of his core rotation, "not sure I could deal with moving" them. Given two choices he picked the casters keeping their core keys; "starfire is on 4".
 
 **2026-09-30, Claude.** v0.63.2. `PlanTab.JOB_SPEC.Balance` and `.Resto`: Sunfire 1 (Combat 4), Moonfire 2 (Combat 3), Wrath 3 (Combat 1), Starfire 4 (Combat 2). Combat 7 (Lunar Eclipse, Lifebloom) then takes Alt+3, Rip's Feral key, which Moonfire leaves: proposed, for Rob to confirm with the overlay. Every other job still follows Feral.
+
+**2026-09-30, Rob:** "note click casting (clique?) for Restoration (can you pull those keys out?)"
+
+**2026-09-30, Claude. Resto click casting, read from Clique.** Source: a `%TEMP%` copy of `SavedVariables\Clique.lua` (written 2026-09-30 23:53), profile `Djinni - Bloodfeather`, the profile this character uses in all four specs (`specswap` off). Every binding is in set `default` (all unit frames) with no spec filter.
+
+| Mouse | Spell | Job (Bellular) |
+|---|---|---|
+| Left | Lifebloom | Combat 7 |
+| Right | Rejuvenation | heal |
+| Shift+Left | Ironbark | External Defensive |
+| Shift+Right | Regrowth | heal |
+| Alt+Left | Swiftmend | heal |
+| Alt+Right | Wild Growth | heal |
+| Wheel up | Nature's Cure, and Remove Corruption | Dispel |
+| Wheel down | Remove Corruption (twice) | Dispel |
+| Ctrl+Left | target | - |
+| Ctrl+Right | unit menu | - |
+
+What this means for the job keys:
+- **Lifebloom is on Left click, not Alt+3.** The Alt+3 proposal for Resto Combat 7 above is weaker: the button only matters for a target that is not on a raid frame.
+- **Wheel up has two spells.** Nature's Cure (Resto) and Remove Corruption (the others) share it with no spec filter; which one fires is up to Clique. Worth a look in game.
+- **No clash with the keyboard.** Clique binds mouse buttons on unit frames only; no keyboard key is used, so the job table and Clique do not fight.
+- **The healer sets match across characters.** The shared `Druid` profile (older druids) and `Whispylydia - Silvermoon` hold the same set, plus Cenarion Ward on Alt+Shift+Left and Innervate on Middle click. Bloodfeather has neither. Rob's other healers keep the same pattern (main heal Left, second heal Right, Shift and Alt for the rest, dispel on the wheel), so "one job, one click" already holds across classes.
