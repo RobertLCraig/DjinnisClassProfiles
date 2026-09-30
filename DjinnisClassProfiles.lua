@@ -1240,6 +1240,23 @@ local function tierText(tiers)
 	return "  " .. TIER_COLOUR[tier] .. tier .. "|r"
 end
 
+-- The tooltip line ClassCodex used to give: the trinket's tier for every druid
+-- spec that has one, the player's own spec first. nil when none is rated, and
+-- when ClassCodex is loaded (tiersFor stands aside), so its line is not doubled.
+function PlanTab.tierLine(mySpec, id, itemName)
+	local parts = {}
+	local function add(spec)
+		local tiers = tiersFor(spec, id, itemName)
+		if tiers then parts[#parts + 1] = spec .. tierText(tiers) end
+	end
+	if TRINKET_TIER[mySpec] then add(mySpec) end
+	for _, spec in ipairs({ "Balance", "Feral", "Guardian", "Resto" }) do
+		if spec ~= mySpec then add(spec) end
+	end
+	if #parts == 0 then return nil end
+	return GREY .. "Trinket tier:|r " .. table.concat(parts, "   ")
+end
+
 -- Stat targets: where you are, where you want to be, and what a drop does ----
 --
 -- Three surfaces, one set of numbers: a Stats tab in this window, a pane that
@@ -1662,6 +1679,8 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tool
 	elseif #planLines == 0 then
 		tooltip:AddLine(GREY .. "Not BiS" .. "|r")
 	end
+	local tierLine = gear and PlanTab.tierLine(playerSpec(), id, name)
+	if tierLine then tooltip:AddLine(tierLine) end
 
 	-- Feed the stat panes, then say the same thing here in words. The panes are
 	-- the picture; a loot roll does not always have one open.
@@ -13310,6 +13329,11 @@ local function selfTest()
 			(tiersFor("Feral", 193701, "Zzz Test Trinket") or {}).u, "S")
 		check("unknown name is still nil", tiersFor("Feral", 999999, "Not A Trinket"), nil)
 		tierNames.Feral[norm("Zzz Test Trinket")] = nil
+
+		-- the tooltip line: every druid spec that rates it, your own spec first
+		local line = PlanTab.tierLine("Guardian", 270175) or ""
+		check("tooltip tier line, your spec first", (line:find("Guardian", 1, true) or 99) < (line:find("Feral", 1, true) or 0), true)
+		check("tooltip tier line, unrated says nothing", PlanTab.tierLine("Feral", 999999, "Not A Trinket"), nil)
 	end
 
 	-- Stat targets. Every spec needs an `all` set, because that is the fallback
