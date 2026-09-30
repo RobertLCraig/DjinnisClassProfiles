@@ -10536,7 +10536,25 @@ PlanTab.JOB_SHORT = {
 	["Immune/Spell Immune/Movement"] = "Move2", ["Taunt/Quick Access"] = "Taunt", ["Buff"] = "Buff",
 	["Healthstone"] = "Stone", ["Damage Potion"] = "DPot", ["Recuperate"] = "Recup",
 	["Incapacitating Roar"] = "Incap", ["Ursol's Vortex"] = "Vortex", ["Thorn Bloom"] = "Thorn",
+	-- Rob's screenshot, 2026-09-30: a job with no short name drew its whole name over its neighbours
+	["Class 2 (CC)"] = "Mass", ["Class 4 (Special)"] = "Spec", ["Self-Heal 2"] = "Heal2", ["Class 6 (Dispel)"] = "Disp",
+	["Class 7 (Raid Defensive)"] = "Raid", ["Movement Ability 2"] = "Move3", ["CC"] = "CC", ["Slow"] = "Slow",
+	["PvP"] = "PvP", ["PvP 2"] = "PvP2", ["PvP 3"] = "PvP3", ["Mount"] = "Mount",
 }
+-- Card 0082, Rob 2026-09-30, on Guardian: "keep Frenzied Regeneration on
+-- Alt+Q, keep Survival Instincts on Alt+1, keep Lunar Beam on Alt+3". Maul
+-- (Combat 3) then takes Alt+4, Combat 8's Feral key, which Lunar Beam leaves.
+PlanTab.JOB_SPEC = {
+	Guardian = {
+		["Combat 4"] = "MULTIACTIONBAR6BUTTON1", ["Personal Defensive 2"] = "ACTIONBUTTON7",
+		["Combat 8"] = "ACTIONBUTTON9", ["Combat 3"] = "ACTIONBUTTON10",
+	},
+}
+
+-- Where `job` belongs for `spec`: the spec's own choice, else Feral's.
+function PlanTab.jobHome(spec, job)
+	return job and ((PlanTab.JOB_SPEC[spec] or {})[job] or PlanTab.JOB_BUTTONS[job]) or nil
+end
 -- bar button name -> its binding's prefix (Blizzard_ActionBar/Shared/MultiActionBars.xml buttonType)
 PlanTab.BUTTON_BINDING = {
 	ActionButton = "ACTIONBUTTON", MultiBarBottomLeftButton = "MULTIACTIONBAR1BUTTON",
@@ -10569,7 +10587,7 @@ function PlanTab.jobPlan(buttons, spec, slots, api)
 	local plan = {}
 	for _, b in ipairs(buttons) do
 		local job = PlanTab.jobOf(spec, slots[b.slot], api)
-		local want = job and PlanTab.JOB_BUTTONS[job]
+		local want = PlanTab.jobHome(spec, job)
 		plan[#plan + 1] = { frame = b.frame, slot = b.slot, binding = b.binding, job = job, want = want,
 			state = want and (want == b.binding and "right" or "move") or nil }
 	end
@@ -10643,6 +10661,9 @@ function PlanTab.drawJobs()
 				g.text:SetText(PlanTab.jobShort(p.job))
 				if p.state == "right" then
 					g.text:SetTextColor(0.2, 1, 0.2)
+					g.to:SetText("")
+				elseif not p.state then  -- a job with no key agreed yet: grey, no "to"
+					g.text:SetTextColor(0.7, 0.7, 0.7)
 					g.to:SetText("")
 				else
 					g.text:SetTextColor(1, 0.6, 0)
@@ -13386,7 +13407,25 @@ function PlanTab.barJobChecks(check)
 	check(t .. ", each spec's own ability for the job", bear[1].job .. "/" .. tostring(bear[1].state), "Combat 1/right")
 	local moon = PlanTab.jobPlan({ { frame = "a", slot = 111, binding = "ACTIONBUTTON3" } }, "Balance", { [111] = S("Wrath") }, api)
 	check(t .. ", Balance's Wrath belongs on Shred's key", moon[1].job .. "/" .. tostring(moon[1].want), "Combat 1/ACTIONBUTTON2")
+	-- Rob's Guardian keeps (2026-09-30)
+	local gid = { ["Frenzied Regeneration"] = 11, ["Survival Instincts"] = 12, ["Lunar Beam"] = 13, Maul = 14 }
+	for name, id in pairs(gid) do names[id] = name end
+	local tank = PlanTab.jobPlan({ { frame = "a", slot = 1, binding = "MULTIACTIONBAR6BUTTON1" }, { frame = "b", slot = 2, binding = "ACTIONBUTTON7" },
+		{ frame = "c", slot = 3, binding = "ACTIONBUTTON9" }, { frame = "d", slot = 4, binding = "ACTIONBUTTON9" } },
+		"Guardian", { [1] = { type = "spell", id = 11 }, [2] = { type = "spell", id = 12 }, [3] = { type = "spell", id = 13 }, [4] = { type = "spell", id = 14 } }, api)
+	check(t .. ", Guardian keeps Frenzied Regeneration, Survival Instincts and Lunar Beam where Rob has them",
+		("%s %s %s"):format(tostring(tank[1].state), tostring(tank[2].state), tostring(tank[3].state)), "right right right")
+	check(t .. ", and Maul goes to Alt+4's button", tostring(tank[4].want), "ACTIONBUTTON10")
+	check(t .. ", Feral keeps its own", PlanTab.jobHome("Feral", "Combat 4") .. "/" .. tostring(PlanTab.jobHome("Feral", nil)), "ACTIONBUTTON7/nil")
+	local long = true
+	for _, job in ipairs(PlanTab.BAR_CATEGORIES) do if #PlanTab.jobShort(job) > 6 then long = job end end
+	check(t .. ", every job has a short name", long, true)
 	local every = true
+	for _, homes in pairs(PlanTab.JOB_SPEC) do
+		for job, binding in pairs(homes) do
+			if not (binding:match("^ACTIONBUTTON%d+$") or binding:match("^MULTIACTIONBAR%dBUTTON%d+$")) then every = job end
+		end
+	end
 	for job, binding in pairs(PlanTab.JOB_BUTTONS) do
 		if not (binding:match("^ACTIONBUTTON%d+$") or binding:match("^MULTIACTIONBAR%dBUTTON%d+$")) then every = job end
 	end
