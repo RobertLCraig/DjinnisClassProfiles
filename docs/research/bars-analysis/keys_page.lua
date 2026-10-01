@@ -82,11 +82,26 @@ for _, n in ipairs({ "Remove Corruption", "Nature's Cure", "Purify", "Purify Dis
 -- Bellular's own sheet swaps its Buff and Res rows for these classes (its
 -- Priest sheet: Buff "Res", Res "Power Word: Fortitude"). Rob moved Arcane
 -- Intellect from the Res key (Alt+G) to Num1, the Buff key.
+-- The rows hold other things too: a warlock's are Demonic Circle and its
+-- Teleport. So each row's spell is sorted by what it is, not by the row.
 local BUFF, RES = 33, 34
-local BUFF_RES_SWAPPED = { [2] = true, [4] = true, [5] = true, [7] = true, [8] = true, [10] = true }
+local IS_BUFF = { ["Battle Shout"] = true, ["Weapon Buffs"] = true, Poisons = true, ["Power Word: Fortitude"] = true,
+	Skyfury = true, ["Arcane Intellect"] = true, ["Mark of the Wild"] = true, ["Blessing of the Bronze"] = true }
+local IS_RES = { Res = true, Revive = true, ["Ancestral Spirit"] = true, ["Ancestral Vision"] = true, Return = true, ["Mass Return"] = true }
 -- A class with no raid buff: its out-of-combat utility takes Num1 (Rob: Path
--- of Frost to Num1 on Blood, Spectral Sight to Num1 on Havoc and Devourer).
-local NUM1_UTILITY = { [6] = "Path of Frost", [12] = "Spectral Sight" }
+-- of Frost to Num1 on Blood, Spectral Sight to Num1 on Havoc and Devourer,
+-- "warlock num 1 I typically have underwater breathing I think").
+local NUM1_UTILITY = { [6] = "Path of Frost", [12] = "Spectral Sight", [9] = "Unending Breath" }
+-- Rob, 2026-10-01: "need to do a beter job of distinguishing buffs from
+-- teleports (monk has trancendance spells that work much the same as a
+-- warlock demonic circle/gateway. these are not buffs that go on num1".
+-- One pair of keys for a place-and-return teleport, the same in both classes:
+-- setting the spot (out of combat) on Shift+2, the teleport (a movement
+-- spell, like a druid's Wild Charge) on Alt+E. Both were free in both.
+local TELEPORT = {
+	["Demonic Circle"] = "MULTIACTIONBAR6BUTTON12", ["Demonic Circle: Teleport"] = "MULTIACTIONBAR6BUTTON3",
+	Transcendence = "MULTIACTIONBAR6BUTTON12", ["Transcendence: Transfer"] = "MULTIACTIONBAR6BUTTON3",
+}
 -- Rob put Havoc's Chaos Nova (Bellular's "CC") on Shift+W, the key a druid's
 -- Incapacitating Roar has: every other class's "CC" goes there too.
 local CC_KEY = "MULTIACTIONBAR6BUTTON8"
@@ -126,7 +141,15 @@ local function plan(spec, class)
 	local own, source, template = rules(spec, class)
 	local column = {}
 	for i, v in ipairs(PlanTab.BAR_ABILITIES[spec] or {}) do column[i] = v end
-	if BUFF_RES_SWAPPED[class] then column[BUFF], column[RES] = column[RES], column[BUFF] end
+	local rows, buff, res = { column[BUFF] or "", column[RES] or "" }, "", ""
+	for _, v in ipairs(rows) do
+		if IS_BUFF[v] then buff = v elseif IS_RES[v] then res = v end
+	end
+	column[BUFF], column[RES] = buff, res
+	local others = {}  -- anything else in the rows: a teleport, placed by TELEPORT
+	for _, v in ipairs(rows) do
+		if v ~= "" and v ~= buff and v ~= res then others[#others + 1] = v end
+	end
 	if NUM1_UTILITY[class] and (column[BUFF] or "") == "" then
 		for i, v in ipairs(column) do if v == NUM1_UTILITY[class] then column[i] = "" end end
 		column[BUFF] = NUM1_UTILITY[class]
@@ -141,6 +164,7 @@ local function plan(spec, class)
 		local src = b and source or "base"
 		if b == "" then b = nil end
 		if own[job] == nil then b = PlanTab.JOB_BUTTONS[job] end
+		if TELEPORT[spell] then b, src, job = TELEPORT[spell], "role", "Teleport" end
 		if job == "CC" and class ~= PlanTab.DRUID and not b then b, src = CC_KEY, "role" end
 		local short = PlanTab.jobShort(job, spec)
 		if not b then nokey[#nokey + 1] = { job = job, spell = spell, short = short } return end
@@ -151,6 +175,7 @@ local function plan(spec, class)
 	for i, job in ipairs(PlanTab.BAR_CATEGORIES) do
 		if (column[i] or "") ~= "" then put(job, column[i]) end
 	end
+	for _, v in ipairs(others) do put("Teleport", v) end
 	if class == PlanTab.DRUID then
 		for _, job in ipairs(extras) do put(job, job) end  -- Rob's own druid extras and items
 	else
