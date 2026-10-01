@@ -90,6 +90,13 @@ local NUM1_UTILITY = { [6] = "Path of Frost", [12] = "Spectral Sight" }
 -- Rob put Havoc's Chaos Nova (Bellular's "CC") on Shift+W, the key a druid's
 -- Incapacitating Roar has: every other class's "CC" goes there too.
 local CC_KEY = "MULTIACTIONBAR6BUTTON8"
+-- Bellular's cells that join an either/or talent pair whose spells do different
+-- jobs. Rob, 2026-10-01, on Fury's Avatar/Bladestorm: "I do not think they
+-- should share a key, they do fundamentally different things." The second
+-- spell gets its own key: Bladestorm on Alt+2, as on Arms.
+local SPLIT = {
+	Fury = { cell = "Avatar/Bladestorm", keep = "Avatar", move = "Bladestorm", to = "ACTIONBUTTON8" },
+}
 -- Rob's own moves on the page, 2026-10-01, kept as he made them
 local ROB_PICKS = {
 	Havoc = { Darkness = "ACTIONBUTTON5", ["Essence Break"] = "ACTIONBUTTON4", ["Rain from Above"] = "ACTIONBUTTON8" },
@@ -134,6 +141,16 @@ local function plan(spec, class)
 		for _, job in ipairs(extras) do put(job, job) end  -- Rob's own druid extras and items
 	else
 		for _, job in ipairs({ "Healthstone", "Damage Potion" }) do put(job, job) end  -- any class can use these
+	end
+	local split = SPLIT[spec]
+	if split then
+		for b, c in pairs(cells) do
+			if c.spell == split.cell then
+				c.spell = split.keep
+				assert(not cells[split.to], spec .. ": the split's key is taken")
+				cells[split.to] = { spell = split.move, job = c.job, short = c.short, source = "rob" }
+			end
+		end
 	end
 	-- Rob's own moves: the spell onto the key, what was there onto the
 	-- spell's old key (a swap), or to "no key yet"
