@@ -10697,6 +10697,8 @@ function PlanTab.drawJobs()
 		return ok and canRead(id) and id or nil
 	end
 	local plan = PlanTab.jobPlan(PlanTab.jobButtons(), spec, api.here, api)
+	local slotOf = {}  -- the button each key has on screen now
+	for _, p in ipairs(plan) do slotOf[p.binding] = p.slot end
 	local n = 0
 	for _, p in ipairs(plan) do
 		if p.job or p.need then
@@ -10723,8 +10725,17 @@ function PlanTab.drawJobs()
 				g.needBack:SetPoint("TOPLEFT", g.need, "TOPLEFT", -1, 1)
 				g.needBack:SetPoint("BOTTOMRIGHT", g.need, "BOTTOMRIGHT", 1, -1)
 				g.needBack:SetColorTexture(0, 0, 0, 0.75)
+				g:SetScript("OnMouseUp", function(self, button)
+					if button == "LeftButton" and self.p then GameTooltip:Hide() PlanTab.jobMove(self.p) end
+				end)
+				g:SetScript("OnEnter", function(self) PlanTab.jobTip(self) end)
+				g:SetScript("OnLeave", function() GameTooltip:Hide() end)
 				PlanTab.jobLabels[n] = g
 			end
+			-- only an amber label takes the mouse; the rest let clicks through
+			p.toSlot = p.want and slotOf[p.want]
+			g.p = p.state == "move" and p or nil
+			g:EnableMouse(g.p ~= nil)
 			local l, b, w, h = p.frame:GetRect()
 			local scale = p.frame:GetEffectiveScale()
 			if ui.canRead(l) and l and ui.canRead(scale) then
@@ -10756,6 +10767,59 @@ function PlanTab.drawJobs()
 		end
 	end
 	return n
+end
+
+-- Swaps what slots `from` and `to` hold: nothing is lost, and the same swap
+-- undoes it. Rob, 2026-10-01, on Solar Beam to Shift+E over Rejuvenation:
+-- "Do the change."
+function PlanTab.jobSwap(from, to)
+	PickupAction(from)
+	PlaceAction(to)  -- the old action comes onto the cursor
+	if GetCursorInfo() then PlaceAction(from) end
+	ClearCursor()
+end
+
+-- A click on an amber label: its spell onto its key, what that key held onto
+-- this one. Answers "moved", or why not.
+PlanTab.jobUndo = {}
+function PlanTab.jobMove(p)
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return "fenced" end
+	local to = p and p.toSlot
+	if not to then PlanTab.say("That key's button is not on screen. Move it by hand.") return "none" end
+	local mine, theirs = PlanTab.actionLabel(PlanTab.readSlot(p.slot)), PlanTab.actionLabel(PlanTab.readSlot(to))
+	PlanTab.jobSwap(p.slot, to)
+	table.insert(PlanTab.jobUndo, { from = p.slot, to = to, text = ("%s and %s"):format(mine, theirs) })
+	PlanTab.say(("Moved %s to %s. %s, which was there, is now on %s. More > Undo the last job move swaps them back.")
+		:format(mine, PlanTab.keyFor(p.want), theirs, PlanTab.keyFor(p.binding)))
+	return "moved"
+end
+
+function PlanTab.jobUndoLast()
+	local last = PlanTab.jobUndo[#PlanTab.jobUndo]
+	if not last then PlanTab.say("No job move to undo.") return "none" end
+	local why = PlanTab.barsFence()
+	if why then PlanTab.say(why) return "fenced" end
+	PlanTab.jobSwap(last.to, last.from)
+	table.remove(PlanTab.jobUndo)
+	PlanTab.say(("Swapped back: %s."):format(last.text))
+	return "undone"
+end
+
+function PlanTab.jobTip(g)
+	local p = g.p
+	if not p then return end
+	GameTooltip:SetOwner(g, "ANCHOR_TOP")
+	local mine = PlanTab.actionLabel(PlanTab.readSlot(p.slot))
+	GameTooltip:AddLine(("%s belongs on %s."):format(mine, PlanTab.keyFor(p.want)), 1, 0.6, 0)
+	if p.toSlot then
+		GameTooltip:AddLine(("%s now holds %s, which would come here (%s)."):format(PlanTab.keyFor(p.want),
+			PlanTab.actionLabel(PlanTab.readSlot(p.toSlot)), PlanTab.keyFor(p.binding)), 1, 1, 1, true)
+		GameTooltip:AddLine("Click: swap them.", 0, 1, 0)
+	else
+		GameTooltip:AddLine("That key's button is not on screen, so move it by hand.", 1, 1, 1, true)
+	end
+	GameTooltip:Show()
 end
 
 -- More > Show jobs on the bars. Redrawn when the bars, the form or the spec
@@ -10797,6 +10861,7 @@ function PlanTab.barsCommand(rest)
 	elseif rest == "match" then PlanTab.matchBuildBars()
 	elseif rest == "unmatch" then PlanTab.unmatchBuildBars()
 	elseif rest == "jobs" then PlanTab.toggleJobs()
+	elseif rest == "jobs undo" then PlanTab.jobUndoLast()
 	elseif verb == "compare" then
 		local spec = playerSpec()
 		local key = spec and (name:lower() == spec:lower() and spec or (spec .. " / " .. name))
@@ -10846,7 +10911,10 @@ function PlanTab.menuItems(where)
 		add({ text = ("Make every %s build use these bars"):format(playerSpec()), tip = "Your action bars and key bindings now become the layout of every build of this spec. Each build keeps only its own talent swaps on the same button (Berserk for Incarnation). Asks first.", fn = function() PlanTab.matchBuildBars() end })
 	end
 	-- card 0082
-	add({ text = PlanTab.jobsOn and "Hide jobs on the bars" or "Show jobs on the bars", tip = "Writes each button's job on it (C1 is Combat 1, Kick the interrupt). Green: on its Feral key. Amber: it belongs on the key shown.", fn = function() PlanTab.toggleJobs() end })
+	add({ text = PlanTab.jobsOn and "Hide jobs on the bars" or "Show jobs on the bars", tip = "Writes each button's job on it (C1 is Combat 1, Kick the interrupt). Green: on its key. Amber: it belongs on the key shown; click it to swap it there.", fn = function() PlanTab.toggleJobs() end })
+	if #PlanTab.jobUndo > 0 then
+		add({ text = "Undo the last job move", tip = "Swaps back " .. PlanTab.jobUndo[#PlanTab.jobUndo].text .. ".", fn = function() PlanTab.jobUndoLast() end })
+	end
 	-- card 0080
 	local compare = PlanTab.compareItems()
 	if #compare > 0 then
@@ -13562,6 +13630,37 @@ function PlanTab.barJobChecks(check)
 		if not (binding:match("^ACTIONBUTTON%d+$") or binding:match("^MULTIACTIONBAR%dBUTTON%d+$")) then every = job end
 	end
 	check(t .. ", every job's button is a binding name", every, true)
+	-- Rob, 2026-10-01: "Do the change": a click swaps a spell onto its key
+	do
+		local keptG = { PickupAction, PlaceAction, GetCursorInfo, ClearCursor }
+		local keptP = { PlanTab.barsFence, PlanTab.readSlot, PlanTab.say, PlanTab.keyFor, PlanTab.jobUndo }
+		local ok2, err2 = pcall(function()
+			local bars, cursor, said = { [9] = "Solar Beam", [12] = "Rejuvenation", [5] = "Moonfire" }, nil, ""
+			PickupAction = function(slot) cursor, bars[slot] = bars[slot], nil end
+			PlaceAction = function(slot) bars[slot], cursor = cursor, bars[slot] end
+			GetCursorInfo = function() return cursor end
+			ClearCursor = function() cursor = nil end
+			PlanTab.barsFence = function() return nil end
+			PlanTab.readSlot = function(slot) return bars[slot] and { type = "macro", name = bars[slot] } or nil end
+			PlanTab.say = function(s) said = s end
+			PlanTab.keyFor = function(b) return ({ ACTIONBUTTON9 = "Alt+3", ACTIONBUTTON12 = "Shift+E" })[b] or b end
+			PlanTab.jobUndo = {}
+			local r = PlanTab.jobMove({ slot = 9, binding = "ACTIONBUTTON9", want = "ACTIONBUTTON12", toSlot = 12 })
+			check(t .. ", a click swaps the spell onto its key and what was there comes back",
+				("%s %s %s %s"):format(r, tostring(bars[12]), tostring(bars[9]), tostring(cursor)), "moved Solar Beam Rejuvenation nil")
+			check(t .. ", and says what was there", said:find("Rejuvenation, which was there, is now on Alt+3", 1, true) ~= nil, true)
+			PlanTab.jobUndoLast()
+			check(t .. ", undo swaps them back", ("%s %s %d"):format(tostring(bars[9]), tostring(bars[12]), #PlanTab.jobUndo), "Solar Beam Rejuvenation 0")
+			PlanTab.jobMove({ slot = 5, binding = "ACTIONBUTTON5", want = "ACTIONBUTTON6", toSlot = 6 })
+			check(t .. ", onto an empty key it just moves", tostring(bars[6]) .. "/" .. tostring(bars[5]), "Moonfire/nil")
+			check(t .. ", no button on screen for the key, nothing moves", PlanTab.jobMove({ slot = 6, binding = "ACTIONBUTTON6", want = "ACTIONBUTTON11" }) .. "/" .. tostring(bars[6]), "none/Moonfire")
+			PlanTab.barsFence = function() return "Not in combat." end
+			check(t .. ", not in combat", PlanTab.jobMove({ slot = 6, toSlot = 5 }) .. "/" .. tostring(bars[6]), "fenced/Moonfire")
+		end)
+		PickupAction, PlaceAction, GetCursorInfo, ClearCursor = keptG[1], keptG[2], keptG[3], keptG[4]
+		PlanTab.barsFence, PlanTab.readSlot, PlanTab.say, PlanTab.keyFor, PlanTab.jobUndo = keptP[1], keptP[2], keptP[3], keptP[4], keptP[5]
+		check(t .. ", the swap checks ran", ok2 and true or err2, true)
+	end
 	local keptDraw, keptSay, keptOn = PlanTab.drawJobs, PlanTab.say, PlanTab.jobsOn
 	local ok, err = pcall(function()
 		PlanTab.drawJobs, PlanTab.say = function() return 3 end, function() end

@@ -136,3 +136,11 @@ Not moved: Resto's caster Shift+E holds Incapacitating Roar; Resto has no interr
 Withdrawn: moving Frenzied Regeneration to Alt+Q in Feral and Resto. Alt+Q is bar 7 button 1 (slot 157), which does not change with form, and holds Survival Instincts on Feral, Nature's Swiftness on Resto, nothing on Balance, Frenzied Regeneration on Guardian. The move would have pushed Survival Instincts and Nature's Swiftness out in every form. Frenzied Regeneration stays on Shift+Q on the Feral and Resto bear pages (Feral's cat Shift+Q is Frantic Frenzy); Guardian keeps it on Alt+Q, an accepted exception.
 
 Rob's old Guardian Shift+Q defensive: likely Rage of the Sleeper, which SimulationCraft names 22 times on branch `thewarwithin` and 0 on `midnight`.
+
+**2026-10-01, Rob**, on Solar Beam to Shift+E over Rejuvenation on Balance's caster bar: "Do the change."
+
+**2026-10-01, Claude.** v0.64.0. No session can press a button in the client, so the overlay does it: an amber label now takes a left click (`PlanTab.jobMove`) and swaps its spell with what its key's button holds (`PlanTab.jobSwap`: PickupAction, PlaceAction, the old action back onto the first slot; the same calls compare mode already makes). Nothing is lost. Its tooltip says what the key holds now and where that goes. `PlanTab.jobUndo` keeps the swaps for the session; More > Undo the last job move (and `/dcp bars jobs undo`) swaps the last one back. Only amber labels take the mouse; the rest let clicks through. Fenced in combat, with something on the cursor, or on a vehicle bar. A key whose button is not on screen says to move it by hand. 7 checks; 4 mutations each fail the test.
+
+For Rob's Balance caster bar: Solar Beam (Alt+3) to Shift+E swaps Rejuvenation onto Alt+3. Alt+3 is Lunar Eclipse's key (Combat 7), but on the caster bar Rejuvenation is the only thing that needs a place.
+
+In-game check: as Balance in caster form, hover Solar Beam's amber label (the tooltip names Rejuvenation), click it, see the swap and the chat line; More > Undo the last job move puts it back. And a non-amber label must not block a mouse click on its button.
