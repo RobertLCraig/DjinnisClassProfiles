@@ -221,3 +221,5 @@ Still free: Alt+1 Affliction (no keyless combat spell in Bellular's data for it)
 **2026-10-01, Rob:** "druid is my main class. Not sure about frenzied regen on 4. it requires bear form and I'd rather not risk pressing it by accident". **Claude:** swapped, Feral Maim 4 and Frenzied Regeneration Shift+4. 0 clashes.
 
 **2026-10-01, Rob:** "if the macro works. I guess it could go on shift S". Waits on card `0083`: when its in-game looks pass, the Healthstone leaves Shift+S in every spec (the macro is on Shift+2) and Feral Frenzied Regeneration moves Shift+4 to Shift+S.
+
+**2026-10-01, Rob:** "macro seems to work okay!" **Claude:** done as planned: no Healthstone key in any of the 40 specs (Shift+S is free outside Feral), Feral Frenzied Regeneration Shift+S, Shift+4 empty again. 0 clashes. The addon's own `JOB_BUTTONS` still sends the Healthstone job to Shift+S; that changes when the plan is built into the addon.

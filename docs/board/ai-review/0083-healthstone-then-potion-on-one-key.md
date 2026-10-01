@@ -43,7 +43,7 @@ didnt have one)". A macro has no conditional for "I have this item".
 - [x] Add 258138 = "Healing Potion" to `PlanTab.ITEM_JOBS`, with a short label.
 - [x] One character macro, created if missing, rewritten on `BAG_UPDATE_DELAYED` and `PLAYER_REGEN_ENABLED` with `EditMacro` (present in 12.1: `Blizzard_MacroUI.lua:344`; protected in combat).
 - [x] The self-test checks named above, run by `lua offline-check.lua`.
-- [ ] In-game look for Rob: with a stone, one press uses the stone and the next the potion; with none, one press drinks the potion.
+- [x] In-game look for Rob: with a stone, one press uses the stone and the next the potion; with none, one press drinks the potion.
 
 ## Plan
 
@@ -77,3 +77,5 @@ Two more looks for Rob:
 7. The macro's icon is the stone while a stone is ready, the potion after it is used, grey with neither.
 
 **2026-10-01, Rob**, on Feral's Frenzied Regeneration: "if the macro works. I guess it could go on shift S". **Claude:** so the macro goes on Shift+2 (the healing potion key, every spec), not Shift+S as look 1 says; drag it there. When looks 1 to 7 pass, the key page drops the Healthstone from Shift+S in all 40 specs, and Feral's Frenzied Regeneration moves from Shift+4 to Shift+S. Not done before then: a failed macro would leave the stone with no key.
+
+**2026-10-01, Rob:** "macro seems to work okay!" **Claude:** the in-game task ticked. Look 5 (a rewrite between pulls in a Mythic+ key) is still open unless Rob says he saw it. The key page now gives the Healthstone no key in any spec, and Feral Frenzied Regeneration is on Shift+S.

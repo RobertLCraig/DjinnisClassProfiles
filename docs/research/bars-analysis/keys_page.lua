@@ -166,9 +166,10 @@ end
 -- Rob fixes them on the page. Druid first. Hibernate is rare, out of a fight:
 -- Num2, free in all four. Feral's 4 was empty (bar 1, the cat page). Rob,
 -- on Frenzied Regeneration there: "it requires bear form and I'd rather not
--- risk pressing it by accident". So Maim on 4, Frenzied Regeneration on Shift+4.
+-- risk pressing it by accident". So Maim on 4. Then "if the macro works. I
+-- guess it could go on shift S": the heal macro freed Shift+S, a self-heal key.
 local DRUID_FILL = { Hibernate = "MULTIACTIONBAR4BUTTON2" }
-PROPOSED.Feral = with(DRUID_FILL, { Maim = "ACTIONBUTTON4", ["Frenzied Regeneration"] = "MULTIACTIONBAR2BUTTON10" })
+PROPOSED.Feral = with(DRUID_FILL, { Maim = "ACTIONBUTTON4", ["Frenzied Regeneration"] = "MULTIACTIONBAR6BUTTON6" })
 PROPOSED.Guardian = with(DRUID_FILL, { ["Bristling Fur"] = "MULTIACTIONBAR2BUTTON10" })
 PROPOSED.Balance = DRUID_FILL
 PROPOSED.Resto = with(DRUID_FILL, { Efflorescence = "ACTIONBUTTON7", Starsurge = "ACTIONBUTTON12" })
@@ -229,6 +230,9 @@ local function plan(spec, class)
 	local placed = {}
 	local function put(job, spell)
 		if placed[spell] then return end  -- Bellular gives Unholy's Death Coil two rows; one key is enough
+		-- Card 0083's macro, on Shift+2, uses the stone first. Rob, 2026-10-01:
+		-- "macro seems to work okay!" So the stone needs no key of its own.
+		if spell == "Healthstone" then return end
 		placed[spell] = true
 		if DISPELS[spell] then clique[#clique + 1] = { job = job, spell = spell, short = PlanTab.jobShort(job, spec) } return end
 		local b = own[job]
