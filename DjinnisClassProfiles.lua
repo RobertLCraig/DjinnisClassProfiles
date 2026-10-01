@@ -10524,10 +10524,11 @@ PlanTab.JOB_BUTTONS = {
 	["Buff"] = "MULTIACTIONBAR4BUTTON1",
 	-- not in Bellular's list: items, and Rob's own extras, each its own job
 	["Healthstone"] = "MULTIACTIONBAR6BUTTON6", ["Damage Potion"] = "MULTIACTIONBAR3BUTTON7",
+	["Healing Potion"] = "MULTIACTIONBAR6BUTTON12",  -- card 0083, Rob: "Shift 2 should be healing potion"
 	["Recuperate"] = "MULTIACTIONBAR3BUTTON3", ["Incapacitating Roar"] = "MULTIACTIONBAR6BUTTON8",
 	["Ursol's Vortex"] = "MULTIACTIONBAR6BUTTON4", ["Thorn Bloom"] = "MULTIACTIONBAR6BUTTON11",
 }
-PlanTab.ITEM_JOBS = { [5512] = "Healthstone", [245898] = "Damage Potion" }
+PlanTab.ITEM_JOBS = { [5512] = "Healthstone", [245898] = "Damage Potion", [258138] = "Healing Potion" }
 -- a short name drawn on the button; a Combat job is C and its number
 PlanTab.JOB_SHORT = {
 	["Class 1 (Movement)"] = "Roar", ["Class 3 (Tag)"] = "Roots", ["Self-Heal 1"] = "Heal1",
@@ -10535,7 +10536,7 @@ PlanTab.JOB_SHORT = {
 	["Class 8 (Lust/BRes)"] = "BRes", ["Personal Defensive 1"] = "Def1", ["Personal Defensive 2"] = "Def2",
 	["Movement Ability"] = "Move", ["CC 2"] = "CC2", ["Interrupt"] = "Kick", ["Res"] = "Res",
 	["Immune/Spell Immune/Movement"] = "Move2", ["Taunt/Quick Access"] = "Taunt", ["Buff"] = "Buff",
-	["Healthstone"] = "Stone", ["Damage Potion"] = "DPot", ["Recuperate"] = "Recup",
+	["Healthstone"] = "Stone", ["Damage Potion"] = "DPot", ["Healing Potion"] = "HPot", ["Recuperate"] = "Recup",
 	["Incapacitating Roar"] = "Incap", ["Ursol's Vortex"] = "Vortex", ["Thorn Bloom"] = "Thorn",
 	-- Rob's screenshot, 2026-09-30: a job with no short name drew its whole name over its neighbours
 	["Class 2 (CC)"] = "Mass", ["Class 4 (Special)"] = "Spec", ["Self-Heal 2"] = "Heal2", ["Class 6 (Dispel)"] = "Disp",
@@ -10854,6 +10855,109 @@ function PlanTab.toggleJobs(on)
 	return n
 end
 
+-- Card 0083: the Healthstone, then the healing potion, on one key. Rob,
+-- 2026-10-01: "ideally I would like them on the same key, with healthstones
+-- being prioritised". A macro cannot see the bags, so the addon rewrites one
+-- character macro out of combat: the stone then the potion while a stone is
+-- ready, the potion alone while there is none or it is cooling down. Not
+-- AutoPotion's or EQOL's way, which Rob found unreliable in Midnight:
+-- /castsequence moves on only after a use that worked, so a stone that cannot
+-- be used holds the potion back all fight. The reasons, with sources:
+-- docs/research/2026-10-01-healthstone-macro-addons.md.
+PlanTab.HEAL_MACRO = "DCP Heal"
+PlanTab.HEAL_STONES = { 5512, 224464 }  -- Healthstone, Demonic Healthstone
+PlanTab.HEAL_POTION = 258138  -- Potent Healing Potion, on Rob's Shift+2
+
+-- The game's reads, each nil when it hands back a secret (none is documented
+-- secret in 12.1: ItemDocumentation.lua, GetItemCount and GetItemCooldown).
+function PlanTab.healApi()
+	local function plain(v) return v ~= nil and not (issecretvalue and issecretvalue(v)) end
+	return {
+		count = function(id)
+			local n = C_Item.GetItemCount(id, false, false)
+			return plain(n) and n or nil
+		end,
+		cooldown = function(id)  -- seconds left
+			local start, duration = C_Item.GetItemCooldown(id)
+			if not (plain(start) and plain(duration)) then return nil end
+			if duration <= 0 then return 0 end
+			return math.max(0, start + duration - GetTime())
+		end,
+	}
+end
+
+-- The macro text for the bags `api` reads, and the seconds until a stone comes
+-- off cooldown (nil when none is waiting). Nil text when a read failed.
+function PlanTab.healBody(api)
+	local stone, wait
+	for _, id in ipairs(PlanTab.HEAL_STONES) do
+		local n = api.count(id)
+		if n == nil then return nil end
+		if n > 0 then
+			local left = api.cooldown(id)
+			if left == nil then return nil end
+			if left <= 0 then stone = id break end
+			wait = math.min(wait or left, left)
+		end
+	end
+	local potion = "item:" .. PlanTab.HEAL_POTION
+	if stone then
+		return ("#showtooltip\n/castsequence reset=combat item:%d, %s"):format(stone, potion), nil
+	end
+	return "#showtooltip\n/use " .. potion, wait
+end
+
+-- Rewrites the macro if there is one and its text is not already right. Never
+-- in combat: the macro a fight starts with is the one it keeps. Answers what
+-- happened: "written", "same", "none", "combat" or "unread".
+function PlanTab.healRewrite(api)
+	if InCombatLockdown() then return "combat" end
+	local index = GetMacroIndexByName(PlanTab.HEAL_MACRO)
+	if not index or index == 0 then return "none" end
+	local body, wait = PlanTab.healBody(api or PlanTab.healApi())
+	if not body then return "unread" end
+	-- a stone cooling down: put it back first the moment it is ready
+	if wait and C_Timer and not PlanTab.healWaiting then
+		PlanTab.healWaiting = true
+		C_Timer.After(wait + 0.5, function() PlanTab.healWaiting = nil PlanTab.healRewrite() end)
+	end
+	local _, _, now = GetMacroInfo(index)
+	if now == body then return "same" end
+	EditMacro(index, nil, nil, body)
+	return "written"
+end
+
+-- More > Make the heal macro. One character macro, never a second: the EQOL
+-- copies on Rob's account were three of the same name.
+function PlanTab.healMake()
+	if InCombatLockdown() then PlanTab.say("The heal macro can be made after the fight.") return end
+	local where = "Open the macro window (Esc > Macros), Character Specific Macros, and drag it onto your key."
+	if (GetMacroIndexByName(PlanTab.HEAL_MACRO) or 0) ~= 0 then
+		PlanTab.healRewrite()
+		PlanTab.say(("You already have the macro %s. %s"):format(PlanTab.HEAL_MACRO, where))
+		return
+	end
+	local body = PlanTab.healBody(PlanTab.healApi()) or ("#showtooltip\n/use item:" .. PlanTab.HEAL_POTION)
+	local index, why = PlanTab.makeMacro({ name = PlanTab.HEAL_MACRO, icon = 134400, body = body, char = true }, { made = {} })
+	if not index then PlanTab.say(("No heal macro made: %s."):format(why or "the game refused")) return end
+	PlanTab.say(("Made the macro %s: your Healthstone, then your healing potion, or the potion alone when you have no stone ready. It changes itself out of combat. %s"):format(PlanTab.HEAL_MACRO, where))
+end
+
+-- Handler first, then one event at a time, each verified (docs/DECISIONS.md,
+-- 2026-08-21). BAG_UPDATE_COOLDOWN: a stone used out of combat.
+function PlanTab.healWatch()
+	if PlanTab.healFrame then return end
+	local f = CreateFrame("Frame")
+	f:SetScript("OnEvent", function() PlanTab.healRewrite() end)
+	for _, event in ipairs({ "BAG_UPDATE_DELAYED", "BAG_UPDATE_COOLDOWN", "PLAYER_REGEN_ENABLED", "PLAYER_ENTERING_WORLD" }) do
+		f:RegisterEvent(event)
+		if not f:IsEventRegistered(event) then
+			PlanTab.say(("Could not watch %s, so the heal macro may not change by itself. Use More > Make the heal macro to set it."):format(event))
+		end
+	end
+	PlanTab.healFrame = f
+end
+
 -- /dcp bars [save | save build | save <name> | load <name> | list | delete <name> | undo | from [spec] | match | unmatch | compare <build> | jobs]
 function PlanTab.barsCommand(rest)
 	local verb, name = rest:match("^(%S+)%s+(.+)$")
@@ -10916,6 +11020,8 @@ function PlanTab.menuItems(where)
 	if #PlanTab.jobUndo > 0 then
 		add({ text = "Undo the last job move", tip = "Swaps back " .. PlanTab.jobUndo[#PlanTab.jobUndo].text .. ".", fn = function() PlanTab.jobUndoLast() end })
 	end
+	-- card 0083
+	add({ text = "Make the heal macro", tip = "One macro for your Healthstone, then your healing potion. With no stone ready it drinks the potion. It changes itself out of combat; drag it onto your key.", fn = function() PlanTab.healMake() end })
 	-- card 0080
 	local compare = PlanTab.compareItems()
 	if #compare > 0 then
@@ -11108,6 +11214,7 @@ loader:SetScript("OnEvent", function(_, event, name)
 		pcall(PlanTab.armLootCard)  -- PLAYER_ENTERING_WORLD fires after PLAYER_LOGIN, so a login inside the raid still draws the card (card 0015)
 		pcall(PlanTab.armGroupPrompt)  -- the spec prompt when a group finder listing takes you (card 0024)
 		pcall(PlanTab.armLoadouts)  -- the planned builds as loadouts on this character (card 0031)
+		pcall(PlanTab.healWatch)  -- the heal macro keeps itself right (card 0083); PLAYER_ENTERING_WORLD follows, macros loaded
 		-- the talent window is load-on-demand: armed here only if something loaded it before login (card 0019)
 		if C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded("Blizzard_PlayerSpells") then pcall(PlanTab.armSidebar) end
 	elseif event == "ADDON_LOADED" then
@@ -13534,6 +13641,40 @@ function PlanTab.barMatchChecks(check)
 end
 
 -- Card 0082: each button's job, drawn on the real bars.
+-- Card 0083: the heal macro's text, and when it is rewritten.
+function PlanTab.healMacroChecks(check)
+	local t = "heal macro"
+	local function bags(counts, cooldowns)
+		return { count = function(id) return counts[id] or 0 end, cooldown = function(id) return (cooldowns or {})[id] or 0 end }
+	end
+	local both = "#showtooltip\n/castsequence reset=combat item:5512, item:258138"
+	local alone = "#showtooltip\n/use item:258138"
+	check(t .. ": stone then potion when a stone is in the bags", PlanTab.healBody(bags({ [5512] = 1, [258138] = 3 })), both)
+	check(t .. ": a Demonic Healthstone counts as the stone", PlanTab.healBody(bags({ [224464] = 1 })), "#showtooltip\n/castsequence reset=combat item:224464, item:258138")
+	check(t .. ": potion alone with no stone", PlanTab.healBody(bags({ [258138] = 3 })), alone)
+	local body, wait = PlanTab.healBody(bags({ [5512] = 1 }, { [5512] = 42 }))
+	check(t .. ": potion alone while the stone cools down, and when it is back", body .. "/" .. tostring(wait), alone .. "/42")
+	check(t .. ": a secret read writes nothing", tostring(PlanTab.healBody({ count = function() return nil end, cooldown = function() return 0 end })), "nil")
+
+	-- the rewrite, against a stubbed macro list
+	local kept = { InCombatLockdown, GetMacroIndexByName, GetMacroInfo, EditMacro, C_Timer }
+	local fight, macro, writes = true, "#showtooltip\n/use item:258138", 0
+	InCombatLockdown = function() return fight end
+	GetMacroIndexByName = function(name) return name == PlanTab.HEAL_MACRO and 125 or 0 end
+	GetMacroInfo = function() return PlanTab.HEAL_MACRO, 134400, macro end
+	EditMacro = function(_, _, _, text) macro, writes = text, writes + 1 end
+	C_Timer = nil
+	local stone = bags({ [5512] = 1, [258138] = 3 })
+	local inFight = PlanTab.healRewrite(stone)
+	fight = false
+	local after = PlanTab.healRewrite(stone)
+	local again = PlanTab.healRewrite(stone)
+	check(t .. ": no rewrite in combat, one after", ("%s %s %s %d"):format(inFight, after, again, writes), "combat written same 1")
+	GetMacroIndexByName = function() return 0 end
+	check(t .. ": no macro, nothing made by itself", PlanTab.healRewrite(stone) .. " " .. writes, "none 1")
+	InCombatLockdown, GetMacroIndexByName, GetMacroInfo, EditMacro, C_Timer = kept[1], kept[2], kept[3], kept[4], kept[5]
+end
+
 function PlanTab.barJobChecks(check)
 	local t = "jobs on the bars"
 	check(t .. ", short names", table.concat({ PlanTab.jobShort("Combat 3"), PlanTab.jobShort("Interrupt"), PlanTab.jobShort("Personal Defensive 2"), tostring(PlanTab.jobShort(nil)) }, " "), "C3 Kick Def2 nil")
@@ -13545,7 +13686,7 @@ function PlanTab.barJobChecks(check)
 	check(t .. ", a spell's job is its Bellular category", PlanTab.jobOf("Feral", S("Shred"), api), "Combat 1")
 	check(t .. ", a macro's job is its spell's", PlanTab.jobOf("Feral", { type = "macro", name = "M", index = 50 }, api), "Combat 3")
 	check(t .. ", a macro with no spell has none", tostring(PlanTab.jobOf("Feral", { type = "macro", name = "M", index = 51 }, api)), "nil")
-	check(t .. ", a known item's job", PlanTab.jobOf("Feral", { type = "item", id = 5512 }, api) .. "/" .. tostring(PlanTab.jobOf("Feral", { type = "item", id = 1 }, api)), "Healthstone/nil")
+	check(t .. ", a known item's job", PlanTab.jobOf("Feral", { type = "item", id = 5512 }, api) .. "/" .. PlanTab.jobOf("Feral", { type = "item", id = 258138 }, api) .. "/" .. tostring(PlanTab.jobOf("Feral", { type = "item", id = 1 }, api)), "Healthstone/Healing Potion/nil")
 	check(t .. ", Rob's own extras are jobs by name", PlanTab.jobOf("Guardian", S("Recuperate"), api), "Recuperate")
 	check(t .. ", a talent standing in for the sheet's spell", PlanTab.jobOf("Feral", S("Frantic Frenzy"), api) .. "/" .. PlanTab.jobOf("Feral", S("Tiger Dash"), api), "Combat 6/Movement Ability")
 	check(t .. ", nothing known has no job", tostring(PlanTab.jobOf("Feral", S("Nothing"), api)) .. "/" .. tostring(PlanTab.jobOf("Feral", nil, api)), "nil/nil")
@@ -17070,6 +17211,7 @@ local function selfTest()
 	PlanTab.barCompareChecks(check)  -- card 0080
 	PlanTab.barOnlyChecks(check)  -- card 0081
 	PlanTab.barJobChecks(check)  -- card 0082
+	PlanTab.healMacroChecks(check)  -- card 0083
 	PlanTab.orphanChecks(check)  -- card 0066
 	PlanTab.combatLogChecks(check)  -- card 0076
 	PlanTab.craftChecks(check)  -- card 0078
