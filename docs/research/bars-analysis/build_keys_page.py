@@ -121,11 +121,72 @@ def all_names():
 wago_lookup(all_names())
 
 
+# Bar 1 per form (Rob, 2026-10-01: "can we make bar 1 change based on stance?
+# Like in game?"). The game pages bar 1 for a druid's forms and a rogue's
+# stealth; a warrior's stances only page it under a bar addon (Dominos'
+# retail bar states give warriors `form`, not `bonusbar`), so not here.
+# A saved action is named and iconed by its spell or item id; cached in id_icons.json.
+ids_path = os.path.join(HERE, "id_icons.json")
+id_icons = json.load(open(ids_path, encoding="utf-8")) if os.path.exists(ids_path) else {}
+
+
+def by_id(kind, num):
+    k = "%s=%d" % (kind, num)
+    if k not in id_icons:
+        try:
+            tip = json.loads(fetch("https://nether.wowhead.com/tooltip/%s/%d" % (kind, num)))
+            id_icons[k] = {"name": tip.get("name"), "icon": tip.get("icon")}
+        except Exception:
+            id_icons[k] = {"name": None, "icon": None}
+    return k, id_icons[k]
+
+
+def saved_cell(v):
+    if v["type"] == "macro":
+        k, hit = by_id("spell", v["index"]) if v.get("index") else (None, {})
+        name = v.get("name") or "macro"
+        # Rob's macros are named "Druid - Moonfire": the spell is the part after the dash
+        spell = hit.get("name") or name.split(" - ")[-1]
+        return {"spell": spell, "icon": hit.get("icon"), "wh": k, "short": "macro", "source": "saved", "macro": name}
+    k, hit = by_id(v["type"], v["id"])
+    return {"spell": hit.get("name") or "%s %d" % (v["type"], v["id"]), "icon": hit.get("icon"), "wh": k, "source": "saved"}
+
+
+FORM_NAMES = {"caster": "Caster", "cat": "Cat Form", "prowl": "Prowl", "bear": "Bear Form", "moonkin": "Moonkin Form",
+              "normal": "Normal", "stealth": "Stealth"}
+for s in data["specs"]:
+    f = s.pop("forms", None)
+    bar1 = {b: c for b, c in s["cells"].items() if b.startswith("ACTIONBUTTON")}
+    if f:
+        home = f["home"]
+        s["formList"] = [[n, FORM_NAMES[n]] for n in ("caster", "cat", "prowl", "bear", "moonkin")]
+        s["formHome"] = home
+        s["formNote"] = "Pages other than %s are your saved bars (%s, saved %s), as they are." % (FORM_NAMES[home], f["from"], f["saved"])
+        for b, c in bar1.items():
+            del s["cells"][b]
+            s["cells"][b + "@" + home] = c
+        for form, page in f["pages"].items():
+            if form == home or not isinstance(page, dict):
+                continue
+            for b, v in page.items():
+                s["cells"][b + "@" + form] = saved_cell(v)
+    elif s["className"] == "Rogue":
+        # no saved rogue bars: the stealth page starts as a copy of bar 1
+        s["formList"] = [["normal", "Normal"], ["stealth", "Stealth"]]
+        s["formHome"] = "normal"
+        s["formNote"] = "The Stealth page starts as a copy of bar 1. Put your openers on it."
+        for b, c in bar1.items():
+            del s["cells"][b]
+            s["cells"][b + "@normal"] = c
+            s["cells"][b + "@stealth"] = dict(c, source="copy")
+json.dump(id_icons, open(ids_path, "w", encoding="utf-8"), indent=1, sort_keys=True)
+
 MOUSE_ORDER = ["MOUSEWHEELUP", "MOUSEWHEELDOWN"]
 for s in data["specs"]:
     sid = s["id"]
     for c in s["cells"].values():
-        resolve(c, sid)
+        if c.get("source") != "saved":  # a saved action is already named by its id
+            resolve(c, sid)
         # Bellular's "Taunt/Quick Access": a taunt only for a tank (Prowl, a stealth, elsewhere)
         if c.get("job") == "Taunt/Quick Access" and s["role"] != "TANK":
             c["short"] = "Quick"

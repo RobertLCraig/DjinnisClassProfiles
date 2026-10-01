@@ -22,6 +22,11 @@ h1 { font-size: 22px; margin: 0 0 2px; }
 .slot { position: relative; width: var(--slot); height: var(--slot); border: 2px dashed #333945; border-radius: 4px; background: #0d0f13; box-sizing: border-box; }
 .slot.filled { border-style: solid; border-color: #d8d8d8; background-size: cover; background-position: center; cursor: grab; }
 .slot.base { border-color: #d8d8d8; } .slot.role { border-color: #4fb0ff; } .slot.druid, .slot.rob { border-color: #5ad25a; }
+.slot.saved { border-color: #6b7280; } .slot.copy { border-color: #6b7280; border-style: dotted; }
+.forms { display: flex; gap: 3px; margin-bottom: 5px; flex-wrap: wrap; }
+.forms button { background: #22262e; color: #ccc; border: 1px solid #3a3f4a; border-radius: 3px; padding: 2px 7px; font-size: 11px; cursor: pointer; }
+.forms button.on { background: #3b4a63; border-color: #7cc8ff; color: #fff; }
+.forms button.home::after { content: " (fights here)"; color: #9aa0aa; }
 .slot.review { border-color: #c98a1e; box-shadow: 0 0 0 2px #5a3d0a inset; }
 .slot.mine { border-color: #ffd24d; box-shadow: 0 0 6px #ffd24d; }
 .slot.over { outline: 2px solid #fff; outline-offset: 1px; }
@@ -59,12 +64,13 @@ Druid keys are the ones agreed so far. Every other class shows the "copy by role
 <span><i style="border-color:#d8d8d8"></i>Feral's key (the model)</span>
 <span><i style="border-color:#4fb0ff"></i>moved for the role</span>
 <span><i style="border-color:#5ad25a"></i>agreed with you (druid keys, your picks)</span>
+<span><i style="border-color:#6b7280"></i>your saved bars, not planned yet</span>
 <span><i style="border-color:#c98a1e"></i>druid habit copied to a tank: review</span>
 <span><i style="border-color:#ffd24d"></i>you moved it here</span>
 </div>
 
 <div class="stage">
-  <div class="bar" style="grid-column:2;grid-row:1"><h3>Bar 1 (above the minimap)</h3><div class="grid" id="bar-ACTIONBUTTON"></div></div>
+  <div class="bar" style="grid-column:2;grid-row:1"><h3>Bar 1 (above the minimap)</h3><div class="forms" id="formtabs"></div><div class="grid" id="bar-ACTIONBUTTON"></div><div class="small" id="formnote" style="max-width:290px;margin-top:4px"></div></div>
   <div class="bar" style="grid-column:1;grid-row:2"><h3>Bar 7 (left)</h3><div class="grid" id="bar-MULTIACTIONBAR6BUTTON"></div></div>
   <div style="grid-column:2;grid-row:2"><div class="minimap">minimap</div></div>
   <div class="bar" style="grid-column:3;grid-row:2"><h3>Bar 4 (right)</h3><div class="grid" id="bar-MULTIACTIONBAR3BUTTON"></div></div>
@@ -88,6 +94,7 @@ Druid keys are the ones agreed so far. Every other class shows the "copy by role
 
 <script>
 const DATA = /*DATA*/;
+const HINT = document.getElementById("info").textContent;
 const ICON = n => "https://wow.zamimg.com/images/wow/icons/large/" + n + ".jpg";
 const BARS = ["ACTIONBUTTON", "MULTIACTIONBAR6BUTTON", "MULTIACTIONBAR3BUTTON", "MULTIACTIONBAR4BUTTON"];
 const MOUSE = [
@@ -96,7 +103,7 @@ const MOUSE = [
   ["ALT-BUTTON1", "Alt+Left"], ["ALT-BUTTON2", "Alt+Right"], ["ALT-SHIFT-BUTTON1", "Alt+Shift+Left"], ["ALT-SHIFT-BUTTON2", "Alt+Shift+Right"],
 ];
 const FIXED = [["CTRL-BUTTON1", "Ctrl+Left: target"], ["CTRL-BUTTON2", "Ctrl+Right: menu"]];
-const SRC = { rob: "your pick", base: "Feral's key (the model)", role: "moved for the role", druid: "a druid key, agreed with you", clique: "your Clique bind", cliqueNew: "proposed: dispel on the wheel, as your other healers" };
+const SRC = { saved: "as on your saved bars; not planned yet", copy: "copied from bar 1", rob: "your pick", base: "Feral's key (the model)", role: "moved for the role", druid: "a druid key, agreed with you", clique: "your Clique bind", cliqueNew: "proposed: dispel on the wheel, as your other healers" };
 const short = k => (k || "").replace("Shift+", "s-").replace("Alt+", "a-").replace("Ctrl+", "c-");
 
 let spec = null, state = {}, orig = {};
@@ -116,11 +123,23 @@ function tray(s, st) {
   for (const c of Object.values(orig)) if (!placed.has(c.spell) && !t.some(x => x.spell === c.spell)) t.push(Object.assign({}, c, { source: "spare" }));
   return t;
 }
+// Bar 1 is one page per form: its ids carry the form ("b:ACTIONBUTTON1@cat").
+let form = null;
+const formOf = id => (id.split("@")[1] || "");
+const formName = (s, f) => ((s.formList || []).find(x => x[0] === f) || [f, f])[1];
+// a state saved before bar 1 had forms: its bar 1 was the page the spec fights on
+function migrate(s, st) {
+  if (!s.formList) return st;
+  for (const id of Object.keys(st)) if (/^b:ACTIONBUTTON\d+$/.test(id)) { st[id + "@" + s.formHome] = st[id]; delete st[id]; }
+  return st;
+}
 function load(name) {
   spec = specOf(name);
   orig = original(spec);
+  form = spec.formHome || null;  // a spec opens on the page it fights on
   const saved = localStorage.getItem(store(name));
-  state = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(orig));
+  state = saved ? migrate(spec, JSON.parse(saved)) : JSON.parse(JSON.stringify(orig));
+  document.getElementById("info").textContent = HINT;
   render();
 }
 function save() { localStorage.setItem(store(spec.spec), JSON.stringify(state)); }
@@ -158,7 +177,10 @@ function fill(d, cell, id) {
 }
 
 function keyName(id) {
-  if (id.startsWith("b:")) return DATA.keys[id.slice(2)] || "no key";
+  if (id.startsWith("b:")) {
+    const [b, f] = id.slice(2).split("@");
+    return (DATA.keys[b] || "no key") + (f ? " (" + formName(spec, f) + ")" : "");
+  }
   if (id.startsWith("m:")) { const m = MOUSE.find(x => x[0] === id.slice(2)); return m ? m[1] : id.slice(2); }
   return "the tray";
 }
@@ -177,20 +199,23 @@ function describe(id, keyText) {
 // Rob, 2026-10-01: "non spec specific spells should automatically be changed
 // for all specs". A spell another spec of the class also uses (on its plan,
 // spare, or a Clique bind) moves the same way there.
-function stateOf(s) { const saved = localStorage.getItem(store(s.spec)); return saved ? JSON.parse(saved) : original(s); }
+function stateOf(s) { const saved = localStorage.getItem(store(s.spec)); return saved ? migrate(s, JSON.parse(saved)) : original(s); }
 function planCell(s, spell) {
   const o = original(s);
   for (const c of Object.values(o)) if (c.spell === spell) return Object.assign({}, c);
   const n = s.nokey.find(c => c.spell === spell) || (s.others || []).find(c => c.spell === spell);
   return n ? Object.assign({}, n, { source: "mine" }) : null;
 }
-function propagate(spell, target) {
+// A spell can sit on more than one form page (Moonfire on cat and bear): the
+// copy that moves is the one on the same page as the key it goes to.
+function propagate(spell, target, from) {
   const done = [];
+  const page = formOf(target === "tray" ? from : target);
   for (const y of DATA.specs.filter(x => x.className === spec.className && x.spec !== spec.spec)) {
     const base = planCell(y, spell);
     if (!base) continue;
     const st = stateOf(y);
-    const pos = Object.keys(st).find(k => st[k].spell === spell);
+    const pos = Object.keys(st).find(k => st[k].spell === spell && formOf(k) === page);
     if (target === "tray") {
       if (!pos) continue;
       delete st[pos];
@@ -209,7 +234,7 @@ function propagate(spell, target) {
 function drop(from, to) {
   if (!from || from === to) return;
   const moving = from.startsWith("t:") ? from.slice(2) : (state[from] && state[from].spell);
-  const also = moving && to ? propagate(moving, to) : [];
+  const also = moving && to ? propagate(moving, to, from) : [];
   dropHere(from, to);
   document.getElementById("info").textContent = moving + (also.length ? ": moved here and in " + also.join(", ") + "." : ": moved in " + spec.spec + " only. No other " + spec.className + " spec uses it.");
 }
@@ -242,10 +267,22 @@ function render() {
     g.innerHTML = "";
     // top row: buttons 7 to 12, bottom row: 1 to 6, as on Rob's screen
     for (const n of [7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6]) {
-      const b = bar + n;
-      g.appendChild(slotEl("b:" + b, state["b:" + b], DATA.keys[b] || ""));
+      const b = bar + n, id = "b:" + b + (bar === "ACTIONBUTTON" && form ? "@" + form : "");
+      g.appendChild(slotEl(id, state[id], DATA.keys[b] || ""));
     }
   }
+  // bar 1's pages, as the game swaps them: a druid's forms, a rogue's stealth
+  const ft = document.getElementById("formtabs"); ft.innerHTML = "";
+  for (const [f, label] of spec.formList || []) {
+    const b = document.createElement("button"); b.textContent = label;
+    if (f === form) b.classList.add("on");
+    if (f === spec.formHome && spec.formList.length > 2) b.classList.add("home");
+    b.onclick = () => { form = f; render(); };
+    // drop a button on a tab to show that page, then drop it on a key
+    b.ondragover = e => { e.preventDefault(); if (form !== f) { form = f; render(); } };
+    ft.appendChild(b);
+  }
+  document.getElementById("formnote").textContent = spec.formNote || "";
   const m = document.getElementById("mouse");
   m.innerHTML = "";
   for (const [k, label] of MOUSE) {
@@ -280,7 +317,9 @@ function changeText(name, st) {
       if (told.has(now.spell)) continue;
       told.add(now.spell);
       if (was) told.add(was.spell);
-      const from = Object.keys(o).find(k => o[k].spell === now.spell);
+      // the key it left: one that held it and does not now, on the same page first
+      const left = Object.keys(o).filter(k => o[k].spell === now.spell && (!st[k] || st[k].spell !== now.spell));
+      const from = left.find(k => formOf(k) === formOf(id)) || left[0];
       let l = name + ": " + now.spell + (from ? " from " + keyName(from) : " (no key before)") + " to " + keyName(id);
       if (was) l += "; " + keyName(id) + " held " + was.spell + (where[was.spell] ? ", now on " + keyName(where[was.spell]) : ", now off the bars");
       lines.push(l + ".");

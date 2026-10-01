@@ -1,0 +1,158 @@
+{
+ "item=6948": {
+  "icon": "inv_misc_rune_01",
+  "name": "Hearthstone"
+ },
+ "spell=102793": {
+  "icon": "spell_druid_ursolsvortex",
+  "name": "Ursol's Vortex"
+ },
+ "spell=106839": {
+  "icon": "inv_bone_skull_04",
+  "name": "Skull Bash"
+ },
+ "spell=106898": {
+  "icon": "spell_druid_stampedingroar_cat",
+  "name": "Stampeding Roar"
+ },
+ "spell=1079": {
+  "icon": "ability_ghoulfrenzy",
+  "name": "Rip"
+ },
+ "spell=1229376": {
+  "icon": "ui_spellbook_onebutton",
+  "name": "Single-Button Assistant"
+ },
+ "spell=125439": {
+  "icon": "spell_misc_petheal",
+  "name": "Revive Battle Pets"
+ },
+ "spell=1261867": {
+  "icon": "inv12_ability_druid_flourish_empowered",
+  "name": "Heart of the Wild"
+ },
+ "spell=132469": {
+  "icon": "ability_druid_typhoon",
+  "name": "Typhoon"
+ },
+ "spell=1822": {
+  "icon": "ability_druid_disembowel",
+  "name": "Rake"
+ },
+ "spell=1850": {
+  "icon": "ability_druid_dash",
+  "name": "Dash"
+ },
+ "spell=190984": {
+  "icon": "spell_nature_wrathv2",
+  "name": "Wrath"
+ },
+ "spell=192081": {
+  "icon": "ability_druid_ironfur",
+  "name": "Ironfur"
+ },
+ "spell=194153": {
+  "icon": "spell_arcane_starfire",
+  "name": "Starfire"
+ },
+ "spell=197626": {
+  "icon": "spell_arcane_arcane03",
+  "name": "Starsurge"
+ },
+ "spell=197628": {
+  "icon": "spell_arcane_starfire",
+  "name": "Starfire"
+ },
+ "spell=213764": {
+  "icon": "inv_misc_monsterclaw_03",
+  "name": "Swipe"
+ },
+ "spell=22568": {
+  "icon": "ability_druid_ferociousbite",
+  "name": "Ferocious Bite"
+ },
+ "spell=22842": {
+  "icon": "ability_bullrush",
+  "name": "Frenzied Regeneration"
+ },
+ "spell=24858": {
+  "icon": "spell_nature_forceofnature",
+  "name": "Moonkin Form"
+ },
+ "spell=2908": {
+  "icon": "ability_hunter_beastsoothe",
+  "name": "Soothe"
+ },
+ "spell=29166": {
+  "icon": "spell_nature_lightning",
+  "name": "Innervate"
+ },
+ "spell=339": {
+  "icon": "spell_nature_stranglevines",
+  "name": "Entangling Roots"
+ },
+ "spell=5176": {
+  "icon": "spell_nature_wrathv2",
+  "name": "Wrath"
+ },
+ "spell=5211": {
+  "icon": "ability_druid_bash",
+  "name": "Mighty Bash"
+ },
+ "spell=5215": {
+  "icon": "ability_druid_prowl",
+  "name": "Prowl"
+ },
+ "spell=5217": {
+  "icon": "ability_mount_jungletiger",
+  "name": "Tiger's Fury"
+ },
+ "spell=5221": {
+  "icon": "spell_shadow_vampiricaura",
+  "name": "Shred"
+ },
+ "spell=5487": {
+  "icon": "ability_racial_bearform",
+  "name": "Bear Form"
+ },
+ "spell=6795": {
+  "icon": "ability_physical_taunt",
+  "name": "Growl"
+ },
+ "spell=768": {
+  "icon": "ability_druid_catform",
+  "name": "Cat Form"
+ },
+ "spell=774": {
+  "icon": "spell_nature_rejuvenation",
+  "name": "Rejuvenation"
+ },
+ "spell=77761": {
+  "icon": "spell_druid_stamedingroar",
+  "name": "Stampeding Roar"
+ },
+ "spell=78674": {
+  "icon": "spell_arcane_arcane03",
+  "name": "Starsurge"
+ },
+ "spell=78675": {
+  "icon": "ability_vehicle_sonicshockwave",
+  "name": "Solar Beam"
+ },
+ "spell=8921": {
+  "icon": "spell_nature_starfall",
+  "name": "Moonfire"
+ },
+ "spell=8936": {
+  "icon": "spell_nature_resistnature",
+  "name": "Regrowth"
+ },
+ "spell=93402": {
+  "icon": "ability_mage_firestarter",
+  "name": "Sunfire"
+ },
+ "spell=99": {
+  "icon": "ability_druid_demoralizingroar",
+  "name": "Incapacitating Roar"
+ }
+}

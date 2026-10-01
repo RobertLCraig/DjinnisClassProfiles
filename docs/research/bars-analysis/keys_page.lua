@@ -177,6 +177,28 @@ local function json(v)
 	return "{" .. table.concat(parts, ",") .. "}"
 end
 
+-- Rob, 2026-10-01: "can we make bar 1 change based on stance? Like in game?"
+-- A druid's bar 1 is a different page in each form. The plan is the page the
+-- spec fights on (PlanTab.FORM_PAGE); the other pages come from his saved bars,
+-- as they are, slot by slot.
+local SNAPSHOT = { Feral = "Feral / Dungeon", Guardian = "Guardian / Dungeon", Balance = "Balance", Resto = "Resto" }
+local FORMS = { { "caster", 0 }, { "cat", 72 }, { "prowl", 84 }, { "bear", 96 }, { "moonkin", 108 } }
+local HOME = { [0] = "caster", [72] = "cat", [96] = "bear", [108] = "moonkin" }
+local function savedPages(spec)
+	local snap = DjinnisCPDB.bars[SNAPSHOT[spec] or ""]
+	if not snap then return nil end
+	local pages = {}
+	for _, f in ipairs(FORMS) do
+		local page = {}
+		for n = 1, 12 do
+			local v = snap.slots[f[2] + n]
+			if v then page["ACTIONBUTTON" .. n] = { type = v.type, id = v.id, name = v.name, index = v.index } end
+		end
+		pages[f[1]] = page
+	end
+	return { home = HOME[PlanTab.FORM_PAGE[spec]], pages = pages, saved = snap.saved, from = SNAPSHOT[spec] }
+end
+
 local specs, clashes = {}, 0
 for _, s in ipairs(PlanTab.SPECS) do
 	local id, name, class, role = s[1], s[2], s[3], s[4]
@@ -184,7 +206,8 @@ for _, s in ipairs(PlanTab.SPECS) do
 		local cells, nokey, clique, clash = plan(name, class)
 		clashes = clashes + #clash
 		specs[#specs + 1] = { id = id, spec = name, class = class, className = CLASS[class] or ("class " .. class), role = role,
-			template = class ~= PlanTab.DRUID and PlanTab.templateFor(name) or nil, cells = cells, nokey = nokey, clique = clique, clash = clash }
+			template = class ~= PlanTab.DRUID and PlanTab.templateFor(name) or nil, cells = cells, nokey = nokey, clique = clique, clash = clash,
+				forms = class == PlanTab.DRUID and savedPages(name) or nil }
 	end
 end
 

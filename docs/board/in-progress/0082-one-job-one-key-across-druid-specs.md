@@ -175,3 +175,9 @@ Built by: `keys_page.lua` (the addon's tables to `keys_data.json`), `bellular_sp
 40 specs, 0 clashes. Not extrapolated: Darkness (Havoc 5 and Devourer Alt+Q disagree, and Bellular's "Raid Defensive" row holds different kinds of spell per class); Rain from Above (a PvP talent).
 
 The page now moves a spell in every spec of the class that uses it: drop it on a key (what was there takes its old key, or the tray), or drag it to the tray. It says which specs also moved. Checked in a browser: Spectral Sight moved in Havoc also moved in Vengeance and Devourer; Essence Break moved in Havoc only.
+
+**2026-10-01, Rob:** "can we make bar 1 change based on stance? Like in game? (stance for warriors, shapeshift form for druids)"
+
+**2026-10-01, Claude.** Bar 1 on the page has a tab per page the game swaps to: a druid's Caster, Cat Form, Prowl, Bear Form, Moonkin Form; a rogue's Normal and Stealth. Each spec opens on the page it fights on (`PlanTab.FORM_PAGE`). That page is the plan; a druid's other pages are his saved bars (`Feral / Dungeon`, `Guardian / Dungeon`, `Balance`, `Resto`, saved 2026-09-30), grey, as they are. A macro shows the spell it casts (its `index`). The rogue Stealth page starts as a copy of bar 1 (no rogue bars saved). A class-wide move on a form page moves the copy on the same form page in the other specs.
+Warriors not done: Blizzard's bar 1 does not page for warrior stances. Dominos' retail bar states (`Dominos/core/barStates/Standard.lua`) page a rogue and an Evoker on `[bonusbar:1]` but a warrior on `form`, an addon option. Rob's bars are Blizzard's (Edit Mode). Asked Rob whether to add warrior stance tabs anyway.
+Checked in a browser: tabs, each spec's home page, Growl moved to Alt+2 on Feral's bear page also moved on Resto's (Guardian and Balance already had it there), the change list names the right old key, old saved changes move onto the home page.
