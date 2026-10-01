@@ -165,15 +165,18 @@ local ROB_PICKS = {
 	Havoc = { Darkness = "ACTIONBUTTON5", ["Essence Break"] = "ACTIONBUTTON4", ["Rain from Above"] = "ACTIONBUTTON8" },
 	Devourer = { Darkness = "MULTIACTIONBAR6BUTTON1", ["Void Nova"] = "ACTIONBUTTON7" },
 	Brewmaster = with(MONK, { ["Purifying Brew"] = "MULTIACTIONBAR6BUTTON1", ["Breath of Fire"] = "ACTIONBUTTON2", ["Chi Burst"] = "ACTIONBUTTON7" }),
-	Mistweaver = MONK,
+	-- Rob, 2026-10-01, "okay" to keys for the spells his moves left with none:
+	-- Vampiric Blood 2, Death Strike 4, Putrefy Alt+2, Celestial Conduit Alt+1, all free
+	Mistweaver = with(MONK, { ["Celestial Conduit"] = "ACTIONBUTTON7" }),
 	Windwalker = with(MONK, { ["Strike of the Windlord"] = "ACTIONBUTTON5", ["Whirling Dragon Punch"] = "ACTIONBUTTON11" }),
 	Balance = { ["Wild Mushroom"] = "ACTIONBUTTON7" },  -- Balance fights on the Moonkin page
-	Blood = { Asphyxiate = "ACTIONBUTTON6", ["Gorefiend's Grasp"] = "MULTIACTIONBAR6BUTTON8" },
-	["Frost Death Knight"] = DK_STUN, Unholy = DK_STUN,
+	Blood = { Asphyxiate = "ACTIONBUTTON6", ["Gorefiend's Grasp"] = "MULTIACTIONBAR6BUTTON8", ["Vampiric Blood"] = "ACTIONBUTTON2" },
+	["Frost Death Knight"] = with(DK_STUN, { ["Death Strike"] = "ACTIONBUTTON4" }),
+	Unholy = with(DK_STUN, { ["Death Strike"] = "ACTIONBUTTON4", Putrefy = "ACTIONBUTTON8" }),
 	Fire = MAGE_AOE, ["Frost Mage"] = MAGE_AOE,
 }
 -- Rob took these off their key; the whole class follows.
-local ROB_OFF = { [8] = { "Time Warp" } }
+local ROB_OFF = {}  -- Time Warp, taken off Alt+D, went back: Rob's "okay"
 -- Rob's moves of a spell the whole class has, by class id. Imprison: Wheel up
 -- on Havoc and Devourer, then "Devourer: Imprison (no key before) to Alt+R"
 -- (Clique's wheel only fires over a unit frame, a poor home for an enemy CC).
