@@ -13,7 +13,7 @@ import json, os, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "2026-10-01-keybind-layout.html")
-ITEMS = {"Healthstone": 5512, "Damage Potion": 245898}
+ITEMS = {"Healthstone": 5512, "Damage Potion": 245898, "Healing Potion": 258138}  # Potent Healing Potion, on Rob's Feral Shift+2
 
 data = json.load(open(os.path.join(HERE, "keys_data.json"), encoding="utf-8"))
 bell = json.load(open(os.path.join(HERE, "bellular_spells.json"), encoding="utf-8"))["spells"]

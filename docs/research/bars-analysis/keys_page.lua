@@ -99,11 +99,25 @@ local NUM1_UTILITY = { [6] = "Path of Frost", [12] = "Spectral Sight", [9] = "Un
 -- setting the spot (out of combat) on Shift+2, the teleport (a movement
 -- spell, like a druid's Wild Charge) on Alt+E. Both were free in both.
 local TELEPORT = {
-	["Demonic Circle"] = "MULTIACTIONBAR6BUTTON12", ["Demonic Circle: Teleport"] = "MULTIACTIONBAR6BUTTON3",
+	["Demonic Circle"] = "MULTIACTIONBAR6BUTTON10", ["Demonic Circle: Teleport"] = "MULTIACTIONBAR6BUTTON3",
 	-- Rob, 2026-10-01: "on druid alt e is for charge, I feel like roll is more of
 	-- a charge than a movement". A monk's Alt+E is Roll, so its teleport goes on
-	-- Shift+V, where Bellular had it.
-	Transcendence = "MULTIACTIONBAR6BUTTON12", ["Transcendence: Transfer"] = "MULTIACTIONBAR3BUTTON6",
+	-- Shift+V, where Bellular had it. The place spell: Shift+R, Bellular's key
+	-- for Transcendence, since Shift+2 is the healing potion (below).
+	Transcendence = "MULTIACTIONBAR6BUTTON10", ["Transcendence: Transfer"] = "MULTIACTIONBAR3BUTTON6",
+}
+-- Spells with a key set by name, for every spec that has them.
+local SPELL_KEY = {
+	-- Rob, 2026-10-01: "Shift 2 should be healing potion on all classes and
+	-- specs, shift s healthstone (ideally I would like them on the same key,
+	-- with healthstones being prioritised)". His Feral bars already do this.
+	["Healing Potion"] = "MULTIACTIONBAR6BUTTON12",
+	-- Demonic Circle took Banish's Shift+R: Banish goes where a Demon Hunter's
+	-- Imprison is, Alt+R, the same job (one enemy out of the fight).
+	Banish = "MULTIACTIONBAR6BUTTON4",
+	-- Rob: "can you have both roll and flying serpent kick? I deffinately dont
+	-- like that on num 1". Both, yes (not a choice node). C was free on Windwalker.
+	["Flying Serpent Kick"] = "MULTIACTIONBAR3BUTTON3",
 }
 -- Rob put Havoc's Chaos Nova (Bellular's "CC") on Shift+W, the key a druid's
 -- Incapacitating Roar has: every other class's "CC" goes there too.
@@ -144,7 +158,7 @@ local ROB_PICKS = {
 	Havoc = { Darkness = "ACTIONBUTTON5", ["Essence Break"] = "ACTIONBUTTON4", ["Rain from Above"] = "ACTIONBUTTON8" },
 	Devourer = { Darkness = "MULTIACTIONBAR6BUTTON1", ["Void Nova"] = "ACTIONBUTTON7" },
 	Brewmaster = MONK, Mistweaver = MONK,
-	Windwalker = with(MONK, { ["Flying Serpent Kick"] = "MULTIACTIONBAR4BUTTON1" }),
+	Windwalker = MONK,
 }
 -- Rob took these off their key (Blood Asphyxiate, Arcane Frost Nova, both off
 -- Shift+W); the whole class follows.
@@ -187,6 +201,7 @@ local function plan(spec, class)
 		if b == "" then b = nil end
 		if own[job] == nil then b = PlanTab.JOB_BUTTONS[job] end
 		if TELEPORT[spell] then b, src, job = TELEPORT[spell], "role", "Teleport" end
+		if SPELL_KEY[spell] then b, src = SPELL_KEY[spell], spell == "Healing Potion" and "rob" or "role" end
 		if job == "CC" and class ~= PlanTab.DRUID and not b then b, src = CC_KEY, "role" end
 		local short = PlanTab.jobShort(job, spec)
 		if not b then nokey[#nokey + 1] = { job = job, spell = spell, short = short } return end
@@ -203,6 +218,7 @@ local function plan(spec, class)
 	else
 		for _, job in ipairs({ "Healthstone", "Damage Potion" }) do put(job, job) end  -- any class can use these
 	end
+	put("Healing Potion", "Healing Potion")
 	local split = SPLIT[spec]
 	if split then
 		for b, c in pairs(cells) do
