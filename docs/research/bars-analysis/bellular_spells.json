@@ -1,0 +1,6593 @@
+{
+"source": "https://keybinding.bellular.games/",
+"spells": [
+{
+"id": 17,
+"name": "Power Word: Shield",
+"category": "Combat",
+"icon": "spell_holy_powerwordshield",
+"specs": [
+256,
+258
+]
+},
+{
+"id": 53,
+"name": "Backstab",
+"category": "Combat",
+"icon": "ability_backstab",
+"specs": [
+261
+]
+},
+{
+"id": 99,
+"name": "Incapacitating Roar",
+"category": "",
+"icon": "ability_druid_demoralizingroar",
+"specs": []
+},
+{
+"id": 100,
+"name": "Charge",
+"category": "Movement",
+"icon": "ability_warrior_charge",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 118,
+"name": "Polymorph",
+"category": "Tag",
+"icon": "spell_nature_polymorph",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 120,
+"name": "Cone of Cold",
+"category": "CC",
+"icon": "spell_frost_glacier",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 122,
+"name": "Frost Nova",
+"category": "CC",
+"icon": "spell_frost_frostnova",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 130,
+"name": "Slow Fall",
+"category": "Raid Defensive",
+"icon": "spell_magic_featherfall",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 133,
+"name": "Fireball",
+"category": "Combat",
+"icon": "spell_fire_flamebolt",
+"specs": [
+63
+]
+},
+{
+"id": 136,
+"name": "Mend Pet",
+"category": "Self-Heal",
+"icon": "ability_hunter_mendpet",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 172,
+"name": "Corruption",
+"category": "Combat",
+"icon": "spell_shadow_abominationexplosion",
+"specs": [
+265
+]
+},
+{
+"id": 339,
+"name": "Entangling Roots",
+"category": "Tag",
+"icon": "spell_nature_stranglevines",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 355,
+"name": "Taunt",
+"category": "Taunt",
+"icon": "spell_nature_reincarnation",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 370,
+"name": "Purge",
+"category": "Purge",
+"icon": "spell_nature_purge",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 408,
+"name": "Kidney Shot",
+"category": "CC",
+"icon": "ability_rogue_kidneyshot",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 453,
+"name": "Mind Soothe",
+"category": "Lust/BRes",
+"icon": "spell_holy_mindsooth",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 475,
+"name": "Remove Curse",
+"category": "Dispel",
+"icon": "spell_nature_removecurse",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 498,
+"name": "Divine Protection",
+"category": "Defensive",
+"icon": "spell_holy_divineprotection",
+"specs": [
+65
+]
+},
+{
+"id": 527,
+"name": "Purify",
+"category": "Dispel",
+"icon": "spell_holy_dispelmagic",
+"specs": [
+256
+]
+},
+{
+"id": 528,
+"name": "Dispel Magic",
+"category": "Purge",
+"icon": "spell_nature_nullifydisease",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 585,
+"name": "Smite",
+"category": "Combat",
+"icon": "spell_holy_holysmite",
+"specs": [
+256,
+257
+]
+},
+{
+"id": 586,
+"name": "Fade",
+"category": "Defensive",
+"icon": "spell_magic_lesserinvisibilty",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 589,
+"name": "Shadow Word: Pain",
+"category": "Combat",
+"icon": "spell_shadow_shadowwordpain",
+"specs": [
+256,
+258
+]
+},
+{
+"id": 596,
+"name": "Prayer of Healing",
+"category": "Combat",
+"icon": "spell_holy_prayerofhealing02",
+"specs": [
+257
+]
+},
+{
+"id": 605,
+"name": "Mind Control",
+"category": "Slow",
+"icon": "spell_shadow_shadowworddominate",
+"specs": [
+257,
+258
+]
+},
+{
+"id": 633,
+"name": "Lay on Hands",
+"category": "Self-Heal",
+"icon": "spell_holy_layonhands",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 642,
+"name": "Divine Shield",
+"category": "Immune",
+"icon": "spell_holy_divineshield",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 686,
+"name": "Shadow Bolt",
+"category": "Combat",
+"icon": "spell_shadow_shadowbolt",
+"specs": [
+266
+]
+},
+{
+"id": 702,
+"name": "Curse of Weakness",
+"category": "Tag",
+"icon": "spell_shadow_curseofmannoroth",
+"specs": [
+265,
+266
+]
+},
+{
+"id": 703,
+"name": "Garrote",
+"category": "Combat",
+"icon": "ability_rogue_garrote",
+"specs": [
+259
+]
+},
+{
+"id": 710,
+"name": "Banish",
+"category": "Purge",
+"icon": "spell_shadow_cripple",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 740,
+"name": "Tranquility",
+"category": "Combat",
+"icon": "spell_nature_tranquility",
+"specs": [
+105
+]
+},
+{
+"id": 768,
+"name": "Cat Form",
+"category": "",
+"icon": "ability_druid_catform",
+"specs": []
+},
+{
+"id": 774,
+"name": "Rejuvenation",
+"category": "Combat",
+"icon": "spell_nature_rejuvenation",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 781,
+"name": "Disengage",
+"category": "Taunt",
+"icon": "ability_rogue_feint",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 783,
+"name": "Travel Form",
+"category": "",
+"icon": "ability_druid_travelform",
+"specs": []
+},
+{
+"id": 845,
+"name": "Cleave",
+"category": "Combat",
+"icon": "ability_warrior_cleave",
+"specs": [
+71
+]
+},
+{
+"id": 853,
+"name": "Hammer of Justice",
+"category": "CC",
+"icon": "spell_holy_sealofmight",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 871,
+"name": "Shield Wall",
+"category": "Defensive",
+"icon": "ability_warrior_shieldwall",
+"specs": [
+73
+]
+},
+{
+"id": 883,
+"name": "Call Pet 1",
+"category": "Special",
+"icon": "ability_hunter_beastcall",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 974,
+"name": "Earth Shield",
+"category": "Self-Heal",
+"icon": "spell_nature_skinofearth",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 980,
+"name": "Agony",
+"category": "Combat",
+"icon": "spell_shadow_curseofsargeras",
+"specs": [
+265
+]
+},
+{
+"id": 982,
+"name": "Revive Pet",
+"category": "Self-Heal",
+"icon": "ability_hunter_beastsoothe",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 1022,
+"name": "Blessing of Protection",
+"category": "CC",
+"icon": "spell_holy_sealofprotection",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 1044,
+"name": "Blessing of Freedom",
+"category": "Movement",
+"icon": "spell_holy_sealofvalor",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 1064,
+"name": "Chain Heal",
+"category": "Combat",
+"icon": "inv_1115_shaman_chainheal",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 1079,
+"name": "Rip",
+"category": "Combat",
+"icon": "ability_ghoulfrenzy",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 1098,
+"name": "Subjugate Demon",
+"category": "Slow",
+"icon": "spell_shadow_enslavedemon",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 1122,
+"name": "Summon Infernal",
+"category": "Combat",
+"icon": "spell_shadow_summoninfernal",
+"specs": [
+267
+]
+},
+{
+"id": 1126,
+"name": "Mark of the Wild",
+"category": "Buff",
+"icon": "spell_nature_regeneration",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 1160,
+"name": "Demoralizing Shout",
+"category": "Combat",
+"icon": "ability_warrior_warcry",
+"specs": [
+73
+]
+},
+{
+"id": 1161,
+"name": "Challenging Shout",
+"category": "Dispel",
+"icon": "ability_bullrush",
+"specs": [
+73
+]
+},
+{
+"id": 1329,
+"name": "Mutilate",
+"category": "Combat",
+"icon": "ability_rogue_shadowstrikes",
+"specs": [
+259
+]
+},
+{
+"id": 1449,
+"name": "Arcane Explosion",
+"category": "Combat",
+"icon": "spell_nature_wispsplode",
+"specs": [
+64
+]
+},
+{
+"id": 1459,
+"name": "Arcane Intellect",
+"category": "Res",
+"icon": "spell_holy_magicalsentry",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 1464,
+"name": "Slam",
+"category": "Combat",
+"icon": "ability_warrior_decisivestrike",
+"specs": [
+71
+]
+},
+{
+"id": 1543,
+"name": "Flare",
+"category": "Dispel",
+"icon": "spell_fire_flare",
+"specs": [
+253,
+254
+]
+},
+{
+"id": 1706,
+"name": "Levitate",
+"category": "Raid Defensive",
+"icon": "spell_holy_layonhands",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 1714,
+"name": "Curse of Tongues",
+"category": "CC",
+"icon": "spell_shadow_curseoftounges",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 1715,
+"name": "Hamstring",
+"category": "Slow",
+"icon": "ability_shockwave",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 1719,
+"name": "Recklessness",
+"category": "Combat",
+"icon": "warrior_talent_icon_innerrage",
+"specs": [
+72
+]
+},
+{
+"id": 1725,
+"name": "Distract",
+"category": "Dispel",
+"icon": "ability_rogue_distract",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 1766,
+"name": "Kick",
+"category": "Interrupt",
+"icon": "ability_kick",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 1776,
+"name": "Gouge",
+"category": "Slow",
+"icon": "ability_gouge",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 1784,
+"name": "Stealth",
+"category": "",
+"icon": "ability_stealth",
+"specs": []
+},
+{
+"id": 1822,
+"name": "Rake",
+"category": "Combat",
+"icon": "ability_druid_disembowel",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 1833,
+"name": "Cheap Shot",
+"category": "CC",
+"icon": "ability_cheapshot",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 1850,
+"name": "Dash",
+"category": "Mobility",
+"icon": "ability_druid_dash",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 1856,
+"name": "Vanish",
+"category": "Special",
+"icon": "ability_vanish",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 1943,
+"name": "Rupture",
+"category": "Combat",
+"icon": "ability_rogue_rupture",
+"specs": [
+259
+]
+},
+{
+"id": 1953,
+"name": "Blink",
+"category": "Mobility",
+"icon": "spell_arcane_blink",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 1966,
+"name": "Feint",
+"category": "Defensive",
+"icon": "ability_rogue_feint",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 2006,
+"name": "Resurrection",
+"category": "",
+"icon": "spell_holy_resurrection",
+"specs": []
+},
+{
+"id": 2008,
+"name": "Ancestral Spirit",
+"category": "Buff",
+"icon": "spell_nature_regenerate",
+"specs": [
+262,
+263
+]
+},
+{
+"id": 2050,
+"name": "Holy Word: Serenity",
+"category": "Combat",
+"icon": "spell_holy_persuitofjustice",
+"specs": [
+257
+]
+},
+{
+"id": 2061,
+"name": "Flash Heal",
+"category": "Combat",
+"icon": "spell_holy_flashheal",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 2094,
+"name": "Blind",
+"category": "CC",
+"icon": "spell_shadow_mindsteal",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 2098,
+"name": "Dispatch",
+"category": "Combat",
+"icon": "ability_rogue_waylay",
+"specs": [
+260
+]
+},
+{
+"id": 2139,
+"name": "Counterspell",
+"category": "Interrupt",
+"icon": "spell_frost_iceshock",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 2565,
+"name": "Shield Block",
+"category": "Combat",
+"icon": "ability_defend",
+"specs": [
+73
+]
+},
+{
+"id": 2637,
+"name": "Hibernate",
+"category": "Special",
+"icon": "spell_nature_sleep",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 2645,
+"name": "Ghost Wolf",
+"category": "Mobility",
+"icon": "spell_nature_spiritwolf",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 2782,
+"name": "Remove Corruption",
+"category": "Dispel",
+"icon": "spell_holy_removecurse",
+"specs": [
+102,
+103,
+104
+]
+},
+{
+"id": 2908,
+"name": "Soothe",
+"category": "Purge",
+"icon": "ability_hunter_beastsoothe",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 2948,
+"name": "Scorch",
+"category": "Combat",
+"icon": "spell_fire_soulburn",
+"specs": [
+63
+]
+},
+{
+"id": 2983,
+"name": "Sprint",
+"category": "Mobility",
+"icon": "ability_rogue_sprint",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 3411,
+"name": "Intervene",
+"category": "Purge",
+"icon": "ability_warrior_victoryrush",
+"specs": [
+73
+]
+},
+{
+"id": 3714,
+"name": "Path of Frost",
+"category": "Dispel",
+"icon": "spell_deathknight_pathoffrost",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 4987,
+"name": "Cleanse",
+"category": "Dispel",
+"icon": "spell_holy_purify",
+"specs": [
+65
+]
+},
+{
+"id": 5116,
+"name": "Concussive Shot",
+"category": "Slow",
+"icon": "spell_frost_stun",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 5143,
+"name": "Arcane Missiles",
+"category": "Combat",
+"icon": "spell_nature_starfall",
+"specs": [
+62
+]
+},
+{
+"id": 5176,
+"name": "Wrath",
+"category": "Combat",
+"icon": "spell_nature_wrathv2",
+"specs": [
+103,
+104,
+105
+]
+},
+{
+"id": 5211,
+"name": "Mighty Bash",
+"category": "CC",
+"icon": "ability_druid_bash",
+"specs": [
+102,
+103
+]
+},
+{
+"id": 5215,
+"name": "Prowl",
+"category": "Raid Defensive",
+"icon": "ability_druid_prowl",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 5217,
+"name": "Tiger's Fury",
+"category": "Combat",
+"icon": "ability_mount_jungletiger",
+"specs": [
+103
+]
+},
+{
+"id": 5221,
+"name": "Shred",
+"category": "Combat",
+"icon": "spell_shadow_vampiricaura",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 5277,
+"name": "Evasion",
+"category": "Defensive",
+"icon": "spell_shadow_shadowward",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 5308,
+"name": "Execute",
+"category": "Combat",
+"icon": "inv_sword_48",
+"specs": [
+72
+]
+},
+{
+"id": 5384,
+"name": "Feign Death",
+"category": "Defensive",
+"icon": "ability_rogue_feigndeath",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 5394,
+"name": "Healing Stream Totem",
+"category": "Self-Heal",
+"icon": "inv_spear_04",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 5487,
+"name": "Bear Form",
+"category": "",
+"icon": "ability_racial_bearform",
+"specs": []
+},
+{
+"id": 5782,
+"name": "Fear",
+"category": "CC",
+"icon": "spell_shadow_possession",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 5938,
+"name": "Shiv",
+"category": "Purge",
+"icon": "inv_throwingknife_04",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 6343,
+"name": "Thunder Clap",
+"category": "Combat",
+"icon": "spell_nature_thunderclap",
+"specs": [
+73
+]
+},
+{
+"id": 6353,
+"name": "Soul Fire",
+"category": "Combat",
+"icon": "spell_fire_firebolt",
+"specs": [
+267
+]
+},
+{
+"id": 6544,
+"name": "Heroic Leap",
+"category": "Mobility",
+"icon": "ability_heroicleap",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 6552,
+"name": "Pummel",
+"category": "Interrupt",
+"icon": "inv_gauntlets_04",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 6572,
+"name": "Revenge",
+"category": "Combat",
+"icon": "ability_warrior_revenge",
+"specs": [
+73
+]
+},
+{
+"id": 6673,
+"name": "Battle Shout",
+"category": "Buff",
+"icon": "ability_warrior_battleshout",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 6770,
+"name": "Sap",
+"category": "Movement",
+"icon": "ability_sap",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 6789,
+"name": "Mortal Coil",
+"category": "Self-Heal",
+"icon": "ability_warlock_mortalcoil",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 6795,
+"name": "Growl",
+"category": "Taunt",
+"icon": "ability_physical_taunt",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 6940,
+"name": "Blessing of Sacrifice",
+"category": "Tag",
+"icon": "spell_holy_sealofsacrifice",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 7328,
+"name": "Redemption",
+"category": "",
+"icon": "spell_holy_resurrection",
+"specs": []
+},
+{
+"id": 7384,
+"name": "Overpower",
+"category": "Combat",
+"icon": "ability_meleedamage",
+"specs": [
+71
+]
+},
+{
+"id": 8004,
+"name": "Healing Surge",
+"category": "Self-Heal",
+"icon": "spell_nature_healingway",
+"specs": [
+262,
+263
+]
+},
+{
+"id": 8042,
+"name": "Earth Shock",
+"category": "Combat",
+"icon": "spell_nature_earthshock",
+"specs": [
+262
+]
+},
+{
+"id": 8092,
+"name": "Mind Blast",
+"category": "Combat",
+"icon": "spell_shadow_unholyfrenzy",
+"specs": [
+256,
+258
+]
+},
+{
+"id": 8122,
+"name": "Psychic Scream",
+"category": "CC",
+"icon": "spell_shadow_psychicscream",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 8143,
+"name": "Tremor Totem",
+"category": "CC",
+"icon": "spell_nature_tremortotem",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 8676,
+"name": "Ambush",
+"category": "",
+"icon": "ability_rogue_ambush",
+"specs": []
+},
+{
+"id": 8921,
+"name": "Moonfire",
+"category": "Combat",
+"icon": "spell_nature_starfall",
+"specs": [
+102,
+104,
+105
+]
+},
+{
+"id": 8936,
+"name": "Regrowth",
+"category": "Combat",
+"icon": "spell_nature_resistnature",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 9484,
+"name": "Shackle Horror",
+"category": "CC",
+"icon": "spell_nature_slow",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 10060,
+"name": "Power Infusion",
+"category": "Special",
+"icon": "spell_holy_powerinfusion",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 10326,
+"name": "Turn Evil",
+"category": "Purge",
+"icon": "ability_paladin_turnevil",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 11366,
+"name": "Pyroblast",
+"category": "Combat",
+"icon": "spell_fire_fireball02",
+"specs": [
+63
+]
+},
+{
+"id": 11426,
+"name": "Ice Barrier",
+"category": "",
+"icon": "spell_ice_lament",
+"specs": []
+},
+{
+"id": 12051,
+"name": "Evocation",
+"category": "Combat",
+"icon": "spell_nature_purge",
+"specs": [
+62
+]
+},
+{
+"id": 12294,
+"name": "Mortal Strike",
+"category": "Combat",
+"icon": "ability_warrior_savageblow",
+"specs": [
+71
+]
+},
+{
+"id": 12323,
+"name": "Piercing Howl",
+"category": "CC",
+"icon": "spell_shadow_deathscream",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 13750,
+"name": "Adrenaline Rush",
+"category": "Combat",
+"icon": "spell_shadow_shadowworddominate",
+"specs": [
+260
+]
+},
+{
+"id": 13877,
+"name": "Blade Flurry",
+"category": "Combat",
+"icon": "ability_warrior_punishingblow",
+"specs": [
+260
+]
+},
+{
+"id": 14914,
+"name": "Holy Fire",
+"category": "Combat",
+"icon": "spell_holy_searinglight",
+"specs": [
+257
+]
+},
+{
+"id": 15286,
+"name": "Vampiric Embrace",
+"category": "Self-Heal",
+"icon": "spell_shadow_unsummonbuilding",
+"specs": [
+258
+]
+},
+{
+"id": 15407,
+"name": "Mind Flay",
+"category": "Combat",
+"icon": "spell_shadow_siphonmana",
+"specs": [
+258
+]
+},
+{
+"id": 15487,
+"name": "Silence",
+"category": "Interrupt",
+"icon": "ability_priest_silence",
+"specs": [
+258
+]
+},
+{
+"id": 17364,
+"name": "Stormstrike",
+"category": "Combat",
+"icon": "ability_shaman_stormstrike",
+"specs": [
+263
+]
+},
+{
+"id": 17877,
+"name": "Shadowburn",
+"category": "Combat",
+"icon": "spell_shadow_scourgebuild",
+"specs": [
+267
+]
+},
+{
+"id": 17962,
+"name": "Conflagrate",
+"category": "Combat",
+"icon": "spell_fire_fireball",
+"specs": [
+267
+]
+},
+{
+"id": 18499,
+"name": "Berserker Rage",
+"category": "",
+"icon": "spell_nature_ancestralguardian",
+"specs": []
+},
+{
+"id": 18562,
+"name": "Swiftmend",
+"category": "Combat",
+"icon": "inv_relics_idolofrejuvenation",
+"specs": [
+105
+]
+},
+{
+"id": 19236,
+"name": "Desperate Prayer",
+"category": "Self-Heal",
+"icon": "spell_holy_testoffaith",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 19434,
+"name": "Aimed Shot",
+"category": "Combat",
+"icon": "inv_spear_07",
+"specs": [
+254
+]
+},
+{
+"id": 19574,
+"name": "Bestial Wrath",
+"category": "Combat",
+"icon": "ability_druid_ferociousbite",
+"specs": [
+253
+]
+},
+{
+"id": 19577,
+"name": "Intimidation",
+"category": "CC",
+"icon": "ability_devour",
+"specs": [
+253,
+255
+]
+},
+{
+"id": 19750,
+"name": "Flash of Light",
+"category": "Combat",
+"icon": "spell_holy_flashheal",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 19801,
+"name": "Tranquilizing Shot",
+"category": "Purge",
+"icon": "spell_nature_drowsy",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 20271,
+"name": "Judgment",
+"category": "Combat",
+"icon": "spell_holy_righteousfury",
+"specs": [
+70
+]
+},
+{
+"id": 20473,
+"name": "Holy Shock",
+"category": "Combat",
+"icon": "spell_holy_searinglight",
+"specs": [
+65
+]
+},
+{
+"id": 20484,
+"name": "Rebirth",
+"category": "Lust/BRes",
+"icon": "spell_nature_reincarnation",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 20707,
+"name": "Soulstone",
+"category": "Lust/BRes",
+"icon": "spell_shadow_soulgem",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 21562,
+"name": "Power Word: Fortitude",
+"category": "Res",
+"icon": "spell_holy_wordfortitude",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 22568,
+"name": "Ferocious Bite",
+"category": "Combat",
+"icon": "ability_druid_ferociousbite",
+"specs": [
+102,
+103,
+105
+]
+},
+{
+"id": 22570,
+"name": "Maim",
+"category": "Combat",
+"icon": "ability_druid_mangle-tga",
+"specs": [
+102,
+103,
+104
+]
+},
+{
+"id": 22812,
+"name": "Barkskin",
+"category": "Defensive",
+"icon": "spell_nature_stoneclawtotem",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 22842,
+"name": "Frenzied Regeneration",
+"category": "Combat",
+"icon": "ability_bullrush",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 23881,
+"name": "Bloodthirst",
+"category": "Combat",
+"icon": "spell_nature_bloodlust",
+"specs": [
+72
+]
+},
+{
+"id": 23920,
+"name": "Spell Reflection",
+"category": "Self-Heal",
+"icon": "ability_warrior_shieldreflection",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 23922,
+"name": "Shield Slam",
+"category": "Combat",
+"icon": "inv_shield_05",
+"specs": [
+73
+]
+},
+{
+"id": 24858,
+"name": "Moonkin Form",
+"category": "",
+"icon": "spell_nature_forceofnature",
+"specs": []
+},
+{
+"id": 26573,
+"name": "Consecration",
+"category": "Combat",
+"icon": "spell_holy_innerfire",
+"specs": [
+66
+]
+},
+{
+"id": 27243,
+"name": "Seed of Corruption",
+"category": "Combat",
+"icon": "spell_shadow_seedofdestruction",
+"specs": [
+265
+]
+},
+{
+"id": 29166,
+"name": "Innervate",
+"category": "Self-Heal",
+"icon": "spell_nature_lightning",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 29722,
+"name": "Incinerate",
+"category": "Combat",
+"icon": "spell_fire_burnout",
+"specs": [
+267
+]
+},
+{
+"id": 30283,
+"name": "Shadowfury",
+"category": "CC",
+"icon": "ability_warlock_shadowfurytga",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 30449,
+"name": "Spellsteal",
+"category": "Purge",
+"icon": "spell_arcane_arcane02",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 30451,
+"name": "Arcane Blast",
+"category": "Combat",
+"icon": "spell_arcane_blast",
+"specs": [
+62
+]
+},
+{
+"id": 30455,
+"name": "Ice Lance",
+"category": "Combat",
+"icon": "spell_frost_frostblast",
+"specs": [
+64
+]
+},
+{
+"id": 31224,
+"name": "Cloak of Shadows",
+"category": "Self-Heal",
+"icon": "spell_shadow_nethercloak",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 31821,
+"name": "Aura Mastery",
+"category": "Combat",
+"icon": "spell_holy_auramastery",
+"specs": [
+65
+]
+},
+{
+"id": 31850,
+"name": "Ardent Defender",
+"category": "Defensive",
+"icon": "spell_holy_ardentdefender",
+"specs": [
+66
+]
+},
+{
+"id": 31884,
+"name": "Avenging Wrath",
+"category": "Combat",
+"icon": "spell_holy_avenginewrath",
+"specs": [
+65
+]
+},
+{
+"id": 31935,
+"name": "Avenger's Shield",
+"category": "Combat",
+"icon": "spell_holy_avengersshield",
+"specs": [
+66
+]
+},
+{
+"id": 32182,
+"name": "Heroism",
+"category": "Lust/BRes",
+"icon": "ability_shaman_heroism",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 32379,
+"name": "Shadow Word: Death",
+"category": "Combat",
+"icon": "spell_shadow_demonicfortitude",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 32645,
+"name": "Envenom",
+"category": "Combat",
+"icon": "ability_rogue_disembowel",
+"specs": [
+259
+]
+},
+{
+"id": 33076,
+"name": "Prayer of Mending",
+"category": "Combat",
+"icon": "spell_holy_prayerofmendingtga",
+"specs": [
+257
+]
+},
+{
+"id": 33206,
+"name": "Pain Suppression",
+"category": "Combat",
+"icon": "spell_holy_painsupression",
+"specs": [
+256
+]
+},
+{
+"id": 33763,
+"name": "Lifebloom",
+"category": "Combat",
+"icon": "inv_misc_herb_felblossom",
+"specs": [
+105
+]
+},
+{
+"id": 33891,
+"name": "Incarnation: Tree of Life",
+"category": "Combat",
+"icon": "ability_druid_improvedtreeform",
+"specs": [
+105
+]
+},
+{
+"id": 33917,
+"name": "Mangle",
+"category": "Combat",
+"icon": "ability_druid_mangle2",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 34026,
+"name": "Kill Command",
+"category": "Combat",
+"icon": "ability_hunter_killcommand",
+"specs": [
+253
+]
+},
+{
+"id": 34477,
+"name": "Misdirection",
+"category": "Tag",
+"icon": "ability_hunter_misdirection",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 34914,
+"name": "Vampiric Touch",
+"category": "Combat",
+"icon": "spell_holy_stoicism",
+"specs": [
+258
+]
+},
+{
+"id": 36554,
+"name": "Shadowstep",
+"category": "Immune",
+"icon": "ability_rogue_shadowstep",
+"specs": [
+259,
+261
+]
+},
+{
+"id": 42650,
+"name": "Army of the Dead",
+"category": "Combat",
+"icon": "spell_deathknight_armyofthedead",
+"specs": [
+252
+]
+},
+{
+"id": 43265,
+"name": "Death and Decay",
+"category": "Combat",
+"icon": "spell_shadow_deathanddecay",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 44425,
+"name": "Arcane Barrage",
+"category": "Combat",
+"icon": "ability_mage_arcanebarrage",
+"specs": [
+62
+]
+},
+{
+"id": 44614,
+"name": "Flurry",
+"category": "Combat",
+"icon": "ability_deathknight_chillstreak",
+"specs": [
+64
+]
+},
+{
+"id": 45438,
+"name": "Ice Block",
+"category": "Immune",
+"icon": "spell_frost_frost",
+"specs": [
+62,
+64
+]
+},
+{
+"id": 45524,
+"name": "Chains of Ice",
+"category": "Slow",
+"icon": "spell_frost_chainsofice",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 46584,
+"name": "Raise Dead",
+"category": "Combat",
+"icon": "inv_pet_ghoul",
+"specs": [
+252
+]
+},
+{
+"id": 46585,
+"name": "Raise Dead",
+"category": "Combat",
+"icon": "inv_pet_ghoul",
+"specs": [
+250,
+251
+]
+},
+{
+"id": 46968,
+"name": "Shockwave",
+"category": "CC",
+"icon": "ability_warrior_shockwave",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 47528,
+"name": "Mind Freeze",
+"category": "Interrupt",
+"icon": "spell_deathknight_mindfreeze",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 47540,
+"name": "Penance",
+"category": "Combat",
+"icon": "spell_holy_penance",
+"specs": [
+256
+]
+},
+{
+"id": 47541,
+"name": "Death Coil",
+"category": "Combat",
+"icon": "spell_shadow_deathcoil",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 47568,
+"name": "Empower Rune Weapon",
+"category": "Combat",
+"icon": "inv_sword_62",
+"specs": [
+251
+]
+},
+{
+"id": 47585,
+"name": "Dispersion",
+"category": "Taunt",
+"icon": "spell_shadow_dispersion",
+"specs": [
+258
+]
+},
+{
+"id": 47788,
+"name": "Guardian Spirit",
+"category": "Combat",
+"icon": "spell_holy_guardianspirit",
+"specs": [
+257
+]
+},
+{
+"id": 48018,
+"name": "Demonic Circle",
+"category": "Buff",
+"icon": "spell_shadow_demoniccirclesummon",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 48020,
+"name": "Demonic Circle: Teleport",
+"category": "Res",
+"icon": "spell_shadow_demoniccircleteleport",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 48181,
+"name": "Haunt",
+"category": "Combat",
+"icon": "ability_warlock_haunt",
+"specs": [
+265
+]
+},
+{
+"id": 48265,
+"name": "Death's Advance",
+"category": "Mobility",
+"icon": "spell_shadow_demonicempathy",
+"specs": [
+250,
+251
+]
+},
+{
+"id": 48438,
+"name": "Wild Growth",
+"category": "Combat",
+"icon": "ability_druid_flourish",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 48707,
+"name": "Anti-Magic Shell",
+"category": "Immune",
+"icon": "spell_shadow_antimagicshell",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 48743,
+"name": "Death Pact",
+"category": "Self-Heal",
+"icon": "spell_shadow_deathpact",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 48792,
+"name": "Icebound Fortitude",
+"category": "Defensive",
+"icon": "spell_deathknight_iceboundfortitude",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 49020,
+"name": "Obliterate",
+"category": "Combat",
+"icon": "spell_deathknight_classicon",
+"specs": [
+251
+]
+},
+{
+"id": 49028,
+"name": "Dancing Rune Weapon",
+"category": "Combat",
+"icon": "inv_sword_07",
+"specs": [
+250
+]
+},
+{
+"id": 49039,
+"name": "Lichborne",
+"category": "Self-Heal",
+"icon": "spell_shadow_raisedead",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 49143,
+"name": "Frost Strike",
+"category": "Combat",
+"icon": "spell_deathknight_empowerruneblade2",
+"specs": [
+251
+]
+},
+{
+"id": 49184,
+"name": "Howling Blast",
+"category": "Combat",
+"icon": "spell_frost_arcticwinds",
+"specs": [
+251
+]
+},
+{
+"id": 49376,
+"name": "Wild Charge",
+"category": "Immune",
+"icon": "spell_druid_feralchargecat",
+"specs": [
+103
+]
+},
+{
+"id": 49576,
+"name": "Death Grip",
+"category": "Movement",
+"icon": "spell_deathknight_strangulate",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 49998,
+"name": "Death Strike",
+"category": "Combat",
+"icon": "spell_deathknight_butcher2",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 50334,
+"name": "Berserk",
+"category": "Combat",
+"icon": "ability_druid_berserk",
+"specs": [
+104
+]
+},
+{
+"id": 50769,
+"name": "Revive",
+"category": "Res",
+"icon": "ability_druid_lunarguidance",
+"specs": [
+102,
+103,
+104
+]
+},
+{
+"id": 50842,
+"name": "Blood Boil",
+"category": "Combat",
+"icon": "spell_deathknight_bloodboil",
+"specs": [
+250
+]
+},
+{
+"id": 51052,
+"name": "Anti-Magic Zone",
+"category": "Raid Defensive",
+"icon": "spell_deathknight_antimagiczone",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 51271,
+"name": "Pillar of Frost",
+"category": "Combat",
+"icon": "ability_deathknight_pillaroffrost",
+"specs": [
+251
+]
+},
+{
+"id": 51490,
+"name": "Thunderstorm",
+"category": "CC",
+"icon": "spell_shaman_thunderstorm",
+"specs": [
+262
+]
+},
+{
+"id": 51505,
+"name": "Lava Burst",
+"category": "Combat",
+"icon": "spell_shaman_lavaburst",
+"specs": [
+262,
+264
+]
+},
+{
+"id": 51514,
+"name": "Hex",
+"category": "Tag",
+"icon": "spell_shaman_hex",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 51690,
+"name": "Killing Spree",
+"category": "Combat",
+"icon": "inv_112_rogue_betweentheeyes",
+"specs": [
+260
+]
+},
+{
+"id": 51723,
+"name": "Fan of Knives",
+"category": "Combat",
+"icon": "ability_rogue_fanofknives",
+"specs": [
+259
+]
+},
+{
+"id": 51886,
+"name": "Cleanse Spirit",
+"category": "Dispel",
+"icon": "ability_shaman_cleansespirit",
+"specs": [
+262,
+263
+]
+},
+{
+"id": 52127,
+"name": "Water Shield",
+"category": "",
+"icon": "ability_shaman_watershield",
+"specs": []
+},
+{
+"id": 53385,
+"name": "Divine Storm",
+"category": "Combat",
+"icon": "ability_paladin_divinestorm",
+"specs": [
+70
+]
+},
+{
+"id": 53480,
+"name": "Roar of Sacrifice",
+"category": "Combat",
+"icon": "ability_hunter_fervor",
+"specs": [
+253,
+255
+]
+},
+{
+"id": 53563,
+"name": "Beacon of Light",
+"category": "Self-Heal",
+"icon": "ability_paladin_beaconoflight",
+"specs": [
+65
+]
+},
+{
+"id": 53600,
+"name": "Shield of the Righteous",
+"category": "Combat",
+"icon": "ability_paladin_shieldofvengeance",
+"specs": [
+66
+]
+},
+{
+"id": 55090,
+"name": "Scourge Strike",
+"category": "Combat",
+"icon": "spell_deathknight_scourgestrike",
+"specs": [
+252
+]
+},
+{
+"id": 55233,
+"name": "Vampiric Blood",
+"category": "Combat",
+"icon": "spell_shadow_lifedrain",
+"specs": [
+250
+]
+},
+{
+"id": 55342,
+"name": "Mirror Image",
+"category": "Self-Heal",
+"icon": "spell_magic_lesserinvisibilty",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 56222,
+"name": "Dark Command",
+"category": "Taunt",
+"icon": "spell_nature_shamanrage",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 56641,
+"name": "Steady Shot",
+"category": "Combat",
+"icon": "ability_hunter_steadyshot",
+"specs": [
+254
+]
+},
+{
+"id": 57755,
+"name": "Heroic Throw",
+"category": "Tag",
+"icon": "inv_axe_66",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 57934,
+"name": "Tricks of the Trade",
+"category": "Raid Defensive",
+"icon": "ability_rogue_tricksofthetrade",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 57994,
+"name": "Wind Shear",
+"category": "Interrupt",
+"icon": "spell_nature_cyclone",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 58875,
+"name": "Spirit Walk",
+"category": "Mobility",
+"icon": "ability_tracking",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 58984,
+"name": "Shadowmeld",
+"category": "",
+"icon": "ability_ambush",
+"specs": []
+},
+{
+"id": 59545,
+"name": "Gift of the Naaru",
+"category": "",
+"icon": "spell_holy_holyprotection",
+"specs": []
+},
+{
+"id": 59547,
+"name": "Gift of the Naaru",
+"category": "",
+"icon": "spell_holy_holyprotection",
+"specs": []
+},
+{
+"id": 59752,
+"name": "Will to Survive",
+"category": "",
+"icon": "spell_shadow_charm",
+"specs": []
+},
+{
+"id": 60103,
+"name": "Lava Lash",
+"category": "Combat",
+"icon": "ability_shaman_lavalash",
+"specs": [
+263
+]
+},
+{
+"id": 61295,
+"name": "Riptide",
+"category": "Combat",
+"icon": "spell_nature_riptide",
+"specs": [
+264
+]
+},
+{
+"id": 61336,
+"name": "Survival Instincts",
+"category": "Defensive",
+"icon": "ability_druid_tigersroar",
+"specs": [
+103,
+104
+]
+},
+{
+"id": 61999,
+"name": "Raise Ally",
+"category": "Lust/BRes",
+"icon": "spell_shadow_deadofnight",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 62124,
+"name": "Hand of Reckoning",
+"category": "Taunt",
+"icon": "spell_holy_unyieldingfaith",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 62618,
+"name": "Power Word: Barrier",
+"category": "Combat",
+"icon": "spell_holy_powerwordbarrier",
+"specs": [
+256
+]
+},
+{
+"id": 64382,
+"name": "Shattering Throw",
+"category": "",
+"icon": "ability_warrior_shatteringthrow",
+"specs": []
+},
+{
+"id": 64843,
+"name": "Divine Hymn",
+"category": "Combat",
+"icon": "spell_holy_divinehymn",
+"specs": [
+257
+]
+},
+{
+"id": 73325,
+"name": "Leap of Faith",
+"category": "Immune",
+"icon": "priest_spell_leapoffaith_a",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 73685,
+"name": "Unleash Life",
+"category": "Combat",
+"icon": "spell_shaman_unleashweapon_life",
+"specs": [
+264
+]
+},
+{
+"id": 73920,
+"name": "Healing Rain",
+"category": "Combat",
+"icon": "spell_nature_giftofthewaterspirit",
+"specs": [
+264
+]
+},
+{
+"id": 77130,
+"name": "Purify Spirit",
+"category": "Dispel",
+"icon": "ability_shaman_cleansespirit",
+"specs": [
+264
+]
+},
+{
+"id": 77472,
+"name": "Healing Wave",
+"category": "Combat",
+"icon": "spell_nature_healingwavelesser",
+"specs": [
+264
+]
+},
+{
+"id": 77575,
+"name": "Outbreak",
+"category": "Combat",
+"icon": "spell_deathvortex",
+"specs": [
+252
+]
+},
+{
+"id": 77606,
+"name": "Dark Simulacrum",
+"category": "PvP",
+"icon": "spell_holy_consumemagic",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 77758,
+"name": "Thrash",
+"category": "Combat",
+"icon": "spell_druid_thrash",
+"specs": [
+102,
+103,
+104
+]
+},
+{
+"id": 77764,
+"name": "Stampeding Roar",
+"category": "Movement",
+"icon": "spell_druid_stampedingroar_cat",
+"specs": [
+103
+]
+},
+{
+"id": 78674,
+"name": "Starsurge",
+"category": "Combat",
+"icon": "spell_arcane_arcane03",
+"specs": [
+102
+]
+},
+{
+"id": 78675,
+"name": "Solar Beam",
+"category": "Interrupt",
+"icon": "ability_vehicle_sonicshockwave",
+"specs": [
+102
+]
+},
+{
+"id": 79206,
+"name": "Spiritwalker's Grace",
+"category": "Special",
+"icon": "spell_shaman_spiritwalkersgrace",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 80240,
+"name": "Havoc",
+"category": "Combat",
+"icon": "ability_warlock_baneofhavoc",
+"specs": [
+267
+]
+},
+{
+"id": 80353,
+"name": "Time Warp",
+"category": "Lust/BRes",
+"icon": "ability_mage_timewarp",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 82326,
+"name": "Holy Light",
+"category": "Combat",
+"icon": "spell_holy_surgeoflight",
+"specs": [
+65
+]
+},
+{
+"id": 84714,
+"name": "Frozen Orb",
+"category": "Combat",
+"icon": "spell_frost_frozenorb",
+"specs": [
+64
+]
+},
+{
+"id": 85222,
+"name": "Light of Dawn",
+"category": "Combat",
+"icon": "spell_paladin_lightofdawn",
+"specs": [
+65
+]
+},
+{
+"id": 85288,
+"name": "Raging Blow",
+"category": "Combat",
+"icon": "warrior_wild_strike",
+"specs": [
+72
+]
+},
+{
+"id": 85673,
+"name": "Word of Glory",
+"category": "Combat",
+"icon": "inv_helmet_96",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 85948,
+"name": "Festering Strike",
+"category": "Combat",
+"icon": "spell_deathknight_festering_strike",
+"specs": [
+252
+]
+},
+{
+"id": 88163,
+"name": "Attack",
+"category": "",
+"icon": "inv_sword_04",
+"specs": []
+},
+{
+"id": 88423,
+"name": "Nature's Cure",
+"category": "Dispel",
+"icon": "ability_shaman_cleansespirit",
+"specs": [
+105
+]
+},
+{
+"id": 88625,
+"name": "Holy Word: Chastise",
+"category": "Interrupt",
+"icon": "spell_holy_chastise",
+"specs": [
+257
+]
+},
+{
+"id": 88747,
+"name": "Wild Mushroom",
+"category": "Combat",
+"icon": "druid_ability_wildmushroom_a",
+"specs": [
+102
+]
+},
+{
+"id": 93402,
+"name": "Sunfire",
+"category": "Combat",
+"icon": "ability_mage_firestarter",
+"specs": [
+102,
+105
+]
+},
+{
+"id": 96231,
+"name": "Rebuke",
+"category": "Interrupt",
+"icon": "spell_holy_rebuke",
+"specs": [
+66,
+70
+]
+},
+{
+"id": 97462,
+"name": "Rallying Cry",
+"category": "Raid Defensive",
+"icon": "ability_warrior_rallyingcry",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 98008,
+"name": "Spirit Link Totem",
+"category": "Combat",
+"icon": "spell_shaman_spiritlink",
+"specs": [
+264
+]
+},
+{
+"id": 100780,
+"name": "Tiger Palm",
+"category": "Combat",
+"icon": "ability_monk_tigerpalm",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 100784,
+"name": "Blackout Kick",
+"category": "Combat",
+"icon": "ability_monk_roundhousekick",
+"specs": [
+269,
+270
+]
+},
+{
+"id": 101545,
+"name": "Flying Serpent Kick",
+"category": "Combat",
+"icon": "ability_monk_flyingdragonkick",
+"specs": [
+269
+]
+},
+{
+"id": 101546,
+"name": "Spinning Crane Kick",
+"category": "Combat",
+"icon": "ability_monk_cranekick_new",
+"specs": [
+269,
+270
+]
+},
+{
+"id": 101643,
+"name": "Transcendence",
+"category": "Purge",
+"icon": "monk_ability_transcendence",
+"specs": [
+269,
+270
+]
+},
+{
+"id": 102342,
+"name": "Ironbark",
+"category": "Combat",
+"icon": "spell_druid_ironbark",
+"specs": [
+105
+]
+},
+{
+"id": 102351,
+"name": "Cenarion Ward",
+"category": "",
+"icon": "ability_druid_naturalperfection",
+"specs": []
+},
+{
+"id": 102359,
+"name": "Mass Entanglement",
+"category": "CC",
+"icon": "spell_druid_massentanglement",
+"specs": [
+102,
+105
+]
+},
+{
+"id": 102383,
+"name": "Wild Charge",
+"category": "Immune",
+"icon": "ability_druid_owlkinfrenzy",
+"specs": [
+102
+]
+},
+{
+"id": 102401,
+"name": "Wild Charge",
+"category": "Immune",
+"icon": "spell_druid_wildcharge",
+"specs": [
+104,
+105
+]
+},
+{
+"id": 102793,
+"name": "Ursol's Vortex",
+"category": "",
+"icon": "spell_druid_ursolsvortex",
+"specs": []
+},
+{
+"id": 104316,
+"name": "Call Dreadstalkers",
+"category": "Combat",
+"icon": "spell_warlock_calldreadstalkers",
+"specs": [
+266
+]
+},
+{
+"id": 104773,
+"name": "Unending Resolve",
+"category": "Defensive",
+"icon": "spell_shadow_demonictactics",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 105174,
+"name": "Hand of Gul'dan",
+"category": "Combat",
+"icon": "ability_warlock_handofguldan",
+"specs": [
+266
+]
+},
+{
+"id": 106785,
+"name": "Swipe",
+"category": "Combat",
+"icon": "inv_misc_monsterclaw_03",
+"specs": [
+103
+]
+},
+{
+"id": 106839,
+"name": "Skull Bash",
+"category": "Interrupt",
+"icon": "inv_bone_skull_04",
+"specs": [
+103,
+104
+]
+},
+{
+"id": 106898,
+"name": "Stampeding Roar",
+"category": "Movement",
+"icon": "spell_druid_stampedingroar_cat",
+"specs": [
+102,
+104,
+105
+]
+},
+{
+"id": 106951,
+"name": "Berserk",
+"category": "Combat",
+"icon": "ability_druid_berserk",
+"specs": [
+103
+]
+},
+{
+"id": 107428,
+"name": "Rising Sun Kick",
+"category": "Combat",
+"icon": "ability_monk_risingsunkick",
+"specs": [
+269,
+270
+]
+},
+{
+"id": 107570,
+"name": "Storm Bolt",
+"category": "CC",
+"icon": "warrior_talent_icon_stormbolt",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 107574,
+"name": "Avatar",
+"category": "Combat",
+"icon": "warrior_talent_icon_avatar",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 108199,
+"name": "Gorefiend's Grasp",
+"category": "CC",
+"icon": "ability_deathknight_aoedeathgrip",
+"specs": [
+250
+]
+},
+{
+"id": 108271,
+"name": "Astral Shift",
+"category": "Defensive",
+"icon": "ability_shaman_astralshift",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 108287,
+"name": "Totemic Projection",
+"category": "Raid Defensive",
+"icon": "ability_shaman_totemrelocation",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 108416,
+"name": "Dark Pact",
+"category": "Defensive",
+"icon": "spell_shadow_deathpact",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 108853,
+"name": "Fire Blast",
+"category": "Combat",
+"icon": "spell_fire_fireball",
+"specs": [
+63
+]
+},
+{
+"id": 109132,
+"name": "Roll",
+"category": "Mobility",
+"icon": "ability_monk_roll",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 109248,
+"name": "Binding Shot",
+"category": "CC",
+"icon": "spell_shaman_bindelemental",
+"specs": [
+253,
+254
+]
+},
+{
+"id": 109304,
+"name": "Exhilaration",
+"category": "Self-Heal",
+"icon": "ability_hunter_onewithnature",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 110959,
+"name": "Greater Invisibility",
+"category": "Taunt",
+"icon": "ability_mage_greaterinvisibility",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 111400,
+"name": "Burning Rush",
+"category": "Mobility",
+"icon": "ability_deathwing_sealarmorbreachtga",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 111673,
+"name": "Control Undead",
+"category": "Purge",
+"icon": "inv_misc_bone_skull_01",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 111771,
+"name": "Demonic Gateway",
+"category": "Mobility",
+"icon": "spell_warlock_demonicportal_green",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 113656,
+"name": "Fists of Fury",
+"category": "Combat",
+"icon": "monk_ability_fistoffury",
+"specs": [
+269
+]
+},
+{
+"id": 114014,
+"name": "Shuriken Toss",
+"category": "Tag",
+"icon": "inv_throwingknife_07",
+"specs": [
+261
+]
+},
+{
+"id": 114018,
+"name": "Shroud of Concealment",
+"category": "Lust/BRes",
+"icon": "ability_rogue_shroudofconcealment",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 114050,
+"name": "Ascendance",
+"category": "Combat",
+"icon": "spell_fire_elementaldevastation",
+"specs": [
+262
+]
+},
+{
+"id": 114052,
+"name": "Ascendance",
+"category": "Combat",
+"icon": "spell_fire_elementaldevastation",
+"specs": [
+264
+]
+},
+{
+"id": 115078,
+"name": "Paralysis",
+"category": "CC",
+"icon": "ability_monk_paralysis",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 115151,
+"name": "Renewing Mist",
+"category": "Combat",
+"icon": "ability_monk_renewingmists",
+"specs": [
+270
+]
+},
+{
+"id": 115175,
+"name": "Soothing Mist",
+"category": "Combat",
+"icon": "ability_monk_soothingmists",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 115178,
+"name": "Resuscitate",
+"category": "",
+"icon": "ability_druid_lunarguidance",
+"specs": []
+},
+{
+"id": 115181,
+"name": "Breath of Fire",
+"category": "Combat",
+"icon": "ability_monk_breathoffire",
+"specs": [
+268
+]
+},
+{
+"id": 115203,
+"name": "Fortifying Brew",
+"category": "Defensive",
+"icon": "ability_monk_fortifyingale_new",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 115310,
+"name": "Revival",
+"category": "Combat",
+"icon": "spell_monk_revival",
+"specs": [
+270
+]
+},
+{
+"id": 115313,
+"name": "Summon Jade Serpent Statue",
+"category": "Lust/BRes",
+"icon": "ability_monk_summonserpentstatue",
+"specs": [
+270
+]
+},
+{
+"id": 115315,
+"name": "Summon Black Ox Statue",
+"category": "Lust/BRes",
+"icon": "monk_ability_summonoxstatue",
+"specs": [
+268
+]
+},
+{
+"id": 115399,
+"name": "Black Ox Brew",
+"category": "Self-Heal",
+"icon": "ability_monk_chibrew",
+"specs": [
+268
+]
+},
+{
+"id": 115450,
+"name": "Detox",
+"category": "Dispel",
+"icon": "ability_rogue_imrovedrecuperate",
+"specs": [
+270
+]
+},
+{
+"id": 115546,
+"name": "Provoke",
+"category": "Taunt",
+"icon": "ability_monk_provoke",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 115750,
+"name": "Blinding Light",
+"category": "CC",
+"icon": "ability_paladin_blindinglight",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 116095,
+"name": "Disable",
+"category": "Slow",
+"icon": "ability_shockwave",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 116670,
+"name": "Vivify",
+"category": "Self-Heal",
+"icon": "ability_monk_vivify",
+"specs": [
+268,
+269
+]
+},
+{
+"id": 116680,
+"name": "Thunder Focus Tea",
+"category": "Self-Heal",
+"icon": "ability_monk_thunderfocustea",
+"specs": [
+270
+]
+},
+{
+"id": 116705,
+"name": "Spear Hand Strike",
+"category": "Interrupt",
+"icon": "ability_monk_spearhand",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 116841,
+"name": "Tiger's Lust",
+"category": "Mobility",
+"icon": "ability_monk_tigerslust",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 116844,
+"name": "Ring of Peace",
+"category": "CC",
+"icon": "spell_monk_ringofpeace",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 116847,
+"name": "Rushing Jade Wind",
+"category": "Combat",
+"icon": "ability_monk_rushingjadewind",
+"specs": [
+268
+]
+},
+{
+"id": 116849,
+"name": "Life Cocoon",
+"category": "Combat",
+"icon": "ability_monk_chicocoon",
+"specs": [
+270
+]
+},
+{
+"id": 116858,
+"name": "Chaos Bolt",
+"category": "Combat",
+"icon": "ability_warlock_chaosbolt",
+"specs": [
+267
+]
+},
+{
+"id": 117952,
+"name": "Crackling Jade Lightning",
+"category": "Tag",
+"icon": "ability_monk_cracklingjadelightning",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 118038,
+"name": "Die by the Sword",
+"category": "Defensive",
+"icon": "ability_warrior_challange",
+"specs": [
+71
+]
+},
+{
+"id": 119381,
+"name": "Leg Sweep",
+"category": "CC",
+"icon": "ability_monk_legsweep",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 119582,
+"name": "Purifying Brew",
+"category": "Combat",
+"icon": "inv_misc_beer_06",
+"specs": [
+268
+]
+},
+{
+"id": 119910,
+"name": "Spell Lock",
+"category": "Interrupt",
+"icon": "spell_shadow_mindrot",
+"specs": [
+265,
+267
+]
+},
+{
+"id": 119914,
+"name": "Axe Toss",
+"category": "",
+"icon": "ability_warrior_titansgrip",
+"specs": []
+},
+{
+"id": 119996,
+"name": "Transcendence: Transfer",
+"category": "Movement",
+"icon": "spell_shaman_spectraltransformation",
+"specs": [
+269,
+270
+]
+},
+{
+"id": 121253,
+"name": "Keg Smash",
+"category": "Combat",
+"icon": "achievement_brewery_2",
+"specs": [
+268
+]
+},
+{
+"id": 121471,
+"name": "Shadow Blades",
+"category": "Combat",
+"icon": "inv_knife_1h_grimbatolraid_d_03",
+"specs": [
+261
+]
+},
+{
+"id": 122470,
+"name": "Touch of Karma",
+"category": "Defensive",
+"icon": "ability_monk_touchofkarma",
+"specs": [
+269
+]
+},
+{
+"id": 123904,
+"name": "Invoke Xuen, the White Tiger",
+"category": "Combat",
+"icon": "ability_monk_summontigerstatue",
+"specs": [
+269
+]
+},
+{
+"id": 123986,
+"name": "Chi Burst",
+"category": "Combat",
+"icon": "spell_arcane_arcanetorrent",
+"specs": [
+268
+]
+},
+{
+"id": 124682,
+"name": "Enveloping Mist",
+"category": "Combat",
+"icon": "spell_monk_envelopingmist",
+"specs": [
+270
+]
+},
+{
+"id": 125883,
+"name": "Zen Flight",
+"category": "Raid Defensive",
+"icon": "ability_monk_zenflight",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 132157,
+"name": "Holy Nova",
+"category": "Movement",
+"icon": "spell_holy_holynova",
+"specs": [
+256,
+257,
+258
+]
+},
+{
+"id": 132158,
+"name": "Nature's Swiftness",
+"category": "Combat",
+"icon": "spell_nature_ravenform",
+"specs": [
+105
+]
+},
+{
+"id": 132469,
+"name": "Typhoon",
+"category": "CC",
+"icon": "ability_druid_typhoon",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 132578,
+"name": "Invoke Niuzao, the Black Ox",
+"category": "Combat",
+"icon": "spell_monk_brewmaster_spec",
+"specs": [
+268
+]
+},
+{
+"id": 147362,
+"name": "Counter Shot",
+"category": "",
+"icon": "inv_ammo_arrow_03",
+"specs": []
+},
+{
+"id": 152108,
+"name": "Cataclysm",
+"category": "Combat",
+"icon": "achievement_zone_cataclysm",
+"specs": [
+267
+]
+},
+{
+"id": 152175,
+"name": "Whirling Dragon Punch",
+"category": "Combat",
+"icon": "ability_monk_hurricanestrike",
+"specs": [
+269
+]
+},
+{
+"id": 153561,
+"name": "Meteor",
+"category": "Combat",
+"icon": "spell_mage_meteor",
+"specs": [
+63
+]
+},
+{
+"id": 153626,
+"name": "Arcane Orb",
+"category": "Combat",
+"icon": "spell_mage_arcaneorb",
+"specs": [
+62
+]
+},
+{
+"id": 155625,
+"name": "Moonfire",
+"category": "Combat",
+"icon": "spell_nature_starfall",
+"specs": [
+103
+]
+},
+{
+"id": 155835,
+"name": "Bristling Fur",
+"category": "Combat",
+"icon": "spell_druid_bristlingfur",
+"specs": [
+104
+]
+},
+{
+"id": 156910,
+"name": "Beacon of Faith",
+"category": "Self-Heal",
+"icon": "ability_paladin_beaconsoflight",
+"specs": [
+65
+]
+},
+{
+"id": 157980,
+"name": "Supernova",
+"category": "CC",
+"icon": "spell_mage_supernova",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 162794,
+"name": "Chaos Strike",
+"category": "Combat",
+"icon": "ability_demonhunter_chaosstrike",
+"specs": [
+577
+]
+},
+{
+"id": 163201,
+"name": "Execute",
+"category": "Combat",
+"icon": "inv_sword_48",
+"specs": [
+73
+]
+},
+{
+"id": 164862,
+"name": "Flap",
+"category": "",
+"icon": "inv_feather_12",
+"specs": []
+},
+{
+"id": 167105,
+"name": "Colossus Smash",
+"category": "Combat",
+"icon": "inv_warbreaker",
+"specs": [
+71
+]
+},
+{
+"id": 179057,
+"name": "Chaos Nova",
+"category": "CC",
+"icon": "spell_fire_felfirenova",
+"specs": [
+577,
+581
+]
+},
+{
+"id": 183752,
+"name": "Disrupt",
+"category": "Interrupt",
+"icon": "ability_demonhunter_consumemagic",
+"specs": [
+577,
+581,
+1480
+]
+},
+{
+"id": 184364,
+"name": "Enraged Regeneration",
+"category": "Defensive",
+"icon": "ability_warrior_focusedrage",
+"specs": [
+72
+]
+},
+{
+"id": 184367,
+"name": "Rampage",
+"category": "Combat",
+"icon": "ability_warrior_rampage",
+"specs": [
+72
+]
+},
+{
+"id": 184575,
+"name": "Blade of Justice",
+"category": "Combat",
+"icon": "ability_paladin_bladeofjustice",
+"specs": [
+70
+]
+},
+{
+"id": 185123,
+"name": "Throw Glaive",
+"category": "Tag",
+"icon": "ability_demonhunter_throwglaive",
+"specs": [
+577,
+1480
+]
+},
+{
+"id": 185245,
+"name": "Torment",
+"category": "Taunt",
+"icon": "ability_demonhunter_torment",
+"specs": [
+577,
+581,
+1480
+]
+},
+{
+"id": 185311,
+"name": "Crimson Vial",
+"category": "Self-Heal",
+"icon": "ability_rogue_crimsonvial",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 185313,
+"name": "Shadow Dance",
+"category": "Combat",
+"icon": "ability_rogue_shadowdance",
+"specs": [
+261
+]
+},
+{
+"id": 185358,
+"name": "Arcane Shot",
+"category": "Combat",
+"icon": "ability_impalingbolt",
+"specs": [
+254
+]
+},
+{
+"id": 185438,
+"name": "Shadowstrike",
+"category": "Combat",
+"icon": "ability_rogue_shadowstrike",
+"specs": [
+261
+]
+},
+{
+"id": 185565,
+"name": "Poisoned Knife",
+"category": "Tag",
+"icon": "ability_rogue_poisonedknife",
+"specs": [
+259
+]
+},
+{
+"id": 185763,
+"name": "Pistol Shot",
+"category": "Combat",
+"icon": "ability_rogue_pistolshot",
+"specs": [
+260
+]
+},
+{
+"id": 186257,
+"name": "Aspect of the Cheetah",
+"category": "Mobility",
+"icon": "ability_mount_jungletiger",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 186265,
+"name": "Aspect of the Turtle",
+"category": "Immune",
+"icon": "ability_hunter_pet_turtle",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 186270,
+"name": "Raptor Strike",
+"category": "Combat",
+"icon": "ability_hunter_raptorstrike",
+"specs": [
+255
+]
+},
+{
+"id": 186289,
+"name": "Aspect of the Eagle",
+"category": "Combat",
+"icon": "spell_hunter_aspectoftheironhawk",
+"specs": [
+255
+]
+},
+{
+"id": 187650,
+"name": "Freezing Trap",
+"category": "CC",
+"icon": "spell_frost_chainsofice",
+"specs": [
+253,
+254
+]
+},
+{
+"id": 187698,
+"name": "Tar Trap",
+"category": "Movement",
+"icon": "spell_yorsahj_bloodboil_black",
+"specs": [
+253,
+254
+]
+},
+{
+"id": 187707,
+"name": "Muzzle",
+"category": "Interrupt",
+"icon": "ability_hunter_negate",
+"specs": [
+255
+]
+},
+{
+"id": 187827,
+"name": "Metamorphosis",
+"category": "Combat",
+"icon": "ability_demonhunter_metamorphasistank",
+"specs": [
+581
+]
+},
+{
+"id": 187874,
+"name": "Crash Lightning",
+"category": "Combat",
+"icon": "spell_shaman_crashlightning",
+"specs": [
+263
+]
+},
+{
+"id": 188196,
+"name": "Lightning Bolt",
+"category": "Combat",
+"icon": "spell_nature_lightning",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 188443,
+"name": "Chain Lightning",
+"category": "Combat",
+"icon": "spell_nature_chainlightning",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 188499,
+"name": "Blade Dance",
+"category": "Combat",
+"icon": "ability_demonhunter_bladedance",
+"specs": [
+577
+]
+},
+{
+"id": 188501,
+"name": "Spectral Sight",
+"category": "Special",
+"icon": "ability_demonhunter_spectralsight",
+"specs": [
+577,
+581
+]
+},
+{
+"id": 190319,
+"name": "Combustion",
+"category": "Combat",
+"icon": "spell_fire_sealoffire",
+"specs": [
+63
+]
+},
+{
+"id": 190336,
+"name": "Conjure Refreshment",
+"category": "",
+"icon": "inv_misc_food_73cinnamonroll",
+"specs": []
+},
+{
+"id": 190411,
+"name": "Whirlwind",
+"category": "Combat",
+"icon": "ability_whirlwind",
+"specs": [
+72
+]
+},
+{
+"id": 190456,
+"name": "Ignore Pain",
+"category": "Combat",
+"icon": "ability_warrior_renewedvigor",
+"specs": [
+73
+]
+},
+{
+"id": 190784,
+"name": "Divine Steed",
+"category": "Mobility",
+"icon": "ability_paladin_divinesteed",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 190925,
+"name": "Harpoon",
+"category": "Combat",
+"icon": "ability_hunter_harpoon",
+"specs": [
+255
+]
+},
+{
+"id": 190984,
+"name": "Wrath",
+"category": "Combat",
+"icon": "spell_nature_wrathv2",
+"specs": [
+102
+]
+},
+{
+"id": 191034,
+"name": "Starfall",
+"category": "Combat",
+"icon": "ability_druid_starfall",
+"specs": [
+102
+]
+},
+{
+"id": 191634,
+"name": "Stormkeeper",
+"category": "Combat",
+"icon": "ability_thunderking_lightningwhip",
+"specs": [
+262
+]
+},
+{
+"id": 192058,
+"name": "Capacitor Totem",
+"category": "CC",
+"icon": "spell_nature_brilliance",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 192081,
+"name": "Ironfur",
+"category": "Combat",
+"icon": "ability_druid_ironfur",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 192106,
+"name": "Lightning Shield",
+"category": "",
+"icon": "spell_nature_lightningshield",
+"specs": []
+},
+{
+"id": 193265,
+"name": "Hatchet Toss",
+"category": "Combat",
+"icon": "ability_hunter_hatchettoss",
+"specs": [
+255
+]
+},
+{
+"id": 193315,
+"name": "Sinister Strike",
+"category": "Combat",
+"icon": "spell_shadow_ritualofsacrifice",
+"specs": [
+260
+]
+},
+{
+"id": 193455,
+"name": "Cobra Shot",
+"category": "Combat",
+"icon": "ability_hunter_cobrashot",
+"specs": [
+253
+]
+},
+{
+"id": 194153,
+"name": "Starfire",
+"category": "Combat",
+"icon": "spell_arcane_starfire",
+"specs": [
+102
+]
+},
+{
+"id": 194223,
+"name": "Celestial Alignment",
+"category": "Combat",
+"icon": "spell_nature_natureguardian",
+"specs": [
+102
+]
+},
+{
+"id": 194509,
+"name": "Power Word: Radiance",
+"category": "Combat",
+"icon": "spell_priest_power-word",
+"specs": [
+256
+]
+},
+{
+"id": 194913,
+"name": "Glacial Advance",
+"category": "Combat",
+"icon": "ability_hunter_glacialtrap",
+"specs": [
+251
+]
+},
+{
+"id": 195072,
+"name": "Fel Rush",
+"category": "Mobility",
+"icon": "ability_demonhunter_felrush",
+"specs": [
+577
+]
+},
+{
+"id": 195182,
+"name": "Marrowrend",
+"category": "Combat",
+"icon": "ability_deathknight_marrowrend",
+"specs": [
+250
+]
+},
+{
+"id": 195292,
+"name": "Death's Caress",
+"category": "Combat",
+"icon": "ability_deathknight_deathscaress",
+"specs": [
+250
+]
+},
+{
+"id": 195457,
+"name": "Grappling Hook",
+"category": "Immune",
+"icon": "ability_rogue_grapplinghook",
+"specs": [
+260
+]
+},
+{
+"id": 196277,
+"name": "Implosion",
+"category": "Combat",
+"icon": "inv_implosion",
+"specs": [
+266
+]
+},
+{
+"id": 196447,
+"name": "Channel Demonfire",
+"category": "Combat",
+"icon": "spell_fire_ragnaros_lavaboltgreen",
+"specs": [
+267
+]
+},
+{
+"id": 196718,
+"name": "Darkness",
+"category": "Raid Defensive",
+"icon": "ability_demonhunter_darkness",
+"specs": [
+577,
+581,
+1480
+]
+},
+{
+"id": 196770,
+"name": "Remorseless Winter",
+"category": "Combat",
+"icon": "ability_deathknight_remorselesswinters2",
+"specs": [
+251
+]
+},
+{
+"id": 196819,
+"name": "Eviscerate",
+"category": "Combat",
+"icon": "ability_rogue_eviscerate",
+"specs": [
+261
+]
+},
+{
+"id": 196840,
+"name": "Frost Shock",
+"category": "Combat",
+"icon": "spell_frost_frostshock",
+"specs": [
+262,
+263
+]
+},
+{
+"id": 197214,
+"name": "Sundering",
+"category": "Combat",
+"icon": "ability_rhyolith_lavapool",
+"specs": [
+263
+]
+},
+{
+"id": 197626,
+"name": "Starsurge",
+"category": "Combat",
+"icon": "spell_arcane_arcane03",
+"specs": [
+105
+]
+},
+{
+"id": 197628,
+"name": "Starfire",
+"category": "Combat",
+"icon": "spell_arcane_starfire",
+"specs": [
+105
+]
+},
+{
+"id": 197835,
+"name": "Shuriken Storm",
+"category": "Combat",
+"icon": "ability_rogue_shurikenstorm",
+"specs": [
+261
+]
+},
+{
+"id": 198013,
+"name": "Eye Beam",
+"category": "Combat",
+"icon": "ability_demonhunter_eyebeam",
+"specs": [
+577
+]
+},
+{
+"id": 198103,
+"name": "Earth Elemental",
+"category": "Defensive",
+"icon": "spell_nature_earthelemental_totem",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 198589,
+"name": "Blur",
+"category": "Defensive",
+"icon": "ability_demonhunter_blur",
+"specs": [
+577,
+1480
+]
+},
+{
+"id": 198590,
+"name": "Drain Soul",
+"category": "Combat",
+"icon": "spell_shadow_haunting",
+"specs": [
+265
+]
+},
+{
+"id": 198793,
+"name": "Vengeful Retreat",
+"category": "Combat",
+"icon": "ability_demonhunter_vengefulretreat2",
+"specs": [
+577,
+581,
+1480
+]
+},
+{
+"id": 199483,
+"name": "Camouflage",
+"category": "Self-Heal",
+"icon": "ability_hunter_camouflage",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 199786,
+"name": "Glacial Spike",
+"category": "",
+"icon": "ability_mage_glacialspike",
+"specs": []
+},
+{
+"id": 200183,
+"name": "Apotheosis",
+"category": "Combat",
+"icon": "ability_priest_ascension",
+"specs": [
+257
+]
+},
+{
+"id": 200829,
+"name": "Plea",
+"category": "Combat",
+"icon": "spell_priest_plea_yellow",
+"specs": [
+256
+]
+},
+{
+"id": 201664,
+"name": "Demoralizing Roar",
+"category": "",
+"icon": "ability_druid_challangingroar",
+"specs": []
+},
+{
+"id": 202137,
+"name": "Sigil of Silence",
+"category": "CC",
+"icon": "ability_demonhunter_sigilofsilence",
+"specs": [
+581
+]
+},
+{
+"id": 202168,
+"name": "Impending Victory",
+"category": "Self-Heal",
+"icon": "spell_impending_victory",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 202335,
+"name": "Double Barrel",
+"category": "PvP",
+"icon": "archaeology_5_0_emptykegofbrewfatherxinwoyin",
+"specs": [
+268
+]
+},
+{
+"id": 202770,
+"name": "Fury of Elune",
+"category": "Combat",
+"icon": "ability_druid_dreamstate",
+"specs": [
+102
+]
+},
+{
+"id": 203173,
+"name": "Death Chain",
+"category": "PvP",
+"icon": "ability_deathknight_deathchain",
+"specs": [
+250
+]
+},
+{
+"id": 203286,
+"name": "Greater Pyroblast",
+"category": "",
+"icon": "ability_mage_greaterpyroblast",
+"specs": []
+},
+{
+"id": 203720,
+"name": "Demon Spikes",
+"category": "Combat",
+"icon": "ability_demonhunter_demonspikes",
+"specs": [
+581
+]
+},
+{
+"id": 204018,
+"name": "Blessing of Spellwarding",
+"category": "Special",
+"icon": "spell_holy_blessingofprotection",
+"specs": [
+65,
+66
+]
+},
+{
+"id": 204019,
+"name": "Blessed Hammer",
+"category": "Combat",
+"icon": "paladin_retribution",
+"specs": [
+66
+]
+},
+{
+"id": 204021,
+"name": "Fiery Brand",
+"category": "Defensive",
+"icon": "ability_demonhunter_fierybrand",
+"specs": [
+581
+]
+},
+{
+"id": 204066,
+"name": "Lunar Beam",
+"category": "Combat",
+"icon": "spell_nature_moonglow",
+"specs": [
+104
+]
+},
+{
+"id": 204157,
+"name": "Throw Glaive",
+"category": "Tag",
+"icon": "ability_demonhunter_throwglaive",
+"specs": [
+581
+]
+},
+{
+"id": 204596,
+"name": "Sigil of Flame",
+"category": "Combat",
+"icon": "ability_demonhunter_sigilofinquisition",
+"specs": [
+581
+]
+},
+{
+"id": 205021,
+"name": "Ray of Frost",
+"category": "Combat",
+"icon": "ability_mage_rayoffrost",
+"specs": [
+64
+]
+},
+{
+"id": 205025,
+"name": "Presence of Mind",
+"category": "Combat",
+"icon": "spell_nature_enchantarmor",
+"specs": [
+62
+]
+},
+{
+"id": 205180,
+"name": "Summon Darkglare",
+"category": "Combat",
+"icon": "inv_beholderwarlock",
+"specs": [
+265
+]
+},
+{
+"id": 205523,
+"name": "Blackout Kick",
+"category": "Combat",
+"icon": "ability_monk_roundhousekick",
+"specs": [
+268
+]
+},
+{
+"id": 205636,
+"name": "Force of Nature",
+"category": "Combat",
+"icon": "ability_druid_forceofnature",
+"specs": [
+102
+]
+},
+{
+"id": 206930,
+"name": "Heart Strike",
+"category": "Combat",
+"icon": "inv_weapon_shortblade_40",
+"specs": [
+250
+]
+},
+{
+"id": 207167,
+"name": "Blinding Sleet",
+"category": "CC",
+"icon": "spell_frost_chillingblast",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 207230,
+"name": "Frostscythe",
+"category": "Combat",
+"icon": "inv12_ability_deathknight_frostscythe",
+"specs": [
+251
+]
+},
+{
+"id": 207317,
+"name": "Epidemic",
+"category": "Combat",
+"icon": "spell_nature_nullifydisease",
+"specs": [
+252
+]
+},
+{
+"id": 207407,
+"name": "Soul Carver",
+"category": "Combat",
+"icon": "inv_glaive_1h_artifactaldrochi_d_01",
+"specs": [
+581
+]
+},
+{
+"id": 207684,
+"name": "Sigil of Misery",
+"category": "CC",
+"icon": "ability_demonhunter_sigilofmisery",
+"specs": [
+581,
+1480
+]
+},
+{
+"id": 208652,
+"name": "Dire Beast: Hawk",
+"category": "PvP",
+"icon": "spell_hunter_aspectoftheironhawk",
+"specs": [
+253
+]
+},
+{
+"id": 209749,
+"name": "Faerie Swarm",
+"category": "PvP",
+"icon": "spell_druid_swarm",
+"specs": [
+102
+]
+},
+{
+"id": 210128,
+"name": "Zombify",
+"category": "PvP",
+"icon": "ability_deathknight_reanimation",
+"specs": [
+252
+]
+},
+{
+"id": 212036,
+"name": "Mass Resurrection",
+"category": "",
+"icon": "achievement_guildperk_massresurrection",
+"specs": []
+},
+{
+"id": 212040,
+"name": "Revitalize",
+"category": "",
+"icon": "ability_druid_empoweredtouch",
+"specs": []
+},
+{
+"id": 212048,
+"name": "Ancestral Vision",
+"category": "Buff",
+"icon": "spell_shaman_elementaloath",
+"specs": [
+264
+]
+},
+{
+"id": 212051,
+"name": "Reawaken",
+"category": "",
+"icon": "ability_monk_chiswirl",
+"specs": []
+},
+{
+"id": 212056,
+"name": "Absolution",
+"category": "",
+"icon": "ability_paladin_savedbythelight",
+"specs": []
+},
+{
+"id": 212084,
+"name": "Fel Devastation",
+"category": "Combat",
+"icon": "ability_demonhunter_feldevastation",
+"specs": [
+581
+]
+},
+{
+"id": 212552,
+"name": "Wraith Walk",
+"category": "Mobility",
+"icon": "inv_helm_plate_raiddeathknight_p_01",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 212638,
+"name": "Tracker's Net",
+"category": "",
+"icon": "hunter_pvp_trackersnet",
+"specs": []
+},
+{
+"id": 212640,
+"name": "Mending Bandage",
+"category": "",
+"icon": "inv_firstaid_bandage2",
+"specs": []
+},
+{
+"id": 212641,
+"name": "Guardian of Ancient Kings",
+"category": "Defensive",
+"icon": "spell_holy_heroism",
+"specs": [
+66
+]
+},
+{
+"id": 213634,
+"name": "Purify Disease",
+"category": "Dispel",
+"icon": "spell_holy_nullifydisease",
+"specs": [
+257,
+258
+]
+},
+{
+"id": 213644,
+"name": "Cleanse Toxins",
+"category": "Dispel",
+"icon": "spell_holy_renew",
+"specs": [
+66,
+70
+]
+},
+{
+"id": 213764,
+"name": "Swipe",
+"category": "Combat",
+"icon": "inv_misc_monsterclaw_03",
+"specs": [
+102,
+104,
+105
+]
+},
+{
+"id": 215652,
+"name": "Shield of Virtue",
+"category": "",
+"icon": "inv_shield_60",
+"specs": []
+},
+{
+"id": 217200,
+"name": "Barbed Shot",
+"category": "Combat",
+"icon": "ability_hunter_barbedshot",
+"specs": [
+253
+]
+},
+{
+"id": 217832,
+"name": "Imprison",
+"category": "Dispel",
+"icon": "ability_demonhunter_imprison",
+"specs": [
+577,
+581,
+1480
+]
+},
+{
+"id": 218164,
+"name": "Detox",
+"category": "Dispel",
+"icon": "ability_rogue_imrovedrecuperate",
+"specs": [
+268,
+269
+]
+},
+{
+"id": 221562,
+"name": "Asphyxiate",
+"category": "CC",
+"icon": "ability_deathknight_asphixiate",
+"specs": [
+250,
+251,
+252
+]
+},
+{
+"id": 228260,
+"name": "Voidform",
+"category": "Combat",
+"icon": "spell_priest_void-blast",
+"specs": [
+258
+]
+},
+{
+"id": 228477,
+"name": "Soul Cleave",
+"category": "Combat",
+"icon": "ability_demonhunter_soulcleave",
+"specs": [
+581
+]
+},
+{
+"id": 228920,
+"name": "Ravager",
+"category": "Combat",
+"icon": "warrior_talent_icon_ravager",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 231895,
+"name": "Avenging Wrath",
+"category": "Combat",
+"icon": "spell_holy_avenginewrath",
+"specs": [
+70
+]
+},
+{
+"id": 232893,
+"name": "Felblade",
+"category": "Combat",
+"icon": "ability_demonhunter_felblade",
+"specs": [
+577,
+581
+]
+},
+{
+"id": 233759,
+"name": "Grapple Weapon",
+"category": "",
+"icon": "ability_warrior_disarm",
+"specs": []
+},
+{
+"id": 234153,
+"name": "Drain Life",
+"category": "Self-Heal",
+"icon": "spell_shadow_lifedrain02",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 235313,
+"name": "Blazing Barrier",
+"category": "",
+"icon": "ability_mage_moltenarmor",
+"specs": []
+},
+{
+"id": 235450,
+"name": "Prismatic Barrier",
+"category": "Defensive",
+"icon": "spell_magearmor",
+"specs": [
+62
+]
+},
+{
+"id": 247454,
+"name": "Spirit Bomb",
+"category": "Combat",
+"icon": "inv_icon_shadowcouncilorb_purple",
+"specs": [
+581
+]
+},
+{
+"id": 255647,
+"name": "Light's Judgment",
+"category": "",
+"icon": "ability_racial_orbitalstrike",
+"specs": []
+},
+{
+"id": 255937,
+"name": "Wake of Ashes",
+"category": "Combat",
+"icon": "inv_sword_2h_artifactashbringerfire_d_03",
+"specs": [
+70
+]
+},
+{
+"id": 256948,
+"name": "Spatial Rift",
+"category": "",
+"icon": "ability_racial_spatialrift",
+"specs": []
+},
+{
+"id": 257044,
+"name": "Rapid Fire",
+"category": "Combat",
+"icon": "ability_hunter_efficiency",
+"specs": [
+254
+]
+},
+{
+"id": 257284,
+"name": "Hunter's Mark",
+"category": "Combat",
+"icon": "ability_hunter_markedfordeath",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 257620,
+"name": "Multi-Shot",
+"category": "Combat",
+"icon": "ability_upgrademoonglaive",
+"specs": [
+254
+]
+},
+{
+"id": 258860,
+"name": "Essence Break",
+"category": "Combat",
+"icon": "spell_shadow_ritualofsacrifice",
+"specs": [
+577
+]
+},
+{
+"id": 258920,
+"name": "Immolation Aura",
+"category": "Combat",
+"icon": "ability_demonhunter_immolation",
+"specs": [
+577,
+581
+]
+},
+{
+"id": 259489,
+"name": "Kill Command",
+"category": "Combat",
+"icon": "ability_hunter_killcommand",
+"specs": [
+255
+]
+},
+{
+"id": 259495,
+"name": "Wildfire Bomb",
+"category": "Combat",
+"icon": "inv_wildfirebomb",
+"specs": [
+255
+]
+},
+{
+"id": 260243,
+"name": "Volley",
+"category": "Combat",
+"icon": "ability_hunter_rapidkilling",
+"specs": [
+254
+]
+},
+{
+"id": 260708,
+"name": "Sweeping Strikes",
+"category": "Combat",
+"icon": "ability_rogue_slicedice",
+"specs": [
+71
+]
+},
+{
+"id": 263642,
+"name": "Fracture",
+"category": "Combat",
+"icon": "ability_creature_felsunder",
+"specs": [
+581
+]
+},
+{
+"id": 264178,
+"name": "Demonbolt",
+"category": "Combat",
+"icon": "inv__demonbolt",
+"specs": [
+266
+]
+},
+{
+"id": 264735,
+"name": "Survival of the Fittest",
+"category": "Defensive",
+"icon": "spell_nature_spiritarmor",
+"specs": [
+253,
+254,
+255
+]
+},
+{
+"id": 265187,
+"name": "Summon Demonic Tyrant",
+"category": "Combat",
+"icon": "inv_summondemonictyrant",
+"specs": [
+266
+]
+},
+{
+"id": 271877,
+"name": "Blade Rush",
+"category": "Combat",
+"icon": "ability_arakkoa_spinning_blade",
+"specs": [
+260
+]
+},
+{
+"id": 272651,
+"name": "Command Pet",
+"category": "Raid Defensive",
+"icon": "ability_hunter_pet_goto",
+"specs": [
+253,
+254
+]
+},
+{
+"id": 272682,
+"name": "Master's Call",
+"category": "",
+"icon": "ability_hunter_masterscall",
+"specs": []
+},
+{
+"id": 274837,
+"name": "Feral Frenzy",
+"category": "Combat",
+"icon": "ability_druid_rake",
+"specs": [
+103
+]
+},
+{
+"id": 275773,
+"name": "Judgment",
+"category": "Combat",
+"icon": "spell_holy_righteousfury",
+"specs": [
+65
+]
+},
+{
+"id": 275779,
+"name": "Judgment",
+"category": "Combat",
+"icon": "spell_holy_righteousfury",
+"specs": [
+66
+]
+},
+{
+"id": 278326,
+"name": "Consume Magic",
+"category": "Purge",
+"icon": "spell_misc_zandalari_council_soulswap",
+"specs": [
+577,
+581,
+1480
+]
+},
+{
+"id": 279302,
+"name": "Frostwyrm's Fury",
+"category": "Combat",
+"icon": "achievement_boss_sindragosa",
+"specs": [
+251
+]
+},
+{
+"id": 280719,
+"name": "Secret Technique",
+"category": "Combat",
+"icon": "ability_rogue_sinistercalling",
+"specs": [
+261
+]
+},
+{
+"id": 285381,
+"name": "Primal Wrath",
+"category": "Combat",
+"icon": "artifactability_feraldruid_ashamanesbite",
+"specs": [
+103
+]
+},
+{
+"id": 288613,
+"name": "Trueshot",
+"category": "Combat",
+"icon": "ability_trueshot",
+"specs": [
+254
+]
+},
+{
+"id": 315341,
+"name": "Between the Eyes",
+"category": "Combat",
+"icon": "inv_weapon_rifle_01",
+"specs": [
+260
+]
+},
+{
+"id": 319175,
+"name": "Black Powder",
+"category": "Combat",
+"icon": "spell_priest_divinestar_shadow",
+"specs": [
+261
+]
+},
+{
+"id": 321507,
+"name": "Touch of the Magi",
+"category": "Combat",
+"icon": "inv_ability_mage_radiantspark",
+"specs": [
+62
+]
+},
+{
+"id": 322101,
+"name": "Expel Harm",
+"category": "Self-Heal",
+"icon": "ability_monk_expelharm",
+"specs": [
+268
+]
+},
+{
+"id": 322109,
+"name": "Touch of Death",
+"category": "Special",
+"icon": "ability_monk_touchofdeath",
+"specs": [
+268,
+269,
+270
+]
+},
+{
+"id": 322729,
+"name": "Spinning Crane Kick",
+"category": "Combat",
+"icon": "ability_monk_cranekick_new",
+"specs": [
+268
+]
+},
+{
+"id": 325153,
+"name": "Exploding Keg",
+"category": "Combat",
+"icon": "inv12_ability_monk_explodingkeg",
+"specs": [
+268
+]
+},
+{
+"id": 325197,
+"name": "Invoke Chi-Ji, the Red Crane",
+"category": "Combat",
+"icon": "inv_pet_cranegod",
+"specs": [
+270
+]
+},
+{
+"id": 333889,
+"name": "Fel Domination",
+"category": "Self-Heal",
+"icon": "spell_shadow_felmending",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 334275,
+"name": "Curse of Exhaustion",
+"category": "Movement",
+"icon": "spell_shadow_grimward",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 335467,
+"name": "Shadow Word: Madness",
+"category": "Combat",
+"icon": "inv12_ability_priest_powerwordmadness_eye",
+"specs": [
+258
+]
+},
+{
+"id": 342245,
+"name": "Alter Time",
+"category": "Self-Heal",
+"icon": "spell_mage_altertime",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 343294,
+"name": "Soul Reaper",
+"category": "Combat",
+"icon": "ability_deathknight_soulreaper",
+"specs": [
+252
+]
+},
+{
+"id": 343527,
+"name": "Execution Sentence",
+"category": "Combat",
+"icon": "spell_paladin_executionsentence",
+"specs": [
+70
+]
+},
+{
+"id": 351338,
+"name": "Quell",
+"category": "Interrupt",
+"icon": "ability_evoker_quell",
+"specs": [
+1467,
+1473
+]
+},
+{
+"id": 352278,
+"name": "Ice Wall",
+"category": "",
+"icon": "ability_mage_icewall",
+"specs": []
+},
+{
+"id": 354540,
+"name": "Nimble Brew",
+"category": "PvP",
+"icon": "spell_monk_nimblebrew",
+"specs": [
+268
+]
+},
+{
+"id": 354654,
+"name": "Grove Protection",
+"category": "",
+"icon": "ability_druid_protectionofthegrove",
+"specs": []
+},
+{
+"id": 355913,
+"name": "Emerald Blossom",
+"category": "Self-Heal",
+"icon": "ability_evoker_emeraldblossom",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 355936,
+"name": "Dream Breath",
+"category": "Combat",
+"icon": "ability_evoker_dreambreath",
+"specs": [
+1468
+]
+},
+{
+"id": 356707,
+"name": "Wild Kingdom",
+"category": "PvP",
+"icon": "ability_druid_kingofthejungle",
+"specs": [
+253
+]
+},
+{
+"id": 356719,
+"name": "Chimaeral Sting",
+"category": "PvP",
+"icon": "ability_hunter_snaketrap",
+"specs": [
+253
+]
+},
+{
+"id": 356995,
+"name": "Disintegrate",
+"category": "Combat",
+"icon": "ability_evoker_disintegrate",
+"specs": [
+1467,
+1468
+]
+},
+{
+"id": 357170,
+"name": "Time Dilation",
+"category": "Combat",
+"icon": "ability_evoker_timedilation",
+"specs": [
+1468
+]
+},
+{
+"id": 357208,
+"name": "Fire Breath",
+"category": "Combat",
+"icon": "ability_evoker_firebreath",
+"specs": [
+1468,
+1473
+]
+},
+{
+"id": 357210,
+"name": "Deep Breath",
+"category": "Combat",
+"icon": "ability_evoker_deepbreath",
+"specs": [
+1467,
+1468
+]
+},
+{
+"id": 357211,
+"name": "Pyre",
+"category": "Combat",
+"icon": "ability_evoker_pyre",
+"specs": [
+1467
+]
+},
+{
+"id": 357214,
+"name": "Wing Buffet",
+"category": "",
+"icon": "ability_racial_wingbuffet",
+"specs": []
+},
+{
+"id": 358267,
+"name": "Hover",
+"category": "Mobility",
+"icon": "ability_evoker_hover",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 358385,
+"name": "Landslide",
+"category": "Tag",
+"icon": "ability_earthen_pillar",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 359816,
+"name": "Dream Flight",
+"category": "Combat",
+"icon": "ability_evoker_dreamflight",
+"specs": [
+1468
+]
+},
+{
+"id": 360194,
+"name": "Deathmark",
+"category": "Combat",
+"icon": "ability_rogue_deathmark",
+"specs": [
+259
+]
+},
+{
+"id": 360806,
+"name": "Sleep Walk",
+"category": "CC",
+"icon": "ability_xavius_dreamsimulacrum",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 360823,
+"name": "Naturalize",
+"category": "Dispel",
+"icon": "ability_evoker_fontofmagic_green",
+"specs": [
+1468
+]
+},
+{
+"id": 360827,
+"name": "Blistering Scales",
+"category": "Combat",
+"icon": "ability_evoker_blisteringscales",
+"specs": [
+1473
+]
+},
+{
+"id": 360995,
+"name": "Verdant Embrace",
+"category": "Self-Heal",
+"icon": "ability_evoker_rescue",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 361178,
+"name": "Mass Return",
+"category": "Res",
+"icon": "ability_evoker_return2",
+"specs": [
+1468
+]
+},
+{
+"id": 361227,
+"name": "Return",
+"category": "Res",
+"icon": "ability_evoker_return",
+"specs": [
+1473
+]
+},
+{
+"id": 361469,
+"name": "Living Flame",
+"category": "Combat",
+"icon": "ability_evoker_livingflame",
+"specs": [
+1467,
+1473
+]
+},
+{
+"id": 361584,
+"name": "Whirling Surge",
+"category": "",
+"icon": "ability_dragonriding_barrelroll01",
+"specs": []
+},
+{
+"id": 362969,
+"name": "Azure Strike",
+"category": "Combat",
+"icon": "ability_evoker_azurestrike",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 363534,
+"name": "Rewind",
+"category": "Combat",
+"icon": "ability_evoker_rewind",
+"specs": [
+1468
+]
+},
+{
+"id": 363916,
+"name": "Obsidian Scales",
+"category": "Defensive",
+"icon": "inv_artifact_dragonscales",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 364342,
+"name": "Blessing of the Bronze",
+"category": "Buff",
+"icon": "ability_evoker_blessingofthebronze",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 364343,
+"name": "Echo",
+"category": "Combat",
+"icon": "ability_evoker_echo",
+"specs": [
+1468
+]
+},
+{
+"id": 365350,
+"name": "Arcane Surge",
+"category": "Combat",
+"icon": "ability_mage_arcanesurge",
+"specs": [
+62
+]
+},
+{
+"id": 365585,
+"name": "Expunge",
+"category": "Dispel",
+"icon": "ability_evoker_fontofmagic_green",
+"specs": [
+1467,
+1473
+]
+},
+{
+"id": 366155,
+"name": "Reversion",
+"category": "Combat",
+"icon": "ability_evoker_reversion",
+"specs": [
+1468
+]
+},
+{
+"id": 368970,
+"name": "Tail Swipe",
+"category": "CC",
+"icon": "ability_racial_tailswipe",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 369459,
+"name": "Source of Magic",
+"category": "Raid Defensive",
+"icon": "ability_evoker_blue_01",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 369536,
+"name": "Soar",
+"category": "",
+"icon": "ability_racial_soar",
+"specs": []
+},
+{
+"id": 370388,
+"name": "Swoop Up",
+"category": "PvP",
+"icon": "ability_evoker_aerialmastery",
+"specs": [
+1468,
+1473
+]
+},
+{
+"id": 370553,
+"name": "Tip the Scales",
+"category": "Self-Heal",
+"icon": "ability_evoker_tipthescales",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 370665,
+"name": "Rescue",
+"category": "Purge",
+"icon": "ability_evoker_flywithme",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 370965,
+"name": "The Hunt",
+"category": "Combat",
+"icon": "inv_ability_demonhunter_thehunt",
+"specs": [
+577
+]
+},
+{
+"id": 372048,
+"name": "Oppressing Roar",
+"category": "CC",
+"icon": "ability_evoker_oppressingroar",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 372608,
+"name": "Surge Forward",
+"category": "",
+"icon": "ability_dragonriding_forwardflap01",
+"specs": []
+},
+{
+"id": 372610,
+"name": "Skyward Ascent",
+"category": "",
+"icon": "ability_dragonriding_upwardflap01",
+"specs": []
+},
+{
+"id": 373861,
+"name": "Temporal Anomaly",
+"category": "Combat",
+"icon": "ability_evoker_temporalanomaly",
+"specs": [
+1468
+]
+},
+{
+"id": 374227,
+"name": "Zephyr",
+"category": "Movement",
+"icon": "ability_evoker_hoverblack",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 374251,
+"name": "Cauterizing Flame",
+"category": "Self-Heal",
+"icon": "ability_evoker_fontofmagic_red",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 375087,
+"name": "Dragonrage",
+"category": "Combat",
+"icon": "ability_evoker_dragonrage",
+"specs": [
+1467
+]
+},
+{
+"id": 375576,
+"name": "Divine Toll",
+"category": "Combat",
+"icon": "inv_ability_paladin_divinetoll",
+"specs": [
+66,
+70
+]
+},
+{
+"id": 376079,
+"name": "Champion's Spear",
+"category": "Combat",
+"icon": "inv_ability_warrior_championsspear",
+"specs": [
+71,
+72,
+73
+]
+},
+{
+"id": 376743,
+"name": "Surge Forward",
+"category": "",
+"icon": "inv_icon_wing08b",
+"specs": []
+},
+{
+"id": 376744,
+"name": "Skyward Ascent",
+"category": "",
+"icon": "inv_icon_wing07c",
+"specs": []
+},
+{
+"id": 378081,
+"name": "Nature's Swiftness",
+"category": "Combat",
+"icon": "spell_nature_ravenform",
+"specs": [
+262,
+263
+]
+},
+{
+"id": 378270,
+"name": "Deeply Rooted Elements",
+"category": "",
+"icon": "inv_misc_herb_liferoot_stem",
+"specs": []
+},
+{
+"id": 378441,
+"name": "Time Stop",
+"category": "PvP",
+"icon": "inv_10_enchanting2_magicswirl_bronze",
+"specs": [
+1468,
+1473
+]
+},
+{
+"id": 381623,
+"name": "Thistle Tea",
+"category": "Self-Heal",
+"icon": "inv_drink_milk_05",
+"specs": [
+259,
+260,
+261
+]
+},
+{
+"id": 381989,
+"name": "Keep It Rolling",
+"category": "Combat",
+"icon": "ability_rogue_keepitrolling",
+"specs": [
+260
+]
+},
+{
+"id": 382266,
+"name": "Fire Breath",
+"category": "Combat",
+"icon": "ability_evoker_firebreath",
+"specs": [
+1467
+]
+},
+{
+"id": 382411,
+"name": "Eternity Surge",
+"category": "Combat",
+"icon": "ability_evoker_eternitysurge",
+"specs": [
+1467
+]
+},
+{
+"id": 383005,
+"name": "Chrono Loop",
+"category": "PvP",
+"icon": "ability_evoker_rewind2",
+"specs": [
+1468,
+1473
+]
+},
+{
+"id": 383121,
+"name": "Mass Polymorph",
+"category": "Movement",
+"icon": "spell_nature_doublepolymorph1",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 383328,
+"name": "Final Verdict",
+"category": "Combat",
+"icon": "spell_paladin_templarsverdict",
+"specs": [
+70
+]
+},
+{
+"id": 384100,
+"name": "Berserker Shout",
+"category": "Self-Heal",
+"icon": "spell_nature_ancestralguardian",
+"specs": [
+71
+]
+},
+{
+"id": 385059,
+"name": "Odyn's Fury",
+"category": "Combat",
+"icon": "inv_sword_1h_artifactvigfus_d_01",
+"specs": [
+72
+]
+},
+{
+"id": 385627,
+"name": "Kingsbane",
+"category": "Combat",
+"icon": "inv_knife_1h_artifactgarona_d_01",
+"specs": [
+259
+]
+},
+{
+"id": 385899,
+"name": "Soulburn",
+"category": "Raid Defensive",
+"icon": "spell_warlock_soulburn",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 385952,
+"name": "Shield Charge",
+"category": "Combat",
+"icon": "ability_warrior_shieldcharge",
+"specs": [
+73
+]
+},
+{
+"id": 389539,
+"name": "Sentinel",
+"category": "Combat",
+"icon": "spell_holy_holynova",
+"specs": [
+66
+]
+},
+{
+"id": 390386,
+"name": "Fury of the Aspects",
+"category": "Lust/BRes",
+"icon": "ability_evoker_furyoftheaspects",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 390612,
+"name": "Frost Bomb",
+"category": "",
+"icon": "spell_mage_frostbomb",
+"specs": []
+},
+{
+"id": 391054,
+"name": "Intercession",
+"category": "Lust/BRes",
+"icon": "ability_paladin_intercession",
+"specs": [
+65,
+66,
+70
+]
+},
+{
+"id": 391528,
+"name": "Convoke the Spirits",
+"category": "Combat",
+"icon": "inv_ability_druid_convokethespirits",
+"specs": [
+102,
+103,
+104
+]
+},
+{
+"id": 392983,
+"name": "Strike of the Windlord",
+"category": "Combat",
+"icon": "inv_hand_1h_artifactskywall_d_01",
+"specs": [
+269
+]
+},
+{
+"id": 395152,
+"name": "Ebon Might",
+"category": "Combat",
+"icon": "spell_sarkareth",
+"specs": [
+1473
+]
+},
+{
+"id": 395160,
+"name": "Eruption",
+"category": "Combat",
+"icon": "ability_evoker_eruption",
+"specs": [
+1473
+]
+},
+{
+"id": 396286,
+"name": "Upheaval",
+"category": "Combat",
+"icon": "ability_evoker_upheaval",
+"specs": [
+1473
+]
+},
+{
+"id": 399491,
+"name": "Sheilun's Gift",
+"category": "Combat",
+"icon": "inv12_ability_monk_sheilunsgift",
+"specs": [
+270
+]
+},
+{
+"id": 400254,
+"name": "Raze",
+"category": "",
+"icon": "ability_druid_lacerate",
+"specs": []
+},
+{
+"id": 403092,
+"name": "Aerial Halt",
+"category": "",
+"icon": "ability_dragonriding_haltthewinds01",
+"specs": []
+},
+{
+"id": 403876,
+"name": "Divine Protection",
+"category": "Defensive",
+"icon": "spell_holy_divineprotection",
+"specs": [
+70
+]
+},
+{
+"id": 404542,
+"name": "Crusading Strikes",
+"category": "",
+"icon": "inv_sword_08",
+"specs": []
+},
+{
+"id": 404977,
+"name": "Time Skip",
+"category": "Combat",
+"icon": "ability_evoker_timeskip",
+"specs": [
+1473
+]
+},
+{
+"id": 406732,
+"name": "Spatial Paradox",
+"category": "Special",
+"icon": "ability_evoker_stretchtime",
+"specs": [
+1467,
+1468,
+1473
+]
+},
+{
+"id": 407028,
+"name": "Sticky Tar Bomb",
+"category": "",
+"icon": "ability_hunter_stickytarbombtrap",
+"specs": []
+},
+{
+"id": 408233,
+"name": "Bestow Weyrnstone",
+"category": "",
+"icon": "ability_evoker_bestowweyrnstone",
+"specs": []
+},
+{
+"id": 409311,
+"name": "Prescience",
+"category": "Combat",
+"icon": "ability_evoker_prescience",
+"specs": [
+1473
+]
+},
+{
+"id": 412710,
+"name": "Timelessness",
+"category": "",
+"icon": "ability_evoker_timelessness",
+"specs": []
+},
+{
+"id": 414658,
+"name": "Ice Cold",
+"category": "",
+"icon": "spell_fire_bluefire",
+"specs": []
+},
+{
+"id": 414664,
+"name": "Mass Invisibility",
+"category": "Special",
+"icon": "ability_mage_massinvisibility",
+"specs": [
+62,
+63,
+64
+]
+},
+{
+"id": 415091,
+"name": "Shield of the Righteous",
+"category": "Combat",
+"icon": "ability_paladin_shieldofvengeance",
+"specs": [
+65
+]
+},
+{
+"id": 421453,
+"name": "Ultimate Penitence",
+"category": "",
+"icon": "ability_priest_ascendance",
+"specs": []
+},
+{
+"id": 425782,
+"name": "Second Wind",
+"category": "",
+"icon": "ability_dragonriding_evasivemaneuvers01",
+"specs": []
+},
+{
+"id": 426591,
+"name": "Goremaw's Bite",
+"category": "Combat",
+"icon": "inv_knife_1h_artifactfangs_d_01",
+"specs": [
+261
+]
+},
+{
+"id": 431443,
+"name": "Chrono Flames",
+"category": "",
+"icon": "inv_ability_chronowardenevoker_chronoflame",
+"specs": []
+},
+{
+"id": 432459,
+"name": "Holy Bulwark",
+"category": "Combat",
+"icon": "inv_ability_lightsmithpaladin_holybulwark",
+"specs": [
+65,
+66
+]
+},
+{
+"id": 433568,
+"name": "Rite of Sanctification",
+"category": "",
+"icon": "inv_inscription_weaponscroll01",
+"specs": []
+},
+{
+"id": 434763,
+"name": "Transcendence",
+"category": "Purge",
+"icon": "monk_ability_transcendence",
+"specs": [
+268
+]
+},
+{
+"id": 434766,
+"name": "Transcendence: Transfer",
+"category": "Movement",
+"icon": "spell_shaman_spectraltransformation",
+"specs": [
+268
+]
+},
+{
+"id": 436358,
+"name": "Demolish",
+"category": "Combat",
+"icon": "inv_ability_colossuswarrior_demolish",
+"specs": [
+71,
+73
+]
+},
+{
+"id": 439843,
+"name": "Reaper's Mark",
+"category": "Combat",
+"icon": "inv_ability_deathbringerdeathknight_reapersmark",
+"specs": [
+250,
+251
+]
+},
+{
+"id": 442204,
+"name": "Breath of Eons",
+"category": "Combat",
+"icon": "ability_evoker_breathofeons",
+"specs": [
+1473
+]
+},
+{
+"id": 442726,
+"name": "Malevolence",
+"category": "Combat",
+"icon": "inv_ability_hellcallerwarlock_malevolence",
+"specs": [
+265,
+267
+]
+},
+{
+"id": 442804,
+"name": "Curse of the Satyr",
+"category": "",
+"icon": "inv_fabric_felrag",
+"specs": []
+},
+{
+"id": 443028,
+"name": "Celestial Conduit",
+"category": "Combat",
+"icon": "inv_ability_conduitofthecelestialsmonk_celestialconduit",
+"specs": [
+270
+]
+},
+{
+"id": 443454,
+"name": "Ancestral Swiftness",
+"category": "",
+"icon": "inv_ability_farseershaman_ancestralswiftness",
+"specs": []
+},
+{
+"id": 444347,
+"name": "Death Charge",
+"category": "",
+"icon": "ability_mount_steelwarhorse",
+"specs": []
+},
+{
+"id": 444995,
+"name": "Surging Totem",
+"category": "Combat",
+"icon": "inv_ability_totemicshaman_surgingtotem",
+"specs": [
+263
+]
+},
+{
+"id": 445468,
+"name": "Wither",
+"category": "",
+"icon": "inv_ability_hellcallerwarlock_wither",
+"specs": []
+},
+{
+"id": 462854,
+"name": "Skyfury",
+"category": "Res",
+"icon": "achievement_raidprimalist_windelemental",
+"specs": [
+262,
+263,
+264
+]
+},
+{
+"id": 466904,
+"name": "Harrier's Cry",
+"category": "Lust/BRes",
+"icon": "inv_111_hunter_ability_harrierscall",
+"specs": [
+254
+]
+},
+{
+"id": 466930,
+"name": "Black Arrow",
+"category": "Combat",
+"icon": "inv_ability_darkrangerhunter_blackarrow",
+"specs": [
+253,
+254
+]
+},
+{
+"id": 470057,
+"name": "Voltaic Blaze",
+"category": "",
+"icon": "inv_10_dungeonjewelry_primalist_trinket_1ragingelement_fire",
+"specs": []
+},
+{
+"id": 470411,
+"name": "Flame Shock",
+"category": "Combat",
+"icon": "spell_fire_flameshock",
+"specs": [
+262,
+264
+]
+},
+{
+"id": 472433,
+"name": "Evangelism",
+"category": "Combat",
+"icon": "spell_holy_divineillumination",
+"specs": [
+256
+]
+},
+{
+"id": 473662,
+"name": "Consume",
+"category": "Combat",
+"icon": "inv_12_dh_void_ability_consume",
+"specs": [
+1480
+]
+},
+{
+"id": 473728,
+"name": "Void Ray",
+"category": "Combat",
+"icon": "inv_12_dh_void_ability_voidray",
+"specs": [
+1480
+]
+},
+{
+"id": 474421,
+"name": "Intimidation",
+"category": "CC",
+"icon": "artifactability_survivalhunter_eaglesbite",
+"specs": [
+254
+]
+},
+{
+"id": 474750,
+"name": "Symbiotic Relationship",
+"category": "PvP",
+"icon": "ability_druid_focusedgrowth",
+"specs": [
+102,
+103,
+104
+]
+},
+{
+"id": 1214467,
+"name": "Rain of Fire",
+"category": "Combat",
+"icon": "spell_shadow_rainoffire",
+"specs": [
+267
+]
+},
+{
+"id": 1214909,
+"name": "Roll the Bones",
+"category": "Combat",
+"icon": "ability_rogue_rollthebones",
+"specs": [
+260
+]
+},
+{
+"id": 1217605,
+"name": "Void Metamorphosis",
+"category": "Combat",
+"icon": "inv_112_ability_demonhunter_metamorphasisvoid",
+"specs": [
+1480
+]
+},
+{
+"id": 1226019,
+"name": "Reap",
+"category": "Combat",
+"icon": "inv_12_dh_void_ability_reap",
+"specs": [
+1480
+]
+},
+{
+"id": 1227280,
+"name": "Tentacle Slam",
+"category": "Combat",
+"icon": "inv12_ability_priest_tentacleslam",
+"specs": [
+258
+]
+},
+{
+"id": 1233346,
+"name": "Solar Eclipse",
+"category": "",
+"icon": "ability_druid_eclipseorange",
+"specs": []
+},
+{
+"id": 1233448,
+"name": "Dark Transformation",
+"category": "Combat",
+"icon": "achievement_boss_festergutrotface",
+"specs": [
+252
+]
+},
+{
+"id": 1234195,
+"name": "Void Nova",
+"category": "CC",
+"icon": "inv_12_voiddh_ability_voidnova",
+"specs": [
+1480
+]
+},
+{
+"id": 1234796,
+"name": "Shift",
+"category": "Mobility",
+"icon": "inv_12_dh_void_ability_shift",
+"specs": [
+1480
+]
+},
+{
+"id": 1241059,
+"name": "Celestial Infusion",
+"category": "Combat",
+"icon": "ability_monk_tigereyebrandy",
+"specs": [
+268
+]
+},
+{
+"id": 1241462,
+"name": "Arcane Pulse",
+"category": "Combat",
+"icon": "spell_arcane_arcanetorrent",
+"specs": [
+62
+]
+},
+{
+"id": 1242468,
+"name": "Serene Vitality",
+"category": "",
+"icon": "ability_monk_expelharm",
+"specs": []
+},
+{
+"id": 1245412,
+"name": "Voidblade",
+"category": "Combat",
+"icon": "inv_12_voiddh_ability_voidblade",
+"specs": [
+1480
+]
+},
+{
+"id": 1246167,
+"name": "The Hunt",
+"category": "Combat",
+"icon": "inv_12_voiddh_ability_thehunt",
+"specs": [
+1480
+]
+},
+{
+"id": 1246556,
+"name": "Spontaneous Immolation",
+"category": "",
+"icon": "spell_fire_twilightimmolation",
+"specs": []
+},
+{
+"id": 1247227,
+"name": "Crimson Tempest",
+"category": "Combat",
+"icon": "inv12_ability_rogue_crimsontempest",
+"specs": [
+259
+]
+},
+{
+"id": 1247378,
+"name": "Putrefy",
+"category": "Combat",
+"icon": "inv12_ability_deathknight_putrefy",
+"specs": [
+252
+]
+},
+{
+"id": 1249625,
+"name": "Zenith",
+"category": "Combat",
+"icon": "inv_ability_monk_weaponsoforder",
+"specs": [
+269
+]
+},
+{
+"id": 1249658,
+"name": "Breath of Sindragosa",
+"category": "Combat",
+"icon": "spell_deathknight_breathofsindragosa",
+"specs": [
+251
+]
+},
+{
+"id": 1250646,
+"name": "Takedown",
+"category": "Combat",
+"icon": "inv12_ability_hunter_takedown",
+"specs": [
+255
+]
+},
+{
+"id": 1251417,
+"name": "Spectral Sight",
+"category": "Special",
+"icon": "ability_demonhunter_spectralsight",
+"specs": [
+1480
+]
+},
+{
+"id": 1251592,
+"name": "Flamefang Pitch",
+"category": "Combat",
+"icon": "inv_10_blacksmithing_craftedoptional_blacksmithdye_fire",
+"specs": [
+255
+]
+},
+{
+"id": 1253799,
+"name": "Sundering Roar",
+"category": "Combat",
+"icon": "artifactability_feraldruid_openwounds",
+"specs": [
+104
+]
+},
+{
+"id": 1254851,
+"name": "Flamestrike",
+"category": "Combat",
+"icon": "spell_fire_selfdestruct",
+"specs": [
+63
+]
+},
+{
+"id": 1257052,
+"name": "Dark Harvest",
+"category": "Combat",
+"icon": "inv_ability_warlock_soulrot",
+"specs": [
+265
+]
+},
+{
+"id": 1259790,
+"name": "Unstable Affliction",
+"category": "Combat",
+"icon": "spell_shadow_unstableaffliction_3",
+"specs": [
+265
+]
+},
+{
+"id": 1261193,
+"name": "Boomstick",
+"category": "Combat",
+"icon": "inv_musket_04",
+"specs": [
+255
+]
+},
+{
+"id": 1261867,
+"name": "Heart of the Wild",
+"category": "Self-Heal",
+"icon": "inv12_ability_druid_flourish_empowered",
+"specs": [
+102,
+103,
+104,
+105
+]
+},
+{
+"id": 1263824,
+"name": "Consumption",
+"category": "Combat",
+"icon": "inv_axe_2h_artifactmaw_d_01",
+"specs": [
+250
+]
+},
+{
+"id": 1264359,
+"name": "Wild Thrash",
+"category": "Combat",
+"icon": "ability_hunter_sickem",
+"specs": [
+253
+]
+},
+{
+"id": 1271748,
+"name": "Blight of Weakness",
+"category": "Special",
+"icon": "warlock_curse_weakness_amplified",
+"specs": [
+265,
+266,
+267
+]
+},
+{
+"id": 1276467,
+"name": "Grimoire: Fel Ravager",
+"category": "Combat",
+"icon": "spell_shadow_summonfelhunter",
+"specs": [
+266
+]
+},
+{
+"id": 1276672,
+"name": "Summon Doomguard",
+"category": "Combat",
+"icon": "warlock_summon_doomguard",
+"specs": [
+266
+]
+},
+{
+"id": 1277297,
+"name": "Ignore Pain",
+"category": "Combat",
+"icon": "ability_warrior_renewedvigor",
+"specs": [
+71
+]
+},
+{
+"id": 1277933,
+"name": "Preparation",
+"category": "Combat",
+"icon": "ability_rogue_preparation",
+"specs": [
+260
+]
+}
+]
+}

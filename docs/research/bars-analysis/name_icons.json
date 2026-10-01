@@ -1,0 +1,146 @@
+{
+ "ancient hysteria": {
+  "icon": "spell_shadow_unholyfrenzy",
+  "id": 90355
+ },
+ "angelic feather": {
+  "icon": "ability_priest_angelicfeather",
+  "id": 121536
+ },
+ "bladestorm": {
+  "icon": "ability_warrior_bladestorm",
+  "id": 50622
+ },
+ "blizzard": {
+  "icon": "spell_frost_icestorm",
+  "id": 190356
+ },
+ "crusader strike": {
+  "icon": "spell_holy_crusaderstrike",
+  "id": 35395
+ },
+ "doom winds": {
+  "icon": "ability_ironmaidens_swirlingvortex",
+  "id": 384352
+ },
+ "earthgrab totem": {
+  "icon": "spell_nature_stranglevines",
+  "id": 51485
+ },
+ "earthquake": {
+  "icon": "spell_shaman_earthquake",
+  "id": 77478
+ },
+ "efflorescence": {
+  "icon": "inv_misc_herb_talandrasrose",
+  "id": 81269
+ },
+ "feral lunge": {
+  "icon": "spell_beastmaster_wolf",
+  "id": 196884
+ },
+ "frostbolt": {
+  "icon": "spell_frost_frostbolt02",
+  "id": 116
+ },
+ "halo": {
+  "icon": "ability_priest_halo",
+  "id": 120517
+ },
+ "heal": {
+  "icon": "spell_holy_greaterheal",
+  "id": 2060
+ },
+ "holy word: sanctify": {
+  "icon": "spell_holy_divineprovidence",
+  "id": 34861
+ },
+ "illidan's grasp": {
+  "icon": "ability_demonhunter_illidansgrasp",
+  "id": 205630
+ },
+ "immolate": {
+  "icon": "spell_fire_immolation",
+  "id": 118297
+ },
+ "infernal strike": {
+  "icon": "ability_demonhunter_infernalstrike1",
+  "id": 189110
+ },
+ "lunar eclipse": {
+  "icon": "ability_druid_eclipse",
+  "id": 1233272
+ },
+ "mana tea": {
+  "icon": "monk_ability_cherrymanatea",
+  "id": 115869
+ },
+ "mass dispel": {
+  "icon": "spell_arcane_massdispel",
+  "id": 32375
+ },
+ "maul": {
+  "icon": "ability_druid_maul",
+  "id": 6807
+ },
+ "mind vision": {
+  "icon": "spell_holy_mindvision",
+  "id": 2096
+ },
+ "power siphon": {
+  "icon": "ability_warlock_backdraft",
+  "id": 264130
+ },
+ "rain from above": {
+  "icon": "ability_demonhunter_rain-from-above",
+  "id": 206803
+ },
+ "recuperate": {
+  "icon": "spell_nature_protectionformnature",
+  "id": 1231411
+ },
+ "rend": {
+  "icon": "ability_gouge",
+  "id": 772
+ },
+ "renew": {
+  "icon": "spell_holy_renew",
+  "id": 139
+ },
+ "reverse magic": {
+  "icon": "ability_demonhunter_reversemagic",
+  "id": 205604
+ },
+ "sigil of spite": {
+  "icon": "inv_ability_demonhunter_elysiandecree",
+  "id": 390163
+ },
+ "soul immolation": {
+  "icon": "inv_12_dh_void_ability_voidpurge",
+  "id": 1241937
+ },
+ "summon felguard": {
+  "icon": "spell_shadow_summonfelguard",
+  "id": 30146
+ },
+ "summon felhunter": {
+  "icon": "spell_shadow_summonfelhunter",
+  "id": 691
+ },
+ "thorn bloom": {
+  "icon": "inv_12_haranir_ability_thornbloom",
+  "id": 1237885
+ },
+ "void torrent": {
+  "icon": "inv_knife_1h_artifactcthun_d_01",
+  "id": 205065
+ },
+ "wind rush totem": {
+  "icon": "ability_shaman_windwalktotem",
+  "id": 192077
+ },
+ "wrecking throw": {
+  "icon": "warrior_talent_icon_mastercleaver",
+  "id": 384110
+ }
+}

@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rob's bars: every class and spec</title>
+<script>const whTooltips = { colorLinks: false, iconizeLinks: false, renameLinks: false };</script>
+<script src="https://wow.zamimg.com/js/tooltips.js"></script>
+<style>
+:root { --slot: 46px; --gap: 4px; }
+body { font-family: Segoe UI, Arial, sans-serif; background: #121419; color: #e6e6e6; margin: 18px 22px; }
+h1 { font-size: 22px; margin: 0 0 2px; }
+.small { color: #9aa0aa; font-size: 12px; }
+.picker { margin: 12px 0 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+.picker button { background: #22262e; color: #ddd; border: 1px solid #3a3f4a; border-radius: 4px; padding: 4px 9px; cursor: pointer; font-size: 13px; }
+.picker button.on { background: #3b4a63; border-color: #7cc8ff; color: #fff; }
+.picker button.changed::after { content: " *"; color: #ffd24d; }
+.stage { display: grid; grid-template-columns: auto auto auto auto; grid-template-rows: auto auto; gap: 14px 22px; align-items: end; margin: 16px 0 8px; }
+.bar { background: #1a1d24; border: 1px solid #2c313b; border-radius: 6px; padding: 6px 8px 8px; }
+.bar h3 { margin: 0 0 4px; font-size: 12px; color: #9aa0aa; font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(6, var(--slot)); grid-auto-rows: var(--slot); gap: var(--gap); }
+.minimap { width: calc(var(--slot) * 6 + var(--gap) * 5); height: 150px; border-radius: 6px; background: radial-gradient(circle, #24402c 0%, #18241c 60%, #121419 100%); border: 1px solid #2c313b; display: flex; align-items: center; justify-content: center; color: #557; font-size: 12px; }
+.slot { position: relative; width: var(--slot); height: var(--slot); border: 2px dashed #333945; border-radius: 4px; background: #0d0f13; box-sizing: border-box; }
+.slot.filled { border-style: solid; border-color: #d8d8d8; background-size: cover; background-position: center; cursor: grab; }
+.slot.base { border-color: #d8d8d8; } .slot.role { border-color: #4fb0ff; } .slot.druid { border-color: #5ad25a; }
+.slot.review { border-color: #c98a1e; box-shadow: 0 0 0 2px #5a3d0a inset; }
+.slot.mine { border-color: #ffd24d; box-shadow: 0 0 6px #ffd24d; }
+.slot.over { outline: 2px solid #fff; outline-offset: 1px; }
+.slot a { position: absolute; inset: 0; display: block; }
+.slot .key { position: absolute; top: 1px; right: 3px; font-size: 11px; font-weight: 700; color: #fff; text-shadow: 0 0 2px #000, 0 0 2px #000, 0 0 3px #000; pointer-events: none; }
+.slot .job { position: absolute; bottom: 0; left: 0; right: 0; font-size: 10px; text-align: center; background: rgba(0,0,0,.72); color: #ddd; pointer-events: none; white-space: nowrap; overflow: hidden; }
+.slot .q { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; text-align: center; color: #bbb; padding: 2px; pointer-events: none; }
+.info { min-height: 38px; background: #1a1d24; border: 1px solid #2c313b; border-radius: 6px; padding: 6px 10px; margin: 6px 0 10px; font-size: 13px; }
+.row2 { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; }
+.mouse { background: #1a1d24; border: 1px solid #2c313b; border-radius: 6px; padding: 6px 8px 8px; }
+.mouse h3 { margin: 0 0 4px; font-size: 12px; color: #9aa0aa; }
+.mgrid { display: grid; grid-template-columns: repeat(4, var(--slot)); gap: var(--gap); }
+.mgrid .lbl { font-size: 10px; color: #9aa0aa; text-align: center; margin-top: -2px; }
+.fixed { width: var(--slot); height: var(--slot); border: 1px solid #333945; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #777; text-align: center; }
+.tray { background: #1a1d24; border: 1px dashed #3a3f4a; border-radius: 6px; padding: 6px 8px 8px; min-height: 60px; }
+.tray.over { border-color: #fff; }
+.tray h3 { margin: 0 0 4px; font-size: 12px; color: #9aa0aa; }
+.traygrid { display: flex; flex-wrap: wrap; gap: var(--gap); }
+.legend span { display: inline-block; margin-right: 14px; font-size: 12px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border: 2px solid; border-radius: 2px; vertical-align: -2px; margin-right: 4px; }
+.tools button { background: #2b3240; color: #fff; border: 1px solid #4a5568; border-radius: 4px; padding: 5px 10px; cursor: pointer; margin-right: 6px; }
+pre { background: #0d0f13; border: 1px solid #2c313b; padding: 8px; white-space: pre-wrap; font-size: 12px; max-height: 220px; overflow: auto; }
+.warn { color: #ffb4b4; }
+</style>
+</head>
+<body>
+<h1>Rob's bars: every class and spec</h1>
+<div class="small">Card 0082. Built /*BUILT*/ from DjinnisClassProfiles /*VERSION*/ and your key bindings. Spells and icons from Bellular's keybinding tool; tooltips from Wowhead.
+Druid keys are the ones agreed so far. Every other class shows the "copy by role" proposal, which you have not picked yet.</div>
+
+<div class="picker" id="classes"></div>
+<div class="picker" id="specs"></div>
+
+<div class="legend small">
+<span><i style="border-color:#d8d8d8"></i>Feral's key (the model)</span>
+<span><i style="border-color:#4fb0ff"></i>moved for the role</span>
+<span><i style="border-color:#5ad25a"></i>druid key, agreed</span>
+<span><i style="border-color:#c98a1e"></i>druid habit copied to a tank: review</span>
+<span><i style="border-color:#ffd24d"></i>you moved it here</span>
+</div>
+
+<div class="stage">
+  <div class="bar" style="grid-column:2;grid-row:1"><h3>Bar 1 (above the minimap)</h3><div class="grid" id="bar-ACTIONBUTTON"></div></div>
+  <div class="bar" style="grid-column:1;grid-row:2"><h3>Bar 7 (left)</h3><div class="grid" id="bar-MULTIACTIONBAR6BUTTON"></div></div>
+  <div style="grid-column:2;grid-row:2"><div class="minimap">minimap</div></div>
+  <div class="bar" style="grid-column:3;grid-row:2"><h3>Bar 4 (right)</h3><div class="grid" id="bar-MULTIACTIONBAR3BUTTON"></div></div>
+  <div class="bar" style="grid-column:4;grid-row:2"><h3>Bar 5 (Num keys)</h3><div class="grid" id="bar-MULTIACTIONBAR4BUTTON"></div></div>
+</div>
+
+<div class="info" id="info">Hover a button to see the spell, its job and why it is there. Drag a button onto another to swap them. Drag one to the tray below to take it off.</div>
+
+<div class="row2">
+  <div class="mouse"><h3>Click casting (Clique, on a raid frame)</h3><div class="mgrid" id="mouse"></div><div class="small" id="cliquesrc" style="margin-top:6px;max-width:220px"></div></div>
+  <div>
+    <div class="tray" id="tray"><h3>Spare spells: no key yet, or taken off. Drag them onto a button.</h3><div class="traygrid" id="traygrid"></div></div>
+    <div class="tray" style="margin-top:8px" id="others"><h3>Other spells this class can use (Bellular's tool)</h3><div class="traygrid" id="othergrid"></div></div>
+  </div>
+</div>
+
+<h3 style="margin-top:18px">Your changes</h3>
+<div class="tools"><button id="copy">Copy my changes</button><button id="reset">Undo all changes to this spec</button><span class="small" id="copied"></span></div>
+<pre id="changes">No changes yet.</pre>
+<div class="warn small" id="unres"></div>
+
+<script>
+const DATA = /*DATA*/;
+const ICON = n => "https://wow.zamimg.com/images/wow/icons/large/" + n + ".jpg";
+const BARS = ["ACTIONBUTTON", "MULTIACTIONBAR6BUTTON", "MULTIACTIONBAR3BUTTON", "MULTIACTIONBAR4BUTTON"];
+const MOUSE = [
+  ["BUTTON1", "Left"], ["BUTTON2", "Right"], ["BUTTON3", "Middle"], ["MOUSEWHEELUP", "Wheel up"],
+  ["SHIFT-BUTTON1", "Shift+Left"], ["SHIFT-BUTTON2", "Shift+Right"], ["SHIFT-BUTTON3", "Shift+Middle"], ["MOUSEWHEELDOWN", "Wheel down"],
+  ["ALT-BUTTON1", "Alt+Left"], ["ALT-BUTTON2", "Alt+Right"], ["ALT-SHIFT-BUTTON1", "Alt+Shift+Left"], ["ALT-SHIFT-BUTTON2", "Alt+Shift+Right"],
+];
+const FIXED = [["CTRL-BUTTON1", "Ctrl+Left: target"], ["CTRL-BUTTON2", "Ctrl+Right: menu"]];
+const SRC = { base: "Feral's key (the model)", role: "moved for the role", druid: "a druid key, agreed with you", clique: "your Clique bind", cliqueNew: "proposed: dispel on the wheel, as your other healers" };
+const short = k => (k || "").replace("Shift+", "s-").replace("Alt+", "a-").replace("Ctrl+", "c-");
+
+let spec = null, state = {}, orig = {};
+const store = s => "dcp-keys-v1:" + s;
+
+function specOf(name) { return DATA.specs.find(s => s.spec === name); }
+
+function original(s) {
+  const out = {};
+  for (const [b, c] of Object.entries(s.cells)) out["b:" + b] = Object.assign({}, c);
+  for (const c of s.cliqueSlots) out["m:" + c.key] = Object.assign({}, c);
+  return out;
+}
+function tray(s, st) {
+  const placed = new Set(Object.values(st).map(c => c.spell));
+  const t = s.nokey.filter(c => !placed.has(c.spell)).map(c => Object.assign({ source: "spare" }, c));
+  for (const c of Object.values(orig)) if (!placed.has(c.spell) && !t.some(x => x.spell === c.spell)) t.push(Object.assign({}, c, { source: "spare" }));
+  return t;
+}
+function load(name) {
+  spec = specOf(name);
+  orig = original(spec);
+  const saved = localStorage.getItem(store(name));
+  state = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(orig));
+  render();
+}
+function save() { localStorage.setItem(store(spec.spec), JSON.stringify(state)); }
+
+function slotEl(id, cell, keyText) {
+  const d = document.createElement("div");
+  d.className = "slot";
+  d.dataset.id = id;
+  if (keyText) { const k = document.createElement("span"); k.className = "key"; k.textContent = short(keyText); d.appendChild(k); }
+  if (cell) fill(d, cell, id);
+  if (!id) return d;  // a tray tile: the tray takes the drop, and it says what it is itself
+  d.addEventListener("dragover", e => { e.preventDefault(); d.classList.add("over"); });
+  d.addEventListener("dragleave", () => d.classList.remove("over"));
+  d.addEventListener("drop", e => { e.preventDefault(); d.classList.remove("over"); drop(e.dataTransfer.getData("text/plain"), id); });
+  d.addEventListener("mouseenter", () => describe(id, keyText));
+  return d;
+}
+function fill(d, cell, id) {
+  d.classList.add("filled");
+  const moved = id && orig[id] && orig[id].spell !== cell.spell || id && !orig[id];
+  d.classList.add(moved ? "mine" : (cell.note ? "review" : (cell.source || "base")));
+  if (cell.icon) d.style.backgroundImage = "url(" + ICON(cell.icon) + ")";
+  else { const q = document.createElement("span"); q.className = "q"; q.textContent = cell.spell; d.appendChild(q); }
+  if (cell.wh) {
+    const a = document.createElement("a");
+    a.href = "https://www.wowhead.com/" + cell.wh;
+    a.dataset.wowhead = cell.wh;
+    a.draggable = false;
+    a.addEventListener("click", e => e.preventDefault());
+    d.appendChild(a);
+  }
+  if (cell.short) { const j = document.createElement("span"); j.className = "job"; j.textContent = cell.short; d.appendChild(j); }
+  d.draggable = true;
+  d.addEventListener("dragstart", e => e.dataTransfer.setData("text/plain", d.dataset.id || ("t:" + cell.spell)));
+}
+
+function keyName(id) {
+  if (id.startsWith("b:")) return DATA.keys[id.slice(2)] || "no key";
+  if (id.startsWith("m:")) { const m = MOUSE.find(x => x[0] === id.slice(2)); return m ? m[1] : id.slice(2); }
+  return "the tray";
+}
+function describe(id, keyText) {
+  const c = state[id];
+  const was = orig[id];
+  const el = document.getElementById("info");
+  if (!c) { el.textContent = keyName(id) + ": empty." + (was ? " It held " + was.spell + "." : ""); return; }
+  let t = "<b>" + keyName(id) + "</b>: " + c.spell + (c.job ? " <span class=small>(" + c.job + ")</span>" : "");
+  if (was && was.spell !== c.spell) t += ". You moved it here; this key held " + was.spell + ".";
+  else if (!was) t += ". You moved it here.";
+  else t += ". " + (c.note || SRC[c.source] || "");
+  el.innerHTML = t;
+}
+
+function drop(from, to) {
+  if (!from || from === to) return;
+  if (from.startsWith("t:")) {
+    const spell = from.slice(2);
+    const cell = [...tray(spec, state), ...others()].find(c => c.spell === spell);
+    if (!cell || to === "tray") return;
+    state[to] = Object.assign({}, cell, { source: "mine" });
+  } else if (to === "tray") {
+    delete state[from];
+  } else {
+    const a = state[from], b = state[to];
+    if (a) state[to] = a; else delete state[to];
+    if (b) state[from] = b; else delete state[from];
+  }
+  save();
+  render();
+}
+
+function others() {
+  const placed = new Set([...Object.values(state).map(c => c.spell), ...tray(spec, state).map(c => c.spell)]);
+  return (spec.others || []).filter(c => !placed.has(c.spell));
+}
+
+function render() {
+  for (const bar of BARS) {
+    const g = document.getElementById("bar-" + bar);
+    g.innerHTML = "";
+    // top row: buttons 7 to 12, bottom row: 1 to 6, as on Rob's screen
+    for (const n of [7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6]) {
+      const b = bar + n;
+      g.appendChild(slotEl("b:" + b, state["b:" + b], DATA.keys[b] || ""));
+    }
+  }
+  const m = document.getElementById("mouse");
+  m.innerHTML = "";
+  for (const [k, label] of MOUSE) {
+    const wrap = document.createElement("div");
+    wrap.appendChild(slotEl("m:" + k, state["m:" + k], ""));
+    const l = document.createElement("div"); l.className = "lbl"; l.textContent = label; wrap.appendChild(l);
+    m.appendChild(wrap);
+  }
+  for (const [, label] of FIXED) { const f = document.createElement("div"); f.className = "fixed"; f.textContent = label; m.appendChild(f); }
+  document.getElementById("cliquesrc").textContent = spec.cliqueProfile ? "From your Clique profile " + spec.cliqueProfile + ", spells this spec has." : "No Clique profile for this class yet. The dispel is proposed on the wheel.";
+  const tg = document.getElementById("traygrid"); tg.innerHTML = "";
+  for (const c of tray(spec, state)) { const d = slotEl(null, null, ""); fill(d, c, null); d.dataset.id = "t:" + c.spell; d.addEventListener("mouseenter", () => { document.getElementById("info").innerHTML = "<b>" + c.spell + "</b>" + (c.job ? " <span class=small>(" + c.job + ")</span>" : "") + ": no key yet. Drag it onto a button."; }); tg.appendChild(d); }
+  const og = document.getElementById("othergrid"); og.innerHTML = "";
+  for (const c of others()) { const d = slotEl(null, null, ""); fill(d, c, null); d.dataset.id = "t:" + c.spell; d.addEventListener("mouseenter", () => { document.getElementById("info").innerHTML = "<b>" + c.spell + "</b>: not in the plan. Drag it onto a button."; }); og.appendChild(d); }
+  const trayBox = document.getElementById("tray");
+  trayBox.ondragover = e => { e.preventDefault(); trayBox.classList.add("over"); };
+  trayBox.ondragleave = () => trayBox.classList.remove("over");
+  trayBox.ondrop = e => { e.preventDefault(); trayBox.classList.remove("over"); drop(e.dataTransfer.getData("text/plain"), "tray"); };
+  document.getElementById("changes").textContent = changeText(spec.spec, state) || "No changes yet.";
+  pickers();
+  if (window.$WowheadPower && $WowheadPower.refreshLinks) try { $WowheadPower.refreshLinks(); } catch (e) {}
+}
+
+// "what was already there": every change names what the key held
+function changeText(name, st) {
+  const s = specOf(name), o = original(s), lines = [];
+  const where = {}, told = new Set();  // told: a spell whose new key a line already gave
+  for (const [id, c] of Object.entries(st)) where[c.spell] = id;
+  for (const id of new Set([...Object.keys(o), ...Object.keys(st)])) {
+    const now = st[id], was = o[id];
+    if (now && (!was || was.spell !== now.spell)) {
+      if (told.has(now.spell)) continue;
+      told.add(now.spell);
+      if (was) told.add(was.spell);
+      const from = Object.keys(o).find(k => o[k].spell === now.spell);
+      let l = name + ": " + now.spell + (from ? " from " + keyName(from) : " (no key before)") + " to " + keyName(id);
+      if (was) l += "; " + keyName(id) + " held " + was.spell + (where[was.spell] ? ", now on " + keyName(where[was.spell]) : ", now off the bars");
+      lines.push(l + ".");
+    } else if (!now && was && !where[was.spell]) {
+      lines.push(name + ": " + was.spell + " taken off " + keyName(id) + ".");
+    }
+  }
+  return lines.join("\n");
+}
+function allChanges() {
+  const out = [];
+  for (const s of DATA.specs) { const saved = localStorage.getItem(store(s.spec)); if (saved) { const t = changeText(s.spec, JSON.parse(saved)); if (t) out.push(t); } }
+  return out.join("\n");
+}
+
+function pickers() {
+  const cs = document.getElementById("classes"), ss = document.getElementById("specs");
+  cs.innerHTML = ""; ss.innerHTML = "";
+  const classes = [...new Set(DATA.specs.map(s => s.className))];
+  for (const c of classes) {
+    const b = document.createElement("button"); b.textContent = c;
+    if (c === spec.className) b.classList.add("on");
+    if (DATA.specs.some(s => s.className === c && localStorage.getItem(store(s.spec)) && changeText(s.spec, JSON.parse(localStorage.getItem(store(s.spec)))))) b.classList.add("changed");
+    b.onclick = () => load(DATA.specs.find(s => s.className === c).spec);
+    cs.appendChild(b);
+  }
+  for (const s of DATA.specs.filter(s => s.className === spec.className)) {
+    const b = document.createElement("button"); b.textContent = s.spec + " (" + s.role.toLowerCase() + ")";
+    if (s.spec === spec.spec) b.classList.add("on");
+    const saved = localStorage.getItem(store(s.spec));
+    if (saved && changeText(s.spec, JSON.parse(saved))) b.classList.add("changed");
+    b.onclick = () => load(s.spec);
+    ss.appendChild(b);
+  }
+}
+
+document.getElementById("copy").onclick = () => {
+  const t = allChanges() || "No changes.";
+  navigator.clipboard.writeText(t).then(() => { document.getElementById("copied").textContent = "Copied. Paste it to Claude."; });
+};
+document.getElementById("reset").onclick = () => { localStorage.removeItem(store(spec.spec)); load(spec.spec); };
+document.getElementById("unres").textContent = DATA.unresolved.length ? "No icon found for: " + DATA.unresolved.join(", ") : "";
+load("Feral");
+</script>
+</body>
+</html>

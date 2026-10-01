@@ -1,0 +1,175 @@
+"""Card 0082. Builds docs/research/2026-10-01-keybind-layout.html: Rob's bars
+laid out as on his screen, for every class and spec, with icons and Wowhead
+tooltips, drag to move, and a Clique panel.
+
+Reads keys_data.json (from keys_page.lua) and bellular_spells.json (from
+bellular_spells.py). Item icons come from Wowhead's tooltip API and are
+cached in item_icons.json.
+
+    lua docs/research/bars-analysis/keys_page.lua
+    python docs/research/bars-analysis/build_keys_page.py
+"""
+import json, os, urllib.request
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(HERE, "..", "2026-10-01-keybind-layout.html")
+ITEMS = {"Healthstone": 5512, "Damage Potion": 245898}
+
+data = json.load(open(os.path.join(HERE, "keys_data.json"), encoding="utf-8"))
+bell = json.load(open(os.path.join(HERE, "bellular_spells.json"), encoding="utf-8"))["spells"]
+by_name = {}
+for e in bell:
+    by_name.setdefault(e["name"].lower(), []).append(e)
+
+cache_path = os.path.join(HERE, "item_icons.json")
+item_icons = json.load(open(cache_path, encoding="utf-8")) if os.path.exists(cache_path) else {}
+for name, iid in ITEMS.items():
+    if name not in item_icons:
+        req = urllib.request.Request("https://nether.wowhead.com/tooltip/item/%d" % iid, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            item_icons[name] = json.loads(r.read().decode("utf-8"))["icon"]
+json.dump(item_icons, open(cache_path, "w", encoding="utf-8"), indent=1)
+
+# Names Bellular's tool does not carry: the player spell of that name from
+# wago.tools (SpellName, kept to spells in SkillLineAbility, so not an NPC's),
+# its icon from Wowhead. Cached in name_icons.json.
+names_path = os.path.join(HERE, "name_icons.json")
+name_icons = json.load(open(names_path, encoding="utf-8")) if os.path.exists(names_path) else {}
+
+
+def fetch(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (DjinnisClassProfiles keybind page)"})
+    with urllib.request.urlopen(req, timeout=120) as r:
+        return r.read().decode("utf-8", "replace")
+
+
+def wago_lookup(wanted):
+    import csv, io
+    want = {w.lower() for w in wanted if w.lower() not in name_icons}
+    if not want:
+        return
+    names = csv.DictReader(io.StringIO(fetch("https://wago.tools/db2/SpellName/csv")))
+    ids = {}
+    for row in names:
+        n = (row.get("Name_lang") or "").lower()
+        if n in want:
+            ids.setdefault(n, []).append(int(row["ID"]))
+    player = {int(r["Spell"]) for r in csv.DictReader(io.StringIO(fetch("https://wago.tools/db2/SkillLineAbility/csv")))}
+    # talents are not in SkillLineAbility (Maul is a talent): add the talent tree's spells
+    player |= {int(r["SpellID"]) for r in csv.DictReader(io.StringIO(fetch("https://wago.tools/db2/TraitDefinition/csv"))) if r.get("SpellID", "0").isdigit()}
+    for n, cands in ids.items():
+        pick = sorted(c for c in cands if c in player) or []
+        for sid in pick[:3]:
+            try:
+                tip = json.loads(fetch("https://nether.wowhead.com/tooltip/spell/%d" % sid))
+            except Exception:
+                continue
+            if tip.get("icon"):
+                name_icons[n] = {"id": sid, "icon": tip["icon"]}
+                break
+    json.dump(name_icons, open(names_path, "w", encoding="utf-8"), indent=1, sort_keys=True)
+
+
+# spells neither table names as a player's, by id: Lunar Eclipse is the spell on
+# Rob's Balance moonkin Shift+Q (1233272); the rest are PvP talents or older ids
+BY_ID = {"lunar eclipse": 1233272, "infernal strike": 189110, "heal": 2060, "illidan's grasp": 205630,
+         "reverse magic": 205604, "rain from above": 206803, "ancient hysteria": 90355}
+for n, sid in BY_ID.items():
+    if n not in name_icons:
+        try:
+            tip = json.loads(fetch("https://nether.wowhead.com/tooltip/spell/%d" % sid))
+            if tip.get("icon"):
+                name_icons[n] = {"id": sid, "icon": tip["icon"]}
+        except Exception:
+            pass
+json.dump(name_icons, open(names_path, "w", encoding="utf-8"), indent=1, sort_keys=True)
+
+unresolved = set()
+
+
+def resolve(cell, spec_id):
+    """Adds icon and Wowhead id to a cell, by its spell name, preferring the spec's own spell."""
+    name = cell["spell"]
+    if name in ITEMS:
+        cell["icon"], cell["wh"] = item_icons.get(name), "item=%d" % ITEMS[name]
+        return True
+    for alt in name.split("/"):
+        hits = by_name.get(alt.strip().lower(), [])
+        hit = next((e for e in hits if spec_id in e["specs"]), hits[0] if hits else None)
+        if hit:
+            cell["icon"], cell["wh"] = hit["icon"], "spell=%d" % hit["id"]
+            return spec_id in hit["specs"] or not hit["specs"]
+    for alt in name.split("/"):
+        hit = name_icons.get(alt.strip().lower())
+        if hit:
+            cell["icon"], cell["wh"] = hit["icon"], "spell=%d" % hit["id"]
+            return True
+    unresolved.add(name)
+    return None
+
+
+def all_names():
+    out = set()
+    for s in data["specs"]:
+        for c in list(s["cells"].values()) + s["nokey"] + (s.get("clique") or []):
+            out |= {a.strip() for a in c["spell"].split("/")}
+    for p in data["clique"].values():
+        out |= {b["spell"] for b in p["binds"] if b.get("spell")}
+    return {n for n in out if n.lower() not in by_name and n not in ITEMS}
+
+
+wago_lookup(all_names())
+
+
+MOUSE_ORDER = ["MOUSEWHEELUP", "MOUSEWHEELDOWN"]
+for s in data["specs"]:
+    sid = s["id"]
+    for c in s["cells"].values():
+        resolve(c, sid)
+        # Bellular's "Taunt/Quick Access": a taunt only for a tank (Prowl, a stealth, elsewhere)
+        if c.get("job") == "Taunt/Quick Access" and s["role"] != "TANK":
+            c["short"] = "Quick"
+    for c in s["nokey"]:
+        resolve(c, sid)
+    # Clique: the class profile's spells this spec has; the dispel on the wheel where it is missing
+    prof = data["clique"].get(s["className"])
+    slots, taken = [], set()
+    if prof:
+        s["cliqueProfile"] = prof["profile"]
+        for b in prof["binds"]:
+            if b.get("type") != "spell" or b["key"].startswith("CTRL-") or b["key"] in taken:
+                continue
+            c = {"spell": b["spell"], "key": b["key"], "source": "clique"}
+            ok = resolve(c, sid)
+            if ok is False:
+                continue  # another spec's spell (Remove Corruption on a Resto)
+            slots.append(c)
+            taken.add(b["key"])
+    have = {c["spell"] for c in slots}
+    for d in s.get("clique") or []:
+        if d["spell"] in have:
+            continue
+        key = next((k for k in MOUSE_ORDER if k not in taken), None)
+        if key:
+            c = {"spell": d["spell"], "key": key, "source": "cliqueNew", "job": d["job"], "short": d["short"]}
+            resolve(c, sid)
+            slots.append(c)
+            taken.add(key)
+    s["cliqueSlots"] = slots
+    # every other spell Bellular's tool gives this spec
+    planned = {c["spell"].lower() for c in s["cells"].values()} | {c["spell"].lower() for c in s["nokey"]} | {c["spell"].lower() for c in slots}
+    planned |= {alt.strip().lower() for p in list(planned) for alt in p.split("/")}
+    s["others"] = [{"spell": e["name"], "icon": e["icon"], "wh": "spell=%d" % e["id"], "source": "spare"}
+                   for e in bell if sid in e["specs"] and e["name"].lower() not in planned]
+    for k in ("clique", "clash"):
+        s.pop(k, None)
+
+# druids first, then the rest by class name
+data["specs"].sort(key=lambda s: (s["className"] != "Druid", s["className"], s["spec"]))
+data["unresolved"] = sorted(unresolved)
+data.pop("clique", None)
+
+html = open(os.path.join(HERE, "keys_page_template.html"), encoding="utf-8").read()
+html = html.replace("/*DATA*/", json.dumps(data, ensure_ascii=False)).replace("/*BUILT*/", data["built"]).replace("/*VERSION*/", data["version"])
+open(OUT, "w", encoding="utf-8").write(html)
+print("wrote", os.path.normpath(OUT), "-", len(data["specs"]), "specs,", len(unresolved), "names without an icon:", ", ".join(sorted(unresolved)))
