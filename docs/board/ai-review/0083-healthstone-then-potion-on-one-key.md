@@ -75,3 +75,5 @@ Pass: all five as written, and no Lua error with `/console scriptErrors 1`.
 Two more looks for Rob:
 6. With a Fleeting and a Potent potion in the bags and no stone: one press drinks the Fleeting one.
 7. The macro's icon is the stone while a stone is ready, the potion after it is used, grey with neither.
+
+**2026-10-01, Rob**, on Feral's Frenzied Regeneration: "if the macro works. I guess it could go on shift S". **Claude:** so the macro goes on Shift+2 (the healing potion key, every spec), not Shift+S as look 1 says; drag it there. When looks 1 to 7 pass, the key page drops the Healthstone from Shift+S in all 40 specs, and Feral's Frenzied Regeneration moves from Shift+4 to Shift+S. Not done before then: a failed macro would leave the stone with no key.

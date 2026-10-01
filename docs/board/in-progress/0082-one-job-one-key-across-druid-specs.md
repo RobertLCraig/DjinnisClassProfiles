@@ -219,3 +219,5 @@ Still free: Alt+1 Affliction (no keyless combat spell in Bellular's data for it)
 **2026-10-01, Rob:** "1": Claude proposes keys for the spells with none, class by class, and Rob fixes them on the page. **Claude**, druid first (`PROPOSED`, source role): Hibernate Num2 in all four; Feral Frenzied Regeneration 4 (empty on the cat page) and Maim Shift+4; Guardian Bristling Fur Shift+4; Resto Efflorescence Alt+1 and Starsurge Shift+E. Mass Entanglement and Mighty Bash were never gaps: the page joins each with its either/or partner (Alt+R, Shift+W). Ironbark is on Clique Shift+click. 0 clashes. Asked Rob: Feral 4 for Frenzied Regeneration or Maim.
 
 **2026-10-01, Rob:** "druid is my main class. Not sure about frenzied regen on 4. it requires bear form and I'd rather not risk pressing it by accident". **Claude:** swapped, Feral Maim 4 and Frenzied Regeneration Shift+4. 0 clashes.
+
+**2026-10-01, Rob:** "if the macro works. I guess it could go on shift S". Waits on card `0083`: when its in-game looks pass, the Healthstone leaves Shift+S in every spec (the macro is on Shift+2) and Feral Frenzied Regeneration moves Shift+4 to Shift+S.
