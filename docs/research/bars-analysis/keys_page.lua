@@ -72,8 +72,29 @@ local REVIEW = {
 	["Combat 10"] = "Guardian put Convoke on Shift+Q because Growl took its key.",
 }
 -- Rob, 2026-10-01: "dispels and heals go on mouse buttons that are only
--- triggered on a unitframe hover (clique/click casting)"
-local ON_CLIQUE = { ["Class 6 (Dispel)"] = true }
+-- triggered on a unitframe hover (clique/click casting)". Only a real
+-- dispel: Bellular's "Class 6" holds Path of Frost for a Death Knight and
+-- Imprison for a Demon Hunter, and Rob took Path of Frost off the wheel.
+local DISPELS = {}
+for _, n in ipairs({ "Remove Corruption", "Nature's Cure", "Purify", "Purify Disease", "Cleanse", "Cleanse Toxins", "Detox",
+	"Cleanse Spirit", "Purify Spirit", "Remove Curse", "Expunge", "Naturalize" }) do DISPELS[n] = true end
+
+-- Bellular's own sheet swaps its Buff and Res rows for these classes (its
+-- Priest sheet: Buff "Res", Res "Power Word: Fortitude"). Rob moved Arcane
+-- Intellect from the Res key (Alt+G) to Num1, the Buff key.
+local BUFF, RES = 33, 34
+local BUFF_RES_SWAPPED = { [2] = true, [4] = true, [5] = true, [7] = true, [8] = true, [10] = true }
+-- A class with no raid buff: its out-of-combat utility takes Num1 (Rob: Path
+-- of Frost to Num1 on Blood, Spectral Sight to Num1 on Havoc and Devourer).
+local NUM1_UTILITY = { [6] = "Path of Frost", [12] = "Spectral Sight" }
+-- Rob put Havoc's Chaos Nova (Bellular's "CC") on Shift+W, the key a druid's
+-- Incapacitating Roar has: every other class's "CC" goes there too.
+local CC_KEY = "MULTIACTIONBAR6BUTTON8"
+-- Rob's own moves on the page, 2026-10-01, kept as he made them
+local ROB_PICKS = {
+	Havoc = { Darkness = "ACTIONBUTTON5", ["Essence Break"] = "ACTIONBUTTON4", ["Rain from Above"] = "ACTIONBUTTON8" },
+	Devourer = { Darkness = "MULTIACTIONBAR6BUTTON1", ["Void Nova"] = "ACTIONBUTTON7" },
+}
 
 local extras, bellular = {}, {}
 for _, job in ipairs(PlanTab.BAR_CATEGORIES) do bellular[job] = true end
@@ -82,14 +103,24 @@ table.sort(extras)
 
 local function plan(spec, class)
 	local own, source, template = rules(spec, class)
-	local column = PlanTab.BAR_ABILITIES[spec] or {}
+	local column = {}
+	for i, v in ipairs(PlanTab.BAR_ABILITIES[spec] or {}) do column[i] = v end
+	if BUFF_RES_SWAPPED[class] then column[BUFF], column[RES] = column[RES], column[BUFF] end
+	if NUM1_UTILITY[class] and (column[BUFF] or "") == "" then
+		for i, v in ipairs(column) do if v == NUM1_UTILITY[class] then column[i] = "" end end
+		column[BUFF] = NUM1_UTILITY[class]
+	end
 	local cells, nokey, clique, clash = {}, {}, {}, {}
+	local placed = {}
 	local function put(job, spell)
-		if ON_CLIQUE[job] then clique[#clique + 1] = { job = job, spell = spell, short = PlanTab.jobShort(job, spec) } return end
+		if placed[spell] then return end  -- Bellular gives Unholy's Death Coil two rows; one key is enough
+		placed[spell] = true
+		if DISPELS[spell] then clique[#clique + 1] = { job = job, spell = spell, short = PlanTab.jobShort(job, spec) } return end
 		local b = own[job]
 		local src = b and source or "base"
 		if b == "" then b = nil end
 		if own[job] == nil then b = PlanTab.JOB_BUTTONS[job] end
+		if job == "CC" and class ~= PlanTab.DRUID and not b then b, src = CC_KEY, "role" end
 		local short = PlanTab.jobShort(job, spec)
 		if not b then nokey[#nokey + 1] = { job = job, spell = spell, short = short } return end
 		local note = (src == "role" and template == "Guardian" and REVIEW[job]) or nil
@@ -103,6 +134,24 @@ local function plan(spec, class)
 		for _, job in ipairs(extras) do put(job, job) end  -- Rob's own druid extras and items
 	else
 		for _, job in ipairs({ "Healthstone", "Damage Potion" }) do put(job, job) end  -- any class can use these
+	end
+	-- Rob's own moves: the spell onto the key, what was there onto the
+	-- spell's old key (a swap), or to "no key yet"
+	for spell, b in pairs(ROB_PICKS[spec] or {}) do
+		local from, entry
+		for k, c in pairs(cells) do if c.spell == spell then from, entry = k, c end end
+		for i, c in ipairs(nokey) do if c.spell == spell then entry = table.remove(nokey, i) break end end
+		if entry and from ~= b then
+			local there = cells[b]
+			cells[b] = { spell = spell, job = entry.job, short = entry.short, source = "rob" }
+			if from then cells[from] = there end
+			if there and not from then nokey[#nokey + 1] = { job = there.job, spell = there.spell, short = there.short } end
+		end
+	end
+	local seen = {}
+	for b, c in pairs(cells) do
+		if seen[c.spell] then clash[#clash + 1] = c.spell .. " on two keys" end
+		seen[c.spell] = true
 	end
 	return cells, nokey, clique, clash
 end

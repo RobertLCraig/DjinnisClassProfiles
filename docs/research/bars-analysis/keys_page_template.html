@@ -21,7 +21,7 @@ h1 { font-size: 22px; margin: 0 0 2px; }
 .minimap { width: calc(var(--slot) * 6 + var(--gap) * 5); height: 150px; border-radius: 6px; background: radial-gradient(circle, #24402c 0%, #18241c 60%, #121419 100%); border: 1px solid #2c313b; display: flex; align-items: center; justify-content: center; color: #557; font-size: 12px; }
 .slot { position: relative; width: var(--slot); height: var(--slot); border: 2px dashed #333945; border-radius: 4px; background: #0d0f13; box-sizing: border-box; }
 .slot.filled { border-style: solid; border-color: #d8d8d8; background-size: cover; background-position: center; cursor: grab; }
-.slot.base { border-color: #d8d8d8; } .slot.role { border-color: #4fb0ff; } .slot.druid { border-color: #5ad25a; }
+.slot.base { border-color: #d8d8d8; } .slot.role { border-color: #4fb0ff; } .slot.druid, .slot.rob { border-color: #5ad25a; }
 .slot.review { border-color: #c98a1e; box-shadow: 0 0 0 2px #5a3d0a inset; }
 .slot.mine { border-color: #ffd24d; box-shadow: 0 0 6px #ffd24d; }
 .slot.over { outline: 2px solid #fff; outline-offset: 1px; }
@@ -58,7 +58,7 @@ Druid keys are the ones agreed so far. Every other class shows the "copy by role
 <div class="legend small">
 <span><i style="border-color:#d8d8d8"></i>Feral's key (the model)</span>
 <span><i style="border-color:#4fb0ff"></i>moved for the role</span>
-<span><i style="border-color:#5ad25a"></i>druid key, agreed</span>
+<span><i style="border-color:#5ad25a"></i>agreed with you (druid keys, your picks)</span>
 <span><i style="border-color:#c98a1e"></i>druid habit copied to a tank: review</span>
 <span><i style="border-color:#ffd24d"></i>you moved it here</span>
 </div>
@@ -96,7 +96,7 @@ const MOUSE = [
   ["ALT-BUTTON1", "Alt+Left"], ["ALT-BUTTON2", "Alt+Right"], ["ALT-SHIFT-BUTTON1", "Alt+Shift+Left"], ["ALT-SHIFT-BUTTON2", "Alt+Shift+Right"],
 ];
 const FIXED = [["CTRL-BUTTON1", "Ctrl+Left: target"], ["CTRL-BUTTON2", "Ctrl+Right: menu"]];
-const SRC = { base: "Feral's key (the model)", role: "moved for the role", druid: "a druid key, agreed with you", clique: "your Clique bind", cliqueNew: "proposed: dispel on the wheel, as your other healers" };
+const SRC = { rob: "your pick", base: "Feral's key (the model)", role: "moved for the role", druid: "a druid key, agreed with you", clique: "your Clique bind", cliqueNew: "proposed: dispel on the wheel, as your other healers" };
 const short = k => (k || "").replace("Shift+", "s-").replace("Alt+", "a-").replace("Ctrl+", "c-");
 
 let spec = null, state = {}, orig = {};
@@ -174,8 +174,47 @@ function describe(id, keyText) {
   el.innerHTML = t;
 }
 
+// Rob, 2026-10-01: "non spec specific spells should automatically be changed
+// for all specs". A spell another spec of the class also uses (on its plan,
+// spare, or a Clique bind) moves the same way there.
+function stateOf(s) { const saved = localStorage.getItem(store(s.spec)); return saved ? JSON.parse(saved) : original(s); }
+function planCell(s, spell) {
+  const o = original(s);
+  for (const c of Object.values(o)) if (c.spell === spell) return Object.assign({}, c);
+  const n = s.nokey.find(c => c.spell === spell) || (s.others || []).find(c => c.spell === spell);
+  return n ? Object.assign({}, n, { source: "mine" }) : null;
+}
+function propagate(spell, target) {
+  const done = [];
+  for (const y of DATA.specs.filter(x => x.className === spec.className && x.spec !== spec.spec)) {
+    const base = planCell(y, spell);
+    if (!base) continue;
+    const st = stateOf(y);
+    const pos = Object.keys(st).find(k => st[k].spell === spell);
+    if (target === "tray") {
+      if (!pos) continue;
+      delete st[pos];
+    } else {
+      if (pos === target) continue;
+      const there = st[target];
+      st[target] = pos ? st[pos] : base;
+      if (pos) { if (there) st[pos] = there; else delete st[pos]; }
+    }
+    localStorage.setItem(store(y.spec), JSON.stringify(st));
+    done.push(y.spec);
+  }
+  return done;
+}
+
 function drop(from, to) {
   if (!from || from === to) return;
+  const moving = from.startsWith("t:") ? from.slice(2) : (state[from] && state[from].spell);
+  const also = moving && to ? propagate(moving, to) : [];
+  dropHere(from, to);
+  document.getElementById("info").textContent = moving + (also.length ? ": moved here and in " + also.join(", ") + "." : ": moved in " + spec.spec + " only. No other " + spec.className + " spec uses it.");
+}
+
+function dropHere(from, to) {
   if (from.startsWith("t:")) {
     const spell = from.slice(2);
     const cell = [...tray(spec, state), ...others()].find(c => c.spell === spell);
