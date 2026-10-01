@@ -88,7 +88,7 @@ Druid keys are the ones agreed so far. Every other class shows the "copy by role
 </div>
 
 <h3 style="margin-top:18px">Your changes</h3>
-<div class="tools"><button id="copy">Copy my changes</button><button id="reset">Undo all changes to this spec</button><span class="small" id="copied"></span></div>
+<div class="tools"><button id="copy">Copy my changes</button><button id="reset">Undo all changes to this spec</button><button id="resetall">Clear my changes on every spec</button><span class="small" id="copied"></span></div>
 <pre id="changes">No changes yet.</pre>
 <div class="warn small" id="unres"></div>
 
@@ -370,6 +370,12 @@ document.getElementById("copy").onclick = () => {
   navigator.clipboard.writeText(t).then(() => { document.getElementById("copied").textContent = "Copied. Paste it to Claude."; });
 };
 document.getElementById("reset").onclick = () => { localStorage.removeItem(store(spec.spec)); load(spec.spec); };
+// after Claude builds the pasted changes into the page, the saved copies only hide them
+document.getElementById("resetall").onclick = () => {
+  if (!confirm("Clear your changes on every spec? Copy them first if Claude does not have them yet.")) return;
+  for (const s of DATA.specs) localStorage.removeItem(store(s.spec));
+  load(spec.spec);
+};
 document.getElementById("unres").textContent = DATA.unresolved.length ? "No icon found for: " + DATA.unresolved.join(", ") : "";
 load("Feral");
 </script>

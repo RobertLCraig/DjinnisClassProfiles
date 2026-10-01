@@ -56,3 +56,5 @@ must be readable outside combat. Use `C_Item.GetItemCount` (see
 ## Comments
 
 **2026-10-01, Claude.** Opened from Rob's two messages quoted in `## Why`, during card `0082`.
+
+**2026-10-01, Rob:** "there are a number of addons that purpotedly do the healthstone macro (autopotion/eqol) but I've not had much luck with them in midnight." So the in-game look is the real test, and the first task is finding why those fail; read their source (CurseForge or GitHub via `gh`) before writing ours. One fact checked: `C_Item.GetItemCount` has no secret return in 12.1 (`ItemDocumentation.lua:429`, `SecretArguments = "AllowedWhenUntainted"` only).
