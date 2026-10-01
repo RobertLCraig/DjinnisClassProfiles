@@ -181,6 +181,30 @@ for s in data["specs"]:
             s["cells"][b + "@stealth"] = dict(c, source="copy")
 json.dump(id_icons, open(ids_path, "w", encoding="utf-8"), indent=1, sort_keys=True)
 
+# Either/or talents share a key (Rob, 2026-10-01: "you cannot have mighty bash
+# AND incapacitating roar at the same time, so both can be on the same bind").
+# choice_nodes.json (from choice_nodes.py) lists every talent choice node. One
+# option on a key and the other with none: the other joins that key. Both on
+# keys: listed, not merged, since a node can be one spec's only (Bellular keeps
+# Arms' Avatar and Bladestorm apart, Fury's together).
+choices = json.load(open(os.path.join(HERE, "choice_nodes.json"), encoding="utf-8"))["nodes"]
+for s in data["specs"]:
+    s["choiceBoth"] = []
+    for node in choices:
+        names = list(dict.fromkeys(o["name"] for o in node["options"]))
+        if len(names) < 2:
+            continue
+        keyed = [(b, c) for b, c in s["cells"].items() if c.get("source") != "saved" and any(a.strip() in names for a in c["spell"].split("/"))]
+        spare = [c for c in s["nokey"] if c["spell"] in names]
+        # one spell can be on several pages (a rogue's Stealth copy): count spells, not keys
+        if len({c["spell"] for _, c in keyed}) == 1 and spare:
+            for b, c in keyed:
+                c["spell"] = " / ".join([c["spell"]] + [x["spell"] for x in spare])
+                c["choice"] = True
+            s["nokey"] = [x for x in s["nokey"] if x not in spare]
+        elif len({c["spell"] for _, c in keyed}) > 1:
+            s["choiceBoth"].append([[c["spell"], b] for b, c in keyed])
+
 MOUSE_ORDER = ["MOUSEWHEELUP", "MOUSEWHEELDOWN"]
 for s in data["specs"]:
     sid = s["id"]

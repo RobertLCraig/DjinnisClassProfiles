@@ -193,6 +193,7 @@ function describe(id, keyText) {
   if (was && was.spell !== c.spell) t += ". You moved it here; this key held " + was.spell + ".";
   else if (!was) t += ". You moved it here.";
   else t += ". " + (c.note || SRC[c.source] || "");
+  if (c.choice) t += (t.endsWith(".") ? "" : ".") + " An either/or talent: you take one, so they share this key.";
   el.innerHTML = t;
 }
 

@@ -1,0 +1,8472 @@
+{
+ "built": "2026-10-01",
+ "source": "wago.tools build 12.1.0.69933",
+ "nodes": [
+  {
+   "node": 76042,
+   "tree": 750,
+   "class": "Death Knight",
+   "options": [
+    {
+     "spell": 108199,
+     "name": "Gorefiend's Grasp"
+    },
+    {
+     "spell": 1263569,
+     "name": "Abomination Limb"
+    }
+   ]
+  },
+  {
+   "node": 76064,
+   "tree": 750,
+   "class": "Death Knight",
+   "options": [
+    {
+     "spell": 221562,
+     "name": "Asphyxiate"
+    },
+    {
+     "spell": 276079,
+     "name": "Death's Reach"
+    }
+   ]
+  },
+  {
+   "node": 76074,
+   "tree": 750,
+   "class": "Death Knight",
+   "options": [
+    {
+     "spell": 391546,
+     "name": "March of Darkness"
+    },
+    {
+     "spell": 212552,
+     "name": "Wraith Walk"
+    }
+   ]
+  },
+  {
+   "node": 76176,
+   "tree": 750,
+   "class": "Death Knight",
+   "options": [
+    {
+     "spell": 1242608,
+     "name": "Raise Abomination"
+    },
+    {
+     "spell": 1242147,
+     "name": "Summon Gargoyle"
+    }
+   ]
+  },
+  {
+   "node": 76186,
+   "tree": 750,
+   "class": "Death Knight",
+   "options": [
+    {
+     "spell": 390166,
+     "name": "Plague Mastery"
+    },
+    {
+     "spell": 1238900,
+     "name": "Grave Mastery"
+    }
+   ]
+  },
+  {
+   "node": 95035,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "Deathbringer",
+   "options": [
+    {
+     "spell": 440476,
+     "name": "Pact of the Deathbringer"
+    },
+    {
+     "spell": 440282,
+     "name": "Rune Carved Plates"
+    }
+   ]
+  },
+  {
+   "node": 95049,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "Deathbringer",
+   "options": [
+    {
+     "spell": 437122,
+     "name": "Death's Messenger"
+    },
+    {
+     "spell": 439948,
+     "name": "Expelling Shield"
+    }
+   ]
+  },
+  {
+   "node": 95057,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "Deathbringer",
+   "options": [
+    {
+     "spell": 436687,
+     "name": "Dark Talons"
+    },
+    {
+     "spell": 469870,
+     "name": "Reaper's Onslaught"
+    }
+   ]
+  },
+  {
+   "node": 95037,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "Rider of the Apocalypse",
+   "options": [
+    {
+     "spell": 444074,
+     "name": "Horsemen's Aid"
+    },
+    {
+     "spell": 444083,
+     "name": "Pact of the Apocalypse"
+    }
+   ]
+  },
+  {
+   "node": 95042,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "Rider of the Apocalypse",
+   "options": [
+    {
+     "spell": 444069,
+     "name": "Fury of the Horsemen"
+    },
+    {
+     "spell": 444072,
+     "name": "A Feast of Souls"
+    }
+   ]
+  },
+  {
+   "node": 95060,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "Rider of the Apocalypse",
+   "options": [
+    {
+     "spell": 444008,
+     "name": "On a Paler Horse"
+    },
+    {
+     "spell": 444010,
+     "name": "Death Charge"
+    }
+   ]
+  },
+  {
+   "node": 95048,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "San'layn",
+   "options": [
+    {
+     "spell": 434033,
+     "name": "Blood-Soaked Ground"
+    },
+    {
+     "spell": 1234559,
+     "name": "Desecrate"
+    }
+   ]
+  },
+  {
+   "node": 95055,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "San'layn",
+   "options": [
+    {
+     "spell": 434261,
+     "name": "Pact of the San'layn"
+    },
+    {
+     "spell": 434263,
+     "name": "Sanguine Scent"
+    }
+   ]
+  },
+  {
+   "node": 95056,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "San'layn",
+   "options": [
+    {
+     "spell": 434100,
+     "name": "Vampiric Aura"
+    },
+    {
+     "spell": 434136,
+     "name": "Bloody Fortitude"
+    }
+   ]
+  },
+  {
+   "node": 95064,
+   "tree": 750,
+   "class": "Death Knight",
+   "heroTree": "San'layn",
+   "options": [
+    {
+     "spell": 433934,
+     "name": "Newly Turned"
+    },
+    {
+     "spell": 434028,
+     "name": "Vampiric Speed"
+    }
+   ]
+  },
+  {
+   "node": 90927,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 1266316,
+     "name": "Burn It Out"
+    },
+    {
+     "spell": 1266496,
+     "name": "Soul Cleanse"
+    }
+   ]
+  },
+  {
+   "node": 90956,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 1265924,
+     "name": "Soul Barrier"
+    },
+    {
+     "spell": 395446,
+     "name": "Soul Sigils"
+    }
+   ]
+  },
+  {
+   "node": 90994,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 389763,
+     "name": "Master of the Glaive"
+    },
+    {
+     "spell": 429211,
+     "name": "Champion of the Glaive"
+    }
+   ]
+  },
+  {
+   "node": 91001,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 389781,
+     "name": "Long Night"
+    },
+    {
+     "spell": 389783,
+     "name": "Pitch Black"
+    }
+   ]
+  },
+  {
+   "node": 91012,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 389977,
+     "name": "Relentless Onslaught"
+    },
+    {
+     "spell": 388106,
+     "name": "Soulscar"
+    }
+   ]
+  },
+  {
+   "node": 91021,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 206476,
+     "name": "Exergy"
+    },
+    {
+     "spell": 427640,
+     "name": "Inertia"
+    }
+   ]
+  },
+  {
+   "node": 91031,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 388116,
+     "name": "Shattered Destiny"
+    },
+    {
+     "spell": 390152,
+     "name": "Collective Anguish"
+    }
+   ]
+  },
+  {
+   "node": 91035,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 389687,
+     "name": "Chaos Theory"
+    },
+    {
+     "spell": 389693,
+     "name": "Inner Demon"
+    }
+   ]
+  },
+  {
+   "node": 93015,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 427776,
+     "name": "Deflecting Dance"
+    },
+    {
+     "spell": 328725,
+     "name": "Mortal Dance"
+    }
+   ]
+  },
+  {
+   "node": 108123,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 1242492,
+     "name": "Emptiness"
+    },
+    {
+     "spell": 1247534,
+     "name": "Soul Glutton"
+    }
+   ]
+  },
+  {
+   "node": 108726,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 1246558,
+     "name": "Scythe's Embrace"
+    },
+    {
+     "spell": 1246562,
+     "name": "Duty Eternal"
+    }
+   ]
+  },
+  {
+   "node": 108727,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "options": [
+    {
+     "spell": 1246555,
+     "name": "Tempered Soul"
+    },
+    {
+     "spell": 1246556,
+     "name": "Spontaneous Immolation"
+    }
+   ]
+  },
+  {
+   "node": 94896,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Aldrachi Reaver",
+   "options": [
+    {
+     "spell": 442714,
+     "name": "Army Unto Oneself"
+    },
+    {
+     "spell": 442736,
+     "name": "Incorruptible Spirit"
+    }
+   ]
+  },
+  {
+   "node": 94910,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Aldrachi Reaver",
+   "options": [
+    {
+     "spell": 442497,
+     "name": "Keen Engagement"
+    },
+    {
+     "spell": 444997,
+     "name": "Preemptive Strike"
+    }
+   ]
+  },
+  {
+   "node": 94911,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Aldrachi Reaver",
+   "options": [
+    {
+     "spell": 444926,
+     "name": "Evasive Action"
+    },
+    {
+     "spell": 444931,
+     "name": "Unhindered Assault"
+    }
+   ]
+  },
+  {
+   "node": 109448,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Annihilator",
+   "options": [
+    {
+     "spell": 1253399,
+     "name": "Path to Oblivion"
+    },
+    {
+     "spell": 1253402,
+     "name": "State of Matter"
+    }
+   ]
+  },
+  {
+   "node": 109450,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Annihilator",
+   "options": [
+    {
+     "spell": 1253676,
+     "name": "Doomsayer"
+    },
+    {
+     "spell": 1279247,
+     "name": "Harness the Cosmos"
+    }
+   ]
+  },
+  {
+   "node": 94899,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Fel-Scarred",
+   "options": [
+    {
+     "spell": 452406,
+     "name": "Set Fire to the Pain"
+    },
+    {
+     "spell": 452407,
+     "name": "Improved Soul Rending"
+    }
+   ]
+  },
+  {
+   "node": 94902,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Fel-Scarred",
+   "options": [
+    {
+     "spell": 452412,
+     "name": "Student of Suffering"
+    },
+    {
+     "spell": 452413,
+     "name": "Flamebound"
+    }
+   ]
+  },
+  {
+   "node": 94913,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Fel-Scarred",
+   "options": [
+    {
+     "spell": 452403,
+     "name": "Wave of Debilitation"
+    },
+    {
+     "spell": 452404,
+     "name": "Pursuit of Angriness"
+    }
+   ]
+  },
+  {
+   "node": 110107,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Void-Scarred",
+   "options": [
+    {
+     "spell": 452412,
+     "name": "Student of Suffering"
+    },
+    {
+     "spell": 452413,
+     "name": "Flamebound"
+    }
+   ]
+  },
+  {
+   "node": 110114,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Void-Scarred",
+   "options": [
+    {
+     "spell": 452403,
+     "name": "Wave of Debilitation"
+    },
+    {
+     "spell": 452404,
+     "name": "Pursuit of Angriness"
+    }
+   ]
+  },
+  {
+   "node": 110117,
+   "tree": 854,
+   "class": "Demon Hunter",
+   "heroTree": "Void-Scarred",
+   "options": [
+    {
+     "spell": 452406,
+     "name": "Set Fire to the Pain"
+    },
+    {
+     "spell": 452407,
+     "name": "Improved Soul Rending"
+    }
+   ]
+  },
+  {
+   "node": 82051,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 203651,
+     "name": "Overgrowth"
+    },
+    {
+     "spell": 382550,
+     "name": "Passing Seasons"
+    }
+   ]
+  },
+  {
+   "node": 82064,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 33891,
+     "name": "Incarnation: Tree of Life"
+    },
+    {
+     "spell": 391528,
+     "name": "Convoke the Spirits"
+    }
+   ]
+  },
+  {
+   "node": 82074,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 426702,
+     "name": "Liveliness"
+    },
+    {
+     "spell": 289237,
+     "name": "Master Shapeshifter"
+    }
+   ]
+  },
+  {
+   "node": 82079,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 392410,
+     "name": "Verdant Infusion"
+    },
+    {
+     "spell": 200383,
+     "name": "Prosperity"
+    }
+   ]
+  },
+  {
+   "node": 82081,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 197061,
+     "name": "Stonebark"
+    },
+    {
+     "spell": 382552,
+     "name": "Improved Ironbark"
+    }
+   ]
+  },
+  {
+   "node": 82093,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 391978,
+     "name": "Veinripper"
+    },
+    {
+     "spell": 391347,
+     "name": "Rip and Tear"
+    }
+   ]
+  },
+  {
+   "node": 82107,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 391078,
+     "name": "Raging Fury"
+    },
+    {
+     "spell": 391872,
+     "name": "Tiger's Tenacity"
+    }
+   ]
+  },
+  {
+   "node": 82108,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 155580,
+     "name": "Lunar Inspiration"
+    },
+    {
+     "spell": 1244258,
+     "name": "Chomp"
+    }
+   ]
+  },
+  {
+   "node": 82111,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 1244544,
+     "name": "Focused Frenzy"
+    },
+    {
+     "spell": 1243807,
+     "name": "Frantic Frenzy"
+    }
+   ]
+  },
+  {
+   "node": 82114,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 102543,
+     "name": "Incarnation: Avatar of Ashamane"
+    },
+    {
+     "spell": 391528,
+     "name": "Convoke the Spirits"
+    }
+   ]
+  },
+  {
+   "node": 82136,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 102558,
+     "name": "Incarnation: Guardian of Ursoc"
+    },
+    {
+     "spell": 391528,
+     "name": "Convoke the Spirits"
+    }
+   ]
+  },
+  {
+   "node": 82147,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 372567,
+     "name": "Twin Moonfire"
+    },
+    {
+     "spell": 1252871,
+     "name": "Red Moon"
+    }
+   ]
+  },
+  {
+   "node": 82152,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 204053,
+     "name": "Rend and Tear"
+    },
+    {
+     "spell": 372943,
+     "name": "Untamed Savagery"
+    }
+   ]
+  },
+  {
+   "node": 82161,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 393618,
+     "name": "Reinforced Fur"
+    },
+    {
+     "spell": 155835,
+     "name": "Bristling Fur"
+    }
+   ]
+  },
+  {
+   "node": 82198,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 102401,
+     "name": "Wild Charge"
+    },
+    {
+     "spell": 252216,
+     "name": "Tiger Dash"
+    }
+   ]
+  },
+  {
+   "node": 82207,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 102359,
+     "name": "Mass Entanglement"
+    },
+    {
+     "spell": 102793,
+     "name": "Ursol's Vortex"
+    }
+   ]
+  },
+  {
+   "node": 82229,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 2908,
+     "name": "Soothe"
+    },
+    {
+     "spell": 33786,
+     "name": "Cyclone"
+    }
+   ]
+  },
+  {
+   "node": 82237,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 99,
+     "name": "Incapacitating Roar"
+    },
+    {
+     "spell": 5211,
+     "name": "Mighty Bash"
+    }
+   ]
+  },
+  {
+   "node": 88202,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 468936,
+     "name": "Sunseeker Mushroom"
+    },
+    {
+     "spell": 88747,
+     "name": "Wild Mushroom"
+    }
+   ]
+  },
+  {
+   "node": 88206,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 394013,
+     "name": "Incarnation: Chosen of Elune"
+    },
+    {
+     "spell": 391528,
+     "name": "Convoke the Spirits"
+    }
+   ]
+  },
+  {
+   "node": 88209,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 327541,
+     "name": "Aetherial Kindling"
+    },
+    {
+     "spell": 1240262,
+     "name": "Meteor Storm"
+    }
+   ]
+  },
+  {
+   "node": 88218,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 394094,
+     "name": "Sundered Firmament"
+    },
+    {
+     "spell": 383197,
+     "name": "Orbit Breaker"
+    }
+   ]
+  },
+  {
+   "node": 88221,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 468743,
+     "name": "Whirling Stars"
+    },
+    {
+     "spell": 390378,
+     "name": "Orbital Strike"
+    }
+   ]
+  },
+  {
+   "node": 88224,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 202770,
+     "name": "Fury of Elune"
+    },
+    {
+     "spell": 274281,
+     "name": "New Moon"
+    }
+   ]
+  },
+  {
+   "node": 88236,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 393940,
+     "name": "Starweaver"
+    },
+    {
+     "spell": 393954,
+     "name": "Rattle the Stars"
+    }
+   ]
+  },
+  {
+   "node": 92585,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 372119,
+     "name": "Dream of Cenarius"
+    },
+    {
+     "spell": 1278886,
+     "name": "Dream Guide"
+    }
+   ]
+  },
+  {
+   "node": 104078,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 474530,
+     "name": "Circle of the Wild"
+    },
+    {
+     "spell": 474541,
+     "name": "Circle of the Heavens"
+    }
+   ]
+  },
+  {
+   "node": 104079,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 400142,
+     "name": "Gale Winds"
+    },
+    {
+     "spell": 400140,
+     "name": "Incessant Tempest"
+    }
+   ]
+  },
+  {
+   "node": 109375,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 393611,
+     "name": "Ursoc's Endurance"
+    },
+    {
+     "spell": 200854,
+     "name": "Gory Fur"
+    }
+   ]
+  },
+  {
+   "node": 109377,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 1251876,
+     "name": "Gift of an Ancient Guardian"
+    },
+    {
+     "spell": 155578,
+     "name": "Guardian of Elune"
+    }
+   ]
+  },
+  {
+   "node": 109378,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 1250923,
+     "name": "Ward of the Forest"
+    },
+    {
+     "spell": 203953,
+     "name": "Brambles"
+    }
+   ]
+  },
+  {
+   "node": 110279,
+   "tree": 793,
+   "class": "Druid",
+   "options": [
+    {
+     "spell": 450347,
+     "name": "Nature's Grace"
+    },
+    {
+     "spell": 1240283,
+     "name": "Elune's Challenge"
+    }
+   ]
+  },
+  {
+   "node": 94612,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Druid of the Claw",
+   "options": [
+    {
+     "spell": 441689,
+     "name": "Empowered Shapeshifting"
+    },
+    {
+     "spell": 441691,
+     "name": "Wildpower Surge"
+    }
+   ]
+  },
+  {
+   "node": 94614,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Druid of the Claw",
+   "options": [
+    {
+     "spell": 441845,
+     "name": "Strike for the Heart"
+    },
+    {
+     "spell": 441846,
+     "name": "Tear Down the Mighty"
+    }
+   ]
+  },
+  {
+   "node": 109723,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Druid of the Claw",
+   "options": [
+    {
+     "spell": 441814,
+     "name": "Ruthless Aggression"
+    },
+    {
+     "spell": 441824,
+     "name": "Killing Strikes"
+    }
+   ]
+  },
+  {
+   "node": 94585,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Elune's Chosen",
+   "options": [
+    {
+     "spell": 428655,
+     "name": "The Light of Elune"
+    },
+    {
+     "spell": 429536,
+     "name": "Astral Insight"
+    }
+   ]
+  },
+  {
+   "node": 94586,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Elune's Chosen",
+   "options": [
+    {
+     "spell": 429540,
+     "name": "Arcane Affinity"
+    },
+    {
+     "spell": 429539,
+     "name": "Lunation"
+    }
+   ]
+  },
+  {
+   "node": 94597,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Elune's Chosen",
+   "options": [
+    {
+     "spell": 429538,
+     "name": "Moondust"
+    },
+    {
+     "spell": 443046,
+     "name": "Elune's Grace"
+    }
+   ]
+  },
+  {
+   "node": 94591,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Keeper of the Grove",
+   "options": [
+    {
+     "spell": 429215,
+     "name": "Bounteous Bloom"
+    },
+    {
+     "spell": 428937,
+     "name": "Early Spring"
+    }
+   ]
+  },
+  {
+   "node": 94592,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Keeper of the Grove",
+   "options": [
+    {
+     "spell": 434220,
+     "name": "Power of the Dream"
+    },
+    {
+     "spell": 434249,
+     "name": "Control of the Dream"
+    }
+   ]
+  },
+  {
+   "node": 94595,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Keeper of the Grove",
+   "options": [
+    {
+     "spell": 429402,
+     "name": "Grove's Inspiration"
+    },
+    {
+     "spell": 429420,
+     "name": "Potent Enchantments"
+    }
+   ]
+  },
+  {
+   "node": 94605,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Keeper of the Grove",
+   "options": [
+    {
+     "spell": 428859,
+     "name": "Power of Nature"
+    },
+    {
+     "spell": 429227,
+     "name": "Durability of Nature"
+    }
+   ]
+  },
+  {
+   "node": 94622,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Wildstalker",
+   "options": [
+    {
+     "spell": 439895,
+     "name": "Entangling Vortex"
+    },
+    {
+     "spell": 439901,
+     "name": "Flower Walk"
+    }
+   ]
+  },
+  {
+   "node": 94625,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Wildstalker",
+   "options": [
+    {
+     "spell": 439929,
+     "name": "Bond with Nature"
+    },
+    {
+     "spell": 440116,
+     "name": "Harmonious Constitution"
+    }
+   ]
+  },
+  {
+   "node": 94628,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Wildstalker",
+   "options": [
+    {
+     "spell": 440117,
+     "name": "Twin Sprouts"
+    },
+    {
+     "spell": 440118,
+     "name": "Implant"
+    }
+   ]
+  },
+  {
+   "node": 94631,
+   "tree": 793,
+   "class": "Druid",
+   "heroTree": "Wildstalker",
+   "options": [
+    {
+     "spell": 439880,
+     "name": "Resilient Flourishing"
+    },
+    {
+     "spell": 439882,
+     "name": "Root Network"
+    }
+   ]
+  },
+  {
+   "node": 93202,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 412733,
+     "name": "Unyielding Domain"
+    },
+    {
+     "spell": 408002,
+     "name": "Tectonic Locus"
+    }
+   ]
+  },
+  {
+   "node": 93211,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 406907,
+     "name": "Regenerative Chitin"
+    },
+    {
+     "spell": 410643,
+     "name": "Molten Blood"
+    }
+   ]
+  },
+  {
+   "node": 93221,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 407814,
+     "name": "Pupil of Alexstrasza"
+    },
+    {
+     "spell": 410784,
+     "name": "Echoing Strike"
+    }
+   ]
+  },
+  {
+   "node": 93235,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 410253,
+     "name": "Perilous Fate"
+    },
+    {
+     "spell": 409676,
+     "name": "Chrono Ward"
+    }
+   ]
+  },
+  {
+   "node": 93242,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 376138,
+     "name": "Empath"
+    },
+    {
+     "spell": 376150,
+     "name": "Spiritual Clarity"
+    }
+   ]
+  },
+  {
+   "node": 93243,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 1241669,
+     "name": "Dream Simulacrum"
+    },
+    {
+     "spell": 1241704,
+     "name": "Wings of Liberty"
+    }
+   ]
+  },
+  {
+   "node": 93258,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 1291636,
+     "name": "Temporal Barrier"
+    },
+    {
+     "spell": 376237,
+     "name": "Nozdormu's Teachings"
+    }
+   ]
+  },
+  {
+   "node": 93267,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 359816,
+     "name": "Dream Flight"
+    },
+    {
+     "spell": 370537,
+     "name": "Stasis"
+    }
+   ]
+  },
+  {
+   "node": 93318,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 411165,
+     "name": "Eye of Infinity"
+    },
+    {
+     "spell": 411164,
+     "name": "Event Horizon"
+    }
+   ]
+  },
+  {
+   "node": 93335,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 376207,
+     "name": "Delay Harm"
+    },
+    {
+     "spell": 376204,
+     "name": "Just in Time"
+    }
+   ]
+  },
+  {
+   "node": 93351,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 374968,
+     "name": "Time Spiral"
+    },
+    {
+     "spell": 406732,
+     "name": "Spatial Paradox"
+    }
+   ]
+  },
+  {
+   "node": 93359,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 410687,
+     "name": "Prolong Life"
+    },
+    {
+     "spell": 414969,
+     "name": "Dream of Spring"
+    }
+   ]
+  },
+  {
+   "node": 93369,
+   "tree": 872,
+   "class": "Evoker",
+   "options": [
+    {
+     "spell": 412723,
+     "name": "Tomorrow, Today"
+    },
+    {
+     "spell": 412713,
+     "name": "Interwoven Threads"
+    }
+   ]
+  },
+  {
+   "node": 94932,
+   "tree": 872,
+   "class": "Evoker",
+   "heroTree": "Chronowarden",
+   "options": [
+    {
+     "spell": 431874,
+     "name": "Double-time"
+    },
+    {
+     "spell": 431984,
+     "name": "Time Convergence"
+    }
+   ]
+  },
+  {
+   "node": 94935,
+   "tree": 872,
+   "class": "Evoker",
+   "heroTree": "Chronowarden",
+   "options": [
+    {
+     "spell": 431873,
+     "name": "Temporality"
+    },
+    {
+     "spell": 432008,
+     "name": "Motes of Acceleration"
+    }
+   ]
+  },
+  {
+   "node": 94931,
+   "tree": 872,
+   "class": "Evoker",
+   "heroTree": "Flameshaper",
+   "options": [
+    {
+     "spell": 444322,
+     "name": "Lifecinders"
+    },
+    {
+     "spell": 445958,
+     "name": "Draconic Instincts"
+    }
+   ]
+  },
+  {
+   "node": 94937,
+   "tree": 872,
+   "class": "Evoker",
+   "heroTree": "Flameshaper",
+   "options": [
+    {
+     "spell": 444849,
+     "name": "Trailblazer"
+    },
+    {
+     "spell": 445074,
+     "name": "Shape of Flame"
+    }
+   ]
+  },
+  {
+   "node": 94956,
+   "tree": 872,
+   "class": "Evoker",
+   "heroTree": "Flameshaper",
+   "options": [
+    {
+     "spell": 444016,
+     "name": "Enkindle"
+    },
+    {
+     "spell": 444845,
+     "name": "Expanded Lungs"
+    }
+   ]
+  },
+  {
+   "node": 94928,
+   "tree": 872,
+   "class": "Evoker",
+   "heroTree": "Scalecommander",
+   "options": [
+    {
+     "spell": 441212,
+     "name": "Extended Battle"
+    },
+    {
+     "spell": 441219,
+     "name": "Diverted Power"
+    }
+   ]
+  },
+  {
+   "node": 94933,
+   "tree": 872,
+   "class": "Evoker",
+   "heroTree": "Scalecommander",
+   "options": [
+    {
+     "spell": 441180,
+     "name": "Hardened Scales"
+    },
+    {
+     "spell": 441181,
+     "name": "Menacing Presence"
+    }
+   ]
+  },
+  {
+   "node": 94943,
+   "tree": 872,
+   "class": "Evoker",
+   "heroTree": "Scalecommander",
+   "options": [
+    {
+     "spell": 441253,
+     "name": "Nimble Flyer"
+    },
+    {
+     "spell": 441257,
+     "name": "Slipstream"
+    }
+   ]
+  },
+  {
+   "node": 102282,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 1257011,
+     "name": "Vulnerability"
+    },
+    {
+     "spell": 462036,
+     "name": "Blackrock Munitions"
+    }
+   ]
+  },
+  {
+   "node": 102344,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 468695,
+     "name": "Snakeskin Quiver"
+    },
+    {
+     "spell": 378244,
+     "name": "Cobra Senses"
+    }
+   ]
+  },
+  {
+   "node": 102393,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 187698,
+     "name": "Tar Trap"
+    },
+    {
+     "spell": 1513,
+     "name": "Scare Beast"
+    }
+   ]
+  },
+  {
+   "node": 102394,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 459507,
+     "name": "Territorial Instincts"
+    },
+    {
+     "spell": 1258509,
+     "name": "Guttural Roar"
+    }
+   ]
+  },
+  {
+   "node": 102415,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 459983,
+     "name": "Kodo Tranquilizer"
+    },
+    {
+     "spell": 459991,
+     "name": "Devilsaur Tranquilizer"
+    }
+   ]
+  },
+  {
+   "node": 103957,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 257621,
+     "name": "Trick Shots"
+    },
+    {
+     "spell": 470945,
+     "name": "Aspect of the Hydra"
+    }
+   ]
+  },
+  {
+   "node": 103958,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 260404,
+     "name": "Calling the Shots"
+    },
+    {
+     "spell": 474738,
+     "name": "Unerring Vision"
+    }
+   ]
+  },
+  {
+   "node": 103959,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 471350,
+     "name": "Obsidian Arrowhead"
+    },
+    {
+     "spell": 471348,
+     "name": "On Target"
+    }
+   ]
+  },
+  {
+   "node": 103986,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 474456,
+     "name": "Tenacious"
+    },
+    {
+     "spell": 474440,
+     "name": "Cunning"
+    }
+   ]
+  },
+  {
+   "node": 104127,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 466867,
+     "name": "Avian Specialization"
+    },
+    {
+     "spell": 1223323,
+     "name": "Unbreakable Bond"
+    }
+   ]
+  },
+  {
+   "node": 109307,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 385737,
+     "name": "Bloody Claws"
+    },
+    {
+     "spell": 1252738,
+     "name": "Wallop"
+    }
+   ]
+  },
+  {
+   "node": 109309,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 1253172,
+     "name": "Shrapnel Bomb"
+    },
+    {
+     "spell": 1253176,
+     "name": "Flamebreak"
+    }
+   ]
+  },
+  {
+   "node": 109316,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 1253945,
+     "name": "Mongoose Rounds"
+    },
+    {
+     "spell": 1261229,
+     "name": "Wildfire Shells"
+    }
+   ]
+  },
+  {
+   "node": 110152,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 459460,
+     "name": "Tar-Coated Bindings"
+    },
+    {
+     "spell": 472729,
+     "name": "Horsehair Tether"
+    }
+   ]
+  },
+  {
+   "node": 110155,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 199921,
+     "name": "Trailblazer"
+    },
+    {
+     "spell": 459488,
+     "name": "Moment of Opportunity"
+    }
+   ]
+  },
+  {
+   "node": 110158,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 267116,
+     "name": "Animal Companion"
+    },
+    {
+     "spell": 474746,
+     "name": "Solitary Companion"
+    }
+   ]
+  },
+  {
+   "node": 110164,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 53480,
+     "name": "Roar of Sacrifice"
+    },
+    {
+     "spell": 1272094,
+     "name": "Guardian's Hide"
+    }
+   ]
+  },
+  {
+   "node": 110573,
+   "tree": 774,
+   "class": "Hunter",
+   "options": [
+    {
+     "spell": 1301406,
+     "name": "Tactical Reload"
+    },
+    {
+     "spell": 473520,
+     "name": "Unstable Trigger"
+    }
+   ]
+  },
+  {
+   "node": 94957,
+   "tree": 774,
+   "class": "Hunter",
+   "heroTree": "Dark Ranger",
+   "options": [
+    {
+     "spell": 467902,
+     "name": "Banshee's Mark"
+    },
+    {
+     "spell": 467644,
+     "name": "The Bell Tolls"
+    }
+   ]
+  },
+  {
+   "node": 94960,
+   "tree": 774,
+   "class": "Hunter",
+   "heroTree": "Dark Ranger",
+   "options": [
+    {
+     "spell": 430712,
+     "name": "Dark Chains"
+    },
+    {
+     "spell": 467741,
+     "name": "Shadow Dagger"
+    }
+   ]
+  },
+  {
+   "node": 94986,
+   "tree": 774,
+   "class": "Hunter",
+   "heroTree": "Dark Ranger",
+   "options": [
+    {
+     "spell": 467897,
+     "name": "Ebon Bowstring"
+    },
+    {
+     "spell": 1277565,
+     "name": "Through the Eyes"
+    }
+   ]
+  },
+  {
+   "node": 94972,
+   "tree": 774,
+   "class": "Hunter",
+   "heroTree": "Pack Leader",
+   "options": [
+    {
+     "spell": 472476,
+     "name": "Ursine Fury"
+    },
+    {
+     "spell": 472524,
+     "name": "Sharpened Claws"
+    }
+   ]
+  },
+  {
+   "node": 94979,
+   "tree": 774,
+   "class": "Hunter",
+   "heroTree": "Pack Leader",
+   "options": [
+    {
+     "spell": 472719,
+     "name": "Slicked Shoes"
+    },
+    {
+     "spell": 1268705,
+     "name": "Masterful Call"
+    }
+   ]
+  },
+  {
+   "node": 109804,
+   "tree": 774,
+   "class": "Hunter",
+   "heroTree": "Pack Leader",
+   "options": [
+    {
+     "spell": 1264797,
+     "name": "Hoof and Blade"
+    },
+    {
+     "spell": 1264792,
+     "name": "Wyvern's Gaze"
+    }
+   ]
+  },
+  {
+   "node": 94958,
+   "tree": 774,
+   "class": "Hunter",
+   "heroTree": "Sentinel",
+   "options": [
+    {
+     "spell": 1253751,
+     "name": "Stargazer"
+    },
+    {
+     "spell": 1253807,
+     "name": "Open Fire"
+    }
+   ]
+  },
+  {
+   "node": 94980,
+   "tree": 774,
+   "class": "Hunter",
+   "heroTree": "Sentinel",
+   "options": [
+    {
+     "spell": 1253887,
+     "name": "Conditioning"
+    },
+    {
+     "spell": 1253892,
+     "name": "Scout's Vigil"
+    }
+   ]
+  },
+  {
+   "node": 110028,
+   "tree": 774,
+   "class": "Hunter",
+   "heroTree": "Sentinel",
+   "options": [
+    {
+     "spell": 1264904,
+     "name": "Twilight Requiem"
+    },
+    {
+     "spell": 1266069,
+     "name": "Stalk and Strike"
+    }
+   ]
+  },
+  {
+   "node": 62087,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 386763,
+     "name": "Freezing Cold"
+    },
+    {
+     "spell": 157997,
+     "name": "Ice Nova"
+    }
+   ]
+  },
+  {
+   "node": 62088,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 113724,
+     "name": "Ring of Frost"
+    },
+    {
+     "spell": 383121,
+     "name": "Mass Polymorph"
+    }
+   ]
+  },
+  {
+   "node": 62094,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 1244031,
+     "name": "Spatial Manipulation"
+    },
+    {
+     "spell": 1270829,
+     "name": "Reflection"
+    }
+   ]
+  },
+  {
+   "node": 62105,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 212653,
+     "name": "Shimmer"
+    },
+    {
+     "spell": 1244340,
+     "name": "Improved Blink"
+    }
+   ]
+  },
+  {
+   "node": 62110,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 343183,
+     "name": "Improved Frost Nova"
+    },
+    {
+     "spell": 205036,
+     "name": "Ice Ward"
+    }
+   ]
+  },
+  {
+   "node": 62173,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 378406,
+     "name": "Wintertide"
+    },
+    {
+     "spell": 1281638,
+     "name": "White Out"
+    }
+   ]
+  },
+  {
+   "node": 101007,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 383967,
+     "name": "Slow Burn"
+    },
+    {
+     "spell": 1254512,
+     "name": "Burn It All"
+    }
+   ]
+  },
+  {
+   "node": 101883,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 31661,
+     "name": "Dragon's Breath"
+    },
+    {
+     "spell": 157980,
+     "name": "Supernova"
+    }
+   ]
+  },
+  {
+   "node": 102454,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 12051,
+     "name": "Evocation"
+    },
+    {
+     "spell": 321526,
+     "name": "Mana Adept"
+    }
+   ]
+  },
+  {
+   "node": 102460,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 205025,
+     "name": "Presence of Mind"
+    },
+    {
+     "spell": 236457,
+     "name": "Slipstream"
+    }
+   ]
+  },
+  {
+   "node": 102465,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 1243507,
+     "name": "Aegwynn's Technique"
+    },
+    {
+     "spell": 342231,
+     "name": "Arcane Echo"
+    }
+   ]
+  },
+  {
+   "node": 102472,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 461248,
+     "name": "High Voltage"
+    },
+    {
+     "spell": 461251,
+     "name": "Charged Missiles"
+    }
+   ]
+  },
+  {
+   "node": 103771,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 418733,
+     "name": "Splintering Ray"
+    },
+    {
+     "spell": 1247055,
+     "name": "Frigid Focus"
+    }
+   ]
+  },
+  {
+   "node": 108653,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 235219,
+     "name": "Cold Snap"
+    },
+    {
+     "spell": 1244110,
+     "name": "Glacial Bulwark"
+    }
+   ]
+  },
+  {
+   "node": 108654,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 1244087,
+     "name": "Time Walk"
+    },
+    {
+     "spell": 1244090,
+     "name": "Temporal Realignment"
+    }
+   ]
+  },
+  {
+   "node": 108850,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 31687,
+     "name": "Summon Water Elemental"
+    },
+    {
+     "spell": 205024,
+     "name": "Lonely Winter"
+    }
+   ]
+  },
+  {
+   "node": 108863,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 1280779,
+     "name": "Glacial Chill"
+    },
+    {
+     "spell": 1280780,
+     "name": "Glacial Shatter"
+    }
+   ]
+  },
+  {
+   "node": 108864,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 190356,
+     "name": "Blizzard"
+    },
+    {
+     "spell": 1248829,
+     "name": "Blizzard"
+    }
+   ]
+  },
+  {
+   "node": 109409,
+   "tree": 658,
+   "class": "Mage",
+   "options": [
+    {
+     "spell": 2120,
+     "name": "Flamestrike"
+    },
+    {
+     "spell": 1254851,
+     "name": "Flamestrike"
+    }
+   ]
+  },
+  {
+   "node": 94633,
+   "tree": 658,
+   "class": "Mage",
+   "heroTree": "Frostfire",
+   "options": [
+    {
+     "spell": 431067,
+     "name": "Elemental Affinity"
+    },
+    {
+     "spell": 431112,
+     "name": "Flame and Frost"
+    }
+   ]
+  },
+  {
+   "node": 94640,
+   "tree": 658,
+   "class": "Mage",
+   "heroTree": "Frostfire",
+   "options": [
+    {
+     "spell": 431117,
+     "name": "Thermal Conditioning"
+    },
+    {
+     "spell": 431189,
+     "name": "Severe Temperatures"
+    }
+   ]
+  },
+  {
+   "node": 94642,
+   "tree": 658,
+   "class": "Mage",
+   "heroTree": "Frostfire",
+   "options": [
+    {
+     "spell": 431066,
+     "name": "Imbued Warding"
+    },
+    {
+     "spell": 431131,
+     "name": "Meltdown"
+    }
+   ]
+  },
+  {
+   "node": 94659,
+   "tree": 658,
+   "class": "Mage",
+   "heroTree": "Spellslinger",
+   "options": [
+    {
+     "spell": 444752,
+     "name": "Slippery Slinging"
+    },
+    {
+     "spell": 444756,
+     "name": "Look Again"
+    }
+   ]
+  },
+  {
+   "node": 94660,
+   "tree": 658,
+   "class": "Mage",
+   "heroTree": "Spellslinger",
+   "options": [
+    {
+     "spell": 444827,
+     "name": "Reactive Barrier"
+    },
+    {
+     "spell": 444784,
+     "name": "Phantasmal Image"
+    }
+   ]
+  },
+  {
+   "node": 109669,
+   "tree": 658,
+   "class": "Mage",
+   "heroTree": "Spellslinger",
+   "options": [
+    {
+     "spell": 1261106,
+     "name": "Attuned Familiar"
+    },
+    {
+     "spell": 444675,
+     "name": "Shifting Shards"
+    }
+   ]
+  },
+  {
+   "node": 94649,
+   "tree": 658,
+   "class": "Mage",
+   "heroTree": "Sunfury",
+   "options": [
+    {
+     "spell": 449330,
+     "name": "Merely a Setback"
+    },
+    {
+     "spell": 1255166,
+     "name": "Time Twist"
+    }
+   ]
+  },
+  {
+   "node": 94650,
+   "tree": 658,
+   "class": "Mage",
+   "heroTree": "Sunfury",
+   "options": [
+    {
+     "spell": 449412,
+     "name": "Savor the Moment"
+    },
+    {
+     "spell": 449349,
+     "name": "Sunfury Execution"
+    }
+   ]
+  },
+  {
+   "node": 94651,
+   "tree": 658,
+   "class": "Mage",
+   "heroTree": "Sunfury",
+   "options": [
+    {
+     "spell": 449627,
+     "name": "Lessons in Debilitation"
+    },
+    {
+     "spell": 1246030,
+     "name": "Explosive Potential"
+    }
+   ]
+  },
+  {
+   "node": 101043,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 1248833,
+     "name": "Airborne Rhythm"
+    },
+    {
+     "spell": 1248837,
+     "name": "Hurricane's Vault"
+    }
+   ]
+  },
+  {
+   "node": 101044,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 392994,
+     "name": "Path of Jade"
+    },
+    {
+     "spell": 451573,
+     "name": "Singularly Focused Jade"
+    }
+   ]
+  },
+  {
+   "node": 101052,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 391370,
+     "name": "Drinking Horn Cover"
+    },
+    {
+     "spell": 280197,
+     "name": "Spiritual Focus"
+    }
+   ]
+  },
+  {
+   "node": 101057,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 1248749,
+     "name": "Cyclone's Drift"
+    },
+    {
+     "spell": 1248747,
+     "name": "Crashing Fists"
+    }
+   ]
+  },
+  {
+   "node": 101065,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 387625,
+     "name": "Staggering Strikes"
+    },
+    {
+     "spell": 388505,
+     "name": "Quick Sip"
+    }
+   ]
+  },
+  {
+   "node": 101067,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 322507,
+     "name": "Celestial Brew"
+    },
+    {
+     "spell": 1241059,
+     "name": "Celestial Infusion"
+    }
+   ]
+  },
+  {
+   "node": 101078,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 387638,
+     "name": "Shadowboxing Treads"
+    },
+    {
+     "spell": 387230,
+     "name": "Fluidity of Motion"
+    }
+   ]
+  },
+  {
+   "node": 101082,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 325093,
+     "name": "Light Brewing"
+    },
+    {
+     "spell": 383714,
+     "name": "Training of Niuzao"
+    }
+   ]
+  },
+  {
+   "node": 101095,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 388218,
+     "name": "Calming Coalescence"
+    },
+    {
+     "spell": 467270,
+     "name": "Refreshment"
+    }
+   ]
+  },
+  {
+   "node": 101098,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 202424,
+     "name": "Chrysalis"
+    },
+    {
+     "spell": 399226,
+     "name": "Burst of Life"
+    }
+   ]
+  },
+  {
+   "node": 101102,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 467293,
+     "name": "Jadefire Teachings"
+    },
+    {
+     "spell": 467307,
+     "name": "Rushing Wind Kick"
+    }
+   ]
+  },
+  {
+   "node": 101104,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 1243155,
+     "name": "Way of the Serpent"
+    },
+    {
+     "spell": 388779,
+     "name": "Way of the Crane"
+    }
+   ]
+  },
+  {
+   "node": 101112,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 388701,
+     "name": "Dancing Mists"
+    },
+    {
+     "spell": 1299572,
+     "name": "Vital Expenditure"
+    }
+   ]
+  },
+  {
+   "node": 101113,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 388031,
+     "name": "Jade Bond"
+    },
+    {
+     "spell": 388212,
+     "name": "Gift of the Celestials"
+    }
+   ]
+  },
+  {
+   "node": 101117,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 387991,
+     "name": "Tear of Morning"
+    },
+    {
+     "spell": 274909,
+     "name": "Rising Mist"
+    }
+   ]
+  },
+  {
+   "node": 101118,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 404408,
+     "name": "Legacy of Wisdom"
+    },
+    {
+     "spell": 471761,
+     "name": "Emperor's Favor"
+    }
+   ]
+  },
+  {
+   "node": 101119,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 400053,
+     "name": "Veil of Pride"
+    },
+    {
+     "spell": 1270621,
+     "name": "Tranquil Tea"
+    }
+   ]
+  },
+  {
+   "node": 101125,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 467316,
+     "name": "Jade Empowerment"
+    },
+    {
+     "spell": 1277302,
+     "name": "Morning Breeze"
+    }
+   ]
+  },
+  {
+   "node": 101129,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 322118,
+     "name": "Invoke Yu'lon, the Jade Serpent"
+    },
+    {
+     "spell": 325197,
+     "name": "Invoke Chi-Ji, the Red Crane"
+    }
+   ]
+  },
+  {
+   "node": 101130,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 422031,
+     "name": "Energizing Brew"
+    },
+    {
+     "spell": 197915,
+     "name": "Lifecycles"
+    }
+   ]
+  },
+  {
+   "node": 101131,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 115310,
+     "name": "Revival"
+    },
+    {
+     "spell": 388615,
+     "name": "Restoral"
+    }
+   ]
+  },
+  {
+   "node": 101135,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 387276,
+     "name": "Strength of Spirit"
+    },
+    {
+     "spell": 392910,
+     "name": "Profound Rebuttal"
+    }
+   ]
+  },
+  {
+   "node": 101136,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 116844,
+     "name": "Ring of Peace"
+    },
+    {
+     "spell": 198898,
+     "name": "Song of Chi-Ji"
+    }
+   ]
+  },
+  {
+   "node": 101149,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 450335,
+     "name": "Crashing Momentum"
+    },
+    {
+     "spell": 116095,
+     "name": "Disable"
+    }
+   ]
+  },
+  {
+   "node": 101158,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 450503,
+     "name": "Quick Footed"
+    },
+    {
+     "spell": 328670,
+     "name": "Hasty Provocation"
+    }
+   ]
+  },
+  {
+   "node": 101164,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 1242910,
+     "name": "Jade Infusion"
+    },
+    {
+     "spell": 115313,
+     "name": "Summon Jade Serpent Statue"
+    }
+   ]
+  },
+  {
+   "node": 101174,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 388814,
+     "name": "Ironshell Brew"
+    },
+    {
+     "spell": 388813,
+     "name": "Expeditious Fortification"
+    }
+   ]
+  },
+  {
+   "node": 101176,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 394110,
+     "name": "Escape from Reality"
+    },
+    {
+     "spell": 434774,
+     "name": "Transcendence: Linked Spirits"
+    }
+   ]
+  },
+  {
+   "node": 101183,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 115173,
+     "name": "Celerity"
+    },
+    {
+     "spell": 115008,
+     "name": "Chi Torpedo"
+    }
+   ]
+  },
+  {
+   "node": 101187,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 383994,
+     "name": "Dragonfire Brew"
+    },
+    {
+     "spell": 386965,
+     "name": "Charred Passions"
+    }
+   ]
+  },
+  {
+   "node": 101188,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 383698,
+     "name": "Scalding Brew"
+    },
+    {
+     "spell": 383697,
+     "name": "Sal'salabim's Strength"
+    }
+   ]
+  },
+  {
+   "node": 101190,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 280515,
+     "name": "Bob and Weave"
+    },
+    {
+     "spell": 115399,
+     "name": "Black Ox Brew"
+    }
+   ]
+  },
+  {
+   "node": 101193,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 418359,
+     "name": "Press the Advantage"
+    },
+    {
+     "spell": 196736,
+     "name": "Blackout Combo"
+    }
+   ]
+  },
+  {
+   "node": 101196,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 1262628,
+     "name": "Awakening Spirit"
+    },
+    {
+     "spell": 1262659,
+     "name": "Vital Flame"
+    }
+   ]
+  },
+  {
+   "node": 101202,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 196730,
+     "name": "Special Delivery"
+    },
+    {
+     "spell": 116847,
+     "name": "Rushing Jade Wind"
+    }
+   ]
+  },
+  {
+   "node": 101203,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 451524,
+     "name": "Revolving Whirl"
+    },
+    {
+     "spell": 1250042,
+     "name": "Echo Technique"
+    }
+   ]
+  },
+  {
+   "node": 101207,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 392983,
+     "name": "Strike of the Windlord"
+    },
+    {
+     "spell": 152175,
+     "name": "Whirling Dragon Punch"
+    }
+   ]
+  },
+  {
+   "node": 102433,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 450391,
+     "name": "Chi Wave"
+    },
+    {
+     "spell": 123986,
+     "name": "Chi Burst"
+    }
+   ]
+  },
+  {
+   "node": 110022,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 387276,
+     "name": "Strength of Spirit"
+    },
+    {
+     "spell": 392910,
+     "name": "Profound Rebuttal"
+    }
+   ]
+  },
+  {
+   "node": 110026,
+   "tree": 1000,
+   "class": "Monk",
+   "options": [
+    {
+     "spell": 388812,
+     "name": "Vivacious Vivification"
+    },
+    {
+     "spell": 1266734,
+     "name": "Serene Surge"
+    }
+   ]
+  },
+  {
+   "node": 101233,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Conduit of the Celestials",
+   "options": [
+    {
+     "spell": 442719,
+     "name": "Restore Balance"
+    },
+    {
+     "spell": 443625,
+     "name": "Yu'lon's Knowledge"
+    }
+   ]
+  },
+  {
+   "node": 101236,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Conduit of the Celestials",
+   "options": [
+    {
+     "spell": 442743,
+     "name": "Temple Training"
+    },
+    {
+     "spell": 442687,
+     "name": "Xuen's Guidance"
+    }
+   ]
+  },
+  {
+   "node": 101238,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Conduit of the Celestials",
+   "options": [
+    {
+     "spell": 442747,
+     "name": "Niuzao's Protection"
+    },
+    {
+     "spell": 443059,
+     "name": "Jade Sanctuary"
+    }
+   ]
+  },
+  {
+   "node": 110221,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Conduit of the Celestials",
+   "options": [
+    {
+     "spell": 442719,
+     "name": "Restore Balance"
+    },
+    {
+     "spell": 392986,
+     "name": "Xuen's Bond"
+    }
+   ]
+  },
+  {
+   "node": 101221,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Master of Harmony",
+   "options": [
+    {
+     "spell": 451041,
+     "name": "Tiger's Vigor"
+    },
+    {
+     "spell": 451043,
+     "name": "Roar from the Heavens"
+    }
+   ]
+  },
+  {
+   "node": 101224,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Master of Harmony",
+   "options": [
+    {
+     "spell": 450867,
+     "name": "Purified Spirit"
+    },
+    {
+     "spell": 450870,
+     "name": "Harmonic Gambit"
+    }
+   ]
+  },
+  {
+   "node": 101226,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Master of Harmony",
+   "options": [
+    {
+     "spell": 450912,
+     "name": "Path of Resurgence"
+    },
+    {
+     "spell": 450965,
+     "name": "Way of a Thousand Strikes"
+    }
+   ]
+  },
+  {
+   "node": 101229,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Master of Harmony",
+   "options": [
+    {
+     "spell": 451036,
+     "name": "Mantra of Purity"
+    },
+    {
+     "spell": 451029,
+     "name": "Mantra of Tenacity"
+    }
+   ]
+  },
+  {
+   "node": 101245,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Shado-Pan",
+   "options": [
+    {
+     "spell": 450991,
+     "name": "Whirling Steel"
+    },
+    {
+     "spell": 450992,
+     "name": "Predictive Training"
+    }
+   ]
+  },
+  {
+   "node": 101247,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Shado-Pan",
+   "options": [
+    {
+     "spell": 450979,
+     "name": "Pride of Pandaria"
+    },
+    {
+     "spell": 450982,
+     "name": "High Impact"
+    }
+   ]
+  },
+  {
+   "node": 101254,
+   "tree": 1000,
+   "class": "Monk",
+   "heroTree": "Shado-Pan",
+   "options": [
+    {
+     "spell": 1272844,
+     "name": "Combat Stance"
+    },
+    {
+     "spell": 1272849,
+     "name": "Initiator's Edge"
+    }
+   ]
+  },
+  {
+   "node": 81469,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 53595,
+     "name": "Hammer of the Righteous"
+    },
+    {
+     "spell": 204019,
+     "name": "Blessed Hammer"
+    }
+   ]
+  },
+  {
+   "node": 81476,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 1245979,
+     "name": "Valiant Crusade"
+    },
+    {
+     "spell": 1301732,
+     "name": "Blessed Word"
+    }
+   ]
+  },
+  {
+   "node": 81479,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 386738,
+     "name": "Divine Resonance"
+    },
+    {
+     "spell": 379391,
+     "name": "Quickened Invocation"
+    }
+   ]
+  },
+  {
+   "node": 81493,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 393071,
+     "name": "Strength in Adversity"
+    },
+    {
+     "spell": 380188,
+     "name": "Crusader's Resolve"
+    }
+   ]
+  },
+  {
+   "node": 81494,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 1276945,
+     "name": "Imbued Shield"
+    },
+    {
+     "spell": 280373,
+     "name": "Redoubt"
+    }
+   ]
+  },
+  {
+   "node": 81496,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 375576,
+     "name": "Divine Toll"
+    },
+    {
+     "spell": 114165,
+     "name": "Holy Prism"
+    }
+   ]
+  },
+  {
+   "node": 81501,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 1244070,
+     "name": "Searing Sunlight"
+    },
+    {
+     "spell": 315924,
+     "name": "Hand of the Protector"
+    }
+   ]
+  },
+  {
+   "node": 81503,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 378405,
+     "name": "Light of the Titans"
+    },
+    {
+     "spell": 392928,
+     "name": "Tirion's Devotion"
+    }
+   ]
+  },
+  {
+   "node": 81505,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 1246488,
+     "name": "Sweeping Verdict"
+    },
+    {
+     "spell": 1277005,
+     "name": "Adjudication"
+    }
+   ]
+  },
+  {
+   "node": 81521,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 383228,
+     "name": "Swift Justice"
+    },
+    {
+     "spell": 404436,
+     "name": "Light of Justice"
+    }
+   ]
+  },
+  {
+   "node": 81523,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 402912,
+     "name": "Righteous Cause"
+    },
+    {
+     "spell": 406064,
+     "name": "Art of War"
+    }
+   ]
+  },
+  {
+   "node": 81533,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 405461,
+     "name": "Improved Judgment"
+    },
+    {
+     "spell": 405278,
+     "name": "Boundless Judgment"
+    }
+   ]
+  },
+  {
+   "node": 81554,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 156910,
+     "name": "Beacon of Faith"
+    },
+    {
+     "spell": 200025,
+     "name": "Beacon of Virtue"
+    }
+   ]
+  },
+  {
+   "node": 81566,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 392911,
+     "name": "Unwavering Spirit"
+    },
+    {
+     "spell": 200430,
+     "name": "Protection of Tyr"
+    }
+   ]
+  },
+  {
+   "node": 81571,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 387786,
+     "name": "Moment of Compassion"
+    },
+    {
+     "spell": 392902,
+     "name": "Resplendent Light"
+    }
+   ]
+  },
+  {
+   "node": 81584,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 31884,
+     "name": "Avenging Wrath"
+    },
+    {
+     "spell": 394088,
+     "name": "Avenging Crusader"
+    }
+   ]
+  },
+  {
+   "node": 81588,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 1241275,
+     "name": "Tyr's Deliverance"
+    },
+    {
+     "spell": 1242008,
+     "name": "Hand of Divinity"
+    }
+   ]
+  },
+  {
+   "node": 81592,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 53376,
+     "name": "Sanctified Wrath"
+    },
+    {
+     "spell": 414195,
+     "name": "Awakening"
+    }
+   ]
+  },
+  {
+   "node": 81607,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 384820,
+     "name": "Sacrifice of the Just"
+    },
+    {
+     "spell": 384914,
+     "name": "Recompense"
+    }
+   ]
+  },
+  {
+   "node": 81618,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 469337,
+     "name": "Sacred Strength"
+    },
+    {
+     "spell": 408459,
+     "name": "Divine Purpose"
+    }
+   ]
+  },
+  {
+   "node": 81631,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 469304,
+     "name": "Steed of Liberty"
+    },
+    {
+     "spell": 1044,
+     "name": "Blessing of Freedom"
+    }
+   ]
+  },
+  {
+   "node": 90062,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 393114,
+     "name": "Improved Ardent Defender"
+    },
+    {
+     "spell": 377053,
+     "name": "Seal of Reprisal"
+    }
+   ]
+  },
+  {
+   "node": 92838,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 403745,
+     "name": "Improved Blade of Justice"
+    },
+    {
+     "spell": 383342,
+     "name": "Holy Blade"
+    }
+   ]
+  },
+  {
+   "node": 93180,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 386738,
+     "name": "Divine Resonance"
+    },
+    {
+     "spell": 379391,
+     "name": "Quickened Invocation"
+    }
+   ]
+  },
+  {
+   "node": 93181,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 384027,
+     "name": "Divine Resonance"
+    },
+    {
+     "spell": 379391,
+     "name": "Quickened Invocation"
+    }
+   ]
+  },
+  {
+   "node": 93189,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 385414,
+     "name": "Afterimage"
+    },
+    {
+     "spell": 326734,
+     "name": "Healing Hands"
+    }
+   ]
+  },
+  {
+   "node": 93191,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 469337,
+     "name": "Sacred Strength"
+    },
+    {
+     "spell": 223817,
+     "name": "Divine Purpose"
+    }
+   ]
+  },
+  {
+   "node": 93192,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 469337,
+     "name": "Sacred Strength"
+    },
+    {
+     "spell": 223817,
+     "name": "Divine Purpose"
+    }
+   ]
+  },
+  {
+   "node": 93520,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 387801,
+     "name": "Echoing Blessings"
+    },
+    {
+     "spell": 305394,
+     "name": "Unbound Freedom"
+    }
+   ]
+  },
+  {
+   "node": 101927,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 1245891,
+     "name": "Solace"
+    },
+    {
+     "spell": 1277162,
+     "name": "Instrument of the Divine"
+    }
+   ]
+  },
+  {
+   "node": 101928,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 378457,
+     "name": "Soaring Shield"
+    },
+    {
+     "spell": 378845,
+     "name": "Focused Enmity"
+    }
+   ]
+  },
+  {
+   "node": 102502,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 461287,
+     "name": "Liberation"
+    },
+    {
+     "spell": 196926,
+     "name": "Crusader's Might"
+    }
+   ]
+  },
+  {
+   "node": 103855,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 460720,
+     "name": "Wrench Evil"
+    },
+    {
+     "spell": 469317,
+     "name": "Stand Against Evil"
+    }
+   ]
+  },
+  {
+   "node": 103856,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 377128,
+     "name": "Golden Path"
+    },
+    {
+     "spell": 469434,
+     "name": "Selfless Healer"
+    }
+   ]
+  },
+  {
+   "node": 103865,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 469279,
+     "name": "Worthy Sacrifice"
+    },
+    {
+     "spell": 469321,
+     "name": "Righteous Protection"
+    }
+   ]
+  },
+  {
+   "node": 109374,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 406646,
+     "name": "Templar Strikes"
+    },
+    {
+     "spell": 404542,
+     "name": "Crusading Strikes"
+    }
+   ]
+  },
+  {
+   "node": 110862,
+   "tree": 790,
+   "class": "Paladin",
+   "options": [
+    {
+     "spell": 204018,
+     "name": "Blessing of Spellwarding"
+    },
+    {
+     "spell": 378425,
+     "name": "Uther's Counsel"
+    }
+   ]
+  },
+  {
+   "node": 95071,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Herald of the Sun",
+   "options": [
+    {
+     "spell": 445200,
+     "name": "Blessing of An'she"
+    },
+    {
+     "spell": 431407,
+     "name": "Lingering Radiance"
+    }
+   ]
+  },
+  {
+   "node": 95073,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Herald of the Sun",
+   "options": [
+    {
+     "spell": 431482,
+     "name": "Morning Star"
+    },
+    {
+     "spell": 431480,
+     "name": "Gleaming Rays"
+    }
+   ]
+  },
+  {
+   "node": 95098,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Herald of the Sun",
+   "options": [
+    {
+     "spell": 431423,
+     "name": "Illumine"
+    },
+    {
+     "spell": 431406,
+     "name": "Will of the Dawn"
+    }
+   ]
+  },
+  {
+   "node": 95231,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Lightsmith",
+   "options": [
+    {
+     "spell": 432964,
+     "name": "Divine Inspiration"
+    },
+    {
+     "spell": 432804,
+     "name": "Forewarning"
+    }
+   ]
+  },
+  {
+   "node": 95232,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Lightsmith",
+   "options": [
+    {
+     "spell": 469886,
+     "name": "Authoritative Rebuke"
+    },
+    {
+     "spell": 469701,
+     "name": "Tempered in Battle"
+    }
+   ]
+  },
+  {
+   "node": 95233,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Lightsmith",
+   "options": [
+    {
+     "spell": 433568,
+     "name": "Rite of Sanctification"
+    },
+    {
+     "spell": 433583,
+     "name": "Rite of Adjuration"
+    }
+   ]
+  },
+  {
+   "node": 95235,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Lightsmith",
+   "options": [
+    {
+     "spell": 433106,
+     "name": "Divine Guidance"
+    },
+    {
+     "spell": 433015,
+     "name": "Blessed Assurance"
+    }
+   ]
+  },
+  {
+   "node": 95181,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Templar",
+   "options": [
+    {
+     "spell": 432992,
+     "name": "Bonds of Fellowship"
+    },
+    {
+     "spell": 432990,
+     "name": "Unrelenting Charger"
+    }
+   ]
+  },
+  {
+   "node": 95185,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Templar",
+   "options": [
+    {
+     "spell": 432615,
+     "name": "Endless Wrath"
+    },
+    {
+     "spell": 432977,
+     "name": "Sanctification"
+    }
+   ]
+  },
+  {
+   "node": 109745,
+   "tree": 790,
+   "class": "Paladin",
+   "heroTree": "Templar",
+   "options": [
+    {
+     "spell": 1260429,
+     "name": "Divine Exaction"
+    },
+    {
+     "spell": 1263252,
+     "name": "Seal of the Templar"
+    }
+   ]
+  },
+  {
+   "node": 82558,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 392507,
+     "name": "Deathspeaker"
+    },
+    {
+     "spell": 321291,
+     "name": "Death and Madness"
+    }
+   ]
+  },
+  {
+   "node": 82564,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 421453,
+     "name": "Ultimate Penitence"
+    },
+    {
+     "spell": 62618,
+     "name": "Power Word: Barrier"
+    }
+   ]
+  },
+  {
+   "node": 82571,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 197862,
+     "name": "Archangel"
+    },
+    {
+     "spell": 1280137,
+     "name": "Mindbender"
+    }
+   ]
+  },
+  {
+   "node": 82588,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 372991,
+     "name": "Pain Transformation"
+    },
+    {
+     "spell": 373035,
+     "name": "Protector of the Frail"
+    }
+   ]
+  },
+  {
+   "node": 82591,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 390684,
+     "name": "Bright Pupil"
+    },
+    {
+     "spell": 390685,
+     "name": "Enduring Luminescence"
+    }
+   ]
+  },
+  {
+   "node": 82604,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 1215265,
+     "name": "Dispersing Light"
+    },
+    {
+     "spell": 200128,
+     "name": "Trail of Light"
+    }
+   ]
+  },
+  {
+   "node": 82613,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 419110,
+     "name": "Seraphic Crescendo"
+    },
+    {
+     "spell": 372370,
+     "name": "Gales of Song"
+    }
+   ]
+  },
+  {
+   "node": 82636,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 391124,
+     "name": "Restitution"
+    },
+    {
+     "spell": 200209,
+     "name": "Guardian Angel"
+    }
+   ]
+  },
+  {
+   "node": 82647,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 407470,
+     "name": "Mind's Eye"
+    },
+    {
+     "spell": 409044,
+     "name": "Distorted Reality"
+    }
+   ]
+  },
+  {
+   "node": 82656,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 341240,
+     "name": "Improved Voidform"
+    },
+    {
+     "spell": 1231346,
+     "name": "Ancient Madness"
+    }
+   ]
+  },
+  {
+   "node": 82666,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 238558,
+     "name": "Misery"
+    },
+    {
+     "spell": 1279350,
+     "name": "Invoked Nightmare"
+    }
+   ]
+  },
+  {
+   "node": 82676,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 415416,
+     "name": "Benevolence"
+    },
+    {
+     "spell": 1249230,
+     "name": "Focused Power"
+    }
+   ]
+  },
+  {
+   "node": 82695,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 390919,
+     "name": "Sheer Terror"
+    },
+    {
+     "spell": 55676,
+     "name": "Petrifying Scream"
+    }
+   ]
+  },
+  {
+   "node": 82708,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 196704,
+     "name": "Psychic Voice"
+    },
+    {
+     "spell": 1250691,
+     "name": "Void Tendrils"
+    }
+   ]
+  },
+  {
+   "node": 82710,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 605,
+     "name": "Mind Control"
+    },
+    {
+     "spell": 205364,
+     "name": "Dominate Mind"
+    }
+   ]
+  },
+  {
+   "node": 104097,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 1215245,
+     "name": "Eternal Sanctity"
+    },
+    {
+     "spell": 1215241,
+     "name": "Divinity"
+    }
+   ]
+  },
+  {
+   "node": 109017,
+   "tree": 795,
+   "class": "Priest",
+   "options": [
+    {
+     "spell": 288733,
+     "name": "Intangibility"
+    },
+    {
+     "spell": 377065,
+     "name": "Mental Fortitude"
+    }
+   ]
+  },
+  {
+   "node": 94678,
+   "tree": 795,
+   "class": "Priest",
+   "heroTree": "Archon",
+   "options": [
+    {
+     "spell": 449874,
+     "name": "Energy Compression"
+    },
+    {
+     "spell": 454001,
+     "name": "Sustained Potency"
+    }
+   ]
+  },
+  {
+   "node": 94686,
+   "tree": 795,
+   "class": "Priest",
+   "heroTree": "Archon",
+   "options": [
+    {
+     "spell": 453852,
+     "name": "Shock Pulse"
+    },
+    {
+     "spell": 453918,
+     "name": "Incessant Screams"
+    }
+   ]
+  },
+  {
+   "node": 109775,
+   "tree": 795,
+   "class": "Priest",
+   "heroTree": "Archon",
+   "options": [
+    {
+     "spell": 1272326,
+     "name": "Realized Potential"
+    },
+    {
+     "spell": 1247178,
+     "name": "Spiritwell"
+    }
+   ]
+  },
+  {
+   "node": 109776,
+   "tree": 795,
+   "class": "Priest",
+   "heroTree": "Archon",
+   "options": [
+    {
+     "spell": 453726,
+     "name": "Word of Supremacy"
+    },
+    {
+     "spell": 453729,
+     "name": "Heightened Alteration"
+    }
+   ]
+  },
+  {
+   "node": 94675,
+   "tree": 795,
+   "class": "Priest",
+   "heroTree": "Oracle",
+   "options": [
+    {
+     "spell": 440670,
+     "name": "Divine Feathers"
+    },
+    {
+     "spell": 440669,
+     "name": "Save the Day"
+    }
+   ]
+  },
+  {
+   "node": 94690,
+   "tree": 795,
+   "class": "Priest",
+   "heroTree": "Oracle",
+   "options": [
+    {
+     "spell": 433905,
+     "name": "Prophet's Will"
+    },
+    {
+     "spell": 458718,
+     "name": "Desperate Measures"
+    }
+   ]
+  },
+  {
+   "node": 94693,
+   "tree": 795,
+   "class": "Priest",
+   "heroTree": "Voidweaver",
+   "options": [
+    {
+     "spell": 451204,
+     "name": "No Escape"
+    },
+    {
+     "spell": 451018,
+     "name": "Dark Energy"
+    }
+   ]
+  },
+  {
+   "node": 94695,
+   "tree": 795,
+   "class": "Priest",
+   "heroTree": "Voidweaver",
+   "options": [
+    {
+     "spell": 450138,
+     "name": "Void Empowerment"
+    },
+    {
+     "spell": 449912,
+     "name": "Darkening Horizon"
+    }
+   ]
+  },
+  {
+   "node": 94696,
+   "tree": 795,
+   "class": "Priest",
+   "heroTree": "Voidweaver",
+   "options": [
+    {
+     "spell": 451311,
+     "name": "Void Leech"
+    },
+    {
+     "spell": 451569,
+     "name": "Embrace the Shadow"
+    }
+   ]
+  },
+  {
+   "node": 90626,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 1249809,
+     "name": "Finish the Job"
+    },
+    {
+     "spell": 1292996,
+     "name": "Negotiable Contract"
+    }
+   ]
+  },
+  {
+   "node": 90634,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 1250359,
+     "name": "Canny Strikes"
+    },
+    {
+     "spell": 381627,
+     "name": "Internal Bleeding"
+    }
+   ]
+  },
+  {
+   "node": 90638,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 470669,
+     "name": "Echoing Reprimand"
+    },
+    {
+     "spell": 470668,
+     "name": "Forced Induction"
+    }
+   ]
+  },
+  {
+   "node": 90655,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 1259465,
+     "name": "Heightened Rush"
+    },
+    {
+     "spell": 1256630,
+     "name": "Menacing Rush"
+    }
+   ]
+  },
+  {
+   "node": 90671,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 381619,
+     "name": "Thief's Versatility"
+    },
+    {
+     "spell": 1259492,
+     "name": "Flickering Steel"
+    }
+   ]
+  },
+  {
+   "node": 90673,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 256188,
+     "name": "Retractable Hook"
+    },
+    {
+     "spell": 256165,
+     "name": "Blinding Powder"
+    }
+   ]
+  },
+  {
+   "node": 90681,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 196922,
+     "name": "Hit and Run"
+    },
+    {
+     "spell": 381877,
+     "name": "Combat Stamina"
+    }
+   ]
+  },
+  {
+   "node": 90686,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 57934,
+     "name": "Tricks of the Trade"
+    },
+    {
+     "spell": 379005,
+     "name": "Blackjack"
+    }
+   ]
+  },
+  {
+   "node": 90692,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 381620,
+     "name": "Improved Ambush"
+    },
+    {
+     "spell": 381621,
+     "name": "Tight Spender"
+    }
+   ]
+  },
+  {
+   "node": 90701,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 257505,
+     "name": "Shot in the Dark"
+    },
+    {
+     "spell": 428486,
+     "name": "Exhilarating Execution"
+    }
+   ]
+  },
+  {
+   "node": 90703,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 382508,
+     "name": "Planned Execution"
+    },
+    {
+     "spell": 426555,
+     "name": "Warning Signs"
+    }
+   ]
+  },
+  {
+   "node": 90714,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 277953,
+     "name": "Night Terrors"
+    },
+    {
+     "spell": 428387,
+     "name": "Terrifying Pace"
+    }
+   ]
+  },
+  {
+   "node": 90728,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 382503,
+     "name": "Quick Decisions"
+    },
+    {
+     "spell": 426563,
+     "name": "Ephemeral Bond"
+    }
+   ]
+  },
+  {
+   "node": 90733,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 382515,
+     "name": "Cloaked in Shadows"
+    },
+    {
+     "spell": 382514,
+     "name": "Fade to Nothing"
+    }
+   ]
+  },
+  {
+   "node": 90741,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 1776,
+     "name": "Gouge"
+    },
+    {
+     "spell": 200733,
+     "name": "Airborne Irritant"
+    }
+   ]
+  },
+  {
+   "node": 90742,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 79008,
+     "name": "Elusiveness"
+    },
+    {
+     "spell": 31230,
+     "name": "Cheat Death"
+    }
+   ]
+  },
+  {
+   "node": 90756,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 469779,
+     "name": "Thistle Tea"
+    },
+    {
+     "spell": 1298826,
+     "name": "Thistle Tea"
+    }
+   ]
+  },
+  {
+   "node": 90763,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 5761,
+     "name": "Numbing Poison"
+    },
+    {
+     "spell": 381637,
+     "name": "Atrophic Poison"
+    }
+   ]
+  },
+  {
+   "node": 90767,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 1250036,
+     "name": "Inspiring Strike"
+    },
+    {
+     "spell": 1250318,
+     "name": "Poisoner's Drive"
+    }
+   ]
+  },
+  {
+   "node": 109003,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 381631,
+     "name": "Flying Daggers"
+    },
+    {
+     "spell": 1250141,
+     "name": "Secondary Poisoning"
+    }
+   ]
+  },
+  {
+   "node": 109004,
+   "tree": 852,
+   "class": "Rogue",
+   "options": [
+    {
+     "spell": 381630,
+     "name": "Intent to Kill"
+    },
+    {
+     "spell": 196861,
+     "name": "Iron Wire"
+    }
+   ]
+  },
+  {
+   "node": 95106,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Deathstalker",
+   "options": [
+    {
+     "spell": 457022,
+     "name": "Ethereal Cloak"
+    },
+    {
+     "spell": 457034,
+     "name": "Bait and Switch"
+    }
+   ]
+  },
+  {
+   "node": 95109,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Deathstalker",
+   "options": [
+    {
+     "spell": 457056,
+     "name": "Lingering Darkness"
+    },
+    {
+     "spell": 457062,
+     "name": "Symbolic Victory"
+    }
+   ]
+  },
+  {
+   "node": 95123,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Deathstalker",
+   "options": [
+    {
+     "spell": 457057,
+     "name": "Shadewalker"
+    },
+    {
+     "spell": 457063,
+     "name": "Shroud of Night"
+    }
+   ]
+  },
+  {
+   "node": 95131,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Deathstalker",
+   "options": [
+    {
+     "spell": 457067,
+     "name": "Momentum of Despair"
+    },
+    {
+     "spell": 457068,
+     "name": "Follow the Blood"
+    }
+   ]
+  },
+  {
+   "node": 95114,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Fatebound",
+   "options": [
+    {
+     "spell": 1249190,
+     "name": "Overflowing Purse"
+    },
+    {
+     "spell": 454435,
+     "name": "Destiny Defined"
+    }
+   ]
+  },
+  {
+   "node": 95130,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Fatebound",
+   "options": [
+    {
+     "spell": 454432,
+     "name": "Inexorable March"
+    },
+    {
+     "spell": 454433,
+     "name": "Death's Arrival"
+    }
+   ]
+  },
+  {
+   "node": 95138,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Fatebound",
+   "options": [
+    {
+     "spell": 1249201,
+     "name": "Chosen's Revelry"
+    },
+    {
+     "spell": 454286,
+     "name": "Tempted Fate"
+    }
+   ]
+  },
+  {
+   "node": 95116,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Trickster",
+   "options": [
+    {
+     "spell": 441429,
+     "name": "Cloud Cover"
+    },
+    {
+     "spell": 441398,
+     "name": "No Scruples"
+    }
+   ]
+  },
+  {
+   "node": 95134,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Trickster",
+   "options": [
+    {
+     "spell": 441403,
+     "name": "So Tricky"
+    },
+    {
+     "spell": 441415,
+     "name": "Don't Be Suspicious"
+    }
+   ]
+  },
+  {
+   "node": 95137,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Trickster",
+   "options": [
+    {
+     "spell": 441346,
+     "name": "Thousand Cuts"
+    },
+    {
+     "spell": 441359,
+     "name": "Flickerstrike"
+    }
+   ]
+  },
+  {
+   "node": 95141,
+   "tree": 852,
+   "class": "Rogue",
+   "heroTree": "Trickster",
+   "options": [
+    {
+     "spell": 441247,
+     "name": "Smoke"
+    },
+    {
+     "spell": 441250,
+     "name": "Mirrors"
+    }
+   ]
+  },
+  {
+   "node": 80984,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 8042,
+     "name": "Earth Shock"
+    },
+    {
+     "spell": 117014,
+     "name": "Elemental Blast"
+    }
+   ]
+  },
+  {
+   "node": 80985,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 462620,
+     "name": "Earthquake"
+    },
+    {
+     "spell": 61882,
+     "name": "Earthquake"
+    }
+   ]
+  },
+  {
+   "node": 80998,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 191717,
+     "name": "Fury of the Storms"
+    },
+    {
+     "spell": 468571,
+     "name": "Herald of the Storms"
+    }
+   ]
+  },
+  {
+   "node": 80999,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 1258843,
+     "name": "Molten Wrath"
+    },
+    {
+     "spell": 16166,
+     "name": "Master of the Elements"
+    }
+   ]
+  },
+  {
+   "node": 81000,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 1258899,
+     "name": "Tectonic Collapse"
+    },
+    {
+     "spell": 273221,
+     "name": "Aftershock"
+    }
+   ]
+  },
+  {
+   "node": 81031,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 382732,
+     "name": "Ancestral Reach"
+    },
+    {
+     "spell": 382039,
+     "name": "Flow of the Tides"
+    }
+   ]
+  },
+  {
+   "node": 81032,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 114052,
+     "name": "Ascendance"
+    },
+    {
+     "spell": 108280,
+     "name": "Healing Tide Totem"
+    }
+   ]
+  },
+  {
+   "node": 81033,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 462440,
+     "name": "First Ascendant"
+    },
+    {
+     "spell": 462443,
+     "name": "Preeminence"
+    }
+   ]
+  },
+  {
+   "node": 92219,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 378270,
+     "name": "Deeply Rooted Elements"
+    },
+    {
+     "spell": 114051,
+     "name": "Ascendance"
+    }
+   ]
+  },
+  {
+   "node": 103581,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 260878,
+     "name": "Spirit Wolf"
+    },
+    {
+     "spell": 378075,
+     "name": "Thunderous Paws"
+    }
+   ]
+  },
+  {
+   "node": 103591,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 58875,
+     "name": "Spirit Walk"
+    },
+    {
+     "spell": 192063,
+     "name": "Gust of Wind"
+    }
+   ]
+  },
+  {
+   "node": 103593,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 1217622,
+     "name": "Therazane's Resilience"
+    },
+    {
+     "spell": 462454,
+     "name": "Reactive Warding"
+    }
+   ]
+  },
+  {
+   "node": 103599,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 8143,
+     "name": "Tremor Totem"
+    },
+    {
+     "spell": 383013,
+     "name": "Poison Cleansing Totem"
+    }
+   ]
+  },
+  {
+   "node": 103607,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 462791,
+     "name": "Ascending Air"
+    },
+    {
+     "spell": 462817,
+     "name": "Jet Stream"
+    }
+   ]
+  },
+  {
+   "node": 103611,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 381647,
+     "name": "Planes Traveler"
+    },
+    {
+     "spell": 377933,
+     "name": "Astral Bulwark"
+    }
+   ]
+  },
+  {
+   "node": 103624,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 370,
+     "name": "Purge"
+    },
+    {
+     "spell": 378773,
+     "name": "Greater Purge"
+    }
+   ]
+  },
+  {
+   "node": 103626,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 192088,
+     "name": "Graceful Spirit"
+    },
+    {
+     "spell": 378077,
+     "name": "Spiritwalker's Aegis"
+    }
+   ]
+  },
+  {
+   "node": 103631,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 1258895,
+     "name": "Elemental Resonance"
+    },
+    {
+     "spell": 462757,
+     "name": "Thunderstrike Ward"
+    }
+   ]
+  },
+  {
+   "node": 103640,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 462440,
+     "name": "First Ascendant"
+    },
+    {
+     "spell": 462443,
+     "name": "Preeminence"
+    }
+   ]
+  },
+  {
+   "node": 109493,
+   "tree": 786,
+   "class": "Shaman",
+   "options": [
+    {
+     "spell": 462762,
+     "name": "Encasing Cold"
+    },
+    {
+     "spell": 462764,
+     "name": "Arctic Snowstorm"
+    }
+   ]
+  },
+  {
+   "node": 94858,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Farseer",
+   "options": [
+    {
+     "spell": 443442,
+     "name": "Natural Harmony"
+    },
+    {
+     "spell": 443441,
+     "name": "Earthen Communion"
+    }
+   ]
+  },
+  {
+   "node": 94862,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Farseer",
+   "options": [
+    {
+     "spell": 443449,
+     "name": "Latent Wisdom"
+    },
+    {
+     "spell": 443423,
+     "name": "Ancient Fellowship"
+    }
+   ]
+  },
+  {
+   "node": 94884,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Farseer",
+   "options": [
+    {
+     "spell": 443444,
+     "name": "Heed My Call"
+    },
+    {
+     "spell": 443445,
+     "name": "Routine Communication"
+    }
+   ]
+  },
+  {
+   "node": 94863,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Stormbringer",
+   "options": [
+    {
+     "spell": 467778,
+     "name": "Lightning Conduit"
+    },
+    {
+     "spell": 454022,
+     "name": "Electroshock"
+    }
+   ]
+  },
+  {
+   "node": 94873,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Stormbringer",
+   "options": [
+    {
+     "spell": 455088,
+     "name": "Storm Swell"
+    },
+    {
+     "spell": 455110,
+     "name": "Supercharge"
+    }
+   ]
+  },
+  {
+   "node": 94880,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Stormbringer",
+   "options": [
+    {
+     "spell": 454027,
+     "name": "Nature's Protection"
+    },
+    {
+     "spell": 454372,
+     "name": "Surging Currents"
+    }
+   ]
+  },
+  {
+   "node": 94859,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Totemic",
+   "options": [
+    {
+     "spell": 445026,
+     "name": "Oversized Totems"
+    },
+    {
+     "spell": 445027,
+     "name": "Swift Recall"
+    }
+   ]
+  },
+  {
+   "node": 94866,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Totemic",
+   "options": [
+    {
+     "spell": 445032,
+     "name": "Pulse Capacitor"
+    },
+    {
+     "spell": 445033,
+     "name": "Supportive Imbuements"
+    }
+   ]
+  },
+  {
+   "node": 94874,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Totemic",
+   "options": [
+    {
+     "spell": 445029,
+     "name": "Amplification Core"
+    },
+    {
+     "spell": 445030,
+     "name": "Oversurge"
+    }
+   ]
+  },
+  {
+   "node": 94881,
+   "tree": 786,
+   "class": "Shaman",
+   "heroTree": "Totemic",
+   "options": [
+    {
+     "spell": 445036,
+     "name": "Totemic Coordination"
+    },
+    {
+     "spell": 455590,
+     "name": "Earthsurge"
+    }
+   ]
+  },
+  {
+   "node": 71916,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 386648,
+     "name": "Nightmare"
+    },
+    {
+     "spell": 56244,
+     "name": "Horrify"
+    }
+   ]
+  },
+  {
+   "node": 71937,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 386664,
+     "name": "Ichor of Devils"
+    },
+    {
+     "spell": 386686,
+     "name": "Frequent Donor"
+    }
+   ]
+  },
+  {
+   "node": 71947,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 5484,
+     "name": "Howl of Terror"
+    },
+    {
+     "spell": 30283,
+     "name": "Shadowfury"
+    }
+   ]
+  },
+  {
+   "node": 71956,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 317138,
+     "name": "Strength of Will"
+    },
+    {
+     "spell": 386659,
+     "name": "Dark Accord"
+    }
+   ]
+  },
+  {
+   "node": 71960,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 417234,
+     "name": "Crashing Chaos"
+    },
+    {
+     "spell": 266086,
+     "name": "Rain of Chaos"
+    }
+   ]
+  },
+  {
+   "node": 71971,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 453105,
+     "name": "Summoner's Embrace"
+    },
+    {
+     "spell": 108503,
+     "name": "Grimoire of Sacrifice"
+    }
+   ]
+  },
+  {
+   "node": 71979,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 387506,
+     "name": "Mayhem"
+    },
+    {
+     "spell": 80240,
+     "name": "Havoc"
+    }
+   ]
+  },
+  {
+   "node": 71980,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 205148,
+     "name": "Reverse Entropy"
+    },
+    {
+     "spell": 266134,
+     "name": "Internal Combustion"
+    }
+   ]
+  },
+  {
+   "node": 72037,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 453105,
+     "name": "Summoner's Embrace"
+    },
+    {
+     "spell": 108503,
+     "name": "Grimoire of Sacrifice"
+    }
+   ]
+  },
+  {
+   "node": 72045,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 453080,
+     "name": "Improved Shadow Bolt"
+    },
+    {
+     "spell": 388667,
+     "name": "Drain Soul"
+    }
+   ]
+  },
+  {
+   "node": 72051,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 196103,
+     "name": "Absolute Corruption"
+    },
+    {
+     "spell": 452999,
+     "name": "Siphon Life"
+    }
+   ]
+  },
+  {
+   "node": 72064,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 1214442,
+     "name": "Demonfire Infusion"
+    },
+    {
+     "spell": 196447,
+     "name": "Channel Demonfire"
+    }
+   ]
+  },
+  {
+   "node": 72069,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 5740,
+     "name": "Rain of Fire"
+    },
+    {
+     "spell": 1214467,
+     "name": "Rain of Fire"
+    }
+   ]
+  },
+  {
+   "node": 101893,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 196277,
+     "name": "Implosion"
+    },
+    {
+     "spell": 264130,
+     "name": "Power Siphon"
+    }
+   ]
+  },
+  {
+   "node": 101895,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 455449,
+     "name": "Mark of Shatug"
+    },
+    {
+     "spell": 455450,
+     "name": "Mark of F'harg"
+    }
+   ]
+  },
+  {
+   "node": 108681,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 1280868,
+     "name": "Dimensional Rift"
+    },
+    {
+     "spell": 6353,
+     "name": "Soul Fire"
+    }
+   ]
+  },
+  {
+   "node": 109848,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 1265799,
+     "name": "Blight of Weakness"
+    },
+    {
+     "spell": 1271802,
+     "name": "Blight of Tongues"
+    }
+   ]
+  },
+  {
+   "node": 110197,
+   "tree": 720,
+   "class": "Warlock",
+   "options": [
+    {
+     "spell": 1276452,
+     "name": "Grimoire: Imp Lord"
+    },
+    {
+     "spell": 1276467,
+     "name": "Grimoire: Fel Ravager"
+    }
+   ]
+  },
+  {
+   "node": 94836,
+   "tree": 720,
+   "class": "Warlock",
+   "heroTree": "Diabolist",
+   "options": [
+    {
+     "spell": 428911,
+     "name": "Soul-Etched Circles"
+    },
+    {
+     "spell": 429072,
+     "name": "Annihilan's Bellow"
+    }
+   ]
+  },
+  {
+   "node": 94848,
+   "tree": 720,
+   "class": "Warlock",
+   "heroTree": "Diabolist",
+   "options": [
+    {
+     "spell": 429902,
+     "name": "Cruelty of Kerxan"
+    },
+    {
+     "spell": 429917,
+     "name": "Infernal Machine"
+    }
+   ]
+  },
+  {
+   "node": 94852,
+   "tree": 720,
+   "class": "Warlock",
+   "heroTree": "Diabolist",
+   "options": [
+    {
+     "spell": 429115,
+     "name": "Infernal Vitality"
+    },
+    {
+     "spell": 429130,
+     "name": "Infernal Bulwark"
+    }
+   ]
+  },
+  {
+   "node": 94822,
+   "tree": 720,
+   "class": "Warlock",
+   "heroTree": "Hellcaller",
+   "options": [
+    {
+     "spell": 440057,
+     "name": "Curse of the Satyr"
+    },
+    {
+     "spell": 440059,
+     "name": "Aura of Enfeeblement"
+    }
+   ]
+  },
+  {
+   "node": 94835,
+   "tree": 720,
+   "class": "Warlock",
+   "heroTree": "Hellcaller",
+   "options": [
+    {
+     "spell": 440065,
+     "name": "Zevrim's Resilience"
+    },
+    {
+     "spell": 440070,
+     "name": "Illhoof's Design"
+    }
+   ]
+  },
+  {
+   "node": 94854,
+   "tree": 720,
+   "class": "Warlock",
+   "heroTree": "Hellcaller",
+   "options": [
+    {
+     "spell": 440048,
+     "name": "Hatefury Rituals"
+    },
+    {
+     "spell": 440051,
+     "name": "Bleakheart Tactics"
+    }
+   ]
+  },
+  {
+   "node": 94823,
+   "tree": 720,
+   "class": "Warlock",
+   "heroTree": "Soul Harvester",
+   "options": [
+    {
+     "spell": 449704,
+     "name": "Shared Fate"
+    },
+    {
+     "spell": 449706,
+     "name": "Feast of Souls"
+    }
+   ]
+  },
+  {
+   "node": 94824,
+   "tree": 720,
+   "class": "Warlock",
+   "heroTree": "Soul Harvester",
+   "options": [
+    {
+     "spell": 449707,
+     "name": "Eternal Servitude"
+    },
+    {
+     "spell": 389623,
+     "name": "Gorefiend's Resolve"
+    }
+   ]
+  },
+  {
+   "node": 94850,
+   "tree": 720,
+   "class": "Warlock",
+   "heroTree": "Soul Harvester",
+   "options": [
+    {
+     "spell": 449701,
+     "name": "Gorebound Fortitude"
+    },
+    {
+     "spell": 449703,
+     "name": "Friends In Dark Places"
+    }
+   ]
+  },
+  {
+   "node": 90264,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 385704,
+     "name": "Bloodborne"
+    },
+    {
+     "spell": 29725,
+     "name": "Sudden Death"
+    }
+   ]
+  },
+  {
+   "node": 90276,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 383103,
+     "name": "Fueled by Violence"
+    },
+    {
+     "spell": 1277297,
+     "name": "Ignore Pain"
+    }
+   ]
+  },
+  {
+   "node": 90312,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 203177,
+     "name": "Heavy Repercussions"
+    },
+    {
+     "spell": 202603,
+     "name": "Into the Fray"
+    }
+   ]
+  },
+  {
+   "node": 90318,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 397103,
+     "name": "Defender's Aegis"
+    },
+    {
+     "spell": 384072,
+     "name": "Impenetrable Wall"
+    }
+   ]
+  },
+  {
+   "node": 90348,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 384100,
+     "name": "Berserker Shout"
+    },
+    {
+     "spell": 1271925,
+     "name": "Fearless"
+    }
+   ]
+  },
+  {
+   "node": 90351,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 384110,
+     "name": "Wrecking Throw"
+    },
+    {
+     "spell": 64382,
+     "name": "Shattering Throw"
+    }
+   ]
+  },
+  {
+   "node": 90398,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 383848,
+     "name": "Frenzied Enrage"
+    },
+    {
+     "spell": 440277,
+     "name": "Powerful Enrage"
+    }
+   ]
+  },
+  {
+   "node": 90415,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 107574,
+     "name": "Avatar"
+    },
+    {
+     "spell": 227847,
+     "name": "Bladestorm"
+    }
+   ]
+  },
+  {
+   "node": 90432,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 1235113,
+     "name": "Whirling Blade"
+    },
+    {
+     "spell": 228920,
+     "name": "Ravager"
+    }
+   ]
+  },
+  {
+   "node": 90441,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 227847,
+     "name": "Bladestorm"
+    },
+    {
+     "spell": 228920,
+     "name": "Ravager"
+    }
+   ]
+  },
+  {
+   "node": 90450,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 1235023,
+     "name": "Spellbreaker"
+    },
+    {
+     "spell": 1235022,
+     "name": "Hunker Down"
+    }
+   ]
+  },
+  {
+   "node": 92614,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 400205,
+     "name": "Overpowering Finish"
+    },
+    {
+     "spell": 1273075,
+     "name": "Mass Execution"
+    }
+   ]
+  },
+  {
+   "node": 108674,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 3411,
+     "name": "Intervene"
+    },
+    {
+     "spell": 1244088,
+     "name": "Interpose"
+    }
+   ]
+  },
+  {
+   "node": 108676,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 3411,
+     "name": "Intervene"
+    },
+    {
+     "spell": 1244088,
+     "name": "Interpose"
+    }
+   ]
+  },
+  {
+   "node": 108705,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 5246,
+     "name": "Intimidating Shout"
+    },
+    {
+     "spell": 12323,
+     "name": "Piercing Howl"
+    }
+   ]
+  },
+  {
+   "node": 109681,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 1261046,
+     "name": "Brute Force"
+    },
+    {
+     "spell": 1261047,
+     "name": "Efficiency"
+    }
+   ]
+  },
+  {
+   "node": 109683,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 1261051,
+     "name": "Tactical Edge"
+    },
+    {
+     "spell": 1261056,
+     "name": "Crushing Combo"
+    }
+   ]
+  },
+  {
+   "node": 109686,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 1261048,
+     "name": "Just Warming Up"
+    },
+    {
+     "spell": 1261049,
+     "name": "Broad Strokes"
+    }
+   ]
+  },
+  {
+   "node": 109967,
+   "tree": 850,
+   "class": "Warrior",
+   "options": [
+    {
+     "spell": 280392,
+     "name": "Meat Cleaver"
+    },
+    {
+     "spell": 1300463,
+     "name": "Carving Blades"
+    }
+   ]
+  },
+  {
+   "node": 94789,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Colossus",
+   "options": [
+    {
+     "spell": 429639,
+     "name": "Boneshaker"
+    },
+    {
+     "spell": 440992,
+     "name": "Earthquaker"
+    }
+   ]
+  },
+  {
+   "node": 94799,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Colossus",
+   "options": [
+    {
+     "spell": 429637,
+     "name": "One Against Many"
+    },
+    {
+     "spell": 440995,
+     "name": "Arterial Bleed"
+    }
+   ]
+  },
+  {
+   "node": 94815,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Colossus",
+   "options": [
+    {
+     "spell": 429644,
+     "name": "No Stranger to Pain"
+    },
+    {
+     "spell": 440993,
+     "name": "Veteran Vitality"
+    }
+   ]
+  },
+  {
+   "node": 94792,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Mountain Thane",
+   "options": [
+    {
+     "spell": 436201,
+     "name": "Gathering Clouds"
+    },
+    {
+     "spell": 436152,
+     "name": "Thorim's Might"
+    }
+   ]
+  },
+  {
+   "node": 94797,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Mountain Thane",
+   "options": [
+    {
+     "spell": 437079,
+     "name": "Flashing Skies"
+    },
+    {
+     "spell": 456270,
+     "name": "Snap Induction"
+    }
+   ]
+  },
+  {
+   "node": 94798,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Mountain Thane",
+   "options": [
+    {
+     "spell": 438590,
+     "name": "Keep Your Feet on the Ground"
+    },
+    {
+     "spell": 434970,
+     "name": "Steadfast as the Peaks"
+    }
+   ]
+  },
+  {
+   "node": 94817,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Mountain Thane",
+   "options": [
+    {
+     "spell": 436162,
+     "name": "Storm Bolts"
+    },
+    {
+     "spell": 438597,
+     "name": "Storm Shield"
+    }
+   ]
+  },
+  {
+   "node": 94786,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Slayer",
+   "options": [
+    {
+     "spell": 444778,
+     "name": "Culling Cyclone"
+    },
+    {
+     "spell": 446085,
+     "name": "Brutal Finish"
+    }
+   ]
+  },
+  {
+   "node": 94787,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Slayer",
+   "options": [
+    {
+     "spell": 444773,
+     "name": "Fierce Followthrough"
+    },
+    {
+     "spell": 444774,
+     "name": "Opportunist"
+    }
+   ]
+  },
+  {
+   "node": 94795,
+   "tree": 850,
+   "class": "Warrior",
+   "heroTree": "Slayer",
+   "options": [
+    {
+     "spell": 444776,
+     "name": "Relentless Pursuit"
+    },
+    {
+     "spell": 444777,
+     "name": "Vicious Agility"
+    }
+   ]
+  }
+ ],
+ "byName": {
+  "A Feast of Souls": [
+   "Fury of the Horsemen"
+  ],
+  "Abomination Limb": [
+   "Gorefiend's Grasp"
+  ],
+  "Absolute Corruption": [
+   "Siphon Life"
+  ],
+  "Adjudication": [
+   "Sweeping Verdict"
+  ],
+  "Aegwynn's Technique": [
+   "Arcane Echo"
+  ],
+  "Aetherial Kindling": [
+   "Meteor Storm"
+  ],
+  "Afterimage": [
+   "Healing Hands"
+  ],
+  "Aftershock": [
+   "Tectonic Collapse"
+  ],
+  "Airborne Irritant": [
+   "Gouge"
+  ],
+  "Airborne Rhythm": [
+   "Hurricane's Vault"
+  ],
+  "Amplification Core": [
+   "Oversurge"
+  ],
+  "Ancestral Reach": [
+   "Flow of the Tides"
+  ],
+  "Ancient Fellowship": [
+   "Latent Wisdom"
+  ],
+  "Ancient Madness": [
+   "Improved Voidform"
+  ],
+  "Animal Companion": [
+   "Solitary Companion"
+  ],
+  "Annihilan's Bellow": [
+   "Soul-Etched Circles"
+  ],
+  "Arcane Affinity": [
+   "Lunation"
+  ],
+  "Arcane Echo": [
+   "Aegwynn's Technique"
+  ],
+  "Archangel": [
+   "Mindbender"
+  ],
+  "Arctic Snowstorm": [
+   "Encasing Cold"
+  ],
+  "Army Unto Oneself": [
+   "Incorruptible Spirit"
+  ],
+  "Art of War": [
+   "Righteous Cause"
+  ],
+  "Arterial Bleed": [
+   "One Against Many"
+  ],
+  "Ascendance": [
+   "Healing Tide Totem",
+   "Deeply Rooted Elements"
+  ],
+  "Ascending Air": [
+   "Jet Stream"
+  ],
+  "Aspect of the Hydra": [
+   "Trick Shots"
+  ],
+  "Asphyxiate": [
+   "Death's Reach"
+  ],
+  "Astral Bulwark": [
+   "Planes Traveler"
+  ],
+  "Astral Insight": [
+   "The Light of Elune"
+  ],
+  "Atrophic Poison": [
+   "Numbing Poison"
+  ],
+  "Attuned Familiar": [
+   "Shifting Shards"
+  ],
+  "Aura of Enfeeblement": [
+   "Curse of the Satyr"
+  ],
+  "Authoritative Rebuke": [
+   "Tempered in Battle"
+  ],
+  "Avatar": [
+   "Bladestorm"
+  ],
+  "Avenging Crusader": [
+   "Avenging Wrath"
+  ],
+  "Avenging Wrath": [
+   "Avenging Crusader"
+  ],
+  "Avian Specialization": [
+   "Unbreakable Bond"
+  ],
+  "Awakening": [
+   "Sanctified Wrath"
+  ],
+  "Awakening Spirit": [
+   "Vital Flame"
+  ],
+  "Bait and Switch": [
+   "Ethereal Cloak"
+  ],
+  "Banshee's Mark": [
+   "The Bell Tolls"
+  ],
+  "Beacon of Faith": [
+   "Beacon of Virtue"
+  ],
+  "Beacon of Virtue": [
+   "Beacon of Faith"
+  ],
+  "Benevolence": [
+   "Focused Power"
+  ],
+  "Berserker Shout": [
+   "Fearless"
+  ],
+  "Black Ox Brew": [
+   "Bob and Weave"
+  ],
+  "Blackjack": [
+   "Tricks of the Trade"
+  ],
+  "Blackout Combo": [
+   "Press the Advantage"
+  ],
+  "Blackrock Munitions": [
+   "Vulnerability"
+  ],
+  "Bladestorm": [
+   "Avatar",
+   "Ravager"
+  ],
+  "Bleakheart Tactics": [
+   "Hatefury Rituals"
+  ],
+  "Blessed Assurance": [
+   "Divine Guidance"
+  ],
+  "Blessed Hammer": [
+   "Hammer of the Righteous"
+  ],
+  "Blessed Word": [
+   "Valiant Crusade"
+  ],
+  "Blessing of An'she": [
+   "Lingering Radiance"
+  ],
+  "Blessing of Freedom": [
+   "Steed of Liberty"
+  ],
+  "Blessing of Spellwarding": [
+   "Uther's Counsel"
+  ],
+  "Blight of Tongues": [
+   "Blight of Weakness"
+  ],
+  "Blight of Weakness": [
+   "Blight of Tongues"
+  ],
+  "Blinding Powder": [
+   "Retractable Hook"
+  ],
+  "Blizzard": [],
+  "Blood-Soaked Ground": [
+   "Desecrate"
+  ],
+  "Bloodborne": [
+   "Sudden Death"
+  ],
+  "Bloody Claws": [
+   "Wallop"
+  ],
+  "Bloody Fortitude": [
+   "Vampiric Aura"
+  ],
+  "Bob and Weave": [
+   "Black Ox Brew"
+  ],
+  "Bond with Nature": [
+   "Harmonious Constitution"
+  ],
+  "Bonds of Fellowship": [
+   "Unrelenting Charger"
+  ],
+  "Boneshaker": [
+   "Earthquaker"
+  ],
+  "Boundless Judgment": [
+   "Improved Judgment"
+  ],
+  "Bounteous Bloom": [
+   "Early Spring"
+  ],
+  "Brambles": [
+   "Ward of the Forest"
+  ],
+  "Bright Pupil": [
+   "Enduring Luminescence"
+  ],
+  "Bristling Fur": [
+   "Reinforced Fur"
+  ],
+  "Broad Strokes": [
+   "Just Warming Up"
+  ],
+  "Brutal Finish": [
+   "Culling Cyclone"
+  ],
+  "Brute Force": [
+   "Efficiency"
+  ],
+  "Burn It All": [
+   "Slow Burn"
+  ],
+  "Burn It Out": [
+   "Soul Cleanse"
+  ],
+  "Burst of Life": [
+   "Chrysalis"
+  ],
+  "Calling the Shots": [
+   "Unerring Vision"
+  ],
+  "Calming Coalescence": [
+   "Refreshment"
+  ],
+  "Canny Strikes": [
+   "Internal Bleeding"
+  ],
+  "Carving Blades": [
+   "Meat Cleaver"
+  ],
+  "Celerity": [
+   "Chi Torpedo"
+  ],
+  "Celestial Brew": [
+   "Celestial Infusion"
+  ],
+  "Celestial Infusion": [
+   "Celestial Brew"
+  ],
+  "Champion of the Glaive": [
+   "Master of the Glaive"
+  ],
+  "Channel Demonfire": [
+   "Demonfire Infusion"
+  ],
+  "Chaos Theory": [
+   "Inner Demon"
+  ],
+  "Charged Missiles": [
+   "High Voltage"
+  ],
+  "Charred Passions": [
+   "Dragonfire Brew"
+  ],
+  "Cheat Death": [
+   "Elusiveness"
+  ],
+  "Chi Burst": [
+   "Chi Wave"
+  ],
+  "Chi Torpedo": [
+   "Celerity"
+  ],
+  "Chi Wave": [
+   "Chi Burst"
+  ],
+  "Chomp": [
+   "Lunar Inspiration"
+  ],
+  "Chosen's Revelry": [
+   "Tempted Fate"
+  ],
+  "Chrono Ward": [
+   "Perilous Fate"
+  ],
+  "Chrysalis": [
+   "Burst of Life"
+  ],
+  "Circle of the Heavens": [
+   "Circle of the Wild"
+  ],
+  "Circle of the Wild": [
+   "Circle of the Heavens"
+  ],
+  "Cloaked in Shadows": [
+   "Fade to Nothing"
+  ],
+  "Cloud Cover": [
+   "No Scruples"
+  ],
+  "Cobra Senses": [
+   "Snakeskin Quiver"
+  ],
+  "Cold Snap": [
+   "Glacial Bulwark"
+  ],
+  "Collective Anguish": [
+   "Shattered Destiny"
+  ],
+  "Combat Stamina": [
+   "Hit and Run"
+  ],
+  "Combat Stance": [
+   "Initiator's Edge"
+  ],
+  "Conditioning": [
+   "Scout's Vigil"
+  ],
+  "Control of the Dream": [
+   "Power of the Dream"
+  ],
+  "Convoke the Spirits": [
+   "Incarnation: Tree of Life",
+   "Incarnation: Avatar of Ashamane",
+   "Incarnation: Guardian of Ursoc",
+   "Incarnation: Chosen of Elune"
+  ],
+  "Crashing Chaos": [
+   "Rain of Chaos"
+  ],
+  "Crashing Fists": [
+   "Cyclone's Drift"
+  ],
+  "Crashing Momentum": [
+   "Disable"
+  ],
+  "Cruelty of Kerxan": [
+   "Infernal Machine"
+  ],
+  "Crusader's Might": [
+   "Liberation"
+  ],
+  "Crusader's Resolve": [
+   "Strength in Adversity"
+  ],
+  "Crusading Strikes": [
+   "Templar Strikes"
+  ],
+  "Crushing Combo": [
+   "Tactical Edge"
+  ],
+  "Culling Cyclone": [
+   "Brutal Finish"
+  ],
+  "Cunning": [
+   "Tenacious"
+  ],
+  "Curse of the Satyr": [
+   "Aura of Enfeeblement"
+  ],
+  "Cyclone": [
+   "Soothe"
+  ],
+  "Cyclone's Drift": [
+   "Crashing Fists"
+  ],
+  "Dancing Mists": [
+   "Vital Expenditure"
+  ],
+  "Dark Accord": [
+   "Strength of Will"
+  ],
+  "Dark Chains": [
+   "Shadow Dagger"
+  ],
+  "Dark Energy": [
+   "No Escape"
+  ],
+  "Dark Talons": [
+   "Reaper's Onslaught"
+  ],
+  "Darkening Horizon": [
+   "Void Empowerment"
+  ],
+  "Death Charge": [
+   "On a Paler Horse"
+  ],
+  "Death and Madness": [
+   "Deathspeaker"
+  ],
+  "Death's Arrival": [
+   "Inexorable March"
+  ],
+  "Death's Messenger": [
+   "Expelling Shield"
+  ],
+  "Death's Reach": [
+   "Asphyxiate"
+  ],
+  "Deathspeaker": [
+   "Death and Madness"
+  ],
+  "Deeply Rooted Elements": [
+   "Ascendance"
+  ],
+  "Defender's Aegis": [
+   "Impenetrable Wall"
+  ],
+  "Deflecting Dance": [
+   "Mortal Dance"
+  ],
+  "Delay Harm": [
+   "Just in Time"
+  ],
+  "Demonfire Infusion": [
+   "Channel Demonfire"
+  ],
+  "Desecrate": [
+   "Blood-Soaked Ground"
+  ],
+  "Desperate Measures": [
+   "Prophet's Will"
+  ],
+  "Destiny Defined": [
+   "Overflowing Purse"
+  ],
+  "Devilsaur Tranquilizer": [
+   "Kodo Tranquilizer"
+  ],
+  "Dimensional Rift": [
+   "Soul Fire"
+  ],
+  "Disable": [
+   "Crashing Momentum"
+  ],
+  "Dispersing Light": [
+   "Trail of Light"
+  ],
+  "Distorted Reality": [
+   "Mind's Eye"
+  ],
+  "Diverted Power": [
+   "Extended Battle"
+  ],
+  "Divine Exaction": [
+   "Seal of the Templar"
+  ],
+  "Divine Feathers": [
+   "Save the Day"
+  ],
+  "Divine Guidance": [
+   "Blessed Assurance"
+  ],
+  "Divine Inspiration": [
+   "Forewarning"
+  ],
+  "Divine Purpose": [
+   "Sacred Strength"
+  ],
+  "Divine Resonance": [
+   "Quickened Invocation"
+  ],
+  "Divine Toll": [
+   "Holy Prism"
+  ],
+  "Divinity": [
+   "Eternal Sanctity"
+  ],
+  "Dominate Mind": [
+   "Mind Control"
+  ],
+  "Don't Be Suspicious": [
+   "So Tricky"
+  ],
+  "Doomsayer": [
+   "Harness the Cosmos"
+  ],
+  "Double-time": [
+   "Time Convergence"
+  ],
+  "Draconic Instincts": [
+   "Lifecinders"
+  ],
+  "Dragon's Breath": [
+   "Supernova"
+  ],
+  "Dragonfire Brew": [
+   "Charred Passions"
+  ],
+  "Drain Soul": [
+   "Improved Shadow Bolt"
+  ],
+  "Dream Flight": [
+   "Stasis"
+  ],
+  "Dream Guide": [
+   "Dream of Cenarius"
+  ],
+  "Dream Simulacrum": [
+   "Wings of Liberty"
+  ],
+  "Dream of Cenarius": [
+   "Dream Guide"
+  ],
+  "Dream of Spring": [
+   "Prolong Life"
+  ],
+  "Drinking Horn Cover": [
+   "Spiritual Focus"
+  ],
+  "Durability of Nature": [
+   "Power of Nature"
+  ],
+  "Duty Eternal": [
+   "Scythe's Embrace"
+  ],
+  "Early Spring": [
+   "Bounteous Bloom"
+  ],
+  "Earth Shock": [
+   "Elemental Blast"
+  ],
+  "Earthen Communion": [
+   "Natural Harmony"
+  ],
+  "Earthquake": [],
+  "Earthquaker": [
+   "Boneshaker"
+  ],
+  "Earthsurge": [
+   "Totemic Coordination"
+  ],
+  "Ebon Bowstring": [
+   "Through the Eyes"
+  ],
+  "Echo Technique": [
+   "Revolving Whirl"
+  ],
+  "Echoing Blessings": [
+   "Unbound Freedom"
+  ],
+  "Echoing Reprimand": [
+   "Forced Induction"
+  ],
+  "Echoing Strike": [
+   "Pupil of Alexstrasza"
+  ],
+  "Efficiency": [
+   "Brute Force"
+  ],
+  "Electroshock": [
+   "Lightning Conduit"
+  ],
+  "Elemental Affinity": [
+   "Flame and Frost"
+  ],
+  "Elemental Blast": [
+   "Earth Shock"
+  ],
+  "Elemental Resonance": [
+   "Thunderstrike Ward"
+  ],
+  "Elune's Challenge": [
+   "Nature's Grace"
+  ],
+  "Elune's Grace": [
+   "Moondust"
+  ],
+  "Elusiveness": [
+   "Cheat Death"
+  ],
+  "Embrace the Shadow": [
+   "Void Leech"
+  ],
+  "Empath": [
+   "Spiritual Clarity"
+  ],
+  "Emperor's Favor": [
+   "Legacy of Wisdom"
+  ],
+  "Empowered Shapeshifting": [
+   "Wildpower Surge"
+  ],
+  "Emptiness": [
+   "Soul Glutton"
+  ],
+  "Encasing Cold": [
+   "Arctic Snowstorm"
+  ],
+  "Endless Wrath": [
+   "Sanctification"
+  ],
+  "Enduring Luminescence": [
+   "Bright Pupil"
+  ],
+  "Energizing Brew": [
+   "Lifecycles"
+  ],
+  "Energy Compression": [
+   "Sustained Potency"
+  ],
+  "Enkindle": [
+   "Expanded Lungs"
+  ],
+  "Entangling Vortex": [
+   "Flower Walk"
+  ],
+  "Ephemeral Bond": [
+   "Quick Decisions"
+  ],
+  "Escape from Reality": [
+   "Transcendence: Linked Spirits"
+  ],
+  "Eternal Sanctity": [
+   "Divinity"
+  ],
+  "Eternal Servitude": [
+   "Gorefiend's Resolve"
+  ],
+  "Ethereal Cloak": [
+   "Bait and Switch"
+  ],
+  "Evasive Action": [
+   "Unhindered Assault"
+  ],
+  "Event Horizon": [
+   "Eye of Infinity"
+  ],
+  "Evocation": [
+   "Mana Adept"
+  ],
+  "Exergy": [
+   "Inertia"
+  ],
+  "Exhilarating Execution": [
+   "Shot in the Dark"
+  ],
+  "Expanded Lungs": [
+   "Enkindle"
+  ],
+  "Expeditious Fortification": [
+   "Ironshell Brew"
+  ],
+  "Expelling Shield": [
+   "Death's Messenger"
+  ],
+  "Explosive Potential": [
+   "Lessons in Debilitation"
+  ],
+  "Extended Battle": [
+   "Diverted Power"
+  ],
+  "Eye of Infinity": [
+   "Event Horizon"
+  ],
+  "Fade to Nothing": [
+   "Cloaked in Shadows"
+  ],
+  "Fearless": [
+   "Berserker Shout"
+  ],
+  "Feast of Souls": [
+   "Shared Fate"
+  ],
+  "Fierce Followthrough": [
+   "Opportunist"
+  ],
+  "Finish the Job": [
+   "Negotiable Contract"
+  ],
+  "First Ascendant": [
+   "Preeminence"
+  ],
+  "Flame and Frost": [
+   "Elemental Affinity"
+  ],
+  "Flamebound": [
+   "Student of Suffering"
+  ],
+  "Flamebreak": [
+   "Shrapnel Bomb"
+  ],
+  "Flamestrike": [],
+  "Flashing Skies": [
+   "Snap Induction"
+  ],
+  "Flickering Steel": [
+   "Thief's Versatility"
+  ],
+  "Flickerstrike": [
+   "Thousand Cuts"
+  ],
+  "Flow of the Tides": [
+   "Ancestral Reach"
+  ],
+  "Flower Walk": [
+   "Entangling Vortex"
+  ],
+  "Fluidity of Motion": [
+   "Shadowboxing Treads"
+  ],
+  "Flying Daggers": [
+   "Secondary Poisoning"
+  ],
+  "Focused Enmity": [
+   "Soaring Shield"
+  ],
+  "Focused Frenzy": [
+   "Frantic Frenzy"
+  ],
+  "Focused Power": [
+   "Benevolence"
+  ],
+  "Follow the Blood": [
+   "Momentum of Despair"
+  ],
+  "Forced Induction": [
+   "Echoing Reprimand"
+  ],
+  "Forewarning": [
+   "Divine Inspiration"
+  ],
+  "Frantic Frenzy": [
+   "Focused Frenzy"
+  ],
+  "Freezing Cold": [
+   "Ice Nova"
+  ],
+  "Frenzied Enrage": [
+   "Powerful Enrage"
+  ],
+  "Frequent Donor": [
+   "Ichor of Devils"
+  ],
+  "Friends In Dark Places": [
+   "Gorebound Fortitude"
+  ],
+  "Frigid Focus": [
+   "Splintering Ray"
+  ],
+  "Fueled by Violence": [
+   "Ignore Pain"
+  ],
+  "Fury of Elune": [
+   "New Moon"
+  ],
+  "Fury of the Horsemen": [
+   "A Feast of Souls"
+  ],
+  "Fury of the Storms": [
+   "Herald of the Storms"
+  ],
+  "Gale Winds": [
+   "Incessant Tempest"
+  ],
+  "Gales of Song": [
+   "Seraphic Crescendo"
+  ],
+  "Gathering Clouds": [
+   "Thorim's Might"
+  ],
+  "Gift of an Ancient Guardian": [
+   "Guardian of Elune"
+  ],
+  "Gift of the Celestials": [
+   "Jade Bond"
+  ],
+  "Glacial Bulwark": [
+   "Cold Snap"
+  ],
+  "Glacial Chill": [
+   "Glacial Shatter"
+  ],
+  "Glacial Shatter": [
+   "Glacial Chill"
+  ],
+  "Gleaming Rays": [
+   "Morning Star"
+  ],
+  "Golden Path": [
+   "Selfless Healer"
+  ],
+  "Gorebound Fortitude": [
+   "Friends In Dark Places"
+  ],
+  "Gorefiend's Grasp": [
+   "Abomination Limb"
+  ],
+  "Gorefiend's Resolve": [
+   "Eternal Servitude"
+  ],
+  "Gory Fur": [
+   "Ursoc's Endurance"
+  ],
+  "Gouge": [
+   "Airborne Irritant"
+  ],
+  "Graceful Spirit": [
+   "Spiritwalker's Aegis"
+  ],
+  "Grave Mastery": [
+   "Plague Mastery"
+  ],
+  "Greater Purge": [
+   "Purge"
+  ],
+  "Grimoire of Sacrifice": [
+   "Summoner's Embrace"
+  ],
+  "Grimoire: Fel Ravager": [
+   "Grimoire: Imp Lord"
+  ],
+  "Grimoire: Imp Lord": [
+   "Grimoire: Fel Ravager"
+  ],
+  "Grove's Inspiration": [
+   "Potent Enchantments"
+  ],
+  "Guardian Angel": [
+   "Restitution"
+  ],
+  "Guardian of Elune": [
+   "Gift of an Ancient Guardian"
+  ],
+  "Guardian's Hide": [
+   "Roar of Sacrifice"
+  ],
+  "Gust of Wind": [
+   "Spirit Walk"
+  ],
+  "Guttural Roar": [
+   "Territorial Instincts"
+  ],
+  "Hammer of the Righteous": [
+   "Blessed Hammer"
+  ],
+  "Hand of Divinity": [
+   "Tyr's Deliverance"
+  ],
+  "Hand of the Protector": [
+   "Searing Sunlight"
+  ],
+  "Hardened Scales": [
+   "Menacing Presence"
+  ],
+  "Harmonic Gambit": [
+   "Purified Spirit"
+  ],
+  "Harmonious Constitution": [
+   "Bond with Nature"
+  ],
+  "Harness the Cosmos": [
+   "Doomsayer"
+  ],
+  "Hasty Provocation": [
+   "Quick Footed"
+  ],
+  "Hatefury Rituals": [
+   "Bleakheart Tactics"
+  ],
+  "Havoc": [
+   "Mayhem"
+  ],
+  "Healing Hands": [
+   "Afterimage"
+  ],
+  "Healing Tide Totem": [
+   "Ascendance"
+  ],
+  "Heavy Repercussions": [
+   "Into the Fray"
+  ],
+  "Heed My Call": [
+   "Routine Communication"
+  ],
+  "Heightened Alteration": [
+   "Word of Supremacy"
+  ],
+  "Heightened Rush": [
+   "Menacing Rush"
+  ],
+  "Herald of the Storms": [
+   "Fury of the Storms"
+  ],
+  "High Impact": [
+   "Pride of Pandaria"
+  ],
+  "High Voltage": [
+   "Charged Missiles"
+  ],
+  "Hit and Run": [
+   "Combat Stamina"
+  ],
+  "Holy Blade": [
+   "Improved Blade of Justice"
+  ],
+  "Holy Prism": [
+   "Divine Toll"
+  ],
+  "Hoof and Blade": [
+   "Wyvern's Gaze"
+  ],
+  "Horrify": [
+   "Nightmare"
+  ],
+  "Horsehair Tether": [
+   "Tar-Coated Bindings"
+  ],
+  "Horsemen's Aid": [
+   "Pact of the Apocalypse"
+  ],
+  "Howl of Terror": [
+   "Shadowfury"
+  ],
+  "Hunker Down": [
+   "Spellbreaker"
+  ],
+  "Hurricane's Vault": [
+   "Airborne Rhythm"
+  ],
+  "Ice Nova": [
+   "Freezing Cold"
+  ],
+  "Ice Ward": [
+   "Improved Frost Nova"
+  ],
+  "Ichor of Devils": [
+   "Frequent Donor"
+  ],
+  "Ignore Pain": [
+   "Fueled by Violence"
+  ],
+  "Illhoof's Design": [
+   "Zevrim's Resilience"
+  ],
+  "Illumine": [
+   "Will of the Dawn"
+  ],
+  "Imbued Shield": [
+   "Redoubt"
+  ],
+  "Imbued Warding": [
+   "Meltdown"
+  ],
+  "Impenetrable Wall": [
+   "Defender's Aegis"
+  ],
+  "Implant": [
+   "Twin Sprouts"
+  ],
+  "Implosion": [
+   "Power Siphon"
+  ],
+  "Improved Ambush": [
+   "Tight Spender"
+  ],
+  "Improved Ardent Defender": [
+   "Seal of Reprisal"
+  ],
+  "Improved Blade of Justice": [
+   "Holy Blade"
+  ],
+  "Improved Blink": [
+   "Shimmer"
+  ],
+  "Improved Frost Nova": [
+   "Ice Ward"
+  ],
+  "Improved Ironbark": [
+   "Stonebark"
+  ],
+  "Improved Judgment": [
+   "Boundless Judgment"
+  ],
+  "Improved Shadow Bolt": [
+   "Drain Soul"
+  ],
+  "Improved Soul Rending": [
+   "Set Fire to the Pain"
+  ],
+  "Improved Voidform": [
+   "Ancient Madness"
+  ],
+  "Incapacitating Roar": [
+   "Mighty Bash"
+  ],
+  "Incarnation: Avatar of Ashamane": [
+   "Convoke the Spirits"
+  ],
+  "Incarnation: Chosen of Elune": [
+   "Convoke the Spirits"
+  ],
+  "Incarnation: Guardian of Ursoc": [
+   "Convoke the Spirits"
+  ],
+  "Incarnation: Tree of Life": [
+   "Convoke the Spirits"
+  ],
+  "Incessant Screams": [
+   "Shock Pulse"
+  ],
+  "Incessant Tempest": [
+   "Gale Winds"
+  ],
+  "Incorruptible Spirit": [
+   "Army Unto Oneself"
+  ],
+  "Inertia": [
+   "Exergy"
+  ],
+  "Inexorable March": [
+   "Death's Arrival"
+  ],
+  "Infernal Bulwark": [
+   "Infernal Vitality"
+  ],
+  "Infernal Machine": [
+   "Cruelty of Kerxan"
+  ],
+  "Infernal Vitality": [
+   "Infernal Bulwark"
+  ],
+  "Initiator's Edge": [
+   "Combat Stance"
+  ],
+  "Inner Demon": [
+   "Chaos Theory"
+  ],
+  "Inspiring Strike": [
+   "Poisoner's Drive"
+  ],
+  "Instrument of the Divine": [
+   "Solace"
+  ],
+  "Intangibility": [
+   "Mental Fortitude"
+  ],
+  "Intent to Kill": [
+   "Iron Wire"
+  ],
+  "Internal Bleeding": [
+   "Canny Strikes"
+  ],
+  "Internal Combustion": [
+   "Reverse Entropy"
+  ],
+  "Interpose": [
+   "Intervene"
+  ],
+  "Intervene": [
+   "Interpose"
+  ],
+  "Interwoven Threads": [
+   "Tomorrow, Today"
+  ],
+  "Intimidating Shout": [
+   "Piercing Howl"
+  ],
+  "Into the Fray": [
+   "Heavy Repercussions"
+  ],
+  "Invoke Chi-Ji, the Red Crane": [
+   "Invoke Yu'lon, the Jade Serpent"
+  ],
+  "Invoke Yu'lon, the Jade Serpent": [
+   "Invoke Chi-Ji, the Red Crane"
+  ],
+  "Invoked Nightmare": [
+   "Misery"
+  ],
+  "Iron Wire": [
+   "Intent to Kill"
+  ],
+  "Ironshell Brew": [
+   "Expeditious Fortification"
+  ],
+  "Jade Bond": [
+   "Gift of the Celestials"
+  ],
+  "Jade Empowerment": [
+   "Morning Breeze"
+  ],
+  "Jade Infusion": [
+   "Summon Jade Serpent Statue"
+  ],
+  "Jade Sanctuary": [
+   "Niuzao's Protection"
+  ],
+  "Jadefire Teachings": [
+   "Rushing Wind Kick"
+  ],
+  "Jet Stream": [
+   "Ascending Air"
+  ],
+  "Just Warming Up": [
+   "Broad Strokes"
+  ],
+  "Just in Time": [
+   "Delay Harm"
+  ],
+  "Keen Engagement": [
+   "Preemptive Strike"
+  ],
+  "Keep Your Feet on the Ground": [
+   "Steadfast as the Peaks"
+  ],
+  "Killing Strikes": [
+   "Ruthless Aggression"
+  ],
+  "Kodo Tranquilizer": [
+   "Devilsaur Tranquilizer"
+  ],
+  "Latent Wisdom": [
+   "Ancient Fellowship"
+  ],
+  "Legacy of Wisdom": [
+   "Emperor's Favor"
+  ],
+  "Lessons in Debilitation": [
+   "Explosive Potential"
+  ],
+  "Liberation": [
+   "Crusader's Might"
+  ],
+  "Lifecinders": [
+   "Draconic Instincts"
+  ],
+  "Lifecycles": [
+   "Energizing Brew"
+  ],
+  "Light Brewing": [
+   "Training of Niuzao"
+  ],
+  "Light of Justice": [
+   "Swift Justice"
+  ],
+  "Light of the Titans": [
+   "Tirion's Devotion"
+  ],
+  "Lightning Conduit": [
+   "Electroshock"
+  ],
+  "Lingering Darkness": [
+   "Symbolic Victory"
+  ],
+  "Lingering Radiance": [
+   "Blessing of An'she"
+  ],
+  "Liveliness": [
+   "Master Shapeshifter"
+  ],
+  "Lonely Winter": [
+   "Summon Water Elemental"
+  ],
+  "Long Night": [
+   "Pitch Black"
+  ],
+  "Look Again": [
+   "Slippery Slinging"
+  ],
+  "Lunar Inspiration": [
+   "Chomp"
+  ],
+  "Lunation": [
+   "Arcane Affinity"
+  ],
+  "Mana Adept": [
+   "Evocation"
+  ],
+  "Mantra of Purity": [
+   "Mantra of Tenacity"
+  ],
+  "Mantra of Tenacity": [
+   "Mantra of Purity"
+  ],
+  "March of Darkness": [
+   "Wraith Walk"
+  ],
+  "Mark of F'harg": [
+   "Mark of Shatug"
+  ],
+  "Mark of Shatug": [
+   "Mark of F'harg"
+  ],
+  "Mass Entanglement": [
+   "Ursol's Vortex"
+  ],
+  "Mass Execution": [
+   "Overpowering Finish"
+  ],
+  "Mass Polymorph": [
+   "Ring of Frost"
+  ],
+  "Master Shapeshifter": [
+   "Liveliness"
+  ],
+  "Master of the Elements": [
+   "Molten Wrath"
+  ],
+  "Master of the Glaive": [
+   "Champion of the Glaive"
+  ],
+  "Masterful Call": [
+   "Slicked Shoes"
+  ],
+  "Mayhem": [
+   "Havoc"
+  ],
+  "Meat Cleaver": [
+   "Carving Blades"
+  ],
+  "Meltdown": [
+   "Imbued Warding"
+  ],
+  "Menacing Presence": [
+   "Hardened Scales"
+  ],
+  "Menacing Rush": [
+   "Heightened Rush"
+  ],
+  "Mental Fortitude": [
+   "Intangibility"
+  ],
+  "Merely a Setback": [
+   "Time Twist"
+  ],
+  "Meteor Storm": [
+   "Aetherial Kindling"
+  ],
+  "Mighty Bash": [
+   "Incapacitating Roar"
+  ],
+  "Mind Control": [
+   "Dominate Mind"
+  ],
+  "Mind's Eye": [
+   "Distorted Reality"
+  ],
+  "Mindbender": [
+   "Archangel"
+  ],
+  "Mirrors": [
+   "Smoke"
+  ],
+  "Misery": [
+   "Invoked Nightmare"
+  ],
+  "Molten Blood": [
+   "Regenerative Chitin"
+  ],
+  "Molten Wrath": [
+   "Master of the Elements"
+  ],
+  "Moment of Compassion": [
+   "Resplendent Light"
+  ],
+  "Moment of Opportunity": [
+   "Trailblazer"
+  ],
+  "Momentum of Despair": [
+   "Follow the Blood"
+  ],
+  "Mongoose Rounds": [
+   "Wildfire Shells"
+  ],
+  "Moondust": [
+   "Elune's Grace"
+  ],
+  "Morning Breeze": [
+   "Jade Empowerment"
+  ],
+  "Morning Star": [
+   "Gleaming Rays"
+  ],
+  "Mortal Dance": [
+   "Deflecting Dance"
+  ],
+  "Motes of Acceleration": [
+   "Temporality"
+  ],
+  "Natural Harmony": [
+   "Earthen Communion"
+  ],
+  "Nature's Grace": [
+   "Elune's Challenge"
+  ],
+  "Nature's Protection": [
+   "Surging Currents"
+  ],
+  "Negotiable Contract": [
+   "Finish the Job"
+  ],
+  "New Moon": [
+   "Fury of Elune"
+  ],
+  "Newly Turned": [
+   "Vampiric Speed"
+  ],
+  "Night Terrors": [
+   "Terrifying Pace"
+  ],
+  "Nightmare": [
+   "Horrify"
+  ],
+  "Nimble Flyer": [
+   "Slipstream"
+  ],
+  "Niuzao's Protection": [
+   "Jade Sanctuary"
+  ],
+  "No Escape": [
+   "Dark Energy"
+  ],
+  "No Scruples": [
+   "Cloud Cover"
+  ],
+  "No Stranger to Pain": [
+   "Veteran Vitality"
+  ],
+  "Nozdormu's Teachings": [
+   "Temporal Barrier"
+  ],
+  "Numbing Poison": [
+   "Atrophic Poison"
+  ],
+  "Obsidian Arrowhead": [
+   "On Target"
+  ],
+  "On Target": [
+   "Obsidian Arrowhead"
+  ],
+  "On a Paler Horse": [
+   "Death Charge"
+  ],
+  "One Against Many": [
+   "Arterial Bleed"
+  ],
+  "Open Fire": [
+   "Stargazer"
+  ],
+  "Opportunist": [
+   "Fierce Followthrough"
+  ],
+  "Orbit Breaker": [
+   "Sundered Firmament"
+  ],
+  "Orbital Strike": [
+   "Whirling Stars"
+  ],
+  "Overflowing Purse": [
+   "Destiny Defined"
+  ],
+  "Overgrowth": [
+   "Passing Seasons"
+  ],
+  "Overpowering Finish": [
+   "Mass Execution"
+  ],
+  "Oversized Totems": [
+   "Swift Recall"
+  ],
+  "Oversurge": [
+   "Amplification Core"
+  ],
+  "Pact of the Apocalypse": [
+   "Horsemen's Aid"
+  ],
+  "Pact of the Deathbringer": [
+   "Rune Carved Plates"
+  ],
+  "Pact of the San'layn": [
+   "Sanguine Scent"
+  ],
+  "Pain Transformation": [
+   "Protector of the Frail"
+  ],
+  "Passing Seasons": [
+   "Overgrowth"
+  ],
+  "Path of Jade": [
+   "Singularly Focused Jade"
+  ],
+  "Path of Resurgence": [
+   "Way of a Thousand Strikes"
+  ],
+  "Path to Oblivion": [
+   "State of Matter"
+  ],
+  "Perilous Fate": [
+   "Chrono Ward"
+  ],
+  "Petrifying Scream": [
+   "Sheer Terror"
+  ],
+  "Phantasmal Image": [
+   "Reactive Barrier"
+  ],
+  "Piercing Howl": [
+   "Intimidating Shout"
+  ],
+  "Pitch Black": [
+   "Long Night"
+  ],
+  "Plague Mastery": [
+   "Grave Mastery"
+  ],
+  "Planes Traveler": [
+   "Astral Bulwark"
+  ],
+  "Planned Execution": [
+   "Warning Signs"
+  ],
+  "Poison Cleansing Totem": [
+   "Tremor Totem"
+  ],
+  "Poisoner's Drive": [
+   "Inspiring Strike"
+  ],
+  "Potent Enchantments": [
+   "Grove's Inspiration"
+  ],
+  "Power Siphon": [
+   "Implosion"
+  ],
+  "Power Word: Barrier": [
+   "Ultimate Penitence"
+  ],
+  "Power of Nature": [
+   "Durability of Nature"
+  ],
+  "Power of the Dream": [
+   "Control of the Dream"
+  ],
+  "Powerful Enrage": [
+   "Frenzied Enrage"
+  ],
+  "Predictive Training": [
+   "Whirling Steel"
+  ],
+  "Preeminence": [
+   "First Ascendant"
+  ],
+  "Preemptive Strike": [
+   "Keen Engagement"
+  ],
+  "Presence of Mind": [
+   "Slipstream"
+  ],
+  "Press the Advantage": [
+   "Blackout Combo"
+  ],
+  "Pride of Pandaria": [
+   "High Impact"
+  ],
+  "Profound Rebuttal": [
+   "Strength of Spirit"
+  ],
+  "Prolong Life": [
+   "Dream of Spring"
+  ],
+  "Prophet's Will": [
+   "Desperate Measures"
+  ],
+  "Prosperity": [
+   "Verdant Infusion"
+  ],
+  "Protection of Tyr": [
+   "Unwavering Spirit"
+  ],
+  "Protector of the Frail": [
+   "Pain Transformation"
+  ],
+  "Psychic Voice": [
+   "Void Tendrils"
+  ],
+  "Pulse Capacitor": [
+   "Supportive Imbuements"
+  ],
+  "Pupil of Alexstrasza": [
+   "Echoing Strike"
+  ],
+  "Purge": [
+   "Greater Purge"
+  ],
+  "Purified Spirit": [
+   "Harmonic Gambit"
+  ],
+  "Pursuit of Angriness": [
+   "Wave of Debilitation"
+  ],
+  "Quick Decisions": [
+   "Ephemeral Bond"
+  ],
+  "Quick Footed": [
+   "Hasty Provocation"
+  ],
+  "Quick Sip": [
+   "Staggering Strikes"
+  ],
+  "Quickened Invocation": [
+   "Divine Resonance"
+  ],
+  "Raging Fury": [
+   "Tiger's Tenacity"
+  ],
+  "Rain of Chaos": [
+   "Crashing Chaos"
+  ],
+  "Rain of Fire": [],
+  "Raise Abomination": [
+   "Summon Gargoyle"
+  ],
+  "Rattle the Stars": [
+   "Starweaver"
+  ],
+  "Ravager": [
+   "Whirling Blade",
+   "Bladestorm"
+  ],
+  "Reactive Barrier": [
+   "Phantasmal Image"
+  ],
+  "Reactive Warding": [
+   "Therazane's Resilience"
+  ],
+  "Realized Potential": [
+   "Spiritwell"
+  ],
+  "Reaper's Onslaught": [
+   "Dark Talons"
+  ],
+  "Recompense": [
+   "Sacrifice of the Just"
+  ],
+  "Red Moon": [
+   "Twin Moonfire"
+  ],
+  "Redoubt": [
+   "Imbued Shield"
+  ],
+  "Reflection": [
+   "Spatial Manipulation"
+  ],
+  "Refreshment": [
+   "Calming Coalescence"
+  ],
+  "Regenerative Chitin": [
+   "Molten Blood"
+  ],
+  "Reinforced Fur": [
+   "Bristling Fur"
+  ],
+  "Relentless Onslaught": [
+   "Soulscar"
+  ],
+  "Relentless Pursuit": [
+   "Vicious Agility"
+  ],
+  "Rend and Tear": [
+   "Untamed Savagery"
+  ],
+  "Resilient Flourishing": [
+   "Root Network"
+  ],
+  "Resplendent Light": [
+   "Moment of Compassion"
+  ],
+  "Restitution": [
+   "Guardian Angel"
+  ],
+  "Restoral": [
+   "Revival"
+  ],
+  "Restore Balance": [
+   "Yu'lon's Knowledge",
+   "Xuen's Bond"
+  ],
+  "Retractable Hook": [
+   "Blinding Powder"
+  ],
+  "Reverse Entropy": [
+   "Internal Combustion"
+  ],
+  "Revival": [
+   "Restoral"
+  ],
+  "Revolving Whirl": [
+   "Echo Technique"
+  ],
+  "Righteous Cause": [
+   "Art of War"
+  ],
+  "Righteous Protection": [
+   "Worthy Sacrifice"
+  ],
+  "Ring of Frost": [
+   "Mass Polymorph"
+  ],
+  "Ring of Peace": [
+   "Song of Chi-Ji"
+  ],
+  "Rip and Tear": [
+   "Veinripper"
+  ],
+  "Rising Mist": [
+   "Tear of Morning"
+  ],
+  "Rite of Adjuration": [
+   "Rite of Sanctification"
+  ],
+  "Rite of Sanctification": [
+   "Rite of Adjuration"
+  ],
+  "Roar from the Heavens": [
+   "Tiger's Vigor"
+  ],
+  "Roar of Sacrifice": [
+   "Guardian's Hide"
+  ],
+  "Root Network": [
+   "Resilient Flourishing"
+  ],
+  "Routine Communication": [
+   "Heed My Call"
+  ],
+  "Rune Carved Plates": [
+   "Pact of the Deathbringer"
+  ],
+  "Rushing Jade Wind": [
+   "Special Delivery"
+  ],
+  "Rushing Wind Kick": [
+   "Jadefire Teachings"
+  ],
+  "Ruthless Aggression": [
+   "Killing Strikes"
+  ],
+  "Sacred Strength": [
+   "Divine Purpose"
+  ],
+  "Sacrifice of the Just": [
+   "Recompense"
+  ],
+  "Sal'salabim's Strength": [
+   "Scalding Brew"
+  ],
+  "Sanctification": [
+   "Endless Wrath"
+  ],
+  "Sanctified Wrath": [
+   "Awakening"
+  ],
+  "Sanguine Scent": [
+   "Pact of the San'layn"
+  ],
+  "Save the Day": [
+   "Divine Feathers"
+  ],
+  "Savor the Moment": [
+   "Sunfury Execution"
+  ],
+  "Scalding Brew": [
+   "Sal'salabim's Strength"
+  ],
+  "Scare Beast": [
+   "Tar Trap"
+  ],
+  "Scout's Vigil": [
+   "Conditioning"
+  ],
+  "Scythe's Embrace": [
+   "Duty Eternal"
+  ],
+  "Seal of Reprisal": [
+   "Improved Ardent Defender"
+  ],
+  "Seal of the Templar": [
+   "Divine Exaction"
+  ],
+  "Searing Sunlight": [
+   "Hand of the Protector"
+  ],
+  "Secondary Poisoning": [
+   "Flying Daggers"
+  ],
+  "Selfless Healer": [
+   "Golden Path"
+  ],
+  "Seraphic Crescendo": [
+   "Gales of Song"
+  ],
+  "Serene Surge": [
+   "Vivacious Vivification"
+  ],
+  "Set Fire to the Pain": [
+   "Improved Soul Rending"
+  ],
+  "Severe Temperatures": [
+   "Thermal Conditioning"
+  ],
+  "Shadewalker": [
+   "Shroud of Night"
+  ],
+  "Shadow Dagger": [
+   "Dark Chains"
+  ],
+  "Shadowboxing Treads": [
+   "Fluidity of Motion"
+  ],
+  "Shadowfury": [
+   "Howl of Terror"
+  ],
+  "Shape of Flame": [
+   "Trailblazer"
+  ],
+  "Shared Fate": [
+   "Feast of Souls"
+  ],
+  "Sharpened Claws": [
+   "Ursine Fury"
+  ],
+  "Shattered Destiny": [
+   "Collective Anguish"
+  ],
+  "Shattering Throw": [
+   "Wrecking Throw"
+  ],
+  "Sheer Terror": [
+   "Petrifying Scream"
+  ],
+  "Shifting Shards": [
+   "Attuned Familiar"
+  ],
+  "Shimmer": [
+   "Improved Blink"
+  ],
+  "Shock Pulse": [
+   "Incessant Screams"
+  ],
+  "Shot in the Dark": [
+   "Exhilarating Execution"
+  ],
+  "Shrapnel Bomb": [
+   "Flamebreak"
+  ],
+  "Shroud of Night": [
+   "Shadewalker"
+  ],
+  "Singularly Focused Jade": [
+   "Path of Jade"
+  ],
+  "Siphon Life": [
+   "Absolute Corruption"
+  ],
+  "Slicked Shoes": [
+   "Masterful Call"
+  ],
+  "Slippery Slinging": [
+   "Look Again"
+  ],
+  "Slipstream": [
+   "Nimble Flyer",
+   "Presence of Mind"
+  ],
+  "Slow Burn": [
+   "Burn It All"
+  ],
+  "Smoke": [
+   "Mirrors"
+  ],
+  "Snakeskin Quiver": [
+   "Cobra Senses"
+  ],
+  "Snap Induction": [
+   "Flashing Skies"
+  ],
+  "So Tricky": [
+   "Don't Be Suspicious"
+  ],
+  "Soaring Shield": [
+   "Focused Enmity"
+  ],
+  "Solace": [
+   "Instrument of the Divine"
+  ],
+  "Solitary Companion": [
+   "Animal Companion"
+  ],
+  "Song of Chi-Ji": [
+   "Ring of Peace"
+  ],
+  "Soothe": [
+   "Cyclone"
+  ],
+  "Soul Barrier": [
+   "Soul Sigils"
+  ],
+  "Soul Cleanse": [
+   "Burn It Out"
+  ],
+  "Soul Fire": [
+   "Dimensional Rift"
+  ],
+  "Soul Glutton": [
+   "Emptiness"
+  ],
+  "Soul Sigils": [
+   "Soul Barrier"
+  ],
+  "Soul-Etched Circles": [
+   "Annihilan's Bellow"
+  ],
+  "Soulscar": [
+   "Relentless Onslaught"
+  ],
+  "Spatial Manipulation": [
+   "Reflection"
+  ],
+  "Spatial Paradox": [
+   "Time Spiral"
+  ],
+  "Special Delivery": [
+   "Rushing Jade Wind"
+  ],
+  "Spellbreaker": [
+   "Hunker Down"
+  ],
+  "Spirit Walk": [
+   "Gust of Wind"
+  ],
+  "Spirit Wolf": [
+   "Thunderous Paws"
+  ],
+  "Spiritual Clarity": [
+   "Empath"
+  ],
+  "Spiritual Focus": [
+   "Drinking Horn Cover"
+  ],
+  "Spiritwalker's Aegis": [
+   "Graceful Spirit"
+  ],
+  "Spiritwell": [
+   "Realized Potential"
+  ],
+  "Splintering Ray": [
+   "Frigid Focus"
+  ],
+  "Spontaneous Immolation": [
+   "Tempered Soul"
+  ],
+  "Staggering Strikes": [
+   "Quick Sip"
+  ],
+  "Stalk and Strike": [
+   "Twilight Requiem"
+  ],
+  "Stand Against Evil": [
+   "Wrench Evil"
+  ],
+  "Stargazer": [
+   "Open Fire"
+  ],
+  "Starweaver": [
+   "Rattle the Stars"
+  ],
+  "Stasis": [
+   "Dream Flight"
+  ],
+  "State of Matter": [
+   "Path to Oblivion"
+  ],
+  "Steadfast as the Peaks": [
+   "Keep Your Feet on the Ground"
+  ],
+  "Steed of Liberty": [
+   "Blessing of Freedom"
+  ],
+  "Stonebark": [
+   "Improved Ironbark"
+  ],
+  "Storm Bolts": [
+   "Storm Shield"
+  ],
+  "Storm Shield": [
+   "Storm Bolts"
+  ],
+  "Storm Swell": [
+   "Supercharge"
+  ],
+  "Strength in Adversity": [
+   "Crusader's Resolve"
+  ],
+  "Strength of Spirit": [
+   "Profound Rebuttal"
+  ],
+  "Strength of Will": [
+   "Dark Accord"
+  ],
+  "Strike for the Heart": [
+   "Tear Down the Mighty"
+  ],
+  "Strike of the Windlord": [
+   "Whirling Dragon Punch"
+  ],
+  "Student of Suffering": [
+   "Flamebound"
+  ],
+  "Sudden Death": [
+   "Bloodborne"
+  ],
+  "Summon Gargoyle": [
+   "Raise Abomination"
+  ],
+  "Summon Jade Serpent Statue": [
+   "Jade Infusion"
+  ],
+  "Summon Water Elemental": [
+   "Lonely Winter"
+  ],
+  "Summoner's Embrace": [
+   "Grimoire of Sacrifice"
+  ],
+  "Sundered Firmament": [
+   "Orbit Breaker"
+  ],
+  "Sunfury Execution": [
+   "Savor the Moment"
+  ],
+  "Sunseeker Mushroom": [
+   "Wild Mushroom"
+  ],
+  "Supercharge": [
+   "Storm Swell"
+  ],
+  "Supernova": [
+   "Dragon's Breath"
+  ],
+  "Supportive Imbuements": [
+   "Pulse Capacitor"
+  ],
+  "Surging Currents": [
+   "Nature's Protection"
+  ],
+  "Sustained Potency": [
+   "Energy Compression"
+  ],
+  "Sweeping Verdict": [
+   "Adjudication"
+  ],
+  "Swift Justice": [
+   "Light of Justice"
+  ],
+  "Swift Recall": [
+   "Oversized Totems"
+  ],
+  "Symbolic Victory": [
+   "Lingering Darkness"
+  ],
+  "Tactical Edge": [
+   "Crushing Combo"
+  ],
+  "Tactical Reload": [
+   "Unstable Trigger"
+  ],
+  "Tar Trap": [
+   "Scare Beast"
+  ],
+  "Tar-Coated Bindings": [
+   "Horsehair Tether"
+  ],
+  "Tear Down the Mighty": [
+   "Strike for the Heart"
+  ],
+  "Tear of Morning": [
+   "Rising Mist"
+  ],
+  "Tectonic Collapse": [
+   "Aftershock"
+  ],
+  "Tectonic Locus": [
+   "Unyielding Domain"
+  ],
+  "Tempered Soul": [
+   "Spontaneous Immolation"
+  ],
+  "Tempered in Battle": [
+   "Authoritative Rebuke"
+  ],
+  "Templar Strikes": [
+   "Crusading Strikes"
+  ],
+  "Temple Training": [
+   "Xuen's Guidance"
+  ],
+  "Temporal Barrier": [
+   "Nozdormu's Teachings"
+  ],
+  "Temporal Realignment": [
+   "Time Walk"
+  ],
+  "Temporality": [
+   "Motes of Acceleration"
+  ],
+  "Tempted Fate": [
+   "Chosen's Revelry"
+  ],
+  "Tenacious": [
+   "Cunning"
+  ],
+  "Terrifying Pace": [
+   "Night Terrors"
+  ],
+  "Territorial Instincts": [
+   "Guttural Roar"
+  ],
+  "The Bell Tolls": [
+   "Banshee's Mark"
+  ],
+  "The Light of Elune": [
+   "Astral Insight"
+  ],
+  "Therazane's Resilience": [
+   "Reactive Warding"
+  ],
+  "Thermal Conditioning": [
+   "Severe Temperatures"
+  ],
+  "Thief's Versatility": [
+   "Flickering Steel"
+  ],
+  "Thistle Tea": [],
+  "Thorim's Might": [
+   "Gathering Clouds"
+  ],
+  "Thousand Cuts": [
+   "Flickerstrike"
+  ],
+  "Through the Eyes": [
+   "Ebon Bowstring"
+  ],
+  "Thunderous Paws": [
+   "Spirit Wolf"
+  ],
+  "Thunderstrike Ward": [
+   "Elemental Resonance"
+  ],
+  "Tiger Dash": [
+   "Wild Charge"
+  ],
+  "Tiger's Tenacity": [
+   "Raging Fury"
+  ],
+  "Tiger's Vigor": [
+   "Roar from the Heavens"
+  ],
+  "Tight Spender": [
+   "Improved Ambush"
+  ],
+  "Time Convergence": [
+   "Double-time"
+  ],
+  "Time Spiral": [
+   "Spatial Paradox"
+  ],
+  "Time Twist": [
+   "Merely a Setback"
+  ],
+  "Time Walk": [
+   "Temporal Realignment"
+  ],
+  "Tirion's Devotion": [
+   "Light of the Titans"
+  ],
+  "Tomorrow, Today": [
+   "Interwoven Threads"
+  ],
+  "Totemic Coordination": [
+   "Earthsurge"
+  ],
+  "Trail of Light": [
+   "Dispersing Light"
+  ],
+  "Trailblazer": [
+   "Shape of Flame",
+   "Moment of Opportunity"
+  ],
+  "Training of Niuzao": [
+   "Light Brewing"
+  ],
+  "Tranquil Tea": [
+   "Veil of Pride"
+  ],
+  "Transcendence: Linked Spirits": [
+   "Escape from Reality"
+  ],
+  "Tremor Totem": [
+   "Poison Cleansing Totem"
+  ],
+  "Trick Shots": [
+   "Aspect of the Hydra"
+  ],
+  "Tricks of the Trade": [
+   "Blackjack"
+  ],
+  "Twilight Requiem": [
+   "Stalk and Strike"
+  ],
+  "Twin Moonfire": [
+   "Red Moon"
+  ],
+  "Twin Sprouts": [
+   "Implant"
+  ],
+  "Tyr's Deliverance": [
+   "Hand of Divinity"
+  ],
+  "Ultimate Penitence": [
+   "Power Word: Barrier"
+  ],
+  "Unbound Freedom": [
+   "Echoing Blessings"
+  ],
+  "Unbreakable Bond": [
+   "Avian Specialization"
+  ],
+  "Unerring Vision": [
+   "Calling the Shots"
+  ],
+  "Unhindered Assault": [
+   "Evasive Action"
+  ],
+  "Unrelenting Charger": [
+   "Bonds of Fellowship"
+  ],
+  "Unstable Trigger": [
+   "Tactical Reload"
+  ],
+  "Untamed Savagery": [
+   "Rend and Tear"
+  ],
+  "Unwavering Spirit": [
+   "Protection of Tyr"
+  ],
+  "Unyielding Domain": [
+   "Tectonic Locus"
+  ],
+  "Ursine Fury": [
+   "Sharpened Claws"
+  ],
+  "Ursoc's Endurance": [
+   "Gory Fur"
+  ],
+  "Ursol's Vortex": [
+   "Mass Entanglement"
+  ],
+  "Uther's Counsel": [
+   "Blessing of Spellwarding"
+  ],
+  "Valiant Crusade": [
+   "Blessed Word"
+  ],
+  "Vampiric Aura": [
+   "Bloody Fortitude"
+  ],
+  "Vampiric Speed": [
+   "Newly Turned"
+  ],
+  "Veil of Pride": [
+   "Tranquil Tea"
+  ],
+  "Veinripper": [
+   "Rip and Tear"
+  ],
+  "Verdant Infusion": [
+   "Prosperity"
+  ],
+  "Veteran Vitality": [
+   "No Stranger to Pain"
+  ],
+  "Vicious Agility": [
+   "Relentless Pursuit"
+  ],
+  "Vital Expenditure": [
+   "Dancing Mists"
+  ],
+  "Vital Flame": [
+   "Awakening Spirit"
+  ],
+  "Vivacious Vivification": [
+   "Serene Surge"
+  ],
+  "Void Empowerment": [
+   "Darkening Horizon"
+  ],
+  "Void Leech": [
+   "Embrace the Shadow"
+  ],
+  "Void Tendrils": [
+   "Psychic Voice"
+  ],
+  "Vulnerability": [
+   "Blackrock Munitions"
+  ],
+  "Wallop": [
+   "Bloody Claws"
+  ],
+  "Ward of the Forest": [
+   "Brambles"
+  ],
+  "Warning Signs": [
+   "Planned Execution"
+  ],
+  "Wave of Debilitation": [
+   "Pursuit of Angriness"
+  ],
+  "Way of a Thousand Strikes": [
+   "Path of Resurgence"
+  ],
+  "Way of the Crane": [
+   "Way of the Serpent"
+  ],
+  "Way of the Serpent": [
+   "Way of the Crane"
+  ],
+  "Whirling Blade": [
+   "Ravager"
+  ],
+  "Whirling Dragon Punch": [
+   "Strike of the Windlord"
+  ],
+  "Whirling Stars": [
+   "Orbital Strike"
+  ],
+  "Whirling Steel": [
+   "Predictive Training"
+  ],
+  "White Out": [
+   "Wintertide"
+  ],
+  "Wild Charge": [
+   "Tiger Dash"
+  ],
+  "Wild Mushroom": [
+   "Sunseeker Mushroom"
+  ],
+  "Wildfire Shells": [
+   "Mongoose Rounds"
+  ],
+  "Wildpower Surge": [
+   "Empowered Shapeshifting"
+  ],
+  "Will of the Dawn": [
+   "Illumine"
+  ],
+  "Wings of Liberty": [
+   "Dream Simulacrum"
+  ],
+  "Wintertide": [
+   "White Out"
+  ],
+  "Word of Supremacy": [
+   "Heightened Alteration"
+  ],
+  "Worthy Sacrifice": [
+   "Righteous Protection"
+  ],
+  "Wraith Walk": [
+   "March of Darkness"
+  ],
+  "Wrecking Throw": [
+   "Shattering Throw"
+  ],
+  "Wrench Evil": [
+   "Stand Against Evil"
+  ],
+  "Wyvern's Gaze": [
+   "Hoof and Blade"
+  ],
+  "Xuen's Bond": [
+   "Restore Balance"
+  ],
+  "Xuen's Guidance": [
+   "Temple Training"
+  ],
+  "Yu'lon's Knowledge": [
+   "Restore Balance"
+  ],
+  "Zevrim's Resilience": [
+   "Illhoof's Design"
+  ]
+ }
+}
