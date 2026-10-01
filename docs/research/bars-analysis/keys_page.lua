@@ -100,7 +100,10 @@ local NUM1_UTILITY = { [6] = "Path of Frost", [12] = "Spectral Sight", [9] = "Un
 -- spell, like a druid's Wild Charge) on Alt+E. Both were free in both.
 local TELEPORT = {
 	["Demonic Circle"] = "MULTIACTIONBAR6BUTTON12", ["Demonic Circle: Teleport"] = "MULTIACTIONBAR6BUTTON3",
-	Transcendence = "MULTIACTIONBAR6BUTTON12", ["Transcendence: Transfer"] = "MULTIACTIONBAR6BUTTON3",
+	-- Rob, 2026-10-01: "on druid alt e is for charge, I feel like roll is more of
+	-- a charge than a movement". A monk's Alt+E is Roll, so its teleport goes on
+	-- Shift+V, where Bellular had it.
+	Transcendence = "MULTIACTIONBAR6BUTTON12", ["Transcendence: Transfer"] = "MULTIACTIONBAR3BUTTON6",
 }
 -- Rob put Havoc's Chaos Nova (Bellular's "CC") on Shift+W, the key a druid's
 -- Incapacitating Roar has: every other class's "CC" goes there too.
@@ -126,11 +129,30 @@ local MERGE = {
 local PROPOSED = {
 	Destruction = { Havoc = "ACTIONBUTTON7" },
 }
--- Rob's own moves on the page, 2026-10-01, kept as he made them
+-- Rob's own moves on the page, 2026-10-01, kept as he made them. A spell the
+-- whole class has is moved in every spec of the class (Rob: "non spec specific
+-- spells should automatically be changed for all specs").
+local MONK = { ["Tiger's Lust"] = "MULTIACTIONBAR3BUTTON12", Roll = "MULTIACTIONBAR6BUTTON3", ["Ring of Peace"] = "MULTIACTIONBAR6BUTTON4",
+	Disable = "MULTIACTIONBAR6BUTTON11", ["Zen Flight"] = "MULTIACTIONBAR4BUTTON2", ["Touch of Death"] = "ACTIONBUTTON6" }
+local function with(base, more)
+	local t = {}
+	for k, v in pairs(base) do t[k] = v end
+	for k, v in pairs(more or {}) do t[k] = v end
+	return t
+end
 local ROB_PICKS = {
 	Havoc = { Darkness = "ACTIONBUTTON5", ["Essence Break"] = "ACTIONBUTTON4", ["Rain from Above"] = "ACTIONBUTTON8" },
 	Devourer = { Darkness = "MULTIACTIONBAR6BUTTON1", ["Void Nova"] = "ACTIONBUTTON7" },
+	Brewmaster = MONK, Mistweaver = MONK,
+	Windwalker = with(MONK, { ["Flying Serpent Kick"] = "MULTIACTIONBAR4BUTTON1" }),
 }
+-- Rob took these off their key (Blood Asphyxiate, Arcane Frost Nova, both off
+-- Shift+W); the whole class follows.
+local ROB_OFF = { [6] = { "Asphyxiate" }, [8] = { "Frost Nova" } }
+-- Rob's moves of a spell the whole class has, by class id. Imprison: Wheel up
+-- on Havoc and Devourer, then "Devourer: Imprison (no key before) to Alt+R"
+-- (Clique's wheel only fires over a unit frame, a poor home for an enemy CC).
+local ROB_CLASS = { [12] = { Imprison = "MULTIACTIONBAR6BUTTON4" } }
 
 local extras, bellular = {}, {}
 for _, job in ipairs(PlanTab.BAR_CATEGORIES) do bellular[job] = true end
@@ -219,6 +241,12 @@ local function plan(spec, class)
 	end
 	apply(ROB_PICKS[spec], "rob")
 	apply(PROPOSED[spec], "role")
+	for _, spell in ipairs(ROB_OFF[class] or {}) do
+		for b, c in pairs(cells) do
+			if c.spell == spell then nokey[#nokey + 1] = { job = c.job, spell = spell, short = c.short } cells[b] = nil end
+		end
+	end
+	apply(ROB_CLASS[class], "rob")
 	local seen = {}
 	for b, c in pairs(cells) do
 		if seen[c.spell] then clash[#clash + 1] = c.spell .. " on two keys" end
