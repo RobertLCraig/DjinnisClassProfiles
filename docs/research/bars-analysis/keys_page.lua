@@ -99,7 +99,8 @@ local NUM1_UTILITY = { [6] = "Path of Frost", [12] = "Spectral Sight", [9] = "Un
 -- setting the spot (out of combat) on Shift+2, the teleport (a movement
 -- spell, like a druid's Wild Charge) on Alt+E. Both were free in both.
 local TELEPORT = {
-	["Demonic Circle"] = "MULTIACTIONBAR6BUTTON10", ["Demonic Circle: Teleport"] = "MULTIACTIONBAR6BUTTON3",
+	-- Rob, 2026-10-01: "warlock teleport - yes", to Shift+V like the monk's
+	["Demonic Circle"] = "MULTIACTIONBAR6BUTTON10", ["Demonic Circle: Teleport"] = "MULTIACTIONBAR3BUTTON6",
 	-- Rob, 2026-10-01: "on druid alt e is for charge, I feel like roll is more of
 	-- a charge than a movement". A monk's Alt+E is Roll, so its teleport goes on
 	-- Shift+V, where Bellular had it. The place spell: Shift+R, Bellular's key
@@ -115,6 +116,8 @@ local SPELL_KEY = {
 	-- Demonic Circle took Banish's Shift+R: Banish goes where a Demon Hunter's
 	-- Imprison is, Alt+R, the same job (one enemy out of the fight).
 	Banish = "MULTIACTIONBAR6BUTTON4",
+	-- The teleport took its Shift+V: the slow goes on Shift+A, a monk's Disable key
+	["Curse of Exhaustion"] = "MULTIACTIONBAR6BUTTON11",
 	-- Rob: "can you have both roll and flying serpent kick? I deffinately dont
 	-- like that on num 1". Both, yes (not a choice node). C was free on Windwalker.
 	["Flying Serpent Kick"] = "MULTIACTIONBAR3BUTTON3",
