@@ -144,3 +144,7 @@ Rob's old Guardian Shift+Q defensive: likely Rage of the Sleeper, which Simulati
 For Rob's Balance caster bar: Solar Beam (Alt+3) to Shift+E swaps Rejuvenation onto Alt+3. Alt+3 is Lunar Eclipse's key (Combat 7), but on the caster bar Rejuvenation is the only thing that needs a place.
 
 In-game check: as Balance in caster form, hover Solar Beam's amber label (the tooltip names Rejuvenation), click it, see the swap and the chat line; More > Undo the last job move puts it back. And a non-amber label must not block a mouse click on its button.
+
+**2026-10-01, Rob:** "You already had me move thrash to 1" (asked what goes on Guardian key 4; Claude had answered Thrash, from the 01:00 save).
+
+**2026-10-01, Claude.** Error owned: v0.63.5 set Mangle 1 and Thrash 4 from Rob's key-2 answer without asking, after the earlier proposal (Thrash 1, Mangle 2) he had already acted on. v0.64.1: Guardian Thrash (Combat 2) on 1, Feral's default (Rake's key); Mangle (Combat 1) on 4, assumed from a swap since the saved bars predate his move. To confirm with a fresh save. The case against: Mangle is Guardian's most-pressed button and 4 is the furthest of 1 to 4; 2 is taken by Sundering Roar.
