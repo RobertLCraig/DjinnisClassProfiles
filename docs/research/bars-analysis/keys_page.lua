@@ -96,6 +96,20 @@ local CC_KEY = "MULTIACTIONBAR6BUTTON8"
 -- spell gets its own key: Bladestorm on Alt+2, as on Arms.
 local SPLIT = {
 	Fury = { cell = "Avatar/Bladestorm", keep = "Avatar", move = "Bladestorm", to = "ACTIONBUTTON8" },
+	-- Rob, 2026-10-01: "warlock could make better use of alt 1 and alt 2?"
+	-- Implosion is damage, Power Siphon a resource builder.
+	Demonology = { cell = "Implosion/Power Siphon", keep = "Implosion", move = "Power Siphon", to = "ACTIONBUTTON7", src = "role" },
+}
+-- An either/or pair that does one job, on two keys in Bellular's sheet. Rob,
+-- 2026-10-01: "Whirling Dragon Punch and Strike of the Windlord are a choice
+-- node yes. ... they both are frontal aoe, so can share a key." The second
+-- joins the first's key, which frees its own.
+local MERGE = {
+	Windwalker = { keep = "Strike of the Windlord", join = "Whirling Dragon Punch" },
+}
+-- Spells with no key, put on a free key (Rob's Alt+1 question, above)
+local PROPOSED = {
+	Destruction = { Havoc = "ACTIONBUTTON7" },
 }
 -- Rob's own moves on the page, 2026-10-01, kept as he made them
 local ROB_PICKS = {
@@ -148,23 +162,38 @@ local function plan(spec, class)
 			if c.spell == split.cell then
 				c.spell = split.keep
 				assert(not cells[split.to], spec .. ": the split's key is taken")
-				cells[split.to] = { spell = split.move, job = c.job, short = c.short, source = "rob" }
+				cells[split.to] = { spell = split.move, job = c.job, short = c.short, source = split.src or "rob" }
 			end
 		end
 	end
-	-- Rob's own moves: the spell onto the key, what was there onto the
-	-- spell's old key (a swap), or to "no key yet"
-	for spell, b in pairs(ROB_PICKS[spec] or {}) do
-		local from, entry
-		for k, c in pairs(cells) do if c.spell == spell then from, entry = k, c end end
-		for i, c in ipairs(nokey) do if c.spell == spell then entry = table.remove(nokey, i) break end end
-		if entry and from ~= b then
-			local there = cells[b]
-			cells[b] = { spell = spell, job = entry.job, short = entry.short, source = "rob" }
-			if from then cells[from] = there end
-			if there and not from then nokey[#nokey + 1] = { job = there.job, spell = there.spell, short = there.short } end
+	local merge = MERGE[spec]
+	if merge then
+		local keep, join
+		for b, c in pairs(cells) do
+			if c.spell == merge.keep then keep = c end
+			if c.spell == merge.join then join = b end
+		end
+		assert(keep and join, spec .. ": a merged spell is missing")
+		keep.spell, keep.choice, keep.source = merge.keep .. " / " .. merge.join, true, "rob"
+		cells[join] = nil
+	end
+	-- Moves: the spell onto the key, what was there onto the spell's old key
+	-- (a swap), or to "no key yet"
+	local function apply(picks, src)
+		for spell, b in pairs(picks or {}) do
+			local from, entry
+			for k, c in pairs(cells) do if c.spell == spell then from, entry = k, c end end
+			for i, c in ipairs(nokey) do if c.spell == spell then entry = table.remove(nokey, i) break end end
+			if entry and from ~= b then
+				local there = cells[b]
+				cells[b] = { spell = spell, job = entry.job, short = entry.short, source = src }
+				if from then cells[from] = there end
+				if there and not from then nokey[#nokey + 1] = { job = there.job, spell = there.spell, short = there.short } end
+			end
 		end
 	end
+	apply(ROB_PICKS[spec], "rob")
+	apply(PROPOSED[spec], "role")
 	local seen = {}
 	for b, c in pairs(cells) do
 		if seen[c.spell] then clash[#clash + 1] = c.spell .. " on two keys" end
