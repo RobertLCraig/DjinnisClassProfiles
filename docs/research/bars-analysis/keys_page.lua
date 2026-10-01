@@ -164,9 +164,11 @@ end
 -- Rob put Gorefiend's Grasp on Blood's Shift+W.
 -- Rob, 2026-10-01, "1": Claude proposes keys for the spells left with none,
 -- Rob fixes them on the page. Druid first. Hibernate is rare, out of a fight:
--- Num2, free in all four. Feral's 4 was empty (bar 1, the cat page).
+-- Num2, free in all four. Feral's 4 was empty (bar 1, the cat page). Rob,
+-- on Frenzied Regeneration there: "it requires bear form and I'd rather not
+-- risk pressing it by accident". So Maim on 4, Frenzied Regeneration on Shift+4.
 local DRUID_FILL = { Hibernate = "MULTIACTIONBAR4BUTTON2" }
-PROPOSED.Feral = with(DRUID_FILL, { ["Frenzied Regeneration"] = "ACTIONBUTTON4", Maim = "MULTIACTIONBAR2BUTTON10" })
+PROPOSED.Feral = with(DRUID_FILL, { Maim = "ACTIONBUTTON4", ["Frenzied Regeneration"] = "MULTIACTIONBAR2BUTTON10" })
 PROPOSED.Guardian = with(DRUID_FILL, { ["Bristling Fur"] = "MULTIACTIONBAR2BUTTON10" })
 PROPOSED.Balance = DRUID_FILL
 PROPOSED.Resto = with(DRUID_FILL, { Efflorescence = "ACTIONBUTTON7", Starsurge = "ACTIONBUTTON12" })
