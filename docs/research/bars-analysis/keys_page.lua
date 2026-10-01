@@ -162,7 +162,15 @@ end
 -- Unholy's Asphyxiate go on Shift+W, not on T where the page's class-wide move
 -- put them (pushing off Frost's Remorseless Winter). Blood keeps Rob's T, since
 -- Rob put Gorefiend's Grasp on Blood's Shift+W.
-local DK_STUN = { Asphyxiate = "MULTIACTIONBAR6BUTTON8", ["Death and Decay"] = "MULTIACTIONBAR6BUTTON1" }
+-- Rob, 2026-10-01, "1": Claude proposes keys for the spells left with none,
+-- Rob fixes them on the page. Druid first. Hibernate is rare, out of a fight:
+-- Num2, free in all four. Feral's 4 was empty (bar 1, the cat page).
+local DRUID_FILL = { Hibernate = "MULTIACTIONBAR4BUTTON2" }
+PROPOSED.Feral = with(DRUID_FILL, { ["Frenzied Regeneration"] = "ACTIONBUTTON4", Maim = "MULTIACTIONBAR2BUTTON10" })
+PROPOSED.Guardian = with(DRUID_FILL, { ["Bristling Fur"] = "MULTIACTIONBAR2BUTTON10" })
+PROPOSED.Balance = DRUID_FILL
+PROPOSED.Resto = with(DRUID_FILL, { Efflorescence = "ACTIONBUTTON7", Starsurge = "ACTIONBUTTON12" })
+local DK_STUN ={ Asphyxiate = "MULTIACTIONBAR6BUTTON8", ["Death and Decay"] = "MULTIACTIONBAR6BUTTON1" }
 local MAGE_AOE = { ["Arcane Explosion"] = "ACTIONBUTTON10" }
 local ROB_PICKS = {
 	Havoc = { Darkness = "ACTIONBUTTON5", ["Essence Break"] = "ACTIONBUTTON4", ["Rain from Above"] = "ACTIONBUTTON8" },
