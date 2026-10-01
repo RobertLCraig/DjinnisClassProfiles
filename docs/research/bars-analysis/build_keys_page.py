@@ -219,6 +219,11 @@ for s in data["specs"]:
     # Clique: the class profile's spells this spec has; the dispel on the wheel where it is missing
     prof = data["clique"].get(s["className"])
     slots, taken = [], set()
+    for m in s.pop("mouse", None) or []:  # Rob's own mouse binds come first
+        c = {"spell": m["spell"], "key": m["key"], "source": "rob"}
+        resolve(c, sid)
+        slots.append(c)
+        taken.add(m["key"])
     if prof:
         s["cliqueProfile"] = prof["profile"]
         for b in prof["binds"]:

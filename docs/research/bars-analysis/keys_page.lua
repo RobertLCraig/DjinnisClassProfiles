@@ -136,9 +136,10 @@ local SPLIT = {
 -- 2026-10-01: "Whirling Dragon Punch and Strike of the Windlord are a choice
 -- node yes. ... they both are frontal aoe, so can share a key." The second
 -- joins the first's key, which frees its own.
-local MERGE = {
-	Windwalker = { keep = "Strike of the Windlord", join = "Whirling Dragon Punch" },
-}
+-- Rob put Windwalker's pair back on two keys on the page (Strike of the
+-- Windlord 5, Whirling Dragon Punch Shift+Q): a bar slot holds one spell, so
+-- one key for both needs a macro.
+local MERGE = {}
 -- Spells with no key, put on a free key (Rob's Alt+1 question, above)
 local PROPOSED = {
 	Destruction = { Havoc = "ACTIONBUTTON7" },
@@ -154,19 +155,37 @@ local function with(base, more)
 	for k, v in pairs(more or {}) do t[k] = v end
 	return t
 end
+-- Rob, 2026-10-01: "shift + w could be used for any stun". So Frost's and
+-- Unholy's Asphyxiate go on Shift+W, not on T where the page's class-wide move
+-- put them (pushing off Frost's Remorseless Winter). Blood keeps Rob's T, since
+-- Rob put Gorefiend's Grasp on Blood's Shift+W.
+local DK_STUN = { Asphyxiate = "MULTIACTIONBAR6BUTTON8", ["Death and Decay"] = "MULTIACTIONBAR6BUTTON1" }
+local MAGE_AOE = { ["Arcane Explosion"] = "ACTIONBUTTON10" }
 local ROB_PICKS = {
 	Havoc = { Darkness = "ACTIONBUTTON5", ["Essence Break"] = "ACTIONBUTTON4", ["Rain from Above"] = "ACTIONBUTTON8" },
 	Devourer = { Darkness = "MULTIACTIONBAR6BUTTON1", ["Void Nova"] = "ACTIONBUTTON7" },
-	Brewmaster = MONK, Mistweaver = MONK,
-	Windwalker = MONK,
+	Brewmaster = with(MONK, { ["Purifying Brew"] = "MULTIACTIONBAR6BUTTON1", ["Breath of Fire"] = "ACTIONBUTTON2", ["Chi Burst"] = "ACTIONBUTTON7" }),
+	Mistweaver = MONK,
+	Windwalker = with(MONK, { ["Strike of the Windlord"] = "ACTIONBUTTON5", ["Whirling Dragon Punch"] = "ACTIONBUTTON11" }),
+	Balance = { ["Wild Mushroom"] = "ACTIONBUTTON7" },  -- Balance fights on the Moonkin page
+	Blood = { Asphyxiate = "ACTIONBUTTON6", ["Gorefiend's Grasp"] = "MULTIACTIONBAR6BUTTON8" },
+	["Frost Death Knight"] = DK_STUN, Unholy = DK_STUN,
+	Fire = MAGE_AOE, ["Frost Mage"] = MAGE_AOE,
 }
--- Rob took these off their key (Blood Asphyxiate, Arcane Frost Nova, both off
--- Shift+W); the whole class follows.
-local ROB_OFF = { [6] = { "Asphyxiate" }, [8] = { "Frost Nova" } }
+-- Rob took these off their key; the whole class follows.
+local ROB_OFF = { [8] = { "Time Warp" } }
 -- Rob's moves of a spell the whole class has, by class id. Imprison: Wheel up
 -- on Havoc and Devourer, then "Devourer: Imprison (no key before) to Alt+R"
 -- (Clique's wheel only fires over a unit frame, a poor home for an enemy CC).
-local ROB_CLASS = { [12] = { Imprison = "MULTIACTIONBAR6BUTTON4" } }
+local ROB_CLASS = {
+	[12] = { Imprison = "MULTIACTIONBAR6BUTTON4" },
+	[6] = { ["Wraith Walk"] = "MULTIACTIONBAR3BUTTON6", ["Death Grip"] = "MULTIACTIONBAR6BUTTON11", ["Raise Dead"] = "MULTIACTIONBAR3BUTTON10",
+		["Chains of Ice"] = "MULTIACTIONBAR6BUTTON4", Lichborne = "MULTIACTIONBAR6BUTTON7", ["Anti-Magic Zone"] = "ACTIONBUTTON7" },
+	[8] = { ["Mirror Image"] = "ACTIONBUTTON8", ["Cone of Cold"] = "ACTIONBUTTON7", ["Mass Invisibility"] = "MULTIACTIONBAR4BUTTON2",
+		["Frost Nova"] = "MULTIACTIONBAR6BUTTON4", ["Slow Fall"] = "MULTIACTIONBAR3BUTTON2" },
+}
+-- Rob's mouse binds, by spec: the page's Clique panel
+local ROB_MOUSE = { Brewmaster = { MOUSEWHEELDOWN = "Expel Harm" } }
 
 local extras, bellular = {}, {}
 for _, job in ipairs(PlanTab.BAR_CATEGORIES) do bellular[job] = true end
@@ -263,12 +282,18 @@ local function plan(spec, class)
 		end
 	end
 	apply(ROB_CLASS[class], "rob")
+	local mouse = {}
+	for key, spell in pairs(ROB_MOUSE[spec] or {}) do
+		for i, c in ipairs(nokey) do if c.spell == spell then table.remove(nokey, i) break end end
+		for b, c in pairs(cells) do if c.spell == spell then cells[b] = nil end end
+		mouse[#mouse + 1] = { key = key, spell = spell }
+	end
 	local seen = {}
 	for b, c in pairs(cells) do
 		if seen[c.spell] then clash[#clash + 1] = c.spell .. " on two keys" end
 		seen[c.spell] = true
 	end
-	return cells, nokey, clique, clash
+	return cells, nokey, clique, clash, mouse
 end
 
 -- a tiny JSON writer
@@ -318,10 +343,10 @@ local specs, clashes = {}, 0
 for _, s in ipairs(PlanTab.SPECS) do
 	local id, name, class, role = s[1], s[2], s[3], s[4]
 	if PlanTab.BAR_ABILITIES[name] then
-		local cells, nokey, clique, clash = plan(name, class)
+		local cells, nokey, clique, clash, mouse = plan(name, class)
 		clashes = clashes + #clash
 		specs[#specs + 1] = { id = id, spec = name, class = class, className = CLASS[class] or ("class " .. class), role = role,
-			template = class ~= PlanTab.DRUID and PlanTab.templateFor(name) or nil, cells = cells, nokey = nokey, clique = clique, clash = clash,
+			template = class ~= PlanTab.DRUID and PlanTab.templateFor(name) or nil, cells = cells, nokey = nokey, clique = clique, clash = clash, mouse = mouse,
 				forms = class == PlanTab.DRUID and savedPages(name) or nil }
 	end
 end

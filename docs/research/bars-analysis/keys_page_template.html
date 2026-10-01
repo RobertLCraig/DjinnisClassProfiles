@@ -209,8 +209,10 @@ function planCell(s, spell) {
 }
 // A spell can sit on more than one form page (Moonfire on cat and bear): the
 // copy that moves is the one on the same page as the key it goes to.
+let skipped = [];
 function propagate(spell, target, from) {
   const done = [];
+  skipped = [];
   const page = formOf(target === "tray" ? from : target);
   for (const y of DATA.specs.filter(x => x.className === spec.className && x.spec !== spec.spec)) {
     const base = planCell(y, spell);
@@ -223,6 +225,10 @@ function propagate(spell, target, from) {
     } else {
       if (pos === target) continue;
       const there = st[target];
+      // The spell had no key there, so what holds the key would have nowhere
+      // to go: Asphyxiate on Blood's T pushed Frost's Remorseless Winter off
+      // the bars (Rob's changes, 2026-10-01). Leave that spec alone and say so.
+      if (!pos && there) { skipped.push(y.spec + " (" + keyName(target) + " holds " + there.spell + ")"); continue; }
       st[target] = pos ? st[pos] : base;
       if (pos) { if (there) st[pos] = there; else delete st[pos]; }
     }
@@ -237,7 +243,9 @@ function drop(from, to) {
   const moving = from.startsWith("t:") ? from.slice(2) : (state[from] && state[from].spell);
   const also = moving && to ? propagate(moving, to, from) : [];
   dropHere(from, to);
-  document.getElementById("info").textContent = moving + (also.length ? ": moved here and in " + also.join(", ") + "." : ": moved in " + spec.spec + " only. No other " + spec.className + " spec uses it.");
+  let t = moving + (also.length ? ": moved here and in " + also.join(", ") + "." : ": moved in " + spec.spec + " only.");
+  if (skipped.length) t += " Not moved in " + skipped.join(", ") + ": move it there yourself if you want it.";
+  document.getElementById("info").textContent = t;
 }
 
 function dropHere(from, to) {
