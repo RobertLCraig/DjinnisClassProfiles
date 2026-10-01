@@ -10529,6 +10529,7 @@ PlanTab.JOB_BUTTONS = {
 	["Ursol's Vortex"] = "MULTIACTIONBAR6BUTTON4", ["Thorn Bloom"] = "MULTIACTIONBAR6BUTTON11",
 }
 PlanTab.ITEM_JOBS = { [5512] = "Healthstone", [245898] = "Damage Potion", [258138] = "Healing Potion" }
+for _, id in ipairs({ 245918, 245919, 271884, 271883, 241304, 241305 }) do PlanTab.ITEM_JOBS[id] = "Healing Potion" end  -- card 0083's Midnight potions
 -- a short name drawn on the button; a Combat job is C and its number
 PlanTab.JOB_SHORT = {
 	["Class 1 (Movement)"] = "Roar", ["Class 3 (Tag)"] = "Roots", ["Self-Heal 1"] = "Heal1",
@@ -10866,7 +10867,12 @@ end
 -- docs/research/2026-10-01-healthstone-macro-addons.md.
 PlanTab.HEAL_MACRO = "DCP Heal"
 PlanTab.HEAL_STONES = { 5512, 224464 }  -- Healthstone, Demonic Healthstone
-PlanTab.HEAL_POTION = 258138  -- Potent Healing Potion, on Rob's Shift+2
+PlanTab.HEAL_POTION = 258138  -- Potent Healing Potion, on Rob's Shift+2: written when the bags hold none
+-- Rob, 2026-10-01, on the order: "1 (but healthstones always go first)". The
+-- first of these in the bags is the potion: Fleeting first because they run
+-- out, then Concentrated, then plain Silvermoon, then Potent; the higher rank
+-- first within each. Ids and ranks from AutoPotion's Core/Potions.lua.
+PlanTab.HEAL_POTIONS = { 245918, 245919, 271884, 271883, 241304, 241305, 258138 }
 
 -- The game's reads, each nil when it hands back a secret (none is documented
 -- secret in 12.1: ItemDocumentation.lua, GetItemCount and GetItemCooldown).
@@ -10900,7 +10906,13 @@ function PlanTab.healBody(api)
 			wait = math.min(wait or left, left)
 		end
 	end
-	local potion = "item:" .. PlanTab.HEAL_POTION
+	local pick = PlanTab.HEAL_POTION
+	for _, id in ipairs(PlanTab.HEAL_POTIONS) do
+		local n = api.count(id)
+		if n == nil then return nil end
+		if n > 0 then pick = id break end
+	end
+	local potion = "item:" .. pick
 	if stone then
 		return ("#showtooltip\n/castsequence reset=combat item:%d, %s"):format(stone, potion), nil
 	end
@@ -13654,6 +13666,13 @@ function PlanTab.healMacroChecks(check)
 	check(t .. ": potion alone with no stone", PlanTab.healBody(bags({ [258138] = 3 })), alone)
 	local body, wait = PlanTab.healBody(bags({ [5512] = 1 }, { [5512] = 42 }))
 	check(t .. ": potion alone while the stone cools down, and when it is back", body .. "/" .. tostring(wait), alone .. "/42")
+	check(t .. ": the first potion of the list in the bags, the stone still first",
+		PlanTab.healBody(bags({ [5512] = 1, [241305] = 2, [245919] = 1, [258138] = 3 })), "#showtooltip\n/castsequence reset=combat item:5512, item:245919")
+	check(t .. ": the higher rank first, Fleeting before Concentrated",
+		PlanTab.healBody(bags({ [271884] = 1, [245919] = 1, [245918] = 1 })), "#showtooltip\n/use item:245918")
+	check(t .. ": a Silvermoon potion with no stone", PlanTab.healBody(bags({ [241304] = 1, [258138] = 3 })), "#showtooltip\n/use item:241304")
+	check(t .. ": no potion in the bags writes the Potent one", PlanTab.healBody(bags({})), alone)
+	check(t .. ": every Midnight potion is the Healing Potion job", tostring(PlanTab.ITEM_JOBS[271884]) .. "/" .. tostring(PlanTab.ITEM_JOBS[245918]), "Healing Potion/Healing Potion")
 	check(t .. ": a secret read writes nothing", tostring(PlanTab.healBody({ count = function() return nil end, cooldown = function() return 0 end })), "nil")
 
 	-- the rewrite, against a stubbed macro list

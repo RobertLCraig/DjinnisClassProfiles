@@ -68,3 +68,10 @@ In-game looks, for Rob, `/reload` first:
 4. Make the macro again from the menu: chat says you already have it, and the macro list still holds one.
 5. Inside a Mythic+ key, between pulls, after using the stone: does the macro change to the potion? The research could not settle whether `EditMacro` is allowed there.
 Pass: all five as written, and no Lua error with `/console scriptErrors 1`.
+
+**2026-10-01, Rob:** "will this work with other healing potions for midnight? (as well as say rogues thistle tea?) ... maybe recuperate? ... and will the icon update to show what it will do?" Then, on the potion order: "1 (but healthstones always go first)".
+
+**2026-10-01, Claude.** v0.65.1, deployed: `PlanTab.HEAL_POTIONS`, the first in the bags is the potion: Fleeting Silvermoon (245918, 245919), Concentrated Silvermoon (271884, 271883), Silvermoon (241304, 241305), Potent (258138); the higher rank first (AutoPotion's `Core/Potions.lua` names). The stone stays first. None in the bags writes 258138. All seven are the Healing Potion job. Not added: Thistle Tea (energy, a different job) and Recuperate (a step that fails, no combo points, holds the potion back; AutoPotion #80). Five more checks; three mutants (the pick, the rank order, the job list) each turn the suite red.
+Two more looks for Rob:
+6. With a Fleeting and a Potent potion in the bags and no stone: one press drinks the Fleeting one.
+7. The macro's icon is the stone while a stone is ready, the potion after it is used, grey with neither.
