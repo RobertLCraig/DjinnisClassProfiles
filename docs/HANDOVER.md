@@ -7,7 +7,7 @@
 **Stage:** built, unreleased
 **Category:** addon
 **Status:** v0.64.1, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
-_Last updated: 2026-10-01 (v0.64.1: Guardian Thrash 1, Mangle 4, as Rob has them. v0.64.0: click an amber job label to swap that spell onto its key, More > Undo the last job move. v0.63.6: Guardian Convoke on Shift+Q, Moonfire keeps T, Sundering Roar on 2, Raze is Maul. v0.63.5: Guardian Growl on Alt+2, Mangle keeps 1, Thrash 4. v0.63.4: Shift+3 is Prowl in Guardian too. v0.63.3: the jobs overlay names the spell that belongs on each key, blue, or grey when not learned. v0.63.2: Balance and Resto keep Sunfire 1, Moonfire 2, Wrath 3, Starfire 4. v0.63.1: Guardian's own keys for three jobs. v0.63.0: each button's job drawn on the bars, More > Show jobs on the bars, card `0082`. v0.62.0: Wear talents only and Load bars only in a build's menu, card `0081`. v0.61.0: compare a build's bars with yours on the real bars and pick, card `0080`. v0.60.0: every build of a spec on the same buttons, More > Make every <spec> build use these bars, card `0079`. v0.54.0: another spec's bars from the druid layout, card `0051`. v0.53.x: the bonus roll verdict at the offer, card `0054`; the spare deletes one at a time, card `0067`. v0.52.4: your own builds, card `0057`; one loadout change at a time, card `0063`. Older entries: `docs/build/SESSION-LOG-ARCHIVE.md`.)_
+_Last updated: 2026-10-01 (v0.64.1 deployed; card 0082 keybind page for every class, see Key files. Older stamps: docs/build/SESSION-LOG-ARCHIVE.md.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -101,6 +101,16 @@ from the end of `selfTest` (`loadoutChecks`, `barChecks`, `sidebarChecks`, `tree
   `wcl-builds.json`. **`update-builds.py` reads that JSON**, so refresh is two commands, in this order. Answers cache in `.cache/wcl/` for 12 h.
   The key is in `.secrets/warcraftLogsClientSecrets.txt`: gitignored, in `pkgmeta.yaml`'s ignore
   list, and **never printed or committed**.
+- `docs/research/bars-analysis/` - **author tooling, never shipped.** Builds the keybind page
+  `docs/research/2026-10-01-keybind-layout.html` (card `0082`): `lua docs/research/bars-analysis/keys_page.lua`
+  then `python docs/research/bars-analysis/build_keys_page.py`. It reads `%TEMP%\sv-dcp.lua` and
+  `%TEMP%\sv-clique.lua`, copies of the SavedVariables, never the game folder. Rob's agreed rules
+  are tables at the top of `keys_page.lua`. To view it, serve the folder (`python -m http.server`);
+  Playwright refuses `file://`.
+- **Trap: `BAR_ABILITIES` rows 33 and 34 (Buff, Res) are not what their names say.** Bellular swaps
+  them for some classes and puts a warlock's Demonic Circle pair in them, so `translateBars` puts
+  Fortitude, Arcane Intellect and the circle on the wrong keys. The page sorts them by spell
+  (`IS_BUFF`, `IS_RES`, `TELEPORT`); the addon does not yet.
 - `Libs/LibDBIcon-1.0/` - the minimap button and, at `LibDBIcon-1.0.lua:508-526`, the runtime
   `AddonCompartmentFrame:RegisterAddon(...)` call that card `0001` turns on. **Read that card before
   touching how the window opens**; the two routes into the addon drawer are mutually exclusive and

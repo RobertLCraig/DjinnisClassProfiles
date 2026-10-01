@@ -131,6 +131,10 @@
   "icon": "inv_12_haranir_ability_thornbloom",
   "id": 1237885
  },
+ "unending breath": {
+  "icon": "spell_shadow_demonbreath",
+  "id": 5697
+ },
  "void torrent": {
   "icon": "inv_knife_1h_artifactcthun_d_01",
   "id": 205065

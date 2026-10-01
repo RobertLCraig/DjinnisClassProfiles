@@ -7,9 +7,10 @@ docs/board/
   todo/           ready to pick up, nothing in the way
   in-progress/    an agent is building it right now
   ai-review/      built, awaiting an adversarial review by an agent
-  human-review/   a person owes something: a call to make, a build to accept,
-                  or an outside party to chase
-  done/           reviewed, accepted, delivered. The final product.
+  human-review/   a person owes something: a call to make, a step only they can
+                  take, or an outside party to chase
+  done/           reviewed and delivered. The final product. It may still carry
+                  open `proves: manual` looks: the owner's list of things to try
   discarded/      abandoned or superseded, with one line of why
 ```
 
@@ -276,8 +277,8 @@ to protect the attention it would spend.
 1. **A decision that turns on a preference, a cost, a risk, or local knowledge nobody wrote down.**
    That is the same test as `## Is this actually a person's to decide?` below.
 2. **A step only a person can take**, because its effect leaves the repository and no `git revert`
-   reaches it: a scheduled task, a DNS record, a deploy, a message somebody receives, a browser
-   check on a screen.
+   reaches it: a scheduled task, a DNS record, a deploy, a message somebody receives. **A look at
+   something already built is not one of these**: see `A look waits on the product` below.
 3. **An agent that has an answer and good reason to think the person's would differ.** This is the
    narrow one and it is not "the agent is unsure". Write the question, the research behind it, and
    what you would have chosen.
@@ -549,6 +550,21 @@ person at a screen can settle (a browser check, a screenshot, "it looks right"),
 where nothing here can test it, with the reason on the same line. Both are honest and both are
 counted. What is refused is a criterion that is silent about its proof, because that is the one that
 reads as tested and is not.
+
+### A look waits on the product, not in the queue
+
+Rob, 2026-09-30: "I'm interested in reviewing the product. not the card. As much as I do want to see
+a summary of what has been built each hour/day I dont want to review every single card ever done."
+
+**So a built card whose only open criteria say `proves: manual` goes on to `ai-review/` and, when it
+passes, to `done/` with those criteria still open.** Built means at least one box is ticked. The
+reviewers judge everything else and do not count an open look as a finding. ProgressBoard gathers
+every open look on every `done/` card into one list per product, and the owner tries the product
+from that list: tick what passes, or say what failed and move the card back to `todo/` with a
+criterion reopened or added for the fix.
+
+A card with nothing ticked and only manual criteria was never built. It is a task for a person and
+goes to `human-review/` as one.
 
 A project with no suite the loop can find promotes as it always did, and the log says so in those
 words. This rule adds a check where a suite exists; it does not invent one where none does.
