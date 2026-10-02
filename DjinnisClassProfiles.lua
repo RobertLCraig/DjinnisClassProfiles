@@ -9880,6 +9880,35 @@ function PlanTab.translateBars(layout, from, to, api)
 		if not (a and a.type == "spell" and a.id) then return nil end
 		return api.base and api.base(a.id) or a.id
 	end
+	-- Card 0082: a job the template has no button for still has its key in
+	-- `to`'s plan (JOB_SPEC). Rob, 2026-10-02, on his rogue's Blind and Vanish:
+	-- "can the addon not just do it?" Its spell goes there, over anything but
+	-- a spell the template moved. Not for a druid: its bar 1 is form pages.
+	local filled = 0
+	if not PlanTab.FORM_PAGE[to] and PlanTab.JOB_SPEC[to] then
+		local moved = {}
+		for slot, a in pairs(slots) do
+			local k = not stay[slot] and not own[slot] and spellKey(a)
+			if k then moved[k] = true end
+		end
+		local column = PlanTab.BAR_ABILITIES[to] or {}
+		for i, job in ipairs(PlanTab.BAR_CATEGORIES) do
+			local slot = PlanTab.bindingSlot(PlanTab.JOB_SPEC[to][job])
+			local cell, id = column[i] or "", nil
+			if slot and cell ~= "" then
+				for alt in cell:gmatch("[^/]+") do id = id or api.find(alt) end
+				local a = slots[slot]
+				if not id or moved[id] then
+					-- not learned in this build, or the move already gave it a button
+				elseif a and a.type == "spell" and not stay[slot] and not own[slot] then
+					skipped[#skipped + 1] = ("slot %d: %s keeps %s, so %s has no button"):format(slot, api.name(a.id) or ("spell " .. a.id), PlanTab.jobShort(job, to), cell)
+				else
+					slots[slot], stay[slot], own[slot] = { type = "spell", id = id }, nil, nil
+					filled = filled + 1
+				end
+			end
+		end
+	end
 	local placed = {}
 	for slot, a in pairs(slots) do
 		local k = not stay[slot] and not own[slot] and spellKey(a)
@@ -9896,7 +9925,7 @@ function PlanTab.translateBars(layout, from, to, api)
 		keys = {}
 		for key, action in pairs(layout.keys) do keys[key] = action end
 	end
-	return { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil, from = from }, skipped, kept, cleared
+	return { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil, from = from }, skipped, kept, cleared, filled
 end
 
 -- The game's answers for translateBars, for this character.
@@ -9973,13 +10002,13 @@ function PlanTab.barsFrom(from, confirmed)
 		})
 		return "ask"
 	end
-	local layout, skipped, kept, cleared = PlanTab.translateBars(template, from, spec, PlanTab.barsApi())
+	local layout, skipped, kept, cleared, filled = PlanTab.translateBars(template, from, spec, PlanTab.barsApi())
 	local n = 0
 	for _ in pairs(layout.slots) do n = n + 1 end
 	barsDB()[spec] = layout
 	-- every kept button is counted, not only the listed ones (0051 review: 13 said, 47 kept)
-	PlanTab.say(("Made the %s layout from your %s bars: %d slots. %d buttons keep what they have now, and %d are cleared because their spell moves to another button. The %d with no match are below. Hover %sLoad bars: spec|r%s to see it on your bars. Nothing changes until you load it.")
-		:format(spec, from, n, kept, cleared, #skipped, GOLD, GREY))
+	PlanTab.say(("Made the %s layout from your %s bars: %d slots. %d spells your %s bars have no button for go on their planned keys. %d buttons keep what they have now, and %d are cleared because their spell moves to another button. The %d with no match are below. Hover %sLoad bars: spec|r%s to see it on your bars. Nothing changes until you load it.")
+		:format(spec, from, n, filled, from, kept, cleared, #skipped, GOLD, GREY))
 	for _, line in ipairs(skipped) do print("  " .. line) end
 	PlanTab.barsChanged()
 	return "made"
@@ -10581,6 +10610,19 @@ PlanTab.JOB_SPEC = {
 		["Combat 4"] = "ACTIONBUTTON1", ["Combat 7"] = "ACTIONBUTTON9",
 	},
 }
+-- Rogue, 2026-10-02, the keybind page's keys for the jobs Feral has no key
+-- for (Rob: "I want to play my rogue right now"). Blind on Alt+R, the
+-- one-enemy CC key (a Demon Hunter's Imprison); Vanish on Shift+S, freed by
+-- the heal macro, and behind Shift since a stray press drops the fight;
+-- Thistle Tea on C, Recuperate's key; Distract on Num3, out of a fight; Tricks
+-- of the Trade on 4, pressed on cooldown; Kidney Shot on Shift+W, the stun
+-- key; Gouge on Shift+A, the slow key.
+local ROGUE_JOBS = {
+	["Class 2 (CC)"] = "MULTIACTIONBAR6BUTTON4", ["Class 4 (Special)"] = "MULTIACTIONBAR6BUTTON6",
+	["Self-Heal 2"] = "MULTIACTIONBAR3BUTTON3", ["Class 6 (Dispel)"] = "MULTIACTIONBAR4BUTTON3",
+	["Class 7 (Raid Defensive)"] = "ACTIONBUTTON4", ["CC"] = "MULTIACTIONBAR6BUTTON8", ["Slow"] = "MULTIACTIONBAR6BUTTON11",
+}
+PlanTab.JOB_SPEC.Assassination, PlanTab.JOB_SPEC.Outlaw, PlanTab.JOB_SPEC.Subtlety = ROGUE_JOBS, ROGUE_JOBS, ROGUE_JOBS
 
 -- Where `job` belongs for `spec`: the spec's own choice, else Feral's.
 function PlanTab.jobHome(spec, job)
@@ -10596,6 +10638,19 @@ PlanTab.BUTTON_BINDING = {
 	MultiBarLeftButton = "MULTIACTIONBAR4BUTTON", MultiBar5Button = "MULTIACTIONBAR5BUTTON",
 	MultiBar6Button = "MULTIACTIONBAR6BUTTON", MultiBar7Button = "MULTIACTIONBAR7BUTTON",
 }
+-- a binding's prefix -> its bar's action page (Blizzard_ActionBar/Shared/MultiActionBars.lua)
+PlanTab.BINDING_PAGE = {
+	ACTIONBUTTON = 1, MULTIACTIONBAR1BUTTON = 6, MULTIACTIONBAR2BUTTON = 5, MULTIACTIONBAR3BUTTON = 3,
+	MULTIACTIONBAR4BUTTON = 4, MULTIACTIONBAR5BUTTON = 13, MULTIACTIONBAR6BUTTON = 14, MULTIACTIONBAR7BUTTON = 15,
+}
+-- The action slot a binding's button holds, unpaged; nil for any other binding.
+function PlanTab.bindingSlot(binding)
+	local prefix, n = tostring(binding or ""):match("^(.-BUTTON)(%d+)$")
+	local page = prefix and PlanTab.BINDING_PAGE[prefix]
+	n = tonumber(n)
+	if not (page and n and n >= 1 and n <= 12) then return nil end
+	return (page - 1) * 12 + n
+end
 
 function PlanTab.jobShort(job, spec)
 	return job and ((PlanTab.JOB_SHORT_SPEC[spec] or {})[job] or job:match("^Combat (%d+)$") and "C" .. job:match("^Combat (%d+)$") or PlanTab.JOB_SHORT[job] or job) or nil
@@ -14054,6 +14109,23 @@ function PlanTab.barCategoryChecks(check)
 		-- a Resto druid fights on bar 1
 		local tree = PlanTab.translateBars(feral, "Feral", "Resto", api({ "Wrath", "Starfire", "Prowl", "Regrowth", "Tranquility" }))
 		check(t .. ", Resto fights on bar 1", row(tree, { 1, 2, 4, 6, 7 }), "Wrath Starfire Prowl Regrowth Tranquility")
+		-- card 0082: a job the template has no button for goes on the plan's key
+		check(t .. ", a binding's slot", ("%s %s %s %s %s %s"):format(PlanTab.bindingSlot("ACTIONBUTTON12"), PlanTab.bindingSlot("MULTIACTIONBAR6BUTTON4"),
+			PlanTab.bindingSlot("MULTIACTIONBAR4BUTTON3"), PlanTab.bindingSlot("MULTIACTIONBAR3BUTTON3"), PlanTab.bindingSlot("MULTIACTIONBAR2BUTTON10"),
+			tostring(PlanTab.bindingSlot("CAMERAZOOMIN"))), "12 160 39 27 58 nil")
+		PlanTab.JOB_SPEC.Destruction = { ["Combat 9"] = "MULTIACTIONBAR6BUTTON4", ["Combat 6"] = "ACTIONBUTTON1", ["Combat 11"] = "MULTIACTIONBAR3BUTTON3" }
+		local planned, plannedSkips, _, _, filledN = PlanTab.translateBars({ slots = { [73] = S("Shred") } }, "Feral", "Destruction",
+			api({ "Incinerate", "Summon Infernal", "Rain of Fire" }, { [160] = S("Cataclysm"), [5] = S("Summon Infernal") }))
+		check(t .. ", a planned key takes its job's spell over what it held, never over a moved spell, and only a learned one",
+			row(planned, { 160, 1, 27 }) .. "/" .. filledN, "Summon Infernal Incinerate -/1")
+		check(t .. ", the spell is on one button only", spell(planned, 5), "-")
+		local movedFirst = PlanTab.translateBars(feral, "Feral", "Destruction",
+			api({ "Incinerate", "Summon Infernal" }, { [160] = S("Cataclysm") }))
+		check(t .. ", a spell the move gave a button keeps it, the planned key keeps what it has", row(movedFirst, { 7, 160 }), "Summon Infernal Cataclysm")
+		check(t .. ", the planned spell a moved one keeps out is listed", tostring(table.concat(plannedSkips, "\n"):find("Rain of Fire has no button", 1, true) ~= nil), "true")
+		local bearPlan = select(5, PlanTab.translateBars({ slots = {} }, "Feral", "Guardian", api({ "Moonfire" })))
+		check(t .. ", never a druid's: its bar 1 is form pages", bearPlan, 0)
+		PlanTab.JOB_SPEC.Destruction = nil
 
 		-- the command: saved as the spec's layout, and one there asked about first
 		local said, printed, asked = {}, {}, nil

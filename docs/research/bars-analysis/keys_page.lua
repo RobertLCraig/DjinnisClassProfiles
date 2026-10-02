@@ -173,7 +173,16 @@ PROPOSED.Feral = with(DRUID_FILL, { Maim = "ACTIONBUTTON4", ["Frenzied Regenerat
 PROPOSED.Guardian = with(DRUID_FILL, { ["Bristling Fur"] = "MULTIACTIONBAR2BUTTON10" })
 PROPOSED.Balance = DRUID_FILL
 PROPOSED.Resto = with(DRUID_FILL, { Efflorescence = "ACTIONBUTTON7", Starsurge = "ACTIONBUTTON12" })
-local DK_STUN ={ Asphyxiate = "MULTIACTIONBAR6BUTTON8", ["Death and Decay"] = "MULTIACTIONBAR6BUTTON1" }
+-- Rogue, 2026-10-02 (Rob: "I want to play my rogue right now"). Keys free in
+-- all three specs. Blind on Alt+R, the one-enemy CC key (Imprison, Banish);
+-- Gouge on Shift+A, the slow key; Vanish on Shift+S (the heal macro freed it), behind Shift like Feral's Frenzied
+-- Regeneration, since a stray press drops the fight; Tricks of the Trade on 4,
+-- pressed on cooldown and harmless by mistake; Thistle Tea on C, a druid's
+-- Recuperate key; Distract on Num3, out of the fight.
+local ROGUE_FILL = { Blind = "MULTIACTIONBAR6BUTTON4", Gouge = "MULTIACTIONBAR6BUTTON11", Vanish = "MULTIACTIONBAR6BUTTON6",
+	["Tricks of the Trade"] = "ACTIONBUTTON4", ["Thistle Tea"] = "MULTIACTIONBAR3BUTTON3", Distract = "MULTIACTIONBAR4BUTTON3" }
+PROPOSED.Assassination, PROPOSED.Outlaw, PROPOSED.Subtlety = ROGUE_FILL, ROGUE_FILL, ROGUE_FILL
+local DK_STUN = { Asphyxiate = "MULTIACTIONBAR6BUTTON8", ["Death and Decay"] = "MULTIACTIONBAR6BUTTON1" }
 local MAGE_AOE = { ["Arcane Explosion"] = "ACTIONBUTTON10" }
 local ROB_PICKS = {
 	Havoc = { Darkness = "ACTIONBUTTON5", ["Essence Break"] = "ACTIONBUTTON4", ["Rain from Above"] = "ACTIONBUTTON8" },
