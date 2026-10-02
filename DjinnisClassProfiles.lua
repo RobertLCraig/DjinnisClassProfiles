@@ -9023,7 +9023,23 @@ local function pickUp(action, ctx)
 		if not index then return "no macro named " .. tostring(action.name) end
 		if ctx then PlanTab.noteMacro(action, index, ctx) end
 		PickupMacro(index)
-	elseif action.type == "item" then C_Item.PickupItem(action.id)
+	elseif action.type == "item" then
+		C_Item.PickupItem(action.id)
+		-- a toy is an item on the bar but in no bag: the toy box's own call
+		-- (Blizzard_Collections/Mainline/Blizzard_ToyBox.lua)
+		if not GetCursorInfo() and C_ToyBox and C_ToyBox.PickupToyBoxItem then pcall(C_ToyBox.PickupToyBoxItem, action.id) end
+	elseif action.type == "summonmount" then
+		-- Pickup takes the journal's display index, not the mount id; 0 is the
+		-- random favourite (MountJournalDocumentation.lua), whose bar id is 268435455
+		local index = action.id == 268435455 and 0 or nil
+		local ok, n = pcall(C_MountJournal.GetNumDisplayedMounts)
+		for i = 1, ok and canRead(n) and n or 0 do
+			if index then break end
+			local okID, id = pcall(C_MountJournal.GetDisplayedMountID, i)
+			if okID and canRead(id) and id == action.id then index = i end
+		end
+		if not index then return ("mount %d is not in the mount journal's list, so clear its filters"):format(action.id) end
+		C_MountJournal.Pickup(index)
 	elseif action.type == "flyout" then
 		local book = findFlyout(action.id)
 		if not book then return "flyout " .. action.id .. " is not in the spellbook" end
@@ -9852,7 +9868,13 @@ function PlanTab.translateBars(layout, from, to, api)
 			-- an account macro is every character's (1 to 120, as findMacro
 			-- reads them); a character macro or a flyout is the druid's own
 			local account = a.type == "macro" and a.index and a.index <= 120
-			if PlanTab.FORM_PAGE[to] or account then slots[slot] = a else skip(slot, ("the druid's %s %s"):format(a.type, tostring(a.name or a.id))) end
+			local carries, why = false, nil
+			if a.type == "macro" then carries, why = PlanTab.macroCarries(a.body, api) end
+			-- a character macro that casts nothing this character lacks goes too,
+			-- made here by placeBars (Rob, 2026-10-02: "can also place the non
+			-- class specific abilities, toys, macros")
+			if PlanTab.FORM_PAGE[to] or account or carries then slots[slot] = a
+			else skip(slot, ("the druid's %s %s%s"):format(a.type, tostring(a.name or a.id), why and (", " .. why) or "")) end
 		elseif a.type ~= "spell" then
 			slots[slot] = a  -- an item, a pet or a mount is no class's
 		else
@@ -9926,6 +9948,27 @@ function PlanTab.translateBars(layout, from, to, api)
 		for key, action in pairs(layout.keys) do keys[key] = action end
 	end
 	return { slots = slots, keys = keys, saved = date and date("%Y-%m-%d") or nil, from = from }, skipped, kept, cleared, filled
+end
+
+-- Whether a character macro's text works on another class: every name its
+-- /cast, /use and /castsequence lines give is known here, an item:<id>, or an
+-- equipment slot number. With no text it stays the druid's. Pure.
+local MACRO_CASTS = { cast = true, use = true, castsequence = true, castrandom = true }
+function PlanTab.macroCarries(body, api)
+	if type(body) ~= "string" or body == "" then return false, "no text saved" end
+	for line in body:gmatch("[^\r\n]+") do
+		local command, rest = line:match("^%s*/(%a+)%s*(.*)$")
+		if command and MACRO_CASTS[command:lower()] then
+			rest = rest:gsub("%b[]", ""):gsub("reset=%S+", "")
+			for part in rest:gmatch("[^,;]+") do
+				local name = part:gsub("^[%s!]+", ""):gsub("%s+$", "")
+				if name ~= "" and not name:match("^item:%d+$") and not name:match("^%d+$") and not api.find(name) then
+					return false, "it casts " .. name
+				end
+			end
+		end
+	end
+	return true
 end
 
 -- The game's answers for translateBars, for this character.
@@ -11958,6 +12001,20 @@ function PlanTab.barChecks(check)
 	local otherWant = PlanTab.readKeys()
 	otherWant.F = "ACTIONBUTTON1"
 	check(applyTest .. ", but another action on that key still counts", PlanTab.keysDiffer(otherWant), 1)
+	-- Rob, 2026-10-02: "can also place the non class specific abilities, toys, macros"
+	local keptMounts, keptToys, keptBags, keptBarsNow = C_MountJournal, C_ToyBox, C_Item, bars
+	C_MountJournal = { GetNumDisplayedMounts = function() return 2 end, GetDisplayedMountID = function(i) return ({ 40, 41 })[i] end,
+		Pickup = function(i) pick({ type = "summonmount", id = ({ [0] = 268435455, 40, 41 })[i] }) end }
+	C_ToyBox = { PickupToyBoxItem = function(id) if id == 777 then pick({ type = "item", id = id }) end end }
+	C_Item = { PickupItem = function(id) if id == 5512 then pick({ type = "item", id = id }) end end }
+	bars = {}
+	local _, mountSkips = PlanTab.placeBars({ [150] = { type = "summonmount", id = 41 }, [151] = { type = "summonmount", id = 268435455 },
+		[152] = { type = "summonmount", id = 99 }, [153] = { type = "item", id = 777 }, [154] = { type = "item", id = 5512 } })
+	local function idAt(slot) return tostring(bars[slot] and bars[slot].id) end
+	check("mounts and toys: a mount, the random favourite, a toy and a bag item placed, a filtered mount not",
+		table.concat({ idAt(150), idAt(151), idAt(152), idAt(153), idAt(154) }, " "), "41 268435455 nil 777 5512")
+	check("mounts and toys: the filtered mount is listed", tostring(table.concat(mountSkips, "\n"):find("mount 99 is not in the mount journal's list", 1, true) ~= nil), "true")
+	C_MountJournal, C_ToyBox, C_Item, bars = keptMounts, keptToys, keptBags, keptBarsNow
 	PlanTab.applyBars("Feral")  -- a second apply: the undo must still hold the character's own bars
 
 	local undoTest = "one undo puts the bars back"
@@ -14126,6 +14183,16 @@ function PlanTab.barCategoryChecks(check)
 		local bearPlan = select(5, PlanTab.translateBars({ slots = {} }, "Feral", "Guardian", api({ "Moonfire" })))
 		check(t .. ", never a druid's: its bar 1 is form pages", bearPlan, 0)
 		PlanTab.JOB_SPEC.Destruction = nil
+		-- Rob, 2026-10-02: "can also place the non class specific abilities, toys, macros"
+		local lockApi = api({ "Incinerate" })
+		check(t .. ", a macro of items and slots carries", tostring(PlanTab.macroCarries("#showtooltip\n/castsequence reset=combat item:5512, item:258138\n/use [combat] 13; [nocombat] ", lockApi)), "true")
+		check(t .. ", one that casts a spell known here carries", tostring(PlanTab.macroCarries("/cast [@mouseover,exists][] !Incinerate", lockApi)), "true")
+		check(t .. ", one that casts a druid's spell does not, and says which", select(2, PlanTab.macroCarries("/use 14\n/cast [@mouseover] Rake", lockApi)), "it casts Rake")
+		local carried = PlanTab.translateBars({ slots = {
+			[73] = { type = "macro", name = "DCP Heal", index = 130, char = true, body = "#showtooltip\n/use item:258138" },
+			[74] = { type = "macro", name = "MO Rake", index = 131, char = true, body = "/cast [@mouseover] Rake" },
+		} }, "Feral", "Destruction", lockApi)
+		check(t .. ", a character macro another class can use goes, a druid's does not", spell(carried, 1) .. "/" .. spell(carried, 2), "macro/-")
 
 		-- the command: saved as the spec's layout, and one there asked about first
 		local said, printed, asked = {}, {}, nil
