@@ -6991,8 +6991,14 @@ function PlanTab.sidebarClick(row, button)
 	if button == "RightButton" then
 		-- a menu, never an action (Rob, 2026-09-25: "right clicks should open
 		-- menus"); a header has none
-		if not e or e.group or not e.loadout then return end
+		if not e or e.group or not (e.loadout or e.premade) then return end
 		if InCombatLockdown() then PlanTab.say("Not in combat. Try again after the fight.") return "combat" end
+		if e.premade then
+			if not (MenuUtil and MenuUtil.CreateContextMenu) then return nil end
+			local items = PlanTab.premadeMenuItems(e)
+			MenuUtil.CreateContextMenu(row, function(_, root) PlanTab.fillMenu(root, items) end)
+			return "menu"
+		end
 		return PlanTab.openRowMenu(row, e)
 	end
 	if not (e and e.group) or InCombatLockdown() then return end
@@ -7013,6 +7019,20 @@ function PlanTab.sidebarTip(row)
 		GameTooltip:AddLine("Click to fold or open.", 0, 1, 0)
 		GameTooltip:Show()
 		pcall(PlanTab.showChoices, e.names)  -- card 0034
+		return
+	end
+	if e.premade then
+		GameTooltip:SetOwner(row, "ANCHOR_NONE")
+		GameTooltip:SetPoint("RIGHT", row, "LEFT", -4, 0)
+		GameTooltip:AddLine("Premade bars", 1, 1, 1)
+		GameTooltip:AddLine(("Your %s bars, each button given this spec's ability for the same job. Their own profile: your own saved bars for this spec are never replaced."):format(e.template), nil, nil, nil, true)
+		if e.made and pcall(PlanTab.showGhost, e.spec, PlanTab.premadeDB()) and PlanTab.ghostKey then
+			GameTooltip:AddLine("Your bars show them now. Amber: the slots a load changes.", 1, 0.6, 0, true)
+		elseif not e.made then
+			GameTooltip:AddLine("None made yet.", 1, 0.7, 0, true)
+		end
+		GameTooltip:AddLine("Right-click for a menu: make them, then load them.", 0, 1, 0, true)
+		GameTooltip:Show()
 		return
 	end
 	GameTooltip:SetOwner(row, "ANCHOR_NONE")
@@ -7099,6 +7119,13 @@ function PlanTab.sidebarRow(row, e)
 		row.mark:Show()
 		return
 	end
+	if e.premade then
+		row.name:SetText("Premade bars")
+		row.bosses:SetText(GREY .. (e.made and ("from your %s bars"):format(e.template) or "none yet: right-click") .. "|r")
+		row.icon:SetDesaturated(not e.made)
+		row.mark:Hide()
+		return
+	end
 	local text = PlanTab.sidebarText(e)
 	row.name:SetText((e.saved or e.mark) and text or (GREY .. e.loadout .. "   spare|r"))  -- worn through the spare, card 0040
 	row.bosses:SetText(GREY .. table.concat(e.bosses, ", ") .. "|r" .. (e.bars and ((#e.bosses > 0 and "   " or "") .. "|cff66ccffown bars|r") or ""))
@@ -7153,8 +7180,31 @@ function PlanTab.updateSidebar()
 		db().sidebarFolded, PlanTab.sidebarHere(spec), PlanTab.buildProblem, PlanTab.loadoutString)
 	f.data:Flush()
 	for _, e in ipairs(list) do f.data:Insert(e) end
+	local premade = PlanTab.premadeRow(spec)
+	if premade then f.data:Insert(premade) end
 	f.title:SetText(#list > 0 and ((spec or "") .. " builds") or ("No stored builds for " .. (spec or "this spec") .. " yet"))
 	return mode
+end
+
+-- Rob, 2026-10-02: premade bars "as a 'build' at the bottom ... rather than a
+-- button". The list's last row, for a spec that copies another's bars. Pure
+-- but for the saved data.
+function PlanTab.premadeRow(spec)
+	local template = spec and PlanTab.templateNow(spec)
+	if not template then return nil end  -- Feral itself: the one the others copy
+	return { premade = true, spec = spec, template = template, made = PlanTab.premadeDB()[spec] ~= nil,
+		icon = "Interface\\Icons\\INV_Misc_Book_09", bosses = {} }
+end
+
+-- Its menu: make them, then load them (two clicks, Rob's pick).
+function PlanTab.premadeMenuItems(e)
+	return {
+		{ title = "Premade bars" },
+		{ text = ("Make premade bars from your %s bars"):format(e.template), tip = "Saved as their own profile. Nothing changes on your bars, and your own saved bars for this spec are not touched.",
+			fn = function() PlanTab.barsFrom() PlanTab.updateSidebar() end },
+		{ text = "Load premade bars", disabled = not e.made, tip = "Puts them and their keys on this character. Undo bars puts yours back.",
+			fn = function() PlanTab.loadPremade() end },
+	}
 end
 
 -- Once, after Blizzard_PlayerSpells has loaded. Post-hooks only, and the
@@ -9185,6 +9235,22 @@ local function barsDB()
 	return d.bars
 end
 
+-- Premade bars, made from the druid's, by spec: their own profile, so a make
+-- never replaces the bars a player saved for the spec. Rob, 2026-10-02:
+-- "premade bars should have its own profile and button", two clicks, make
+-- then load. A spec layout still marked `from` (made before this, never
+-- loaded) moves here.
+function PlanTab.premadeDB()
+	local d = db()
+	if type(d.premade) ~= "table" then d.premade = {} end
+	for key, layout in pairs(barsDB()) do
+		if type(layout) == "table" and layout.from and not key:find(" / ", 1, true) then
+			d.premade[key], barsDB()[key] = layout, nil
+		end
+	end
+	return d.premade
+end
+
 -- The key of the layout that fits now: the build's own when it has one, else
 -- the spec's, else nil. Also the label for the prompt.
 function PlanTab.barsKey(spec, build)
@@ -9547,6 +9613,17 @@ function PlanTab.loadBars(forBuild)
 	return PlanTab.applyBars(key)
 end
 
+-- The Load premade bars button: this spec's premade bars, from the druid's.
+function PlanTab.loadPremade()
+	local spec = playerSpec()
+	if not spec then PlanTab.say("The game has not said which spec you are in yet.") return "none" end
+	if not PlanTab.premadeDB()[spec] then
+		PlanTab.say(("No premade %s bars yet. Click %sMake premade bars|r%s first."):format(spec, GOLD, GREY))
+		return "none"
+	end
+	return PlanTab.applyBars(spec, PlanTab.premadeDB())
+end
+
 function PlanTab.undoBars()
 	local why = PlanTab.barsFence()
 	if why then PlanTab.say(why) return "fenced" end
@@ -9593,7 +9670,7 @@ end
 -- The list's Undo button and "own bars" marks follow a save, a load and an undo.
 function PlanTab.barsChanged()
 	if PlanTab.sidebar and PlanTab.sidebar:IsShown() then pcall(PlanTab.updateSidebar) end
-	if PlanTab.ghostKey then pcall(PlanTab.showGhost, PlanTab.ghostKey) end  -- a load under the mouse: the amber goes
+	if PlanTab.ghostKey then pcall(PlanTab.showGhost, PlanTab.ghostKey, PlanTab.ghostFrom) end  -- a load under the mouse: the amber goes
 end
 
 -- Card 0046: a saved layout drawn over the real bars while a Load bars
@@ -9667,15 +9744,15 @@ end
 
 PlanTab.ghosts = {}
 
-function PlanTab.showGhost(key)
+function PlanTab.showGhost(key, from)
 	PlanTab.hideGhost()
-	local layout = key and barsDB()[key]
+	local layout = key and (from or barsDB())[key]
 	if not layout or InCombatLockdown() then return 0 end
 	local plan = PlanTab.ghostPlan(layout.slots or {}, PlanTab.ghostButtons(), PlanTab.readBars())
 	local ui = PlanTab.ghostUI
 	local top = ui.top():GetEffectiveScale()
 	if not ui.canRead(top) then return 0 end
-	PlanTab.ghostKey = key  -- only once something can be drawn: the tooltip says it shows
+	PlanTab.ghostKey, PlanTab.ghostFrom = key, from  -- only once something can be drawn: the tooltip says it shows
 	for i, p in ipairs(plan) do
 		local g = PlanTab.ghosts[i]
 		if not g then
@@ -9706,7 +9783,7 @@ function PlanTab.showGhost(key)
 end
 
 function PlanTab.hideGhost()
-	PlanTab.ghostKey = nil
+	PlanTab.ghostKey, PlanTab.ghostFrom = nil, nil
 	for _, g in ipairs(PlanTab.ghosts) do g:Hide() end
 end
 
@@ -10031,27 +10108,14 @@ function PlanTab.barsFrom(from, confirmed)
 		PlanTab.say(("No saved %s layout yet. On your %s druid, click %sMore > Save bars for this spec|r%s first."):format(from, from, GOLD, GREY))
 		return "none"
 	end
-	if barsDB()[spec] and not confirmed then
-		if PlanTab.promptBusy() then PlanTab.say("Answer the open question first, then click again.") return "busy" end
-		PlanTab.prompt("Djinni's Class Profiles: action bars", {
-			("Replace the saved %s layout%s with one made from your %s bars?"):format(spec, barsDB()[spec].saved and (" from " .. barsDB()[spec].saved) or "", from),
-			"It is used for every " .. spec .. " build that has no layout of its own, on every character.",
-		}, {
-			{ label = "Replace", onClick = function()
-				if playerSpec() ~= spec then PlanTab.say("The spec changed since that question, so nothing was made.") return end
-				PlanTab.barsFrom(from, true)
-			end },
-			{ label = "Cancel" },
-		})
-		return "ask"
-	end
+	-- its own profile: made again whenever asked, never over the spec's saved bars
 	local layout, skipped, kept, cleared, filled = PlanTab.translateBars(template, from, spec, PlanTab.barsApi())
 	local n = 0
 	for _ in pairs(layout.slots) do n = n + 1 end
-	barsDB()[spec] = layout
+	PlanTab.premadeDB()[spec] = layout
 	-- every kept button is counted, not only the listed ones (0051 review: 13 said, 47 kept)
-	PlanTab.say(("Made the %s layout from your %s bars: %d slots. %d spells your %s bars have no button for go on their planned keys. %d buttons keep what they have now, and %d are cleared because their spell moves to another button. The %d with no match are below. Hover %sLoad bars: spec|r%s to see it on your bars. Nothing changes until you load it.")
-		:format(spec, from, n, filled, from, kept, cleared, #skipped, GOLD, GREY))
+	PlanTab.say(("Made premade %s bars from your %s bars: %d slots. %d spells your %s bars have no button for go on their planned keys. %d buttons keep what they have now, and %d are cleared because their spell moves to another button. The %d with no match are below. Nothing changes on your bars, and your own saved %s bars are not touched. Hover the %sPremade bars|r%s row at the bottom of the build list to see them; right-click it, then Load premade bars, to put them on.")
+		:format(spec, from, n, filled, from, kept, cleared, #skipped, spec, GOLD, GREY))
 	for _, line in ipairs(skipped) do print("  " .. line) end
 	PlanTab.barsChanged()
 	return "made"
@@ -11142,7 +11206,7 @@ function PlanTab.menuItems(where)
 	end
 	local template = PlanTab.templateNow(playerSpec())
 	if template then
-		add({ text = ("Make bars from your %s bars"):format(template), tip = "Your druid's layout, each button given this spec's ability for the same job (Bellular's keybinding categories). It is saved as this spec's layout. Nothing changes on your bars until you load it.", fn = function() PlanTab.barsFrom() end })
+		add({ text = ("Make premade bars from your %s bars"):format(template), tip = "Your druid's layout, each button given this spec's ability for the same job (Bellular's keybinding categories). Saved as premade bars, their own profile: the last row of the build list loads them. Nothing changes on your bars until you load them.", fn = function() PlanTab.barsFrom() PlanTab.updateSidebar() end })
 	end
 	add({ text = "Save bars as a profile...", tip = "Keeps your action bars and key bindings now under a name. A profile loads on any character and any spec.", fn = PlanTab.askProfileName })
 	add({ text = "Import a profile...", tip = "Paste a string from a profile's Export. It is saved as a profile; Load puts it on your bars.", fn = PlanTab.importProfileAsk })
@@ -14206,25 +14270,43 @@ function PlanTab.barCategoryChecks(check)
 		C_SpecializationInfo = { GetSpecialization = function() return 1 end, GetSpecializationInfo = function() return specID end }
 		d.bars = {}
 		check(t .. ", with no druid layout it says what to save", PlanTab.barsFrom() .. "/" .. tostring(said[#said]:find("No saved Balance layout", 1, true) ~= nil), "none/true")
-		d.bars = { Feral = feral }
-		check(t .. ", with no Balance layout the Warlock copies Feral", PlanTab.barsFrom() .. "/" .. tostring(d.bars.Destruction and d.bars.Destruction.from), "made/Feral")
+		-- Rob, 2026-10-02: "premade bars should have its own profile"
+		local keptPremade = d.premade
+		d.premade = nil
+		local mine = { slots = {}, saved = "2026-09-24" }
+		d.bars = { Feral = feral, Destruction = mine }
+		check(t .. ", the Warlock copies Feral into premade bars, no question asked", PlanTab.barsFrom() .. "/" .. tostring(d.premade.Destruction and d.premade.Destruction.from) .. "/" .. tostring(asked), "made/Feral/nil")
+		check(t .. ", and the spec's own saved bars are not touched", tostring(d.bars.Destruction == mine), "true")
 		check(t .. ", and the skips are in chat", #printed, 6)
-		check(t .. ", and it is not offered at login before it is loaded once", PlanTab.offerBars(), "made")
+		d.bars.Destruction = nil
+		check(t .. ", and they are not offered at login", PlanTab.offerBars(), "none")
+		d.bars.Destruction = mine
 		-- 0051 review: the menu names the template it uses, Feral while there is no Balance one
 		local menuText
-		for _, item in ipairs(PlanTab.menuItems("window")) do menuText = menuText or (item.text and item.text:match("^Make bars from your %a+ bars$")) end
-		check(t .. ", the menu names the template it will use", menuText, "Make bars from your Feral bars")
+		for _, item in ipairs(PlanTab.menuItems("window")) do menuText = menuText or (item.text and item.text:match("^Make premade bars from your %a+ bars$")) end
+		check(t .. ", the menu names the template it will use", menuText, "Make premade bars from your Feral bars")
+		-- the list's last row, its menu make then load
+		local row = PlanTab.premadeRow("Destruction")
+		local rowMenu = {}
+		for _, item in ipairs(PlanTab.premadeMenuItems(row)) do rowMenu[#rowMenu + 1] = (item.title or item.text) .. (item.disabled and "(off)" or "") end
+		check(t .. ", a premade row for a spec that copies, with make and load", tostring(row.made) .. ": " .. table.concat(rowMenu, "; "),
+			"true: Premade bars; Make premade bars from your Feral bars; Load premade bars")
+		check(t .. ", load is off with none made", tostring(PlanTab.premadeMenuItems({ template = "Feral" })[3].disabled), "true")
+		check(t .. ", no premade row for Feral itself, nor with no spec", tostring(PlanTab.premadeRow("Feral")) .. "/" .. tostring(PlanTab.premadeRow(nil)), "nil/nil")
 		local keptChar = DjinnisCPCharDB
-		PlanTab.placeBars, PlanTab.placeKeys = function() return 0, {}, { made = {}, notes = {} } end, function() return 0, {} end
+		local placedSlots
+		PlanTab.placeBars, PlanTab.placeKeys = function(s) placedSlots = s return 0, {}, { made = {}, notes = {} } end, function() return 0, {} end
 		PlanTab.readBars, PlanTab.readKeys, PlanTab.barsFence = function() return {} end, function() return {} end, function() return nil end
-		PlanTab.applyBars("Destruction")
+		check(t .. ", Load premade bars puts them on, not the spec's own", PlanTab.loadPremade() .. "/" .. tostring(placedSlots == d.premade.Destruction.slots), "applied/true")
 		DjinnisCPCharDB = keptChar
-		check(t .. ", once loaded it is no longer marked as made", tostring(d.bars.Destruction.from), "nil")
-		local mine = { slots = {}, saved = "2026-09-24" }
-		d.bars.Destruction = mine
-		check(t .. ", one there already is asked about first", PlanTab.barsFrom() .. "/" .. tostring(d.bars.Destruction == mine), "ask/true")
-		asked[1].onClick()
-		check(t .. ", and replaced once you say so", tostring(d.bars.Destruction ~= mine) .. "/" .. tostring(d.bars.Destruction.from), "true/Feral")
+		check(t .. ", and the spec's own bars are still its own", tostring(d.bars.Destruction == mine), "true")
+		d.premade = {}
+		check(t .. ", with none made it says to make them", PlanTab.loadPremade() .. "/" .. tostring(said[#said]:find("No premade Destruction bars yet", 1, true) ~= nil), "none/true")
+		-- one made before premade bars existed, never loaded, moves across
+		local old = { slots = {}, from = "Feral" }
+		d.bars.Destruction = old
+		check(t .. ", an old made layout moves to premade bars", tostring(PlanTab.premadeDB().Destruction == old) .. "/" .. tostring(d.bars.Destruction), "true/nil")
+		d.premade = keptPremade
 		check(t .. ", a druid spec named that has no layout says so", PlanTab.barsFrom("guardian") .. "/" .. PlanTab.barsFrom("Moonfire"), "none/none")
 		specID = 103
 		check(t .. ", Feral itself has nothing to copy", PlanTab.barsFrom(), "none")
