@@ -7045,7 +7045,8 @@ function PlanTab.sidebarTip(row)
 		elseif not e.made then
 			GameTooltip:AddLine("None made yet.", 1, 0.7, 0, true)
 		end
-		GameTooltip:AddLine("Right-click for a menu: make them, then load them.", 0, 1, 0, true)
+		GameTooltip:AddLine(e.made and "Double-click to put them on." or "Double-click to make them and put them on.", 0, 1, 0)
+		GameTooltip:AddLine("Right-click for a menu: make them again from your druid's bars.", 0, 1, 0, true)
 		GameTooltip:Show()
 		return
 	end
@@ -7117,6 +7118,7 @@ function PlanTab.sidebarRow(row, e)
 		-- the left button only: OnDoubleClick fires for the right too, and a quick
 		-- double right-click would wear the build as well as save it (0065 review)
 		row:SetScript("OnDoubleClick", function(self, button)
+			if button == "LeftButton" and self.element and self.element.premade then PlanTab.wearPremade() return end
 			if button == "LeftButton" and self.element and self.element.loadout and not self.element.shadowed then PlanTab.loadTalents(self.element.loadout) end
 		end)
 		row:SetScript("OnEnter", PlanTab.sidebarTip)
@@ -7135,7 +7137,7 @@ function PlanTab.sidebarRow(row, e)
 	end
 	if e.premade then
 		row.name:SetText("Premade bars")
-		row.bosses:SetText(GREY .. (e.made and ("from your %s bars"):format(e.template) or "none yet: right-click") .. "|r")
+		row.bosses:SetText(GREY .. (e.made and ("from your %s bars"):format(e.template) or "none yet: double-click") .. "|r")
 		row.icon:SetDesaturated(not e.made)
 		row.mark:Hide()
 		return
@@ -7214,7 +7216,20 @@ function PlanTab.premadeRow(spec)
 		icon = "Interface\\Icons\\INV_Misc_Book_09", bosses = {} }
 end
 
--- Its menu: make them, then load them (two clicks, Rob's pick).
+-- A double-click on the row, as on a build (Rob, 2026-10-02: "it should apply
+-- the same way as any other build"): puts them on, made first when there are none.
+function PlanTab.wearPremade()
+	local spec = playerSpec()
+	if spec and not PlanTab.premadeDB()[spec] then
+		local made = PlanTab.barsFrom()
+		if made ~= "made" then return made end
+	end
+	local done = PlanTab.loadPremade()
+	pcall(PlanTab.updateSidebar)
+	return done
+end
+
+-- Its menu: make them again from the druid's bars, or load them.
 function PlanTab.premadeMenuItems(e)
 	return {
 		{ title = "Premade bars" },
@@ -14320,6 +14335,17 @@ function PlanTab.barCategoryChecks(check)
 		check(t .. ", and the spec's own bars are still its own", tostring(d.bars.Destruction == mine), "true")
 		d.premade = {}
 		check(t .. ", with none made it says to make them", PlanTab.loadPremade() .. "/" .. tostring(said[#said]:find("No premade Destruction bars yet", 1, true) ~= nil), "none/true")
+		-- Rob: "it should apply the same way as any other build"
+		placedSlots = nil
+		check(t .. ", a double-click makes them when there are none, then puts them on", PlanTab.wearPremade() .. "/" .. tostring(d.premade.Destruction ~= nil and placedSlots == d.premade.Destruction.slots), "applied/true")
+		local made = d.premade.Destruction
+		PlanTab.wearPremade()
+		check(t .. ", and a second one puts the same ones on, not made again", tostring(d.premade.Destruction == made), "true")
+		d.premade = {}
+		PlanTab.barsFence = function() return "fenced" end
+		check(t .. ", nothing put on when the make fails", PlanTab.wearPremade() .. "/" .. tostring(next(d.premade)), "fenced/nil")
+		PlanTab.barsFence = function() return nil end
+		DjinnisCPCharDB = keptChar
 		-- one made before premade bars existed, never loaded, moves across
 		local old = { slots = {}, from = "Feral" }
 		d.bars.Destruction = old
