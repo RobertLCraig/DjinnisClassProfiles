@@ -6918,6 +6918,20 @@ function PlanTab.buildSidebar()
 	f.saveSpec:SetPoint("BOTTOMRIGHT", -8, 16 + 2 * PlanTab.SIZE.button)
 	f.saveSpec:SetText("Save bars: spec")
 	f.saveSpec:SetScript("OnClick", function() PlanTab.saveBars(false, true) end)
+	-- Premade bars: one row fixed above the buttons, a rule over it, so it is
+	-- never read as a build (Rob, 2026-10-02: "Anchor it to the bottom of the
+	-- list, with a horizontal rule above"). Drawn by sidebarRow like the others.
+	f.premade = CreateFrame("Button", nil, f)
+	f.premade:SetPoint("BOTTOMLEFT", 6, 20 + 3 * PlanTab.SIZE.button)
+	f.premade:SetPoint("BOTTOMRIGHT", -6, 20 + 3 * PlanTab.SIZE.button)
+	f.premade:SetHeight(PlanTab.SIDEBAR_ROW)
+	f.premadeRule = f:CreateTexture(nil, "ARTWORK")
+	f.premadeRule:SetColorTexture(0.6, 0.6, 0.6, 0.6)
+	f.premadeRule:SetHeight(1)
+	f.premadeRule:SetPoint("BOTTOMLEFT", f.premade, "TOPLEFT", 2, 4)
+	f.premadeRule:SetPoint("BOTTOMRIGHT", f.premade, "TOPRIGHT", -2, 4)
+	f.premade:Hide()
+	f.premadeRule:Hide()
 	-- and put them back (card 0044), the same as the offer's Apply
 	f.loadBuild = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
 	f.loadBuild:SetSize(half, PlanTab.SIZE.button)
@@ -7180,8 +7194,12 @@ function PlanTab.updateSidebar()
 		db().sidebarFolded, PlanTab.sidebarHere(spec), PlanTab.buildProblem, PlanTab.loadoutString)
 	f.data:Flush()
 	for _, e in ipairs(list) do f.data:Insert(e) end
+	-- the premade row sits under the list, which ends above its rule
 	local premade = PlanTab.premadeRow(spec)
-	if premade then f.data:Insert(premade) end
+	if premade then PlanTab.sidebarRow(f.premade, premade) end
+	f.premade:SetShown(premade ~= nil)
+	f.premadeRule:SetShown(premade ~= nil)
+	f.scroll:SetPoint("BOTTOMRIGHT", -22, 24 + 3 * PlanTab.SIZE.button + (premade and (PlanTab.SIDEBAR_ROW + 10) or 0))
 	f.title:SetText(#list > 0 and ((spec or "") .. " builds") or ("No stored builds for " .. (spec or "this spec") .. " yet"))
 	return mode
 end
