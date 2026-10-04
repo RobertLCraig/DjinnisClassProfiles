@@ -106,3 +106,41 @@ only what he must decide. No reviewer has read this card's code: `git log` shows
 (`PlanTab.deleteMade`), so it needs the adversarial pass before Rob loads it. After the review, write
 `## What I need from you` from the builder's "Left open" paragraph above, and say whether the build
 has been deployed to the game folder, because the builder did not bump the version or deploy.
+
+**2026-10-04** REVIEW (adversarial, separate agent). Holds. To `done/` with the manual criterion
+open. It is deployed: commit `3655baf` is inside v0.69.0, which HANDOVER records in the game folder
+since 2026-10-02. The look is the builder's "Left open" paragraph above.
+
+Attacked:
+- `offline-check.lua` under Lua 5.1, self-test and spec 250: "no FAIL lines". All six `proves:`
+  names print.
+- Three mutations on a temp copy. Red: making every macro account-wide (7 FAIL lines), undo
+  deleting a made macro whatever its text (2). **Green, and fixed:** not clearing `macrosMade`
+  when a load starts a fresh undo. Then a load, a hand change, a second load and an undo would
+  put the bars back holding the made macro and then delete it. The code was right; nothing held
+  it. One check added in `437d9ac` ("and not one a later load's undo holds"); with the clear
+  removed it goes red.
+- `CreateMacro(name, icon, body, perCharacter)` matches `Blizzard_MacroIconSelector.lua:109`.
+  `EditMacro` returning an index there shows the game re-sorts macros by name, so an index moves on
+  every make. `findMacro` checks the index hint by name before trusting it and `deleteMade` finds
+  by name, so neither depends on an index staying put.
+- Combat: every path that makes or deletes a macro is behind `barsFence`.
+- Reads: body, icon and name all go through `canRead`.
+
+Minor, not blocking:
+- An account macro made by a load is deleted by that character's undo, and by then another
+  character may have placed it.
+- `compareTake` (card 0080) passes a `ctx` to `pickUp`, so it can make a macro too, but does not
+  record it, so Put mine back leaves it.
+
+Security:
+1. Weakest point: since card 0069 a layout can arrive as a pasted string, and its macro bodies are
+   written by `CreateMacro` on Load, unread. A stranger's string could put a macro with any text,
+   `/run` included, on a bar under a familiar name. It still takes a Load and a press. Before this
+   addon is released, the load's chat line should print each made macro's text, or ask first for a
+   layout that came from a string.
+2. Unchecked: body length and content are not validated; the game caps the length itself.
+3. Leaks: an exported string carries every macro's text, so a macro holding anything private goes
+   with it. Nothing leaves the client by itself.
+
+Not looked at in a client: there is none here.
