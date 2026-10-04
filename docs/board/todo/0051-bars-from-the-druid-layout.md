@@ -356,3 +356,46 @@ only what he must decide. The second review passed v0.54.3. v0.54.7 (findings 2,
 reviewer has read them. v0.54.8 is new behaviour: it clears buttons. Review both, then write the
 missing `## What I need from you` from the two in-game checks above (load, then `/dcp bars` says
 "already match"; the Destruction layout has Havoc, Conflagrate and Malevolence on one button each).
+
+**2026-10-04** REVIEW (adversarial, separate agent). Of v0.54.7 and v0.54.8, read in today's
+`translateBars` (which card 0082's job fill has since grown). Does not hold for a druid target.
+Back to `todo/`.
+
+Attacked:
+- Three mutations of the v0.54.8 clearing on a temp copy: no clearing (6 FAIL lines), no base
+  match in `spellKey` (3), own pages counted as placed (4). The checks bite. The v0.54.7 checks
+  were mutated by the builder and I did not repeat them.
+- A probe of the shipped `translateBars` with a stub `api`, Feral to Guardian and to Balance.
+
+Broke:
+1. **A spell on a druid form page clears the same spell from a bar every form sees.** For a druid
+   target the caster bar (1 to 12) and the other form pages are copied from the template and count
+   as "placed", so a kept button on bars 2 to 6 holding the same spell is cleared. Probe: Feral
+   template with Regrowth on the caster bar (5) and Moonfire on the cat page (73); the Guardian has
+   Regrowth at 14 and Moonfire at 15 (plain bar slots, empty on the template). Result for Guardian and for Balance: 14 and 15 cleared
+   (`cleared 2`). Regrowth is now only on a button that shows in caster form, Moonfire only in cat
+   form, and Moonfire's bear-page button was skipped (Combat 11 is Sundering Roar, not known), so
+   a bear has no Moonfire anywhere. A druid keeps a spell on several form pages on purpose; that is
+   what form pages are for. v0.54.8 already exempts a non-druid's own 73 to 120 for exactly this
+   reason and does not extend it to a druid's. This is the card's first run (Feral to Rob's
+   Balance, Guardian and Resto). Fix: for a druid target, only a placement outside the form pages
+   and the caster bar (13 to 72, 121 up) clears a kept button; a placement on a form page or a druid's caster bar
+   does not. Add a check with the probe above.
+
+Held:
+- The clearing for a non-druid target, by the base spell, and the class's own pages never
+  cleared nor counted. Chat line counts kept and cleared separately.
+- `barsFence` refuses in combat, with a cursor item, or on a vehicle or override bar, so no
+  `PlaceAction` runs under lockdown.
+- Nothing new reads a unit name, GUID or power, so no secret-value path. `GetSpellName`,
+  `GetBaseSpell` and `IsSpellKnownOrInSpellBook` reads stay behind `pcall` and `canRead`.
+
+Security:
+1. Weakest point: unchanged, a third party's public sheet writes into shipped code; the escapes
+   and `offline-check.lua` catch a broken load, and there is no code path from a cell.
+2. Unchecked: the kept actions come from this character's own bars and the template from Rob's
+   SavedVariables; both trusted, neither filtered.
+3. Leaks: nothing leaves the client; skip lines go to his own chat.
+
+Not looked at in a client: there is none here. The open in-game checks stand (load, then
+`/dcp bars` says "already match"; Havoc, Conflagrate and Malevolence on one button each).
