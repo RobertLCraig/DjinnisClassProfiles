@@ -63,3 +63,36 @@ Lua 5.4 stops at line 14171 (`unpack`, from commit 417b207 on 2026-09-27); that 
 **2026-09-30, Rob.** "That's not really what I'm going for... more being able to compare and pick between them." Card `0080` is that. This one stays in: its Put back is shared with `0080`, and a whole-spec match is still one click.
 
 **2026-09-30 22:30, after the heroic raid.** The "no saved layout" gap under Uncertain bit in use. Nymrissa, Entombed Sentinels and Vashnik have no build layout, so their builds loaded the 09-24 spec layout, which holds neither Berserk nor Feral Frenzy; the load cleared those buttons. Match was not run (the 09-23 raid layouts are unchanged). Full read of the saved layouts: SecondBrain `outputs/2026-09-30 Feral saved bars review`. A macro naming both spells of a talent choice would fill a swap button in every build.
+
+**2026-10-04** REVIEW (adversarial, separate agent). Holds for what it promises. To `done/` with
+#4, the in-game look, still open. The gap from the raid above is real and is not this card's
+acceptance; it wants its own card.
+
+Attacked:
+- `offline-check.lua` under Lua 5.1: "no FAIL lines".
+- Three mutations on a temp copy. The swap rule without its "nowhere on master" test (3 FAIL
+  lines) and Put back writing an empty layout instead of removing one (3) both went red. One
+  survived: making a layout for the selected build when it had none (`if mine then` instead of
+  `if mine and barsDB()[mine]`). Then Match creates a build layout that Put back cannot remove,
+  because its undo entry is nil. The code is right today; no check holds it there.
+- `matchLayout`: copies, never shares, slots and keys; a swap needs a spell on both sides, so an
+  item or macro on master always wins; a build's spell that master has elsewhere follows master.
+- Combat: `barsFence` before the ask and again inside Match. It writes saved layouts only.
+
+Held, with two things to know:
+- **Put back undoes only the last write.** Card 0080's Save picks shares `matchUndo`, so a Match
+  followed by one Save picks can no longer be put back to before the Match. The prompt says
+  "Put back the build bars undoes this" without that limit. Fine as built, worth one clause in
+  the chat line some day.
+- **The no-layout fallback (Rob's 2026-09-30 22:30 comment)** cleared Berserk and Feral Frenzy for
+  three raid bosses. Match does not reach a build with no layout, so it cannot fix that. A card:
+  a build with no layout of its own loads the spec layout with its talent swaps put back, or
+  `/dcp bars match` offers to make one for each build the spec plan names.
+
+Security:
+1. Weakest point: one click rewrites every account-wide layout of the spec. It asks first, names
+   each build, re-checks the spec on Match, and keeps one undo.
+2. Unchecked: the master is this character's own bars; trusted, not filtered.
+3. Leaks: nothing leaves the client.
+
+Not looked at in a client: there is none here. #4 is the look.
