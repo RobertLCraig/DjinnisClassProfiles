@@ -86,3 +86,25 @@ bars, the keys and any character macro match. Also check that a long string (man
 whole into the box. The offline check cannot see a frame.
 
 **2026-09-29** The loop moved this card from in-progress/ to human-review/ WITHOUT trying it. All 1 of its open acceptance criteria say proves: manual, so there is nothing left an unattended session could close and starting one would change nothing. Each open criterion names what to look at and what a pass is: tick what passes and move the card on, or say what failed and move it back to todo/.
+
+### 2026-10-04 manager (m20261004220238-3d36)
+
+**outcome: rob**
+
+The code is built and its offline checks pass. Only an in-game check on a second character is left, and only Rob can do it.
+
+**what the session said**
+
+I checked `DjinnisClassProfiles.lua`. The code the builder describes is there: `PlanTab.readLayoutString`, the `DCP1:` tag, and the "Import a profile..." menu item. No review finding proves any ticked criterion wrong. The only open criterion is #5, and it is a manual check. Only Rob can do it, in the game.
+
+What Rob must do in the game:
+1. More > Profile: X > Export. Copy the string into a text file.
+2. Log in on another character of the same class. More > Import a profile..., paste the string, OK.
+3. Check that chat says Saved, and that nothing on the bars moved.
+4. More > Profile: X > Load. Check that the bars, the keys and the character macros match.
+5. Export a profile with many macros. Check that the long string pastes into the box in full.
+
+WHY: The code is built and its offline checks pass. Only an in-game check on a second character is left, and only Rob can do it.
+
+OUTCOME: rob
+
