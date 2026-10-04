@@ -119,3 +119,30 @@ Rewriting the looks is an agent's job, so this goes to `todo/`: rewrite them aga
 version, then return the card to `human-review/`.
 
 **2026-09-29** The loop moved this card from todo/ to human-review/ WITHOUT trying it: every acceptance criterion on it is ticked and it has never been through ai-review/, so nothing is left that a session could close. If the work is done, move it to ai-review/ for its review. If it is not, untick or add the criterion that is still open and move it back to todo/.
+
+### 2026-10-04 manager (m20261004153552-bc82)
+
+**outcome: rob**
+
+The code meets every criterion, but the in-game looks describe an addon from 50 versions ago, so a person must rewrite them before anyone runs them.
+
+**what the session said**
+
+I read the card and the code in `DjinnisClassProfiles`. The addon is now at v0.69.0.
+
+The code still backs all five ticked criteria:
+
+- `update-gear-plan.ps1` files any fight style that starts with `^Dungeon` as `mplus`.
+- `DjinnisClassProfiles.lua` has `planScenario`, `bagScenario` and `PlanTab.nextScenario`.
+- The offline checks still test the bag list outside and in a dungeon, and the "No Mythic+ gear plan yet" text.
+
+No finding disproves a ticked box. The 2026-09-29 finding is about the seven looks, not the criteria. If I unticked nothing and sent the card back, the loop would park it again.
+
+The work looks finished. What is left is the seven looks. They describe v0.19.1: the `WS M+` and `DotC M+` loadouts, an empty Mythic+ cell, and a 3-step strip. Look 7 is already done.
+
+So Rob, or a session he is in, must rewrite looks 1 to 6 against v0.69.0. Then the card goes to `ai-review/` for its first review, and after that to Rob in the game.
+
+WHY: The code meets every criterion, but the in-game looks describe an addon from 50 versions ago, so a person must rewrite them before anyone runs them.
+
+OUTCOME: rob
+
