@@ -268,3 +268,34 @@ button is on hold: Rob parked making loadouts automatically (card `0065`).
 **2026-09-24, Claude.** Written from Rob's message. Not started. Prior art to read first:
 `docs/research/talent-loadout-addons.md` (TalentLoadoutsEx's list, ImprovedTalentLoadouts'
 account-wide builds) and `DjinnisClassProfiles` (card `0035`).
+
+**2026-10-04** REVIEW (adversarial, separate agent; this thread runs newest first, this entry is
+appended at the end as the board README says). Of v0.52.4 (`bdcab11`), in today's code. Holds.
+To `done/` with the in-game criterion open; the looks are "What Rob looks at in game" in the
+v0.52.0 entry.
+
+Attacked:
+- `offline-check.lua` under Lua 5.1, self-test, 250 and 62: "no FAIL lines".
+- Two mutations on a temp copy, both red: `goodMine` without the clash-mark rule (the hand-edited
+  check), and the "your builds" loop without its `except` (two rename checks).
+- Both re-review holes: `myNameProblem` now compares without capitals against the plan and yours,
+  leaving out the build being renamed, and refuses a name ending in " (your loadout)";
+  `goodMine` refuses that mark in a hand-edited file too.
+
+Low, not blocking:
+- **The capitals hole has a second door.** The rule runs only when you type a name. If a later
+  plan refresh adds a name that matches one of yours but for capitals (yours "raid: nek'zali",
+  the plan's "Raid: Nek'zali"), `buildsOf` keeps both, because it compares exactly, and the
+  shadow warning (line 6782) does too. Then Blizzard's switch by name can put on the other one.
+  Not fixed in place: `buildsOf` also decides what Delete old loadouts deletes (card 0066), so
+  changing it needs its own checks. It needs a plan name you happened to type first in other
+  capitals.
+
+Security:
+1. Weakest point: an imported string is stored and later passed to `ImportLoadout`; the game
+   validates it, and the addon refuses one for another spec or one that will not read.
+2. Unchecked: names are length-, mark- and clash-checked when typed, and `goodMine` re-checks a
+   hand-edited file.
+3. Leaks: Export shows only the build's own string. Nothing leaves the client.
+
+Not looked at in a client: there is none here.
