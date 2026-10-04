@@ -12433,6 +12433,14 @@ function PlanTab.barChecks(check)
 	bodies[122] = "/cast Rake"  -- the made one, edited by hand since
 	PlanTab.undoBars()
 	check(macroUndoTest .. ", and never one edited since", macros[122], "Cat it")
+	-- 0068 review: a load after a hand change starts a fresh undo, whose bars
+	-- hold the made macro, so that undo must not delete it
+	bars, macros, icons, bodies = {}, { [121] = "Mine" }, { [121] = 1 }, { [121] = "/mine" }
+	applyMacro({ [3] = saved })
+	bars[7] = { type = "macro", name = "Mine", index = 121 }  -- by hand, after the load
+	PlanTab.applyBars("Macro")
+	PlanTab.undoBars()
+	check(macroUndoTest .. ", and not one a later load's undo holds", tostring(macros[122]) .. "/" .. tostring(bars[3] and bars[3].index), "Cat it/122")
 
 	local macroOldTest = "an old layout with no macro body still applies"
 	local old = { type = "macro", name = "Cat it", index = 121 }
