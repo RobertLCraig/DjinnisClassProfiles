@@ -34,3 +34,31 @@ Four mutations each made 1 to 8 checks fail. Lua 5.1: "no FAIL lines".
 <!-- AC:END -->
 
 ## Comments
+
+**2026-10-04** REVIEW (adversarial, separate agent). Holds. To `done/` with #3, the in-game look,
+still open.
+
+Attacked:
+- `offline-check.lua` under Lua 5.1: "no FAIL lines".
+- Two mutations on a temp copy, both red: `wearTalentsOnly` not marking the key (3 FAIL lines),
+  and `offerBars` ignoring `barsSeen` (3, one of them 0033's own check).
+- The spare route: after a switch through the spare loadout, `activeLoadoutName` maps the spare
+  back to the build (`spareBuild`), so the offer reads the same key that was marked. Holds.
+- A build with no bars of its own: both functions fall back to the spec layout, the mark too, so
+  the offer stays quiet for it as well.
+- Combat: `loadTalents` refuses under lockdown and `applyBars` goes through `barsFence`.
+
+Minor, not blocking:
+- The card's own "Uncertain" is real and wider than a failed switch: `loadTalents` returning
+  `combat`, `busy` or `missing` also leaves the mark set, and `combat` says nothing in chat, so a
+  click in combat does nothing visibly. Keeping the mark only when `loadTalents` actually starts
+  a switch would close both.
+- The `proves:` names are a function, not the printed check names ("talents only or bars only, ...").
+
+Security:
+1. Weakest point: the mark is one session field, so the worst a stale one does is skip one bars
+   offer; More > Offer the saved bars still reaches it.
+2. Unchecked: the build name comes from Rob's own row data; nothing typed reaches these two.
+3. Leaks: nothing leaves the client.
+
+Not looked at in a client: there is none here. #3 is the look.
