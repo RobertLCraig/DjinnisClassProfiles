@@ -15546,7 +15546,11 @@ local function selfTest()
 			check(buildTest .. ", " .. spec .. " " .. row.boss, type(PlanTab.buildFor(spec, row.loadout)), "string")
 		end
 	end
+	-- 0030 review: no real cell shares a build's name, so one is put in for
+	-- the check, or the order could be swapped with nothing failing
+	GEAR_PLAN.Feral.check0030 = { loadout = "Raid: Sszorak", talents = "GEAR CELL" }
 	check(buildTest .. ", Dreamgrove's before the gear cell", PlanTab.buildFor("Feral", "Raid: Sszorak"), PlanTab.BUILDS.Feral["Raid: Sszorak"])
+	GEAR_PLAN.Feral.check0030 = nil
 	check(buildTest .. ", the gear cell's for its own name", PlanTab.buildFor("Feral", GEAR_PLAN.Feral.st.loadout), GEAR_PLAN.Feral.st.talents)
 	check(buildTest .. ", nothing for a name nobody planned", PlanTab.buildFor("Feral", "Rob's own"), nil)
 	check(buildTest .. ", nothing without a spec", PlanTab.buildFor(nil, "Dungeon"), nil)
