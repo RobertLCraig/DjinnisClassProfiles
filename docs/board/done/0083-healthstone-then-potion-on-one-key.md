@@ -79,3 +79,37 @@ Two more looks for Rob:
 **2026-10-01, Rob**, on Feral's Frenzied Regeneration: "if the macro works. I guess it could go on shift S". **Claude:** so the macro goes on Shift+2 (the healing potion key, every spec), not Shift+S as look 1 says; drag it there. When looks 1 to 7 pass, the key page drops the Healthstone from Shift+S in all 40 specs, and Feral's Frenzied Regeneration moves from Shift+4 to Shift+S. Not done before then: a failed macro would leave the stone with no key.
 
 **2026-10-01, Rob:** "macro seems to work okay!" **Claude:** the in-game task ticked. Look 5 (a rewrite between pulls in a Mythic+ key) is still open unless Rob says he saw it. The key page now gives the Healthstone no key in any spec, and Feral Frenzied Regeneration is on Shift+S.
+
+**2026-10-04** REVIEW (adversarial, separate agent). Holds. To `done/`; look 5 (a rewrite between
+pulls inside a Mythic+ key) is still open, the rest Rob has seen work.
+
+Attacked:
+- `offline-check.lua` under Lua 5.1: "no FAIL lines"; all four named checks print under the names
+  the criteria give.
+- Four mutations on a temp copy. Red: no combat guard in `healRewrite` (2 FAIL lines), a stone on
+  cooldown counted as ready (2), no "same text" guard (3). Green: swapping the two stones' order,
+  which only matters with both kinds in the bags and is harmless.
+- API against `wow-ui-source`: `C_Item.GetItemCount(itemInfo, includeBank, includeUses, ...)` and
+  `GetItemCooldown` (start, duration, enable) match `ItemDocumentation.lua`; neither return is
+  documented secret, and `healApi` still tests each with `issecretvalue`. `EditMacro(index, nil,
+  nil, body)` is how `Blizzard_MacroUI.lua:344` calls it.
+- Event rule (2026-08-21): `healWatch` sets the handler first, registers one event at a time and
+  checks each with `IsEventRegistered`, and says so in chat on a refusal. Armed at
+  `PLAYER_LOGIN`, under `pcall`.
+- Combat: `healMake` and `healRewrite` both refuse under lockdown, the timer path too.
+
+Minor, not blocking:
+- `GetMacroIndexByName` answers an account macro before a character one. An account macro also
+  named "DCP Heal" would be the one rewritten, on every character. Nothing here makes one.
+- With the macro window open on `DCP Heal`, a rewrite is overwritten by Blizzard's save when the
+  window closes. The next bag event puts it right.
+- A Healthstone whose cooldown has not started (`enableCooldownTimer` false) reads as ready from
+  `duration` alone. Whether that state exists for a stone in 12.1 is an in-game question.
+
+Security:
+1. Weakest point: the addon rewrites a macro Rob presses in a fight. The text is built only from
+   fixed item ids, never from a read string, so nothing can be injected into it.
+2. Unchecked: none; no input from chat, the sheet or saved data reaches the macro body.
+3. Leaks: nothing leaves the client.
+
+Not looked at in a client: there is none here.
