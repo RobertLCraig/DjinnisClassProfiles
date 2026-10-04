@@ -64,3 +64,24 @@ mode shows 5 FAIL lines (`RaidWarningUtil` stub, hover lines); the same 5 show o
 `2aebf7a`, so card `0075` carries them. The brief's `pest`/`pint` do not apply: this repo has no
 PHP. Still needs a live client: `/reload`, open the talent window as Guardian and Resto, and see
 no warning triangle and no dropped rows.
+
+**2026-10-04** REVIEW (adversarial, separate agent). Holds. To `done/`; the look above (no warning
+triangle as Guardian and Resto) stays open.
+
+Attacked:
+- `offline-check.lua` under Lua 5.1: "no FAIL lines". `python update-builds.py --check`: "BUILDS
+  block already current", so the shipped block is what the generator makes.
+- The tree hash check, by flipping single characters of Balance's `Dungeon` string on a temp
+  copy. Inside the 128 bits (character 10, and character 26's low two bits) it goes red and names
+  the build. Just outside (character 26's high bits, character 27) it stays green, which is right:
+  those are talent bits, not hash. So the check measures exactly the hash and nothing more.
+- The three names appear nowhere in `DjinnisClassProfiles.lua` now. `PICK` keeps empty Guardian and
+  Resto entries, so `block()` still indexes every druid spec without a `KeyError`.
+- A player's existing `[CP]` copies of the three are not deleted here; More > Delete old loadouts
+  (card 0066) lists them and asks. That is the scope fence the card sets.
+
+Security: data and a check only. The generator's input is Rob's own Warcraft Logs JSON, and the
+new check is what stops a stale string from a future guide pick shipping. Nothing leaves the
+client.
+
+Not looked at in a client: there is none here.
