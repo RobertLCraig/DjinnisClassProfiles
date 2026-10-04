@@ -51,10 +51,10 @@ saved. Card `0031` makes them.
 
 ## Acceptance
 
-- [ ] WHEN the generator runs, THE SCRIPT SHALL refuse to write if a picked build is missing from a compendium page, or decodes to the wrong spec.
-- [ ] WHEN a boss row has a `talents` string, THE ADDON SHALL treat it as the planned build for that boss.
-- [ ] `/bis test` covers `plannedTalents` for a boss row with and without its own string.
-- [ ] The build decodes to 34 class, 34 spec and 13 hero points for every row (`choices.py` check, carried over).
+- [x] WHEN the generator runs, THE SCRIPT SHALL refuse to write if a picked build is missing from a compendium page, or decodes to the wrong spec. proves: none, `update-builds.py` has no suite; its refusals were probed by the 2026-10-04 review
+- [x] WHEN a boss row has a `talents` string, THE ADDON SHALL treat it as the planned build for that boss. proves: `every boss row has a stored build, Dreamgrove's before the gear cell`
+- [x] `/bis test` covers `plannedTalents` for a boss row with and without its own string. proves: `every boss row has a stored build` (one line per row), `every boss row has a stored build, the gear cell's for its own name`
+- [x] The build decodes to 34 class, 34 spec and 13 hero points for every row (`choices.py` check, carried over). proves: none, `update-builds.py` refuses any other count on every write, and `--check` said current on 2026-10-04
 
 ## Comments
 
@@ -66,3 +66,35 @@ needs a client, and its expectation is stale: Balance's rows are `Raid: Nek'Zali
 `Raid: Cleave` since card `0064` regrouped them, not one `Raid: <boss>` a boss. So it goes to
 `ai-review/`. The reviewer names each criterion's proving check, and writes a current in-game ask
 if the card then needs Rob.
+
+**2026-10-04** REVIEW (adversarial, separate agent). Holds, after one check was made able to fail.
+To `done/`. The criteria were never ticked; I ticked them from the runs below and named each one's
+proof on its line. The code has moved a long way since v0.26.0 (Warcraft Logs builds, card 0064;
+`plannedTalents` is now `buildFor`), so this reviews what the card promised, in today's code.
+
+Attacked:
+- `offline-check.lua` under Lua 5.1, self-test, 250 and 62: "no FAIL lines".
+  `python update-builds.py --check`: "BUILDS block already current".
+- The generator's refusals, by a probe that loads `update-builds.py` and runs it against Raidbots'
+  live `talents.json`: a Guardian string offered as Feral is refused (spec 104), a cut-short Feral
+  string is refused (29 spec points, 2 class), and with the guide and Warcraft Logs both emptied,
+  `block()` exits "the guide no longer has ... Change PICK, do not guess" and writes nothing.
+- `buildFor`'s order, by swapping it on a temp copy (gear cell first). **Every check passed**:
+  no gear cell shares a name with a stored build, so "Dreamgrove's before the gear cell" could not
+  fail. Fixed in place in `41632e2`: the check puts a gear cell named "Raid: Sszorak" in for
+  itself and takes it out. With the order swapped it now fails.
+
+Minor, not blocking:
+- Two Feral gear cells name their loadout `[CP] Raid: Nek'Zali` and `[CP] Raid: Lost Explorers`:
+  `update-gear-plan.ps1` copies the tagged name out of the Raidbots report. `buildFor` is asked
+  with untagged names, so those cells' talents are never its fallback. Nothing is lost today,
+  because the stored builds have both names. The script should strip the tag (card 0059's trap).
+- The old ask ("each boss row names a `Raid: <boss>` loadout") is stale, as the 2026-09-29 entry
+  says, and Rob has raided on these builds since; the in-game side is covered by cards 0031 and
+  0064. No ask is written.
+
+Security: author tooling and data. The generator reads GitHub through `gh`, Raidbots and Rob's
+own Warcraft Logs JSON, and writes only strings that pass the spec and points check, escaped as
+Lua strings. Nothing leaves the client at run time.
+
+Not looked at in a client: there is none here.
