@@ -35,7 +35,7 @@ Built:
 
 ## What I need from you
 
-On Balance: `/reload`, then change spec away and back (or open More > Make the planned loadouts).
+On Balance: `/reload`, then More > Make the planned loadouts (a spec change no longer opens the box, card 0065). More > Delete old loadouts (card 0066) lists the same old ones.
 
 **Pass:** the box lists the old EC and KotG loadouts as "deleted: an old Dreamgrove loadout". "Delete them" deletes them all with one click, a second or so apart, then "Deleted N of N old loadouts." A second later the box offers "Create" for the Balance builds.
 
@@ -216,3 +216,36 @@ builder fixed that in v0.48.11, added the room hint in v0.48.12, and moved the c
 reviewer has read either. Review both. Then refresh the ask: since card `0065` a spec change no
 longer opens the box, so it is **More > Make the planned loadouts** only, and since card `0066`
 **More > Delete old loadouts** lists these too.
+
+**2026-10-04** REVIEW (adversarial, separate agent). Of v0.48.11 and v0.48.12, in today's code.
+Holds. To `done/` with "Done when" 2, the in-game run, still open; its ask above is refreshed for
+cards 0065 and 0066.
+
+Attacked:
+- `offline-check.lua` under Lua 5.1, self-test, 250 and 62: "no FAIL lines".
+- Mutations on a temp copy. Dropping the renamed-since-the-click guard in `tagNext`: red, and the
+  check names the third delete. Dropping the room hint: red. The builder's mutants for the mixed
+  box and the counts I did not repeat.
+- `tagNext` today: a change goes by id only after `configName(id)` still equals the name clicked,
+  and a delete only if that id is not the worn one, both read again before every step and every
+  retry. The end lines count against what was asked, so nothing prints for an empty run.
+- `DeleteConfig` and `RenameConfig` stay behind `pcall`, combat ends the queue and says how many
+  were not done, and `loadoutFence` keeps a second queue out while one runs.
+
+Fixed in place (`060ac8d`): `PlanTab.configName` returned `info.name` without `canRead`, the one
+loadout name read here that skipped it. `tagNext` now compares that name before every change, so
+a secret would have thrown mid-queue and left `PlanTab.tagging` set, refusing every loadout action
+until a reload. A secret now reads as nil, which the queue treats as "changed since the click"
+and leaves alone. All three offline modes still pass.
+
+Still true from the second review, not blocking: a name match decides a delete, so a druid's own
+loadout named like an old Dreamgrove one ("EC M+") is listed for deletion. It needs a click, the
+row names it, and the worn one is never deleted.
+
+Security:
+1. Weakest point: `DeleteConfig` by a name match; covered above.
+2. Unchecked: nothing typed reaches it. The list is read from the game and re-read by id before
+   each step.
+3. Leaks: nothing leaves the client.
+
+Not looked at in a client: there is none here.
