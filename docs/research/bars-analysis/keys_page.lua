@@ -211,7 +211,18 @@ local ROB_CLASS = {
 		["Frost Nova"] = "MULTIACTIONBAR6BUTTON4", ["Slow Fall"] = "MULTIACTIONBAR3BUTTON2" },
 }
 -- Rob's mouse binds, by spec: the page's Clique panel
-local ROB_MOUSE = { Brewmaster = { MOUSEWHEELDOWN = "Expel Harm" } }
+-- Rob, 2026-10-04: "for healer specs. 1-4 should be offensive, primary healing
+-- is done via Clique." The heals Bellular puts on 1 to 4 leave the keys for the
+-- Clique bind Rob's profile already has; damage spells take 1 to 4 (PROPOSED).
+local ROB_MOUSE = { Brewmaster = { MOUSEWHEELDOWN = "Expel Harm" },
+	["Holy Paladin"] = { BUTTON2 = "Holy Light", ["SHIFT-BUTTON1"] = "Flash of Light" },
+	Discipline = { BUTTON1 = "Flash Heal" }, ["Holy Priest"] = { BUTTON1 = "Flash Heal" } }
+-- Shield of the Righteous 5 to 1; Shadow Word: Death (no key) to 1; Holy
+-- Nova (AoE damage, Shift+V) to 2, and Prayer of Mending, a heal no Clique
+-- bind casts, to Alt+1, free. Holy Paladin's 2 is left empty: Rob picks.
+PROPOSED["Holy Paladin"] = { ["Shield of the Righteous"] = "ACTIONBUTTON1" }
+PROPOSED.Discipline = { ["Shadow Word: Death"] = "ACTIONBUTTON1" }
+PROPOSED["Holy Priest"] = { ["Shadow Word: Death"] = "ACTIONBUTTON1", ["Holy Nova"] = "ACTIONBUTTON2", ["Prayer of Mending"] = "ACTIONBUTTON7" }
 
 local extras, bellular = {}, {}
 for _, job in ipairs(PlanTab.BAR_CATEGORIES) do bellular[job] = true end
@@ -303,6 +314,13 @@ local function plan(spec, class)
 			end
 		end
 	end
+	-- the mouse first, so a key a heal leaves to Clique is free for the moves
+	local mouse = {}
+	for key, spell in pairs(ROB_MOUSE[spec] or {}) do
+		for i, c in ipairs(nokey) do if c.spell == spell then table.remove(nokey, i) break end end
+		for b, c in pairs(cells) do if c.spell == spell then cells[b] = nil end end
+		mouse[#mouse + 1] = { key = key, spell = spell }
+	end
 	apply(ROB_PICKS[spec], "rob")
 	apply(PROPOSED[spec], "role")
 	for _, spell in ipairs(ROB_OFF[class] or {}) do
@@ -311,12 +329,6 @@ local function plan(spec, class)
 		end
 	end
 	apply(ROB_CLASS[class], "rob")
-	local mouse = {}
-	for key, spell in pairs(ROB_MOUSE[spec] or {}) do
-		for i, c in ipairs(nokey) do if c.spell == spell then table.remove(nokey, i) break end end
-		for b, c in pairs(cells) do if c.spell == spell then cells[b] = nil end end
-		mouse[#mouse + 1] = { key = key, spell = spell }
-	end
 	local seen = {}
 	for b, c in pairs(cells) do
 		if seen[c.spell] then clash[#clash + 1] = c.spell .. " on two keys" end
