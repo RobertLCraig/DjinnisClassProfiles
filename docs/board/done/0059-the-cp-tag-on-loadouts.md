@@ -5,8 +5,9 @@ needs: 0058
 
 ## What I need from you
 
-1. v0.48.8 is in the game folder. `/reload` on a character with loadouts from before the tag, and
-   click "Tag them" **once**.
+1. v0.69.0 is in the game folder. `/reload` on a character with loadouts from before the tag, open
+   **More > Make the planned loadouts** (the box no longer opens by itself, card 0065), and click
+   "Tag them" **once**.
 
 **Pass:**
 - The box lists each old loadout with what happens to it (renamed, or deleted in red).
@@ -614,3 +615,30 @@ only what he must decide. The seventh review recommended a bounce; the builder f
 v0.48.8 and moved the card on itself, so no reviewer has read v0.48.8. Review it. Then refresh the
 ask: since card `0065` the loadout box no longer opens at `/reload`, so step 1 must say
 **More > Make the planned loadouts**, and the game folder holds v0.54.12, not v0.48.8.
+
+**2026-10-04** REVIEW (adversarial, separate agent). Of v0.48.8 (`c6cc256`), in today's code.
+Holds. To `done/` with the manual criterion open; the ask at the top now names More > Make the
+planned loadouts and v0.69.0.
+
+Attacked:
+- `offline-check.lua` under Lua 5.1, self-test, 250 and 62: "no FAIL lines".
+- Three mutations on a temp copy. Red: the resume timer without its "still held, still waiting"
+  test (the check "a held setup run meanwhile is not run again"), and Set up mid-queue saying
+  nothing ("and says so"). Green: `afterTagging` scheduling for a setup it did not hold, which the
+  timer's own test then drops, so it is harmless.
+- Since card 0065 the queue's end offers no box at all, so the seventh review's finding 1 cannot
+  happen now, whatever `afterTagging` answers. The wait in `setupStep` now covers a swap
+  (`PlanTab.swapping`, card 0063) as well as the rename queue, with its own line.
+- The reverse fence the seventh review noted (`tagOld` not waiting on a setup's spec change) is
+  left as the builder decided: the retries cover a switch, and waiting on a setup the game never
+  finishes would lock Tag them.
+
+Security:
+1. Weakest point: a loadout is the addon's by its `[CP] ` prefix alone, so a player's own loadout
+   named "[CP] Raid" is treated as the build's, and Reset may delete it. That is the convention
+   the card chose, and the prefix is unusual enough to be a fair line.
+2. Unchecked: renames and deletes go by id after `configName` is read again (card 0062's guard,
+   which now reads through `canRead`).
+3. Leaks: nothing leaves the client.
+
+Not looked at in a client: there is none here.
