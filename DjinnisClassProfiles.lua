@@ -7842,7 +7842,8 @@ end
 -- A config's name, or nil. The one read behind noteMade's watched id.
 function PlanTab.configName(id)
 	local ok, info = pcall(C_Traits.GetConfigInfo, id or 0)
-	return ok and info and info.name or nil
+	-- canRead as every other name read: tagNext compares it (0062 review)
+	return ok and info and canRead(info.name) and info.name or nil
 end
 
 -- The level the last job's loadout was made at, once the queue has waited
