@@ -96,3 +96,32 @@ The Pest and Pint commands in the brief do not apply: this repository has no PHP
 test suite. `update-builds.py` has no harness, which is why #1 says `proves: none`.
 
 **2026-09-29** The loop moved this card from in-progress/ to human-review/ WITHOUT trying it. All 1 of its open acceptance criteria say proves: manual, so there is nothing left an unattended session could close and starting one would change nothing. Each open criterion names what to look at and what a pass is: tick what passes and move the card on, or say what failed and move it back to todo/.
+
+### 2026-10-05 manager (m20261005011444-5a24)
+
+**outcome: rob**
+
+The code fix is done and the blocker is done; only Rob's in-game check of the Beast Mastery loadouts is left.
+
+**what the session said**
+
+I read the code. The fix is there. In `update-builds.py`, the function `block()` now checks the name of every `PIN` entry, for every class, before it reads any source. A name with more than `NAME_MAX` letters, or with a `"`, stops the run. That is criterion #1, and the code agrees with the card's proof.
+
+The blocker card `0059` (the `[CP] ` tag) is in `done/`.
+
+Criterion #2 is the only open item. It needs a person in a live game client:
+
+1. Log in on a Beast Mastery Hunter and type `/reload`.
+2. Type `/dcp loadouts` and make both builds.
+3. Open the talent window and pick `[CP] Dungeon`, then `[CP] Raid`.
+
+**Pass:** both names are in the dropdown, and each one loads with no Blizzard "invalid" message.
+
+**Fail:** a name is missing, or Blizzard calls a string invalid. Write down which build and the exact red line.
+
+No agent can run the game, so the builder has nothing to do.
+
+WHY: The code fix is done and the blocker is done; only Rob's in-game check of the Beast Mastery loadouts is left.
+
+OUTCOME: rob
+
