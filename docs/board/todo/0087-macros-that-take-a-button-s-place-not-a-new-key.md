@@ -38,9 +38,19 @@ These are common macro patterns, not GearInsight's work. Write our own bodies. C
 
 - Burst macros (trinkets plus cooldowns). Rob said no. Nothing here replaces the one-button
   assistant: a macro can cast only one spell on the global cooldown per press.
-- Macros with a name to fill in (`@NAME` for Tricks or Power Infusion).
-- Macros that change your focus or target to work, such as the hunter "kick anything" macro.
-- Modifier choices that use Ctrl. Rob does not use Ctrl (see his key reach).
+## Not out (Rob, 2026-10-07: "these are not auto fails")
+
+8. **A spell on a set person: focus, a name, or the tank.** Tricks of the Trade, Misdirection,
+   Power Infusion, Innervate. Rob's Innervate goes on his focus. `[@focus,help,nodead][]` casts on
+   the focus without a target change. A macro that changes target and changes back is also fine,
+   because it is too fast to see.
+   - **Idea:** the addon can fill the name for you. When the group changes, out of combat, write
+     the group's tank into the macro with `EditMacro`. `EditMacro` does not work in combat.
+   - **Check first:** in 12.1 a unit name can be a secret value (workspace `docs/DECISIONS.md`).
+     If the tank's name comes back secret, the addon cannot write it. Then use focus.
+9. **Macros that change target or focus to work.** For example the hunter "kick anything" macro.
+   Judge each one by the button rule, like the rest.
+10. **Ctrl modifiers.** Write them with Shift or Alt. Rob does not use Ctrl (see his key reach).
 
 ## Check before building
 
