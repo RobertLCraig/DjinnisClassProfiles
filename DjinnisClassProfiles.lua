@@ -6140,6 +6140,93 @@ function PlanTab.recheckSoon()
 	if C_Timer and C_Timer.After then C_Timer.After(2, PlanTab.checkSetup) end
 end
 
+-- Old content wants a movement speed build, not the plan (Rob, 2026-10-09:
+-- "this is things like dash, tiger dash, stampeding roar, wraith walk, death's
+-- advance, aspect of the cheetah"). The player's own loadout is found by its
+-- name: the first one with any of these words in it, any case.
+PlanTab.SPEED_WORDS = { "movement", "speed" }
+
+-- Pure. The first name in `names` that reads as a movement speed loadout.
+function PlanTab.speedLoadoutName(names)
+	for _, name in ipairs(names or {}) do
+		local low = name:lower()
+		for _, word in ipairs(PlanTab.SPEED_WORDS) do
+			if low:find(word, 1, true) then return name end
+		end
+	end
+	return nil
+end
+
+-- The spec's saved loadout names as the talent window shows them, in its
+-- order, and the selected one's; nil when the game will not say. The same
+-- reads as PlanTab.savedLoadoutNames, without its plan keys: this is the
+-- player's own loadout, not a build.
+function PlanTab.ownLoadoutNames()
+	local spec = C_SpecializationInfo
+	if not (spec and spec.GetSpecialization and C_ClassTalents and C_ClassTalents.GetConfigIDsBySpecID
+		and C_Traits and C_Traits.GetConfigInfo) then return nil end
+	local ok, specID = pcall(spec.GetSpecializationInfo, spec.GetSpecialization())
+	if not ok or not specID then return nil end
+	local okIDs, ids = pcall(C_ClassTalents.GetConfigIDsBySpecID, specID)
+	if not okIDs or type(ids) ~= "table" then return nil end
+	local function nameOf(id)
+		local okInfo, info = pcall(C_Traits.GetConfigInfo, id)
+		local name = okInfo and info and info.name
+		if name and canRead(name) then return name end
+		return nil
+	end
+	local names = {}
+	for _, id in ipairs(ids) do names[#names + 1] = nameOf(id) end
+	local okStarter, starter = pcall(C_ClassTalents.GetStarterBuildActive)
+	local selected
+	if not (okStarter and starter) then
+		local okSel, configID = pcall(C_ClassTalents.GetLastSelectedSavedConfigID, specID)
+		if okSel and configID then selected = nameOf(configID) end
+	end
+	return names, selected
+end
+
+-- In an old raid or dungeon: offer the movement speed loadout when another is
+-- on, through the same popup, fence and "closed stays closed" as the plan's.
+-- With none saved, says once a session how to make one. Answers what it did.
+function PlanTab.checkSpeed()
+	local _, kind = GetInstanceInfo()
+	if kind ~= "party" and kind ~= "raid" then PlanTab.popupPending = nil; PlanTab.hideSetup(); return "elsewhere" end
+	local names, selected = PlanTab.ownLoadoutNames()
+	if not names then PlanTab.hideSetup(); return "unknown" end
+	local speed = PlanTab.speedLoadoutName(names)
+	if not speed then
+		PlanTab.hideSetup()
+		if not PlanTab.speedHinted then
+			PlanTab.speedHinted = true
+			PlanTab.say("Old content. Save a talent loadout with \"Movement speed\" in its name (Dash, Tiger Dash, Stampeding Roar) and it is offered here.")
+		end
+		return "none"
+	end
+	if speed == selected then PlanTab.popupPending = nil; PlanTab.hideSetup(); return "on" end
+	if PlanTab.fenced() then PlanTab.popupPending = true; return "fenced" end
+	PlanTab.popupPending = nil
+	local place = (GetInstanceInfo())
+	if type(place) ~= "string" or not canRead(place) then place = nil end
+	local key = "speed|" .. (place or "?") .. "|" .. speed
+	if key == PlanTab.popupClosed then return "closed" end
+	local lines = { ("%sTalents|r   now %s, movement speed loadout %s%s|r"):format(GOLD, selected or "not known", GREEN, speed) }
+	local buttons = { { label = "Switch talents",
+		tip = ("Load \"%s\" through Blizzard's own talent helper. Out of combat only."):format(speed),
+		onClick = function()
+			if InCombatLockdown() then return end
+			if ClassTalentHelper and ClassTalentHelper.SwitchToLoadoutByName then
+				ClassTalentHelper.SwitchToLoadoutByName(speed)
+			else
+				PlanTab.openTalents()
+			end
+			PlanTab.recheckSoon()
+		end } }
+	PlanTab.popup(("%s: old content"):format(place or "Here"), lines, buttons, function() PlanTab.popupClosed = key end)
+	PlanTab.popupModel.setup = true
+	return "shown"
+end
+
 -- Reads the game and shows the popup, or not. Answers what it did, for the
 -- checks: "elsewhere" (not in a raid or a dungeon), "no plan" (no row for
 -- this spec here, or the last boss is down), "fenced" (combat, a key or a
@@ -6147,6 +6234,7 @@ end
 -- this answer already) or "shown".
 function PlanTab.checkSetup()
 	local here = autoContext()
+	if not here and PlanTab.legacyHere() then return PlanTab.checkSpeed() end
 	if not here then PlanTab.popupPending = nil; PlanTab.hideSetup(); return "elsewhere" end
 	local spec = playerSpec()
 	local row = PlanTab.bossHere(spec, here)
@@ -12639,6 +12727,8 @@ function PlanTab.sidebarChecks(check)
 	local barsOf = {}
 	for _, e in ipairs(PlanTab.sidebarList("Feral", "raid")) do if e.loadout then barsOf[e.loadout] = e.bars end end
 	check("a row says when its build has its own action bars", barsOf["Raid: Sszorak"], true)
+	check("old content finds the movement speed loadout, any case", PlanTab.speedLoadoutName({ "Raid: Vashnik", "Dungeon", "Movement SPEED" }), "Movement SPEED")
+	check("old content with no speed loadout finds none", PlanTab.speedLoadoutName({ "Raid: Vashnik", "Dungeon" }), nil)
 	check("a row says when its build has its own action bars, and only that row", barsOf["Raid: Nek'Zali"], nil)
 	db().bars = keptBars
 end
