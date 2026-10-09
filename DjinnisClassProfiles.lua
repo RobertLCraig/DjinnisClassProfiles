@@ -1468,8 +1468,21 @@ end
 -- Raid or Mythic+, read off where you are standing. Inside an instance this
 -- is the answer and the switch below cannot override it (card 0009); outside,
 -- nil, and the switch decides, because gearing for Tuesday happens in a city.
+-- Old content: the game runs it under legacy loot rules, the same test
+-- Blizzard's BossBannerToast makes. The plan is for this season's raid and
+-- keys, so an old raid or dungeon counts as elsewhere (Rob, 2026-10-09:
+-- offered the Raid: Nek'Zali talents in Liberation of Undermine). A key is
+-- never legacy, so a past-season dungeon in this season's keys still counts.
+function PlanTab.legacyHere()
+	local api = C_Loot and C_Loot.IsLegacyLootModeEnabled
+	if not api then return false end
+	local ok, on = pcall(api)
+	return ok and canRead(on) and on == true
+end
+
 local function autoContext()
 	if not GetInstanceInfo then return nil end
+	if PlanTab.legacyHere() then return nil end
 	local _, instanceType = GetInstanceInfo()
 	if instanceType == "party" then return "mplus" end
 	if instanceType == "raid" then return "raid" end
@@ -6175,7 +6188,7 @@ end
 -- never read.
 PlanTab.SETUP_EVENTS = { "PLAYER_ENTERING_WORLD", "READY_CHECK", "ENCOUNTER_START", "ENCOUNTER_END",
 	"CHALLENGE_MODE_START", "PLAYER_REGEN_ENABLED", "ADDON_RESTRICTION_STATE_CHANGED",
-	"CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN" }
+	"CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN", "LEGACY_LOOT_RULES_CHANGED" }
 
 -- One event, as the watcher handles it. Pure enough for /bis test: every read
 -- is behind checkSetup. `id`, `name` and `success` are ENCOUNTER_END's first,
@@ -6201,6 +6214,9 @@ function PlanTab.onSetupEvent(event, id, name, _, _, success)
 		local spec = playerSpec()
 		local row = PlanTab.bossRow(spec and PlanTab.BOSSES[spec], id, name)
 		if row and row.id and canRead(success) and success == 1 then PlanTab.lastKill = row.id end
+		PlanTab.later(2, PlanTab.checkSetup)
+	elseif event == "LEGACY_LOOT_RULES_CHANGED" then
+		-- the legacy answer can land after the zone-in check: judge again
 		PlanTab.later(2, PlanTab.checkSetup)
 	elseif PlanTab.popupPending then
 		-- PLAYER_REGEN_ENABLED or ADDON_RESTRICTION_STATE_CHANGED: the fence
