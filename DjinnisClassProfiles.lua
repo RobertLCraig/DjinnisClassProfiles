@@ -5880,14 +5880,16 @@ end
 -- food has its own aura. Oil is a temporary weapon enchant, not an aura:
 -- C_PaperDollInfo.GetTemporaryEnchantmentInfo (PaperDollInfoDocumentation.lua;
 -- GetWeaponEnchantInfo is Blizzard_Deprecated-only in 12.1). `search` is what
--- a click types into the auction house.
--- TODO Rob: name the season's food and oil for `search` (nothing local names
--- them); a line with no `search` has no click.
+-- a click types into the auction house. The food and the oil are the ones
+-- SimC's own Season 2 Feral profile eats and wears
+-- (the workspace's 3rdParty/simc/profiles/MID2/MID2_Druid_Feral.simc: food=harandar_celebration,
+-- temporary_enchant=main_hand:thalassian_phoenix_oil_2; card 0017). A line
+-- with no `search` has no click.
 PlanTab.CONSUMABLES = {
 	{ label = "Flask", auras = { 432021, 431971, 431972, 431973, 431974, 1235057, 1235108, 1235110, 1235111 }, search = "Flask" },
-	{ label = "Food", icon = 136000 },
+	{ label = "Food", icon = 136000, search = "Harandar Celebration" },
 	{ label = "Augment rune", auras = { 1295329, 1264426, 1234969, 1242347, 453250, 393438, 347901 }, search = "Augment Rune" },
-	{ label = "Weapon oil", weapon = 16 },  -- INVSLOT_MAINHAND
+	{ label = "Weapon oil", weapon = 16, search = "Thalassian Phoenix Oil" },  -- INVSLOT_MAINHAND
 }
 
 -- One aura on the player by spell id: the aura, nil for none, "secret" when
@@ -17498,6 +17500,9 @@ local function selfTest()
 		check(fixTest .. ", a missing consumable searches the auction house", searched, "Flask")
 		check(fixTest .. ", one with no search term has no click", clicks[3], nil)
 		check(fixTest .. ", one that cannot be checked has no click", clicks[4], nil)
+		local unnamed = {}
+		for _, c in ipairs(PlanTab.CONSUMABLES) do if not c.search then unnamed[#unnamed + 1] = c.label end end
+		check(fixTest .. ", every consumable names what to search for", table.concat(unnamed, ", "), "")
 		wrongEnchant = 1
 		local _, _, _, enchantClicks = PlanTab.setupPopup("P", nek, "Feral", PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn()))
 		press(enchantClicks[2])
