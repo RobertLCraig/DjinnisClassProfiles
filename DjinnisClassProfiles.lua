@@ -12806,6 +12806,16 @@ function PlanTab.levelChecks(check)
 		PlanTab.lastEdited = {}
 		PlanTab.readLevels = function() return 90, 90 end
 		check(t .. ", but at the cap it is", PlanTab.talentsEdited(code), true)
+		-- the loadout's own level, not only the cap (0055, seventh review):
+		-- made at 81 and read at 82, the trimmed build in play is edited
+		made = { [ids[name]] = 81 }
+		PlanTab.lastEdited = {}
+		PlanTab.readLevels = function() return 82, 90 end
+		check(t .. ", edited a level after the loadout was made", PlanTab.talentsEdited(code), true)
+		-- no saved loadout selected below the cap: may be short, notes nothing
+		made = {}
+		PlanTab.readLevels = function() return 81, 90 end
+		check(t .. ", no loadout selected may be short and notes nothing", PlanTab.mayBeShort(nil) == true and next(made) == nil, true)
 		check(t .. ", Compare says part of the plan", PlanTab.compareWord(trimmed, code, true), "part")
 		check(t .. ", Compare says same for the plan", PlanTab.compareWord(code, code, true), "same")
 		check(t .. ", Compare says different at the cap", PlanTab.compareWord(trimmed, code, false), "different")
