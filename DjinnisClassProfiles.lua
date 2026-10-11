@@ -480,7 +480,7 @@ local PlanTab = {}  -- one name for the whole Plan tab: this file sits at Lua's 
 -- could be. Rob may well choose a cheaper rank on gear he expects to replace
 -- (2026-09-22), so a lower rank is "lesser", never "enchant" or "gem".
 -- BEGIN GENERATED PLAN RANKS
-PlanTab.RANK_SOURCE = "Raidbots enchantments.json and gems.json, read 2026-09-22"
+PlanTab.RANK_SOURCE = "Raidbots enchantments.json and gems.json, read 2026-10-11"
 PlanTab.RANK = {
 	enchant = {
 		[7972] = { "Akil'zon's Swiftness", 1, 2 },
@@ -497,6 +497,8 @@ PlanTab.RANK = {
 		[8159] = { "Forest Hunter's Armor Kit", 2, 2 },
 		[7986] = { "Mark of the Worldsoul", 1, 2 },
 		[7987] = { "Mark of the Worldsoul", 2, 2 },
+		[8688] = { "Rite of the Hash'ey", 1, 2 },
+		[8689] = { "Rite of the Hash'ey", 2, 2 },
 	},
 	gem = {
 		[240982] = { "Indecipherable Eversong Diamond", 1, 2 },
@@ -509,10 +511,6 @@ PlanTab.RANK = {
 		[240856] = { "Quick Peridot", 2, 4 },
 		[240887] = { "Quick Peridot", 3, 4 },
 		[240888] = { "Quick Peridot", 4, 4 },
-		[240861] = { "Versatile Peridot", 1, 4 },
-		[240862] = { "Versatile Peridot", 2, 4 },
-		[240893] = { "Versatile Peridot", 3, 4 },
-		[240894] = { "Versatile Peridot", 4, 4 },
 	},
 }
 -- END GENERATED PLAN RANKS
