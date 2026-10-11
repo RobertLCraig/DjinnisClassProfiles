@@ -275,6 +275,18 @@ if not asSpec then
 		if not (rawequal(rawget(_G, "DjinnisTestSecret"), secret) and rawequal(Enum.DjinnisTestSecret, secret) and rawequal(rawget(PlanTab, "testSecret"), secret)) then
 			fail("did not put back a secret it could not compare")
 		end
+		-- The same secrets, left alone by the run: put back as noted, never
+		-- counted or named as swapped (0056, seventh review).
+		rawequal = function(a, b)
+			if realRawequal(a, secret) or realRawequal(b, secret) then error("a secret") end
+			return realRawequal(a, b)
+		end
+		ok, swapped, text = net(function() end)
+		rawequal = realRawequal
+		if swapped ~= 0 or text:find("DjinnisTestSecret", 1, true) or text:find("values swapped", 1, true) then
+			fail("called a secret the run left alone swapped: " .. text)
+		end
+		if not text:find("could not compare 2 of the game's values", 1, true) then fail("did not say what it could not compare: " .. text) end
 		DjinnisTestSecret, Enum.DjinnisTestSecret, PlanTab.testSecret = nil, nil, nil
 
 		-- An add-on that loads while the test runs: its globals stay, and it says so.

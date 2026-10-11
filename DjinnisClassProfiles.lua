@@ -17732,14 +17732,22 @@ function PlanTab.restore(snap, write, equal)
 		local ok, is = pcall(equal, a, b)
 		return ok and is
 	end
-	local blizzard, plan, names, refused = 0, 0, {}, 0
+	local blizzard, plan, names, refused, uncompared = 0, 0, {}, 0, 0
 	-- counted before anything is put back: the run may have swapped C_AddOns
 	local loadedNow = PlanTab.loadedAddOns()
 	local function put(t, k, v, label)
-		if same(rawget(t, k), v) then return end
+		local okCompare, is = pcall(equal, rawget(t, k), v)
+		if okCompare and is then return end
 		if pcall(write, t, k, v) then
-			blizzard = blizzard + 1
-			if #names < 5 then names[#names + 1] = label end
+			-- A compare the game refused cannot tell a swap from no change, so
+			-- it is put back (the safe way) and counted apart, never as a swap
+			-- (0056, seventh review: an untouched secret read as swapped).
+			if okCompare then
+				blizzard = blizzard + 1
+				if #names < 5 then names[#names + 1] = label end
+			else
+				uncompared = uncompared + 1
+			end
 		else
 			refused = refused + 1
 		end
@@ -17775,7 +17783,7 @@ function PlanTab.restore(snap, write, equal)
 		if same(snap.plan[k], nil) and not PlanTab.isWidget(v) then added[#added + 1] = k end
 	end
 	for _, k in ipairs(added) do PlanTab[k] = nil plan = plan + 1 end
-	return blizzard, plan, names, refused, keepNew
+	return blizzard, plan, names, refused, keepNew, uncompared
 end
 
 -- `run`, `write` and `equal` are for offline-check.lua's proof of this net;
@@ -17785,11 +17793,12 @@ function PlanTab.runSelfTest(run, write, equal)
 	local restore, restoreSaved = PlanTab.restore, PlanTab.restoreSaved  -- a run cannot swap the net itself
 	local ok, err = pcall(run or selfTest)
 	local okSaved, savedRefused = pcall(restoreSaved, snap)
-	local okRestore, blizzard, _, names, refused, keptNew = pcall(restore, snap, write, equal)
+	local okRestore, blizzard, _, names, refused, keptNew, uncompared = pcall(restore, snap, write, equal)
 	if not okRestore then
 		print("|cffff0000FAIL|r the self-test could not put everything back: " .. tostring(blizzard) .. ". Reload the interface now.")
-		blizzard, names, refused = 0, {}, 0
+		blizzard, names, refused, uncompared = 0, {}, 0, 0
 	end
+	if uncompared > 0 then print(("%s[CP] could not compare %d of the game's values, so they are put back as noted.|r"):format(GREY, uncompared)) end
 	refused = refused + ((okSaved and savedRefused) or #PlanTab.SAVED_VARIABLES)
 	if not ok then print("|cffff0000FAIL|r the self-test stopped part way: " .. tostring(err)) end
 	if blizzard > 0 then
