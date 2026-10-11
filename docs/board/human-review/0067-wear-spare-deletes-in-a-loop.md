@@ -2,22 +2,7 @@
 
 ## What I need from you
 
-**Wear three unsaved builds through the spare, in game, once with room and once with every slot
-used.** A grey row marked `spare` in the list beside the talent window is a build with no loadout
-of its own.
-
-1. Open the talent window, double-click a grey `spare` build, and close the window when chat asks.
-   Do this for three different builds, starting the next straight after chat says "Putting on".
-2. Use every slot (40 over all your specs), then do step 1 again.
-
-**Pass:** each build is worn through `[CP*] <build>`, one spare loadout at a time, and chat never
-says "You can't do that right now" or "would not delete the old one".
-
-**Fail:** either of those lines, two leftover `[CP*]` loadouts, or a loadout you named deleted. Say
-which step on this card and move it to `todo/`. At the cap the queue waits only about 3 s for a busy
-server (the fifth review's point 1), so a failure in step 2 alone is that trade-off showing.
-
-**Why it needs you:** only the live server refuses a second change in flight; offline it is a model.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -35,12 +20,13 @@ rule: a list goes through `PlanTab.startTagging`, never a loop.
   then deletes it, waits for the delete to land, and imports.
 - Keep the worn spare: it is never deleted (card `0040`).
 
-## Done when
+## Acceptance
 
-1. `lua offline-check.lua` passes, with a check against `swapChecks`' timed server model: two old
-   spares and a new one, and no call refused.
-2. In game: double-click three different unsaved builds, one after the other. Each is worn through
-   the spare, and chat never says "You can't do that right now".
+<!-- AC:BEGIN -->
+- [x] `lua offline-check.lua` passes, with a check against `swapChecks`' timed server model: two old spares and a new one, and no call refused. proves: `swapChecks` ", it replaces the old spare, never the worn one, and nothing is refused" and ", one at a time, then the spare replaces the last old one"
+- [ ] With free slots, after `/reload`: open the talent window and double-click three different grey `spare` rows, each straight after chat says "Putting on": each is worn as `[CP*] <build>`, one spare loadout at a time, and chat never says "You can't do that right now" or "would not delete the old one". proves: manual
+- [ ] With every loadout slot used (40 over all specs): the same three double-clicks give the same pass, and no loadout you named is deleted (a failure here alone is the 3 s busy-server wait at the cap). proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -418,3 +404,5 @@ Then Reset of two at the cap, timing each.
   that fix was not broken on purpose then.
 - Point 1 left as it is. At the cap the game gives no busy signal, so the queue waits 3 s and
   then tries again. The in-game check above covers it.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked the offline criterion (checks `swapChecks` ", it replaces the old spare, never the worn one, and nothing is refused", ", with every slot used the old spare still makes the room", ", leftover spares are deleted first" and ", one at a time, then the spare replaces the last old one" exist and pass in the Lua 5.1 offline check; the build took one old spare plus one worn, as the first 2026-09-25 entry explains, and the leftover case covers more than one old one); looks rewritten for v0.69.0 as two `proves: manual` lines, with room and at the cap, in a new Acceptance block that replaces Done when. Moves to ai-review/ with only in-game looks open.

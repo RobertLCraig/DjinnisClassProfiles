@@ -29,17 +29,16 @@ The cause: `PlanTab.rowHere` knew only the kill it saw in this session (`PlanTab
 
 ## What I need from you
 
-1. In the raid with Nek'zali dead, `/reload` in front of Entombed Sentinels. Pass: the reminder
-   names Entombed Sentinels, or shows nothing if the talents already match.
-2. Pass: no "Create 3" offer while all slots are used.
-3. In the same spot, open the talent window. Pass: the list beside it puts `Raid: Entombed
-   Sentinels` first, not `Raid: Nek'Zali`. (Added by the third review: the list's own draw is
-   not reached offline.)
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN a boss is dead on this lockout, THE REMINDER SHALL name the next living boss, after a `/reload` too. proves: `..., the reminder names the next living boss`, `..., the list puts the next living boss first`, `..., the lockout is asked as the journal asks it`
-- [ ] WHEN no slot is free, THE OFFER SHALL not ask to Create. proves: `..., and offers no Create with no room`
+<!-- AC:BEGIN -->
+- [x] WHEN a boss is dead on this lockout, THE REMINDER SHALL name the next living boss, after a `/reload` too. proves: `popup names what differs from the plan here, the reminder names the next living boss`, `..., the list puts the next living boss first`, `..., the lockout is asked as the journal asks it`
+- [x] WHEN no slot is free, THE OFFER SHALL not ask to Create. proves: `a build with no loadout of its own is worn through the spare, and offers no Create with no room`
+- [ ] In the raid with Nek'zali dead, `/reload` before Entombed Sentinels. Pass: the reminder names Entombed Sentinels, or nothing shows if the talents already match. proves: manual
+- [ ] Same spot, open the talent window. Pass: the list beside it puts `Raid: Entombed Sentinels` first, not `Raid: Nek'Zali`. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -158,3 +157,5 @@ Security:
 3. Leaks: nothing leaves the client.
 
 No client can be run by an agent. A person owes What I need from you 1 to 3.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked both criteria (checks `popup names what differs from the plan here, ...` (the reminder names the next living boss, the list puts the next living boss first, the lockout is asked as the journal asks it) and `a build with no loadout of its own is worn through the spare, and offers no Create with no room` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0, with the full `proves:` prefixes written out; dropped old step 2 (no Create offer with every slot used), because card 0039's first look checks the same box; moves to ai-review/ with only in-game looks open.

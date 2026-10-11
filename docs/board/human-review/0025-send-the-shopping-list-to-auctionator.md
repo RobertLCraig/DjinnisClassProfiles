@@ -28,6 +28,11 @@ data by hand instead; do not copy that.
 - [x] WHEN Rob clicks "Send to Auctionator" and Auctionator is loaded, THE ADDON SHALL make or replace one Auctionator shopping list named "DjinnisBiS plan" with every item to buy. proves: `shopping list sent to auctionator`
 - [x] WHEN Auctionator has a price for an item, THE SHOPPING LIST SHALL show it, and the total. proves: `shopping list shows auctionator prices`
 - [x] WHEN Auctionator is not loaded, THE BUTTON SHALL not show and no price column SHALL show. proves: `no auctionator parts without auctionator`
+- [ ] `/reload` first (the game folder holds v0.69.0). With Auctionator loaded and a wrong or missing gem on a planned piece: `/dcp`, Plan tab, under `3. To buy` each gem line Auctionator knows ends in a grey price, and a grey `Total ..g ..s` row (`, N without an Auctionator price yet` if any) sits under it with an `Auctionator` button whose label fits. Enchant lines carry no price. proves: manual
+- [ ] Click `Auctionator`: chat says `N items sent to Auctionator's "DjinnisBiS plan" list.` Auctionator's Shopping tab holds a `DjinnisBiS plan` list, one search per thing to buy (gem family name, no rank). Click again: the same list replaced, not a second one. proves: manual
+- [ ] Disable Auctionator, `/reload`: no prices, no Total row, no button, nothing in chat. proves: manual
+- [ ] With a lesser-rank gem on as well, the `Higher ranks exist, if you want to spend on them:` lines carry a grey price but are not in the Total. Pass if that reads right; else say so on the card. proves: manual
+- [ ] Wear a wrong gem the rank table has never seen (its line reads `gem 12345`) so nothing on the list has a name, and click `Auctionator`: chat says `Nothing on the list has a name yet; the Auctionator list is left as it was.` and the old list survives. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -39,22 +44,7 @@ data by hand instead; do not copy that.
 
 ## What I need from you
 
-In the game, with Auctionator loaded and a wrong or missing gem on a planned piece:
-
-1. Open `/bis`, Plan tab. Under "3. To buy", each gem line Auctionator has seen should end in a
-   grey price (count times unit price), and a grey "Total ..g ..s" row should sit under the list
-   with an "Auctionator" button on the right. Enchant lines carry no price; see the comment below.
-2. Click the button. Chat should say "N items sent to Auctionator's "DjinnisBiS plan" list".
-   Open the auction house, Auctionator's Shopping tab: a list named "DjinnisBiS plan" should hold
-   one search term per line, the family name with no rank ("Masterful Garnet", not "rank 4 of 4").
-   Click it again: the same list, replaced, not a second one.
-3. Does the label "Auctionator" fit the 70px action button? "Send to Auctionator" did not, on paper.
-4. Disable Auctionator, `/reload`: no prices, no Total row, no button, nothing in chat.
-5. (review) With a lesser gem on as well, the "Higher ranks exist" lines carry a grey price too, but
-   they are not in the Total. Say if that reads wrong; the code prices every list it draws.
-6. (review) Wear a wrong gem the rank table has never seen (the line reads "gem 12345"), so nothing
-   on the list has a name. The button should say "Nothing on the list has a name yet; the
-   Auctionator list is left as it was." and the old "DjinnisBiS plan" list should survive.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Comments
 
@@ -107,3 +97,5 @@ In the game, with Auctionator loaded and a wrong or missing gem on a planned pie
   event; the only inputs are plain item ids from the plan table and worn links. Leaks: on refusal,
   chat shows Auctionator's own error text, which names this addon and its usage string, nothing
   else. Not seen in a client; looks 1 to 6 above are the check.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked 3 criteria, all ticked already and confirmed (checks `shopping list sent to auctionator`; `shopping list shows auctionator prices`; `no auctionator parts without auctionator` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0 (`/bis` is `/dcp`; the button is now 100 px wide, so the label look folds into look 1; the send now goes through Auctionator's `ConvertToSearchString` when it has one, so the list shows Auctionator's own search lines); moves to ai-review/ with only in-game looks open.

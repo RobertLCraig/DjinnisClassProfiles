@@ -7,27 +7,7 @@ needs: 0008
 
 ## What I need from you
 
-**Four looks in the game, on your Feral druid, out of combat, with the Flawless Masterful Garnet
-still in your wrist.** It is v0.18.1 and already deployed.
-
-1. `/reload`, open the character sheet. The wrist has a grey ring saying "rank", not an amber
-   one saying "gem". Hover it: "Plan: fine. Masterful Garnet (rank 3 of 4) is on; a higher rank
-   exists".
-2. `/bis`, click "Plan". Under "2. Gear to change" the wrist row says "Wrist: fine. ..." in the
-   same words. Under "3. To buy": green "Nothing to buy" (if every other slot is right), then a
-   grey "Higher ranks exist, if you want to spend on them:" with "1x Masterful Garnet (rank 4 of
-   4)" and a Search AH button.
-3. At the auction house, click that Search AH: the box says "Masterful Garnet" and the results
-   include both the plain and the Flawless ones.
-4. Put a Peridot in the wrist instead, or take the garnet out: the ring turns amber and says
-   "gem", and "To buy" lists the garnet again.
-
-**Pass** is all four steps as written and no red Lua error box.
-**Fail** is any step that differs. Write the step number and what you saw in `## Comments`.
-
-**Why it needs you:** the marks exist only inside the game, and no agent can run it. One thing is
-a call, not a check: the tab names your gem "Masterful Garnet (rank 3 of 4)" where the game says
-"Flawless Masterful Garnet". If you would rather read the game's name, say so; it is one line.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -62,6 +42,9 @@ compare ids, and nothing told it which ids were the same thing at another rank.
 - [x] WHEN the worn enchant or gem is a lower rank of the planned one, THE ADDON SHALL leave it off "To buy" and list the planned rank under "Higher ranks exist". proves: `a lower rank of the planned gem or enchant is lesser, not wrong`
 - [x] WHEN the worn enchant or gem is another family, or the id is not in the rank table, THE ADDON SHALL still call it wrong. proves: `slot state is enchant when enchant differs`
 - [x] WHEN a planned gem has two of one family and one is worn, THE ADDON SHALL want one more. proves: `two planned gems of one family, one worn, wants one more`
+- [ ] LOOK 1. On the Feral druid, `/reload`, strip under the stat pane on "1 target". Socket a LOWER rank of Masterful Garnet (any but the top one, for example item 240907) in the second ring, Lightwarden's Bind, which the plan wants with the top rank (240908). The ring slot shows a grey "rank" mark, not an amber "gem" one. Hovering it says "Plan: fine. Masterful Garnet (rank 3 of 4) is on; a higher rank exists", naming the rank you socketed. If you would rather read the game's own gem name there, say so: it is one line. proves: manual
+- [ ] LOOK 2. Same setup, `/dcp`, Plan tab. The second ring's row under "2. Gear to change" says "Plan: fine. ..." in the same words. The garnet is not under "3. To buy". A grey "Higher ranks exist, if you want to spend on them:" lists "1x Masterful Garnet (rank 4 of 4)" with a Search AH button. proves: manual
+- [ ] LOOK 3. Take the garnet out of that ring, or socket a Quick Peridot instead. The mark turns amber and says "gem", and "To buy" lists Masterful Garnet again. No red Lua error box at any step. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -106,3 +89,5 @@ compare ids, and nothing told it which ids were the same thing at another rank.
   Unchecked: every id reaching `PlanTab.RANK` is a plan constant or parsed from a link that
   passed `canRead`, and `gemKey`'s name fallback is behind `canRead`, so no secret value reaches
   a table key or a comparison. Leaks: nothing leaves the machine; two GETs to Raidbots, author only.
+
+**2026-10-11** Clear-down (attended, Rob asked). `update-plan-ranks.py --check` said the rank table was out of date: the plan had gained enchant 8689 (Rite of the Hash'ey) and dropped Versatile Peridot. Ran it on branch `cleardown/djcp`: the block now holds 8688 and 8689 and no Versatile Peridot, `--check` exits 0, and the Lua 5.1 offline check passes. The old looks used a garnet in the WRIST, which no plan cell gems any more; they are rewritten against the second ring, Lightwarden's Bind, where the Feral 1 target, 2 target and Mythic+ cells all plan Masterful Garnet rank 4 (240908). The Search AH look is dropped: card 0008 already proved Search AH. Moves to ai-review/ with only the three in-game looks open (board README, A look waits on the product).

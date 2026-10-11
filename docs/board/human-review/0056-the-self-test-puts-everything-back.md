@@ -29,11 +29,13 @@ closing "passed / failed" line.
 
 ## Acceptance
 
+<!-- AC:BEGIN -->
 - [x] A run that swaps a global, a `C_` field and a PlanTab field and then throws leaves all three as they were, and says so. proves: `offline-check.lua` "the self-test net"
-- [ ] The self-test leaves no Blizzard value swapped. proves: `offline-check.lua` (the net would print a FAIL line naming it). UNTICKED 2026-09-29: the seventh review showed the net writes back and counts as "swapped" a secret the run never touched, because `same()` in `PlanTab.restore` answers false for "cannot compare" as for "changed". So a FAIL line here does not mean a swap, and nothing in the offline check reads that line. Still so at HEAD.
+- [x] The self-test leaves no Blizzard value swapped. proves: `offline-check.lua` (the net would print a FAIL line naming it). Re-ticked 2026-10-11: `PlanTab.restore`'s `put` now counts a compare the game refused apart from a swap, and offline-check.lua's left-alone run ("called a secret the run left alone swapped") reads the line.
 - [x] No self-test item in More. proves: self-test `menuChecks`
 - [x] Mutation: the net's restore removed turns the offline check red (`%TEMP%\mut0053.py`, "self-test net off").
-- [ ] In game: `/reload` first (the old run is still in effect). Then `/djbis test`, close the Reload box with Later, open and close the talent window twice. It works. Then click Reload now. proves: manual (Rob)
+- [ ] In game: `/reload`, then `/dcp test` before opening the talent window or spellbook. Chat ends "[CP] self-test passed", with no Lua error and no "left N of the game's own values swapped" line. Click Later. Open and close the spellbook, then the talent window, twice each: both work. More > Make the planned loadouts opens its box. Then click Reload now. proves: manual
+<!-- AC:END -->
 
 ## Not this card
 
@@ -445,4 +447,6 @@ source check the review describes, then back to `ai-review/`. The in-game criter
 **outcome: rob**
 
 The loop parked this card at its bounce limit, and said: "**2026-09-29** The reviewer returned this card and its finding is the last review entry at the bottom of ## Direction. The loop moved it from todo/ to human-review/ because it has bounced 5 times between todo and ai-review, which is the limit, so it is waiting on a person. THE BUILDER COULD NOT ACT ON THAT FINDING. A reviewer reopens every criterion it reports unmet, and the reviews that sent this card back named no criterion they disproved, so it came back with 0 of 0 criteria still ticked, every session found nothing open to do, and the loop promoted it again on the boxes. Add or reopen the criterion the finding breaks and move it back to todo/, or say here why the finding is wrong." Sent back to todo/ it would be parked again before any build ran, so no manager session was started and it is yours.
+
+**2026-10-11** Clear-down (attended, Rob asked). Finding 1 of the seventh review is fixed on branch `cleardown/djcp`: `put` in `PlanTab.restore` still writes back a value the game will not compare (the safe way), but counts it on its own and says "[CP] could not compare N of the game's values, so they are put back as noted." in grey; only a compare that answered "different" counts as swapped and is named. `offline-check.lua` adds the left-alone run the review asked for: the three planted secrets in place, a run that does nothing, and it fails on any "values swapped" line or a line naming `DjinnisTestSecret`. Run against the old `put`, that run goes red with the exact false FAIL line the review saw. Lua 5.1 offline check green, spec modes 62, 71, 250 and 265 green. Criterion 2 re-ticked; AC sentinels added; the look rewritten for `/dcp`. **Not done:** finding 2, the source check against the `==` form in `PlanTab.restore`; the reviewer of this pass should judge whether it blocks. Moves to ai-review/ with only the in-game look open.
 

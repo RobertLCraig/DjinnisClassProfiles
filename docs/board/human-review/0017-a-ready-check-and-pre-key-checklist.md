@@ -31,6 +31,14 @@ EnhanceQoL's ClassBuffReminder checks flask, food, rune and weapon oil on `READY
 - [x] WHEN nothing is missing, THE ADDON SHALL show nothing. proves: `no checklist when nothing is missing`
 - [x] WHEN an aura cannot be read because it is secret, THE LINE SHALL say "cannot check" and not "missing". proves: `a secret aura is not reported missing`
 - [x] EACH LINE SHALL click through to its fix where one exists: Switch talents, Equip, Search AH. proves: `checklist lines link to their fix`
+- [ ] `/reload` first (the game folder holds v0.69.0). In a raid with no flask on, start a ready check: the wrong-setup popup lists `Flask   missing` in red after the talents and gear lines, plus `Food`, `Augment rune`, `Weapon oil` as they apply. Flask up and ready-check again: the Flask line goes. If your flask is on and the line still says missing, its aura is not among the ids in `PlanTab.CONSUMABLES` (432021, 431971-431974, 1235057, 1235108, 1235110, 1235111) and must be added. proves: manual
+- [ ] In a dungeon with something missing, open the keystone slot at the font: the same popup shows with no ready check. proves: manual
+- [ ] With the planned talents, the planned gear and all four consumables on (any flask above; any Well Fed food buff, found by its icon 136000; an augment rune, aura 1295329, 1264426 Void-Touched, 1234969, 1242347, 453250, 393438 or 347901; any oil on the main hand, slot 16): a ready check shows nothing. proves: manual
+- [ ] With the auction house open, click a red `Flask   missing` line: the search runs for `Flask`; click `Augment rune   missing`: it runs for `Augment Rune`; click `Food   missing`: it runs for `Harandar Celebration`; click `Weapon oil   missing`: it runs for `Thalassian Phoenix Oil`. With the house closed: one grey line `Open the auction house first, then click Search AH.` If a search finds nothing because the item has another name this season, say which. proves: manual
+- [ ] Click the popup's talents line when it reads `planned X, now Y`: the loadout loads. Click a red gear line with the planned piece in your bags: it equips. proves: manual
+- [ ] On a live client none of the four consumable lines reads `cannot check (12.1 hides this aura)`. If only Food does, `PlanTab.auraByIcon` is the place to look. proves: manual
+- [ ] At login no line says `could not register CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN`. proves: manual
+- [ ] The popup still drags from its body, and hovering a line shows its tooltip to the right. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -45,27 +53,7 @@ EnhanceQoL's ClassBuffReminder checks flask, food, rune and weapon oil on `READY
 
 ## What I need from you
 
-Every one of these is a live-client look; nothing here can run a frame.
-
-1. In the raid, start a ready check with no flask on. The 0013 popup should gain lines after the
-   talents and gear ones: `Flask   missing` in red, and the same for food, rune and oil as they
-   apply. Then flask up and ready-check again: the flask line goes.
-2. Open the keystone slot in a dungeon (walk up to the font) with something missing: the same
-   popup, without a ready check.
-3. With everything on, the right talents and the right gear: a ready check shows nothing.
-4. Click a `missing` consumable line with the auction house open: the search box fills with
-   `Flask` or `Augment Rune` and searches. With it closed, one grey chat line says to open it.
-   Food and oil have no click until you name their items in `PlanTab.CONSUMABLES`.
-5. Click the talents line when it says `planned X, now Y`: the loadout loads (same as the button).
-   Click a red gear line with the piece in your bags: it equips.
-6. Whether any of the four reads `cannot check (12.1 hides this aura)` on a live client. If food
-   does and the others do not, the Well Fed icon scan (`PlanTab.auraByIcon`) is what to look at.
-7. Whether `CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN` registers: a refused one prints one line at
-   login, "could not register CHALLENGE_MODE_KEYSTONE_RECEPTABLE_OPEN".
-8. The popup's lines are now buttons: check the window still drags from its body, and that a
-   line's tooltip shows to the right on hover.
-9. The flask id list is EnhanceQoL's "TWW + Midnight" set. If your flask is on and the line still
-   says missing, the season's flask aura is not in that list and needs adding.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Comments
 
@@ -85,3 +73,7 @@ Every one of these is a live-client look; nothing here can run a frame.
   produced a FAIL line (buffsHere keeps what is on; READY_CHECK no longer asks; predicate ignored;
   issecretvalue ignored; lines get no click; keystone event dropped). Not done: item names for the
   food and oil AH search (nothing local names them), so those two lines have no click.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked 4 criteria, all ticked already and confirmed (checks `checklist lists what is missing`; `no checklist when nothing is missing`; `a secret aura is not reported missing`; `checklist lines link to their fix` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0 with the real ids from `PlanTab.CONSUMABLES`: the flask and rune lines search `Flask` and `Augment Rune` and are matched by the aura ids now written into the looks; food is matched by the Well Fed icon 136000 and oil by the main-hand temporary enchant, neither by an item. The code names no food or oil item, so those two lines still have no click (the `TODO Rob:` above `PlanTab.CONSUMABLES` stands); naming them needs `search = "<item name>"` on the Food and Weapon oil entries, a code change not made here. Old look 9 folded into look 1; moves to ai-review/ with only in-game looks open.
+
+**2026-10-11** Agent first, done (same clear-down). The food and oil are now named in `PlanTab.CONSUMABLES` on branch `cleardown/djcp` (`6e2edb8`): Food searches "Harandar Celebration" and Weapon oil "Thalassian Phoenix Oil", the two SimC's own Season 2 Feral profile uses (`C:\Dev\WoWAddons\3rdParty\simc\profiles\MID2\MID2_Druid_Feral.simc`, `food=harandar_celebration`, `temporary_enchant=main_hand:thalassian_phoenix_oil_2`). Source of the choice, applied rather than asked: SimC's default consumables are the ones its maintainers sim the spec with. The `TODO Rob:` is gone, and a new check, "checklist lines link to their fix, every consumable names what to search for", fails if a line is left with no search. The entry above saying those two lines have no click is out of date; the AH look now covers all four.

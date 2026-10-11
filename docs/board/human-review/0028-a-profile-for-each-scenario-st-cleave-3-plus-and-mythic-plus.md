@@ -41,6 +41,8 @@ string, so a 2-target boss has gear but no planned build, and there is no cell a
 - [x] WHEN the strip's scenario button is pressed in a raid, THE ADDON SHALL cycle 1 target, 2 targets, 3+ targets, 1 target. proves: `the scenario button reaches 3+ targets`
 - [x] WHEN a boss row names scenario `3t`, THE PLAN TAB SHALL draw that cell's gear and build for it. proves: `a 3t boss row draws the 3t cell`
 - [x] WHEN a cell has no `talents` string, THE ADDON SHALL show no build for it and mark nothing edited. proves: `a cell without talents has no planned build`
+- [ ] WHEN the twelve Raidbots Top Gear runs under "What I need from you" are baked with `.\update-gear-plan.ps1 <links> -Deploy`, THE PLAN SHALL hold all four cells for Balance, Guardian and Resto, beside Feral's. proves: manual (Rob runs the sims; the script's own listing is the check)
+- [ ] LOOK, after `/reload`, outside an instance: press the strip's scenario button under the character sheet from "1 target". It reads "2 targets", "3+ targets", "Mythic+", "1 target", and "3+ targets" fits the button. In a raid it reads 1, 2, 3+, 1. The Plan tab shows four content buttons with "Raid - 3+ targets" third. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -52,31 +54,47 @@ string, so a 2-target boss has gear but no planned build, and there is no cell a
 
 ## What I need from you
 
-**Which Feral bosses, if any, should use the 3+ targets plan, and which other specs do you want
-simmed?** Feral's four plans are all baked now: single target, 2 targets and Mythic+ on
-2026-09-28 (commit `09c637c`), 3+ targets on 2026-09-23. No boss row is marked 3+ targets, so
-that plan is reached only from the strip's button.
+**Twelve Raidbots Top Gear runs, then paste the twelve report links into a session.** You decided
+2026-10-11 that every druid spec gets a gear plan (see Comments). Only your Raidbots account can run
+a sim, so these are yours. Nothing else on this card waits on you.
 
-1. **3+ bosses.** Name the bosses, and each named row is marked 3+ targets, so the Plan tab and
-   the setup prompt hand you the 3+ gear for that fight. Or say none, and nothing changes. I
-   recommend none until you know a fight is mostly 3+ targets: nothing on disk says which fights
-   are, and a wrongly marked row hands you the wrong gear list.
-2. **Other specs.** For each spec you want a gear plan for (Balance, Guardian, Restoration): one
-   Raidbots Top Gear run per scenario on the loadout the Plan tab names, then
-   `.\update-gear-plan.ps1 <report links>` and `/reload`. Or say Feral only, and this part closes.
-3. **One look in the game, after `/reload`.** Open the character sheet outside an instance and
-   press the strip's scenario button from 1 target. It reads 2 targets, 3+ targets, Mythic+,
-   1 target. In a raid it reads 1, 2, 3+, 1. The Plan tab shows four content buttons, with
-   "Raid - 3+ targets" third, and "3+ targets" fits the strip's button.
+For each run: switch to the spec in game, type `/simc`, copy the WHOLE export including the
+checksum line (a trimmed export turns the page to Unverified Input), and paste it into
+raidbots.com > **Top Gear** (not Advanced: the bake refuses an Advanced report). Pick the loadout
+below in Top Gear's talent dropdown. Leave everything else at Raidbots' default (5 minute fight).
 
-**Pass:** the look reads as written, and 1 and 2 are answered.
+| # | Spec | Scenario | Fight style | Bosses | Loadout to pick |
+|---|---|---|---|---|---|
+| 1 | Balance | 1 target | Patchwerk | 1 | `[CP] Raid: Single Target` |
+| 2 | Balance | 2 targets | Patchwerk | 2 | `[CP] Raid: Cleave` |
+| 3 | Balance | 3+ targets | Patchwerk | 3 | `[CP] Raid: Cleave` |
+| 4 | Balance | Mythic+ | Dungeon Slice | - | `[CP] Dungeon` |
+| 5 | Guardian | 1 target | Patchwerk | 1 | `[CP] Raid` |
+| 6 | Guardian | 2 targets | Patchwerk | 2 | `[CP] Raid` |
+| 7 | Guardian | 3+ targets | Patchwerk | 3 | `[CP] Raid` |
+| 8 | Guardian | Mythic+ | Dungeon Slice | - | `[CP] Dungeon` |
+| 9 | Restoration | 1 target | Patchwerk | 1 | `[CP] Raid` |
+| 10 | Restoration | 2 targets | Patchwerk | 2 | `[CP] Raid` |
+| 11 | Restoration | 3+ targets | Patchwerk | 3 | `[CP] Raid` |
+| 12 | Restoration | Mythic+ | Dungeon Slice | - | `[CP] Dungeon` |
 
-**Fail:** the cycle, the buttons or the label differ. Say what you saw in `## Comments`.
+The loadouts are the builds each spec has today (`PlanTab.BUILDS`): Guardian and Restoration
+have one raid build, so all three raid runs use it. Balance has no 3+ target build, so its 3+ run
+uses the cleave one. Each spec's runs can go in any order and on any day; a report lasts 30 days.
 
-**Why it needs you.** Which fights your raid treats as 3+ targets, and which specs are worth your
-Raidbots time, are yours. The look is a frame in a game client.
+**To bake them**, from `C:\Dev\WoWAddons\DjinnisClassProfiles`, or hand the links to a session:
 
-Paste-ready: `**2026-MM-DD** **Decided:** 3+ bosses: none. Other specs: Feral only.`
+    .\update-gear-plan.ps1 <link 1> <link 2> ... <link 12> -Deploy
+
+It says which spec and scenario each report filled. Then `/reload`.
+
+**Pass:** the script lists twelve cells, `Balance st` to `Resto mplus`, and refuses none.
+
+**Fail:** a refusal. Paste its message into `## Comments`; it names the report and why.
+
+**One thing you might choose differently.** Raidbots' Top Gear ranks gear by damage done. For
+Guardian and Restoration that is the damage-best set, not the most survival or the most healing.
+If you want those two judged another way, say so before running 5 to 12.
 
 ## Comments
 
@@ -140,3 +158,7 @@ Paste-ready: `**2026-MM-DD** **Decided:** 3+ bosses: none. Other specs: Feral on
 and `mplus` cells were re-baked on their own loadouts in commit `09c637c` (`[CP] Raid: Lost
 Explorers`, `Dungeon (new)`), so "re-bake the 2-target cells" is done for Feral. The old second
 look, the empty-`3t` message, cannot be seen on Feral any more, because its `3t` cell is baked.
+
+**2026-10-11** **Decided:** Rob, relayed in the clear-down. 1. 3+ bosses: none for now ("agree, just build it"); no boss row changes. 2. Gear plans for ALL specs: Balance, Guardian and Restoration as well as Feral.
+
+**2026-10-11** Clear-down (attended, Rob asked). Answer 1 needs no change. Answer 2 needs twelve Top Gear runs that only Rob's Raidbots account can make; the exact list and the bake command are now the ask above and one `proves: manual` criterion, and the strip look is the other. Found while writing it: `PlanTab.lines` draws the Plan tab from `PlanTab.BOSSES`, which has rows for Feral and Balance only, so a baked Guardian or Resto plan would reach the strip and the bag glows but not the Plan tab ("No boss plan for Guardian yet"). That is card 0091. The build itself is done and its four criteria ticked, so this moves to ai-review/ with only the manual criteria open (board README, A look waits on the product).

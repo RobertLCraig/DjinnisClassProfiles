@@ -28,11 +28,13 @@ Rob, 2026-09-24, on a level 81 Warlock:
 
 ## Acceptance
 
-- [ ] Part of the plan is the plan below the cap, and not at it; an added node or another choice is still drifted. proves: self-test "below the level cap, part of the plan is the plan". UNTICKED 2026-09-29: the seventh review showed `talentsEdited` can read `PlanTab.belowCap()` instead of the loadout's own level with every check green, and `mayBeShort(nil)` below the cap has no check. Neither check exists in the file today.
+<!-- AC:BEGIN -->
+- [x] Part of the plan is the plan below the cap, and not at it; an added node or another choice is still drifted. proves: self-test "below the level cap, part of the plan is the plan". Re-ticked 2026-10-11: the two checks the seventh review named now exist in `PlanTab.levelChecks`, "below the level cap, edited a level after the loadout was made" and "below the level cap, no loadout selected may be short and notes nothing".
 - [x] The tab is placed when the list is closed. proves: self-test "sidebar stays closed, the tab is placed when the list is closed"
 - [x] "Show the build list" is in the window menu only while the list is closed. proves: self-test `menuChecks`
 - [x] Mutations: level trim off, the cap ignored in gaps, more ranks allowed, another choice allowed, the tab not placed, no menu item. Each turns the offline check red (`%TEMP%\mut0053.py`).
-- [ ] In game, on the level 81 Warlock: `/reload`. The loadout offer does not list the loadouts it already made. Open the talent window: the list is beside it, or its "BiS plan" tab is. proves: manual (Rob)
+- [ ] In game, on the level 81 Warlock: `/reload`. **More > Make the planned loadouts** does not list the loadouts it already made, and **More > Compare talents with the plan** says "the plan, as far as this level allows". Open the talent window: the build list is beside it, or its "Builds" tab is. At 82, Make offers to reset the loadouts made at 81 and Compare calls them different. proves: manual
+<!-- AC:END -->
 
 ## Not this card
 
@@ -461,4 +463,6 @@ Owed: the two checks the review names, then back to `ai-review/`. The in-game cr
 **outcome: rob**
 
 The loop parked this card at its bounce limit, and said: "**2026-09-29** The reviewer returned this card and its finding is the last review entry at the bottom of ## Direction. The loop moved it from todo/ to human-review/ because it has bounced 6 times between todo and ai-review, which is the limit, so it is waiting on a person. THE BUILDER COULD NOT ACT ON THAT FINDING. A reviewer reopens every criterion it reports unmet, and the reviews that sent this card back named no criterion they disproved, so it came back with 0 of 0 criteria still ticked, every session found nothing open to do, and the loop promoted it again on the boxes. Add or reopen the criterion the finding breaks and move it back to todo/, or say here why the finding is wrong." Sent back to todo/ it would be parked again before any build ran, so no manager session was started and it is yours.
+
+**2026-10-11** Clear-down (attended, Rob asked). The seventh review's two missing checks are added to `PlanTab.levelChecks` on branch `cleardown/djcp`: "below the level cap, edited a level after the loadout was made" (noted at 81, read at 82, `talentsEdited` is true) and "below the level cap, no loadout selected may be short and notes nothing" (`mayBeShort(nil)` at 81 of 90). Each was broken in a scratch copy and went red: `talentsEdited` on `PlanTab.belowCap()` fails the first, and the `id and` guard removed throws "table index is nil" in the second. The Lua 5.1 offline check passes. Criterion 1 re-ticked; AC sentinels added so the board reads the look; the in-game look rewritten for v0.69.0 (the menu names and the "Builds" tab). Moves to ai-review/ with only that look open.
 

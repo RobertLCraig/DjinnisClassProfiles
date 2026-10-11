@@ -32,6 +32,12 @@ KeystoneLoot shows a card on entering a dungeon: the wanted items that drop ther
 - [x] THE CARD SHALL mark the current loot spec, and SHALL have a Set loot spec button for each other spec shown. proves: `loot card marks the loot spec and offers the others`
 - [x] WHEN no planned item drops here, THE ADDON SHALL show no card. proves: `no loot card when nothing planned drops`
 - [x] WHEN the player is in combat, THE ADDON SHALL not change the loot spec. proves: `loot spec not changed in combat`
+- [ ] Enter the Venomous Abyss out of combat, journal closed: a card "Loot spec for The Venomous Abyss" near the top with a Feral row: icon, planned drops as item buttons, "+N more" if over six. Hover an item: the game tooltip. Empty or missing: open `/dcp` Plan tab once, re-enter, and say so. proves: manual
+- [ ] Loot spec on Feral: the Feral name is green with "loot spec" under it and no button. Set loot spec to Guardian in the spec window: the row turns white with a "Set loot spec" button. Click it: loot spec is Feral and the row green, no reload. proves: manual
+- [ ] In combat at a dummy, click Set loot spec: one grey chat line "Loot spec not changed: you are in combat." and the loot spec is unchanged. proves: manual
+- [ ] Drag the card by its title, close it with its X, change loot spec: it stays closed. `/reload` inside the raid: it comes back where it was dragged to. proves: manual
+- [ ] Enter a Mythic dungeon and an old raid: no card from this addon in either (KeystoneLoot's dungeon card is its own). proves: manual
+- [ ] After entering the raid, open the journal on a boss page: the tier, instance and boss page are as you left them. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -44,31 +50,7 @@ KeystoneLoot shows a card on entering a dungeon: the wanted items that drop ther
 
 ## What I need from you
 
-There is no test client, so nothing below has run in one. Frames, anchors and events are the
-looks; the data and the pure logic are proven offline. Type `/reload` first.
-
-1. Enter the Venomous Abyss out of combat with the journal closed. A card titled "Loot spec for
-   The Venomous Abyss" appears near the top of the screen with a Feral row: the Feral icon, the
-   planned drops as item buttons with quality borders, and "+N more" if over six. Hover an item
-   button: the game tooltip. Today only Feral has a plan, so one row. If the card is empty or
-   missing, the pools were not in yet: open `/bis` Plan tab once and re-enter, and say so here,
-   because then the eight retries are not enough.
-2. With loot spec on Feral (or 0 following Feral), the Feral name is green with "loot spec" under
-   it and no button. Set loot spec to Guardian through the spec window: the row turns white and
-   gains a 24-high "Set loot spec" button. Click it: loot spec is Feral again and the row goes
-   green without a reload.
-3. Click Set loot spec while at a training dummy in combat: one grey chat line, "Loot spec not
-   changed: you are in combat", and the loot spec is as it was.
-4. Drag the card by its title bar and close it with its X. Change loot spec: it stays closed (the
-   loot spec event only redraws a card that is showing). `/reload` inside the raid brings it back,
-   where it was dragged to, because a reload is a `PLAYER_ENTERING_WORLD`; leaving the raid and
-   coming back does the same.
-5. Enter a Mythic dungeon and an old raid: no card from this addon in either (KeystoneLoot's own
-   card in the dungeon is its).
-6. Open the journal on a boss page after entering the raid: the tier, instance and boss page are
-   as you left them. (Only the pools' walk touches the journal now.)
-7. The title reads the journal's name for the raid, not the map's. If they differ, that is the
-   review's change working, not a fault.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Comments
 
@@ -176,3 +158,5 @@ looks; the data and the pure logic are proven offline. Type `/reload` first.
   `KeystoneLootAPI:AddFavorite(itemId, specId, tier, options)` (`modules\api.lua` line 536), can fill
   it from the plan. Before building this card, decide: send the plan to KeystoneLoot and keep only
   the raid half here, or drop the card.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new; the four `proves:` checks (`loot card lists planned drops per spec`, `loot card marks the loot spec and offers the others`, `no loot card when nothing planned drops`, `loot spec not changed in combat`) were already ticked and still exist and pass in the Lua 5.1 offline check. Looks rewritten for v0.69.0 and `/dcp`; the title, button and combat strings match `PlanTab.showLootCard`, `lootCardRow` and `setLootSpec`, and Feral is still the only spec with a gear plan. Dropped old look 7 (the title is the journal's name): it was a note, not a check. Moves to ai-review/ with only in-game looks open.

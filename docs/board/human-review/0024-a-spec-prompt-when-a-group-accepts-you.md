@@ -26,8 +26,14 @@ the dungeon and the role; neither changes the setup.
 
 <!-- AC:BEGIN -->
 - [x] WHEN a group finder application is accepted and the role given needs another spec than the current one, THE ADDON SHALL show a prompt naming the role, the place and the planned spec. proves: `prompt names role, place and spec on acceptance`
-- [ ] THE PROMPT SHALL have one button that changes spec, then loads the planned loadout, then equips the planned set, out of combat only. proves: manual (built; `set up changes spec, then loadout, then set, out of combat` proves the order and the combat guard against stubs, only the game proves the changes)
+- [ ] THE PROMPT SHALL have one button that changes spec, then loads the planned loadout, then equips the planned set, out of combat only. Look: `/reload` first (the game folder holds v0.69.0). As Guardian, out of combat, get accepted as Damage to a Mythic+ listing: the `Group joined` window lists `Change spec to Feral`, `Load loadout "Dungeon"`, `Equip set DBiS Feral M+`. Click Set up: the spec changes to Feral, then `Dungeon` loads, then the set equips (one grey chat line if the set is not saved), with no "commit in progress" error. proves: manual
 - [x] WHEN the current spec already fits the role, THE PROMPT SHALL offer only the loadout and gear parts that differ, or not show at all. proves: `no prompt when spec, loadout and gear already fit`
+- [ ] As Feral, get accepted as Healer to a Mythic+ listing: a `Group joined` window reads `Healer for <dungeon>`, `Plan: Resto, Mythic+`, `Change spec to Resto`, with Set up and Not now (no loadout or set line: Resto has no plan). Escape closes it, it drags, the text clears the buttons. Nothing at all means the role read as nil. proves: manual
+- [ ] After a Set up, pull a training dummy and press every bar button for 30 seconds: no `ADDON_ACTION_FORBIDDEN` and no "blocked from an action only available to the Blizzard UI". proves: manual
+- [ ] As Feral with `Dungeon` loaded and the `DBiS Feral M+` set on, get accepted as Damage to a Mythic+ listing: no window. proves: manual
+- [ ] As Feral with a raid loadout loaded (say `Raid: Nek'Zali`) and the M+ set on, accepted as Damage to Mythic+: a window offering only `Load loadout "Dungeon"`. proves: manual
+- [ ] Click Set up, then change spec by hand to a third spec before the first lands: nothing more happens, and later spec changes do nothing. proves: manual
+- [ ] Click Set up in combat, then have a party member change spec before combat ends: nothing until combat ends, then the spec change once. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -126,25 +132,8 @@ the dungeon and the role; neither changes the setup.
   **Not proven here:** the frame's height, anchors and button row, the one-second wait, and the
   helpers' taint. Listed below.
 
+**2026-10-11** Clear-down (attended, Rob asked): ticked 2 criteria, all ticked already and confirmed (checks `prompt names role, place and spec on acceptance`; `no prompt when spec, loadout and gear already fit` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0 against `PlanTab.offerSetup`: only Feral has a gear plan, so the full spec, loadout, set chain is now looked at as Guardian accepted as Damage (the manual criterion carries it), and the Healer look shows only the spec step; the role-nil diagnosis folded into that look. The hand-test task (`SwitchToSpecializationByName`) stays open as a task: the build goes by index and the taint look answers it; moves to ai-review/ with only in-game looks open.
+
 ## What I need from you
 
-Out of combat, on a druid, none of it seen in a client:
-
-1. Apply to a Mythic+ listing as Healer while Feral and get accepted: a small "Group joined" window
-   names Healer, the dungeon and "Plan: Resto, Mythic+", with Set up and Not now. Escape closes it;
-   it drags; the text does not run under the buttons.
-2. Set up: the spec changes, then (if a Resto Mythic+ cell exists) the loadout loads and the set
-   equips, one grey chat line for each set not saved. If Blizzard's frame says "commit in progress"
-   after the spec change, the one-second wait in `PlanTab.onGroupEvent` is short: say so here.
-3. Taint: after Set up, pull a target dummy and press every bar button for 30 seconds. An
-   `ADDON_ACTION_FORBIDDEN` or "blocked from an action only available to the Blizzard UI" at the
-   click means the `HasRestrictions` helpers are closed to addons and the prompt must open the
-   Specializations tab instead.
-4. Accepted as Damage while Feral with the Mythic+ loadout loaded and the set on: no window.
-5. The same with the raid loadout loaded: a window offering only the loadout.
-6. Set up, then change spec by hand to a third spec before the first lands: nothing more happens,
-   and later spec changes do nothing.
-7. Set up while in combat, then have a party member change spec before combat ends: nothing until
-   combat ends, then the spec change once.
-8. If the role reads as nil (nothing shows, nothing in chat), `GetApplicationInfo`'s fifth return has
-   moved; the read in `PlanTab.onAccepted` is the place.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).

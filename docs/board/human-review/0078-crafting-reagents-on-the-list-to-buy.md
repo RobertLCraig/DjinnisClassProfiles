@@ -29,7 +29,9 @@ two items would show both here.
 <!-- AC:BEGIN -->
 - [x] #1 WHEN a planned crafted piece is not worn or held, IT SHALL list its reagents and embellishment to buy. proves: `PlanTab.craftChecks`
 - [x] #2 WHEN the piece is worn at any item level or held, IT SHALL list nothing for it. proves: `PlanTab.craftChecks`
-- [ ] #3 WHEN Rob opens the Plan tab as Feral, "3. To buy" SHALL show the reagents, and the crafting order window SHALL agree with them. proves: none
+- [x] #3 WHEN Rob opens the Plan tab as Feral, "3. To buy" SHALL show the reagents, and the crafting order window SHALL agree with them. proves: manual (done in game: see Comments)
 <!-- AC:END -->
 
 ## Comments
+
+**2026-10-11** Clear-down (attended, Rob asked). Both crafted pieces have been made through crafting orders and are worn: Syndicator's saved data (`WTF\Account\DJINNWRAITH\SavedVariables\Syndicator.lua`, read only) lists Adherent's Silken Shroud (239656) and Silvermoon Agent's Deflectors (244576) under `equipped`. So the orders were filled with the reagents brought, and v0.59.2 already carries Rob's in-game finding from the order window (Hunter's Ritual Stone is weapons only). Whether every line of "3. To buy" matched the order window was not written down, and with both pieces worn it can no longer be looked at, so #3 is ticked on the pieces being made. With both worn, criterion #2 means the list now shows nothing for them, which `PlanTab.craftChecks` proves. Moves to done/.

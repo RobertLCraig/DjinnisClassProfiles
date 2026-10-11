@@ -2,22 +2,7 @@
 
 ## What I need from you
 
-**Try the More menu in game, and say if you want the self-test back in it.**
-
-1. `/reload`. Open the BiS window from the minimap button. Click **More** (top right, left of Import sim).
-2. Click **Save bars as a profile...**. Type a name. Press Enter. Chat says it saved.
-3. Click **More** again. Point at **Profile: <name>**. Click **Load**. Then **More > Undo bars**.
-4. **More > Profile: <name> > Delete**. A box asks. Click Delete.
-5. Open the talent window. The list beside it has a small **More** at the top. The title does not run under it.
-6. Look at each menu item once. No item should do nothing, and no message should say to type a command.
-7. Close the build list with its X. **More** in the main window now shows **Show the build list**. Click it, then open the talent window: the list is back.
-
-Pass is every step doing what it says. Fail is an item that does nothing, a message that says to type
-a command, or text under the More button. Say which step on this card.
-
-**Why it needs you:** it is in-game UI, which no agent can run. And you asked for every command to
-have a button, but the self-test no longer has one (card `0056`: it broke your talent window). That
-is your call.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -52,13 +37,20 @@ Typed `tidy` now asks the same question as the menu; `tidy yes` still deletes at
 
 ## Acceptance
 
+<!-- AC:BEGIN -->
 - [x] Each command in the table reaches its function from the menu. proves: self-test `menuChecks`
 - [x] The menu is drawn as the items say: titles, dividers, a greyed item, a submenu, tooltips; a click passes no arguments. proves: self-test `menuChecks`, with a fake menu root
 - [x] Delete old loadouts and Delete profile ask first, and delete only on Delete. proves: self-test `menuChecks`
 - [x] Off a druid, no tidy item and no bonus roll item. proves: self-test `menuChecks`, class swapped to 6
 - [x] No text the player sees names a slash command. proves: `offline-check.lua` source scan (comments and the two `SLASH_` lines are allowed)
 - [x] All 36 non-druid specs still pass the spec mode. proves: `lua offline-check.lua <spec id>`, each
-- [ ] In game: the More button in the main window and beside the talent window opens the menu; each item works; the name box saves a profile. proves: manual (Rob)
+- [ ] `/reload`, open the main window from the minimap button, click **More** (left of **Import sim**), and click each item once. Pass: every item does something, and no message says to type a command. proves: manual
+- [ ] **More > Save bars as a profile...**, type a name, press Enter. Pass: chat says "Saved the <name> profile". proves: manual
+- [ ] **More > Profile: <name> > Load**, then **More > Undo bars**. Pass: the profile's bars go on, then your old bars come back. proves: manual
+- [ ] **More > Profile: <name> > Delete**. Pass: a box asks "Delete the <name> profile?"; **Delete** removes it from the menu. proves: manual
+- [ ] Open the talent window. Pass: the list beside it has a small **More** left of its X, the title stops short of it, and its menu has **Open the main window**. proves: manual
+- [ ] Close the build list with its X, then click **More** in the main window. Pass: it shows **Show the build list**; click it, open the talent window, and the list is back. proves: manual
+<!-- AC:END -->
 
 ## Not this card
 
@@ -228,3 +220,5 @@ SavedVariables. Nothing is sent anywhere, and no other player is read.
 
 **No browser, no game client.** The surface is in-game UI, so "look at it in a real browser" does
 not apply. Rob's seven steps and the self-test question are under `## What I need from you`.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new (the six built criteria were already ticked; `PlanTab.menuChecks` and the `offline-check.lua` source scan exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the seven steps became six (step 6, every item once, folded into step 1), "the BiS window" is now the main window, and the one manual criterion was split into them. Dropped the self-test question: the code keeps it off the menu on purpose (card 0056, check `no self-test in the menu`), so it is not a look; a new card if Rob wants it back. Note: the ticked "off a druid, no tidy item" half is superseded by card 0066, which gives every class "Delete old loadouts" (check `a Death Knight can delete old loadouts too (card 0066)`); the bonus roll half still holds. Moves to ai-review/ with only in-game looks open.

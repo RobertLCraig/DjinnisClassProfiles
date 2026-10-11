@@ -2,19 +2,7 @@
 
 ## What I need from you
 
-**Check the bonus roll verdict on your next raid night, on a druid.** It changes the "Bonus roll:
-YES/NO" line: it now waits for the game's bonus roll prompt, and leaves out BiS you already own.
-
-1. Kill a boss you have not looted this week, with a bonus roll coin. Pass: when the roll prompt
-   appears, the verdict appears, and it names that boss.
-2. Kill a boss you have already looted this week. Pass: no verdict at all.
-3. Kill a boss, then `/reload` while the roll prompt is still up. Pass: the verdict comes back and
-   still names that boss.
-
-**Fail:** a verdict with no roll offered, the wrong boss named, or a YES for an item you already
-own. Say which step on this card and move it to `todo/`.
-
-**Why it needs you:** only a live raid kill fires the prompt; the offline checks cover the rest.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -45,12 +33,15 @@ of 2026-08-29, apply to `bonusRollVerdict`:
 
 ## Acceptance
 
-- [ ] The verdict does not show on `ENCOUNTER_END` alone. proves: offline-check, spec mode and self-test
-- [ ] The verdict shows on `SPELL_CONFIRMATION_PROMPT` with the BonusRoll type, for the last boss. proves: self-test
-- [ ] Owned BiS does not count toward YES. proves: self-test, with `planOwned` swapped on PlanTab
-- [ ] `SPELL_CONFIRMATION_PROMPT` registration is checked for a refusal (the protected-event trap in
-  `docs/DECISIONS.md`). proves: self-test
-- [ ] In game: kill a boss already looted this week. No verdict shows. proves: manual (Rob)
+<!-- AC:BEGIN -->
+- [x] The verdict does not show on `ENCOUNTER_END` alone. proves: `the bonus roll verdict, a kill only remembers the boss`
+- [x] The verdict shows on `SPELL_CONFIRMATION_PROMPT` with the BonusRoll type, for the last boss. proves: `the bonus roll verdict, the offer gives the verdict for the last boss`, `..., another prompt says nothing`
+- [x] Owned BiS does not count toward YES. proves: `the bonus roll verdict, owned BiS does not count, but the rest does`, `..., all of it owned is NO, and it says so`
+- [x] `SPELL_CONFIRMATION_PROMPT` registration is checked for a refusal (the protected-event trap in `docs/DECISIONS.md`). proves: `the bonus roll verdict, a refused offer event is seen`, `..., the roll frame holds the offer, its end, the loading screen and the kill`
+- [ ] On a druid, kill a boss you have not looted this week, holding a bonus roll coin. Pass: the "Bonus roll: YES/NO" warning appears when the roll prompt does, naming that boss. proves: manual
+- [ ] On a druid, kill a boss you have already looted this week. Pass: no roll prompt and no verdict at all. proves: manual
+- [ ] On a druid, kill a boss, then `/reload` while the roll prompt is still up. Pass: the verdict comes back and still names that boss. proves: manual
+<!-- AC:END -->
 
 ## Not this card
 
@@ -390,3 +381,5 @@ fallback is running.
 **2026-09-24, Claude.** Written from the clippings page. Not started. `SPELL_CONFIRMATION_PROMPT` and
 its payload are read from `wow-ui-source` on branch `live`; whether 12.1 protects the event is not
 known offline.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked all four built criteria (checks `the bonus roll verdict, a kill only remembers the boss`, `the offer gives the verdict for the last boss`, `another prompt says nothing`, `owned BiS does not count, but the rest does`, `all of it owned is NO, and it says so`, `a refused offer event is seen`, `the roll frame holds the offer, its end, the loading screen and the kill` exist and pass in the Lua 5.1 offline check; each criterion's vague proves: now names them); looks rewritten for v0.69.0: the three raid-night steps of What I need from you, the third covering the reviews' "names the boss just killed"; moves to ai-review/ with only in-game looks open.

@@ -2,20 +2,7 @@
 
 ## What I need from you
 
-In the game, v0.51.0:
-
-1. `/reload`, then log in or switch spec. **No loadout box should appear.**
-2. Open the talent window. In the list beside it, right-click a grey build (one marked "spare").
-   A menu opens: Wear it, Save to the game, Export. **A right-click alone does nothing else.**
-3. Choose Save to the game on two grey builds, then close the talent window. Both are saved as
-   "[CP] <build>" when the window closes.
-4. On a saved build, the menu shows "Saved in the game" greyed out. Hover it: the tip still shows.
-5. Choose Export. A box shows the string, selected. Ctrl+C, then Escape closes it.
-6. Change a saved build's talents, then right-click it: "Reset to the plan..." With the talent
-   window open it asks you to close it first; shut, it asks before it resets.
-
-Pass: no box on login or spec change, a right-click only opens a menu, and each item does what it
-says.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -34,6 +21,18 @@ to save to the game".
 - The sidebar row takes the right button (`sidebarClick(row, button)`), which opens a menu (see the
   v0.51.0 comment below).
 - `PlanTab.saveOneChecks` covers `saveOne`, the menu's items, `rowState` and `resetAsk`.
+
+## Acceptance
+
+<!-- AC:BEGIN -->
+- [x] The offline check passes (`lua offline-check.lua`, and `250`). proves: the `save one build` checks in `PlanTab.saveOneChecks`
+- [ ] After `/reload`, log in and then switch spec and back: no loadout box opens on its own. proves: manual
+- [ ] Open the talent window and right-click a grey row marked `spare` in the list beside it: only a menu opens (Wear it, Save to the game and Export... among its items), and nothing else changes. proves: manual
+- [ ] Choose Save to the game on two grey rows, then close the talent window: both are made as `[CP] <build>`, and their rows are no longer grey. proves: manual
+- [ ] Right-click a saved build: "Saved in the game" is greyed out, and hovering it still shows its tip. proves: manual
+- [ ] Choose Export... on a row: a box shows the string, selected; Ctrl+C copies it and Escape closes the box. proves: manual
+- [ ] Change a saved build's talents in the talent window, then right-click its row and choose Reset to the plan...: chat says "Close the talent window first, then choose Reset to the plan." and nothing changes. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -83,7 +82,4 @@ combat. The API checks passed against `wow-ui-source`.
 
 Copy, import, rename and delete need "your builds" stored in SavedVariables, which is card `0057`.
 
-## Done when
-
-1. The offline check passes (`lua offline-check.lua`, and `250`).
-2. Rob's steps above pass in the game.
+**2026-10-11** Clear-down (attended, Rob asked): ticked the offline-check criterion (checks `save one build, a spec change offers nothing`, `save one build, right-click on a build row opens its menu, and makes nothing`, `save one build, both made when the window shuts` and the rest of `PlanTab.saveOneChecks` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0, one `proves: manual` line each, in a new Acceptance block that replaces Done when. The menu now also holds Wear talents only, Load bars only and Copy to your builds... (cards 0081, 0057). The old step 6 said Reset asks first once the window is shut, but the build list only shows while the talent window is open (`updateSidebar`), so from the row Reset always gives the close-first line; the look asks only for that. A drifted build is reset from More > Make the planned loadouts. Moves to ai-review/ with only in-game looks open.

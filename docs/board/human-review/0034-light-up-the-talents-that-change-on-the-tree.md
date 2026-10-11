@@ -41,16 +41,16 @@ is better, and TalentTreeTweaks' `inspectDiff` module shows it can be done
 
 ## What I need from you
 
-1. `/console taintLog 1`, then `/reload`.
-2. Open the talent window. Hover a build that is not the one in play. Pass: a handful of nodes tint
-   green, red or amber, and they match what the build changes. Move off: the tint goes.
-3. Hover the Raid header. Pass: blue on the nodes the raid builds disagree on.
-4. One pull on a dummy, then log out. Pass: `Logs\taint.log` names nothing from DjinnisBiS.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN a row is hovered, THE TREE SHALL mark exactly the nodes that differ from the current build, and SHALL clear them when the hover ends.
-- [ ] No taint warning in `/console taintLog 1` output after a hover and a pull.
+<!-- AC:BEGIN -->
+- [x] WHEN a row is hovered, THE TREE SHALL mark exactly the nodes that differ from the current build, and SHALL clear them when the hover ends. proves: `hovering a row lights what that build changes, the dropped node is red`, `..., the added node is green`, `..., the kept node is plain`, `..., and it all goes when the hover ends`, `the tint lands on the marked buttons only`
+- [ ] `/reload`, open the talent window, hover a build row that is not the one in play. Pass: a few nodes tint green (adds), red (drops) or amber (changes), matching the build; moving off clears them. proves: manual
+- [ ] In the talent window, hover the **Raid** group header in the list beside it. Pass: blue on the nodes the raid builds disagree on, nothing else. proves: manual
+- [ ] `/console taintLog 1`, `/reload`, hover a build row and a header, one pull on a dummy, log out. Pass: `Logs\taint.log` names nothing from DjinnisClassProfiles. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -140,3 +140,5 @@ Security: unchanged. The decoder is read-only, and a header this client would re
 nothing.
 
 Verdict: CLEAN. Acceptance is in-game only, so the card goes to human-review next.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked the hover criterion (checks `hovering a row lights what that build changes, ...` and `the tint lands on the marked buttons only, ...` exist and pass in the Lua 5.1 offline check; the review's granted-node check exists too, as `the nodes a build would change, a granted node is not a pick`); looks rewritten for v0.69.0, the addon is DjinnisClassProfiles now so the taint look names that, and the hover and header looks moved into Acceptance from What I need from you; moves to ai-review/ with only in-game looks open.

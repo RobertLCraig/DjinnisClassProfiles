@@ -48,10 +48,13 @@ What it costs, if it works: one click per boss instead of a window and a dropdow
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] WHEN the Talents button is clicked out of combat and the planned loadout exists, THE ADDON SHALL load it through Blizzard's `ClassTalentHelper`, or through its slash command on a secure macro button if the direct call taints. proves: manual (built; `talents button loads a saved loadout through ClassTalentHelper` proves the call, only the game proves the load)
+- [ ] WHEN Talents is clicked out of combat and the planned loadout exists, THE ADDON SHALL load it through Blizzard's `ClassTalentHelper`. Look: on Feral, `/dcp`, Plan tab, pick a boss whose loadout is red, click Talents once: the talent cast bar, the loadout loads, the line goes green with the window open. "No data" or nothing on the first click after login is a fail; say so. proves: manual
 - [x] WHEN the planned loadout name is not among the spec's saved loadouts, THE ADDON SHALL open the talent window as today and say in one line which name is missing. proves: `talents button falls back when the loadout is missing`
 - [x] THE ADDON SHALL call no `C_ClassTalents` or `C_Traits` function that changes talents. proves: `no talent-changing call in the file` (twice: the in-game check records every `C_ClassTalents` and `C_Traits` key the button touches, and `offline-check.lua` scans the file's code against a list of readers)
 - [x] WHEN the player is in combat, THE ADDON SHALL not change the button's macro text. proves: `talents button does nothing in combat` (there is no macro text, route 2 was not needed; in combat the button calls nothing and opens nothing)
+- [ ] Right after, hit a training dummy pressing every action bar button for 30 seconds: no frozen bar, no "blocked" message. proves: manual
+- [ ] Click Talents while moving so the commit fails: one grey chat line, "the talent change did not go through (CONFIG_COMMIT_FAILED)". proves: manual
+- [ ] Hover Talents: the tip names the picked boss's loadout and says it loads through Blizzard's own talent helper. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -159,21 +162,8 @@ come from our own table, so refuse any such name rather than escape it.
   events with a numeric configID that is not read, and a click. On failure it leaks one grey chat
   line naming a loadout from our own table, nothing else. Nothing fixed, nothing bounced.
 
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new; `talents button falls back when the loadout is missing`, `no talent-changing call in the file` (in-game check and the `offline-check.lua` scan) and `talents button does nothing in combat` were already ticked and still exist and pass in the Lua 5.1 offline check, as does `talents button loads a saved loadout through ClassTalentHelper`, which proves the call; the load itself stays a look. Looks rewritten for v0.69.0 and `/dcp`. Dropped old look 3 (rename a loadout): a missing planned loadout now goes through the spare loadout (card 0040) when the build is stored, so the open-the-window fallback is only reached for a name with no stored build, which the check proves. Moves to ai-review/ with only in-game looks open.
+
 ## What I need from you
 
-Out of combat, on Feral, after `/reload`:
-
-1. `/bis`, Plan tab, pick a boss whose loadout line is red, click Talents once. Expected: the
-   talent-change cast bar, the loadout loads, the line goes green on its own. If the game says
-   "no data" or nothing happens on this very first click, say so: that is the `variablesLoaded`
-   note above, and the one-line fix is named there.
-2. Then pull a target dummy and press every action bar button for 30 seconds. Expected: no frozen
-   bar, no "blocked" message. This is the taint question from a button's OnClick, which `/run` did
-   not settle.
-3. Rename the picked boss's loadout in the talent window, click Talents. Expected: the window opens
-   and one grey chat line names the missing loadout. Rename it back.
-4. Click Talents while moving so the commit fails. Expected: one grey line about
-   `CONFIG_COMMIT_FAILED`.
-5. Hover Talents. Expected: the tip names the loadout it will load.
-
-Say which of the five you saw, and this card can go to done.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).

@@ -23,32 +23,11 @@ different one. Tiers now fall back to matching on the item name when the id miss
 thing both routes agree on. The regression check was watched failing with the fix removed
 (`expected S, got nil`) before it was watched passing.
 
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new (no criterion names a check; #1 to #6 bar #4b were already ticked). Looks rewritten for v0.69.0 and `/dcp`: #4b is now a `proves: manual` look with the on-screen line read from the code, plus the Gebbo's look and the three specs never looked at. Dropped: the ranked block and equipped ticks on Balance (seen working 2026-09-02, above) and `/bis test` (the same self-test passes in full under Lua 5.1 offline). Moves to ai-review/ with only in-game looks open.
+
 ## What I need from you
 
-**Most of this is now done, see Comments.** What is left is two things, and the second is the one
-that matters:
-
-1. `/reload`, then check `Gebbo's Bottomless Bag` in the Trinket slot now carries `C/S`, matching
-   the ranked list below it. It was blank before today's fix.
-2. **Enable ClassCodex, `/reload`.** Every tier must vanish and the ranked block must be replaced
-   by one grey line saying ClassCodex is loaded. Disable it and they come back. This is the part
-   you asked for and the only part still unproven.
-
-The original four checks, kept because the other three specs were never looked at:
-
-1. Under the two columns there is a new **Trinket ranks** block. Does it list trinkets with a
-   coloured letter beside each, and do the names resolve to real item links rather than `item
-   249343`? A cold item cache shows bare ids on the very first open and is right on the second, so
-   check twice before calling it broken.
-2. Do the trinkets already on the BiS list carry a letter too, and does a tick appear next to any
-   trinket you are actually wearing?
-3. Run `/bis test`. It should end `[BiS] self-test passed`.
-4. Then **re-enable ClassCodex and reload**. The Trinket ranks block must be replaced by a single
-   grey line saying the ranks are off because ClassCodex is loaded, and every letter elsewhere in
-   the window must be gone. Disable it again and they come back.
-
-The fourth is the one worth doing carefully, because it is the thing you asked for and it is the
-only part that cannot be checked from here.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -153,12 +132,13 @@ tier, and carrying it would have meant a sixth colour for one item.
       name whose link has not resolved, returning nothing in each case rather than throwing.
 - [x] #4a THE RANKED TRINKET LIST SHALL render in a live client with real item links, with
       ClassCodex disabled. **Seen working 2026-09-02**, screenshot on this card's Comments.
-- [ ] #4b THE TIERS SHALL all disappear when ClassCodex is enabled, verified by a person. **Still
-      open, and it is the half that was asked for.**
 - [x] #6 THE SAME TRINKET SHALL carry the same tier wherever it appears in the window, whether it
       is reached by item id or by name.
 - [x] #5 REFRESHING THE TIERS SHALL be one repeatable command with a dry run, SHALL be safe to
       re-run when nothing has changed, and SHALL fail loudly rather than write a partial table.
+- [ ] #4b THE TIERS SHALL all disappear when ClassCodex is enabled. Look: enable ClassCodex, `/reload`, `/dcp`, By Slot: no tier letter anywhere, and the ranks block is one line, "Trinket ranks are off: ClassCodex is loaded and keeps them current". Disable it, `/reload`: the letters and the ranked list are back. proves: manual
+- [ ] `/dcp`, By Slot, Balance: Gebbo's Bottomless Bag in the Trinket slot carries the same letter as its row in Trinket ranks below. proves: manual
+- [ ] `/dcp`, By Slot, on Feral, Guardian and Resto in turn: a Trinket ranks block with coloured letters and real item names (bare ids on the first open are a cold cache; open again). proves: manual
 <!-- AC:END -->
 
 ## Tasks

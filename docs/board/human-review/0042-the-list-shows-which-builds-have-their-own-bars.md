@@ -16,12 +16,15 @@ bars for its build."
 
 ## What I need from you
 
-1. `/reload`, open the talent window. Pass: builds you saved bars for say **own bars** in blue.
-2. Pick a build with no bars. Click **Save bars: build**. Pass: its row says **own bars** at once.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN a build has its own saved action bars, ITS ROW SHALL say so, and no other row SHALL.
+<!-- AC:BEGIN -->
+- [x] WHEN a build has its own saved action bars, ITS ROW SHALL say so, and no other row SHALL. proves: `a row says when its build has its own action bars`, `a row says when its build has its own action bars, and only that row`
+- [ ] `/reload`, open the talent window. Pass: only builds you saved bars for end their second line in blue **own bars**, not cut off by the tick on raid rows. proves: manual
+- [ ] Wear a build with no bars, click **Save bars: build**. Pass: its row says **own bars** at once, without a reload. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -64,3 +67,5 @@ Security:
 No client can be run by an agent. The in-game checks are this card's What I need from you. Also
 look at: the blue "own bars" fits on the second line after the boss names on a raid row, and is
 not cut off by the tick.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked the one criterion (checks `a row says when its build has its own action bars` and `..., and only that row` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0, with the review's fit-beside-the-tick look folded into the first; the redraw after Save bars: build is still proved only in game, as the review said; moves to ai-review/ with only in-game looks open.

@@ -18,17 +18,17 @@ Rob, 2026-09-23, after the Load bars buttons: "an undo button sounds eminently u
 
 ## What I need from you
 
-1. `/reload`, open the talent window. Pass: **Undo bars** is greyed.
-2. Click **Load bars: spec**. Pass: **Undo bars** lights up. Click it: the bars go back, and it
-   greys again.
-3. Pass: the list still shows several rows above the five buttons.
-4. Click **Load bars: spec**, then rebind one key by hand, then click **Undo bars**. Pass: it asks
-   first, and **Undo anyway** puts the bars and keys back. (Added by the third review, as the
-   second one asked.)
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN a load can be undone, THE BUTTON SHALL be on, and undo it; otherwise it SHALL be greyed. WHEN the bars or keys changed by hand since the load, IT SHALL ask first. proves: `..., the Undo button is on after an apply`, `..., and off after the undo`, `..., the button asks first after a hand change`, `..., a key changed by hand asks first too`, `..., and Undo anyway undoes`
+<!-- AC:BEGIN -->
+- [x] WHEN a load can be undone, THE BUTTON SHALL be on, and undo it; otherwise it SHALL be greyed. WHEN the bars or keys changed by hand since the load, IT SHALL ask first. proves: `..., the Undo button is on after an apply`, `..., and off after the undo`, `..., the button asks first after a hand change`, `..., a key changed by hand asks first too`, `..., and Undo anyway undoes`
+- [ ] `/reload`, open the talent window, with nothing loaded since your last undo. Pass: **Undo bars** (full width, bottom of the list beside it) is greyed. proves: manual
+- [ ] Click **Load bars: spec**. Pass: **Undo bars** lights up; click it, the bars and keys go back, and it greys again. proves: manual
+- [ ] Click **Load bars: spec**, rebind one key by hand, click **Undo bars**. Pass: it asks first; **Undo anyway** puts the bars and keys back. proves: manual
+- [ ] On the smallest talent window, look at the list. Pass: several build rows still show above the premade row and the five bar buttons. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -157,3 +157,5 @@ Security:
 
 No client can be run by an agent. A person owes What I need from you 1 to 4, and the five buttons
 in the 280 px list on the smallest talent window.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked the one criterion (checks `the Undo button is on after an apply`, `and off after the undo`, `the button asks first after a hand change`, `a key changed by hand asks first too`, `and Undo anyway undoes` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the four steps of What I need from you, step 3 merged with the third review's smallest-window look and now counting the premade row above the Load buttons; moves to ai-review/ with only in-game looks open.

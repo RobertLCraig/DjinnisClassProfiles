@@ -29,8 +29,13 @@ bags/bank" lines.
 <!-- AC:BEGIN -->
 - [x] WHEN an item's tooltip shows and the item is in a druid spec's plan, THE ADDON SHALL add one line per spec and content that plans it, for example "Feral raid: in plan", current spec first. proves: `tooltip lists each plan that has the item`
 - [x] WHEN the item is planned and already owned, THE LINE SHALL say "owned". proves: `tooltip says a planned item is owned`
-- [ ] WHEN a loot roll starts for an item in any druid plan, THE ADDON SHALL mark the roll frame and name the specs in its tooltip. proves: manual
+- [ ] WHEN a loot roll starts for an item in any druid plan, THE ADDON SHALL mark the roll frame and name the specs in its tooltip. Look: `/reload` first (the game folder holds v0.69.0). Loot roll for a planned item: a green glow over the roll frame's item icon, the spec lines ("Feral raid: in plan") in the icon's tooltip, and one chat line `[BiS] PLAN <link> -> Feral raid; Feral Mythic+`. Need, Greed and Pass still click with no taint error. A roll for an unplanned item: no glow, no PLAN line. proves: manual
 - [x] WHEN the item is in no plan, THE ADDON SHALL add no plan line. proves: `no plan line for an unplanned item`
+- [ ] `/dcp test` while wearing or holding the planned Feral head (Enigmatic Dreamwatcher's Somnolent Stare, 271528): it prints `[CP] self-test passed`. proves: manual
+- [ ] Hover the planned Feral head anywhere (bag, bank, Encounter Journal, a chat link): green lines `Feral raid: in plan` and `Feral Mythic+: in plan`, each ending `, owned` when it is worn or in a bag or bank. Hover an unplanned piece: no such line. proves: manual
+- [ ] Hover a copy of a planned piece below its planned level (the head below 321): the line reads `in plan at 321`. proves: manual
+- [ ] Two group loot rolls close together on the same roll frame, the first planned and the second not: the glow goes out on the second. A roll whose frame flickers and vanishes (item not cached): no glow left behind, no error. proves: manual
+- [ ] On the character sheet hover the worn planned head: the gold slot line and the green plan line both show. Pass if they read as one answer; if they read as a duplicate, say so on the card. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -140,20 +145,8 @@ bags/bank" lines.
   slot mark's gold line and this card's green line, two lines saying nearly the same thing.
   Decide whether that is fine after seeing it.
 
+**2026-10-11** Clear-down (attended, Rob asked): ticked 3 criteria, all ticked already and confirmed (checks `tooltip lists each plan that has the item`; `tooltip says a planned item is owned`; `no plan line for an unplanned item` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); the look list rewritten for v0.69.0 (`/bis test` is `/dcp test`, the self-test line is `[CP] self-test passed`; the roll chat line is still `[BiS] PLAN`, checked in the lua); the Guardian-first look dropped, because only Feral has a gear plan in v0.69.0, so no item is planned by two specs; moves to ai-review/ with only in-game looks open.
+
 ## What I need from you
 
-Nothing here ran in a client. The five looks in the build comment stand, and two are sharper
-after this review:
-
-1. `/bis test` in the client, wearing or holding the planned Feral head (Enigmatic
-   Dreamwatcher's Somnolent Stare, 271528): the 0016 checks must still pass. Before the fix
-   they could not.
-2. Two group loot rolls close together, the first for a planned item and the second for an
-   unplanned one landing on the same roll frame: the glow must go out on the second. Then a
-   third roll on a frame whose item info is not yet cached (the frame flickers and vanishes):
-   no glow left behind and no error.
-3. Looks 1 to 4 from the build comment: the green line on any planned item's tooltip with
-   ", owned" and "at 321" behaving as written, the glow and the spec lines on the roll icon's
-   tooltip, the "[BiS] PLAN" chat line, and Need, Greed and Pass clicking with no taint error.
-4. The character sheet's worn head: say whether the gold slot line plus the green plan line
-   together read as one answer or as a duplicate.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).

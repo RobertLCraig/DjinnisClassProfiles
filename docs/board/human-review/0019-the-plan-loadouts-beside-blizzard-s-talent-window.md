@@ -28,7 +28,7 @@ exists because attaching to that window can taint Blizzard's own loadout menu.
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] WHEN the talent window opens out of combat, THE ADDON SHALL show beside it the plan's loadouts for the current spec and content, each with the boss it is planned for. proves: manual
+- [x] WHEN the talent window opens out of combat, THE ADDON SHALL show beside it the plan's loadouts for the current spec and content, each with the boss it is planned for. proves: manual (superseded by card 0032's list; its look is open there)
 - [x] EACH LOADOUT SHALL have an Apply button that loads it through `0011`'s route, and the active one SHALL be marked. proves: `sidebar marks the active loadout`
 - [x] WHEN the player is in combat, THE ADDON SHALL not build or change the sidebar. proves: `sidebar not changed in combat`
 - [x] THE SIDEBAR SHALL have a close button, and SHALL stay closed until the player opens it again. proves: `sidebar stays closed`
@@ -157,16 +157,5 @@ exists because attaching to that window can taint Blizzard's own loadout menu.
   and any value only closes a sidebar, so there is nothing to gain by editing it. Leaks: one
   grey chat line naming TLM when it is loaded, and nothing on failure, since `pcall` swallows.
 
-## What I need from you
+**2026-10-11** Clear-down (attended, Rob asked). **Superseded by card 0032** (commit `8a71604`, v0.29.0): this sidebar was rebuilt as the TalentLoadoutsEx-style build list, with no Apply button (double-click switches through `PlanTab.loadTalents`). The criterion below is ticked on that: the list now shows beside the talent window, and Rob used it in game on 2026-09-24 (cards 0055 and 0061). The look that is still open lives on card 0032, and the old "What I need from you" looks (v0.21.0, `/bis`, an Apply box) no longer describe the addon, so they are removed. Moves to done/.
 
-Out of combat, on Feral, after `/reload`; the game folder holds v0.21.0 and this branch is not
-deployed, so deploy it first. The seven looks in the build comment stand, and these are the
-review's additions:
-
-1. With Talent Loadout Manager **not** installed (it is not, today): press N, then equip any
-   item while the window is open. The box redraws and stays one box.
-2. If TLM is ever installed: press N, apply a loadout from TLM's own sidebar. **No** "Plan
-   loadouts" box appears beside it at any point, and one grey chat line at login says why.
-3. After `/bis test` in the client: pull a target dummy and press every action bar button for
-   30 seconds, then open and close the talent window. Any "blocked" message here is finding (1)
-   above, and belongs to every card that swaps `InCombatLockdown`, not to this one.

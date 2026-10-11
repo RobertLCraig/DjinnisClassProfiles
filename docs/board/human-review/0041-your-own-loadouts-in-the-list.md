@@ -17,15 +17,17 @@ Rob, 2026-09-23: "Additionally should show all existing blizzard builds in the l
 
 ## What I need from you
 
-1. Open the talent window. Pass: a **Your loadouts** group at the bottom, holding every loadout
-   of yours that is not a plan build. Compare it with Blizzard's dropdown.
-2. Double-click one. Pass: it is worn, and it gets the tick.
-3. Hover one. Pass: the tree shows what it would change.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN the talent window opens, THE LIST SHALL show every saved loadout of the spec, the plan's and the player's own.
-- [ ] WHEN an own loadout is double-clicked, THE ADDON SHALL switch through Blizzard's helper only.
+<!-- AC:BEGIN -->
+- [x] WHEN the talent window opens, THE LIST SHALL show every saved loadout of the spec, the plan's and the player's own. proves: `the player's own loadouts are listed too`, `..., never the spare`, `..., nor a swap's new loadout (card 0059)`, `..., ticked by its own string`, `..., and marked when selected`
+- [x] WHEN an own loadout is double-clicked, THE ADDON SHALL switch through Blizzard's helper only. proves: `talents button loads a saved loadout through ClassTalentHelper`, `no talent-changing call in the file, the button reads only`
+- [ ] `/reload`, open the talent window. Pass: a **Your loadouts** group last in the list holds every loadout in Blizzard's dropdown that is not a plan build or `[CP...]`; long names cut, not wrapped. proves: manual
+- [ ] Double-click a row under **Your loadouts**. Pass: it is worn, and it gets the tick. proves: manual
+- [ ] Hover a row under **Your loadouts**. Pass: the tree tints what it would change (green, red, amber). proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -74,3 +76,5 @@ Security:
 
 No client can be run by an agent. The in-game checks are this card's What I need from you. Also
 look at: a long own loadout name is cut, not wrapped over the next row.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked both criteria (checks `the player's own loadouts are listed too, ...` cover the list; the double-click criterion is ticked on `talents button loads a saved loadout through ClassTalentHelper` and `no talent-changing call in the file, the button reads only`, since the row's OnDoubleClick calls `loadTalents` and nothing else; all exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the list now also has a **Your builds** group (card 0057), so **Your loadouts** is the last group rather than "at the bottom" alone, and `[CP*]`/`[CP+]` loadouts are kept out of it; the review's long-name look is folded into the first look; moves to ai-review/ with only in-game looks open.

@@ -35,19 +35,19 @@ a global profile". Card `0033` saves both, but only by slash command (`/djbis ba
 
 ## What I need from you
 
-1. `/reload`, open the talent window. Pass: two buttons sit at the bottom of the plan list, and
-   the list scrolls above them without overlapping.
-2. Select a loadout, click **Save bars: build**. Pass: chat says how many slots and keys were
-   saved as `<Spec> / <loadout>`.
-3. Click **Save bars: spec**. If a spec layout exists, pass: a prompt asks before replacing it.
-4. Hover each button. Pass: the tooltip says which it saves.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN Rob clicks **Save bars: build** with a loadout selected, THE ADDON SHALL save his bars and keys for that build.
-- [ ] WHEN Rob clicks **Save bars: spec**, THE ADDON SHALL save them as the spec's layout.
-- [ ] WHEN a layout of that name exists, THE ADDON SHALL ask before replacing it.
-- [ ] In a client: both buttons show under the list and do not overlap it.
+<!-- AC:BEGIN -->
+- [x] WHEN Rob clicks **Save bars: build** with a loadout selected, THE ADDON SHALL save his bars and keys for that build. proves: `the Save bars buttons, a build with no layout saves at once`, `..., and asks nothing`
+- [x] WHEN Rob clicks **Save bars: spec**, THE ADDON SHALL save them as the spec's layout. proves: `the Save bars buttons, Replace saves it`
+- [x] WHEN a layout of that name exists, THE ADDON SHALL ask before replacing it. proves: `the Save bars buttons, replacing the spec layout asks first`, `..., and keeps it until Replace`, `..., Cancel does nothing`, `..., a stale Replace saves nothing`, `..., with another question up, it waits`
+- [ ] `/reload`, open the talent window. Pass: **Save bars: build** and **Save bars: spec** sit side by side under the list, labels not cut, nothing overlapping the list. proves: manual
+- [ ] Select a loadout, click **Save bars: build**. Pass: chat says "Saved N action bar slots and N key bindings as the <Spec> / <loadout> layout". proves: manual
+- [ ] With a spec layout already saved, click **Save bars: spec**. Pass: a box asks "Replace the saved <Spec> layout ...?" with Replace and Cancel. proves: manual
+- [ ] Hover each Save button. Pass: tooltips read "Save bars to this build" and "Save bars for the spec". proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -132,3 +132,5 @@ Security:
 There is no browser surface. The layout and tooltips can only be checked in a client.
 
 Verdict: CLEAN, human-review next.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked the build save, the spec save and the ask-before-replace criteria (checks `the Save bars buttons, ...`: a build with no layout saves at once, and asks nothing, Replace saves it, replacing the spec layout asks first, and keeps it until Replace, Cancel does nothing, a stale Replace saves nothing, with another question up it waits; all exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the list's foot now holds a Premade bars row, the Save row, the Load row (0044) and a full-width Undo bars button, the chat line and tooltip titles are quoted from the code, and the layout criterion became the first look; moves to ai-review/ with only in-game looks open.

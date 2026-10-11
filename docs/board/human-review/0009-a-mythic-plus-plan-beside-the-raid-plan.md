@@ -5,39 +5,7 @@ needs: 0004, 0007
 
 ## What I need from you
 
-**Six looks in the game at 0.19.1 after a `/reload`, then one Top Gear run.**
-
-1. In a city, open the character sheet. The strip under the stat pane has a button on its right
-   reading "1 target". Click: "2 targets". Click: "Mythic+", and the stat pane's header button
-   above reads "Mythic+" too. Click: "1 target" again, and the header reads "Raid".
-2. With the strip on "Mythic+" it says "No Mythic+ gear plan for Feral yet. Click for how." Click
-   that text. The Plan tab opens with "> Mythic+, any key   WS M+   Mythic+" as the picked row,
-   red if your loadout is "DotC M+", and under "2. Gear to change" it says to run a Top Gear sim
-   with the DungeonSlice fight style.
-3. On the Plan tab, click the Nek'zali row. The gear list is the raid one again. That row is for
-   looking only: the strip and the glows stay on Mythic+ until you click the strip's button.
-4. Zone into any dungeon, a normal one will do. Touch nothing: the strip reads "Mythic+", its
-   button and the stat pane's Raid / Mythic+ button are greyed out, and no bag item glows green
-   (there is no Mythic+ plan yet). Leave: both buttons come back, the strip reads "1 target" or
-   "2 targets", and the bag glows are back.
-5. Zone into the raid. The strip button reads "1 target" and clicks go "2 targets", "1 target",
-   never "Mythic+". The stat pane's header reads "Raid *" and its button is greyed.
-6. Card `0003`'s look 3, the Raid / Mythic+ button changing the targets, is only true outside an
-   instance now. Do it in a city.
-7. Run one Top Gear on Raidbots with the DungeonSlice fight style, then
-   `.\update-gear-plan.ps1 <report link> -Deploy` and `/reload`. The tool says it filed the report
-   as `Feral    mplus`, and the Plan tab's Mythic+ row lists gear.
-
-**Pass** is all seven as written.
-
-**Fail** is any one. Say which number and what you saw in `## Comments`; the card goes back to
-`todo/`. If look 7's tool run refuses the report, paste its message: the value Raidbots writes for
-a dungeon fight style has never been seen on a real report, only assumed to start with `Dungeon`.
-
-**Why it needs you.** Every look is a frame in a game client, and the fight style value is on a
-report only your Raidbots account can make. One decision is taken and is yours to overturn: your
-note that the Plan tab has no Raid / M+ switch is left to `0020`, whose acceptance already names
-the three-button row. This review only made the strip's round-robin button honest.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -74,6 +42,12 @@ pane already has a Mythic+ / Raid switch from `0003`; the plan never used it.
 - [x] WHEN one item is in both the raid and the Mythic+ plan, THE ADDON SHALL show it as one wanted item in the bags. proves: `an item planned for both contents is wanted once`
 - [x] WHEN the Plan tab is open, THE ADDON SHALL show the current content's loadout, gear changes and shopping list, and let the other content be viewed. proves: `plan tab shows the current content and can switch`
 - [x] WHEN there is no Mythic+ plan for the current spec, THE ADDON SHALL say so and not fall back to the raid plan silently. proves: `missing mplus plan is said, not filled from raid`
+- [ ] In a city on Feral, open the character sheet: the strip's button reads "1 target" and clicks go "2 targets", "3+ targets", "Mythic+", "1 target". On Mythic+ the stat pane's header button reads "Mythic+", otherwise "Raid". proves: manual
+- [ ] With the strip on Mythic+, it reads "Gear plan: N slots to fix. Click for the list." (or "every slot matches"), never "No Mythic+ gear plan". Click it: the Plan tab opens with "> Mythic+, any key   Dungeon   Mythic+" picked and a gear list under "2. Gear to change". proves: manual
+- [ ] Plan tab: four buttons on top, "Raid - 1 target", "Raid - 2 targets", "Raid - 3+ targets", "Mythic+", the chosen one lit. Click another: it lights, and the strip and gear list follow it. proves: manual
+- [ ] With Mythic+ chosen, click the Nek'zali row on the Plan tab: the gear list is the raid one, while the strip and the bag glows stay on Mythic+. proves: manual
+- [ ] Zone into any dungeon: the strip reads "Mythic+", its button and the stat pane's button are greyed, the three Raid buttons on the Plan tab are greyed with "You are in a dungeon" in their tooltip, and bag items the Mythic+ plan wants glow green. Leave: all come back. proves: manual
+- [ ] Zone into the raid: the strip goes "1 target", "2 targets", "3+ targets", "1 target", never Mythic+; the stat pane's button reads "Raid *", greyed; the Plan tab's Mythic+ button is greyed with "You are in a raid" in its tooltip. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -146,3 +120,4 @@ WHY: The code meets every criterion, but the in-game looks describe an addon fro
 
 OUTCOME: rob
 
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new; the five `proves:` checks were already ticked and still exist (`current content follows instance type then the switch`, `an item planned for both contents is wanted once`, `plan tab shows the current content and can switch`, `missing mplus plan is said, not filled from raid` pass in the Lua 5.1 offline check; `generator files a report under raid or mplus by fight style` is in `update-gear-plan.ps1 -SelfTest`, not re-run here). Looks 1 to 6 rewritten for v0.69.0: the Mythic+ cell is filled, the Mythic+ row's loadout is "Dungeon", the strip cycles 1, 2, 3+ targets, Mythic+ (`PlanTab.nextScenario`), and the Plan tab has its own four content buttons (`PlanTab.CHOICE_LABEL`). Old look 6 is folded into card 0003's look 3, which now says a city. Look 7 is done: Dungeon Slice reports were baked as Feral `mplus` on 2026-09-22 and 2026-09-28. Moves to ai-review/ with only in-game looks open.

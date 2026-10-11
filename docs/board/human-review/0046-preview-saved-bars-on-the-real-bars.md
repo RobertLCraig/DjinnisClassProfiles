@@ -32,20 +32,18 @@ positioning infomation about the bars which is a major visual queue".
 
 ## What I need from you
 
-1. `/reload`, open the talent window. Point at **Load bars: spec**. Pass: icons sit exactly on
-   your bars, the same size, on every bar you have shown.
-2. Pass: slots that differ have an amber edge. Slots that match have none.
-3. Move away. Pass: all of it goes.
-4. Point at a row that says **own bars**. Pass: that build's bars show.
-5. Change UI scale, or a bar's scale in Edit Mode, and do step 1 again. Pass: still on top.
-6. In Cat Form, step 1 again. Pass: the main bar shows the saved Cat page.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN a Load bars button or an "own bars" row is pointed at, THE ADDON SHALL draw that layout's icons over the shown action buttons, amber where a load changes the slot. proves: `..., a slot the load clears is marked`, `..., the same action is not marked`, `..., a macro is matched by name`, `..., shown for a saved layout`
-- [ ] WHEN the mouse leaves, or in combat, THE PREVIEW SHALL not show. proves: `..., and hidden`, `..., nothing in combat`
-- [ ] THE PREVIEW SHALL never write to Blizzard's action buttons. proves: manual (read `PlanTab.showGhost`)
-- [ ] Rob sees the icons line up on his bars in a client.
+<!-- AC:BEGIN -->
+- [x] WHEN a Load bars button or an "own bars" row is pointed at, THE ADDON SHALL draw that layout's icons over the shown action buttons, amber where a load changes the slot. proves: `..., a slot the load clears is marked`, `..., the same action is not marked`, `..., a macro is matched by name`, `..., shown for a saved layout`
+- [x] WHEN the mouse leaves, or in combat, THE PREVIEW SHALL not show. proves: `..., and hidden`, `..., nothing in combat`
+- [x] THE PREVIEW SHALL never write to Blizzard's action buttons. proves: manual (read `PlanTab.showGhost`)
+- [x] Rob sees the icons line up on his bars in a client.
+- [ ] LOOK (old step 5). `/reload`, change UI scale, or one bar's scale in Edit Mode, then open the talent window and point at **Load bars: spec**. The preview icons still sit exactly on your bars, the same size. proves: manual
+- [ ] LOOK (old step 6). In Cat Form, point at **Load bars: spec** again. The main bar shows the saved Cat page's icons. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -388,3 +386,5 @@ Noted, not findings:
 Security: **Weakest point:** `/djbis test` in a client. It is now covered after a throw: the key
 is cleared and the pool is checked. **Unchecked:** the anchor frame (criterion 3 is manual) and
 the slot `canRead`, both as noted before. **Leaks:** nothing. It is all local.
+
+**2026-10-11** Clear-down (attended, Rob asked). Ticked all four criteria. 1 and 2: the six named checks exist and pass in the Lua 5.1 offline check. 3: read `PlanTab.showGhost` and `hideGhost` at HEAD; they only set textures on the addon's own ghost frames and never call `PickupAction`, `PlaceAction` or `SetAttribute` on an action button. 4: Rob saw v0.39.0 in game on 2026-09-23, "That looks great! and responsive", covering steps 1, 2 and 4 (entry above). The fourth adversarial review was clean. Steps 5 (UI and bar scale) and 6 (Cat Form page) were never seen and stay open as `proves: manual` looks. Moves to done/ with those two open (board README, A look waits on the product).

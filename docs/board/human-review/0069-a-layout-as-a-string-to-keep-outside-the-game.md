@@ -22,6 +22,10 @@ every layout goes with them, and there is no copy outside the game.
   to refuse a bad string.
 - No import of Myslot's own strings.
 
+## What I need from you
+
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
+
 ## Acceptance
 
 <!-- AC:BEGIN -->
@@ -29,7 +33,9 @@ every layout goes with them, and there is no copy outside the game.
 - [x] WHEN that string is imported, THE ADDON SHALL rebuild the same layout: slots, keys and macros. proves: `export then import gives the same layout`
 - [x] WHEN the string is damaged or is for another class, THE ADDON SHALL refuse it and save nothing. proves: `a damaged string is refused and nothing is saved`
 - [x] WHEN a layout is imported, THE ADDON SHALL only save it. Apply stays a separate click. proves: `import saves and does not apply`
-- [ ] WHEN Rob exports in the game, imports the string on another character and applies it, THE BARS SHALL match. proves: manual
+- [ ] After `/reload`: More > Profile: X > Export, copy the string into a text file. On another character of the class, More > Import a profile..., paste with Ctrl+V, OK: chat says `Saved the X profile from the string` and nothing on the bars moves. proves: manual
+- [ ] Then More > Profile: X > Load on that character: the bars, the keys and any character macros match the first character's. proves: manual
+- [ ] Export a profile with many macros: the whole string pastes into the import box, and the import is not refused. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -108,3 +114,4 @@ WHY: The code is built and its offline checks pass. Only an in-game check on a s
 
 OUTCOME: rob
 
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new: the four built criteria were already ticked, and their checks (`export gives one string for a layout`, `export then import gives the same layout`, `a damaged string is refused and nothing is saved`, `import saves and does not apply`) exist and pass in the Lua 5.1 offline check. The one manual criterion is split into the three looks the 2026-09-29 entry named, rewritten for v0.69.0 (More > Profile: X > Export and Load, More > Import a profile..., the OK button and the `Saved the X profile` chat line all match the code). Moves to ai-review/ with only in-game looks open.

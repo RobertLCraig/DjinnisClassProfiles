@@ -44,6 +44,12 @@ never before.
 - [x] WHEN a set is saved, THE ADDON SHALL leave the shirt and tabard slots out of it. proves: `the set ignores shirt and tabard`
 - [x] THE ADDON SHALL never change or delete an equipment set whose name does not start "DBiS ". proves: `sets Rob made are never touched`
 - [x] WHEN the player is in combat, THE ADDON SHALL save no set. proves: `no set is saved in combat`
+- [ ] On Feral with a planned piece in the bags, `/dcp`, Plan tab, Equip all: about two seconds later chat says "Saved as equipment set DBiS Feral ST" (ST, 2T, 3T or M+ follows the content choice). "No equipment set saved: not worn: <slot>" after a real full equip: press Save set and say so. proves: manual
+- [ ] Open the equipment manager on the character sheet: the set is there with the Feral icon (not the default one), and shirt and tabard are ignored. proves: manual
+- [ ] Hover a piece of the set: the tooltip says "Equipment Sets: DBiS Feral ST". proves: manual
+- [ ] Press Equip all again: the same set is updated, and no second set appears. proves: manual
+- [ ] Wear a piece that is not the plan, open the Plan tab: no Save set button, and the slot is listed under "2. Gear to change". proves: manual
+- [ ] Tick a slot ignore on the paper doll, press Save set: note whether the tick stays drawn. If it does, that is the cosmetic mismatch in comment (7), a small card of its own, not a fail here. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -148,23 +154,8 @@ not this addon. The ask now says `/reload`, because the game folder holds v0.54.
 `/dcp`. The set names and chat lines were checked against `PlanTab.setName` and `saveSet` and
 still read as the steps say.
 
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new; the five `proves:` checks (`equip all saves the plan as an equipment set`, `no set is saved from a half-worn plan`, `the set ignores shirt and tabard`, `sets Rob made are never touched`, `no set is saved in combat`) were already ticked and still exist and pass in the Lua 5.1 offline check. Looks rewritten for v0.69.0: the set name is still `PlanTab.SET_PREFIX` "DBiS " plus ST/2T/3T/M+ (3T is new since card 0028), the chat lines and the Save set button read as the looks say. The Baganator task stays open; it is not a criterion. Moves to ai-review/ with only in-game looks open.
+
 ## What I need from you
 
-Seven looks in the game, none of which an agent can take. The game folder already holds this
-build (v0.54.12), so type `/reload` and then, on the Feral druid:
-
-1. With a planned piece in the bags, open `/dcp`, Plan tab, press Equip all. Two seconds later
-   the chat line should read "Saved as equipment set DBiS Feral ST". Open the character sheet's
-   equipment manager: the set is there with the Feral icon, and shirt and tabard are greyed out.
-2. Hover a planned item in the bag. The tooltip should say "Equipment Sets: DBiS Feral ST".
-3. Press Equip all again. The same set is updated, and no second set appears.
-4. If the chat line after a real full equip says "No equipment set saved: not worn: Finger" or
-   similar, the two seconds were too short: press Save set under the gear list and say so on
-   this card, so the timer can be lengthened or replaced with an event.
-5. If the set shows Blizzard's default icon instead of the Feral one, the fileID was refused
-   where the API says cstring; say so on this card.
-6. Wear a piece that is not the plan and open the Plan tab: the Save set button should be gone
-   and the gear row should list the slot.
-7. Tick a slot ignore on the paper doll, then press Save set. Note whether the tick stays drawn
-   afterwards; if it does, that is the cosmetic mismatch in comment (7) and is a small card of
-   its own.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).

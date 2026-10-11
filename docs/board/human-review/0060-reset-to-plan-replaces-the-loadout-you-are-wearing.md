@@ -2,18 +2,7 @@
 
 ## What I need from you
 
-1. With v0.48.4 in the game, wear a `[CP]` loadout whose talents you have changed by hand, then
-   click More > Make the planned loadouts > Reset to plan.
-2. Do it once more with the talent window open, and close the window.
-
-**Pass:**
-- Step 1 ends with one loadout of that name, worn, holding the plan. No `[CP+]` loadout is left.
-- Step 2 does nothing while the window is open, says it waits, and does the same on close.
-
-**Fail:** the starter build, two loadouts of one name, or a Lua error. Move the card to `todo/` with
-what you saw.
-
-**Why it needs you:** no agent can run the game client; every offline check and mutation is green.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -42,11 +31,14 @@ Deleting the worn loadout drops the character to the starter build, so it cannot
 
 ## Acceptance
 
+<!-- AC:BEGIN -->
 - [x] The worn drifted loadout is made new, worn, the old deleted and the new renamed. proves: offline-check "Reset to plan swaps the loadout you are wearing"
 - [x] With the talent window open it waits, does nothing, and runs once on close. proves: same block, "with the talent window open it waits" and "and only once"
 - [x] A switch that does not take keeps the old loadout and says what to do. proves: "a switch that did not take keeps the old one"
 - [x] A refused rename leaves the plan worn and says to rename it. proves: "a refused rename is said"
-- [ ] In a live client, "Reset to plan" on the worn loadout ends with one loadout of the old name, worn, holding the plan. proves: manual
+- [ ] Wear a `[CP]` loadout, change a talent by hand and apply it, close the talent window, then **More > Make the planned loadouts > Reset to plan**. Pass: one loadout of that name, worn, holding the plan; no `[CP+]` left, no starter build, no Lua error. proves: manual
+- [ ] Do it again with the talent window open. Pass: chat says to close it and it goes ahead then; nothing changes until you close it, then the same result as above, once. proves: manual
+<!-- AC:END -->
 
 ## Not this card
 
@@ -296,3 +288,5 @@ Messages go to the local chat frame only.
 
 Not looked at in a client. There is no browser surface and the game cannot be run from here. The
 manual criterion stays open, so the card goes to human-review. Deploy was not touched.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new (the four built criteria were already ticked; checks `Reset to plan swaps the loadout you are wearing`, `with the talent window open it waits`, `and only once`, `a switch that did not take keeps the old one`, `a refused rename is said` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the two steps of What I need from you, now one criterion each, with the "close it, and this goes ahead then" message the code prints; moves to ai-review/ with only in-game looks open.

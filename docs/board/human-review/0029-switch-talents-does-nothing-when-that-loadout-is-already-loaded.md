@@ -43,6 +43,10 @@ answers it.
 - [x] WHEN the popup's loadout is the row's own name with the wrong build, THE ADDON SHALL label the button "Fix talents", not "Switch talents". proves: `the row's own loadout with the wrong build is not a switch, the button says Fix talents`
 - [x] WHEN that is the case, THE ADDON SHALL say on the line that the build is not the one simmed, instead of "planned X, now X (edited)". proves: `the row's own loadout with the wrong build is not a switch, the line says the build is not the one simmed`
 - [x] WHEN Rob types `/djbis talents`, THE ADDON SHALL print the build in play and every planned build of the spec, each marked same, different or cannot compare. proves: run in a client 2026-09-22, three lines, both cells marked `different`
+- [ ] `/reload` first (the game folder holds v0.69.0). On Feral select the `[CP] Dungeon` loadout, move one talent, Apply, walk into a dungeon: the popup's talents line reads `Dungeon is loaded, but its build is not the one simmed` and the button says `Fix talents`. proves: manual
+- [ ] Click `Fix talents`: the talent window opens and one chat line says `"Dungeon" is loaded already, but its build is not the planned one. Pick another loadout, then More > Make the planned loadouts offers Reset to plan.` Nothing else changes. proves: manual
+- [ ] Put the talent back, then `/dcp`, Plan tab, the `Mythic+, any key` row, click `Talents`: chat says `"Dungeon" is on already.`, nothing about Reset, no window opens. proves: manual
+- [ ] In a key with `[CP] Raid: Nek'Zali` loaded: the popup reads `planned Dungeon, now Raid: Nek'Zali`, the button says `Switch talents`, and clicking it loads `Dungeon`. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -56,19 +60,7 @@ answers it.
 
 ## What I need from you
 
-1. `/reload` (the game folder holds v0.38.1). On Feral, select `Dungeon`, move one talent and
-   click Apply, then walk into a dungeon. The talents line should read `Dungeon is loaded, but its
-   build is not the one simmed` and the button should say **Fix talents**.
-2. Click it. The talent window should open and one gold chat line should point at
-   `/djbis loadouts` and Reset to plan. Nothing else should happen.
-2a. Put the talent back. Click the Plan tab's **Talents** button on that loadout. Chat should say
-   it is on already, and nothing about Reset.
-3. ~~`/djbis talents`~~ **Done, 2026-09-22.** Answered card `0014` item 4: the saved loadout has
-   really drifted. Same 25-character header and same first 58 characters as the plan's `WS M+`,
-   then divergent, 118 characters against 117. The mark is true and the baked string is fine.
-   Rob's own fix is to delete the saved `WS M+` and import the plan's string under that name.
-4. With a genuinely wrong loadout loaded (say `Raid: Nek'Zali` in a key), the popup should still
-   say **Switch talents** and that button should still work.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Comments
 
@@ -223,3 +215,5 @@ id, and Blizzard's helper loads the first by name. It needs the player to make t
 
 **Not checked in a client.** No agent can run the game. A person owes What I need from you steps
 1, 2, 2a and 4.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked 4 criteria, all ticked already and confirmed (checks `talents button says so when that loadout is loaded already`, `..., unmoved it is on already`; `the row's own loadout with the wrong build is not a switch, the button says Fix talents`; `the row's own loadout with the wrong build is not a switch, the line says the build is not the one simmed`; run in a client 2026-09-22, three lines, both cells marked `different` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); steps rewritten for v0.69.0 against `PlanTab.setupPopup` and `PlanTab.loadTalents`: the loadout in the game is the tagged `[CP] Dungeon` (card 0059), the chat line now points at More > Make the planned loadouts for Reset to plan, and `/djbis` is `/dcp`. Old step 3 (`/djbis talents`) dropped: done in a client 2026-09-22 and recorded under criterion 4; moves to ai-review/ with only in-game looks open.

@@ -2,35 +2,7 @@
 
 ## What I need from you
 
-Five minutes in a live client. Nothing left on this card can be settled from the repository or from
-research: the code is written, and the only remaining question is whether Blizzard's UI actually
-shows the control, which only a running client answers. Do a **full client restart**, not a
-`/reload`, then report three things. Does *Djinni's BiS* appear in the minimap addon drawer. Does
-the minimap button appear on the ring. Does hovering it show the summary tooltip.
-
-One of the open tasks no longer needs chasing, because the answer is in this repository.
-`Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua:508-526` calls `AddonCompartmentFrame:RegisterAddon(...)`
-whenever a button's saved settings carry `showInCompartment = true`. That is what puts
-`DjinnisDelveTracker` and `DjinnisWarbandManager` in the drawer with no `AddonCompartmentFunc` line
-anywhere: the library registers them at runtime, the `.toc` never comes into it. Their own files sit
-outside this sandbox, so that last step is read off the shared library rather than off their code.
-
-Which leaves this addon on the single route that has already failed once:
-
-| Route into the drawer | Where it lives | On in DjinnisBiS today |
-|---|---|---|
-| `## AddonCompartmentFunc: DjinnisBiS_Toggle` | `DjinnisBiS.toc:7` | yes, and it is the only one |
-| `showInCompartment = true` in the LibDBIcon db | `DjinnisBiS.lua:1143` | **no**, the table is `{ hide = false }` |
-| Minimap ring button (not the drawer) | `DjinnisBiS.lua:1144` | yes |
-
-Both compartment routes on together would almost certainly show two *Djinni's BiS* entries, so it is
-one or the other. My reading is that the `.toc` field is sound and only ever needed the restart, but
-the sibling addons prove the library route works in your client and it costs one word to switch to
-it. If the restart shows no drawer entry, take the library route and drop the `.toc` field.
-
-That last bit is a choice, not a build, and it is the only choice left on the card. It is left
-inline rather than split into its own decision card, because the observation comes first and may
-settle it without anyone having to choose. Split it if you would rather decide it separately.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -94,13 +66,12 @@ entry never appeared, and the tooltip summary has never been seen in a live clie
 ## Acceptance
 
 <!-- AC:BEGIN -->
-- [ ] #1 THE ADDON SHALL open its window from a control that survives a UI reload and a full client
-      restart, verified in a live client rather than reasoned about.
-- [ ] #2 WHEN the addon compartment entry is investigated, THE FINDING SHALL be written down: either
-      the entry works and the earlier failure is explained, or the field is abandoned with a reason.
+- [ ] #1 THE ADDON SHALL open its window from a control that survives a `/reload` and a full client restart. Look: quit WoW fully and start it (not a `/reload`); the claw button is on the minimap ring and a click opens the window; `/reload`, and it still does. proves: manual
+- [ ] #2 THE COMPARTMENT FINDING SHALL be written down. Look: after that full restart, open the minimap addon drawer; pass is exactly one "Djinni's Class Profiles" entry that opens the window. None or two: write which on the card and move it to `todo/` (the fix is LibDBIcon's `showInCompartment = true` with the `.toc` field dropped). proves: manual
 - [x] #3 THE ADDON SHALL depend on no other addon, and SHALL expose its summary through an open
       interface rather than a private one.
 - [x] #4 THE FLOATING CLAW BUTTON SHALL either be removed or become an opt-in, not the only route.
+- [ ] Hover the minimap button in a city: the tooltip reads "Djinni's Class Profiles" and "Click to open"; inside the Venomous Abyss it also shows a green "N BiS items drop here" line. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -127,3 +98,7 @@ count the paper doll ticks.
 
 Keep the standalone fallback whatever is decided. An addon that only works alongside another
 private addon cannot be published, and publishing is now on the table.
+
+## Comments
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new (#3 and #4 were already ticked; no criterion names a check). Looks rewritten for v0.69.0: #1 and #2 are now `proves: manual` looks, and the tooltip look from Tasks is added. The `.toc` still carries `## AddonCompartmentFunc: DjinnisClassProfiles_Toggle` and the LibDBIcon db is still `{ hide = false }` (`buildBroker`), so the restart answers which route works; the old route table under What I need from you is folded into look #2. Moves to ai-review/ with only in-game looks open.

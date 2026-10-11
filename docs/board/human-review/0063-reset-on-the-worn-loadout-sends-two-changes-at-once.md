@@ -2,19 +2,7 @@
 
 ## What I need from you
 
-**Reset the loadout you are wearing, once, in game.**
-
-1. Wear a `[CP]` loadout, change one talent by hand and apply it, so it no longer matches the plan.
-2. Close the talent window. Open the window from the minimap button, click **More > Make the
-   planned loadouts**, then **Reset to plan**.
-
-**Pass:** chat says the loadout now holds the plan, you are still wearing it under the same name,
-and there is one loadout of that name.
-
-**Fail:** "You can't do that right now", "Rename it in the talent window", a `[CP+]` loadout left
-over, or the starter build. Say what you saw on this card and move it to `todo/`.
-
-**Why it needs you:** only the live server refuses a second change in flight; offline it is a model.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -34,12 +22,12 @@ Send each second change only once the first has landed, the way `PlanTab.tagNext
 the config to read the new state, one beat more, and retry a refusal. Hold `loadoutFence` for the
 whole swap.
 
-## Done when
+## Acceptance
 
-1. `lua offline-check.lua` passes, with checks against a timed server model (one change in flight)
-   for `finishSwap` and `importOne`.
-2. In game: wear a loadout whose build has drifted from the plan, click Reset to plan. Chat says it
-   now holds the plan, with no "You can't do that right now" and no "Rename it in the talent window".
+<!-- AC:BEGIN -->
+- [x] `lua offline-check.lua` passes, with checks against a timed server model (one change in flight) for `finishSwap` and `importOne`. proves: `PlanTab.swapChecks`, among them `one loadout change at a time, the delete goes alone`, `..., then the import, and nothing is refused`, `..., the rename once the delete has landed, and nothing is refused`, `..., it ends holding the plan under its name`
+- [ ] Wear a `[CP]` loadout, change a talent by hand and apply it, close the talent window, then **More > Make the planned loadouts > Reset to plan**. Pass: chat says it "now holds the plan, and you are wearing it"; no "You can't do that right now", no "Rename it". proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -187,3 +175,5 @@ gone, `importOne` imports at once and sends no delete. A new check in `swapCheck
 it fails when the fix is taken out. The three checks the reviewer said were missing are left as
 they are: two only change a message or a beat, and the third is covered by `wearSpare`'s own
 guard.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked Done-when 1 (checks `one loadout change at a time, the delete goes alone`, `then the import, and nothing is refused`, `the rename once the delete has landed, and nothing is refused`, `it ends holding the plan under its name` in `PlanTab.swapChecks` exist and pass in the Lua 5.1 offline check); `## Done when` became `## Acceptance` in the AC block, wording kept; looks rewritten for v0.69.0: the one in-game Reset, with the chat line the code prints ("now holds the plan, and you are wearing it"); it is the same action as 0060's first look, so one try answers both; moves to ai-review/ with only in-game looks open.

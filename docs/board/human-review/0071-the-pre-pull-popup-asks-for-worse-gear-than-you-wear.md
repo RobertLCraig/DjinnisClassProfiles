@@ -2,23 +2,7 @@
 
 ## What I need from you
 
-**One look in the game, v0.54.13.** `/reload` first.
-
-1. Next raid night as Feral, when the pre-pull popup comes up, read every gear line on it.
-
-Pass is all of:
-- no line asks you to put on a piece with a lower item level than the one you wear
-- if you have won a piece since 2026-09-28 that beats the plan's, one grey line says
-  `Gear plan from 2026-09-28. You have upgraded since: rerun Top Gear.`
-- if you have not, there is no such line
-- the Augment rune line still shows when you have no rune
-- Equip all takes off nothing better than what goes on
-
-Fail is any of those not true. Say which on this card.
-
-**Why it needs you:** the popup only draws in a live client. The Feral st, 2t and M+ plans were
-resimmed on 2026-09-28 from your own gear, so the exact popup from Coiled Altar cannot come back.
-The rule itself is covered by the offline check.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -71,14 +55,14 @@ Rob, mid-raid: "do it for me please".
   `lua offline-check.lua` passes.
 - Not checked: the popup in a live client.
 
-## Done when
+## Acceptance
 
-With Rob's gear from the 2026-09-27 SimC export and today's `GEAR_PLAN`:
-
-1. The Coiled Altar popup shows no feet, finger or main hand line.
-2. It shows the stale-plan line with the date `2026-09-21`.
-3. The Augment rune line still shows when there is no rune.
-4. After a fresh `update-gear-plan.ps1` run, the stale-plan line is gone.
+<!-- AC:BEGIN -->
+- [x] A slot whose worn item has a higher item level than the planned item is not asked for; its enchant and its own sockets still are. proves: `slot state` checks ", not when the worn piece outranks the plan", ", an outranking piece still needs the planned enchant", ", an outranking piece with no socket is not asked for the planned gem"
+- [x] The stale-plan line shows when another item outranks the plan, and not for the planned item raised or a lower item. proves: `the popup says the plan is old when another item outranks it`, `the popup does not say the plan is old for the planned item raised`, `the popup does not say the plan is old for a lower item`
+- [ ] Raid night as Feral, after `/reload`: when the pre-pull popup comes up, no gear line asks for a piece with a lower item level than the one you wear, and Equip all takes off nothing better than what goes on. proves: manual
+- [ ] On the same popup: if you have won a piece since 2026-09-30 that beats the plan's, one grey line says `Gear plan from 2026-09-30. You have upgraded since: rerun Top Gear.`; if not, there is no such line; the Augment rune line still shows when you have no rune. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -111,3 +95,5 @@ outside. Every value is the player's own gear from the game's item links. It lea
 no network call and no chat output.
 
 No browser: this is a game popup. No agent can run the client, so the look is the ask above.
+
+**2026-10-11** Clear-down (attended, Rob asked): converted Done when to an Acceptance block and ticked the two offline criteria (the `slot state` outrank checks and the three `the popup says / does not say the plan is old ...` checks exist and pass in the Lua 5.1 offline check). Done when 1, 2 and 4 could not be met as written: the Coiled Altar popup cannot come back and the Feral plans were resimmed (now `simmed = "2026-09-30"`), so the rule they stood for is the two ticked lines. Looks rewritten for v0.69.0: the stale date is now 2026-09-30, not 2026-09-28. Moves to ai-review/ with only in-game looks open.

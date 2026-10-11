@@ -29,6 +29,9 @@ lookup uses, and add the id, which the events use.
 - [x] EVERY boss row in the plan SHALL carry both its name and its encounter id. proves: `every boss row has a name and an id`
 - [x] WHEN the addon looks up a boss from a game event, THE ADDON SHALL match by id first, and by name when there is no id. proves: `boss lookup tries id then name`
 - [x] WHEN a row's name and id point at two different bosses, THE CHECK SHALL fail. proves: `a name and id that disagree fail the check`
+- [ ] `/reload` first (the game folder holds v0.69.0). `/dcp test` in the game prints `[CP] self-test passed` (the `canRead` guard in `PlanTab.bossRow` only means anything against the real `canaccessvalue`). proves: manual
+- [ ] Before a Venomous Abyss pull paste `/run local f=CreateFrame("Frame") f:RegisterEvent("ENCOUNTER_START") f:SetScript("OnEvent", function(_,_,id,name) print(id, name, canaccessvalue(id), canaccessvalue(name)) end)` and pull Nek'zali: it prints `3470 Nek'zali the Soulcoiler true true`. BigWigs' Nek'zali timers starting on the pull say the same. proves: manual
+- [ ] As Feral, kill Nek'zali with the talents for the next boss wrong: the wrong-setup popup after the kill names Entombed Sentinels and `Raid: Entombed Sentinels`, not Nek'zali. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -41,19 +44,7 @@ lookup uses, and add the id, which the events use.
 
 ## What I need from you
 
-There is no test client, so nothing here has been seen in the game. Two looks:
-
-1. `/djbis test` in the game. The three named checks run there as well as offline, and the
-   `canRead` guard in `PlanTab.bossRow` only means anything against the real `canaccessvalue`.
-2. Any Venomous Abyss pull. Nothing in this addon reacts to it yet (that is `0013` and `0023`), so
-   the look is indirect: BigWigs enables its boss module off `ENCOUNTER_START` by the same id this
-   card copied, so if BigWigs' Nek'zali timers start on the Nek'zali pull, id 3470 is the one the
-   event carries. If BigWigs stays quiet, the id is wrong and so is this table.
-3. (added in review) Before that same pull, paste this once, it prints what the event carries:
-   `/run local f=CreateFrame("Frame") f:RegisterEvent("ENCOUNTER_START")
-   f:SetScript("OnEvent", function(_,_,id,name) print(id, name, canaccessvalue(id), canaccessvalue(name)) end)`
-   before the pull. Expect `3470 Nek'zali the Soulcoiler true true` for Nek'zali. Anything but
-   `true true` means the payload is secret in practice and `bossRow` will answer nil for every boss.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Comments
 
@@ -129,3 +120,5 @@ There is no test client, so nothing here has been seen in the game. Two looks:
   in exists until `0013` or `0023`. Leaks: nothing, it returns a row of the addon's own hand-kept
   table or nil, and no id or name goes to chat or SavedVariables.
   **Not looked at in the game**, the two looks above stand; a third is added below.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked 3 criteria, all ticked already and confirmed (checks `every boss row has a name and an id`; `boss lookup tries id then name`; `a name and id that disagree fail the check` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); all three criteria were ticked and are confirmed offline. Looks rewritten for v0.69.0 (`/djbis test` is `/dcp test`); the BigWigs look folded into the `/run` look; the old look 2 said nothing in the addon reacts to a pull yet, which is no longer true: `PlanTab.onSetupEvent` calls `bossRow` on `ENCOUNTER_END` to move the popup to the next boss, so that is now a direct look; moves to ai-review/ with only in-game looks open.

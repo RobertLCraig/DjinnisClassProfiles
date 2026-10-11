@@ -20,15 +20,14 @@ only while no line wraps. Both of those lines wrap at 380 wide.
 
 ## Acceptance
 
+<!-- AC:BEGIN -->
 - [x] WHEN the prompt's text wraps, THE PROMPT SHALL be tall enough that no text sits under the buttons. proves: the four "prompt height" checks in `PlanTab.barChecks`, the last on the real prompt
-- [ ] Rob sees the action bars prompt with every line above the buttons. proves: manual
+- [ ] `/reload`, then click **Save bars: spec** beside the talent window (or type `/dcp bars save`) on a spec that already has a saved layout. Pass: the question and "It is used for every ..." sit above **Replace** and **Cancel**, with a gap; no text touches a button. proves: manual
+<!-- AC:END -->
 
 ## What I need from you
 
-`/reload`, then `/dcp bars save` (the command was `/djbis` before card `0058`) on a spec that
-already has a saved layout. Pass: the question
-and "It is used for every ..." sit above Replace and Cancel, with a gap. Fail: any text touches a
-button.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Comments
 
@@ -132,3 +131,5 @@ Security: unchanged from the first review. The height a secret could hand back i
 the text is the addon's own, and nothing is sent.
 
 No client here. Rob's look above is the proof that the measure returns the wrapped height at once.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new (the first criterion was already ticked; its four "prompt height" checks exist and pass in the Lua 5.1 offline check); the look rewritten for v0.69.0 and moved into the AC block, with the Save bars: spec button as the way in beside `/dcp bars save`; moves to ai-review/ with only in-game looks open.

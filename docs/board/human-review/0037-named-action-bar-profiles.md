@@ -32,22 +32,19 @@ named profiles, saved under a name of his and loadable on any spec.
 
 ## What I need from you
 
-The command is `/dcp` now (renamed from `/djbis` by card `0058`).
-
-1. `/dcp bars save Main`. Pass: chat says how many slots and keys were saved.
-2. `/dcp bars list`. Pass: `Main` with today's date.
-3. On another character or spec: `/dcp bars load main`. Pass: the bars change, and a list names
-   what was skipped.
-4. `/dcp bars undo`. Pass: the old bars are back.
-5. `/dcp bars delete Main`, then `/dcp bars list`. Pass: it is gone.
-
-Fail: any step that does not do what it says. Say which step on this card.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN Rob types `/djbis bars save <name>`, THE ADDON SHALL keep his bars and keys under that name for every character.
-- [ ] WHEN Rob types `/djbis bars load <name>` on any spec, THE ADDON SHALL apply them, list what it skipped, and keep one undo.
-- [ ] THE ADDON SHALL never offer a named profile on its own.
+<!-- AC:BEGIN -->
+- [x] WHEN Rob types `/dcp bars save <name>`, THE ADDON SHALL keep his bars and keys under that name for every character. proves: `a named action bar profile, saved under its name`, `..., holds the bars`, `..., the same name in other case replaces it`
+- [x] WHEN Rob types `/dcp bars load <name>` on any spec, THE ADDON SHALL apply them, list what it skipped, and keep one undo. proves: `a named action bar profile, loads by name in any case`, `..., onto the bars`, `..., and undo takes it off`
+- [x] THE ADDON SHALL never offer a named profile on its own. proves: `a named action bar profile, never taken for a spec or build layout`
+- [ ] `/reload`, `/dcp bars save Main`, then `/dcp bars list`. Pass: "Saved the Main profile: N action bar slots and N key bindings", and the list shows Main (saved <today>). proves: manual
+- [ ] On another character or spec, `/dcp bars load main`. Pass: bars change; chat says "Applied the Main layout: ... N skipped" and lists the skipped ones. proves: manual
+- [ ] Then `/dcp bars undo`. Pass: the bars from before the load are back. proves: manual
+- [ ] `/dcp bars delete Main`, then `/dcp bars list`. Pass: "Deleted the Main profile", and Main is no longer listed. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -112,3 +109,5 @@ Verdict: CLEAN, human-review next.
 and spacing, with a check, and the undo check clears `barsUndo` before the load so it can only
 pass on the load's own undo. Case-sensitive verbs are left as they are, the same as every other
 slash command here.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked all three criteria (checks `a named action bar profile, ...`: saved under its name, holds the bars, the same name in other case replaces it, loads by name in any case, onto the bars, and undo takes it off, never taken for a spec or build layout; all exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: `/djbis` is `/dcp` in the criteria too, the five steps folded into four looks with the chat lines quoted from the code; moves to ai-review/ with only in-game looks open.

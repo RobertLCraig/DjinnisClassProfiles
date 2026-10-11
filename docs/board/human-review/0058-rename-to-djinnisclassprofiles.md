@@ -2,27 +2,7 @@
 
 ## What I need from you
 
-**One trip to the game to see the old saved data arrive.**
-
-0. If any character has not logged in since the rename, put the stub back in the game first: it is
-   not in the AddOns folder now. `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then
-   without `-WhatIf`.
-1. Restart the game fully. On a character that has not logged in since the rename: chat says
-   "Djinni's BiS is now Djinni's Class Profiles, and your saved data is copied over."
-2. The window has that character's saved bars, profiles, gear targets and sim imports. The minimap
-   button is where it was.
-3. `/reload`: no message this time.
-4. `/dump C_AddOns.GetAddOnOptionalDependencies("DjinnisClassProfiles")` shows `DjinnisBiS`.
-5. The add-on list shows "Djinni's BiS (old saved data)", not marked out of date. Leave it on until
-   every character has logged in once, then turn it off.
-6. Log in once on the `958357#1` account. Afterwards its `SavedVariables\DjinnisClassProfiles.lua`
-   still holds `DjinnisClassProfilesDB` (compare with `C:\Dev\WoWAddons\.wtf-backup-2026-09-24\`).
-7. A data bar that showed the old "DjinnisBiS" broker: add "DjinnisClassProfiles" again.
-
-Pass is every step doing what it says. Fail is a missing message, missing data, or a second message
-after `/reload`. Say which step on this card.
-
-**Why it needs you:** the add-on loader and the saved-data files are only in a live client.
+Nothing now. Done: the copy landed (see the 2026-10-11 comment). Retiring the `DjinnisBiS` stub is card 0088.
 
 ## Why
 
@@ -53,6 +33,7 @@ whether that meant the gear side goes too, he answered **A: rename only, everyth
 
 Written after the build (the review's finding 4), so attack the code, not these ticks.
 
+<!-- AC:BEGIN -->
 - [x] The old saved data is copied once per account and once per character, deep, into a table
       made before login too, never writing the old tables, and it says so.
       proves: `PlanTab.renameChecks`
@@ -66,8 +47,10 @@ Written after the build (the review's finding 4), so attack the code, not these 
       proves: `offline-check.lua`, the card 0053 scan
 - [x] The public repository ships the Ace3 licence, `Libs/CallbackHandler-1.0/LICENSE.txt`.
       proves: `git ls-files Libs`
-- [ ] In the game: the message, the data, the stub in the add-on list, no second message after
-      `/reload`. proves: manual (Rob; see What I need from you)
+- [x] In the game: the message, the data, the stub in the add-on list, no second message after
+      `/reload`. proves: manual (Rob; see What I need from you). Ticked 2026-10-11 on the saved
+      files the game wrote: see Comments.
+<!-- AC:END -->
 
 ## Not this card
 
@@ -510,3 +493,10 @@ Security, where the card produced code (this commit is the check and a doc):
    is committed here goes public once pushed.
 
 **No browser, no game client.** The surface is the game's add-on loader and saved-data files.
+
+**2026-10-11** Clear-down (attended, Rob asked). **The copy landed**, read off the saved files the game itself wrote (read only, `C:\Games\World of Warcraft\_retail_\WTF\Account\`):
+- Account `DJINNWRAITH`: `SavedVariables\DjinnisClassProfiles.lua` (written 2026-10-10) carries `fromBiS`, so the account copy ran. The old `DjinnisBiS.lua` was last written 2026-09-24.
+- Characters: five have an old per-character `DjinnisBiS.lua`. Three (Djinni on Aggra, Djinni on Bloodfeather, Wtbsoul on Shadowsong) have their copy marked `fromBiS`. The other two (Buyme and Shortnbitter on Aggra) hold only `DjinnisBiSCharDB = nil`, so nothing of theirs is left to copy.
+- Account `958357#1` still holds `DjinnisClassProfilesDB` (old step 6).
+
+The in-game criterion is ticked on that. The stub is not in the game folder and no data waits on it, so retiring it is now ordinary work: card 0088 (the folder, the `.toc`'s `OptionalDeps`, and the offline check's stub expectations, because deleting the folder alone turns the offline check red). Moves to done/.

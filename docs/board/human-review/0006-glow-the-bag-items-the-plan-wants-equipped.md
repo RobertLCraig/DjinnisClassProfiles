@@ -7,30 +7,7 @@ needs: 0004
 
 ## What I need from you
 
-**Five looks in the game, on Feral, with a planned piece in your bags and not worn.** `/reload`
-first, with `/console scriptErrors 1` on.
-
-1. Open Baganator. The planned piece glows green. A lower copy of the same item does not.
-2. Hover it. The tooltip gains a green "Plan: equip in <slot>, 1 target" line.
-3. Equip it. The glow goes.
-4. Hit a training dummy with Baganator open, and swap a weapon. No glow changes until combat
-   ends. Then the glows catch up. Right-click a potion or food in the bag while in combat: it is
-   used, with no "action blocked" message.
-5. `/reload` with Baganator disabled. The default bags show the same glow, combined or separate.
-   Use an item from them in combat, as in step 4.
-
-**Pass** is all of:
-- all five steps look as written
-- no Lua error
-- bag items still click, drag, equip and use as before
-
-**Fail** is anything else. Say which step and what you saw in `## Comments`, with a screenshot if
-you can, and the card goes back to `todo/`. If nothing glows at step 1, first check Baganator's
-settings, Icon Corners: "Djinni's BiS: gear plan" should be listed top right.
-
-**Why it needs you.** The glow only exists in a running game, and no agent can run one. The
-offline checks prove which item is wanted and prove no frame. Step 4 has no offline check at all,
-and whether drawing on Blizzard's bag buttons blocks item use can only be seen in combat.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -64,7 +41,11 @@ working on Retail.
 - [x] WHEN two copies of the planned item are in the bags, THE ADDON SHALL glow only the copy whose item level matches the plan. proves: `only the planned copy of a duplicate is wanted`
 - [x] WHEN the planned item is already equipped, THE ADDON SHALL not glow any bag copy of it. proves: `equipped planned item glows no bag copy`
 - [x] WHEN a glowing bag item is hovered, THE ADDON SHALL add a tooltip line naming the slot and the scenario it is planned for. proves: `wanted bag item names its slot and scenario`
-- [ ] WHEN the player is in combat, THE ADDON SHALL not rescan the bags until combat ends. proves: manual
+- [ ] On Feral with a planned piece in the bags and not worn, open Baganator: that piece glows green; a lower copy of the same item does not. Nothing glows: check Baganator's Icon Corners lists "Djinni's Class Profiles: gear plan". proves: manual
+- [ ] Hover the glowing piece: the tooltip gains a "Plan: equip in <slot>, 1 target" line (the last words follow the plan's content choice). proves: manual
+- [ ] Equip it: its glow goes. proves: manual
+- [ ] WHEN the player is in combat, THE ADDON SHALL not rescan the bags until combat ends. Look: hit a dummy with Baganator open and swap a weapon: no glow changes until combat ends, then they catch up. Right-click a potion or food in combat: it is used, no "action blocked". proves: manual
+- [ ] Disable Baganator, `/reload`: the default bags, combined and separate, show the same glow, and an item used from them in combat works with no "action blocked". No Lua error through any of this. proves: manual
 <!-- AC:END -->
 
 The last criterion is checked in the client by Rob.
@@ -167,3 +148,5 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
     failed event registration prints the event name only.
   - **No client.** There is no browser surface and no agent can run the game, so no frame here
     has been seen by anyone. That is a stated claim, and it is why this is not in `done/`.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new; the four `proves:` checks (`bag item is wanted when it matches an unfilled plan slot`, `only the planned copy of a duplicate is wanted`, `equipped planned item glows no bag copy`, `wanted bag item names its slot and scenario`) were already ticked and still exist and pass in the Lua 5.1 offline check. Looks rewritten for v0.69.0: the Baganator corner widget is now "Djinni's Class Profiles: gear plan"; the five looks are `proves: manual` criteria, the combat one carrying the original combat criterion. Moves to ai-review/ with only in-game looks open.

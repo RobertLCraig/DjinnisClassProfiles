@@ -5,33 +5,7 @@ not_for_the_loop: Rob, 2026-09-21: building DjinnisBiS by hand in a session on m
 
 ## What I need from you
 
-**Six looks in the game, at 0.15.1 after a `/reload`.** Out of combat unless it says otherwise.
-
-1. Open the character sheet, then hit a dummy until something procs. The four bars must stay, with
-   the numbers they had before the pull. Hover gear mid-fight: the tooltip keeps its stat lines.
-2. Still hitting the dummy, `/reload`, then open the sheet. The pane must say "Ratings are hidden
-   right now", with no bars and never `0 / <target>`. Stop hitting. The bars must come back with
-   real numbers, without a reopen.
-3. Click the Raid / Mythic+ button in the pane's header. The targets must change and the button
-   must name the one showing.
-4. `/bis`, third tab, "Stats". Four bars and the same button. Hover gear in your bags: this pane
-   and the sheet's pane must both draw the ghost segment.
-5. Wearing a two-hander, hover a one-handed weapon. The footer must name the two-hander, not "an
-   empty slot", and mastery must go down.
-6. Wearing two rings, hover a third. The footer must name the weaker of the two, by summed
-   secondary stats, not by item level.
-
-**Pass** is all six as written.
-
-**Fail** is any one of them. Say which number and what you saw, in `## Comments`; a screenshot in
-`docs/board/attachments/` helps. The card goes back to `todo/`. In look 2, a blank block between
-the heading and the footer is known. Say if it bothers you.
-
-**Why it needs you.** The pane, the tooltip and the `/bis` tab exist only in a running game client,
-and no agent can run one. Two adversarial passes have attacked the code and the offline checks are
-green. Left out because you already confirmed them: placement, dragging, side-swap and styling at
-0.11.3, and the hero talent in the heading, ghost segments on the sheet's pane and tooltip lines
-at 0.12.0.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Ask
 
@@ -59,6 +33,20 @@ the ratings the top 20% of each spec are observed to be wearing, harvested by u.
 few genuinely are mechanical breakpoints, where a haste value fits one more tick into a channel.
 Most are just where good gear settles. Calling all of them breakpoints would claim something the
 data does not say, so the panel says "targets" and the comment block above the table says why.
+
+## Acceptance
+
+<!-- AC:BEGIN -->
+- [x] WHEN the ratings cannot be read, THE ADDON SHALL draw no bar and add no tooltip stat line, never a zero. proves: `a nil rating does not reach statVerdict as 0`
+- [x] WHEN a slot is worn twice, THE ADDON SHALL compare a drop against the weaker piece by summed secondary rating, an empty slot counting as zero. proves: `replaces the weaker of two`
+- [x] THE ADDON SHALL turn the hero talent's name into the key the target table uses, spaces and both apostrophes included. proves: `hero slug, curly apostrophe`
+- [ ] Open the character sheet and hit a training dummy until something procs: the four bars keep the numbers they had before the pull, and gear hovered mid-fight keeps its stat lines. proves: manual
+- [ ] Still hitting the dummy, `/reload`, open the sheet: the pane says "Ratings are hidden right now", no bars, never `0 / <target>`. Stop: the bars come back with real numbers without a reopen. proves: manual
+- [ ] In a city, click the Raid / Mythic+ button in the pane's header: the targets change and the button names the one showing. Inside a raid or dungeon the button is greyed. proves: manual
+- [ ] `/dcp`, Stats tab: four bars and the same Raid / Mythic+ button. Hover gear in your bags: this pane and the sheet's pane both draw a ghost segment. proves: manual
+- [ ] Wearing a two-hander, hover a one-handed weapon: the footer says "vs your <two-hander>", not "vs an empty slot", and mastery goes down. proves: manual
+- [ ] Wearing two rings, hover a third: the footer names the weaker of the two by summed secondary stats, not by item level. proves: manual
+<!-- AC:END -->
 
 ## Plan
 
@@ -380,3 +368,5 @@ that rule. A mutation test confirmed they bite: flipping `<` to `>` fails three 
     never compared, concatenated or used as a key, because it is dropped at `canRead`.
   - **No browser surface.** The UI exists only in a live game client and no agent can run one. This
     pass saw no screen.
+
+**2026-10-11** Clear-down (attended, Rob asked): the card had no Acceptance block, so one is added. Ticked three criteria the card's own Checks section describes (checks `a nil rating does not reach statVerdict as 0`, `replaces the weaker of two` and `hero slug, curly apostrophe` exist and pass in the Lua 5.1 offline check). Looks rewritten for v0.69.0 and `/dcp`; look 3 now says a city, since inside an instance the place decides (card 0009). Dropped as seen: placement, drag, side-swap and styling (0.11.3), and the hero talent in the heading, ghost segments and tooltip lines through Baganator (2026-09-21 entry above). The checklist under What a person has to look at is history; the AC block is the list. Moves to ai-review/ with only in-game looks open.

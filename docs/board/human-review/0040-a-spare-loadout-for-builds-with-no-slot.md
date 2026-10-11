@@ -38,28 +38,21 @@ route cards `0002` and `0011` rule out.
 
 ## What I need from you
 
-The spare is named `[CP*] <build>` now, not `BiS: <build>` (card `0059`).
-
-1. `/reload`. Open the talent window as Feral. Double-click `Raid: Vashnik` (grey,
-   `spare`). Pass: chat says to close the talent window. Close it. Pass: chat says "Making the
-   spare loadout" and then "Putting on", and the talents change.
-2. Open the talent window. Pass: the tree is the full Vashnik build, and `[CP*] Raid: Vashnik` is
-   in the dropdown.
-3. Do this with five spare builds in a row, checking the tree each time. A half-filled tree would
-   come and go, so one good pass proves little.
-4. Click **Switch talents** on the reminder for a build with no loadout, with the talent window
-   shut. Pass: it is worn in one step.
-5. Go back to the build before. Pass: a plain switch, no "Making" line.
-6. After a pull: action bars update in combat (no frozen buttons, card `0011`).
-
-Fail: a half-filled tree, "You can't do that right now", frozen bars, or a loadout of yours deleted.
-Say which step on this card.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN a build with no loadout is double-clicked, THE GAME SHALL wear it through `BiS: <build>`, with the full tree. proves: `... is worn through the spare, made once the window is shut`, `..., then worn through Blizzard's helper`, `..., an unfilled spare is not worn`, and the in-game steps
-- [ ] WHEN the next spare build is worn, THE ADDON SHALL delete the previous spare and never the one worn, and never a loadout it did not make. proves: `..., then the one not worn goes`, `..., a player's own "BiS: " loadout is never deleted`, `..., a "BiS: X" it did not make is not doubled`
-- [ ] Action bars still update in combat after a spare wear. proves: manual, step 6
+<!-- AC:BEGIN -->
+- [x] WHEN a build with no loadout is double-clicked, THE GAME SHALL wear it through `[CP*] <build>` (was `BiS: <build>`, renamed by card 0059), with the full tree. proves: `a build with no loadout of its own is worn through the spare, made once the window is shut`, `..., then worn through Blizzard's helper`, `..., an unfilled spare is not worn`
+- [x] WHEN the next spare build is worn, THE ADDON SHALL delete the previous spare and never the one worn, and never a loadout it did not make. proves: `a build with no loadout of its own is worn through the spare, then the one not worn goes`, `..., a player's own "[CP*] " loadout is never deleted`, `..., a "[CP*] X" it did not make is not doubled`
+- [ ] `/reload`, open the talent window, double-click a grey `spare` row. Pass: chat says "Close the talent window to put on ..."; close it: "Making the spare loadout", then "Putting on", talents change. proves: manual
+- [ ] Reopen the talent window. Pass: the tree is that full build, `[CP*] <build>` is in Blizzard's dropdown, and no red "invalid config" message came. proves: manual
+- [ ] Wear five spare builds in a row the same way. Pass: the tree is full every time, never half-filled. proves: manual
+- [ ] Window shut, click **Switch talents** on the reminder for a build with no loadout. Pass: it is worn in one step. proves: manual
+- [ ] Go back to the build worn before. Pass: a plain switch, no "Making" line. proves: manual
+- [ ] Double-click a grey `spare` row with the window open, then pick another loadout (or Starter Build) in the dropdown, close. Pass: no spare made. proves: manual
+- [ ] After a spare wear, one pull. Pass: action bars update in combat, no frozen buttons (card 0011). proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -373,3 +366,5 @@ review added, and:
   spare is not made.
 - double-click a grey row with the window open, pick another loadout, close. Pass: that loadout
   stays on.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked the wear and the delete criteria (checks `a build with no loadout of its own is worn through the spare, ...`: made once the window is shut, then worn through Blizzard's helper, an unfilled spare is not worn, then the one not worn goes, a player's own "[CP*] " loadout is never deleted, a "[CP*] X" it did not make is not doubled; all exist under the `[CP*]` names and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: `BiS: ` is `[CP*] ` throughout, steps 1 to 6 became looks, and the fourth review's two dropdown looks are merged into one. Dropped two of the second review's extras: "a grey row, then a real loadout, then close" is covered by the check that a new ask clears the waiting wish, and "an old v0.36 BiS: X in the dropdown, no second one" is about the old prefix, which card 0059's tagging now handles; moves to ai-review/ with only in-game looks open.

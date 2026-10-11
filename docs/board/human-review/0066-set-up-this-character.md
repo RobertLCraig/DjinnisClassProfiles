@@ -5,19 +5,7 @@ needs: 0057
 
 ## What I need from you
 
-**Try Delete old loadouts once in game (v0.54.11 or later).** The last criterion, "Parked", is not a
-question: you parked it on 2026-09-26 and it waits for you to unpark card `0065`.
-
-On your main, rename one of your builds (right-click its row). Log on to an alt of the same class
-and spec. Click **More > Delete old loadouts**. Chat lists "[CP] old name  (no build is called old
-name now)". Click **Delete** in the box. The old loadout goes, one at a time. Then click **More >
-Make the planned loadouts** to make the new name.
-
-**Pass:** no loadout you named yourself is listed, never the one you are wearing, and nothing goes
-before the click.
-
-**Fail:** a loadout you named deleted or listed, the worn one deleted, or "You can't do that right
-now". Say what you saw on this card and move it to `todo/`.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -31,6 +19,11 @@ deleted by hand.
 
 Rob, 2026-09-26, given the choice: build the clean-up part only. Nothing is made, and there is no
 login offer, so the park on `0065` holds.
+
+## Links
+
+**Relates to**
+- `0090` - the parked half of this card: one button that also makes and resets, and the login offer.
 
 ## What
 
@@ -64,13 +57,11 @@ login offer, so the park on `0065` holds.
 
 ## Acceptance
 
-- [x] What Delete old loadouts would delete is pure and checked: orphans, the worn one kept, only
-  tagged ones. proves: self-test
-- [x] Nothing changes without the click. proves: self-test
-- [ ] In game, on an alt after a rename on the main: the old "[CP]" loadout goes. proves: manual
-  (Rob)
-- [ ] Parked: one button that also makes and resets, and the login offer. Waits on Rob unparking
-  card `0065`.
+<!-- AC:BEGIN -->
+- [x] What Delete old loadouts would delete is pure and checked: orphans, the worn one kept, only tagged ones. proves: `old loadouts no build names` checks in `PlanTab.orphanChecks`
+- [x] Nothing changes without the click. proves: `old loadouts no build names, and deletes nothing unasked`
+- [ ] On an alt that has `[CP] X` for one of your builds X, rename X on your main (right-click its row > Rename...). On the alt, after `/reload`, click More > Delete old loadouts: chat lists `[CP] X  (no plan build or build of yours is called X now)` and nothing goes yet. Click Delete in the box: `[CP] X` goes, one at a time, and no loadout you named yourself, nor the one you are wearing, is listed or deleted. Then More > Make the planned loadouts makes the new name. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -359,3 +350,5 @@ error. As before, `250` and `62` stop tidy at "The game will not list this spec'
 
 Mutation script: `%TEMP%\dcp66r3_mut.py`, run on the temp copy `%TEMP%\dcp66r3`. The copy was put
 back after the run. Addon code untouched. In-game pass still waits on Rob (see "Try this in game").
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new: both built criteria were already ticked, and their checks (`old loadouts no build names, ...` in `PlanTab.orphanChecks`, among them `, and deletes nothing unasked` and `, Delete runs the list chat showed`) exist and pass in the Lua 5.1 offline check; their vague `proves: self-test` now names them. The in-game look is rewritten for v0.69.0 (the chat line, the Rename... item and the box's Delete button match the code). The parked criterion (one button that also makes and resets, and the login offer) is split off to card `0090`, so this card's Acceptance no longer carries it. Moves to ai-review/ with only the in-game look open.

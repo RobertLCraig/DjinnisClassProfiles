@@ -24,24 +24,16 @@ Death Knight, a Shaman, Hunters, Rogues, Monks and a Demon Hunter (from SavedIns
 
 ## Acceptance
 
+<!-- AC:BEGIN -->
 - [x] WHEN a non-druid logs in, THE ADDON SHALL load with no error and offer its bar and talent features for that spec. proves: a new `offline-check.lua` run as spec 250
 - [x] WHEN a druid logs in, THE SAVED DATA SHALL still be found under the old keys. proves: the existing checks, unchanged
-- [ ] Rob logs in on one alt and sees the list and the bar buttons. proves: manual
+- [x] Rob logs in on one alt and sees the list and the bar buttons. proves: manual (done on the level 81 Warlock, 2026-09-24: see Comments)
+- [ ] LOOK, on a non-druid alt, after `/reload`: `/dcp bars save` says the bars are saved for your spec, and `/dcp bars undo` works. Then the druid-only gate: hover any gear, no "BiS" or "Not BiS" line. `/dcp here` prints one line, "The BiS list is druid gear, so there is no verdict for this class." The character sheet strip and the Plan tab each say "Gear plans are for druids only, for now." with no scenario buttons. On a loot roll, no glow on the icon and no "[BiS]" chat line. proves: manual
+<!-- AC:END -->
 
 ## What I need from you
 
-On one alt that is not a druid (the Death Knight, say), after `/reload`. The command is `/dcp` now
-(renamed from `/djbis` by card `0058`):
-1. Open the talent window. Pass: the list beside it shows, with that spec's stored builds (card
-   `0050` gave every spec a "Dungeon", and most a "Raid"). Fail: a Lua error, or no list.
-2. `/dcp bars save`. Pass: it says the bars are saved for your spec. Then `/dcp bars undo` works.
-3. Hover any piece of gear. Pass: no "BiS" or "Not BiS" line.
-4. `/dcp here`. Pass: one line saying the BiS list is druid gear.
-5. Open the character sheet. Pass: the strip under it says "Gear plans are for druids only, for
-   now." and has no scenario button.
-6. On your next loot roll: no glow on the item's icon, and no "[BiS]" line in chat.
-7. Open the window from the minimap button, then the Plan tab. Pass: one line, "Gear plans are for
-   druids only, for now.", and no scenario buttons above it.
+Nothing now. Built; the open look is the `proves: manual` criterion under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Comments
 
@@ -298,3 +290,5 @@ Security:
    is read. Failures print only to the player's own chat.
 
 No client here. What is left is Rob's seven steps above on a non-druid alt.
+
+**2026-10-11** Clear-down (attended, Rob asked). Built at `9b15154` (v0.41.3) and re-reviewed. Rob has since run it on a non-druid: on 2026-09-24 he played a level 81 Warlock with it, used the build list beside the talent window and Reset to plan there (cards 0055 and 0056 record what he saw). That is old step 1, so the alt criterion is ticked. Spec modes 250 and 265 of the Lua 5.1 offline check pass today. Step 2 (`/dcp bars save` and `undo` on the alt) and steps 3 to 7, the druid-only lines, were never reported and stay as one `proves: manual` look. Moves to done/ with that look open (board README, A look waits on the product).

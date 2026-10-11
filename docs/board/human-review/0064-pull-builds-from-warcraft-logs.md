@@ -2,25 +2,7 @@
 
 ## What I need from you
 
-One trip to the game, v0.49.0 or later:
-
-1. `/reload`.
-2. As Balance, Guardian and Resto, one at a time, open the loadout box with **More > Make the
-   planned loadouts** (since card `0065` it no longer opens by itself). It should list the retired rows
-   (`[CP] Raid: Elune's Chosen`, `Raid: Druid of the Claw`, `Raid: short on mana`,
-   `Raid: mana is fine`, `Raid: Nek'Zali, Nymrissa`, whichever you have) as "deleted: a build this
-   addon no longer makes". Click **Delete them**, wait for the count, then **Create**.
-3. Open the talent window on each druid spec. No row should show the "out of date" triangle except
-   Guardian `Dungeon: survive more` and Resto `Dungeon: cat damage` / `Dungeon: caster damage`
-   (Dreamgrove strings with a tree hash, card `0061`).
-4. Balance `Raid: Single Target` is now Keeper of the Grove (it was Elune's Chosen). If an action-bar
-   profile was saved for it, check the bars when you wear it.
-5. Feral: the raid rows are now mostly Wildstalker. The stat targets were simmed on other builds.
-
-Pass: each spec's planned loadouts are made with no error, and the rows load.
-
-Fail: a Lua error, a loadout of yours listed for deletion, or a triangle on any other row. Say which
-spec and step on this card.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Why
 
@@ -51,12 +33,16 @@ season's zone ids. It settles most of the research file's "Cannot be settled her
 
 Card 0061 (three Guardian builds out of date) is settled by this card's first run for Guardian.
 
-## Done when
+## Acceptance
 
-1. `python update-builds.py --check` passes, and each spec's raid and Mythic+ build comes from a run
-   whose report states when it ran, how many rankings it used, the window and the share.
-2. The report lists the alternatives and per-talent popularity for each.
-3. In game: each changed spec's rows load without the "out of date" warning.
+<!-- AC:BEGIN -->
+- [ ] `python update-builds.py --check` passes, and each spec's raid and Mythic+ build comes from a run whose report states when it ran, how many rankings it used, the window and the share. proves: `python update-builds.py --check`, exit 0
+- [x] The report lists the alternatives and per-talent popularity for each. proves: `docs/builds/wcl-report.md`, 80 raid and Mythic+ sections over 40 specs, each with "Most common other builds" and "Split talents"
+- [ ] `/reload`. As Balance, Guardian and Resto in turn: **More > Make the planned loadouts**. Pass: only retired `[CP]` rows show "deleted: a build this addon no longer makes", none of yours. proves: manual
+- [ ] In that box click **Delete them** (or **Tag and delete**), wait for the count, then **Create**. Pass: the planned loadouts are made with no Lua error. proves: manual
+- [ ] Open the talent window on each druid spec. Pass: no row shows the "out of date" triangle, and each row loads when clicked. proves: manual
+- [ ] As Balance, wear **Raid: Single Target**. Pass: it loads as Keeper of the Grove, and bars saved for it, if any, go on right. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -104,3 +90,8 @@ Offline check: Feral and 250 pass. The 102, 104 and 105 modes show 8 FAIL lines.
 Not done here:
 - The sidebar lists Guardian and Resto `Raid` under "Other builds", because neither spec has boss rows.
 - Three Dreamgrove M+ rows keep a non-zero tree hash (card 0061).
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked Done-when 2 (`docs/builds/wcl-report.md` lists alternatives and split talents for all 80 raid and Mythic+ sections; no Lua check covers this card, it is the Python pipeline); `## Done when` became `## Acceptance` in the AC block, wording kept. **Done-when 1 stays open and is not manual:** `python update-builds.py --check` run today in the v0.69.0 worktree exits 1, "docs/builds/wcl-builds.json is 16 days old. Run `python wcl-builds.py` first" (`WCL_MAX_DAYS` is 14; the JSON ran 2026-09-25). It passed when built; an agent clears it by running `wcl-builds.py` (needs the Warcraft Logs secrets) and then `update-builds.py`, which may change BUILDS. Looks rewritten for v0.69.0: steps 1 to 4 of What I need from you, step 3 now with no exceptions because Guardian and Resto have only `Dungeon` and `Raid` (the three Dreamgrove rows of card 0061 are gone from BUILDS); step 5 (Feral is mostly Wildstalker) dropped, it was a note with nothing to check. Moves to ai-review/ once Done-when 1 is green; until then it has one open non-manual criterion.
+
+
+**2026-10-11** Same clear-down, the lane: this goes to todo/, not ai-review/. Refreshing the Warcraft Logs pull is agent work (the key is on this machine) and nothing here is a decision of Rob's. The session that takes it runs `python wcl-builds.py`, `python update-builds.py`, `python wcl-builds.py` (the HANDOVER order), the Lua 5.1 offline check, and ticks criterion 1; the card then goes to ai-review/ with the four looks open.

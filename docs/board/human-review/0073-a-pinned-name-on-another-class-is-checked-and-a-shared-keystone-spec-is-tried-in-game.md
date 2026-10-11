@@ -38,7 +38,7 @@ fallback, and the answer did not ask for it. Not a release to CurseForge.
 ## Acceptance
 <!-- AC:BEGIN -->
 - [x] #1 IF a `PIN` entry for a non-druid spec names a loadout over `NAME_MAX` letters or containing a `"`, THEN `update-builds.py` SHALL exit 1 naming the spec and the name, and leave `DjinnisClassProfiles.lua` byte-identical (settled by running it on a copy with such a pin, since the script has no harness). proves: none
-- [ ] #2 WHEN Rob, on a Beast Mastery Hunter after `/reload`, has the addon make its loadouts, THE GAME SHALL show `[CP] Dungeon` and `[CP] Raid` in the talent window's dropdown, and each SHALL load without Blizzard calling the import invalid. proves: manual
+- [ ] #2 On a Beast Mastery Hunter, `/reload`, then `/dcp loadouts` (or More > Make the planned loadouts) and Create both: the talent window's dropdown shows `[CP] Dungeon` and `[CP] Raid`, and picking each loads it with no Blizzard line calling the import invalid. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -56,19 +56,8 @@ proved the bits offline. A game client is the only thing that can prove the impo
 Mastery passes, the other nine carry the same shape.
 
 ## What I need from you
-Criterion #2. Any game build with card `0059`'s tag works (the game folder held v0.54.12 on
-2026-09-27). This card changed only `update-builds.py`, so nothing new needs deploying.
 
-1. Log in on a Beast Mastery Hunter and type `/reload`.
-2. Type `/dcp loadouts` (the same as **More > Make the planned loadouts**) and make both builds.
-3. Open the talent window. Pick `[CP] Dungeon`, then `[CP] Raid`.
-
-**Pass:**
-- The dropdown shows `[CP] Dungeon` and `[CP] Raid`.
-- Each one loads. No Blizzard line calls the import invalid.
-
-**Fail:** either name is missing, or Blizzard says a string is invalid. Write down which build and the
-exact red line.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Comments
 **2026-09-29**
@@ -125,3 +114,4 @@ WHY: The code fix is done and the blocker is done; only Rob's in-game check of t
 
 OUTCOME: rob
 
+**2026-10-11** Clear-down (attended, Rob asked): ticked nothing new: #1 was already ticked and is an `update-builds.py` proof, not a Lua check. #2 is rewritten for v0.69.0 (`/dcp loadouts` and More > Make the planned loadouts both reach `offerLoadouts`; Beast Mastery still has a Dungeon and a Raid build in `BUILDS`). Moves to ai-review/ with only the in-game look open.

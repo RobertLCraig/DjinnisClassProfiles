@@ -33,7 +33,13 @@ files yet.
 - [x] #1 WHEN the player enters a dungeon or raid with logging off, IT SHALL turn logging on. proves: `combatLogChecks`
 - [x] #2 WHEN the player leaves the instance alive, IT SHALL turn logging off. proves: `combatLogChecks`
 - [x] #3 WHEN logging was turned on by hand in the open world, or the player is a ghost outside, IT SHALL do nothing. proves: `combatLogChecks`
-- [ ] #4 WHEN Rob runs two dungeons in a live client, `Logs\` SHALL hold one new file for each. proves: none
+- [x] #4 WHEN Rob runs two dungeons in a live client, `Logs\` SHALL hold one new file for each. proves: manual (read off `Logs\`, 2026-10-11: see Comments)
 <!-- AC:END -->
 
 ## Comments
+
+**2026-10-11** Clear-down (attended, Rob asked). Read `C:\Games\World of Warcraft\_retail_\Logs\` (read only). Since 2026-09-30 there are 11 `WoWCombatLog-*.txt` files, each opening on a `ZONE_CHANGE` into an instance: for example 2026-10-01 15:10 opens in Temple of Sethraliss and 19:52 in Kings' Rest, two files on one evening. Two files half an hour apart on 2026-10-10 (16:01 and 16:33) show that each `LoggingCombat(true)` opens a new file, which was the open question under Not proven. So #4 is ticked and the card goes to done/.
+
+Two limits seen in the same files, neither a fault of the criteria as written:
+- **The garrison turns logging on.** 2026-10-08 11:17 (2.5 KB) and both 2026-10-10 files open in instance 1159, Lunarfall: `GetInstanceInfo` calls a garrison `party`. Raised as card 0089.
+- **Instance to instance with no open world between them is one file.** 2026-10-08 18:23 runs 2813, 2923, Kings' Rest, Ruby Life Pools, Karazhan and Emerald Dreamway back to back in one 287 MB file, because the off switch waits for a zone-in outside an instance. A new file per instance would be one more rule in `PlanTab.autoCombatLog`; no card is raised for it, since the criteria ask for one file per run with the open world between runs.

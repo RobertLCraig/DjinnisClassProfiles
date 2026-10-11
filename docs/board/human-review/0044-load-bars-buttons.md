@@ -19,14 +19,16 @@ Rob, 2026-09-23: "so far addon looks to be working well. Need to add a 'load bar
 
 ## What I need from you
 
-1. `/reload`, open the talent window. Pass: four buttons, two rows, not over the list.
-2. Change one action bar slot. Click **Load bars: spec**. Pass: it comes back, and chat says how
-   many changed.
-3. On a build with no bars of its own, click **Load bars: build**. Pass: chat says none is saved.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN Load bars is clicked, THE ADDON SHALL apply that saved layout, or say none is saved.
+<!-- AC:BEGIN -->
+- [x] WHEN Load bars is clicked, THE ADDON SHALL apply that saved layout, or say none is saved. proves: `the Load bars buttons, the build's own`, `..., the spec's`, `..., a build with none loads nothing`, `..., no loadout selected, nothing`
+- [ ] `/reload`, open the talent window. Pass: a Save bars row, a Load bars row and a full-width **Undo bars** under the list, none over it, no label cut. proves: manual
+- [ ] Change one action bar slot, click **Load bars: spec**. Pass: the slot comes back; chat says "Applied the <Spec> layout: N slots and N keys changed". proves: manual
+- [ ] On a build with no bars of its own, click **Load bars: build**. Pass: chat says "No saved <Spec> / <build> layout yet", nothing changes. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -75,3 +77,5 @@ Security:
 
 No client can be run by an agent. The in-game checks are this card's What I need from you. Also
 look at: "Load bars: build" and "Save bars: build" fit in 128 px without being cut.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked the one criterion (checks `the Load bars buttons, ...` (the build's own, the spec's, a build with none loads nothing, no loadout selected, nothing) exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the foot of the list is now three rows (Save bars, Load bars, a full-width Undo bars from card 0045) under a Premade bars row, not "four buttons, two rows", and the chat lines are quoted from the code; which button calls which is still proved only in game, as the review said; moves to ai-review/ with only in-game looks open.

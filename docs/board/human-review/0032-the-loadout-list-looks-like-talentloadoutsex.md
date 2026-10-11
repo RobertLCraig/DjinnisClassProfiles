@@ -48,20 +48,16 @@ good is written up in `docs/research/talent-loadout-addons.md`.
 
 ## What I need from you
 
-1. `/reload`, open the talent window as Feral. Pass: the list sits on the right, with the Raid
-   group of boss portraits and a Mythic+ group. Compare it with a TalentLoadoutsEx screenshot.
-2. Pass: one green tick, on the build in play. Move one talent: the tick goes.
-3. Click the Raid header: it folds. `/reload`: it is still folded.
-4. Double-click a saved build. Pass: the talents switch, and no frozen button on the next pull.
-5. As Guardian: the builds sit under Other builds, each with a warning mark. Hover one to read it.
-6. Enter combat with the talent window open. Pass: the list goes, and comes back after.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN the talent window opens, THE LIST SHALL show every stored build for the spec, grouped, with the current raid's boss first.
-- [ ] WHEN the tree matches a stored build, THE LIST SHALL tick that row and no other.
-- [ ] WHEN a row is double-clicked, THE ADDON SHALL switch through Blizzard's helper only.
-- [ ] Rob accepts the look in a client, against a screenshot of TalentLoadoutsEx.
+<!-- AC:BEGIN -->
+- [x] WHEN the talent window opens, THE LIST SHALL show every stored build for the spec, grouped, with the current raid's boss first. proves: `the list beside the talent window, Mythic+ first in a key`, `the list beside the talent window, the boss here comes first`
+- [x] WHEN the tree matches a stored build, THE LIST SHALL tick that row and no other. proves: the tick checks in `PlanTab.sidebarChecks`, including "two builds with one string: only one ticks"
+- [x] WHEN a row is double-clicked, THE ADDON SHALL switch through Blizzard's helper only. proves: the row's `OnDoubleClick` calls `PlanTab.loadTalents` and nothing else (read at HEAD); `talents button loads a saved loadout through ClassTalentHelper`
+- [ ] LOOK. `/reload`, open the talent window as Feral. The list sits on the right: a Raid group of boss portraits, a Mythic+ group, then Other builds and Your loadouts. One green tick on the build in play; move one talent and it goes. Click the Raid header: it folds, and stays folded after `/reload`. Enter combat with the window open: the list goes, and comes back after. Say whether you accept the look beside a TalentLoadoutsEx screenshot. proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -168,3 +164,5 @@ Security: unchanged. The fold setting is the player's own saved file, and it is 
 on both paths.
 
 Verdict: CLEAN. Acceptance is in-game only, so the card goes to human-review next.
+
+**2026-10-11** Clear-down (attended, Rob asked). The triage said Rob already saw this in game, quoting 2026-09-23. That quote ("Visually I like TalentLoadoutsEx") is the ASK, not a sighting, so the look-acceptance criterion is not ticked on it. What is on record: Rob used the list in game on 2026-09-24 (card 0061's Guardian screenshot of its warning marks, card 0055's "the side panel next to the talent window"). Ticked 1 to 3 on the checks named beside them, which exist and pass in the Lua 5.1 offline check, and on reading the double-click handler. The six old looks fold into one `proves: manual` look; the Guardian warning-mark look is dropped, because card 0061 fixed those strings. The re-review above was clean, so this goes to done/ with that look open (board README, A look waits on the product).

@@ -27,6 +27,12 @@ not for raid bosses.
 - [x] FOR each raid boss with a planned item, THE PLAN TAB SHALL name the loot spec with the best chance of a planned item, and show that spec's planned items and pool size, for example "Guardian: 2 of 5". proves: `plan tab names the best loot spec per boss`
 - [x] WHEN two specs tie, THE ADDON SHALL name the current spec if it is one of them. proves: `a tie goes to the current spec`
 - [x] WHEN no spec has a planned item from a boss, THE ADDON SHALL show no loot spec line for it. proves: `no loot spec line without a planned item`
+- [ ] `/reload` first (the game folder holds v0.69.0). `/dcp`, Plan tab, out of combat, Encounter Journal closed: every raid boss row with a planned item ends in grey `loot spec Feral: N of M`. The first open may show none; click a boss row once or twice and they fill. If a row never fills, say so (the harvest needs another shape). proves: manual
+- [ ] The picked boss has a grey line under the boss list, `Loot spec Feral before Nek'zali: N of its M drops are planned: ...`, naming items by name, not `item 271528`. proves: manual
+- [ ] The Mythic+ row and Nymrissa Wavecaller carry no loot spec text. proves: manual
+- [ ] Open the Encounter Journal after the Plan tab: its class and spec loot filter and slot filter are as you left them. proves: manual
+- [ ] Open the journal on a Venomous Abyss boss's page, close it, open the Plan tab, reopen the journal: the same boss page, its loot tab lists that boss's loot, and the tier dropdown is unchanged. With the journal left open on a boss, opening the Plan tab changes nothing in it. proves: manual
+- [ ] In combat (a training dummy will do), with a loot spec other than a row names, open the Plan tab: the rows keep what they had and nothing errors. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -39,25 +45,7 @@ not for raid bosses.
 
 ## What I need from you
 
-Open `/bis`, Plan tab, out of combat, with the Encounter Journal closed:
-
-1. Every raid boss row that has a planned item in some pool ends in "loot spec Feral: N of M" (or
-   another spec). The first open may show none: the journal answers the filters asynchronously,
-   and a row says nothing until all four specs' pools for that boss are in, so click any boss row
-   once or twice and they should be there. If a row never fills after a few clicks, say so: that
-   means the client only keeps the last filter's list and the harvest needs a different shape.
-2. The picked boss has a grey line under the boss list, "Loot spec Feral before Nek'zali: N of its
-   M drops are planned: ..." naming the items. The names should be item names, not "item 271528".
-3. Mythic+ and Nymrissa Wavecaller carry no loot spec text. Neither should.
-4. Open the Encounter Journal afterwards and check its class and spec loot filter and slot filter
-   are as you left them: the harvest puts both back.
-5. `/bis test` in the game prints "self-test passed".
-6. Open the journal on a Venomous Abyss boss's page, close it, open `/bis` Plan tab, then reopen
-   the journal: the page is still that boss and its loot tab lists that boss's loot, not another
-   boss's or the whole raid's, and the tier dropdown still says the tier you had. Then open the
-   Plan tab with the journal left open on a boss: nothing about the journal changes.
-7. Set your loot spec to something other than what a row names, open the Plan tab in combat (a
-   training dummy will do): the rows keep what they had and nothing errors.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Comments
 
@@ -117,3 +105,5 @@ Open `/bis`, Plan tab, out of combat, with the Encounter Journal closed:
   harvest now leaves it as found; unchecked path is none new, every input is the journal's own
   numbers and the gear plan's ids; on failure it leaks nothing, `pcall` swallows the harvest and
   the row shows no text.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked 3 criteria, all ticked already and confirmed (checks `plan tab names the best loot spec per boss`; `a tie goes to the current spec`; `no loot spec line without a planned item` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0 (`/bis` is `/dcp`, strings checked in the lua); the `/bis test` look dropped as a duplicate: the offline self-test passes in full, and the client-only part of this card is the journal harvest the other looks cover; moves to ai-review/ with only in-game looks open.

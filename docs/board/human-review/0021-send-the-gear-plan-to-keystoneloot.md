@@ -37,6 +37,12 @@ What it gains: a whole addon's reminders turn on for four specs, and DjinnisBiS 
 - [x] WHEN the plan drops an item that DjinnisBiS sent before, THE ADDON SHALL remove that favourite, and SHALL never remove one it did not add. proves: `only favourites the addon added are removed`
 - [x] WHEN KeystoneLoot is not loaded, THE BUTTON SHALL not show. proves: `no keystoneloot button without keystoneloot`
 - [x] AFTER a send, THE ADDON SHALL say in one line how many items it added and removed. proves: `send reports added and removed counts`
+- [ ] `/reload` first (the game folder holds v0.69.0). `/dcp`, Plan tab, with KeystoneLoot loaded: the last row reads `Every planned item, every spec, as a Best in Slot favourite in KeystoneLoot.` with a `KeystoneLoot` button whose label is not cut off. proves: manual
+- [ ] Click `KeystoneLoot`: one chat line `N favourites added to KeystoneLoot, M removed` (plus `, K refused as not in its item lists` if any). KeystoneLoot's window on Feral shows the planned pieces at the BiS tier. proves: manual
+- [ ] After the send, hover a planned item in a bag or on the character sheet: KeystoneLoot's own mark and tooltip line show. Enter a Mythic dungeon: its loot spec card fires. proves: manual
+- [ ] Click `KeystoneLoot` again: `0 favourites added to KeystoneLoot, 0 removed.` Remove one planned favourite by hand in KeystoneLoot and click: it comes back and the line still says 0 added. proves: manual
+- [ ] Disable KeystoneLoot, `/reload`: the row and its button are gone and nothing errors. proves: manual
+- [ ] Before any send, favourite one planned Feral piece by hand at Must have, then click: the line ends `, 1 left as yours` (pass if that wording reads right), KeystoneLoot still shows it at Must have, and after `/reload` it is absent from `DjinnisCPDB.keystoneLoot` in the saved variables. proves: manual
 <!-- AC:END -->
 
 ## Tasks
@@ -130,14 +136,8 @@ What it gains: a whole addon's reminders turn on for four specs, and DjinnisBiS 
      have". Click: the line ends "1 left as yours", KeystoneLoot still shows it at Must have, and
      it is absent from `DjinnisBiSDB.keystoneLoot` in the saved variables after a `/reload`.
 
+**2026-10-11** Clear-down (attended, Rob asked): ticked 4 criteria, all ticked already and confirmed (checks `plan items become keystoneloot favourites per spec`; `only favourites the addon added are removed`; `no keystoneloot button without keystoneloot`; `send reports added and removed counts` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); the six looks rewritten for v0.69.0 (`/bis` is `/dcp`; the record lives in `DjinnisCPDB.keystoneLoot`, not `DjinnisBiSDB`; the button is now `ILVL_WIDTH` 100 px wide, so the label worry is one glance in look 1); the wording question folded into look 6. Carried from the old ask: card 0015's dungeon half is a decision for Rob; moves to ai-review/ with only in-game looks open.
+
 ## What I need from you
 
-- The six looks in the game listed in the two comments above, in a client with KeystoneLoot 2.18.0
-  loaded. Look 6 is the new one and is the only way to see the overwrite guard work against the
-  real `Favorites:Add`.
-- Say whether ", N left as yours" is the wording you want for a favourite you made yourself.
-
-  Left out: nothing KeystoneLoot's settings touch, and no favourite Rob made by hand is read or
-  removed, both per "Not this card". The pending `READY` wait cannot be seen from a click after
-  login because KeystoneLoot is ready long before; it is covered by a check only. Card `0015`'s
-  dungeon half is now a decision for Rob, as the card says.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).

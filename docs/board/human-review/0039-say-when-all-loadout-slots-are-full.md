@@ -24,21 +24,18 @@ vague reason.
 
 ## What I need from you
 
-1. With all slots full, open the BiS window, click **More > Make the planned loadouts**, then
-   Create. Pass: the "All 40 loadout slots" line, at once, and no "Making" line.
-2. With all slots full, **More > Delete old loadouts**. Pass: it still lists, and Delete deletes.
-3. Delete loadouts to make 5 free slots, with no spare loadout (`[CP*] ...`) on the character.
-   Create again. Pass: "Made 3 of 3", or fewer if fewer builds are missing. Two slots always stay
-   free for the spare (card `0040`, `PlanTab.loadoutRoom`), which is why 5 and not 3.
-
-Fail: a "Making" line at the cap, Delete old loadouts refused at the cap, or fewer made than free
-slots. Say which step on this card.
+Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
 
 ## Acceptance
 
-- [ ] WHEN every loadout slot is used, THE ADDON SHALL say so and make nothing. proves: `no loadout is made in combat or with the talent window open, all slots full`, `..., and it says so`, `..., slots are counted over every spec`, and in a client (What I need from you, 1)
-- [ ] WHEN a slot is free, THE ADDON SHALL make loadouts as before. proves: `..., a free slot is counted`, `Create makes every missing build, and nothing else`, and in a client (What I need from you, 2)
-- [ ] WHEN every slot is used, `/djbis tidy` SHALL still list and delete. proves: `tidy removes only the old Dreamgrove names, and only on yes, even with every slot used`
+<!-- AC:BEGIN -->
+- [x] WHEN every loadout slot is used, THE ADDON SHALL say so and make nothing. proves: `no loadout is made in combat or with the talent window open, all slots full`, `..., and it says so`, `..., slots are counted over every spec`
+- [x] WHEN a slot is free, THE ADDON SHALL make loadouts as before. proves: `no loadout is made in combat or with the talent window open, a free slot is counted`, `Create makes every missing build, and nothing else`
+- [x] WHEN every slot is used, **More > Delete old loadouts** (`/dcp tidy`) SHALL still list and delete. proves: `tidy removes only the old Dreamgrove names, and only on yes, even with every slot used`
+- [ ] `/reload`. With all 40 slots used, **More > Make the planned loadouts**. Pass: chat says "N builds have no loadout of their own and no room for one", no Create button, no "Making" line. proves: manual
+- [ ] With all 40 slots used, **More > Delete old loadouts**. Pass: the old loadouts are listed in chat, and the box's Delete deletes them. proves: manual
+- [ ] Free 5 slots with no `[CP*]` spare on the character, then **More > Make the planned loadouts** > Create. Pass: Create 3 (fewer if fewer are missing), then "Made 3 of 3". proves: manual
+<!-- AC:END -->
 
 ## Comments
 
@@ -116,3 +113,5 @@ Security:
 
 No agent can run the game. A person still owes What I need from you 1 and 2, and one more look:
 with all 40 slots used, `/djbis tidy` lists the old names and `/djbis tidy yes` deletes them.
+
+**2026-10-11** Clear-down (attended, Rob asked): ticked all three criteria (checks `no loadout is made in combat or with the talent window open, ...` (all slots full, and it says so, slots are counted over every spec, a free slot is counted), `Create makes every missing build, and nothing else` and `tidy removes only the old Dreamgrove names, and only on yes, even with every slot used` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0. The code changed what look 1 can see: since 0043 the loadouts box offers no Create at all when there is no room, and says the builds are worn through the spare, so the "All 40 loadout slots" line is no longer reachable from Create; the look now checks the no-room line. `/dcp tidy` and `/dcp tidy yes` both open the same list-and-ask box as the menu item, so the review's extra tidy look is the second look. Moves to ai-review/ with only in-game looks open.
