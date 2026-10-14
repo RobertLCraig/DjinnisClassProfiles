@@ -16,7 +16,7 @@ and the rename migration from DjinnisBiS (card `0088`) is still wired in.
 - `0088` - the DjinnisBiS stub goes first.
 
 **Relates to**
-- `0099` - if Rob's layout ships as the default template, his key choices stay, as data and not as code.
+- `0103` - a bars mapping for everyone, later; until then Rob's key choices are his only.
 
 ## Not this card
 

@@ -31,3 +31,13 @@ Option 1 for the first release. Option 2 can come later as its own card, if play
 ## Comments
 
 **2026-10-14** Raised from card `0094` (attended).
+
+**2026-10-14** **Decided:** Option 2 (Rob: "0097 - option 2"). A player pastes their own sim
+result in game, and the addon builds their gear plan from it.
+
+Next for whoever picks this up: the follow-up question is still open, which text the player pastes.
+Start from what `update-gear-plan.ps1` already parses (its header says the winning combo is in
+the report's `input.txt`, not `simbot.input`), check what Raidbots lets a player copy from a Top
+Gear result page, and bring that answer back here before writing the Lua parser. Then rewrite this
+card as a feature (`## Acceptance`, `## Tasks`). Rob's own baked-in `GEAR_PLAN` must not ship to
+other players either way.

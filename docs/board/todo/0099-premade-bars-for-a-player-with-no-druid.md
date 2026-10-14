@@ -30,3 +30,8 @@ more thought than any default would.
 ## Comments
 
 **2026-10-14** Raised from card `0094` (attended).
+
+**2026-10-14** **Decided:** Option 1 (Rob): hide the option when the account has no druid bars.
+Rob: "we should work out a way to do this mapping for everyone (I would like to get it working
+better for myself first though!)". That later work is card `0103`. The work left here is the one
+check: `PlanTab.barsFrom`'s More entry is not offered when no druid bars are saved.
