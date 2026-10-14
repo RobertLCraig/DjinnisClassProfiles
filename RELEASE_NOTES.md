@@ -21,7 +21,7 @@
   the file wins even if it is commented out.
 -->
 
-## Version: 0.10.0
+## Version: 0.69.1
 
 First packaged version. Not yet released anywhere.
 
