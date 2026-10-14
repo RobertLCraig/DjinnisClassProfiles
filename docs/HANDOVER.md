@@ -7,7 +7,7 @@
 **Stage:** built, unreleased
 **Category:** addon
 **Status:** v0.69.0, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
-_Last updated: 2026-10-02 (v0.69.0 deployed: premade bars, their own profile, a row fixed under the build list with a rule above: double-click puts them on, as a build, made first when there are none; right-click makes them again. v0.67.0: bars now place mounts, toys, and character macros another class can use. v0.66.0: More > Make bars from your druid's also puts a rogue's Blind, Vanish, Tricks, Gouge, Distract, Thistle Tea and Kidney Shot on their planned keys, card 0082. v0.65.1: More > Make the heal macro, card 0083. Older stamps: docs/build/SESSION-LOG-ARCHIVE.md.)_
+_Last updated: 2026-10-14 (cards 0094-0102: publish with loot help on every class. Earlier: 2026-10-02, v0.69.0 deployed: premade bars, their own profile, a row fixed under the build list with a rule above: double-click puts them on, as a build, made first when there are none; right-click makes them again. v0.67.0: bars now place mounts, toys, and character macros another class can use. v0.66.0: More > Make bars from your druid's also puts a rogue's Blind, Vanish, Tricks, Gouge, Distract, Thistle Tea and Kidney Shot on their planned keys, card 0082. v0.65.1: More > Make the heal macro, card 0083. Older stamps: docs/build/SESSION-LOG-ARCHIVE.md.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -20,8 +20,10 @@ Success, as it appears to operate: the answer is correct for Season 2, The Venom
 reachable fast enough to use during a roll.
 
 Druid-first, not druid-only (Rob, card `0048`). Action bars and talent builds work on every class,
-keyed by `PlanTab.SPECS` (card `0049`). The gear plan, the BiS list and the loot card stay druid-only
-and say so; `PlanTab.gearHere()` is the one gate.
+keyed by `PlanTab.SPECS` (card `0049`). The gear plan, the BiS list and the loot card are druid-only
+today; `PlanTab.gearHere()` is the one gate. **That is changing** (Rob, 2026-10-14, card `0094`):
+the addon is to be published with loot help on every class. Cards `0095` to `0102` are the work, and
+`0102` is the release itself.
 
 ## Canonical data shape
 `DjinnisCPDB`, one account-wide SavedVariables table declared in the `.toc`, and since v0.28.0
