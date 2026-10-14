@@ -80,7 +80,8 @@ GetCombatRating = function(index) return RATINGS[index] or 0 end
 GetInstanceInfo = function() return "Nowhere", "none" end
 GetInventoryItemLink = function() return nil end
 time, date = os.time, os.date  -- WoW exposes both as globals; the plan's age reads time()
-GetBuildInfo = function() return "12.1.0", "00000", "Sep 10 2026", 120100 end
+GetTime = os.clock  -- seconds, as the game's; a refused talent commit reads it
+GetBuildInfo = function() return "12.1.5", "70391", "Oct 13 2026", 120105 end
 
 -- GetNumAddOns lets the self-test net count loaded add-ons, so its removal of
 -- globals a run made is exercised here too (card 0056). A net proof raises

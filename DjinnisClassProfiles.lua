@@ -830,18 +830,26 @@ end
 -- lines on 2026-09-22. It is NOT the Encounter Journal id (Nek'zali is 3470
 -- here and 2888 in the journal). The events' name is the journal's long one,
 -- "Nek'zali the Soulcoiler", which is why the id is the thing to match on.
+-- `map` is the instance id, GetInstanceInfo's eighth return, copied from the
+-- same BigWigs files' `BigWigs:NewBoss(name, map, journal)`. A raid offers only
+-- its own rows (Rob, 2026-10-14: in The Unbinding of Kith'ix, told Nek'zali).
 PlanTab.BOSSES = {
 	Feral = {
-		{ boss = "Nek'zali",            id = 3470, scenario = "st", loadout = "Raid: Nek'Zali" },
-		{ boss = "Entombed Sentinels",  id = 3445, scenario = "st", loadout = "Raid: Entombed Sentinels" },
-		{ boss = "The Lost Explorers",  id = 3497, scenario = "2t", loadout = "Raid: Lost Explorers" },
-		{ boss = "Vashnik",             id = 3455, scenario = "st", loadout = "Raid: Vashnik" },
-		{ boss = "Sszorak",             id = 3420, scenario = "st", loadout = "Raid: Sszorak" },
-		{ boss = "The Twin Fangs",      id = 3421, scenario = "2t", loadout = "Raid: Twin Fangs" },
-		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "Raid: Coiled Altar" },
-		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "Raid: Ula'tek" },
+		{ boss = "Nek'zali",            id = 3470, map = 3004, scenario = "st", loadout = "Raid: Nek'Zali" },
+		{ boss = "Entombed Sentinels",  id = 3445, map = 3004, scenario = "st", loadout = "Raid: Entombed Sentinels" },
+		{ boss = "The Lost Explorers",  id = 3497, map = 3004, scenario = "2t", loadout = "Raid: Lost Explorers" },
+		{ boss = "Vashnik",             id = 3455, map = 3004, scenario = "st", loadout = "Raid: Vashnik" },
+		{ boss = "Sszorak",             id = 3420, map = 3004, scenario = "st", loadout = "Raid: Sszorak" },
+		{ boss = "The Twin Fangs",      id = 3421, map = 3004, scenario = "2t", loadout = "Raid: Twin Fangs" },
+		{ boss = "The Coiled Altar",    id = 3429, map = 3004, scenario = "st", loadout = "Raid: Coiled Altar" },
+		{ boss = "Ula'tek",             id = 3492, map = 3004, scenario = "st", loadout = "Raid: Ula'tek" },
 		-- a lair boss, not a raid one: her id is from BigWigs_MidnightLairs
-		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "st", loadout = "Raid: Nymrissa" },
+		{ boss = "Nymrissa Wavecaller", id = 3379, map = 2987, scenario = "st", loadout = "Raid: Nymrissa" },
+		-- 12.1.5's one-boss raid: adds the raid stacks and cleaves, then a
+		-- single-target burn. Method's Feral page names the Vashnik build for that
+		-- shape. No logs yet for a build of its own, so it shares Vashnik's
+		-- loadout (2026-10-14), which also spends no loadout slot.
+		{ boss = "Kith'ix",             id = 3513, map = 3095, scenario = "st", loadout = "Raid: Vashnik" },
 		-- One Mythic+ loadout, not one per dungeon (card 0009): the typical build
 		-- of top ranked Feral runs on Warcraft Logs (card 0064).
 		{ boss = "Mythic+, any key",   scenario = "mplus", loadout = "Dungeon" },
@@ -853,15 +861,17 @@ PlanTab.BOSSES = {
 	-- Chosen on Nek'zali and the Coiled Altar, Keeper of the Grove on the rest.
 	-- update-builds.py pools each row's bosses, so a regroup here moves builds.
 	Balance = {
-		{ boss = "Nek'zali",            id = 3470, scenario = "st", loadout = "Raid: Nek'Zali, Altar" },
-		{ boss = "Entombed Sentinels",  id = 3445, scenario = "2t", loadout = "Raid: Cleave" },
-		{ boss = "The Lost Explorers",  id = 3497, scenario = "2t", loadout = "Raid: Cleave" },
-		{ boss = "Vashnik",             id = 3455, scenario = "st", loadout = "Raid: Single Target" },
-		{ boss = "Sszorak",             id = 3420, scenario = "st", loadout = "Raid: Single Target" },
-		{ boss = "The Twin Fangs",      id = 3421, scenario = "2t", loadout = "Raid: Cleave" },
-		{ boss = "The Coiled Altar",    id = 3429, scenario = "st", loadout = "Raid: Nek'Zali, Altar" },
-		{ boss = "Ula'tek",             id = 3492, scenario = "st", loadout = "Raid: Single Target" },
-		{ boss = "Nymrissa Wavecaller", id = 3379, scenario = "st", loadout = "Raid: Single Target" },
+		{ boss = "Nek'zali",            id = 3470, map = 3004, scenario = "st", loadout = "Raid: Nek'Zali, Altar" },
+		{ boss = "Entombed Sentinels",  id = 3445, map = 3004, scenario = "2t", loadout = "Raid: Cleave" },
+		{ boss = "The Lost Explorers",  id = 3497, map = 3004, scenario = "2t", loadout = "Raid: Cleave" },
+		{ boss = "Vashnik",             id = 3455, map = 3004, scenario = "st", loadout = "Raid: Single Target" },
+		{ boss = "Sszorak",             id = 3420, map = 3004, scenario = "st", loadout = "Raid: Single Target" },
+		{ boss = "The Twin Fangs",      id = 3421, map = 3004, scenario = "2t", loadout = "Raid: Cleave" },
+		{ boss = "The Coiled Altar",    id = 3429, map = 3004, scenario = "st", loadout = "Raid: Nek'Zali, Altar" },
+		{ boss = "Ula'tek",             id = 3492, map = 3004, scenario = "st", loadout = "Raid: Single Target" },
+		{ boss = "Nymrissa Wavecaller", id = 3379, map = 2987, scenario = "st", loadout = "Raid: Single Target" },
+		-- Kith'ix's stacked adds; a guess until Warcraft Logs has kills (2026-10-14)
+		{ boss = "Kith'ix",             id = 3513, map = 3095, scenario = "2t", loadout = "Raid: Cleave" },
 		{ boss = "Mythic+, any key",   scenario = "mplus", loadout = "Dungeon" },
 	},
 }
@@ -2647,11 +2657,13 @@ local function armBagMarks()
 	-- again, so only Blizzard's bags need telling.
 	local defaultBags = buildBagGlows()
 	local watcher = CreateFrame("Frame")
-	watcher:SetScript("OnEvent", function(_, event)
+	watcher:SetScript("OnEvent", function(_, event, ...)
 		if event == "BAG_UPDATE_DELAYED" then
 			if refreshBagGlows and not InCombatLockdown() then refreshBagGlows() end
 		elseif event == "TRAIT_CONFIG_UPDATED" or event == "CONFIG_COMMIT_FAILED" then
 			PlanTab.onTalentEvent(event)
+		elseif event == "UI_ERROR_MESSAGE" then
+			PlanTab.onUIError(select(2, ...))
 		else
 			rebuildBagWanted()
 			-- The Plan tab lists what to equip, so an equip redraws it. This
@@ -2668,6 +2680,7 @@ local function armBagMarks()
 		"SOCKET_INFO_CLOSE",  -- a gem went in (or the socket window shut): the Plan tab's gem lines
 		"TRAIT_CONFIG_UPDATED",  -- a talent moved or a loadout loaded: the Plan tab's "(edited)" mark and "your loadout now" (cards 0011, 0014)
 		"CONFIG_COMMIT_FAILED",  -- the game refused a loadout: one chat line (card 0011)
+		"UI_ERROR_MESSAGE",  -- the red error text: the only place the game says why it refused
 		defaultBags and "BAG_UPDATE_DELAYED" or nil,
 	}) do
 		watcher:RegisterEvent(event)
@@ -4707,11 +4720,38 @@ end
 -- TRAIT_CONFIG_UPDATED is a loadout landing, CONFIG_COMMIT_FAILED is the game
 -- refusing one. One chat line for the refusal, and either way the tab's "your
 -- loadout now" is redrawn. Called from the bag-mark watcher.
+-- The event carries a config id and no reason. The game says why only in its
+-- red error text, UI_ERROR_MESSAGE, which may come just before or just after,
+-- so the line names it whichever way round they arrive. A refusal within two
+-- seconds of the last is the same one and says nothing more (Rob, 2026-10-14,
+-- in a raid: two bare lines in the same second and no way to tell why).
 function PlanTab.onTalentEvent(event)
 	if event == "CONFIG_COMMIT_FAILED" then
-		print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "the talent change did not go through (CONFIG_COMMIT_FAILED). Stand still, out of combat, and click Talents again.|r")
+		local now, last = GetTime(), PlanTab.uiError
+		local repeated = PlanTab.failedAt and now - PlanTab.failedAt < 2
+		PlanTab.failedAt = now
+		PlanTab.failReason = last and now - last.at < 1 and last.text or nil
+		if not repeated then
+			print(GOLD .. "Djinni's Class Profiles|r " .. GREY .. "the talent change did not go through (CONFIG_COMMIT_FAILED)"
+				.. (PlanTab.failReason and (". The game said: " .. PlanTab.failReason) or "")
+				.. ". Stand still, out of combat, and click Talents again.|r")
+		end
 	end
 	if PlanTab.redraw then PlanTab.redraw() end
+end
+
+-- The game's red error text, kept a second for a refusal that comes after it,
+-- and said at once for one that came just before it with no reason yet.
+-- A secret one is never kept: it could not be printed.
+function PlanTab.onUIError(message)
+	if type(message) ~= "string" or not canRead(message) then return end
+	local now = GetTime()
+	if PlanTab.failedAt and now - PlanTab.failedAt < 1 and not PlanTab.failReason then
+		PlanTab.failReason = message
+		PlanTab.say("the game said why: " .. message)
+		return
+	end
+	PlanTab.uiError = { text = message, at = now }
 end
 
 -- Picks the exact bag copy up and drops it in the slot the plan chose, so a
@@ -5981,11 +6021,14 @@ end
 -- `done(id)`, when given, answers a boss already dead on this lockout, which
 -- is skipped too: a /reload or a zone-in forgets `killedID` (Rob, 2026-09-23,
 -- in front of Entombed Sentinels with Nek'zali down, was told Nek'zali).
-function PlanTab.rowHere(bosses, here, killedID, done)
+-- `map` is the instance you are in: only its rows count, and a raid with none,
+-- or no readable map, is nil and shows no card. Until 2026-10-14 every raid
+-- started at Nek'zali, a new one too (Rob, in The Unbinding of Kith'ix).
+function PlanTab.rowHere(bosses, here, killedID, done, map)
 	local raid = {}
 	for _, row in ipairs(bosses or {}) do
 		if here == "mplus" and row.scenario == "mplus" then return row end
-		if row.scenario ~= "mplus" then raid[#raid + 1] = row end
+		if row.scenario ~= "mplus" and map ~= nil and row.map == map then raid[#raid + 1] = row end
 	end
 	if here ~= "raid" then return nil end
 	local start = 1
@@ -6001,7 +6044,16 @@ end
 -- The row for this place as the reminder and the list both want it: the last
 -- kill seen and the lockout's dead bosses skipped (card 0043).
 function PlanTab.bossHere(spec, here)
-	return PlanTab.rowHere(spec and PlanTab.BOSSES[spec], here, PlanTab.lastKill, PlanTab.bossDone)
+	return PlanTab.rowHere(spec and PlanTab.BOSSES[spec], here, PlanTab.lastKill, PlanTab.bossDone, PlanTab.mapHere())
+end
+
+-- The instance id GetInstanceInfo gives, as the rows' `map` holds it; nil when
+-- there is none or it will not read (a secret is never compared).
+function PlanTab.mapHere()
+	if not GetInstanceInfo then return nil end
+	local mapID = select(8, GetInstanceInfo())
+	if not canRead(mapID) or type(mapID) ~= "number" then return nil end
+	return mapID
 end
 
 -- The game's own "defeated" mark, as the dungeon journal draws it
@@ -16512,7 +16564,7 @@ local function selfTest()
 		[3497] = "The Lost Explorers",      [3455] = "Vashnik the Malignant",
 		[3420] = "Sszorak",                 [3421] = "The Twin Fangs",
 		[3429] = "The Coiled Altar",        [3492] = "Ula'tek",
-		[3379] = "Nymrissa Wavecaller",
+		[3379] = "Nymrissa Wavecaller",     [3513] = "Kith'ix",
 	}
 	local idTest = "every boss row has a name and an id"
 	local seenID = {}
@@ -17141,7 +17193,7 @@ local function selfTest()
 		C_Container = nil  -- no bags: nothing to Equip until a check says so
 		local active, edited = "Raid: Nek'Zali", nil  -- Nek'zali's, the first raid row
 		PlanTab.activeLoadoutName = function() return active, edited end
-		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 15, "Heroic", 30, 0, false, 3004 end
 		local nek = PlanTab.BOSSES.Feral[1]
 		local function labels()
 			local names = {}
@@ -17161,28 +17213,35 @@ local function selfTest()
 		local wrong = PlanTab.wrongHere(nek, active, nil, plan, PlanTab.readWorn())
 		check(namesTest .. ", pure: a wrong enchant is a fix, not a change", table.concat(wrong.fix, ",") .. "/" .. #wrong.change, "1/0")
 		wrongEnchant = nil
-		check(namesTest .. ", the place picks the row: a raid starts at the first boss", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil).boss, "Nek'zali")
-		check(namesTest .. ", after a kill the next boss", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3470).boss, "Entombed Sentinels")
-		check(namesTest .. ", after the last kill nothing", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3379), nil)
+		local ABYSS = 3004  -- The Venomous Abyss's instance id
+		check(namesTest .. ", the place picks the row: a raid starts at the first boss", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil, nil, ABYSS).boss, "Nek'zali")
+		check(namesTest .. ", after a kill the next boss", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3470, nil, ABYSS).boss, "Entombed Sentinels")
+		check(namesTest .. ", after the last kill nothing", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3492, nil, ABYSS), nil)
 		check(namesTest .. ", a dungeon is the Mythic+ row", PlanTab.rowHere(PlanTab.BOSSES.Feral, "mplus", 3470).scenario, "mplus")
 		check(namesTest .. ", elsewhere no row", PlanTab.rowHere(PlanTab.BOSSES.Feral, nil, nil), nil)
-		check(namesTest .. ", a spec with no plan no row", PlanTab.rowHere(nil, "raid", nil), nil)
+		check(namesTest .. ", a spec with no plan no row", PlanTab.rowHere(nil, "raid", nil, nil, ABYSS), nil)
+		-- Rob, 2026-10-14: in The Unbinding of Kith'ix the card said Nek'zali
+		check(namesTest .. ", another raid's rows are not this one's", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil, nil, 3095).boss, "Kith'ix")
+		check(namesTest .. ", Kith'ix takes the Vashnik build", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil, nil, 3095).loadout, "Raid: Vashnik")
+		check(namesTest .. ", a raid with no rows shows no card", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil, nil, 1234), nil)
+		check(namesTest .. ", nor does one whose map will not read", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil, nil, nil), nil)
+		check(namesTest .. ", a kill in another raid moves nothing here", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3513, nil, ABYSS).boss, "Nek'zali")
 		-- a /reload forgets the kill; the lockout does not (Rob, 2026-09-23)
 		local dead = { [3470] = true }
 		local function done(id) return dead[id] == true end
-		check(namesTest .. ", a boss dead on the lockout is skipped", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil, done).boss, "Entombed Sentinels")
+		check(namesTest .. ", a boss dead on the lockout is skipped", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", nil, done, ABYSS).boss, "Entombed Sentinels")
 		dead[3445], dead[3497] = true, true
-		check(namesTest .. ", and so is the next", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3470, done).boss, "Vashnik")
+		check(namesTest .. ", and so is the next", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3470, done, ABYSS).boss, "Vashnik")
 		dead[3445] = nil
-		check(namesTest .. ", a boss left alive behind the last kill is not gone back to", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3497, done).boss, "Vashnik")
+		check(namesTest .. ", a boss left alive behind the last kill is not gone back to", PlanTab.rowHere(PlanTab.BOSSES.Feral, "raid", 3497, done, ABYSS).boss, "Vashnik")
 		-- 0043 review: the lockout read itself, and the one place both callers use
 		-- its own name: reusing wasInstance shadowed the block's, and the block's
 		-- restore then put a fake GetInstanceInfo back for good (found by runSelfTest)
 		local wasLocks, lockInstance, wasKilled, lockAsk = C_RaidLocks, GetInstanceInfo, PlanTab.lastKill, nil
 		C_RaidLocks = { IsEncounterComplete = function(map, id, diff) lockAsk = map .. "/" .. id .. "/" .. tostring(diff) return id == 3470 end }
-		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 15, "Heroic", 30, 0, false, 2939 end
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 15, "Heroic", 30, 0, false, ABYSS end
 		PlanTab.lastKill = nil
-		check(namesTest .. ", the lockout is asked as the journal asks it", (PlanTab.bossDone(3445) and "dead " or "") .. tostring(lockAsk), "2939/3445/15")
+		check(namesTest .. ", the lockout is asked as the journal asks it", (PlanTab.bossDone(3445) and "dead " or "") .. tostring(lockAsk), "3004/3445/15")
 		check(namesTest .. ", a boss dead on it reads dead", PlanTab.bossDone(3470), true)
 		check(namesTest .. ", the reminder's and the list's row skips it", PlanTab.bossHere("Feral", "raid").boss, "Entombed Sentinels")
 		-- second review: through the callers themselves, not only the helper
@@ -17203,7 +17262,7 @@ local function selfTest()
 		GetInstanceInfo = function() return "A Dungeon", "party" end
 		active = "Raid: Nek'Zali"
 		check(namesTest .. ", in a dungeon it is the Mythic+ plan", PlanTab.checkSetup() == "shown" and PlanTab.popupModel.title, "A Dungeon: Mythic+, any key")
-		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 15, "Heroic", 30, 0, false, 3004 end
 
 		local noneTest = "no popup when the setup matches"
 		check(noneTest, PlanTab.checkSetup(), "matches")
@@ -17213,8 +17272,8 @@ local function selfTest()
 		PlanTab.hidePopup()
 		GetInstanceInfo = function() return "Nowhere", "none" end
 		check(noneTest .. ", outside an instance", PlanTab.checkSetup(), "elsewhere")
-		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
-		PlanTab.lastKill = 3379
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 15, "Heroic", 30, 0, false, 3004 end
+		PlanTab.lastKill = 3492  -- Ula'tek, the Abyss's last; Nymrissa is in her own lair now
 		check(noneTest .. ", after the last boss", PlanTab.checkSetup(), "no plan")
 		PlanTab.lastKill = nil
 
@@ -17300,7 +17359,7 @@ local function selfTest()
 		PlanTab.onSetupEvent("ADDON_RESTRICTION_STATE_CHANGED", 1, 0)
 		check(waitTest .. ", the fence lifting outside the place shows nothing", PlanTab.popupModel, nil)
 		check(waitTest .. ", and drops the wait", PlanTab.popupPending, nil)
-		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 15, "Heroic", 30, 0, false, 3004 end
 		PlanTab.onSetupEvent("PLAYER_ENTERING_WORLD")
 		check(waitTest .. ", a zone-in starts over at the first boss", PlanTab.lastKill, nil)
 		check(waitTest .. ", and shows", PlanTab.popupModel and PlanTab.popupModel.title, "The Venomous Abyss: Nek'zali")
@@ -17376,7 +17435,7 @@ local function selfTest()
 		C_Container = nil
 		local active = "Raid: Nek'Zali"
 		PlanTab.activeLoadoutName = function() return active, nil end
-		GetInstanceInfo = function() return "The Venomous Abyss", "raid" end
+		GetInstanceInfo = function() return "The Venomous Abyss", "raid", 15, "Heroic", 30, 0, false, 3004 end
 		local nek = PlanTab.BOSSES.Feral[1]
 		local flask, food, oilRow = PlanTab.CONSUMABLES[1], PlanTab.CONSUMABLES[2], PlanTab.CONSUMABLES[4]
 		local on, secretIds, slots, oil = {}, {}, {}, nil  -- the stubbed player: auras by id, ids the predicate hides, auras by slot, the weapon enchant
@@ -17562,11 +17621,11 @@ local function selfTest()
 	do
 		local rowTest = "a 3t boss row draws the 3t cell"
 		local bosses, keptBoss = PlanTab.BOSSES.Feral, PlanTab.boss
-		local row = { boss = "Self-test 3+ boss", id = 9999, scenario = "3t", loadout = "Raid: Nek'Zali" }
+		local row = { boss = "Self-test 3+ boss", id = 9999, map = 3004, scenario = "3t", loadout = "Raid: Nek'Zali" }
 		bosses[#bosses + 1] = row
 		PlanTab.boss = row.boss
 		check(rowTest .. ", the tab opens on the 3+ row for 3+", PlanTab.bossFor(bosses, nil, "3t"), row.boss)
-		check(rowTest .. ", the row is a raid row for the popup", PlanTab.rowHere(bosses, "raid", 3379), row)
+		check(rowTest .. ", the row is a raid row for the popup", PlanTab.rowHere(bosses, "raid", 3492, nil, 3004), row)
 		check(rowTest .. ", and sits under its loadout in the raid sidebar", (function()
 			for _, out in ipairs(PlanTab.sidebarRows(bosses, "raid", nil, nil)) do
 				if out.loadout == row.loadout then return out.bosses[#out.bosses] end
