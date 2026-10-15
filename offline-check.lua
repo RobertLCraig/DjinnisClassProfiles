@@ -18,6 +18,9 @@
 
 local function noop() end
 
+-- The game runs Lua 5.1, which has a global unpack; the 5.4 this runs on does not
+unpack = unpack or table.unpack
+
 -- Any method not named below answers nil and swallows its arguments, which is
 -- what makes the whole of the UI code loadable without listing its API surface.
 local frameMT = {}

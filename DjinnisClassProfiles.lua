@@ -3589,6 +3589,19 @@ local function buildStatPane(parent, opts)
 	pane.title:SetText("Stat targets")
 	pane.title:SetShown(opts.framed or false)
 
+	-- Minimise (Rob, 2026-10-05: "give a close/minimise button"). It folds the
+	-- pane to its title bar instead of closing it, so the same button brings it
+	-- back and there is nothing to go looking for. Saved per account.
+	if opts.collapsible then
+		pane.collapse = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
+		pane.collapse:SetSize(22, 18)
+		pane.collapse:SetPoint("RIGHT", pane.header, "RIGHT", -2, 0)
+		pane.collapse:SetScript("OnClick", function()
+			db().statPaneCollapsed = not db().statPaneCollapsed or nil
+			pane:Update()
+		end)
+	end
+
 	local top = opts.framed and (HEADER_H + 8) or 4
 
 	pane.context = CreateFrame("Button", nil, pane, "UIPanelButtonTemplate")
@@ -3631,6 +3644,19 @@ local function buildStatPane(parent, opts)
 	pane:SetHeight(pane.fixedHeight + 14)
 
 	function pane:Resize()
+		local folded = opts.collapsible and db().statPaneCollapsed or false
+		if opts.collapsible then
+			self.collapse:SetText(folded and "+" or "-")
+			self.context:SetShown(not folded)
+			self.heading:SetShown(not folded)
+			self.rows:SetShown(not folded)
+			self.footer:SetShown(not folded)
+		end
+		if folded then
+			self:SetHeight(HEADER_H + 10)
+			if opts.onResize then opts.onResize(self, true) end
+			return
+		end
 		local extra = math.max(12, math.ceil(self.footer:GetStringHeight() or 12))
 		self:SetHeight(self.fixedHeight + extra + 4)
 		if opts.onResize then opts.onResize(self) end
@@ -5167,6 +5193,13 @@ function PlanTab.prompt(title, lines, buttons)
 		f.text:SetJustifyH("LEFT")
 		f.text:SetSpacing(4)
 		f.buttons = {}
+		-- A click or Escape hides it under the mouse: what a hover drew goes
+		-- first, so Apply's own redraw (applyBars) finds no preview to refresh.
+		f:SetScript("OnHide", function(self)
+			local leave = self.leave
+			self.leave = nil
+			if leave then leave() end
+		end)
 		tinsert(UISpecialFrames, "DjinnisCPPrompt")
 		PlanTab.promptFrame = f
 	end
@@ -5189,6 +5222,16 @@ function PlanTab.prompt(title, lines, buttons)
 		button:SetScript("OnClick", function()
 			f:Hide()
 			if spec.onClick then spec.onClick() end
+		end)
+		-- `onEnter` and `onLeave` are optional: the bars offer's Apply shows
+		-- the layout over the real bars while pointed at, as card 0046's rows do.
+		button:SetScript("OnEnter", function(self)
+			if spec.onEnter then f.leave = spec.onLeave; spec.onEnter(self) end
+		end)
+		button:SetScript("OnLeave", function()
+			local leave = f.leave
+			f.leave = nil
+			if leave then leave() end
 		end)
 		button:Show()
 	end
@@ -6544,6 +6587,7 @@ end
 -- `below` is what the strip sits under.
 local function buildSlotMarks(holder, below)
 	local strip = CreateFrame("Frame", nil, holder, "BackdropTemplate")
+	holder.strip = strip  -- so the pane's minimise can fold it away
 	strip:SetPoint("TOPLEFT", below, "BOTTOMLEFT", 0, -4)
 	strip:SetPoint("TOPRIGHT", below, "BOTTOMRIGHT", 0, -4)
 	strip:SetHeight(PLAN_STRIP_H - 4)
@@ -6678,14 +6722,23 @@ end
 local function buildCharacterPane()
 	if not CharacterFrame then return end
 
-	local holder = CreateFrame("Frame", "DjinnisCPCharacterPane", CharacterFrame)
+	-- A child of the Character tab, not of the whole window, so it is only up
+	-- while that tab is (Rob, 2026-10-05: "hide stat panel when not on character
+	-- screen"). Reputation and Currency hide PaperDollFrame and this goes with
+	-- it. Our own frame's parent is ours to pick; nothing Blizzard owns changes.
+	local holder = CreateFrame("Frame", "DjinnisCPCharacterPane", PaperDollFrame or CharacterFrame)
 	holder:SetWidth(PANE_W)
 	holder:SetFrameStrata("HIGH")
 
 	local pane = buildStatPane(holder, {
 		spec = playerSpec,
 		framed = true,
-		onResize = function(self) holder:SetHeight(self:GetHeight() + PLAN_STRIP_H) end,
+		collapsible = true,
+		-- Folded, the gear plan strip folds away with the bars.
+		onResize = function(self, folded)
+			holder:SetHeight(self:GetHeight() + (folded and 0 or PLAN_STRIP_H))
+			if holder.strip then holder.strip:SetShown(not folded) end
+		end,
 	})
 	local refreshMarks = buildSlotMarks(holder, pane)
 	pane:SetPoint("TOPLEFT")
@@ -10016,7 +10069,16 @@ function PlanTab.offerBars(asked)
 				return
 			end
 			PlanTab.applyBars(key)
-		end },
+		end,
+		onEnter = function(self)
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip:AddLine("Apply the " .. key .. " layout", 1, 1, 1)
+			if pcall(PlanTab.showGhost, key) and PlanTab.ghostKey then
+				GameTooltip:AddLine("Your bars show it now. Amber: the slots a load changes.", 1, 0.6, 0, true)
+			end
+			GameTooltip:Show()
+		end,
+		onLeave = function() GameTooltip:Hide() pcall(PlanTab.hideGhost) end },
 		{ label = "Not now" },
 	})
 	return "shown"
@@ -10855,7 +10917,10 @@ PlanTab.JOB_BUTTONS = {
 	["Ursol's Vortex"] = "MULTIACTIONBAR6BUTTON4", ["Thorn Bloom"] = "MULTIACTIONBAR6BUTTON11",
 }
 PlanTab.ITEM_JOBS = { [5512] = "Healthstone", [245898] = "Damage Potion", [258138] = "Healing Potion" }
-for _, id in ipairs({ 245918, 245919, 271884, 271883, 241304, 241305 }) do PlanTab.ITEM_JOBS[id] = "Healing Potion" end  -- card 0083's Midnight potions
+-- card 0083's Midnight potions. In a function of its own: a loop here takes the
+-- main chunk past Lua's 200 locals under the 5.4 the offline check runs on
+-- (5.4's generic for keeps one hidden local more than the game's 5.1).
+;(function() for _, id in ipairs({ 245918, 245919, 271884, 271883, 241304, 241305 }) do PlanTab.ITEM_JOBS[id] = "Healing Potion" end end)()
 -- a short name drawn on the button; a Combat job is C and its number
 PlanTab.JOB_SHORT = {
 	["Class 1 (Movement)"] = "Roar", ["Class 3 (Tag)"] = "Roots", ["Self-Heal 1"] = "Heal1",
@@ -12233,6 +12298,11 @@ function PlanTab.barChecks(check)
 	check(applyTest .. ", is offered", PlanTab.offerBars(), "shown")
 	check(applyTest .. ", nothing moves before the click", bars[1] and bars[1].id, 2)
 	check(applyTest .. ", counts what it would change", shown and shown.lines[1]:find("change 5 slots and 4 keys", 1, true) ~= nil, true)
+	-- Rob, 2026-10-15: pointing at Apply shows the layout, as the talent window's rows do
+	check(applyTest .. ", Apply previews on hover", type(shown.buttons[1].onEnter) .. "/" .. type(shown.buttons[1].onLeave), "function/function")
+	pcall(shown.buttons[1].onEnter, UIParent)
+	shown.buttons[1].onLeave()
+	check(applyTest .. ", and the preview goes when the mouse leaves", PlanTab.ghostKey, nil)
 	shown.buttons[1].onClick()
 	check(applyTest .. ", the same spell in the same slot", bars[1] and bars[1].id, 5221)
 	check(applyTest .. ", Rake moved to 2", bars[2] and bars[2].id, 1822)
