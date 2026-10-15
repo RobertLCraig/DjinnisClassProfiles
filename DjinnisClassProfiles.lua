@@ -896,10 +896,12 @@ local BOSS_ORDER = {
 -- Upgrade tracks. Exact per-rank numbers from method.gg, pulled 2026-08-19.
 -- Adventurer and Veteran are deliberately absent: nothing on this list drops on
 -- them, and no source publishes their per-rank numbers, so they would be guesses.
+-- `bonus` is each rank's track bonus id, from KeystoneLoot's upgrade_tracks.lua
+-- (12.1.5): what PlanTab.aimLink puts on a link to show an item at that level.
 local TRACKS = {
-	{ name = "Champion", ilvl = { 292, 295, 298, 302, 305, 308 } },
-	{ name = "Hero",     ilvl = { 305, 308, 311, 315, 318, 321 } },
-	{ name = "Myth",     ilvl = { 318, 321, 324, 328, 331, 334 } },
+	{ name = "Champion", ilvl = { 292, 295, 298, 302, 305, 308 }, bonus = { 12833, 12834, 12835, 12836, 12837, 12838 } },
+	{ name = "Hero",     ilvl = { 305, 308, 311, 315, 318, 321 }, bonus = { 12841, 12842, 12843, 12844, 12845, 12846 } },
+	{ name = "Myth",     ilvl = { 318, 321, 324, 328, 331, 334 }, bonus = { 12849, 12850, 12851, 12852, 12853, 12854 } },
 }
 -- The last two Mythic bosses drop above the normal cap and take no upgrades.
 local MYTHIC_RAID = { name = "Mythic raid", ilvl = 344 }
@@ -5436,6 +5438,30 @@ function PlanTab.crestTotal(marks)
 	return flat
 end
 
+-- The link a planned item is shown by (Rob, 2026-10-15): at the level of the
+-- piece it replaces when its own default is lower, so its tooltip compares
+-- like for like instead of looking like a downgrade. The level is the lowest
+-- track rank at or above the worn one. `default` is for the checks; in game
+-- it is read off the link. Anything unreadable gives the link back unchanged.
+function PlanTab.aimLink(link, wornIlvl, default)
+	if not link or not wornIlvl then return link end
+	default = default or itemLevelOf(link)
+	if not default or default >= wornIlvl then return link end
+	local best, bonus
+	for _, track in ipairs(TRACKS) do
+		for i, ilvl in ipairs(track.ilvl) do
+			if ilvl >= wornIlvl and (not best or ilvl < best) then best, bonus = ilvl, track.bonus[i] end
+		end
+	end
+	local id = link:match("item:(%d+)")
+	if not (bonus and id) then return link end
+	-- item:id, seven empty fields (enchant, four gems, suffix, unique), level,
+	-- spec, modifiers mask, context, then one bonus id
+	local item = table.concat({ "item", id, "", "", "", "", "", "", "", "", "", "", "", "1", bonus }, ":")
+	local out, n = link:gsub("|Hitem:[^|]+|h", "|H" .. item .. "|h", 1)
+	return n == 1 and out or item
+end
+
 -- One line saying what the plan wants in this slot and where that is.
 local function planLineFor(mark)
 	local entry = mark.entry
@@ -5785,6 +5811,7 @@ function PlanTab.lines(forSpec)
 	for _, slotID in ipairs(slotIDs) do
 		local mark = marks[slotID]
 		local _, link = C_Item.GetItemInfo(mark.entry.id)
+		link = PlanTab.aimLink(link, mark.worn and mark.worn.ilvl)
 		-- Not `state == "change" and PlanTab.holding(...)`: an `and` keeps only the
 		-- first of a call's returns, and that is how 0.17.5 drew no Equip at all.
 		local where
@@ -15157,6 +15184,18 @@ function PlanTab.specChecks(check)
 	check("every spec, a Death Knight's list", table.concat(shown, "; "), "[Mythic+]; Dungeon; [Other builds]; Raid")
 end
 
+function PlanTab.aimChecks(check)
+	local base = "|cffa335ee|Hitem:268256::::::::90:103::::::|h[Sash]|h|r"
+	local t = "aim link"
+	check(t .. ", lower default: shown at the worn level", PlanTab.aimLink(base, 308, 289),
+		"|cffa335ee|Hitem:268256::::::::::::1:12838|h[Sash]|h|r")
+	check(t .. ", between ranks: the next rank up", PlanTab.aimLink(base, 331, 289):match("1:(%d+)|h"), "12853")
+	check(t .. ", default as high: unchanged", PlanTab.aimLink(base, 308, 308), base)
+	check(t .. ", nothing worn: unchanged", PlanTab.aimLink(base, nil, 289), base)
+	check(t .. ", above every track: unchanged", PlanTab.aimLink(base, 400, 289), base)
+	check(t .. ", no link", PlanTab.aimLink(nil, 308, 289), nil)
+end
+
 function PlanTab.treeChecks(check)
 	local function node(selected, choice, ranks)
 		return { isNodeSelected = selected, choiceNodeSelection = choice or 1, partialRanksPurchased = ranks or 0 }
@@ -17742,6 +17781,7 @@ local function selfTest()
 	PlanTab.barChecks(check)  -- card 0033
 	PlanTab.sidebarChecks(check)  -- card 0032
 	PlanTab.treeChecks(check)  -- card 0034
+	PlanTab.aimChecks(check)  -- card 0105
 	PlanTab.specChecks(check)  -- card 0049
 	PlanTab.menuChecks(check)  -- card 0053
 	PlanTab.levelChecks(check)  -- card 0055
