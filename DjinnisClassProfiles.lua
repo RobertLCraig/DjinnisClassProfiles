@@ -370,95 +370,95 @@ local STAT_TARGET = {
 -- the string the talent import box takes; nothing here applies it.
 --
 -- BEGIN GENERATED GEAR PLAN
-local GEAR_PLAN_SOURCE = "Raidbots Top Gear 2026-09-28, then local SimC 2026-09-30 (vault, crafted, ring enchant)"
+local GEAR_PLAN_SOURCE = "local SimC droptimiser 2026-10-15: worn gear plus the best raid (heroic 321, mythic 334) and M+ (321) drop per slot"
 local GEAR_PLAN = {
 	Feral = {
 		["st"] = {
-			report = "local SimC", simmed = "2026-09-30", dps = 204084,
+			report = "local SimC droptimiser", simmed = "2026-10-15", dps = 203779,
 			loadout = "[CP] Raid: Nek'Zali",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALghhxMDmxsMmZmxYGDAAAAAADMAAAAAAz2MLmtZW2AzMALmZYAAMzAgB",
 			slots = {
-				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
-				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
-				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=239656,bonus_id=8793/8960/12214/12384/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Arcanoweave Lining)
-				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
-				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
-				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
-				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12838,ilevel=308,upgrade=3444/40", -- Sash of the Forlorn Vessel
-				legs      = "id=271527,enchant_id=8159,bonus_id=6652/13693/13698/1555/12838,ilevel=308,upgrade=0", -- Enigmatic Dreamwatcher's Leggings
-				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
-				finger1   = "id=272147,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
-				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
-				trinket1  = "id=250259,bonus_id=12854/13440/42/12699,ilevel=334,upgrade=3446/100", -- Sapling of the Dawnroot
-				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
-				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
+				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12854,ilevel=334", -- Enigmatic Dreamwatcher's Somnolent Stare (mythic tier token), droptimiser +1.07%
+				neck      = "id=268251,bonus_id=13668/12854,gem_id=240983/240888,ilevel=334", -- Amulet of the Twin Fangs (Twin Fangs), droptimiser +0.36%
+				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12854,ilevel=334", -- Enigmatic Dreamwatcher's Plumage (mythic tier token), droptimiser +0.94%
+				back      = "id=239656,bonus_id=12214/13667/12497/13751/14001/8960/12384/8793/13836,ilevel=331", -- Adherent's Silken Shroud (crafted), worn
+				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12854,ilevel=334", -- Vestment of the Awakening (Nek'zali), droptimiser +0.9%
+				wrist     = "id=244576,bonus_id=12214/13667/12497/13751/14001/8960/12384/8791/13836/13696,ilevel=331", -- Silvermoon Agent's Deflectors (crafted), worn
+				hands     = "id=271529,bonus_id=13691/6652/13697/12854,ilevel=334", -- Enigmatic Dreamwatcher's Gauntlets (mythic tier token), droptimiser +0.62%
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12854,ilevel=334", -- Sash of the Forlorn Vessel (Coiled Altar), droptimiser +1.14%
+				legs      = "id=271527,enchant_id=8159,bonus_id=13334/13693/6652/13698/12854,ilevel=334", -- Enigmatic Dreamwatcher's Leggings (mythic tier token), droptimiser +0.95%
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334", -- Breakwater Boots, worn
+				finger1   = "id=268252,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/13334/12854,ilevel=334", -- Apex Brute's Claw Ring, worn
+				finger2   = "id=268249,bonus_id=13668/12854,enchant_id=7967,gem_id=240908,ilevel=334", -- Vile Alchemist's Band (Vashnik), droptimiser +0.86%
+				trinket1  = "id=270168,bonus_id=12854,ilevel=334", -- Font of Venomous Rage (Ula'tek), droptimiser +1.27%
+				trinket2  = "id=270175,bonus_id=12854,ilevel=334", -- Voracious Heart of Ula'tek (Ula'tek), droptimiser +2.82%
+				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff, worn
 			},
 		},
 		["2t"] = {
-			report = "local SimC", simmed = "2026-09-30", dps = 276146,
+			report = "local SimC droptimiser", simmed = "2026-10-15", dps = 276027,
 			loadout = "[CP] Raid: Lost Explorers",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZMzGzMzMGz2yYZsMzMzYmBAAAgFwsBjZGMjZZmZmZMmxMAAAAAAADAAAAAwsNziZZmtNwMDwiZwAAYmBAD",
 			slots = {
-				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
-				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
-				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=239656,bonus_id=8793/8960/12214/12384/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Arcanoweave Lining)
-				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
-				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
-				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
-				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12838,ilevel=308,upgrade=3444/40", -- Sash of the Forlorn Vessel
-				legs      = "id=271527,enchant_id=8159,bonus_id=6652/13693/13698/1555/12838,ilevel=308,upgrade=0", -- Enigmatic Dreamwatcher's Leggings
-				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
-				finger1   = "id=272147,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
-				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
-				trinket1  = "id=250259,bonus_id=12854/13440/42/12699,ilevel=334,upgrade=3446/100", -- Sapling of the Dawnroot
-				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
-				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
+				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12854,ilevel=334", -- Enigmatic Dreamwatcher's Somnolent Stare (mythic tier token), droptimiser +0.91%
+				neck      = "id=268250,bonus_id=13668/12854,gem_id=240983/240888,ilevel=334", -- Sentinel's Vitriolic Chain (Entombed Sentinels), droptimiser +0.33%
+				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12854,ilevel=334", -- Enigmatic Dreamwatcher's Plumage (mythic tier token), droptimiser +0.61%
+				back      = "id=239656,bonus_id=12214/13667/12497/13751/14001/8960/12384/8793/13836,ilevel=331", -- Adherent's Silken Shroud (crafted), worn
+				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12854,ilevel=334", -- Vestment of the Awakening (Nek'zali), droptimiser +0.58%
+				wrist     = "id=244576,bonus_id=12214/13667/12497/13751/14001/8960/12384/8791/13836/13696,ilevel=331", -- Silvermoon Agent's Deflectors (crafted), worn
+				hands     = "id=271529,bonus_id=13691/6652/13697/12854,ilevel=334", -- Enigmatic Dreamwatcher's Gauntlets (mythic tier token), droptimiser +0.35%
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12854,ilevel=334", -- Sash of the Forlorn Vessel (Coiled Altar), droptimiser +0.94%
+				legs      = "id=271527,enchant_id=8159,bonus_id=13334/13693/6652/13698/12854,ilevel=334", -- Enigmatic Dreamwatcher's Leggings (mythic tier token), droptimiser +0.55%
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334", -- Breakwater Boots, worn
+				finger1   = "id=268252,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/13334/12854,ilevel=334", -- Apex Brute's Claw Ring, worn
+				finger2   = "id=268249,bonus_id=13668/12854,enchant_id=7967,gem_id=240908,ilevel=334", -- Vile Alchemist's Band (Vashnik), droptimiser +1.02%
+				trinket1  = "id=270175,bonus_id=12854,ilevel=334", -- Voracious Heart of Ula'tek (Ula'tek), droptimiser +0.64%
+				trinket2  = "id=270165,bonus_id=12854,ilevel=334", -- Keeper's Seething Core (Entombed Sentinels), droptimiser +2.67%
+				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff, worn
 			},
 		},
 		["3t"] = {
-			report = "local SimC", simmed = "2026-09-30", dps = 318568,
+			report = "local SimC droptimiser", simmed = "2026-10-15", dps = 357207,
 			loadout = "WS Raid 3T",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMm5BmBAAAAAAYAAAAEAMLzs0sMzyGYmBYhBDAgZGAMA",
 			slots = {
-				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
-				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
-				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=239656,bonus_id=8793/8960/12214/12384/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Arcanoweave Lining)
-				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12846,ilevel=321", -- Vestment of the Awakening
-				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
-				hands     = "id=271529,bonus_id=13691/6652/13697/12843,ilevel=311", -- Enigmatic Dreamwatcher's Gauntlets
-				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12836,ilevel=302", -- Sash of the Forlorn Vessel
-				legs      = "id=271527,enchant_id=8159,bonus_id=6652/12836/13693/13698/1555,ilevel=302", -- Enigmatic Dreamwatcher's Leggings
-				feet      = "id=272240,enchant_id=8018,bonus_id=6652/13662/12835,ilevel=298", -- Miststalker's Striders
-				finger1   = "id=272147,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
-				finger2   = "id=268249,gem_id=240888,bonus_id=6652/13668/13333/12841/13696,ilevel=305", -- Vile Alchemist's Band
-				trinket1  = "id=250259,bonus_id=12854/13440/42/12699,ilevel=334,upgrade=3446/100", -- Sapling of the Dawnroot
-				trinket2  = "id=270175,bonus_id=6652/13334/12844,ilevel=315", -- Voracious Heart of Ula'tek
-				main_hand = "id=268215,enchant_id=7982,bonus_id=6652/13333/13846/12838,ilevel=308", -- Abyssal Broodfiend's Bardiche
+				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12854,ilevel=334", -- Enigmatic Dreamwatcher's Somnolent Stare (mythic tier token), droptimiser +0.76%
+				neck      = "id=268251,bonus_id=13668/12854,gem_id=240983/240888,ilevel=334", -- Amulet of the Twin Fangs (Twin Fangs), droptimiser +0.31%
+				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12854,ilevel=334", -- Enigmatic Dreamwatcher's Plumage (mythic tier token), droptimiser +0.78%
+				back      = "id=239656,bonus_id=12214/13667/12497/13751/14001/8960/12384/8793/13836,ilevel=331", -- Adherent's Silken Shroud (crafted), worn
+				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12854,ilevel=334", -- Vestment of the Awakening (Nek'zali), droptimiser +0.82%
+				wrist     = "id=244576,bonus_id=12214/13667/12497/13751/14001/8960/12384/8791/13836/13696,ilevel=331", -- Silvermoon Agent's Deflectors (crafted), worn
+				hands     = "id=271529,bonus_id=13691/6652/13697/12854,ilevel=334", -- Enigmatic Dreamwatcher's Gauntlets (mythic tier token), droptimiser +0.37%
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12854,ilevel=334", -- Sash of the Forlorn Vessel (Coiled Altar), droptimiser +1.11%
+				legs      = "id=271527,enchant_id=8159,bonus_id=13334/13693/6652/13698/12854,ilevel=334", -- Enigmatic Dreamwatcher's Leggings (mythic tier token), droptimiser +0.69%
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334", -- Breakwater Boots, worn
+				finger1   = "id=268252,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/13334/12854,ilevel=334", -- Apex Brute's Claw Ring, worn
+				finger2   = "id=268249,bonus_id=13668/12854,enchant_id=7967,gem_id=240908,ilevel=334", -- Vile Alchemist's Band (Vashnik), droptimiser +1.04%
+				trinket1  = "id=270164,bonus_id=6652/13334/12854,ilevel=334", -- Gebbo's Bottomless Bag, worn
+				trinket2  = "id=270175,bonus_id=12854,ilevel=334", -- Voracious Heart of Ula'tek (Ula'tek), droptimiser +3.7%
+				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff, worn
 			},
 		},
 		["mplus"] = {
-			report = "local SimC", simmed = "2026-09-30", dps = 203335,
+			report = "local SimC droptimiser", simmed = "2026-10-15", dps = 205591,
 			loadout = "Dungeon (new)",
 			talents = "CcGADBD3hSPCL9Y9gz68WcKvMAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYBMbGeAzMYGziZmZmlxMMAAAAAAGYAAAAYmlZZmZGAwCMzMALMYAAAMzGGA",
 			slots = {
-				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12846,ilevel=321", -- Enigmatic Dreamwatcher's Somnolent Stare
-				neck      = "id=268265,gem_id=240983/240888,bonus_id=6652/13668/13333/13987/12838,ilevel=308", -- Aqirbane Reliquary
-				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12846,ilevel=321", -- Enigmatic Dreamwatcher's Plumage
-				back      = "id=239656,bonus_id=8793/8960/12214/12384/13751/13836/14001/12497,ilevel=331", -- Adherent's Silken Shroud (crafted, Arcanoweave Lining)
-				chest     = "id=239048,enchant_id=7987,bonus_id=13440/6652/13662/12699/12846,ilevel=321", -- Vest of Reverent Adoration
-				wrist     = "id=244576,bonus_id=8793/8960/12214/12384/13696/13751/13836/14001/12497,ilevel=331", -- Silvermoon Agent's Deflectors (crafted, Arcanoweave Lining)
-				hands     = "id=271529,bonus_id=13691/6652/13697/12846,ilevel=321,upgrade=3445/60", -- Enigmatic Dreamwatcher's Gauntlets
-				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12838,ilevel=308,upgrade=3444/40", -- Sash of the Forlorn Vessel
-				legs      = "id=271527,enchant_id=8159,bonus_id=6652/13693/13698/1555/12838,ilevel=308,upgrade=0", -- Enigmatic Dreamwatcher's Leggings
-				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334,upgrade=3446/100", -- Breakwater Boots
-				finger1   = "id=272147,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/12838,ilevel=308", -- Colubrine Band
-				finger2   = "id=251194,enchant_id=7967,gem_id=240908,bonus_id=13440/6652/13668/12699/12846,ilevel=321,upgrade=3445/60", -- Lightwarden's Bind
-				trinket1  = "id=250259,bonus_id=12854/13440/42/12699,ilevel=334,upgrade=3446/100", -- Sapling of the Dawnroot: the Idol at 321 sims only +0.3% M+ (2026-09-30 14:19 export), not worth its crests
-				trinket2  = "id=270175,bonus_id=6652/13334/12846,ilevel=321,upgrade=3445/40", -- Voracious Heart of Ula'tek
-				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff
+				head      = "id=271528,enchant_id=7991,bonus_id=6652/13696/13692/13698/12854,ilevel=334", -- Enigmatic Dreamwatcher's Somnolent Stare (mythic tier token), droptimiser +0.71%
+				neck      = "id=268251,bonus_id=13668/12854,gem_id=240983/240888,ilevel=334", -- Amulet of the Twin Fangs (Twin Fangs), droptimiser +0.8%
+				shoulder  = "id=271526,enchant_id=7973,bonus_id=6652/13440/13694/13697/12854,ilevel=334", -- Enigmatic Dreamwatcher's Plumage (mythic tier token), droptimiser +0.83%
+				back      = "id=239656,bonus_id=12214/13667/12497/13751/14001/8960/12384/8793/13836,ilevel=331", -- Adherent's Silken Shroud (crafted), worn
+				chest     = "id=268235,enchant_id=7987,bonus_id=41/13662/13334/12854,ilevel=334", -- Vestment of the Awakening (Nek'zali), droptimiser +0.92%
+				wrist     = "id=244576,bonus_id=12214/13667/12497/13751/14001/8960/12384/8791/13836/13696,ilevel=331", -- Silvermoon Agent's Deflectors (crafted), worn
+				hands     = "id=271529,bonus_id=13691/6652/13697/12854,ilevel=334", -- Enigmatic Dreamwatcher's Gauntlets (mythic tier token), droptimiser +0.7%
+				waist     = "id=268256,bonus_id=6652/13696/13662/13333/12854,ilevel=334", -- Sash of the Forlorn Vessel (Coiled Altar), droptimiser +1.13%
+				legs      = "id=271527,enchant_id=8159,bonus_id=13334/13693/6652/13698/12854,ilevel=334", -- Enigmatic Dreamwatcher's Leggings (mythic tier token), droptimiser +0.85%
+				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334", -- Breakwater Boots, worn
+				finger1   = "id=268252,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/13334/12854,ilevel=334", -- Apex Brute's Claw Ring, worn
+				finger2   = "id=268249,bonus_id=13668/12854,enchant_id=7967,gem_id=240908,ilevel=334", -- Vile Alchemist's Band (Vashnik), droptimiser +0.81%
+				trinket1  = "id=270164,bonus_id=6652/13334/12854,ilevel=334", -- Gebbo's Bottomless Bag, worn
+				trinket2  = "id=270175,bonus_id=12854,ilevel=334", -- Voracious Heart of Ula'tek (Ula'tek), droptimiser +2.69%
+				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff, worn
 			},
 		},
 	},
@@ -16454,7 +16454,7 @@ local function selfTest()
 		check(sendTest .. ", for this character", favs["103:251135"] and favs["103:251135"].options.characterKey, charKey)
 		check(sendTest .. ", with the gem", favs["103:251135"] and favs["103:251135"].options.gems[1], 240908)
 		check(sendTest .. ", with the enchant", favs["103:271528"] and favs["103:271528"].options.enchant, 7991)
-		check(sendTest .. ", with the bonus ids", favs["103:271528"] and table.concat(favs["103:271528"].options.bonusIds, "/"), "6652/13696/13692/13698/12846")
+		check(sendTest .. ", with the bonus ids", favs["103:271528"] and table.concat(favs["103:271528"].options.bonusIds, "/"), "6652/13696/13692/13698/12854")
 		check(sendTest .. ", the refused one is not remembered", db().keystoneLoot[charKey]["103:193763"], nil)
 		check(sendTest .. ", the wrist is remembered", db().keystoneLoot[charKey]["103:251135"] ~= nil, true)
 		local reportTest = "send reports added and removed counts"
