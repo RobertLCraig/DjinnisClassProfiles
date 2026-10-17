@@ -370,3 +370,85 @@ that rule. A mutation test confirmed they bite: flipping `<` to `>` fails three 
     pass saw no screen.
 
 **2026-10-11** Clear-down (attended, Rob asked): the card had no Acceptance block, so one is added. Ticked three criteria the card's own Checks section describes (checks `a nil rating does not reach statVerdict as 0`, `replaces the weaker of two` and `hero slug, curly apostrophe` exist and pass in the Lua 5.1 offline check). Looks rewritten for v0.69.0 and `/dcp`; look 3 now says a city, since inside an instance the place decides (card 0009). Dropped as seen: placement, drag, side-swap and styling (0.11.3), and the hero talent in the heading, ghost segments and tooltip lines through Baganator (2026-09-21 entry above). The checklist under What a person has to look at is history; the AC block is the list. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-17 review (v20261017112132-c85f)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I could not disprove any of the three ticked criteria. Each one leads to real code in `DjinnisClassProfiles.lua`, and each has an offline check.
+
+**#1, no zero when ratings cannot be read.** `allRatings` gives back nil if any one of the four stats is nil.
+- The tooltip uses it. `addStatLines` stops before it adds any stat line.
+- The pane uses it too. Its redraw in the character pane says "Ratings are hidden right now." and hides the bars.
+- No line in the file still turns a missing `ratingOf` value into a 0 (`ratingOf(...) or 0`).
+- The check "a nil rating does not reach statVerdict as 0" covers four cases, and a real 0 is kept.
+
+**#2, the weaker of two.** `weakestOf` adds up the secondary stats and picks the lowest total.
+- An empty slot is passed in with zero stats, so it counts as zero.
+- `deltaAgainstEquipped` sends only slot 16 when a one-handed item meets a two-hander.
+- Five checks cover this, including "replaces the weaker of two" in both orders.
+
+**#3, hero slug.** `heroSlug` removes the typographic apostrophe (U+2019) and the plain one. It changes spaces to hyphens.
+- The check "hero slug, curly apostrophe" gives back `elunes-chosen`.
+
+The open `proves: manual` items are for you to try in the game. They are not findings.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked whether this work stayed inside the card's scope.
+
+**What the diff holds.** The diff has 160 files. Most of them belong to other cards, not to card 0003:
+- The rename from `DjinnisBiS.lua` to `DjinnisClassProfiles.lua` (card 0058).
+- The Warcraft Logs tools: `wcl.py`, `wcl-builds.py`, `update-builds.py`.
+- The bar research under `docs/research/`.
+- About 60 other board cards.
+
+Each of those has its own card. So the diff spans many cards, and this card did not grow on its own.
+
+**The card's own work survives the rename.** `DjinnisClassProfiles.lua` still has all of it:
+- `STAT_TARGET`.
+- `allRatings`, which gives all four ratings or none.
+- `weakestOf`.
+- `activeHero`, which calls `C_Traits.GetSubTreeInfo` with both `configID` and `subTreeID`.
+- The pane text "Ratings are hidden right now." in the character pane builder.
+
+Nothing over the card's fence was found. There is no "Not this card" section to break. Nothing is half done.
+
+The open criteria are all `proves: manual`. They wait for you to try them in the game.
+
+**One caveat.** The diff range mixes many cards. So a scope check of this card alone is weak. The script that picks the diff range should limit it to this card's commits.
+
+No criterion is disproved.
+
+VERDICT: sound
+
+**breakage: defect**
+
+**Finding: a two-hander is compared against only half of what it takes off.**
+
+In `DjinnisClassProfiles.lua`, `deltaAgainstEquipped` gets its slots from `INVTYPE_SLOTS`. For `INVTYPE_2HWEAPON` that list is only `{ 16 }`, the main hand. The code has a rule for one direction: a one-handed item unseats a two-hander (`twoHandedMainHand`). It has no rule for the other direction: a two-hander unseats the main hand **and** the off hand.
+
+What goes wrong:
+- A Balance or Resto druid wears a mace and an off-hand. The BiS lists hold both slots for these specs.
+- They hover a staff.
+- The tooltip and the ghost bars count only the mace coming off. The off-hand's stats are never taken away.
+- So the drop looks like more gain than it is. This is the same kind of error as the "vs an empty slot" bug that was fixed.
+- The footer names only the mace as the piece replaced.
+
+The card's Direction says each item is compared "against the piece it would actually replace". This case breaks that promise. No offline check builds this case. `weakestOf` cannot express it, because it picks one piece and this case needs the sum of two.
+
+Things I checked that held:
+- The nil-rating path (`allRatings`) stops the tooltip.
+- The pane's `setStatRow` never gets a zero.
+- `heroSlug` handles both apostrophes.
+
+No acceptance criterion covers the dual-wield case, so this finding disproves none of them. Criterion #2 is about choosing between two pieces, not about losing both. The card needs a new criterion for this.
+
+VERDICT: defect
+
