@@ -132,7 +132,7 @@ tier, and carrying it would have meant a sixth colour for one item.
       name whose link has not resolved, returning nothing in each case rather than throwing.
 - [x] #4a THE RANKED TRINKET LIST SHALL render in a live client with real item links, with
       ClassCodex disabled. **Seen working 2026-09-02**, screenshot on this card's Comments.
-- [x] #6 THE SAME TRINKET SHALL carry the same tier wherever it appears in the window, whether it
+- [ ] #6 THE SAME TRINKET SHALL carry the same tier wherever it appears in the window, whether it
       is reached by item id or by name.
 - [x] #5 REFRESHING THE TIERS SHALL be one repeatable command with a dry run, SHALL be safe to
       re-run when nothing has changed, and SHALL fail loudly rather than write a partial table.
@@ -178,3 +178,67 @@ every letter has a colour and a rank, every entry rates at least one source, the
 agreement and keeps both letters on disagreement, and the suppression returns nothing for every spec
 once ClassCodex is loaded. **That proves the data and the pure logic and nothing else.** No frame in
 this addon has been drawn outside a game client, which is what acceptance #4 is for.
+
+### 2026-10-17 review (v20261017083928-d286)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each ticked box against the code in `DjinnisClassProfiles.lua`. I could not break any of them.
+
+- **#1, tiers for all four specs, by item id.** This is `TRINKET_TIER`, with the source stamp in `TRINKET_TIER_SOURCE`. Each spec has its own list. Where u.gg and Icy Veins give different letters, the entry keeps both (`u` and `iv`).
+- **#2, no tiers when ClassCodex is loaded.** `tiersForId` and `tiersFor` give back nothing when `classCodexLoaded()` is true. The ranked block in the render code then shows one line: "Trinket ranks are off...".
+- **#3, no errors on missing data.** `tiersForId` gives back nothing for a missing id or an unknown spec. `tiersFor` gives back nothing for a missing name. `tierText(nil)` gives back an empty string.
+- **#6, same letter by id or by name.** `tiersFor` tries the item id first. If the id misses, it tries the name. The name list is rebuilt on every window refresh (`pcall(refreshTierNames)`).
+- **#5, refresh script.** `update-classcodex-data.ps1` exists. I did not run it. I did not read its failure paths. Its 397 lines are in the diff.
+- **#4a.** Rob saw this working in the game on 2026-09-02.
+
+One small thing, not a defect: the tooltip's name lookup only fills after the window has been opened once. No box asks for more than that.
+
+The three open boxes are `proves: manual` checks. Rob does those in the game.
+
+VERDICT: sound
+
+**scope: sound**
+
+I tried to break the card's scope. I could not.
+
+**What I checked:**
+- **The tier table.** `TRINKET_TIER` in `DjinnisClassProfiles.lua` still has the four druid specs. It is keyed by item id. That is criterion #1.
+- **Standing aside for ClassCodex.** `classCodexLoaded` turns off `tiersForId` and `tiersFor`. When ClassCodex is loaded, the By Slot render shows the line "Trinket ranks are off: ClassCodex is loaded and keeps them current". That is criteria #2 and #4b.
+- **The name fallback.** `tiersFor` falls back to the item name only when the id misses. Criterion #6 asks for this. It does not go over the "join is by id" fence.
+- **The fence "do not read ClassCodex live".** No code reads ClassCodex's globals or data files while the game runs. The only runtime touch is the `IsAddOnLoaded` check. The fence is kept.
+- **The fence "no Raidbots tiers, no schedule, no ClassCodex fix".** None of these is in the code.
+
+**One note, not a defect:** the diff (161 files, the rename to DjinnisClassProfiles, the deleted `DjinnisBiS.lua`) is the whole branch history, not this card's change. The tooltip tier line belongs to card 0077. The rename belongs to card 0058. So that growth is not this card's.
+
+The three open criteria are all `proves: manual`. They wait for Rob to try them in game.
+
+VERDICT: sound
+
+**breakage: defect**
+
+I found one real bug. The name fallback never runs in the live addon.
+
+**Finding: the name map is never filled.** In `DjinnisClassProfiles.lua`, the function `refreshTierNames` fills `tierNames`. Nothing calls it. A search for `refreshTierNames(` finds only the line that defines it.
+
+- Because of this, `tiersFor` falls back to an empty `tierNames[spec]` in the game.
+- The fallback always gives nil, so the Gebbo's Bottomless Bag fix does nothing in the game.
+- The ranked list still shows a letter, by item id. The Trinket slot cell (`setItemCell`) is still blank. That is the same mismatch as the 2026-09-02 bug.
+- The `/bis test` self-test does not catch this. It writes a fake entry straight into `tierNames.Feral`, so it skips the missing call.
+- The comment above `tierNames` says it is "Rebuilt on refresh". That is false.
+- The item tooltip (`PlanTab.tierLine`) has the same gap.
+
+This also means the manual Gebbo's check on the card cannot pass until someone fixes the missing call.
+
+UNMET: #6 `refreshTierNames` is never called, so `tierNames` stays empty and the name fallback in `tiersFor` never matches, which leaves Gebbo's Bottomless Bag blank in the Trinket slot while the ranked list rates it.
+
+VERDICT: defect
+
+**acceptance**
+
+- **#6 reopened**, by the breakage lens: `refreshTierNames` is never called, so `tierNames` stays empty and the name fallback in `tiersFor` never matches, which leaves Gebbo's Bottomless Bag blank in the Trinket slot while the ranked list rates it.
+
