@@ -121,3 +121,56 @@ WHY: The code meets every criterion, but the in-game looks describe an addon fro
 OUTCOME: rob
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new; the five `proves:` checks were already ticked and still exist (`current content follows instance type then the switch`, `an item planned for both contents is wanted once`, `plan tab shows the current content and can switch`, `missing mplus plan is said, not filled from raid` pass in the Lua 5.1 offline check; `generator files a report under raid or mplus by fight style` is in `update-gear-plan.ps1 -SelfTest`, not re-run here). Looks 1 to 6 rewritten for v0.69.0: the Mythic+ cell is filled, the Mythic+ row's loadout is "Dungeon", the strip cycles 1, 2, 3+ targets, Mythic+ (`PlanTab.nextScenario`), and the Plan tab has its own four content buttons (`PlanTab.CHOICE_LABEL`). Old look 6 is folded into card 0003's look 3, which now says a city. Look 7 is done: Dungeon Slice reports were baked as Feral `mplus` on 2026-09-22 and 2026-09-28. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-17 review (v20261017230155-bd0d)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I tried to break the five code criteria. I could not.
+
+1. **Report filing.** `update-gear-plan.ps1` sets the scenario to `mplus` when `simbot.fightStyle` matches `^Dungeon`. Every other report goes by its enemy count, the same as before.
+2. **Current content.** `statContext` in `DjinnisClassProfiles.lua` checks where you stand first (`autoContext`): a raid gives Raid, a party instance gives Mythic+. Outside an instance it uses the saved switch, and then Raid. `planScenario` returns `mplus` when the content is Mythic+.
+3. **One wanted item.** `rebuildBagWanted` builds the bag list from one plan only, the one for the current content. So an item that is in both plans is listed one time. `wantedSlot` also stops at the first match.
+4. **Plan tab.** `PlanTab.CHOICE_LABEL` and the choice builder next to it make four buttons. The chosen one is lit, and the others carry the reason they are greyed. `PlanTab.nextScenario` cycles the scenarios.
+5. **Missing Mythic+ plan.** `rebuildBagWanted` uses `gearPlanFor(spec, "mplus")` and does not fall back to the raid plan. The offline check proves two things: the bag list is empty when there is no Mythic+ cell, and the tab shows "No Mythic+ gear plan yet".
+
+One weak point: criterion 3 can only pass, because only one plan is read at a time. That is how the card's own build note chose to do it, so I do not count it as a defect.
+
+The open looks are all `proves: manual`, so they are not findings.
+
+VERDICT: sound
+
+**scope: sound**
+
+**What I checked (scope lens only)**
+
+- **The fence holds.** I found no per-dungeon builds and no per-affix or per-key-level gear. Raid filing still uses `st`, `2t` and `3t`. The Mythic+ work is one more scenario, `mplus`. You can see it in `PlanTab.BOSSES` ("Mythic+, any key"), `PlanTab.CHOICE_LABEL` and `SCENARIO_LABEL`.
+- **The big diff is not this card.** It has 157 files: the rename to DjinnisClassProfiles, WCL tooling, bars research, and many other cards. Those belong to other cards (0058, 0064, 0028 and more). The card 0009 code is small and stays inside its own idea.
+- **One task is ticked but was not done as written.** The task "Add a `content` level above `scenario`" is ticked. The build did not do it. It added `mplus` as a scenario key next to the others. The 2026-09-22 comment says so openly, and no criterion needs the level. So it is a note for the board, not a defect.
+- **"One M+ loadout per spec" is only part done.** Only two specs have a Mythic+ row in `PlanTab.BOSSES`. Card 0091 (in todo) holds the Guardian and Resto rows. Criterion #5 covers the gap: the tab says the plan is missing and does not fill it from raid. So no criterion fails.
+
+No criterion is disproved. Only the in-game `proves: manual` checks are still open.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I checked the code against the card. Nothing on it is broken.
+
+**What I checked:**
+- **Content order.** `statContext` in `DjinnisClassProfiles.lua` puts where you stand first, then the saved switch, then Raid. This is what criterion #2 asks for.
+- **Mythic+ plan.** `planScenario` gives back `mplus` when the content is Mythic+. Anything else it does not know becomes `st` (1 target).
+- **Raid button.** In a raid, `PlanTab.nextScenario` goes 1, 2, 3+, back to 1, and it never offers Mythic+. In a dungeon it stays on Mythic+. This matches looks 6 and 7.
+- **Bag glows.** `rebuildBagWanted` uses the same `planScenario` result. The offline checks look at the bags in three cases: outside, in a dungeon, and in a dungeon with the Mythic+ plan removed. In the last case the bags are empty and do not fall back to the raid list. This backs criteria #3 and #5.
+- **Plan tab text.** The offline checks look for "No Mythic+ gear plan yet" and the picked "> Mythic+, any key" row, which backs criteria #4 and #5.
+
+**One small note, not a fault:** `autoContext` does not count a "legacy" instance (an old one, read by `PlanTab.legacyHere`). In one of those, the saved switch decides. The card does not cover this case.
+
+I did not run the offline checks. The game checks (the `proves: manual` looks) are still open, and that is Rob's job in the game.
+
+VERDICT: sound
+
