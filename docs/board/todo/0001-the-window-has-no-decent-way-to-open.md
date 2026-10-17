@@ -102,3 +102,75 @@ private addon cannot be published, and publishing is now on the table.
 ## Comments
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new (#3 and #4 were already ticked; no criterion names a check). Looks rewritten for v0.69.0: #1 and #2 are now `proves: manual` looks, and the tooltip look from Tasks is added. The `.toc` still carries `## AddonCompartmentFunc: DjinnisClassProfiles_Toggle` and the LibDBIcon db is still `{ hide = false }` (`buildBroker`), so the restart answers which route works; the old route table under What I need from you is folded into look #2. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-17 review (v20261017043854-1bf3)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each acceptance criterion against the code. The code supports every criterion that is ticked. The open ones are in-game checks (`proves: manual`) for Rob to do.
+
+- **#3 (depends on no other addon, open interface): met.** In `DjinnisClassProfiles.lua`, the function `buildBroker` makes a LibDataBroker "data source" with `NewDataObject`. LibDataBroker is the open standard that data text displays read. LibDBIcon then turns it into a minimap button. The four libraries are inside the addon, in `Libs\`, and `DjinnisClassProfiles.toc` lists them. The addon needs no other addon.
+- **#4 (floating claw button gone): met.** `DjinnisBiSButton`, `buildButton` and `DjinnisBiSDB.button` are gone. The only button left is the LibDBIcon one.
+- **#1 (button survives restart and `/reload`): manual.** The code can pass. Startup code calls `buildBroker`. The button's position saves in `DjinnisCPDB.minimap`. A click calls `DjinnisClassProfiles_Toggle`.
+- **#2 (one drawer entry): manual.** `.toc` still has `## AddonCompartmentFunc: DjinnisClassProfiles_Toggle`. `buildBroker` does not set `showInCompartment`. So the restart will show which route works, as the card plans.
+- **Tooltip look: manual.** The function `summaryLines` writes the title and "Click to open". In an instance, it also writes the green "N BiS items drop here" line. It gets that count from `bisFrom(GetInstanceInfo())`.
+
+VERDICT: sound
+
+**scope: sound**
+
+**Scope review of card 0001: no scope defect found.**
+
+**What the card asked for, and what the code does:**
+- In `DjinnisClassProfiles.lua`, `buildBroker` registers a LibDataBroker "data source". It then hands that same object to LibDBIcon, which makes the minimap button. This is the route the card chose on 2026-08-20.
+- `summaryLines` shows the "N BiS items drop here" line. It gets the count from `bisFrom()`, as the card's Plan said it should.
+- The old floating claw button (`DjinnisBiSButton`) is gone. Criterion #4 holds.
+- The addon loads only its own copies of the four libraries, and nothing in the code needs another Djinni addon. Criterion #3 holds.
+- The code does not touch `DjinnisDataTexts`. That part of the "Not this card" fence holds.
+
+**Over the fence?** The git diff is very large: 172 files and a full rename to Class Profiles. That is work from about 100 other cards, not this one. The code that belongs to this card stays inside its fence.
+
+**Left half done (not a defect):**
+- The Plan said that outside an instance, the tooltip shows how many BiS items you already own. `summaryLines` does not do this. It shows "Nothing BiS drops here" instead. No criterion asks for the owned count, so I name no criterion.
+- The `.toc` still has `## AddonCompartmentFunc`. The minimap settings in `buildBroker` still have no `showInCompartment`. Criterion #2 says to keep it this way until a full restart shows the result, and #2 is a manual check that is only open.
+
+**What you do now:** nothing until you play. Then try the three manual checks on the card (#1, #2 and the tooltip check).
+
+VERDICT: sound
+
+**breakage: defect**
+
+I found one defect. The minimap tooltip cannot show "N BiS items drop here" inside the raid. So the tooltip look (the 5th criterion, which has no number) cannot pass.
+
+**Defect: the tooltip asks the wrong question inside the raid**
+
+- `summaryLines` in `DjinnisClassProfiles.lua` takes the zone name from `GetInstanceInfo()`. Inside the raid, that name is "The Venomous Abyss". It then sends that name to `bisFrom`.
+- `bisFrom` checks the name against each item's boss name, such as "Ula'tek" or "Vashnik". It uses a loose text match in both directions.
+- No item in the BiS list has "Venomous Abyss" as its boss. No raid boss name is part of "the venomous abyss" either.
+- So inside the raid, `bisFrom` finds nothing. The tooltip then says "Nothing BiS drops here".
+- The match only works in dungeons, where the boss text is the dungeon name, for example "Temple of Sethraliss".
+- The old `/bis here` command and the end-of-key check have the same problem inside the raid. A boss kill still works, because it gives a boss name.
+
+**Small, not counted against a criterion**
+
+- The comment at the top of the minimap button section in `DjinnisClassProfiles.lua` says the button copies what "DjinnisClassProfiles already use". This addon now has that name, so the comment no longer makes sense.
+
+**What I checked and found correct**
+
+- The libraries load before the main file.
+- `buildBroker` runs at login, after the saved data moves over.
+- The `.toc` names the open function `DjinnisClassProfiles_Toggle`, and that global function exists.
+- The old claw button and `DjinnisBiSDB.button` are gone.
+
+UNMET: #5 inside The Venomous Abyss, summaryLines asks bisFrom about the raid's name, but bisFrom only matches boss names, so the tooltip says "Nothing BiS drops here" and never shows a green "N BiS items drop here" line.
+
+VERDICT: defect
+
+**acceptance**
+
+- **#5 was named by the breakage lens and is not a ticked criterion here**, so nothing was changed: inside The Venomous Abyss, summaryLines asks bisFrom about the raid's name, but bisFrom only matches boss names, so the tooltip says "Nothing BiS drops here" and never shows a green "N BiS items drop here" line.
+
