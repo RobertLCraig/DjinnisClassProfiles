@@ -150,3 +150,72 @@ Deploy: `C:\Dev\WoWAddons\bin\deploy.ps1 -WhatIf -Only DjinnisBiS`, then without
     has been seen by anyone. That is a stated claim, and it is why this is not in `done/`.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new; the four `proves:` checks (`bag item is wanted when it matches an unfilled plan slot`, `only the planned copy of a duplicate is wanted`, `equipped planned item glows no bag copy`, `wanted bag item names its slot and scenario`) were already ticked and still exist and pass in the Lua 5.1 offline check. Looks rewritten for v0.69.0: the Baganator corner widget is now "Djinni's Class Profiles: gear plan"; the five looks are `proves: manual` criteria, the combat one carrying the original combat criterion. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-17 review (v20261017163218-c515)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I could not break any of the four ticked criteria. The other five are manual checks for you to do in the game.
+
+**What I checked, all in `DjinnisClassProfiles.lua`:**
+
+- **#1, a bag item glows when the plan wants it in a slot.**
+  - `wantedFrom` keeps only the slots where the plan wants a "change".
+  - `wantedSlotForLink` checks each bag item against that list.
+  - `buildBagGlows` adds the glow. It uses Baganator's corner widget when Baganator is loaded, and Blizzard's own bag buttons when it is not.
+  - The offline check `bag item is wanted when it matches an unfilled plan slot` covers this.
+- **#2, only the planned copy glows.**
+  - `wantedSlot` uses `planMatches`, which compares item id and item level.
+  - A lower copy, a higher copy and a copy with no item level yet all return nil. The check tests all three.
+- **#3, a worn planned item makes no bag copy glow.**
+  - `slotStates` leaves a worn planned piece out of the "change" list.
+  - The check `equipped planned item glows no bag copy` covers this.
+- **#4, the tooltip names the slot and the scenario.**
+  - `addBagLine` adds a line made by `wantedLine`. The text is "Plan: equip in <slot>, <scenario>".
+  - The check tests it, and it also checks that every plan slot has a label.
+
+**Combat (part of #8):** `rebuildBagWanted` and the default-bag refresh both stop at once in combat (`InCombatLockdown()`). `armBagMarks` rebuilds the list on `PLAYER_REGEN_ENABLED`, which fires when combat ends. Nothing I read stops #8 passing.
+
+**What you do now:** nothing for this review. Try the five manual looks in the game when you can.
+
+VERDICT: sound
+
+**scope: sound**
+
+**What I did:** I checked the card's code only for scope (work the card did not ask for, or work left half done). I read the bag glow code in `DjinnisClassProfiles.lua`, in the Baganator part and in the default-bag part (the `refreshBagGlows` closure).
+
+**What I found:**
+
+- **Baganator:** The code uses only `RegisterCornerWidget`. That is the hook the card's Plan told it to prefer. It does not use the upgrade plugin or the item set source.
+- **Default bags:** The fallback reads only `ContainerFrameCombinedBags` and `ContainerFrameContainer.ContainerFrames`. These are the normal bags, not the bank.
+- **Fence:** The glow code does not touch the bank, the warband bank, Bagnon, AdiBags, ElvUI bags or EnhanceQoL Bags. It adds no character sheet, shopping list or equip button.
+- **Combat:** The rebuild stops in combat, because it checks `InCombatLockdown()`, as the card asks.
+- **Big diff:** The diff has 162 files. That is the rename to DjinnisClassProfiles and the history of many other cards. This card did not grow that work. Other `bank` and `EnhanceQoL` hits in the file belong to other features, not to the glow.
+- **Half done:** I found nothing. Only the `proves: manual` checks are open, and those wait for Rob in the game.
+
+I disproved no criterion.
+
+**What you do now:** Nothing. Plan mode was on, so I edited nothing.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I checked the bag glow code to see if it breaks anything. I found no break.
+
+- **Same match rule (#1 - #3).** `wantedFrom` and `wantedSlot` in `DjinnisClassProfiles.lua` use `planMatches`. Card `0005` uses that same rule (item id and item level). So only the planned copy glows. A planned piece that you already wear makes no "change" slot, so no bag copy glows.
+- **Tooltip line (#4).** `addBagLine` uses `wantedLine`. The offline check tests this with "Plan: equip in Back, 1 target". The manual look expects the same text.
+- **Rename.** `buildBagGlows` now shows the widget name "Djinni's Class Profiles: gear plan". The card looks use the same name. The widget id is still `djinnisbis_plan`. Baganator stores your corner choice by id, so the rename keeps it.
+- **Default bags.** I checked `ContainerFrame_GenerateFrame`, `ContainerFrame_UpdateAll` and `EnumerateValidItems` in `wow-ui-source` (`Blizzard_UIPanels_Game\Mainline\ContainerFrame.lua`). All three are there, so the hooks attach.
+- **Combat.** `rebuildBagWanted` and the default-bag `refreshBagGlows` both stop when `InCombatLockdown()` is true. `PLAYER_REGEN_ENABLED` rebuilds the list after combat.
+
+All open criteria are `proves: manual`. You check them in the game.
+
+What you do now: the card goes to `done/`. Do the five looks in the game when you can.
+
+VERDICT: sound
+
