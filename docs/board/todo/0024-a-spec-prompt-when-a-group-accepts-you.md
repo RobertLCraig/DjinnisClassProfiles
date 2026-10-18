@@ -137,3 +137,75 @@ the dungeon and the role; neither changes the setup.
 ## What I need from you
 
 Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
+
+### 2026-10-19 review (v20261019003153-f2ea)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each criterion in `DjinnisClassProfiles.lua`. I did not run the code or the offline check.
+
+**#1, prompt on acceptance: met.**
+- `PlanTab.armGroupPrompt` starts the watcher at login (wrapped in `pcall`).
+- `PlanTab.onAccepted` acts only on the status `"inviteaccepted"`. It reads the role (fifth return of `GetApplicationInfo`) and the place (`fullName`).
+- `PlanTab.offerSetup` shows the window. Its lines are "Healer for <place>", "Plan: Resto, Mythic+" and "Change spec to Resto".
+- The check `prompt names role, place and spec on acceptance` is in `selfTest`.
+
+**#3, only what differs, or no prompt: met.**
+- `PlanTab.setupSteps` adds the loadout or set step only when it differs from what you have now.
+- It returns nil when nothing differs, and then `offerSetup` shows nothing.
+- The check `no prompt when spec, loadout and gear already fit` is in `selfTest`.
+
+**#2 and the other open criteria are manual looks.** The code for them is there:
+- `PlanTab.setupStep` runs the steps in order: spec, then loadout, then set. It waits while you are in combat.
+- `PlanTab.onGroupEvent` only counts the player's own spec change. A spec change to a third spec drops the setup ("abandoned"). The end of combat starts a step again only if combat held that step.
+- Nothing I read shows that a manual criterion cannot pass.
+
+VERDICT: sound
+
+**scope: sound**
+
+**What I checked.** I compared the card with the code in `DjinnisClassProfiles.lua`. I looked at `PlanTab.onAccepted`, `PlanTab.offerSetup`, `PlanTab.setupStep`, `PlanTab.onGroupEvent` and `PlanTab.armGroupPrompt`.
+
+**The fence ("Not this card"):**
+- **No change without a click.** `PlanTab.offerSetup` changes nothing by itself. All changes start in the "Set up" button's `onClick`. "Not now" does nothing.
+- **No raid invites.** Only `LFG_LIST_APPLICATION_STATUS_UPDATED` with status `"inviteaccepted"` starts the prompt. No party or raid invite event is registered.
+
+**Growth.** The diff shows 164 files. That is the whole branch, so it carries many other cards. The part for card 0024 did not grow past its card. One added thing is in `PlanTab.setupStep`: it waits while `PlanTab.tagging` or `PlanTab.swapping` runs. Reviews of cards 0059 and 0063 asked for this wait. It keeps the card's own order (spec, then loadout, then set), so it is not scope creep.
+
+**Half done.** The build comment said the frame shared with card 0013 was left out. The code now has one shared frame, `PlanTab.prompt`, and many prompts use it. So the "Links" promise is kept.
+
+I found no criterion that is not met. The open criteria are all `proves: manual`.
+
+VERDICT: sound
+
+**breakage: defect**
+
+I checked the setup chain in `DjinnisClassProfiles.lua`. I found one break.
+
+**Finding: the set can go on before the loadout lands.**
+
+- In `PlanTab.setupStep`, only a `"loaded"` answer from `PlanTab.loadTalents` stops the chain to wait for `TRAIT_CONFIG_UPDATED`.
+- Since card 0040, `PlanTab.loadTalents` can hand the job to `PlanTab.wearSpare`. That happens when a build has no saved loadout of its own.
+- `PlanTab.wearSpare` gives other answers: `"worn"` (a loadout switch is sent and is in flight), `"tidying"` (the switch comes later, after the queue), `"waiting"` (it waits for the talent window to close), or an import.
+- `setupStep` reads each of these as "missing" and calls `UseEquipmentSet` in the same frame. So the gear goes on while the talent change is still pending, or before it even starts.
+- The comment in `setupStep` says only "missing or no helper" falls through. Card 0040 made that comment false.
+- The self-test stubs `loadTalents`, so no check builds the spare path.
+
+The other parts held:
+- The party-member filter on `PLAYER_SPECIALIZATION_CHANGED`.
+- Abandoning the setup when you land on a different spec.
+- Resuming after combat only for a step that combat held.
+- Resuming through `afterTagging` once the tagging/swap queue ends.
+
+UNMET: #2 when the planned loadout goes through card 0040's spare path, `setupStep` does not wait for `loadTalents` to finish, so the set is equipped before the loadout lands and the spec-then-loadout-then-set order cannot hold.
+
+VERDICT: defect
+
+**acceptance**
+
+- **#2 was named by the breakage lens and is not a ticked criterion here**, so nothing was changed: when the planned loadout goes through card 0040's spare path, `setupStep` does not wait for `loadTalents` to finish, so the set is equipped before the loadout lands and the spec-then-loadout-then-set order cannot hold.
+
