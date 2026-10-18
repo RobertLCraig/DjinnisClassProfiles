@@ -150,3 +150,61 @@ bags/bank" lines.
 ## What I need from you
 
 Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
+
+### 2026-10-18 review (v20261018120715-f071)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked the three ticked criteria against the code in `DjinnisClassProfiles.lua`. I could not break them.
+
+**#1, one line per spec and content, current spec first.** `PlanTab.buildPlanIndex` makes one row for each spec and content. The two raid cells become one raid row. `PlanTab.planLines` puts the current spec first, then the other specs in spec order. The tooltip post-call gets the lines from `PlanTab.planLinesForLink(link, id)`, so there is no second hook. The self-test checks this under `tooltip lists each plan that has the item`.
+
+**#2, "owned".** `PlanTab.planOwned` reads the worn slots first. Then it calls `C_Item.GetItemCount` with the bank and the account bank on. `planLines` then adds ", owned" to the line. Each value goes through `canRead` before the code compares it. ("Secret" values are game values that addons may not compare or use as keys; `canRead` checks for them.) The self-test checks this under `tooltip says a planned item is owned`.
+
+**#4, no line for an unplanned item.** `planLines` gives back `{}` when the item id is not in the index. `planLinesForLink` gives back `{}` too, or `nil` when the link cannot be read. The self-test checks this under `no plan line for an unplanned item`.
+
+The open manual criteria (#3, #5 to #9) have real code behind them:
+- `PlanTab.markRollFrame` makes the glow, hooked on `GroupLootFrame_OnShow`.
+- The roll handler prints the `[BiS] PLAN` chat line.
+- `planLines` makes the "in plan at N" text.
+
+`markRollFrame` always calls `SetShown`, so a reused roll frame cannot keep the old glow. Nothing I read shows that a manual criterion cannot pass. Those checks are the owner's to do in the game.
+
+Limit: I did not run the offline check. I only read the code.
+
+VERDICT: sound
+
+**scope: sound**
+
+I tried to find work that goes past what the card asked for. I found none.
+
+- **Fence held.** The card says no % upgrade and no Pawn weights. Neither one is in the new code. `PlanTab.planLines` in `DjinnisClassProfiles.lua` only gives "in plan", ", owned" or "in plan at N".
+- **No second tooltip hook.** The plan lines use the tooltip hook that was already there. The roll mark uses `hooksecurefunc` on `GroupLootFrame_OnShow`. The card's Tasks asked for this.
+- **Nothing half done.** `PlanTab.buildPlanIndex`, `planLines`, `planOwned`, `planLinesForLink` and `markRollFrame` all exist. The `[BiS] PLAN` chat line also exists. The self-test has a check for the "in plan at" text.
+- **The big diff is not this card's fault.** It shows 160 files. That is the whole branch: the rename to DjinnisClassProfiles, the bars work and many other cards. The card's own change is only the plan-line code above. I did not count the other cards' work against this one.
+- **Only manual checks are open.** Those are for Rob to try in the game. They are not findings.
+
+VERDICT: sound
+
+**breakage: sound**
+
+**What I did:** I tried to break the plan lines on the tooltip and on the loot roll. I read the new code and its self-test checks.
+
+**Did it work:** Yes. I found no breakage.
+
+- **`PlanTab.planLinesForLink`**: All three callers use it: the tooltip hook, the `START_LOOT_ROLL` chat line and `PlanTab.markRollFrame`. All three handle both answers it can give: an empty list (not a druid, or the item is in no plan) and `nil` (no link, or a value it may not read).
+- **`PlanTab.markRollFrame`**: It has no early return now. So a reused roll frame always turns off an old glow.
+- **`PlanTab.planOwned`**: It runs `canRead` on the count before it compares it. It also checks the worn slots, because the bag count does not include worn gear.
+- **The card 0016 self-test block**: It replaces three game reads with fixed test answers: what you wear, what you carry, and item levels. So it no longer depends on the real character. It puts all three back at the end.
+- **`PlanTab.bonusOwned`** is a newer caller of `planIndex`. It still matches the shape of the index.
+
+**One note, not a finding:** On a character that is not a druid, `/dcp test` gives FAIL lines. This is not new. An older check already expects a druid ("every spec, the class is put back"). Criterion #5 also assumes a druid that holds the Feral head.
+
+**What you do now:** Nothing. The open criteria are all in-game checks that you do yourself.
+
+VERDICT: sound
+
