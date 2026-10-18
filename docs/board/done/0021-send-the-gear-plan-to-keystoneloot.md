@@ -141,3 +141,69 @@ What it gains: a whole addon's reminders turn on for four specs, and DjinnisBiS 
 ## What I need from you
 
 Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
+
+### 2026-10-18 review (v20261018165156-a56a)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I read the code against each of the four built criteria. I tried to break each one and could not.
+
+- **#1 (plan items become favourites per spec):** This passes. `PlanTab.keystoneLootWanted` collects every item in every filled plan cell, for each druid spec. `PlanTab.sendToKeystoneLoot` then sends each one with `AddFavorite` at `Tier.BIS`. It also sends the bonus ids, gems, enchant and character key.
+- **#2 (only favourites the addon added are removed):** This passes. In `PlanTab.sendToKeystoneLoot`, only keys in the `DjinnisCPDB.keystoneLoot[charKey]` record ever reach `RemoveFavorite`. Hand-made favourites are skipped: a favourite that exists already but is not in the record is not sent and not recorded. So it can never be removed later.
+- **#3 (no button without KeystoneLoot):** This passes. `PlanTab.keystoneLoot` returns nothing when the global is missing or has no `AddFavorite`. The Plan tab row is drawn only when that check passes.
+- **#4 (one line with the counts):** This passes. `PlanTab.sendToKeystoneLoot` prints one line: "added" and "removed" counts, plus "refused" and "left as yours" when those are above 0.
+
+One small note, and it is not a defect. When two plan cells have the same item, the gems and enchant of whichever cell `pairs` visits first win. That order is not fixed. It does not break any criterion.
+
+The six open criteria are `proves: manual`, so they are not findings. Rob tries them in the game.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked the KeystoneLoot code against the card. It does not go over the fence.
+
+**What I checked:** `DjinnisClassProfiles.lua`, functions `PlanTab.keystoneLoot`, `PlanTab.keystoneLootWanted` and `PlanTab.sendToKeystoneLoot`.
+
+- **KeystoneLoot settings:** the code never changes them. It calls only `IsReady`, `RegisterCallback`, `GetCurrentCharacterKey`, `IsFavorite`, `AddFavorite` and `RemoveFavorite`. "Not this card" allows all of these.
+- **Rob's own favourites:** the code removes only items in its saved record (`sent`). An item that is a favourite but not in the record is left as it is and counted as "left as yours". So a favourite made by hand is never removed or changed.
+- **The druid check:** `PlanTab.gearHere()` stops the send on a character that is not a druid. That check came from card 0049, not from this card. It agrees with "each druid spec", so it is not extra scope.
+- **The big diff:** most of the diff (the rename, the other cards, the research files) belongs to other cards. It is not part of this card's code.
+
+**Nothing is half done.** All four tasks are in the code: the record, the wait for READY, sending bonus ids, gems and enchant, and the offline checks. The open criteria are all `proves: manual`, and the code does not stop any of them from passing.
+
+**One known gap:** a favourite that Rob deletes by hand comes back on the next click if the plan still wants it. The card already writes this down and accepts it in look 4.
+
+No criterion is disproved.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break the KeystoneLoot send and could not. I found nothing that fails a criterion.
+
+**What I checked** (all in `DjinnisClassProfiles.lua`):
+
+- **The plan list** (`PlanTab.keystoneLootWanted`). It now goes through the specs of every class. Only the druid specs have a gear plan, so other classes add nothing. The item fields (`bonus`, `gems`, `enchant`) have the names that `parsePlanLine` gives them.
+- **The send** (`PlanTab.sendToKeystoneLoot`).
+  - It removes only items that are in its own record.
+  - It does not record a refused item.
+  - It does not touch a favourite that Rob made by hand.
+  - It sends again an item that Rob deleted by hand, and it does not count that item as added. Manual look 4 expects this.
+- **The chat line.** Its words are the same as the words the manual looks expect.
+- **The row.** The game draws it only when `KeystoneLootAPI.AddFavorite` exists.
+
+**Small problems. They fail no criterion:**
+
+1. Say KeystoneLoot is not ready and you click more than once. Each click adds one more READY listener, so the send runs more than once and you get more than one chat line.
+2. Say a call into KeystoneLoot fails in the middle of a send. The record is already part-written, and you get the error line but no count line.
+3. A non-druid character with KeystoneLoot loaded still sees the row. If they click, the addon says "druids only".
+
+The open looks are all `proves: manual`. Rob does them in the game.
+
+VERDICT: sound
+
