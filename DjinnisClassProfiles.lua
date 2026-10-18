@@ -587,7 +587,7 @@ PlanTab.BUILDS = {
 		["Raid: Nymrissa"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYJY2MMmZUzYWGzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs Nymrissa Wavecaller: typical of 100, 73% agree on 18 contested, 2026-09-25
 		["Raid: Twin Fangs"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMmZ2WGmZZGzMmZAAAAYLYYYMzomxsMmZmZZMjBAAAAAgBGAAAAAgZbmlmlZ22AzMALmBDAgZGAMA", -- Twin Fangs
 		["Raid: Coiled Altar"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZm5BmZAAAAYJY2gxMjaGzCzMzYMzDMDAAAAAAwAAAAIAY2mZpZZmlNwMDwiZGGAAzMAYA", -- Coiled Altar
-		["Raid: Ula'tek"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Ulatek
+		["Raid: Ula'tek"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMDDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Ulatek: Catgpt's Heroic kill build (WCL #3, 2026-10-18); the old string had no Primal Wrath, which all top 8 cast
 	},
 	Guardian = {
 		["Dungeon"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD", -- Warcraft Logs M+, all dungeons: typical of 710, 79% agree on 6 contested, 2026-09-25
