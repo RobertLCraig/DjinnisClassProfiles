@@ -35,6 +35,17 @@ Two separate faults:
    Rob's ten `[CP]` Feral loadouts differed from the addon's builds, and none was offered. The
    workaround now: run `/dcp loadouts` again and click **Not now** on the old-loadouts prompt.
 
+## Settled 2026-10-18, after a `/reload`
+
+Rob's screenshot of the loadout list after `/reload`: all four are gone. So fault 1 is a stale read,
+not a refused delete. The deletes landed; `GetConfigInfo(id)` kept answering the old name for at
+least 15 seconds. Fix: count a delete when `TRAIT_CONFIG_DELETED` fires for the id, or when the id
+is missing from `C_ClassTalents.GetConfigIDsBySpecID`, and not from the name. The title's "never
+land" is wrong; the file name keeps it so links do not break.
+
+The same screenshot, after `/dcp loadouts` and **Not now**: the drift prompt listed 9 saved
+loadouts that no longer hold the planned build, which confirms fault 2's workaround.
+
 ## Acceptance
 
 - [ ] After a delete pass, the count matches what is in the loadout list after a `/reload`.
