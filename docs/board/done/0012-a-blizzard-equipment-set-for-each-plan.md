@@ -159,3 +159,69 @@ still read as the steps say.
 ## What I need from you
 
 Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
+
+### 2026-10-18 review (v20261018064135-4c9b)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I tried to break all five code criteria. I could not break any of them. All the code is in `DjinnisClassProfiles.lua`.
+
+- **#1 (save after a full Equip all):** `PlanTab.equipAll` waits two seconds, then calls `PlanTab.saveSetAndSay`. That calls `PlanTab.saveSet`, which uses `GetEquipmentSetID`. It then calls `SaveEquipmentSet` if the set exists, or `CreateEquipmentSet` if it does not. `PlanTab.setName` gives "DBiS <spec> <ST|2T|3T|M+>". The card's comments explain why "Raid" was dropped: Blizzard caps a set name at 16 letters. The M+ suffix still shows raid or Mythic+, and the manual steps use the same short names. So I count this as met.
+- **#2 (no set from a half-worn plan):** `PlanTab.saveSet` gets the missing slots from `PlanTab.missingSlots`. If any are missing, it stops and says "not worn: <slots>".
+- **#3 (shirt and tabard left out):** `PlanTab.saveSet` clears the old ignore ticks first (`ClearIgnoredSlotsForSave`). Then it ignores slots 4 and 19 (`IgnoreSlotForSave`).
+- **#4 (Rob's own sets never touched):** The addon has no code that deletes or modifies a set. `PlanTab.saveSet` reads the set name back with `PlanTab.ownsSet` before it saves over a set. The other set call, `UseEquipmentSet`, only puts a set on. It does not change the set.
+- **#5 (no save in combat):** `PlanTab.saveSet` stops at once if `InCombatLockdown()` is true.
+
+The open criteria all say `proves: manual`. They are Rob's to try in the game. They are not findings.
+
+VERDICT: sound
+
+**scope: sound**
+
+I found no scope defect in the card 0012 code. I only read the code. I changed nothing.
+
+**What I checked**
+- `PlanTab.saveSet` in `DjinnisClassProfiles.lua` does what the card asks, and nothing more:
+  - It stops in combat.
+  - It stops when a planned slot is not worn, and names the slot.
+  - It clears the ignore ticks, then ignores slots 4 (shirt) and 19 (tabard).
+  - It saves into the set with the same name, or makes a new set.
+- `PlanTab.ownsSet` makes sure the code saves only over sets whose name starts "DBiS ".
+- No card 0012 code calls `DeleteEquipmentSet` or `ModifyEquipmentSet`. Only the test stub has them, and the tests use them to prove they are never called.
+
+**The "Not this card" fence**
+- There is one `UseEquipmentSet` call, in the setup step code for card 0024 (the spec prompt when a group takes you). It runs only after a click. It does not swap sets by itself on a spec change or when you enter a zone. So it is not over the fence, and it is not card 0012 work.
+
+**Half done**
+- The Baganator task is still open. The card says it is not an acceptance item, so this is not a defect.
+- The name is "DBiS Feral ST" and not "DBiS Feral Raid ST". The builder wrote down why: Blizzard's name box takes 16 letters at most. The first acceptance item uses the short form, so this is not a defect.
+
+**The large diff**
+- The big git diff (the addon rename, the other cards, the research files) is the whole branch. It is not card 0012 work. I did not count it against this card.
+
+There are no `UNMET:` lines. Only the in-game `proves: manual` items are open, and nothing in the code stops them from passing.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break the equipment-set work for card 0012. I could not.
+
+**What I checked:**
+
+- **Combat guard.** `PlanTab.saveSet` stops in combat. It returns before it calls any `C_EquipmentSet` function.
+- **Half-worn guard.** `PlanTab.saveSet` stops when `PlanTab.missingSlots` lists a slot. The chat line then names that slot through `PlanTab.saveSetAndSay`.
+- **Shirt and tabard.** `PlanTab.saveSet` first clears the ignored slots. Then it ignores slots 4 and 19, before both the save path and the create path.
+- **Rob's own sets.** `PlanTab.ownsSet` reads the set's name back before a save over it. A set with no "DBiS " prefix is never changed. No code path deletes a set.
+- **Name.** `PlanTab.setName` gives "DBiS Feral ST". Criterion 1 says "<spec> <content> <scenario>". The builder dropped "Raid" on purpose, because Blizzard's name box takes only 16 letters. The card comment records this, and the manual criteria expect "DBiS Feral ST". This is a deviation the card accepts, so it is not a defect.
+- **Callers.** `PlanTab.equipAll` serves both the Plan tab and the 0013 popup. It sends spec and scenario through `PlanTab.later`. The Save set button sends the same pair.
+- **Rename.** The rename to DjinnisClassProfiles kept `SET_PREFIX` as "DBiS ". Sets saved before the rename are still found.
+
+I found no stale comment and no caller that the change missed. The open criteria are all `proves: manual`, so they are not findings.
+
+VERDICT: sound
+
