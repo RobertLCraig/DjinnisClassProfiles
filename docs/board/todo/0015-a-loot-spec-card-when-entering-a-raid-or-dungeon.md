@@ -160,3 +160,77 @@ Nothing now. Built; the open looks are the `proves: manual` criteria under Accep
   the raid half here, or drop the card.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new; the four `proves:` checks (`loot card lists planned drops per spec`, `loot card marks the loot spec and offers the others`, `no loot card when nothing planned drops`, `loot spec not changed in combat`) were already ticked and still exist and pass in the Lua 5.1 offline check. Looks rewritten for v0.69.0 and `/dcp`; the title, button and combat strings match `PlanTab.showLootCard`, `lootCardRow` and `setLootSpec`, and Feral is still the only spec with a gear plan. Dropped old look 7 (the title is the journal's name): it was a note, not a check. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-18 review (v20261018091942-5fd7)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked the four ticked criteria against the code, and I could not break them.
+
+**#1, the card lists planned drops per spec.** `PlanTab.lootCardWants` takes the raid's drop lists and the plan of each of the four specs. It returns the specs in order, and each spec lists each item once. `PlanTab.lootCardModel` reads where the player stands and builds the rows. `PlanTab.showLootCard` draws them: the spec icon, up to six item buttons with the game tooltip, and "+N more". `PlanTab.armLootCard` sets the card to show on entering the world. The login code calls it, so the card is connected to the game.
+
+**#2, the card marks the loot spec and offers the others.** `PlanTab.lootSpecName` reads 0 as "the current spec". `PlanTab.lootCardLines` marks the loot spec's row. In `PlanTab.showLootCard`, that row is green, says "loot spec" and has no button. Every other row gets a "Set loot spec" button from `PlanTab.lootCardRow`.
+
+**#3, no card when nothing planned drops.** `PlanTab.lootCardModel` returns nothing in five cases: not a druid, not a raid, a different raid, the raid not yet named by the journal, and no planned item in the drop lists. Then `PlanTab.showLootCard` hides the card.
+
+**#4, no loot spec change in combat.** `PlanTab.setLootSpec` checks for combat first. In combat, it prints one chat line and stops.
+
+One gap is on purpose. Criterion #1 says "raid or dungeon", but only the raid half is built. The card's own comments and look 5 give the dungeon to KeystoneLoot, so I do not count this as a fault.
+
+The open "manual" criteria are for you to try in the game. They are not findings.
+
+VERDICT: sound
+
+**scope: defect**
+
+Two findings.
+
+1. **The dungeon half is not built.**
+   - Where: `PlanTab.lootCardModel` in `DjinnisClassProfiles.lua`.
+   - It returns nil unless `instanceType` is `"raid"`. It also returns nil unless the map is `PlanTab.RAID_ID`.
+   - So the card only shows in the Venomous Abyss. It never shows in a dungeon.
+   - Criterion #1 still says "raid or dungeon". The builder passed the dungeon case to KeystoneLoot through card 0021. Card 0021 is still in `ai-review/`, so it is not done.
+   - The rewritten look #5 now says "no card from this addon" in a Mythic dungeon. That look and criterion #1 say opposite things.
+   - The checks under `loot card lists planned drops per spec` only test the raid. So the tick on #1 claims more than the code does.
+   - The fix is one of two things: build the dungeon half, or reword #1 to "raid" and point to 0021.
+
+2. **Nothing crosses the "Not this card" fence.**
+   - `PlanTab.setLootSpec` acts only on a click. It refuses in combat.
+   - `PlanTab.lootCardWants` reads only the four druid plans, through `SPEC_ORDER`.
+   - The new every-class code puts no extra classes on the card. Through `PlanTab.gearHere`, a non-druid gets no card.
+
+The rest of the big diff is the rename and other cards. It is not this card's scope creep.
+
+UNMET: #1 lootCardModel returns nil for every instance that is not the one planned raid, so entering a dungeon where a planned item drops shows no card, and the dungeon case depends on unfinished card 0021 and a third-party addon.
+
+VERDICT: defect
+
+**breakage: sound**
+
+I tried to break card 0015 and could not.
+
+**What I read:** `PlanTab.lootCardWants`, `lootSpecName`, `lootCardLines`, `setLootSpec`, `lootCardModel`, `showLootCard`, `armLootCard`, and the four self-test blocks in `DjinnisClassProfiles.lua`.
+
+**What holds:**
+- The card lists each spec's planned drops one time each, in spec order. #1 holds.
+- The loot spec row is green and has no button. Each other row has a "Set loot spec" button. A loot spec of 0 means "the current spec". #2 holds.
+- No card when nothing planned drops, in another raid, in a dungeon, or outside. #3 holds.
+- In combat, `setLootSpec` does not change the loot spec. It writes one chat line. #4 holds.
+- A loot spec change does not open a closed card. Look 4 can pass.
+
+**One small risk. It does not fail a criterion:** the loot table can still be loading when you enter the raid. While it loads, `showLootCard` runs again, up to eight times. If you close the card with its X in that short time, the card can come back once. No look tests this case.
+
+There are no `UNMET:` lines. The only open criteria are `proves: manual`.
+
+**What you do now:** nothing. The card goes to `done/`. The in-game looks wait on your list to try.
+
+VERDICT: sound
+
+**acceptance**
+
+- **#1 was named by the scope lens and is not a ticked criterion here**, so nothing was changed: lootCardModel returns nil for every instance that is not the one planned raid, so entering a dungeon where a planned item drops shows no card, and the dungeon case depends on unfinished card 0021 and a third-party addon.
+
