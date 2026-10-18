@@ -167,3 +167,58 @@ come from our own table, so refuse any such name rather than escape it.
 ## What I need from you
 
 Nothing now. Built; the open looks are the `proves: manual` criteria under Acceptance, tried from the product's look list (board README, A look waits on the product).
+
+### 2026-10-18 review (v20261018041940-6073)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I tried to break the three ticked criteria. I could not.
+
+**#2: missing loadout falls back.** In `DjinnisClassProfiles.lua`, `PlanTab.loadTalents` checks the planned name against `PlanTab.savedLoadoutNames`. If the name is not there and no build is stored, it calls `PlanTab.openTalents` and prints one grey line with the name. The check `talents button falls back when the loadout is missing` in `selfTest` proves this. It confirms one open, no helper call, the name in the line, and one line only.
+
+**#3: no talent-changing call.** The only path that changes talents is `ClassTalentHelper.SwitchToLoadoutByName`. The in-game check records every `C_ClassTalents` and `C_Traits` key the button touches, and all of them are reads. The scan in `offline-check.lua` makes every `C_` call in the code sit on an allowlist. That list also holds `ImportLoadout`, `DeleteConfig` and `RenameConfig`, added by cards 0031 and 0040. These calls change saved loadouts, not the talents in play. So the criterion as written still holds. This is narrower than this card's own "Not this card" line ("any `C_Traits` or `C_ClassTalents` call"), but those later cards made that choice on purpose.
+
+**#4: combat.** `PlanTab.loadTalents` returns `"combat"` on its first line, before it does any other work. There is no macro text. The check confirms that in combat the button asks the helper for nothing and opens nothing.
+
+The open `proves: manual` criteria are not findings.
+
+VERDICT: sound
+
+**scope: defect**
+
+**What I checked:** what the Talents button does now, and the file's list of allowed talent calls.
+
+**Finding 1: the button now makes loadouts.** The card says this is out of scope. Its "Not this card" fences off "making or importing a loadout" and "any `C_Traits` or `C_ClassTalents` call from addon code". But in `DjinnisClassProfiles.lua`, `PlanTab.loadTalents` now goes to `PlanTab.wearSpare` (from card 0040) when a planned name is missing. That path calls `C_ClassTalents.ImportLoadout` and `C_ClassTalents.DeleteConfig`. The swap code also calls `C_ClassTalents.RenameConfig`. All three change talents. The one-line "no saved loadout" fallback still exists, but now it only runs when there is no stored build.
+
+**Finding 2: the safety check was weakened.** In `offline-check.lua`, the card 0011 scan has a list called `readers`. It is meant to allow only calls that read. It now also allows `C_ClassTalents.ImportLoadout`, `DeleteConfig` and `RenameConfig`. So the check stays green while those calls are in the file. The ticked proof for criterion #3 now proves nothing.
+
+**Finding 3: the diff is far too big.** It holds 157 files: a full rename, about 40 other cards, research files and data tools. Almost none of it belongs to card 0011.
+
+UNMET: #3 `PlanTab.loadTalents` reaches `C_ClassTalents.ImportLoadout`/`DeleteConfig`/`RenameConfig` through `wearSpare`, and `offline-check.lua` puts those calls on its readers list, so the check passes anyway.
+
+VERDICT: defect
+
+**breakage: sound**
+
+I tried to break card 0011's Talents button. I could not.
+
+**What I checked, by reading only:**
+
+- **Combat (#4):** `PlanTab.loadTalents` stops first thing when `InCombatLockdown()` is true. It calls nothing and opens nothing. The other places that switch loadouts also check combat first, for example the "Switch talents" button in the movement-speed prompt.
+- **Missing loadout (#2):** `PlanTab.loadTalents` opens the talent window and prints one grey line with the missing name. Card 0040 now sends a missing name to `PlanTab.wearSpare` when its build is stored. The card's 2026-10-11 note already says this. So the fallback is still kept for a name with no stored build.
+- **No talent-changing call (#3):** every switch goes through `ClassTalentHelper.SwitchToLoadoutByName`. No code calls `C_ClassTalents.SwitchToLoadoutByName`, `LoadConfig` or `CommitConfig`.
+- **Commit failed (#6):** `PlanTab.onTalentEvent` still prints the exact words "the talent change did not go through (CONFIG_COMMIT_FAILED)". It now adds the game's reason when there is one, and it says nothing for a repeat within 2 seconds. That does not break the criterion.
+- **Old callers:** card 0059 added "[CP]" tags to loadout names. `PlanTab.loadoutNameOf` now turns the plan's name into the tagged name before the switch, so callers still work after that rename.
+
+**Open items:** #1, #5, #6 and #7 are `proves: manual`. You need to try them in the game. Nothing I read shows that they cannot pass.
+
+VERDICT: sound
+
+**acceptance**
+
+- **#3 was named by the scope lens and is not a ticked criterion here**, so nothing was changed: `PlanTab.loadTalents` reaches `C_ClassTalents.ImportLoadout`/`DeleteConfig`/`RenameConfig` through `wearSpare`, and `offline-check.lua` puts those calls on its readers list, so the check passes anyway.
+
