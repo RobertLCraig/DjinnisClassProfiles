@@ -91,3 +91,74 @@ compare ids, and nothing told it which ids were the same thing at another rank.
   a table key or a comparison. Leaks: nothing leaves the machine; two GETs to Raidbots, author only.
 
 **2026-10-11** Clear-down (attended, Rob asked). `update-plan-ranks.py --check` said the rank table was out of date: the plan had gained enchant 8689 (Rite of the Hash'ey) and dropped Versatile Peridot. Ran it on branch `cleardown/djcp`: the block now holds 8688 and 8689 and no Versatile Peridot, `--check` exits 0, and the Lua 5.1 offline check passes. The old looks used a garnet in the WRIST, which no plan cell gems any more; they are rewritten against the second ring, Lightwarden's Bind, where the Feral 1 target, 2 target and Mythic+ cells all plan Masterful Garnet rank 4 (240908). The Search AH look is dropped: card 0008 already proved Search AH. Moves to ai-review/ with only the three in-game looks open (board README, A look waits on the product).
+
+### 2026-10-18 review (v20261018012954-faf2)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I tried to break the four code criteria. I could not break them.
+
+**#1, the "lesser" mark and the "Plan: fine." line.**
+- `PlanTab.rankState` gives "lesser" only when the worn rank is lower in the same family.
+- `slotState` returns "enchant" or "gem" only for a wrong item. It returns "lesser" for a lower rank, and only after all wrong-item checks are done.
+- `planLineFor` (the "lesser" branch) starts the line with "Plan: fine." and gives the worn rank's name from `PlanTab.rankName`.
+
+**#2, keep it off "To buy" and list it under "Higher ranks exist".**
+- In `PlanTab.shoppingList`, a "lesser" enchant goes into `better`, not into `count`. A "lesser" gem pair goes into `better.gem` with the planned id.
+- The grey header line is drawn from that list.
+
+**#3, another family or an unknown id is still wrong.**
+- `rankState` returns "wrong" when either id is missing from the table, or when the families are different.
+- `PlanTab.gemKey` falls back to the item name, or to the id. That key does not match a family that is in the table, so `gemMatch` marks the gem as missing, which means "gem".
+
+**#4, two planned gems of one family and one worn: want one more.**
+- `PlanTab.gemMatch` takes each worn gem out of the pool after it matches one planned gem.
+- So the second planned gem stays in `missing`. The state becomes "gem", and the shopping list counts it.
+
+LOOK 1 to 3 are open manual checks. The code does not stop them from passing.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked the code for this card's work only. Nothing crosses the "Not this card" fence, so my verdict is sound.
+
+**What I checked**
+
+- **No choosing a rank for Rob.** `PlanTab.rankState` in `DjinnisClassProfiles.lua` only sorts a slot into "ok", "lesser" or "wrong". The plan still names the sim's rank.
+- **No rank glows in the bags.** The bag glows (card 0006) do not call `PlanTab.rankState` or `PlanTab.gemMatch`.
+- **One other caller is not scope creep.** The pre-pull popup lists slots to fix and calls `PlanTab.gemMatch` there. It only uses the result to pick a Search AH term. It adds nothing new for this card.
+- **Nothing is half done.** The script, the three helpers, the grey mark, the "Plan: fine." line and the "Higher ranks exist" rows are all in place. Offline checks cover each one.
+
+**What the diff shows**
+
+- The diff holds 157 files: the rename to DjinnisClassProfiles, about 80 other cards, and research files. This is the whole branch, not this card's own work.
+- This card's only new change on 2026-10-11 was the regenerated rank table. I did not judge the rest, because it belongs to other cards.
+
+**What you do now**
+
+- The three LOOK checks are still open. You try them in the game. They are not findings.
+
+VERDICT: sound
+
+**breakage: sound**
+
+**What I did:** I read the rank table, `PlanTab.rankState`, `PlanTab.gemMatch`, and the rank checks in the offline-check block of `DjinnisClassProfiles.lua`. I tried to find something this change breaks. I could not.
+
+**What held:**
+- The table now has every planned enchant and gem. That includes the new enchant 8689 and the new gem Quick Peridot 240888.
+- Masterful Garnet 240907 is rank 3. So LOOK 1 ("rank 3 of 4") matches the data.
+- `gemMatch` reports "gem" when a planned gem is missing, even if another gem is a lower rank. Two planned gems of one family with only one worn still asks for one more.
+- Gem 240894 (Versatile Peridot) is no longer in the table. It is still in the tests. There it correctly reads as "wrong", "gem" or "change".
+- The drawn "Higher ranks exist" check uses a fixed test plan (`pinPlanFixture`). So the live plan dropping the wrist gem does not break it.
+
+**Small stale text:** Two check labels in the rank block still say "rank 2". They are "gem rank 2 of 4 for rank 4" and "gem rank 4 for rank 2 is fine". Since the 0010 review, 240907 is rank 3. Only the label is wrong. The asserted values are right. No criterion fails.
+
+**What you do now:** Nothing. The three LOOK checks are yours to try in game.
+
+VERDICT: sound
+
