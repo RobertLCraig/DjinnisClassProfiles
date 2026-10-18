@@ -569,177 +569,177 @@ end
 -- WHEN to pick the build (Rob, 2026-09-23), and are the ones DjinnisDreamgrove
 -- 0.7.0 imported, so a loadout made there is the same loadout here. Card 0030.
 -- BEGIN GENERATED BUILDS
-PlanTab.BUILD_SOURCE = "Warcraft Logs top rankings (typical build), dreamgrove.gg compendiums for the druid rows it does not cover, wowvalor.app and SimulationCraft where it has none, and the pinned builds in update-builds.py PIN, read 2026-09-29"
+PlanTab.BUILD_SOURCE = "Warcraft Logs top rankings (typical build), dreamgrove.gg compendiums for the druid rows it does not cover, wowvalor.app and SimulationCraft where it has none, and the pinned builds in update-builds.py PIN, read 2026-10-18"
 PlanTab.BUILDS = {
 	Balance = {
-		["Dungeon"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhBjZZmlZWYmxGLzsMmZM2wwAM22mZwY2GATAAAAWMzMzMYzwYMAAMzglBA", -- Warcraft Logs M+, all dungeons: typical of 669, 79% agree on 6 contested, 2026-09-25
-		["Raid: Nek'Zali, Altar"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbDgJAAAALMzMzgNDjxMAAmZgBA", -- Warcraft Logs Nek'zali, The Coiled Altar: typical of 191, 74% agree on 12 contested, 2026-09-25
-		["Raid: Cleave"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzYMzyMLmZGbsMzyYMzYBDDwYbbmBjZbAMBAAAYxMzMzgNDjxMAAmZgBA", -- Warcraft Logs Entombed Sentinels, The Lost Explorers, The Twin Fangs: typical of 300, 73% agree on 7 contested, 2026-09-25
-		["Raid: Single Target"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzY2mZZsMjZsZWmxYmZGbYYAGgttxGmmZWGAAAAsZmZmZwmhxYAYmBAGA", -- Warcraft Logs Vashnik, Sszorak, Ula'tek, Nymrissa Wavecaller: typical of 332, 69% agree on 16 contested, 2026-09-25
+		["Dungeon"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhBjZZmlZWYmxGLzsMmZM2wwAM22mZwY2GATAAAAWMzMzMYzwYMAAMzglBA", -- Warcraft Logs M+, all dungeons: typical of 643, 74% agree on 5 contested, 2026-10-18
+		["Raid: Nek'Zali, Altar"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbDgJAAAALMzMzgNDjxMAAmZgBA", -- Warcraft Logs Nek'zali, The Coiled Altar: typical of 200, 75% agree on 11 contested, 2026-10-18
+		["Raid: Cleave"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzYMzyMLmZGbsMzyYMzYBDDwYbbmBjZbAMBAAAYxMzMzgNDjxMAAmZgBA", -- Warcraft Logs Entombed Sentinels, The Lost Explorers, The Twin Fangs, Kith'ix: typical of 394, 74% agree on 8 contested, 2026-10-18
+		["Raid: Single Target"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzY2mZZsMjZsZWmxYmZGbYYAGgttxGmmZWGAAAAsZmZmZwmhxYAYmBAGA", -- Warcraft Logs Vashnik, Sszorak, Ula'tek, Nymrissa Wavecaller: typical of 400, 69% agree on 16 contested, 2026-10-18
 	},
 	Feral = {
-		["Dungeon"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", -- Warcraft Logs M+, all dungeons: typical of 681, 78% agree on 5 contested, 2026-09-25
-		["Raid: Nek'Zali"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwYmZMmtl5BWGbzMzMzMDAAAALBzGMmZUzYWGzMzYMjZAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB", -- Warcraft Logs Nek'zali: typical of 100, 76% agree on 15 contested, 2026-09-25
-		["Raid: Entombed Sentinels"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALBzmhxMjaGzCzMzYMjZAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB", -- Warcraft Logs Entombed Sentinels: typical of 100, 74% agree on 10 contested, 2026-09-25
-		["Raid: Lost Explorers"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZWYmZmxY2WmBbzMzYmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs The Lost Explorers: typical of 100, 68% agree on 12 contested, 2026-09-25
-		["Raid: Vashnik"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzGWmZZmZm5BmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs Vashnik: typical of 100, 74% agree on 12 contested, 2026-09-25
-		["Raid: Sszorak"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxsMmZmxYGzAAAAAAYgBAAAQzsMLzMzAAWAzMALmBDAAgZ2wA", -- Warcraft Logs Sszorak: typical of 100, 60% agree on 25 contested, 2026-09-25
-		["Raid: Nymrissa"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYJY2MMmZUzYWGzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs Nymrissa Wavecaller: typical of 100, 73% agree on 18 contested, 2026-09-25
-		["Raid: Twin Fangs"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMmZ2WGmZZGzMmZAAAAYLYYYMzomxsMmZmZZMjBAAAAAgBGAAAAAgZbmlmlZ22AzMALmBDAgZGAMA", -- Twin Fangs
+		["Raid: Ula'tek"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMDDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs Heroic Ula'tek, Catgpt's kill (#3, 239k), 2026-10-18: no Mythic rankings yet
+		["Dungeon"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB", -- Warcraft Logs M+, all dungeons: typical of 714, 83% agree on 7 contested, 2026-10-18
+		["Raid: Nek'Zali"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwYmZMmtl5BWGbzMzMzMDAAAALBzGMmZUzYWGzMzYMjZAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB", -- Warcraft Logs Nek'zali: typical of 100, 73% agree on 15 contested, 2026-10-18
+		["Raid: Entombed Sentinels"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2YmZmxY2WGLjtZmZMzMAAAAsEMbGGzMqZMLMzMjxMmBAAAAAwADAAAAAwsNzSzyMLbgZGgFzgBAwMDAGA", -- Warcraft Logs Entombed Sentinels: typical of 100, 75% agree on 11 contested, 2026-10-18
+		["Raid: Lost Explorers"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZWYmZmxY2WmBbzMzYmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs The Lost Explorers: typical of 100, 70% agree on 13 contested, 2026-10-18
+		["Raid: Vashnik"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2MMmZUzYWGzMzYMDDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs Vashnik, Kith'ix: typical of 103, 74% agree on 15 contested, 2026-10-18
+		["Raid: Sszorak"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwgZMGzMzMmtFWGbzMzYmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs Sszorak: typical of 100, 73% agree on 9 contested, 2026-10-18
+		["Raid: Twin Fangs"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMGz2ywMLzMzMmZAAAAYJYYYMzomxswMzMLjZMDAAAAAgBGAAAAAgZbmlmlZ22AzMALmBDAgZGAMA", -- Warcraft Logs The Twin Fangs: typical of 37, 71% agree on 13 contested, 2026-10-18
+		["Raid: Nymrissa"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Warcraft Logs Nymrissa Wavecaller: typical of 100, 66% agree on 16 contested, 2026-10-18
 		["Raid: Coiled Altar"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZm5BmZAAAAYJY2gxMjaGzCzMzYMzDMDAAAAAAwAAAAIAY2mZpZZmlNwMDwiZGGAAzMAYA", -- Coiled Altar
-		["Raid: Ula'tek"] = "CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMDDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA", -- Ulatek: Catgpt's Heroic kill build (WCL #3, 2026-10-18); the old string had no Primal Wrath, which all top 8 cast
 	},
 	Guardian = {
-		["Dungeon"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD", -- Warcraft Logs M+, all dungeons: typical of 710, 79% agree on 6 contested, 2026-09-25
-		["Raid"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZGjZMDAAAAAYGbzAW2mZwY2GATAAAAbYmBYxMYAbW2GgZGAD", -- Warcraft Logs raid, all bosses: typical of 623, 77% agree on 10 contested, 2026-09-25
+		["Dungeon"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD", -- Warcraft Logs M+, all dungeons: typical of 688, 81% agree on 5 contested, 2026-10-18
+		["Raid"] = "CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZGjZMDAAAAAYGbzAW2mZwY2GATAAAAbYmBYxMYAbW2GgZGAD", -- Warcraft Logs raid, all bosses: typical of 710, 75% agree on 10 contested, 2026-10-18
 	},
 	Resto = {
-		["Dungeon"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmNjNbzAAAAAAAAAAgFDNbzw0MDwsYmZmZxwDMAAAAAMAAzAAAAAgZbmtmtZWsxMzMYmZD0MAAzMAMA", -- Warcraft Logs M+, all dungeons: typical of 609, 69% agree on 24 contested, 2026-09-25
-		["Raid"] = "CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALGa2MjpZGgZZmZmZYYGAAAAAGAAAAAAAwsNzSz2Mb2YMzMYGY0MAAzMAMA", -- Warcraft Logs raid, all bosses: typical of 719, 65% agree on 8 contested, 2026-09-25
+		["Dungeon"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmNjNbzAAAAAAAAAAgFDNbzw0MDwsYmZmZxwDMAAAAAMAAzAAAAAgZbmtmtZ2sxMzMYmZD0MAAzMAMA", -- Warcraft Logs M+, all dungeons: typical of 657, 70% agree on 22 contested, 2026-10-18
+		["Raid"] = "CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALGa2MjpZGgZZmZmZYYGAAAAAGAAAAAAAwsNzSz2Mb2YMzMYGY0MAAzMAMA", -- Warcraft Logs raid, all bosses: typical of 923, 72% agree on 11 contested, 2026-10-18
 	},
 	Arms = {
-		["Dungeon"] = "CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGmZbZmZmZYGzMAAAAAGLzMwEGLbDsAGwMMBmBbgZGGGMLzsNAzMAYGGA", -- Warcraft Logs M+, all dungeons: typical of 679, 74% agree on 4 contested, 2026-09-25
-		["Raid"] = "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzYmZGAAAghphZGzMWmZmZGMmZAAAAAMzyMDMhxy2ALgBMDTgZwGYmhx2ALzsNAzMAYGGA", -- Warcraft Logs raid, all bosses: typical of 817, 77% agree on 10 contested, 2026-09-25
+		["Dungeon"] = "CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGzMbmZmZGmxMDAAAAgxyMDMhxy2ALgBMDTgZwGYmhhBzyMbDwMDAmhBA", -- Warcraft Logs M+, all dungeons: typical of 646, 68% agree on 3 contested, 2026-10-18
+		["Raid"] = "CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzYmZGAAAghphZGzMWmZmZGMmZAAAAAMzyMDMhxy2ALgBMDTgZwGYmhx2ALzsNAzMAYGGA", -- Warcraft Logs raid, all bosses: typical of 1000, 76% agree on 10 contested, 2026-10-18
 	},
 	Fury = {
-		["Dungeon"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZmZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMMAAAzMMmlhxgxA", -- Warcraft Logs M+, all dungeons: typical of 655, 79% agree on 7 contested, 2026-09-25
-		["Raid"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2WmZmZmhxMzMzMjZWmxYmZmNzMzAAAxYZbgFwAmhJwMsBMzwAAAMzwYMMGMG", -- Warcraft Logs raid, all bosses: typical of 605, 73% agree on 8 contested, 2026-09-25
+		["Dungeon"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjhZ2WmZmZmZmxMzMzMzMPwyMGzMmNzMzAAAxYZbgFwAmhJwMsBMzwAAAMzwYWGGDGD", -- Warcraft Logs M+, all dungeons: typical of 675, 62% agree on 29 contested, 2026-10-18
+		["Raid"] = "CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2MzMzMDjZmZmZGzsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMM2AAgZGGzywYwYA", -- Warcraft Logs raid, all bosses: typical of 627, 71% agree on 8 contested, 2026-10-18
 	},
 	["Protection Warrior"] = {
-		["Dungeon"] = "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmNzMLzYMGNmxwiZmZGzwMDAAAAWmZAmxAMwGssY0YGAzCmZDGzMDmNAYmBAgZgxA", -- Warcraft Logs M+, all dungeons: typical of 640, 77% agree on 13 contested, 2026-09-25
-		["Raid"] = "CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZmZGzmxsMMGjGmZYZmZmZwYmBAAAALjBYGDwAbwyiRjZAMbYmNYGzMY2AgZGAAmBGD", -- Warcraft Logs raid, all bosses: typical of 638, 66% agree on 26 contested, 2026-09-25
+		["Dungeon"] = "CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmNzMLzYMGNmxwiZmZGzwMDAAAAWmZAmxAMwGssY0YGAzCmZDGzMDjNAYmBAgZgxA", -- Warcraft Logs M+, all dungeons: typical of 694, 80% agree on 18 contested, 2026-10-18
+		["Raid"] = "CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZmZGzmxsMMGjGmZYZmZmZwYmBAAAALjBYGDwAbwyiRjZAMbYmNYGzMY2AgZGAAmBGD", -- Warcraft Logs raid, all bosses: typical of 704, 72% agree on 27 contested, 2026-10-18
 	},
 	["Holy Paladin"] = {
-		["Dungeon"] = "CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAAWGwMzyMzsMjZMsY2MziZaihxMzMGzWGAGA2AbsYmBAAAmZWWWsMzwGbjZwGwMGAgZGAmxY0A", -- Warcraft Logs M+, all dungeons: typical of 692, 67% agree on 8 contested, 2026-09-25
-		["Raid"] = "CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGGzMDjZLDADYYDsxyMmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB", -- Warcraft Logs raid, all bosses: typical of 770, 81% agree on 5 contested, 2026-09-25
+		["Dungeon"] = "CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAwyAmZWmZmlZMjhFzmZWMTTMLGzMzYMbZAYAYDsxiZGAAAYmZZZxyMDbsNmBbAzYAAmZAYGjRDA", -- Warcraft Logs M+, all dungeons: typical of 660, 65% agree on 6 contested, 2026-10-18
+		["Raid"] = "CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGGzMDjZLDADYYDsxyMmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB", -- Warcraft Logs raid, all bosses: typical of 961, 81% agree on 5 contested, 2026-10-18
 	},
 	["Protection Paladin"] = {
-		["Dungeon"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAAAmZW2WaZmxilFmBwgZ2wAgZGAMzAGL", -- Warcraft Logs M+, all dungeons: typical of 694, 74% agree on 11 contested, 2026-09-25
-		["Raid"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMzMzMzMsMGWGWGGAgBAAAAAApZmlZGzMMmt2AwADYGsBAAAAzMLbLtMzYx2GzAgxMMGAMzAgZGwYB", -- Warcraft Logs raid, all bosses: typical of 780, 75% agree on 22 contested, 2026-09-25
+		["Dungeon"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwAbAAAAwMzy2SLzMWsswMAGMzmxAgZGAMzAGL", -- Warcraft Logs M+, all dungeons: typical of 695, 72% agree on 10 contested, 2026-10-18
+		["Raid"] = "CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMzMzMzMsMGWGWmxAAMAAAAAAINzsMzYmhxs1GAGAYGsBAAAAzMLbLtMzYx2GzAgxMMGAMzAgZGwYB", -- Warcraft Logs raid, all bosses: typical of 840, 74% agree on 19 contested, 2026-10-18
 	},
 	Retribution = {
-		["Dungeon"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZZbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMbAzYmZDYmZYMjBD", -- Warcraft Logs M+, all dungeons: typical of 682, 66% agree on 5 contested, 2026-09-25
-		["Raid"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxCbAYWmtZmZrBAAAWAMAYMDzgZMzsBMzMMGGMA", -- Warcraft Logs raid, all bosses: typical of 727, 75% agree on 8 contested, 2026-09-25
+		["Dungeon"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMbAzYmZDYmZYMjBD", -- Warcraft Logs M+, all dungeons: typical of 703, 69% agree on 5 contested, 2026-10-18
+		["Raid"] = "CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxCbAYWmtZmZrBAAAWAMAYMDzgZMzsBMzMMGGMA", -- Warcraft Logs raid, all bosses: typical of 961, 75% agree on 9 contested, 2026-10-18
 	},
 	["Beast Mastery"] = {
-		["Dungeon"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzYbmZMjZwYaGAAAAAAAAYGjBMzGAmFw2AA", -- Warcraft Logs M+, all dungeons: typical of 662, 70% agree on 6 contested, 2026-09-25
-		["Raid"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMmZMzgZGzMMzYmZGmZGzYGMmmBAAAAAAAAzMmBYmNAMLgtBgB", -- Warcraft Logs raid, all bosses: typical of 696, 67% agree on 14 contested, 2026-09-25
+		["Dungeon"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzYzMjZMDGTzAAAAAAAAgZGjBMzGAmFw2AA", -- Warcraft Logs M+, all dungeons: typical of 685, 71% agree on 6 contested, 2026-10-18
+		["Raid"] = "C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzwMzYGzgx0MAAAAAAAAYmZGAzsBgZBsNAA", -- Warcraft Logs raid, all bosses: typical of 793, 66% agree on 14 contested, 2026-10-18
 	},
 	Marksmanship = {
-		["Dungeon"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzwyYaGDmlttZmZmZmZmZhZWGmBAAwDMGDAzYDMAbMz2MG", -- Warcraft Logs M+, all dungeons: typical of 610, 65% agree on 8 contested, 2026-09-25
-		["Raid"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmZxMmZGzgx0MGMbbmZmZmZmZGMzywMDAAYMzwAYGbMMAbMz2MG", -- Warcraft Logs raid, all bosses: typical of 820, 72% agree on 10 contested, 2026-09-25
+		["Dungeon"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzwyYaGDmlttZmZmZmZmZhZWGmBAAwDMGDAzYDMAbMz2MG", -- Warcraft Logs M+, all dungeons: typical of 655, 65% agree on 8 contested, 2026-10-18
+		["Raid"] = "C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmZxMmZGzgx0MGMbbbzMzMzMzMDmZZYmBAAMmZAgZsxwAsxMbzYA", -- Warcraft Logs raid, all bosses: typical of 1000, 68% agree on 8 contested, 2026-10-18
 	},
 	Survival = {
-		["Dungeon"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGw2MzMzYmZbGAAAAAAzYmZGbzYMjZwYaGAAAgBAYZbmxyMmZYGjBgZsBGDzsZAA", -- Warcraft Logs M+, all dungeons: typical of 655, 58% agree on 27 contested, 2026-09-25
-		["Raid"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzgxYGzgx0MAAAADAmxyyMzswMzMzMzAAzYhhxYmZzAA", -- Warcraft Logs raid, all bosses: typical of 539, 73% agree on 10 contested, 2026-09-25
+		["Dungeon"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGw2MzMzYMbzAAAAAAYGzMzYbGjZMDGTzAAAAMAwYZZmxCmZGzYMAMjNwYMzsZAA", -- Warcraft Logs M+, all dungeons: typical of 672, 74% agree on 27 contested, 2026-10-18
+		["Raid"] = "C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzwMGzYGMmmBAAAYAwMWWmZmFmZmZMzYAYGLYxYMzsZAA", -- Warcraft Logs raid, all bosses: typical of 576, 79% agree on 27 contested, 2026-10-18
 	},
 	Assassination = {
-		["Dungeon"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAYgFYGjGzCgtBsZAwMzYMA", -- Warcraft Logs M+, all dungeons: typical of 662, 68% agree on 20 contested, 2026-09-25
-		["Raid"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsYwAAAAAAzygtZAAAAAAZbmZmZmZMWmZmZbmlZmZGjZGjxMzYMAGYBmxoxsBYbAbGAMzMGD", -- Warcraft Logs raid, all bosses: typical of 783, 82% agree on 26 contested, 2026-09-25
+		["Dungeon"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAsZWGYALglhJwwiBzMAjxA", -- Warcraft Logs M+, all dungeons: typical of 629, 87% agree on 17 contested, 2026-10-18
+		["Raid"] = "CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsYwAAAAAAzygtZAAAAAAZbmZmZmZMWmZmZbmlZmZGjZGjxMzYMAGYBmxoxsBYbAbGAMzMGD", -- Warcraft Logs raid, all bosses: typical of 917, 76% agree on 12 contested, 2026-10-18
 	},
 	Outlaw = {
-		["Dungeon"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFGPwMbTLD2mBAAAAAMbLzMzwMjZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBeA", -- Warcraft Logs M+, all dungeons: typical of 716, 66% agree on 9 contested, 2026-09-25
-		["Raid"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMjZmxsAmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDG", -- Warcraft Logs raid, all bosses: typical of 598, 72% agree on 8 contested, 2026-09-25
+		["Dungeon"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFwMbTLD2mBAAAAAMbLzMzwMjZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBG", -- Warcraft Logs M+, all dungeons: typical of 717, 68% agree on 6 contested, 2026-10-18
+		["Raid"] = "CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMjxsAmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDG", -- Warcraft Logs raid, all bosses: typical of 585, 69% agree on 7 contested, 2026-10-18
 	},
 	Subtlety = {
-		["Dungeon"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYGbLzMzMzMjBjZ2GAAAAGMmNzyADYBsMMBmFMDzMAzYA", -- Warcraft Logs M+, all dungeons: typical of 671, 78% agree on 6 contested, 2026-09-25
-		["Raid"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMBmFMDzMAzYA", -- Warcraft Logs raid, all bosses: typical of 739, 71% agree on 2 contested, 2026-09-25
+		["Dungeon"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMjZMMzMzwMbzYmZbZMzMzMjBjZ2GAAAAGMGwYWMMwAzCL0iNMDYmBzYA", -- Warcraft Logs M+, all dungeons: typical of 673, 82% agree on 22 contested, 2026-10-18
+		["Raid"] = "CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMjZgZmZGzMbzYGbbzMzMzMjBjZ2GAAAAGMGwYWMMwAzCL0iNMDYmBzYA", -- Warcraft Logs raid, all bosses: typical of 937, 84% agree on 4 contested, 2026-10-18
 	},
 	Discipline = {
-		["Dungeon"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMGzwMbzYmZmZMzAAAAAAAAAAYYWmBzMzwMmZATzEDwMLYIMmlBYMYBAAGzMzYwMAzMzAmB", -- Warcraft Logs M+, all dungeons: typical of 638, 77% agree on 34 contested, 2026-09-25
-		["Raid"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmBzwMmZbmZmZmZAAAAAAAAAAYGWmBzMzwMmZATz0YwMDAAwsNbLgxmBAgxYmxgZwMDmJYA", -- Warcraft Logs raid, all bosses: typical of 768, 67% agree on 9 contested, 2026-09-25
+		["Dungeon"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMDzyMjxMzMMbzgZmZYGAAAAAAAAAADzyMYmZGmxMDYamYGwMLYIMmlBYMYBAAGzMzYwMAzMzAmB", -- Warcraft Logs M+, all dungeons: typical of 663, 80% agree on 30 contested, 2026-10-18
+		["Raid"] = "CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmBzwMmZbmZmZmZAAAAAAAAAAYGWmBzMzwMmZATz0YwMDAAwsNbLgxmBAgxYmxgZwMDmJYA", -- Warcraft Logs raid, all bosses: typical of 649, 64% agree on 9 contested, 2026-10-18
 	},
 	["Holy Priest"] = {
-		["Dungeon"] = "CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYzMzYWGzMmZMMDsMzMzAAAAYYWmhZmZGmxMDgZKAmZBDhxsMAjBWMmZBgZMzYMYGgZmZgB", -- Warcraft Logs M+, all dungeons: typical of 663, 71% agree on 13 contested, 2026-09-25
-		["Raid"] = "CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZWGzMmZMMDzsMzYGAAAAzYWmBzMzwMMDgZqBwMLYIMmlBYMwiZmZBgZMGjhZGgZmZgB", -- Warcraft Logs raid, all bosses: typical of 746, 77% agree on 7 contested, 2026-09-25
+		["Dungeon"] = "CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAMzMmlxMjZGDzALzMzMAAAAGmlZYmZmhZMzAYmCgZWwQYMLDwYgFjZWAYGzMGDmBYmZGYA", -- Warcraft Logs M+, all dungeons: typical of 686, 77% agree on 15 contested, 2026-10-18
+		["Raid"] = "CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZWGzMmZMMDzsMzYGAAAAzYWmBzMzwMMDgZqBwMLYIMmlBYMwiZmZBgZMGjhZGgZmZgB", -- Warcraft Logs raid, all bosses: typical of 988, 75% agree on 7 contested, 2026-10-18
 	},
 	Shadow = {
-		["Dungeon"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMjZMAAAAAAAAAAAAYMLzMGbzMmZ2mZGDz2MzYmZGbID2mpxAzMzAABY2mtNwsxAADGzMzY2GzgZGMDGA", -- Warcraft Logs M+, all dungeons: typical of 630, 62% agree on 28 contested, 2026-09-25
-		["Raid"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMz2MGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA", -- Warcraft Logs raid, all bosses: typical of 786, 77% agree on 13 contested, 2026-09-25
+		["Dungeon"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAMLmxMbzMmZWmxYY2mZGzMzYDZYZbmGgZAmZzMMbGAyYsAgZGDGzMzY2YmtlBYGMA", -- Warcraft Logs M+, all dungeons: typical of 641, 64% agree on 27 contested, 2026-10-18
+		["Raid"] = "CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMz2MGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA", -- Warcraft Logs raid, all bosses: typical of 949, 76% agree on 15 contested, 2026-10-18
 	},
 	Blood = {
-		["Dungeon"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZxMjZmxAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA", -- Warcraft Logs M+, all dungeons: typical of 702, 75% agree on 4 contested, 2026-09-25
-		["Raid"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMzMMbzMz0MLmZMmxAAAAAmZmZmZmZYGjBAjZmZGAAADMwMW0YZDw2A2AMjZAAAzMwwA", -- Warcraft Logs raid, all bosses: typical of 805, 81% agree on 25 contested, 2026-09-25
+		["Dungeon"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZZmZMzMAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA", -- Warcraft Logs M+, all dungeons: typical of 668, 75% agree on 3 contested, 2026-10-18
+		["Raid"] = "CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMjhZbmZmmZxMjxMGAAAAwMzMzMzMDzYMAYMzMzAAAYgBmxiGLbA2GwGgZMDAAYmBzwA", -- Warcraft Logs raid, all bosses: typical of 999, 76% agree on 22 contested, 2026-10-18
 	},
 	["Frost Death Knight"] = {
-		["Dungeon"] = "CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjZYY2mZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB", -- Warcraft Logs M+, all dungeons: typical of 649, 72% agree on 8 contested, 2026-09-25
-		["Raid"] = "CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjZYY2mZmZmZZmZkZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGAzgB", -- Warcraft Logs raid, all bosses: typical of 705, 69% agree on 8 contested, 2026-09-25
+		["Dungeon"] = "CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjZYY2mZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB", -- Warcraft Logs M+, all dungeons: typical of 682, 70% agree on 7 contested, 2026-10-18
+		["Raid"] = "CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjxYY2mZmZmZZmZkZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGAzgB", -- Warcraft Logs raid, all bosses: typical of 951, 69% agree on 8 contested, 2026-10-18
 	},
 	Unholy = {
-		["Dungeon"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2MzMTz2MzYmZMAAAAAAAAMPwYYAwyMY2MzYmZMwAzYTjlFAbD2wAmBwMzMzYGMzghxA", -- Warcraft Logs M+, all dungeons: typical of 684, 70% agree on 16 contested, 2026-09-25
-		["Raid"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMGDz2MzMTjZmxYGDAAAAAAAAzDMMGAsMDzsZmxMzYgBmxmGLLA2GsBgZAMzMzMmBzMYmZMA", -- Warcraft Logs raid, all bosses: typical of 656, 69% agree on 11 contested, 2026-09-25
+		["Dungeon"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2MzMTz2MzYmZMAAAAAAAAMPwYYAwyMY2MzYmZMwAzYTjlFAbD2wAmBwMzMzYGMzghxA", -- Warcraft Logs M+, all dungeons: typical of 657, 71% agree on 9 contested, 2026-10-18
+		["Raid"] = "CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMGDz2MzMTzyMzYMjBAAAAAAAg5BGGDAWmhZ2MzYmZMwAzYRjlFAbD2AwMAmZmZGzgZGMmxA", -- Warcraft Logs raid, all bosses: typical of 823, 69% agree on 10 contested, 2026-10-18
 	},
 	Elemental = {
-		["Dungeon"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMz2YZGzMGzysMzsMMmZWAAGAYmxwwA", -- Warcraft Logs M+, all dungeons: typical of 693, 70% agree on 11 contested, 2026-09-25
-		["Raid"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMjxyMzMjhlZZmZZYMzsAAMAwMjhhB", -- Warcraft Logs raid, all bosses: typical of 726, 66% agree on 16 contested, 2026-09-25
+		["Dungeon"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmlZmZM2WMtxMz2YZGzMGzysMzsMMmZWAAGAYmxwwA", -- Warcraft Logs M+, all dungeons: typical of 625, 65% agree on 11 contested, 2026-10-18
+		["Raid"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsNzMjx2ipNmZMWmZmZMsMLzYxMDzsMAgBAmZMMMA", -- Warcraft Logs raid, all bosses: typical of 963, 64% agree on 17 contested, 2026-10-18
 	},
 	Enhancement = {
-		["Dungeon"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssMjNmZ2GLzMzMMWGzAAMDjZGGBmZwgxA", -- Warcraft Logs M+, all dungeons: typical of 658, 70% agree on 7 contested, 2026-09-25
-		["Raid"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssMjNmZ2YZmZmhhxMAAzwYmxMTgZGMYMA", -- Warcraft Logs raid, all bosses: typical of 666, 69% agree on 10 contested, 2026-09-25
+		["Dungeon"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssMjNmZ2GLzMzMMWGzAAMDjZGGBmZwgxA", -- Warcraft Logs M+, all dungeons: typical of 704, 71% agree on 9 contested, 2026-10-18
+		["Raid"] = "CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssYsxMz2YZmZmhxyYGAgZYMzwMBmZwgxA", -- Warcraft Logs raid, all bosses: typical of 709, 68% agree on 10 contested, 2026-10-18
 	},
 	["Restoration Shaman"] = {
-		["Dungeon"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzMjhhFYDmxiGbDgZgNMzgZbmxoZZZmZzMmNWMmZMsMLzAAwAYmBzMAMGMA", -- Warcraft Logs M+, all dungeons: typical of 706, 65% agree on 10 contested, 2026-09-25
-		["Raid"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmBbjZmpZbZmZzMmFWMzMjBzyAAAAzMDmZAgBzA", -- Warcraft Logs raid, all bosses: typical of 793, 72% agree on 10 contested, 2026-09-25
+		["Dungeon"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzYMMsAbwMW0YbAMDshZmhZbmZGNLLzMbmxglZMzYwsMDAADgZGMzAwYwA", -- Warcraft Logs M+, all dungeons: typical of 733, 61% agree on 9 contested, 2026-10-18
+		["Raid"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmhZbMzMNbLzMbmxswyMmZMYWGAAAYmZwMDAMYG", -- Warcraft Logs raid, all bosses: typical of 965, 69% agree on 11 contested, 2026-10-18
 	},
 	Arcane = {
-		["Dungeon"] = "C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMmFMDamZGAAAGAwMz0sssMDAgNAA2YMzMsZZGzsMjxMmZGWYmZmZGAgBAAYAmZAzAghZmB", -- Warcraft Logs M+, all dungeons: typical of 712, 70% agree on 7 contested, 2026-09-25
-		["Raid"] = "C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAwMz0sssMDAgNAAAzMDbWmxMLzYMzMzMswMmZmBAYAAAGgZGwMAYYmZA", -- Warcraft Logs raid, all bosses: typical of 830, 74% agree on 6 contested, 2026-09-25
+		["Dungeon"] = "C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMmFMzQzMzAAAwAAmZmmlllZAAsBAwGMzMsZZGzsMjxMzMzwCzMzMzAAMAAADwMDwAghZmB", -- Warcraft Logs M+, all dungeons: typical of 656, 69% agree on 7 contested, 2026-10-18
+		["Raid"] = "C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAwMz0sssMDAgNAAAzMDbWmxMLzYMzMzMswMmZmBAYAAAGgZGwMAYYmZA", -- Warcraft Logs raid, all bosses: typical of 1000, 75% agree on 6 contested, 2026-10-18
 	},
 	Fire = {
-		["Dungeon"] = "C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGAwMz0sstMDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA", -- Warcraft Logs M+, all dungeons: typical of 512, 70% agree on 9 contested, 2026-09-25
-		["Raid"] = "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmlttZAA2MzM2mZmZGAAAAAwiZmZGAAYGjZmZGzMLDAzMwYMgZYMA", -- Warcraft Logs raid, all bosses: typical of 333, 72% agree on 11 contested, 2026-09-25
+		["Dungeon"] = "C8DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMzsgZGZmZGAAAGAwMz0sstMDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA", -- Warcraft Logs M+, all dungeons: typical of 582, 73% agree on 12 contested, 2026-10-18
+		["Raid"] = "C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmlttZAA2MzM2mZmZGLAAAAAYxMzMDAAMjxMzMjZmlBgZGgxAmhxA", -- Warcraft Logs raid, all bosses: typical of 299, 69% agree on 8 contested, 2026-10-18
 	},
 	["Frost Mage"] = {
-		["Dungeon"] = "CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMmZmZmZWMzMjZMDAAAMzMzyyMTbAAwGAAAYBgtlxMzMY2GGzwCAAAzsBMDjBMDGGA", -- Warcraft Logs M+, all dungeons: typical of 525, 63% agree on 27 contested, 2026-09-25
-		["Raid"] = "CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGzMzMziZmZMjZAAAgZmZWWmZaDAAAAAA2AYbZMzMDmthxMsAAAwMbAzADYGMMA", -- Warcraft Logs raid, all bosses: typical of 654, 75% agree on 26 contested, 2026-09-25
+		["Dungeon"] = "CAEAAAAAAAAAAAAAAAAAAAAAAMzwMLzMzsgZmYmxYmZmZWMzMzMzMzsMTzMbzCAAAsAAAbAAAAAstMmZmBz2MmZGbLAAAgZGMDjBMAGA", -- Warcraft Logs M+, all dungeons: typical of 579, 62% agree on 28 contested, 2026-10-18
+		["Raid"] = "CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGzMzMziZmZMjZAAAgZmZWWmZaDAAAAAA2AYbZMzMDmthxMsAAAwMbAzADYGMMA", -- Warcraft Logs raid, all bosses: typical of 699, 71% agree on 27 contested, 2026-10-18
 	},
 	Affliction = {
-		["Dungeon"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWGAAwMzsMLmZ2GDAM2WGYADYG2CMsNAAAMDAAgZmxMmZ2GjZMmZmZMMzMDAwAG", -- Warcraft Logs M+, all dungeons: typical of 597, 65% agree on 15 contested, 2026-09-25
-		["Raid"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAzMLzyMzsMGAwCMwsY0YGAzCYZAAAYGAAYmBzMjZGmZYmxMzYwMzMAAzAD", -- Warcraft Logs raid, all bosses: typical of 712, 75% agree on 30 contested, 2026-09-25
+		["Dungeon"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMjZGNbmZ2mZGzyAAAmZmlZxMz2YAgx2yADYAzwWghtBAAgZAAAMzMmxM2GjZMmZmhhZmZAAmBG", -- Warcraft Logs M+, all dungeons: typical of 636, 64% agree on 15 contested, 2026-10-18
+		["Raid"] = "CkQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAzMLzyMzsMGAwCMwsY0YGAzCYZAAAYGAAYmBzMjZGmZYmxMzYwMzMAAzAD", -- Warcraft Logs raid, all bosses: typical of 743, 75% agree on 30 contested, 2026-10-18
 	},
 	Demonology = {
-		["Dungeon"] = "CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMzyAAAAAAAAGzYYBGYbYhGWMmZsMbzMzYGAYmxMzYmBYMjZsBAAGzMzYYYZGDYA", -- Warcraft Logs M+, all dungeons: typical of 653, 73% agree on 9 contested, 2026-09-25
-		["Raid"] = "CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAAAAAgxMGWgB2GWohFjZGLzyMzMmBAmZMzMmZAmZGzMAAAjZmZMMsMjBMA", -- Warcraft Logs raid, all bosses: typical of 717, 77% agree on 11 contested, 2026-09-25
+		["Dungeon"] = "CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMzyAAAAAAAAGzYYBGYbYhGWMmZsMLzMzYGAYmxMzYmBYMjZsBAAGzMzYYYZGDYA", -- Warcraft Logs M+, all dungeons: typical of 656, 72% agree on 8 contested, 2026-10-18
+		["Raid"] = "CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAAAAAgxMGWgB2GWohFjZGLzyMzMmBAmZMzMmZAmZGzMAAAjZmZMMsMjBMA", -- Warcraft Logs raid, all bosses: typical of 921, 77% agree on 10 contested, 2026-10-18
 	},
 	Destruction = {
-		["Dungeon"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCMw2wCNWYAAgxgBAYmBYMjZmNAAAzMzAAgZYA", -- Warcraft Logs M+, all dungeons: typical of 548, 73% agree on 12 contested, 2026-09-25
-		["Raid"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmZmlZZmZmZxY2WMDAAmxYmZWsADMLGNmBwshNGAAYMAbAAzMYmZMGAAAmZmBAgxwA", -- Warcraft Logs raid, all bosses: typical of 593, 69% agree on 11 contested, 2026-09-25
+		["Dungeon"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCMw2wCNWYAAgxgBAYmBYMjZmNAAAzMzAAgZYA", -- Warcraft Logs M+, all dungeons: typical of 565, 73% agree on 12 contested, 2026-10-18
+		["Raid"] = "CsQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmZmlZZmZmZxY2WMDAAmxYmZWsADMLGNmBwshNGAAYMAbAAzMYmZMGAAAmZmBAgxwA", -- Warcraft Logs raid, all bosses: typical of 548, 74% agree on 15 contested, 2026-10-18
 	},
 	Brewmaster = {
-		["Dungeon"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDzGzMmZZYZ7B22mNMLAAwysMtMbzsMAAAAG2AzMgpxAAAG", -- Warcraft Logs M+, all dungeons: typical of 698, 64% agree on 4 contested, 2026-09-25
-		["Raid"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGzYGWmxGmZMAAAAAAALLYEzMwMM2YwMzMDz2YmxMLDLb22mtZMLAAwGAAAY2mlmZmZhhNAmZYaMAAgB", -- Warcraft Logs raid, all bosses: typical of 655, 74% agree on 26 contested, 2026-09-25
+		["Dungeon"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDzGzMmZZYZ7B22mNMLAAwysMtMbzsMAAAAG2AzMgpxAAAG", -- Warcraft Logs M+, all dungeons: typical of 720, 68% agree on 4 contested, 2026-10-18
+		["Raid"] = "CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGzYGWmxGmZMAAAAAAALLYEzMwMM2YwMzMDz2YmxMLDLb22mtZMLAAwGAAAY2mlmZmZhhNAmZYaMAAgB", -- Warcraft Logs raid, all bosses: typical of 831, 78% agree on 27 contested, 2026-10-18
 	},
 	Mistweaver = {
-		["Dungeon"] = "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZADGAzMzMMbYGmlZCAAAAAAWsNz2sNzAAADGDwMgxALyYGA", -- Warcraft Logs M+, all dungeons: typical of 629, 77% agree on 9 contested, 2026-09-25
-		["Raid"] = "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZZbmxCzoZMDYwgxsMzMzwsNYwiJAAAAAAYxyMLz2MDAAMgBYGwYYsIjZA", -- Warcraft Logs raid, all bosses: typical of 711, 74% agree on 13 contested, 2026-09-25
+		["Dungeon"] = "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZADGAzMzMMbYGmlZCAAAAAAWsNz2sNzAAADGDwMgxALyYGA", -- Warcraft Logs M+, all dungeons: typical of 664, 79% agree on 8 contested, 2026-10-18
+		["Raid"] = "C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZZbmxCzoZMDYwgxsMzMzwsNYwiJAAAAAAYxyMLz2MDAAMgBYGwYYsIjZA", -- Warcraft Logs raid, all bosses: typical of 832, 71% agree on 11 contested, 2026-10-18
 	},
 	Windwalker = {
-		["Dungeon"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYbmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNMDzyMBAswsxMmZmZAAsYmlZbMBAAmxAYGgxyAYmZ2M", -- Warcraft Logs M+, all dungeons: typical of 683, 73% agree on 9 contested, 2026-09-25
-		["Raid"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZY0wMMMgZMMzMzwsNMDzyMBAsYmtxMmZmZAAsYmlZZMBAAMGAzAMWGAzMzmPA", -- Warcraft Logs raid, all bosses: typical of 781, 73% agree on 14 contested, 2026-09-25
+		["Dungeon"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNMDzyMBAswsxMmZmZAAsYmlZbMBAAmxAYGgxyAYmZ2M", -- Warcraft Logs M+, all dungeons: typical of 710, 75% agree on 11 contested, 2026-10-18
+		["Raid"] = "C0QAAAAAAAAAAAAAAAAAAAAAAMzYM2GGsMzMbzAAAAAAAAAAAAsMMaGzwwAGGmZmZY2GmhZZmAAWMz2YGzMzMAAWMzysMmAAAGDgZAGLDgZmZzFA", -- Warcraft Logs raid, all bosses: typical of 957, 71% agree on 16 contested, 2026-10-18
 	},
 	Havoc = {
-		["Dungeon"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMz2MmZmZGzkxMDAAAAAAYWMmtZYmBmxyMzMDzMYWGYZ2MjhZhpxMzYYDAAAYAAAAMzgBAAAgB", -- Warcraft Logs M+, all dungeons: typical of 684, 74% agree on 24 contested, 2026-09-25
-		["Raid"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMzmxMzMmZmMmZAAAAAAAzyDMmtZYmBzMWmZMDzMGzyALziZMMbMNmZGDbAAAAAAAAMzgBAAAgB", -- Warcraft Logs raid, all bosses: typical of 791, 58% agree on 27 contested, 2026-09-25
+		["Dungeon"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYGMzMz2MmZmZGzkxMDAAAAAAYWMmtZYmZ2mZGLzMmxyMDjlZ2mBDjtNmwYmxwCAAAAAAAYmBYAAAAYA", -- Warcraft Logs M+, all dungeons: typical of 704, 73% agree on 8 contested, 2026-10-18
+		["Raid"] = "CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZ2MmZmxMzkxMDAAAAAAY2egxsNDzMz2MzYZmxMWmZYmlZ2mBDjlNmwYmxwCAAAAAAAYmBYAAAAYA", -- Warcraft Logs raid, all bosses: typical of 978, 78% agree on 27 contested, 2026-10-18
 	},
 	Vengeance = {
-		["Dungeon"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZkZmxwyMzMDMjZGzYmZGDmZmxmZmtxYGAAAAAAAAmZGbAAAAYgZmZmZrtZmZAAAAAAG", -- Warcraft Logs M+, all dungeons: typical of 653, 70% agree on 12 contested, 2026-09-25
-		["Raid"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAYMzMjZmZkZmBziZmZgZMzYGzMzYYmZmxmZmtxAAAAAAAAAmZGbAAAAYwMzMzMbtNzMDAMAAAAG", -- Warcraft Logs raid, all bosses: typical of 612, 76% agree on 11 contested, 2026-09-25
+		["Dungeon"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZkZmxwyMzMDMjZGzYmZGDmZmxmZmtxYGAAAAAAAAmZGbAAAAYgZmZmZrtZmZAAAAAAG", -- Warcraft Logs M+, all dungeons: typical of 681, 71% agree on 11 contested, 2026-10-18
+		["Raid"] = "CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMmZkZmBziZmZgZMzYGzMzYYmZmxmZmtxAAAAAAAAAmZGbAAAAYwMzMzMbtNzMDAMAAAAG", -- Warcraft Logs raid, all bosses: typical of 693, 79% agree on 15 contested, 2026-10-18
 	},
 	Devourer = {
-		["Dungeon"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMzYmFzYsolFmZmZ2abmZGADDAAGDGzA", -- Warcraft Logs M+, all dungeons: typical of 679, 70% agree on 5 contested, 2026-09-25
-		["Raid"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMmZmZmZmZYmtZGjNttAAADwMmZmtZmpZbmlZmxYGA", -- Warcraft Logs raid, all bosses: typical of 710, 60% agree on 31 contested, 2026-09-25
+		["Dungeon"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMzYmFzYsolFmZmZ2abmZGADDAAGDGzA", -- Warcraft Logs M+, all dungeons: typical of 714, 80% agree on 23 contested, 2026-10-18
+		["Raid"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMDzsYGjFZhZmZmt2mZmBwwAAwDMmhxMA", -- Warcraft Logs raid, all bosses: typical of 812, 72% agree on 26 contested, 2026-10-18
 	},
 	Devastation = {
-		["Dungeon"] = "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGzYMTjZmpZmZ2mZmZmZmZmZGgZmxYmZZmZgBGD2glxox2AYGA2wMYmBDPA", -- Warcraft Logs M+, all dungeons: typical of 647, 70% agree on 11 contested, 2026-09-25
-		["Raid"] = "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMDMYMTjZmpZmx2MzMzMzMzMzAmxMzYmZZmZgBGD2glxox2AYGA2wAzMY4BA", -- Warcraft Logs raid, all bosses: typical of 708, 73% agree on 8 contested, 2026-09-25
+		["Dungeon"] = "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGzYMTjZmpZmZ2mZmZmZmZmZGgZmxYmZZmZgBGD2glxox2AYGA2wMYmBDPA", -- Warcraft Logs M+, all dungeons: typical of 670, 78% agree on 12 contested, 2026-10-18
+		["Raid"] = "CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMDMYMTjZmpZmx2MzMzMzMzMzAmxMzYmZZmZgBGD2glxox2AYGA2wAzMY4BA", -- Warcraft Logs raid, all bosses: typical of 773, 77% agree on 8 contested, 2026-10-18
 	},
 	Preservation = {
-		["Dungeon"] = "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGzYYMzsZGw2wAAAzYGzMjhZiZmBAAAMzMTGzMjZZMDAMmBWAbgZYCsxYzwMAzMMA", -- Warcraft Logs M+, all dungeons: typical of 639, 69% agree on 10 contested, 2026-09-25
-		["Raid"] = "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAgZMjZMGzImZAAAAmZGZGzMmlZmBAzYGYDsAmhJwmhNDDgZmxA", -- Warcraft Logs raid, all bosses: typical of 829, 71% agree on 10 contested, 2026-09-25
+		["Dungeon"] = "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGzYYMPwsZGw2wAAAzYGzMjhZiZmBAAAMzMTGzMjZZMDAMmBWAbgZYCsZGbGmBYmhB", -- Warcraft Logs M+, all dungeons: typical of 666, 70% agree on 13 contested, 2026-10-18
+		["Raid"] = "CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAgZMjZMGzImZAAAAmZGZGzMmlZmBAzYGYDsAmhJwmhNDDgZmxA", -- Warcraft Logs raid, all bosses: typical of 995, 68% agree on 9 contested, 2026-10-18
 	},
 	Augmentation = {
-		["Dungeon"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAwMMGGjpGzMzAAAAgZmZMmZWGzMwMMwYGLsADMDDNwCGzMzAAD", -- Warcraft Logs M+, all dungeons: typical of 649, 77% agree on 28 contested, 2026-09-25
-		["Raid"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZGMYmZZmZMjZAAAAAAAAgZGjZwYqxMzMAAAAYGzYMzsMmZgZYgxMWYBGYGGagFMzYmBAG", -- Warcraft Logs raid, all bosses: typical of 787, 65% agree on 9 contested, 2026-09-25
+		["Dungeon"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzMzyMYmlZYmxMAAAAAAAAwMwMzYM1YmZGAAAAYmZMmZWGzMwMbGYMjFWgBmhhGYBMzMDAM", -- Warcraft Logs M+, all dungeons: typical of 685, 72% agree on 15 contested, 2026-10-18
+		["Raid"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgBzMLzMzMjZAAAAAAAAgZGMDGTNzMzMAAAAYGzMjZmlxMDMziBGzYhFYgZYoBWwYMzAAD", -- Warcraft Logs raid, all bosses: typical of 971, 64% agree on 11 contested, 2026-10-18
 	},
 }
 -- END GENERATED BUILDS

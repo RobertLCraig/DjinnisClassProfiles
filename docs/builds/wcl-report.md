@@ -1,6 +1,6 @@
 # What top Warcraft Logs players run
 
-Written by `wcl-builds.py` on 2026-09-25 13:53 UTC, for every class. Card 0064. From `wcl-builds.json`, `update-builds.py` takes every spec's typical Mythic+ build as `Dungeon`, every typical raid build as `Raid` for a spec with no boss rows, and for each druid boss row the typical pooled over its bosses.
+Written by `wcl-builds.py` on 2026-10-18 21:24 UTC, for every class. Card 0064. From `wcl-builds.json`, `update-builds.py` takes every spec's typical Mythic+ build as `Dungeon`, every typical raid build as `Raid` for a spec with no boss rows, and for each druid boss row the typical pooled over its bosses.
 
 - **Raid:** The Venomous Abyss, Mythic, every boss, top 100 a boss by dps (hps for healers).
 - **Mythic+:** Mythic+ Season 2, every dungeon, top 100 a dungeon by score.
@@ -18,1846 +18,1847 @@ Written by `wcl-builds.py` on 2026-09-25 13:53 UTC, for every class. Card 0064. 
 
 ### Raid
 
-805 rankings over 10 bosses, logged 2026-08-26 to 2026-09-25. 520 distinct builds. Hero tree: San'layn 87%, Deathbringer 13%.
+999 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 577 distinct builds. Hero tree: San'layn 80%, Deathbringer 20%. 1 left out: their log has no talents.
 
-**Typical** (San'layn, agreement 81% on 25 contested talents, 13 run it exactly):
+**Typical** (San'layn, agreement 76% on 22 contested talents, 12 run it exactly):
 
-`CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMzMMbzMz0MLmZMmxAAAAAmZmZmZmZYGjBAjZmZGAAADMwMW0YZDw2A2AMjZAAAzMwwA`
+`CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMjhZbmZmmZxMjxMGAAAAwMzMzMzMDzYMAYMzMzAAAYgBmxiGLbA2GwGgZMDAAYmBzwA`
 
 **Most common other builds**, each against the typical:
 
-- 18 (2.2%): +Enfeeble; -Death Notes
-  `CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMzMMbzMz0MLmZMmxAAAAAmZmZmZmZYGjBAjZmZGAAADMwMW0YZDw2A2AMjZAAAzMYwA`
-- 14 (1.7%): +Enfeeble; -Grip of the Dead
-  `CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMjhZbmZmmZxMjxMGAAAAwMzMzMzMDzYMAYMzMzAAAYgBmxiGLbA2GwGgZMDAAYmBzwA`
-- 13 (1.6%): +Subduing Grasp; -Blood Scent
-  `CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMzMMbzMz0MLGzMmxAAAAAmZmZmZmZYGjBAjZmZGAAADMwMW0YZDw2A2AMjZAAAzMwwA`
-- 9 (1.1%): +Osmosis; -Grip of the Dead
+- 20 (2.0%): +Grip of the Dead; -Enfeeble
+  `CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMzMMbzMz0MLmZMmxAAAAAmZmZmZmZYGjBAjZmZGAAADMwMW0YZDw2A2AMjZAAAzMwwA`
+- 18 (1.8%): +Foul Bulwark, +Lifeblood, +Osmosis, +Umbilicus Eternus; -Bloodied Blade, -Enfeeble, -Relish in Blood, -Sanguinary Burst
+  `CoPAAAAAAAAAAAAAAAAAAAAAAwMzyYmxMmZMMbzMz0MLmZMmxMAAAAwMmZmZmZYmZAAzMzMzAAAYgBmxiGLbA2GwGgZYAAAzMwwA`
+- 12 (1.2%): +Foul Bulwark; -Relish in Blood
+  `CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMjhZbmZmmZxMjxMGAAAAwMzMzMzMDzYAAzMzMzAAAYgBmxiGLbA2GwGgZMDAAYmBzwA`
+- 12 (1.2%): +Osmosis; -Enfeeble
   `CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMjhZbmZmmZxMjxMmBAAAAmZmZmZmZYGjBAjZmZGAAADMwMW0YZDw2A2AMjZAAAzMwwA`
 
-**Split talents:** Suppression 89%; Gorefiend's Grasp (choice) 89%; Death's Reach (choice) 89%; Relish in Blood 88%; Sanguinary Burst 88%; Visceral Strength 87%; Transfusion 87%; Thrill of Blood 87%; The Blood is Life 87%; Infliction of Sorrow 87%; Inevitable 87%; Incite Terror 87%; Gift of the San'layn 87%; Frenzied Bloodthirst 87%; Pact of the San'layn (choice) 83%; Blood-Soaked Ground (choice) 82%; Assimilation 81%; Bloody Fortitude (choice) 78%; Bloodied Blade 75%; Vampiric Speed (choice) 74%; Blood Scent 73%; March of Darkness (choice) 72%; Death Notes 64%; Grip of the Dead 46%; Enfeeble 45%; Blinding Sleet 33%; Osmosis 29%; Wraith Walk (choice) 27%; Foul Bulwark 23%; Subduing Grasp 17%; Coldthirst 17%; Bloodworms 16%; Wither Away 13%; Wave of Souls 13%; Swift and Painful 13%; Soul Rupture 13%; Rune Carved Plates (choice) 13%; Grim Reaper 13%; Frigid Resolve 13%; Exterminate 13%; Echoing Fury 13%; Deathly Blows 13%; Bind in Darkness 13%; Dark Talons (choice) 13%; Death Pact 13%; Death's Messenger (choice) 12%; Newly Turned (choice) 12%; Asphyxiate (choice) 11%
+**Split talents:** Sanguinary Burst 86%; Blood Scent 81%; Visceral Strength 80%; Transfusion 80%; Thrill of Blood 80%; The Blood is Life 80%; Infliction of Sorrow 80%; Inevitable 80%; Incite Terror 80%; Gift of the San'layn 80%; Frenzied Bloodthirst 80%; Pact of the San'layn (choice) 79%; Relish in Blood 78%; Blood-Soaked Ground (choice) 77%; Assimilation 76%; Bloodied Blade 74%; Bloody Fortitude (choice) 73%; Vampiric Speed (choice) 73%; March of Darkness (choice) 73%; Death Notes 57%; Enfeeble 44%; Grip of the Dead 39%; Osmosis 31%; Blinding Sleet 31%; Foul Bulwark 29%; Wraith Walk (choice) 27%; Wither Away 20%; Wave of Souls 20%; Swift and Painful 20%; Soul Rupture 20%; Rune Carved Plates (choice) 20%; Grim Reaper 20%; Frigid Resolve 20%; Exterminate 20%; Echoing Fury 20%; Deathly Blows 20%; Bind in Darkness 20%; Death's Messenger (choice) 19%; Dark Talons (choice) 19%; Coldthirst 19%; Death Pact 16%; Subduing Grasp 14%; Lifeblood 14%; Bloodworms 13%; Umbilicus Eternus 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 13 of 805 run it exactly.
+- `Raid`: 20 of 999 run it exactly. Typical has +Enfeeble; lacks Grip of the Dead.
 
 ### Mythic+
 
-702 rankings over 8 dungeons, logged 2026-09-05 to 2026-09-25, keys 20 to 22 (median 21). 117 distinct builds. Hero tree: San'layn 99%, Deathbringer 1%. 98 left out: their log has no talents.
+668 rankings over 8 dungeons, logged 2026-09-25 to 2026-10-18, keys 22 to 24 (median 22). 94 distinct builds. Hero tree: San'layn 100%, Deathbringer 0%. 132 left out: their log has no talents.
 
-**Typical** (San'layn, agreement 75% on 4 contested talents, 93 run it exactly):
+**Typical** (San'layn, agreement 75% on 3 contested talents, 179 run it exactly):
 
-`CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZxMjZmxAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA`
+`CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZZmZMzMAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA`
 
 **Most common other builds**, each against the typical:
 
-- 110 (15.7%): +Assimilation; -Suppression
+- 89 (13.3%): +Assimilation; -Death Pact
   `CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzMmxMzMMbzMz0MLmZMzMAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA`
-- 64 (9.1%): +Assimilation; -Blood Scent
-  `CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzMmxMzMMbzMz0MLGjZmxAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA`
-- 49 (7.0%): +Subduing Grasp; -Suppression
+- 68 (10.2%): +Suppression; -Death Pact
+  `CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZxMjZmxAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA`
+- 37 (5.5%): +Control Undead; -Death Pact
+  `CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmZMbzMz0MLmZMzMAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA`
+- 35 (5.2%): +Subduing Grasp; -Death Pact
   `CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZxMzMzMAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA`
-- 24 (3.4%): +Death Pact; -Suppression
-  `CoPAAAAAAAAAAAAAAAAAAAAAAwMzyMzwMmZmhZbmZmmZZmZMzMAAAAAmhZmZmZMzYAAzMzMzAAAYgBmxiGLbA2GwGgZMAAAzMAGA`
 
-**Split talents:** Death's Reach (choice) 90%; Permafrost 89%; Blood Scent 77%; Suppression 43%; Assimilation 33%; Death Pact 23%; Subduing Grasp 15%; Control Undead 11%; Enfeeble 10%; Death Defiance 10%; Asphyxiate (choice) 10%
+**Split talents:** Permafrost 90%; Blood Scent 89%; Death Pact 45%; Suppression 25%; Assimilation 21%; Control Undead 13%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 93 of 702 run it exactly.
+- `Dungeon`: 68 of 668 run it exactly. Typical has +Death Pact; lacks Suppression.
 
 ## Frost Death Knight
 
 ### Raid
 
-705 rankings over 10 bosses, logged 2026-09-06 to 2026-09-25. 259 distinct builds. Hero tree: Deathbringer 100%, Rider of the Apocalypse 0%.
+951 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 297 distinct builds. Hero tree: Deathbringer 100%.
 
-**Typical** (Deathbringer, agreement 69% on 8 contested talents, 13 run it exactly):
+**Typical** (Deathbringer, agreement 69% on 8 contested talents, 25 run it exactly):
 
-`CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjZYY2mZmZmZZmZkZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGAzgB`
+`CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjxYY2mZmZmZZmZkZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGAzgB`
 
 **Most common other builds**, each against the typical:
 
-- 58 (8.2%): +Enfeeble; -Unholy Endurance
+- 40 (4.2%): +Enfeeble, +Runic Protection; -Blood Draw, -Unholy Endurance
   `CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjZAz2MzMzMLzMjMjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAMzgB`
-- 32 (4.5%): +Enfeeble, +Wraith Walk; -March of Darkness, -Unholy Endurance
-  `CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjZAz2MzMzMbzMjMjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAMzgB`
-- 16 (2.3%): +Blinding Sleet; -Unholy Endurance
-  `CsPAAAAAAAAAAAAAAAAAAAAAAMAzMjZMDY2mZmZmZZmZkZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGAzgB`
-- 15 (2.1%): +Blood Draw, +Coldthirst, +Enfeeble; -Death Defiance, -Death Pact, -Runic Protection
-  `CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjxYY2mZmZmZxMjmZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGgZgB`
+- 38 (4.0%): +Enfeeble; -Death Notes
+  `CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjxYY2mZmZmZZmZkZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGgxgB`
+- 28 (2.9%): +Wraith Walk; -March of Darkness
+  `CsPAAAAAAAAAAAAAAAAAAAAAAMAmZMjxYY2mZmZmZbmZkZMGDzMGMzMzMzMzMDAAAAAAAAAjZbgBsAWGmAjFMzYmZgBghZGAzgB`
+- 23 (2.4%): +Asphyxiate, +Blinding Sleet, +Runic Protection, +Wraith Walk; -Assimilation, -Death Notes, -Death's Reach, -March of Darkness
+  `CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjZGDzyMzMzMbzMjMjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB`
 
-**Split talents:** Death's Reach (choice) 88%; Assimilation 74%; Death Pact 73%; Runic Protection 67%; Death Notes 67%; Unholy Endurance 63%; Death Defiance 61%; March of Darkness (choice) 57%; Enfeeble 56%; Blood Draw 53%; Blinding Sleet 49%; Wraith Walk (choice) 41%; Coldthirst 35%; Asphyxiate (choice) 11%
+**Split talents:** Death's Reach (choice) 89%; Death Pact 75%; Assimilation 73%; Unholy Endurance 72%; Death Notes 63%; Blood Draw 63%; March of Darkness (choice) 59%; Death Defiance 55%; Runic Protection 55%; Blinding Sleet 46%; Enfeeble 45%; Coldthirst 44%; Wraith Walk (choice) 40%; Asphyxiate (choice) 11%; Osmosis 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 13 of 705 run it exactly.
+- `Raid`: 10 of 951 run it exactly. Typical has +Blood Draw; lacks Runic Protection.
 
 ### Mythic+
 
-649 rankings over 8 dungeons, logged 2026-09-01 to 2026-09-25, keys 19 to 21 (median 19). 171 distinct builds. Hero tree: Deathbringer 100%. 151 left out: their log has no talents.
+682 rankings over 8 dungeons, logged 2026-09-13 to 2026-10-18, keys 20 to 23 (median 21). 168 distinct builds. Hero tree: Deathbringer 100%. 118 left out: their log has no talents.
 
-**Typical** (Deathbringer, agreement 72% on 8 contested talents, 28 run it exactly):
+**Typical** (Deathbringer, agreement 70% on 7 contested talents, 22 run it exactly):
 
 `CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjZYY2mZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB`
 
 **Most common other builds**, each against the typical:
 
-- 34 (5.2%): +Blood Draw; -Runic Protection
+- 54 (7.9%): +Blood Draw; -Runic Protection
   `CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjxYY2mZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB`
-- 27 (4.2%): +Assimilation; -Unholy Endurance
+- 32 (4.7%): +Asphyxiate; -Death's Reach
+  `CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjZYYWmZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB`
+- 29 (4.3%): +Asphyxiate, +Blood Draw; -Death's Reach, -Runic Protection
+  `CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjxYYWmZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB`
+- 26 (3.8%): +Assimilation; -Unholy Endurance
   `CsPAAAAAAAAAAAAAAAAAAAAAAMAzMjZMDY2mZmZmZbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB`
-- 23 (3.5%): +Assimilation, +Blood Draw, +Death Notes; -Death Defiance, -Death Pact, -Runic Protection
-  `CsPAAAAAAAAAAAAAAAAAAAAAAMAzMjZMGDz2MzMzMbmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAYgB`
-- 20 (3.1%): +Blood Draw, +March of Darkness; -Runic Protection, -Wraith Walk
-  `CsPAAAAAAAAAAAAAAAAAAAAAAMAzMMjxYY2mZmZmZZmZ0MjxYYmxgZmZmZmZmZAAAAAAAAAYMbDMgFwywEYsgZGzMDMAMMzAwgB`
 
-**Split talents:** Blood Scent 89%; Coldthirst 89%; Death's Reach (choice) 72%; Unholy Endurance 70%; Death Pact 70%; Wraith Walk (choice) 65%; Runic Protection 60%; Death Defiance 58%; Blood Draw 51%; Assimilation 40%; Death Notes 35%; March of Darkness (choice) 34%; Asphyxiate (choice) 28%; Enfeeble 24%; Grip of the Dead 11%
+**Split talents:** Blood Scent 86%; Death Pact 77%; Wraith Walk (choice) 68%; Unholy Endurance 67%; Death's Reach (choice) 64%; Death Defiance 64%; Runic Protection 64%; Blood Draw 48%; Death Notes 35%; Asphyxiate (choice) 35%; Assimilation 34%; March of Darkness (choice) 30%; Grip of the Dead 11%; Enfeeble 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 28 of 649 run it exactly.
+- `Dungeon`: the typical build. 22 of 682 run it exactly.
 
 ## Unholy Death Knight
 
 ### Raid
 
-656 rankings over 10 bosses, logged 2026-09-07 to 2026-09-25. 396 distinct builds. Hero tree: San'layn 99%, Rider of the Apocalypse 1%.
+823 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 462 distinct builds. Hero tree: San'layn 100%, Rider of the Apocalypse 0%. 1 left out: their log has no talents.
 
-**Typical** (San'layn, agreement 69% on 11 contested talents, 3 run it exactly):
+**Typical** (San'layn, agreement 69% on 10 contested talents, 9 run it exactly):
 
-`CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMGDz2MzMTjZmxYGDAAAAAAAAzDMMGAsMDzsZmxMzYgBmxmGLLA2GsBgZAMzMzMmBzMYmZMA`
+`CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMGDz2MzMTzyMzYMjBAAAAAAAg5BGGDAWmhZ2MzYmZMwAzYRjlFAbD2AwMAmZmZGzgZGMmxA`
 
 **Most common other builds**, each against the typical:
 
-- 22 (3.4%): +Blood-Soaked Ground, +Bloody Fortitude, +Runic Protection; -Blood Draw, -Desecrate, -Vampiric Aura
-  `CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMDDz2MzMTjZmxYGDAAAAAAAAzDMMGAsMDzsZmxMzYgBmxiGLbA2GsBgZAMzMzMmBzMYmZMA`
-- 21 (3.2%): +Runic Protection, +Wraith Walk; -Blood Draw, -Death Notes
-  `CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMDDz2MzMTz2MzYMjBAAAAAAAg5BGGDAWmhZ2MzYmZMwAzYTjlFAbD2AwMAmZmZGzgZGMmxA`
-- 21 (3.2%): +Blinding Sleet, +Coldthirst; -Assimilation, -Death Notes
-  `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2MzMTjZmxMzYAAAAAAAAYeghxAglZYmNzMmZGDMwM20YZBw2gNAMDgZmZmxMYmBjZMA`
-- 11 (1.7%): +Coldthirst, +Commander of the Dead 2/2, +March of Darkness, +Menacing Magus, +Osmosis, +Outnumber; -Blightfall, -Commander of the Dead 1/2, -Death Defiance, -Death Pact, -Insidious Chill, -Scourging 2/2
-  `CwPAAAAAAAAAAAAAAAAAAAAAAAwMDjxYY2mZmZaWMzYmZMDAAAAAAAgZGGDAWmxMzmZGzMjBGYGbassAYbwGGwMAMmZGzgZGMjxA`
+- 24 (2.9%): +Death Notes, +Desecrate, +Runic Protection; -Blood Draw, -Blood-Soaked Ground, -Unholy Endurance
+  `CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMDY2mZmZaWmZGjZMAAAAAAAAMPwwYAwyMMzmZGzMjBGYGbassAYbwGAmBwMzMzYGMzgZmxA`
+- 15 (1.8%): +Desecrate, +Wraith Walk; -Blood-Soaked Ground, -March of Darkness
+  `CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMGDz2MzMTz2MzYMjBAAAAAAAg5BGGDAWmhZ2MzYmZMwAzYTjlFAbD2AwMAmZmZGzgZGMmxA`
+- 14 (1.7%): +Desecrate; -Blood-Soaked Ground
+  `CwPAAAAAAAAAAAAAAAAAAAAAAAwMjZMGDz2MzMTzyMzYMjBAAAAAAAg5BGGDAWmhZ2MzYmZMwAzYTjlFAbD2AwMAmZmZGzgZGMmxA`
+- 12 (1.5%): +Coldthirst, +Desecrate, +Wraith Walk; -Assimilation, -Blood-Soaked Ground, -March of Darkness
+  `CwPAAAAAAAAAAAAAAAAAAAAAAAwMMjxYY2mZmZa2mZGzMjBAAAAAAAg5BGGDAWmhZ2MzYmZMwAzYTjlFAbD2AwMAmZmZGzgZGMmxA`
 
-**Split talents:** Insidious Chill 87%; Scourging 83%; Blightfall 83%; Assimilation 71%; Blood Draw 67%; Death Pact 64%; Vampiric Aura (choice) 55%; Desecrate (choice) 55%; Death Defiance 53%; Runic Protection 53%; Death Notes 53%; Blood-Soaked Ground (choice) 44%; Bloody Fortitude (choice) 44%; March of Darkness (choice) 43%; Wraith Walk (choice) 42%; Coldthirst 35%; Blinding Sleet 30%; Menacing Magus 27%; Osmosis 18%; Outnumber 17%; Grip of the Dead 14%
+**Split talents:** Unholy Devotion 89%; Enfeeble 86%; Insidious Chill 84%; Blood Draw 77%; Death Pact 73%; Assimilation 70%; Vampiric Aura (choice) 60%; Death Defiance 52%; Blood-Soaked Ground (choice) 51%; Death Notes 50%; March of Darkness (choice) 49%; Desecrate (choice) 49%; Runic Protection 44%; Wraith Walk (choice) 43%; Bloody Fortitude (choice) 40%; Blinding Sleet 30%; Coldthirst 27%; Osmosis 23%; Menacing Magus 15%; Grip of the Dead 13%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 3 of 656 run it exactly.
+- `Raid`: no one in the sample runs it exactly. Typical has +Blood-Soaked Ground, +March of Darkness; lacks Death Notes, Desecrate.
 
 ### Mythic+
 
-684 rankings over 8 dungeons, logged 2026-09-04 to 2026-09-25, keys 18 to 21 (median 19). 355 distinct builds. Hero tree: San'layn 99%, Rider of the Apocalypse 1%. 116 left out: their log has no talents.
+657 rankings over 8 dungeons, logged 2026-09-23 to 2026-10-18, keys 20 to 23 (median 21). 296 distinct builds. Hero tree: San'layn 100%, Rider of the Apocalypse 0%. 143 left out: their log has no talents.
 
-**Typical** (San'layn, agreement 70% on 16 contested talents, 5 run it exactly):
+**Typical** (San'layn, agreement 71% on 9 contested talents, 8 run it exactly):
 
 `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2MzMTz2MzYmZMAAAAAAAAMPwYYAwyMY2MzYmZMwAzYTjlFAbD2wAmBwMzMzYGMzghxA`
 
 **Most common other builds**, each against the typical:
 
-- 15 (2.2%): +Blood-Soaked Ground, +Death Notes, +Grip of the Dead, +Runic Protection; -Death Pact, -Desecrate, -Enfeeble, -Suppression
-  `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMzMDz2MzMTzmZGzMDAAAAAAAAMPwYYAwyMY2MzYmZMwAzYRjlFAbD2wAmBwMzMzYGMzAjxA`
-- 14 (2.0%): +Death Defiance; -Wraith Walk
-  `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2MzMTjZmxMzYAAAAAAAAYegxwAglZwsZmxMzYgBmxmGLLA2GshBMDgZmZmxMYmBjZMA`
-- 9 (1.3%): +Death Defiance, +Unholy Devotion; -Coldthirst, -Ghoulish Frenzy
-  `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2MzMTz2MzYMjBAAAAAAAg5BGDDAWmhZ2MzYMjBGYGbassAYbwGGwMAmZmZGzgZGMmxA`
-- 9 (1.3%): +Asphyxiate, +Grip of the Dead; -Death Pact, -Death's Reach
-  `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMmZYWmZmZa2MzYmZMAAAAAAAAMPwYYAwyMY2MzYmZMwAzYTjlFAbD2wAmBwMzMzYGMzghxA`
+- 26 (4.0%): +Death Defiance; -Permafrost
+  `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2YmZa2mZGzMjBAAAAAAAg5BGDDAWmBzmZGzMjBGYGbassAYbwGGwMAmZmZGzgZGMmxA`
+- 18 (2.7%): +Asphyxiate, +Death Defiance; -Death's Reach, -Permafrost
+  `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDzyYmZa2mZGzMjBAAAAAAAg5BGDDAWmBzmZGzMjBGYGbassAYbwGGwMAmZmZGzgZGMmxA`
+- 14 (2.1%): +Asphyxiate, +Bloody Fortitude, +Grip of the Dead, +Runic Protection; -Blood Draw, -Death's Reach, -Unholy Endurance, -Vampiric Aura
+  `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMjBzyMzMTz2MzYmZMAAAAAAAAMPwYYAwyMY2MzYmZMwAzYTjlNAbD2wAmBwMzMzYGMzghxA`
+- 12 (1.8%): +March of Darkness; -Wraith Walk
+  `CwPAAAAAAAAAAAAAAAAAAAAAAAYmhZMGDz2MzMTzyMzYmZMAAAAAAAAMPwYYAwyMY2MzYmZMwAzYTjlFAbD2wAmBwMzMzYGMzghxA`
 
-**Split talents:** Ghoulish Frenzy 86%; Desecrate (choice) 86%; Blood Scent 85%; Permafrost 82%; Unholy Endurance 77%; Reaping 73%; Soul Reaper 71%; Enfeeble 70%; Death Pact 69%; Death's Reach (choice) 64%; Scourging 63%; Blightfall 63%; Blood Draw 62%; Wraith Walk (choice) 59%; Vampiric Aura (choice) 57%; Grip of the Dead 57%; Unholy Devotion 56%; Runic Protection 49%; Death Defiance 45%; Bloody Fortitude (choice) 42%; Outnumber 37%; Asphyxiate (choice) 36%; Infected Claws 24%; March of Darkness (choice) 20%; Assimilation 19%; Death Notes 19%; Morbidity 18%; Blood-Soaked Ground (choice) 14%; Coil of Devastation 13%
+**Split talents:** Unholy Endurance 83%; Blood Scent 82%; Death Pact 78%; Permafrost 75%; Enfeeble 74%; Blood Draw 70%; Wraith Walk (choice) 60%; Death's Reach (choice) 57%; Vampiric Aura (choice) 57%; Death Defiance 51%; Bloody Fortitude (choice) 43%; Asphyxiate (choice) 43%; Runic Protection 40%; Grip of the Dead 39%; March of Darkness (choice) 27%; Assimilation 19%; Unholy Devotion 14%; Death Notes 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 5 of 684 run it exactly.
+- `Dungeon`: the typical build. 8 of 657 run it exactly.
 
 ## Devourer Demon Hunter
 
 ### Raid
 
-710 rankings over 10 bosses, logged 2026-08-27 to 2026-09-25. 203 distinct builds. Hero tree: Void-Scarred 55%, Annihilator 45%.
+812 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 260 distinct builds. Hero tree: Annihilator 73%, Void-Scarred 27%. 3 refused: unknown talents or not 34/34/13 points.
 
-**Typical** (Void-Scarred, agreement 60% on 31 contested talents, 2 run it exactly):
+**Typical** (Annihilator, agreement 72% on 26 contested talents, 88 run it exactly):
 
-`CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMmZmZmZmZYmtZGjNttAAADwMmZmtZmpZbmlZmxYGA`
+`CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMDzsYGjFZhZmZmt2mZmBwwAAwDMmhxMA`
 
 **Most common other builds**, each against the typical:
 
-- 88 (12.4%): +Erratic Felheart 1/2, +Gift of the Void, +Soulforged Blades; -Demon Muzzle, -Eradicate, -Star Fragments
-  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2MmZmZmZmxwMAAAAAAAegxsNYGAAAAAAAAmxMMmZmZMzMzYmtZGjNttAAADwMmZmtZmpZbmlZmxMGA`
-- 73 (10.3%): +Annihilator, +Catastrophe, +Celestial Echoes, +Dark Matter, +Emptiness, +Final Hour, +Harness the Cosmos, +Mass Acceleration, +Meteoric Fall, +Meteoric Rise, +Midnight 4/4, +Otherworldly Focus, +Phase Shift, +State of Matter, +Sweet Suffering 2/2, +Swift Erasure, +Voidpurge, +World Killer; -Blind Focus, -Burning Blades, -Demonic Intensity, -Devourer's Bite, -Duty Eternal, -Enduring Torment, -Flamebound, -Focused Hatred, -Hungering Slash, -Monster Rising, -Pursuit of Angriness, -Second Helping, -Set Fire to the Pain, -Singular Strikes, -Soul Glutton, -The Hunt, -Undying Embers, -Untethered Fury, -Violent Transformation, -Void-Scarred, -Voidrush, -Volatile Instinct
-  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMDzsYGjFZhZmZmt2mZmBwwAAwMGMmB`
-- 34 (4.8%): +Burn It Out, +Champion of the Glaive, +Erratic Felheart 1/2, +Gift of the Void, +Sweet Suffering 1/2; -Demon Muzzle, -Sigil of Misery, -Soul Cleanse, -Voidrage 2/2
-  `CgcBAAAAAAAAAAAAAAAAAAAAAAAWMmZmZmZmBmBAAAAAAY7BGz2gZAAAAAAAAYGzw8AzMzMzMzMjZ2mZM202CAAMAGzMz2Mz0sNzyMzYMDA`
-- 31 (4.4%): +Annihilator, +Catastrophe, +Celestial Echoes, +Dark Matter, +Emptiness, +Erratic Felheart 1/2, +Final Hour, +Harness the Cosmos, +Mass Acceleration, +Meteoric Fall, +Meteoric Rise, +Midnight 4/4, +Otherworldly Focus, +Phase Shift, +State of Matter, +Sweet Suffering 2/2, +Swift Erasure, +Voidpurge, +World Killer; -Blind Focus, -Burning Blades, -Demon Muzzle, -Demonic Intensity, -Devourer's Bite, -Duty Eternal, -Enduring Torment, -Flamebound, -Focused Hatred, -Hungering Slash, -Monster Rising, -Pursuit of Angriness, -Second Helping, -Set Fire to the Pain, -Singular Strikes, -Soul Glutton, -The Hunt, -Undying Embers, -Untethered Fury, -Violent Transformation, -Void-Scarred, -Voidrush, -Volatile Instinct
-  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2MmZmZmZmxwMAAAAAAAegxsNYGAAAAAAAAmxMMzMzMzMzMDzsYGjFZhZmZmt2mZmBwwAAwMGMmB`
+- 105 (12.9%): +Erratic Felheart 1/2, +Master of the Glaive; -Demon Muzzle, -Sigil of Misery
+  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2MmZmZmZmBmBAAAAAAY5BGz2gZAAAAAAAAYGzwMzMzMzMzMMziZMWkFmZmZ2abmZGADDAAPwYGGzA`
+- 57 (7.0%): +Master of the Glaive; -Felfire Haste
+  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzYmxwMAAAAAAALGz2gZAAAAAAAAYGzwMzMzMzMzMMziZMWkFmZmZ2abmZGADDAAPwYGGzA`
+- 40 (4.9%): +Erratic Felheart 1/2, +Gift of the Void, +Master of the Glaive, +Scythe's Embrace, +Second Helping; -Demon Muzzle, -Eradicate, -Focused Ire, -Voidglare Boon, -Voidpurge
+  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2MmZmZmZmxwMAAAAAAALPwY2GMDAAAAAAAAzYwMzMzMmZmZMziZMW0yCzMzMbtNzMDgZMAA8AjBDD`
+- 26 (3.2%): +Blind Focus, +Burn It Out, +Burning Blades, +Demonic Instinct 2/2, +Demonic Intensity, +Devourer's Bite, +Duty Eternal, +Enduring Torment, +Erratic Felheart 1/2, +Flamebound, +Focused Hatred, +Hungering Slash, +Improved Soul Rending, +Master of the Glaive, +Monster Rising, +Pursuit of Angriness, +Second Helping, +Singular Strikes, +The Hunt, +Undying Embers, +Untethered Fury, +Vengeful Bonds, +Violent Transformation, +Void-Scarred, +Voidrush, +Volatile Instinct; -Annihilator, -Catastrophe, -Celestial Echoes, -Dark Matter, -Demon Muzzle, -Demonic Instinct 1/2, -Eradicate, -Final Hour, -Focused Ire, -Harness the Cosmos, -Mass Acceleration, -Meteoric Fall, -Meteoric Rise, -Otherworldly Focus, -Phase Shift, -Rolling Torment, -Sigil of Misery, -Soul Cleanse, -State of Matter, -Sweet Suffering 2/2, -Swift Erasure, -Voidglare Boon, -Voidpurge, -Voidrage 2/2, -World Killer
+  `CgcBAAAAAAAAAAAAAAAAAAAAAAAWMzMzMzMzMwMAAAAAAALPwY2GMDAAAAAAAAzYwYmZmxMzMMzyMjxm2WAAgBwYmZ2mZmmtZ2mZYMjB`
 
-**Split talents:** Focused Ire 88%; Demonic Instinct 84%; Felfire Haste 84%; Voidrage 78%; Star Fragments 73%; Eradicate 73%; Sigil of Misery 70%; Sweet Suffering 69%; Gift of the Void 66%; Soul Cleanse (choice) 63%; Second Helping 57%; Erratic Felheart 57%; Volatile Instinct 55%; Voidrush 55%; Violent Transformation 55%; Untethered Fury 55%; Undying Embers 55%; The Hunt 55%; Soul Glutton (choice) 55%; Monster Rising 55%; Hungering Slash 55%; Focused Hatred 55%; Flamebound (choice) 55%; Enduring Torment 55%; Devourer's Bite 55%; Demonic Intensity 55%; Burning Blades 55%; Blind Focus 55%; Pursuit of Angriness (choice) 53%; Duty Eternal (choice) 53%; Singular Strikes 52%; Set Fire to the Pain (choice) 51%; Demon Muzzle 45%; World Killer 45%; Voidpurge 45%; Swift Erasure 45%; Phase Shift 45%; Otherworldly Focus 45%; Midnight 45%; Meteoric Rise 45%; Meteoric Fall 45%; Mass Acceleration 45%; Harness the Cosmos (choice) 45%; Final Hour 45%; Emptiness (choice) 45%; Dark Matter 45%; Celestial Echoes 45%; Catastrophe 45%; State of Matter (choice) 45%; Burn It Out (choice) 33%; Soulforged Blades 29%; Vengeful Bonds 16%; Scythe's Embrace (choice) 16%; Champion of the Glaive (choice) 13%; Master of the Glaive (choice) 13%; Charred Warblades 11%
+**Split talents:** Rolling Torment 85%; Eradicate 82%; Focused Ire 81%; Demonic Instinct 78%; Felfire Haste 77%; Voidrage 75%; Soul Cleanse (choice) 75%; Sweet Suffering 75%; World Killer 73%; Swift Erasure 73%; Phase Shift 73%; Otherworldly Focus 73%; Meteoric Rise 73%; Meteoric Fall 73%; Mass Acceleration 73%; Harness the Cosmos (choice) 73%; Final Hour 73%; Dark Matter 73%; Celestial Echoes 73%; Catastrophe 73%; State of Matter (choice) 73%; Sigil of Misery 66%; Voidpurge 64%; Voidglare Boon 64%; Demon Muzzle 53%; Erratic Felheart 46%; Master of the Glaive (choice) 39%; Second Helping 33%; Volatile Instinct 27%; Violent Transformation 27%; Untethered Fury 27%; Undying Embers 27%; Monster Rising 27%; Focused Hatred 27%; Enduring Torment 27%; Demonic Intensity 27%; Burning Blades 27%; Blind Focus 27%; Voidrush 27%; The Hunt 27%; Hungering Slash 27%; Devourer's Bite 27%; Pursuit of Angriness (choice) 26%; Singular Strikes 25%; Burn It Out (choice) 21%; Scythe's Embrace (choice) 20%; Duty Eternal (choice) 20%; Gift of the Void 17%; Flamebound (choice) 17%; Improved Soul Rending (choice) 14%; Charred Warblades 14%; Set Fire to the Pain (choice) 13%; Vengeful Bonds 10%; Student of Suffering (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 2 of 710 run it exactly.
+- `Raid`: no one in the sample runs it exactly. Typical has +Annihilator, +Catastrophe, +Celestial Echoes, +Dark Matter, +Demonic Instinct 1/2, +Emptiness, +Final Hour, +Harness the Cosmos, +Mass Acceleration, +Meteoric Fall, +Meteoric Rise, +Midnight 4/4, +Otherworldly Focus, +Phase Shift, +State of Matter, +Sweet Suffering 2/2, +Swift Erasure, +Voidglare Boon, +Voidpurge, +World Killer; lacks Blind Focus, Burning Blades, Demonic Instinct 2/2, Demonic Intensity, Devourer's Bite, Duty Eternal, Enduring Torment, Flamebound, Focused Hatred, Hungering Slash, Monster Rising, Pursuit of Angriness, Second Helping, Set Fire to the Pain, Singular Strikes, Soul Glutton, The Hunt, Undying Embers, Untethered Fury, Violent Transformation, Void-Scarred, Voidrush, Volatile Instinct.
 
 ### Mythic+
 
-679 rankings over 8 dungeons, logged 2026-08-30 to 2026-09-25, keys 18 to 21 (median 19). 54 distinct builds. Hero tree: Annihilator 99%, Void-Scarred 1%. 121 left out: their log has no talents.
+714 rankings over 8 dungeons, logged 2026-09-16 to 2026-10-18, keys 20 to 23 (median 21). 143 distinct builds. Hero tree: Annihilator 86%, Void-Scarred 14%. 79 left out: their log has no talents. 7 refused: unknown talents or not 34/34/13 points.
 
-**Typical** (Annihilator, agreement 70% on 5 contested talents, 122 run it exactly):
+**Typical** (Annihilator, agreement 80% on 23 contested talents, 52 run it exactly):
 
 `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMzYmFzYsolFmZmZ2abmZGADDAAGDGzA`
 
 **Most common other builds**, each against the typical:
 
-- 133 (19.6%): +Swallowed Anger; -Felfire Haste
+- 66 (9.2%): +Swallowed Anger; -Felfire Haste
   `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzYmxwMAAAAAAAMmthZGAAAAAAAAmxMMzMzMzMzMzYmFzYsolFmZmZ2abmZGADDAAGDGzA`
-- 52 (7.7%): +Master of the Glaive; -Focused Ire
-  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAYxY2GMDAAAAAAAAzYwMzMzMzMzMjZWMjxiWWYmZmZrtZmZAMMAAYMYMD`
-- 46 (6.8%): +Demonic Instinct 2/2; -Gift of the Void, -Scythe's Embrace
-  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMDzsYGjFZhZmZmt2mZmBwwAAwMGMmB`
-- 45 (6.6%): +Demonic Instinct 2/2, +Swallowed Anger; -Felfire Haste, -Gift of the Void, -Scythe's Embrace
-  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzYmxwMAAAAAAAMmthZGAAAAAAAAmxMMzMzMzMzMDzsYGjFZhZmZmt2mZmBwwAAwMGMmB`
+- 65 (9.1%): +Demonic Instinct 1/2, +Voidglare Boon; -Gift of the Void, -Scythe's Embrace
+  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzMzMGmBAAAAAAgxsNYGAAAAAAAAmxMMzMzMzMzMDzsYGjFZhZmZmt2mZmBwwAAwDMmhxMA`
+- 64 (9.0%): +Demonic Instinct 1/2, +Master of the Glaive, +Voidglare Boon; -Felfire Haste, -Gift of the Void, -Scythe's Embrace
+  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzYmxwMAAAAAAALGz2gZAAAAAAAAYGzwMzMzMzMzMMziZMWkFmZmZ2abmZGADDAAPwYGGzA`
+- 27 (3.8%): +Demonic Instinct 1/2, +Swallowed Anger, +Voidglare Boon; -Felfire Haste, -Gift of the Void, -Scythe's Embrace
+  `CgcBAAAAAAAAAAAAAAAAAAAAAAA2mxMzMzYmxwMAAAAAAAMmthZGAAAAAAAAmxMMzMzMzMzMDzsYGjFZhZmZmt2mZmBwwAAwDMmhxMA`
 
-**Split talents:** Focused Ire 86%; Soul Cleanse (choice) 78%; Scythe's Embrace (choice) 71%; Gift of the Void 68%; Felfire Haste 48%; Swallowed Anger 32%; Demonic Instinct 30%; Burn It Out (choice) 15%; Infernal Armor 13%; Master of the Glaive (choice) 11%
+**Split talents:** Focused Ire 89%; Rolling Torment 89%; Sweet Suffering 89%; Voidrage 88%; World Killer 86%; Swift Erasure 86%; State of Matter (choice) 86%; Phase Shift 86%; Otherworldly Focus 86%; Meteoric Rise 86%; Meteoric Fall 86%; Mass Acceleration 86%; Harness the Cosmos (choice) 86%; Final Hour 86%; Dark Matter 86%; Celestial Echoes 86%; Catastrophe 86%; Voidpurge 84%; Soul Cleanse (choice) 78%; Scythe's Embrace (choice) 47%; Gift of the Void 46%; Demonic Instinct 44%; Voidglare Boon 40%; Felfire Haste 36%; Swallowed Anger 27%; Infernal Armor 17%; Master of the Glaive (choice) 16%; Volatile Instinct 14%; Voidrush 14%; Violent Transformation 14%; Untethered Fury 14%; Undying Embers 14%; The Hunt 14%; Singular Strikes 14%; Monster Rising 14%; Hungering Slash 14%; Focused Hatred 14%; Enduring Torment 14%; Devourer's Bite 14%; Demonic Intensity 14%; Burning Blades 14%; Blind Focus 14%; Charred Warblades 13%; Burn It Out (choice) 13%; Set Fire to the Pain (choice) 12%; Pursuit of Angriness (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 122 of 679 run it exactly.
+- `Dungeon`: the typical build. 52 of 714 run it exactly.
 
 ## Havoc Demon Hunter
 
 ### Raid
 
-791 rankings over 10 bosses, logged 2026-09-02 to 2026-09-25. 305 distinct builds. Hero tree: Fel-Scarred 57%, Aldrachi Reaver 43%.
+978 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 253 distinct builds. Hero tree: Aldrachi Reaver 81%, Fel-Scarred 19%. 1 left out: their log has no talents.
 
-**Typical** (Fel-Scarred, agreement 58% on 27 contested talents, 29 run it exactly):
+**Typical** (Aldrachi Reaver, agreement 78% on 27 contested talents, 74 run it exactly):
 
-`CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMzmxMzMmZmMmZAAAAAAAzyDMmtZYmBzMWmZMDzMGzyALziZMMbMNmZGDbAAAAAAAAMzgBAAAgB`
+`CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZ2MmZmxMzkxMDAAAAAAY2egxsNDzMz2MzYZmxMWmZYmlZ2mBDjlNmwYmxwCAAAAAAAYmBYAAAAYA`
 
 **Most common other builds**, each against the typical:
 
-- 125 (15.8%): +Accelerated Blade, +Aldrachi Reaver, +Aldrachi Tactics, +Bladecraft, +Broken Spirit, +Furious Throws, +Fury of the Aldrachi, +Incisive Blade, +Incorruptible Spirit, +Keen Edge, +Keen Engagement, +Reaver's Mark, +Screaming Brutality, +Serrated Glaive, +Shattered Destiny, +Soulscar, +Thrill of the Fight, +Unhindered Assault, +Warblade's Hunger, +Wounded Quarry; -A Fire Inside, -Blind Focus, -Burning Blades, -Burning Wound, -Demonic Intensity, -Enduring Torment, -Fel-Scarred, -Focused Hatred, -Growing Inferno, -Isolated Prey, -Monster Rising, -Pursuit of Angriness, -Ragefire, -Set Fire to the Pain, -Student of Suffering, -Trail of Ruin, -Undying Embers, -Untethered Fury, -Violent Transformation, -Volatile Instinct
+- 179 (18.3%): +Master of the Glaive; -Champion of the Glaive
   `CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZ2MmZmxMzkxMDAAAAAAYWegxsNDzMz2MzYZmxMWmZYmlZ2mBDjlNmwYmxwCAAAAAAAYmBYAAAAYA`
-- 27 (3.4%): +Blind Fury 1/2; -Isolated Prey
-  `CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMzmxMzMmZmMmZAAAAAAAzyDMmtZYmBzMWmZegZYmBzyALziZMMbMNmZGDbAAAAAAAAMzgBAAAgB`
-- 24 (3.0%): +Accelerated Blade, +Aldrachi Reaver, +Aldrachi Tactics, +Bladecraft, +Broken Spirit, +Champion of the Glaive, +Furious Throws, +Fury of the Aldrachi, +Incisive Blade, +Incorruptible Spirit, +Keen Edge, +Keen Engagement, +Reaver's Mark, +Screaming Brutality, +Serrated Glaive, +Shattered Destiny, +Soulscar, +Thrill of the Fight, +Unhindered Assault, +Warblade's Hunger, +Wounded Quarry; -A Fire Inside, -Blind Focus, -Burning Blades, -Burning Wound, -Demonic Intensity, -Enduring Torment, -Fel-Scarred, -Focused Hatred, -Growing Inferno, -Isolated Prey, -Master of the Glaive, -Monster Rising, -Pursuit of Angriness, -Ragefire, -Set Fire to the Pain, -Student of Suffering, -Trail of Ruin, -Undying Embers, -Untethered Fury, -Violent Transformation, -Volatile Instinct
-  `CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZ2MmZmxMzkxMDAAAAAAY2egxsNDzMz2MzYZmxMWmZYmlZ2mBDjlNmwYmxwCAAAAAAAYmBYAAAAYA`
-- 16 (2.0%): +Blind Fury 1/2, +Burn It Out, +Champion of the Glaive, +Demon Muzzle, +Disrupting Fury; -Erratic Felheart 1/2, -Imprison, -Isolated Prey, -Master of the Glaive, -Soul Cleanse
-  `CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMzyMmZmZmZmMmZAAAAAAAzmxsNDjBzMWmZegZYmBzyALziZMMbMNmZGDbAAAAAAAAMzgBAAAgB`
+- 32 (3.3%): +Burn It Out, +Demon Muzzle, +Disrupting Fury; -Erratic Felheart 1/2, -Imprison, -Soul Cleanse
+  `CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZWmxMzMzMzkxMDAAAAAAY2MmtZYMz2MzYZmxMWmZYmlZ2mBDjlNmwYmxwCAAAAAAAYmBYAAAAYA`
+- 24 (2.5%): +Aldrachi Design, +Disrupting Fury, +Live by the Glaive; -Consume Magic, -Imprison, -Sigil of Misery
+  `CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZ2MmZmZmZmwMDAAAAAAY2egZmtZgZ2mZGLzMmxyMDzsMz2MYYssxEGzMzwCAAAAAAAYmBYAAAAYA`
+- 23 (2.4%): +Aldrachi Design, +Disrupting Fury, +Live by the Glaive, +Master of the Glaive; -Champion of the Glaive, -Felfire Haste, -Imprison, -Sigil of Misery
+  `CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZ2MmZmZGzEmZAAAAAAAzyDMzsNDjZ2mZGLzMmxyMDzsMz2MYYssxEGzMzwCAAAAAAAYmBYAAAAYA`
 
-**Split talents:** Felfire Haste 85%; Consume Magic 78%; Soul Cleanse (choice) 77%; Sigil of Misery 71%; Imprison 70%; Master of the Glaive (choice) 60%; Volatile Instinct 57%; Violent Transformation 57%; Untethered Fury 57%; Undying Embers 57%; Monster Rising 57%; Focused Hatred 57%; Enduring Torment 57%; Demonic Intensity 57%; Burning Blades 57%; Blind Focus 57%; Pursuit of Angriness (choice) 56%; Student of Suffering (choice) 54%; Trail of Ruin 51%; Erratic Felheart 51%; Serrated Glaive 51%; Shattered Destiny (choice) 50%; Set Fire to the Pain (choice) 49%; Ragefire 49%; Growing Inferno 49%; Burning Wound 49%; A Fire Inside 49%; Demon Muzzle 44%; Screaming Brutality 43%; Accelerated Blade 43%; Wounded Quarry 43%; Warblade's Hunger 43%; Unhindered Assault (choice) 43%; Thrill of the Fight 43%; Soulscar (choice) 43%; Reaver's Mark 43%; Keen Edge 43%; Incisive Blade 43%; Fury of the Aldrachi 43%; Furious Throws 43%; Broken Spirit 43%; Bladecraft 43%; Aldrachi Tactics 43%; Incorruptible Spirit (choice) 41%; Champion of the Glaive (choice) 40%; Disrupting Fury 39%; Keen Engagement (choice) 39%; Isolated Prey 37%; Blind Fury 34%; Aldrachi Design 28%; Live by the Glaive 20%; Burn It Out (choice) 17%; Infernal Armor 12%
+**Split talents:** Serrated Glaive 82%; Shattered Destiny (choice) 82%; Soul Cleanse (choice) 81%; Wounded Quarry 81%; Warblade's Hunger 81%; Unhindered Assault (choice) 81%; Thrill of the Fight 81%; Soulscar (choice) 81%; Screaming Brutality 81%; Reaver's Mark 81%; Keen Edge 81%; Incisive Blade 81%; Fury of the Aldrachi 81%; Furious Throws 81%; Broken Spirit 81%; Bladecraft 81%; Aldrachi Tactics 81%; Accelerated Blade 81%; Consume Magic 81%; Incorruptible Spirit (choice) 81%; Keen Engagement (choice) 76%; Felfire Haste 72%; Sigil of Misery 72%; Imprison 65%; Champion of the Glaive (choice) 55%; Erratic Felheart 50%; Demon Muzzle 48%; Disrupting Fury 46%; Master of the Glaive (choice) 45%; Aldrachi Design 30%; Live by the Glaive 22%; Trail of Ruin 20%; Volatile Instinct 19%; Violent Transformation 19%; Untethered Fury 19%; Undying Embers 19%; Monster Rising 19%; Focused Hatred 19%; Enduring Torment 19%; Demonic Intensity 19%; Burning Blades 19%; Blind Focus 19%; Student of Suffering (choice) 19%; Pursuit of Angriness (choice) 19%; Ragefire 18%; Growing Inferno 18%; Burning Wound 18%; A Fire Inside 18%; Set Fire to the Pain (choice) 16%; Burn It Out (choice) 13%; Blind Fury 11%; Isolated Prey 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 29 of 791 run it exactly.
+- `Raid`: 9 of 978 run it exactly. Typical has +Accelerated Blade, +Aldrachi Reaver, +Aldrachi Tactics, +Bladecraft, +Broken Spirit, +Champion of the Glaive, +Furious Throws, +Fury of the Aldrachi, +Incisive Blade, +Incorruptible Spirit, +Keen Edge, +Keen Engagement, +Reaver's Mark, +Screaming Brutality, +Serrated Glaive, +Shattered Destiny, +Soulscar, +Thrill of the Fight, +Unhindered Assault, +Warblade's Hunger, +Wounded Quarry; lacks A Fire Inside, Blind Focus, Burning Blades, Burning Wound, Demonic Intensity, Enduring Torment, Fel-Scarred, Focused Hatred, Growing Inferno, Isolated Prey, Master of the Glaive, Monster Rising, Pursuit of Angriness, Ragefire, Set Fire to the Pain, Student of Suffering, Trail of Ruin, Undying Embers, Untethered Fury, Violent Transformation, Volatile Instinct.
 
 ### Mythic+
 
-684 rankings over 8 dungeons, logged 2026-08-28 to 2026-09-25, keys 18 to 21 (median 19). 163 distinct builds. Hero tree: Fel-Scarred 79%, Aldrachi Reaver 21%. 116 left out: their log has no talents.
+704 rankings over 8 dungeons, logged 2026-09-10 to 2026-10-18, keys 20 to 23 (median 21). 163 distinct builds. Hero tree: Aldrachi Reaver 92%, Fel-Scarred 8%. 96 left out: their log has no talents.
 
-**Typical** (Fel-Scarred, agreement 74% on 24 contested talents, 10 run it exactly):
+**Typical** (Aldrachi Reaver, agreement 73% on 8 contested talents, 25 run it exactly):
 
-`CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMz2MmZmZGzkxMDAAAAAAYWMmtZYmBmxyMzMDzMYWGYZ2MjhZhpxMzYYDAAAYAAAAMzgBAAAgB`
+`CEkAAAAAAAAAAAAAAAAAAAAAAYGMzMz2MmZmZGzkxMDAAAAAAYWMmtZYmZ2mZGLzMmxyMDjlZ2mBDjtNmwYmxwCAAAAAAAYmBYAAAAYA`
 
 **Most common other builds**, each against the typical:
 
-- 95 (13.9%): +Focused Ire; -Disrupting Fury
-  `CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMz2MmZmxYmMmZAAAAAAAzixsNDzMwMWmZmZYmBzyALzmZMMLMNmZGzYDAAAYAAAAMzgBAAAgB`
-- 31 (4.5%): +Accelerated Blade, +Aldrachi Reaver, +Aldrachi Tactics, +Bladecraft, +Broken Spirit, +Dancing with Fate 2/2, +Focused Ire, +Furious Throws, +Fury of the Aldrachi, +Incisive Blade, +Incorruptible Spirit, +Keen Edge, +Preemptive Strike, +Reaver's Mark, +Screaming Brutality, +Serrated Glaive, +Soulscar, +Thrill of the Fight, +Unhindered Assault, +Warblade's Hunger, +Wounded Quarry; -A Fire Inside, -Blind Focus, -Blind Fury 2/2, -Burning Blades, -Burning Wound, -Demonic Intensity, -Disrupting Fury, -Enduring Torment, -Fel-Scarred, -Flamebound, -Focused Hatred, -Glaive Tempest, -Growing Inferno, -Monster Rising, -Ragefire, -Set Fire to the Pain, -Undying Embers, -Untethered Fury, -Violent Transformation, -Volatile Instinct, -Wave of Debilitation
-  `CEkAAAAAAAAAAAAAAAAAAAAAAYGMzMz2MmZmxYmMmZAAAAAAAzixsNDzMz2MzYZmxMMzwMLzsNDGGbbMhxMjZsAAAAAAAAmZAGAAAAG`
-- 30 (4.4%): +Infernal Armor 2/2; -Felbound, -Soul Cleanse
-  `CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMjZMzMzMmJjZGAAAAAAwsYMbjxMDMjlZmZGmZwsMwysZGDzCTjZmxwGAAAwAAAAYmBDAAAAD`
-- 28 (4.1%): +Champion of the Glaive, +Infernal Armor 2/2, +Pursuit of Angriness; -Felbound, -Master of the Glaive, -Soul Cleanse, -Wave of Debilitation
-  `CEkAAAAAAAAAAAAAAAAAAAAAAYmZGzMjZMzMzMmJjZGAAAAAAwsZMbjxMDMjlZmZGmZwsMwysZGDzGTjZmxwGAAAwAAAAYmBDAAAAD`
+- 80 (11.4%): +Focused Ire; -Felbound
+  `CEkAAAAAAAAAAAAAAAAAAAAAAYGMzMz2MmZmZGzkxMDAAAAAAYWMmtBzMz2MzYZmxMWmZYsMz2MYYstxEGzMmxCAAAAAAAYmBYAAAAYA`
+- 38 (5.4%): +Champion of the Glaive; -Master of the Glaive
+  `CEkAAAAAAAAAAAAAAAAAAAAAAYGMzMz2MmZmZGzkxMDAAAAAAY2MmtZYmZ2mZGLzMmxyMDjlZ2mBDjtNmwYmxwCAAAAAAAYmBYAAAAYA`
+- 38 (5.4%): +Focused Ire; -Disrupting Fury
+  `CEkAAAAAAAAAAAAAAAAAAAAAAYGMzMz2MmZmxYmMmZAAAAAAAzixsNDzMz2MzYZmxMWmZYsMz2MYYstxEGzMmxCAAAAAAAYmBYAAAAYA`
+- 30 (4.3%): +Burn It Out, +Champion of the Glaive, +Never Say Die; -Master of the Glaive, -Soul Cleanse, -Trail of Ruin
+  `CEkAAAAAAAAAAAAAAAAAAAAAAYgZmZWmxMzMzYmMmZAAAAAAAzmxsNDzMz2MzYZmxMWmZYmlZ2mBDjtNmwYmxwCAAAAAAAYmBYAAAAYA`
 
-**Split talents:** Blind Fury 81%; Volatile Instinct 79%; Violent Transformation 79%; Untethered Fury 79%; Undying Embers 79%; Ragefire 79%; Monster Rising 79%; Growing Inferno 79%; Focused Hatred 79%; Enduring Torment 79%; Demonic Intensity 79%; Burning Wound 79%; Burning Blades 79%; Blind Focus 79%; A Fire Inside 79%; Glaive Tempest 78%; Set Fire to the Pain (choice) 74%; Soul Cleanse (choice) 73%; Flamebound (choice) 73%; Felbound 63%; Disrupting Fury 54%; Wave of Debilitation (choice) 54%; Master of the Glaive (choice) 52%; Champion of the Glaive (choice) 47%; Focused Ire 43%; Infernal Armor 29%; Pursuit of Angriness (choice) 25%; Dancing with Fate 25%; Wounded Quarry 21%; Warblade's Hunger 21%; Unhindered Assault (choice) 21%; Thrill of the Fight 21%; Soulscar (choice) 21%; Serrated Glaive 21%; Screaming Brutality 21%; Reaver's Mark 21%; Keen Edge 21%; Incisive Blade 21%; Fury of the Aldrachi 21%; Furious Throws 21%; Broken Spirit 21%; Bladecraft 21%; Aldrachi Tactics 21%; Accelerated Blade 21%; Incorruptible Spirit (choice) 20%; Preemptive Strike (choice) 18%; Felfire Haste 16%; Shattered Destiny (choice) 11%
+**Split talents:** Preemptive Strike (choice) 87%; Incorruptible Spirit (choice) 86%; Shattered Destiny (choice) 79%; Soul Cleanse (choice) 78%; Trail of Ruin 73%; Disrupting Fury 71%; Felbound 64%; Master of the Glaive (choice) 52%; Focused Ire 49%; Champion of the Glaive (choice) 47%; Never Say Die 43%; Burn It Out (choice) 15%; Blind Fury 13%; Glaive Tempest 12%; Infernal Armor 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 10 of 684 run it exactly.
+- `Dungeon`: 1 of 704 run it exactly. Typical has +Accelerated Blade, +Aldrachi Reaver, +Aldrachi Tactics, +Bladecraft, +Broken Spirit, +Dancing with Fate 2/2, +Furious Throws, +Fury of the Aldrachi, +Incisive Blade, +Incorruptible Spirit, +Keen Edge, +Preemptive Strike, +Reaver's Mark, +Screaming Brutality, +Serrated Glaive, +Shattered Destiny, +Soulscar, +Thrill of the Fight, +Unhindered Assault, +Warblade's Hunger, +Wounded Quarry; lacks A Fire Inside, Blind Focus, Blind Fury 2/2, Burning Blades, Burning Wound, Demonic Intensity, Enduring Torment, Fel-Scarred, Flamebound, Focused Hatred, Glaive Tempest, Growing Inferno, Monster Rising, Never Say Die, Ragefire, Set Fire to the Pain, Undying Embers, Untethered Fury, Violent Transformation, Volatile Instinct, Wave of Debilitation.
 
 ## Vengeance Demon Hunter
 
 ### Raid
 
-612 rankings over 10 bosses, logged 2026-08-30 to 2026-09-25. 286 distinct builds. Hero tree: Annihilator 97%, Aldrachi Reaver 3%. 1 left out: their log has no talents.
+693 rankings over 10 bosses, logged 2026-10-13 to 2026-10-18. 306 distinct builds. Hero tree: Annihilator 98%, Aldrachi Reaver 2%.
 
-**Typical** (Annihilator, agreement 76% on 11 contested talents, 16 run it exactly):
+**Typical** (Annihilator, agreement 79% on 15 contested talents, 18 run it exactly):
 
-`CUkAAAAAAAAAAAAAAAAAAAAAAAAYMzMjZmZkZmBziZmZgZMzYGzMzYYmZmxmZmtxAAAAAAAAAmZGbAAAAYwMzMzMbtNzMDAMAAAAG`
+`CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMmZkZmBziZmZgZMzYGzMzYYmZmxmZmtxAAAAAAAAAmZGbAAAAYwMzMzMbtNzMDAMAAAAG`
 
 **Most common other builds**, each against the typical:
 
-- 28 (4.6%): +Demon Muzzle; -Felfire Haste
-  `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMmZkZmBziZmZgZMzYGzMzYYmZmxmZmtxAAAAAAAAAmZGbAAAAYwMzMzMbtNzMDAMAAAAG`
-- 25 (4.1%): +Demon Muzzle, +Disrupting Fury; -Felbound, -Felfire Haste
+- 26 (3.8%): +Chains of Anger, +Disrupting Fury; -Calcified Spikes, -Felbound
+  `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmxMjMzMYWMzMjBjZGzYmZGDzMzM2MzsNGAAAAAAAAwMzYDAAAADMzMzMbtNzMDAMAAAAG`
+- 26 (3.8%): +Disrupting Fury; -Felbound
   `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmxMjMzMYWMzMDMjZGzYmZGDzMzM2MzsNGAAAAAAAAwMzYDAAAADMzMzMbtNzMDAMAAAAG`
-- 14 (2.3%): +Erratic Felheart 1/2; -Chaos Nova
-  `CUkAAAAAAAAAAAAAAAAAAAAAAAAYMzMjZmZkZmBziZmZgZMzYGzMzYYmZmx2DMzsNGAAAAAAAAwMzYDAAAADGzMzMbtNzMDAMAAAAG`
-- 14 (2.3%): +Erratic Felheart 2/2; -Chaos Nova, -Pitch Black
+- 13 (1.9%): +Erratic Felheart 2/2, +Felfire Haste; -Chaos Nova, -Demon Muzzle, -Pitch Black
   `CUkAAAAAAAAAAAAAAAAAAAAAAAAYMzMjZmZkZmBziZmZgZMzYGzMzYYmZmx2MzYMAAAAAAAAgZmxGAAAAGMmZmZ2abmZGAYAAAAMA`
+- 10 (1.4%): +Erratic Felheart 1/2, +Felfire Haste; -Chaos Nova, -Demon Muzzle
+  `CUkAAAAAAAAAAAAAAAAAAAAAAAAYMzMjZmZkZmBziZmZgZMzYGzMzYYmZmx2DMzsNGAAAAAAAAwMzYDAAAADGzMzMbtNzMDAMAAAAG`
 
-**Split talents:** Soul Barrier (choice) 86%; Quickened Sigils 85%; State of Matter (choice) 83%; Pursuit 81%; Final Breath 80%; Feed the Demon 80%; Volatile Flameblood 74%; Chaos Nova 73%; Felbound 73%; Pitch Black (choice) 72%; Erratic Felheart 61%; Felfire Haste 48%; Demon Muzzle 37%; Painbringer 30%; Imprison 25%; Chains of Anger 25%; Retaliation 15%; Path to Oblivion (choice) 15%; Improved Sigil of Misery 11%; Disrupting Fury 11%
+**Split talents:** Ascending Flame 89%; Fallout 88%; Demonic Resilience 88%; Fel Flame Fortification 87%; State of Matter (choice) 86%; Quickened Sigils 85%; Pursuit 83%; Final Breath 83%; Feed the Demon 80%; Soul Barrier (choice) 78%; Chaos Nova 78%; Volatile Flameblood 77%; Pitch Black (choice) 70%; Felbound 65%; Erratic Felheart 51%; Demon Muzzle 48%; Felfire Haste 43%; Painbringer 33%; Chains of Anger 30%; Imprison 26%; Disrupting Fury 18%; Retaliation 17%; Improved Sigil of Misery 14%; Consume Magic 12%; Path to Oblivion (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 16 of 612 run it exactly.
+- `Raid`: 7 of 693 run it exactly. Typical has +Demon Muzzle; lacks Felfire Haste.
 
 ### Mythic+
 
-653 rankings over 8 dungeons, logged 2026-08-28 to 2026-09-25, keys 18 to 21 (median 19). 273 distinct builds. Hero tree: Annihilator 95%, Aldrachi Reaver 5%. 147 left out: their log has no talents.
+681 rankings over 8 dungeons, logged 2026-09-08 to 2026-10-18, keys 19 to 22 (median 20). 254 distinct builds. Hero tree: Annihilator 98%, Aldrachi Reaver 2%. 119 left out: their log has no talents.
 
-**Typical** (Annihilator, agreement 70% on 12 contested talents, 1 run it exactly):
+**Typical** (Annihilator, agreement 71% on 11 contested talents, 6 run it exactly):
 
 `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZkZmxwyMzMDMjZGzYmZGDmZmxmZmtxYGAAAAAAAAmZGbAAAAYgZmZmZrtZmZAAAAAAG`
 
 **Most common other builds**, each against the typical:
 
-- 22 (3.4%): +Fel Flame Fortification, +Improved Sigil of Misery, +Painbringer 2/2; -Consume Magic, -Felfire Fist, -Revel in Pain, -Soul Barrier
-  `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZmMzMYYmZGYGzMmZmZmxgZmZsZmZbMMAAAAAAAAMzM2AAAAwAzMzMzWbzMzAAAAAAMA`
-- 19 (2.9%): +Erratic Felheart 1/2; -Consume Magic
+- 21 (3.1%): +Erratic Felheart 1/2; -Consume Magic
   `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZkZmxwyMzMDMjZGzYmZGDmZmx2DMzsNGGAAAAAAAAmZGbAAAAYgZmZmZrtZmZAAAAAAG`
-- 19 (2.9%): +Fel Flame Fortification; -Revel in Pain
-  `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZkZmxYWMzMDMjZGzYmZGDmZmxmZmtxYGAAAAAAAAmZGbAAAAYgZmZmZrtZmZAAAAAAG`
-- 17 (2.6%): +Felbound, +Improved Sigil of Misery, +Painbringer 2/2, +Soulmonger; -Disrupting Fury, -Feed the Demon, -Focused Cleave, -Live by the Glaive, -Quickened Sigils
+- 20 (2.9%): +Felbound, +Improved Sigil of Misery, +Painbringer 2/2, +Soulmonger; -Disrupting Fury, -Feed the Demon, -Focused Cleave, -Live by the Glaive, -Quickened Sigils
   `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZMMzkZmxwyMzMDMjZmZMzMzYwwM2MzsNGzAAAAAAAAwMGbAAAAYwMzMzMbtNzMDAAAAAwA`
+- 18 (2.6%): +Fel Flame Fortification, +Improved Sigil of Misery, +Painbringer 2/2; -Consume Magic, -Felfire Fist, -Revel in Pain, -Soul Barrier
+  `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZmMzMYYmZGYGzMmZmZmxgZmZsZmZbMMAAAAAAAAMzM2AAAAwAzMzMzWbzMzAAAAAAMA`
+- 17 (2.5%): +Final Breath; -Consume Magic
+  `CUkAAAAAAAAAAAAAAAAAAAAAAAAMjZmZmhZkZmxwyMzMDMjZGzYmZGDmZmxmZmtxwAAAAAAAAwMzYDAAAADMzMzMbtNzMDAMAAAAG`
 
-**Split talents:** Pitch Black (choice) 89%; Live by the Glaive 89%; State of Matter (choice) 86%; Focused Cleave 84%; Soul Barrier (choice) 83%; Quickened Sigils 77%; Feed the Demon 74%; Ascending Flame 74%; Painbringer 64%; Felfire Fist 54%; Consume Magic 51%; Revel in Pain 47%; Fel Flame Fortification 43%; Erratic Felheart 40%; Disrupting Fury 36%; Sigil of Silence 27%; Final Breath 26%; Improved Sigil of Misery 26%; Pursuit 18%; Soulmonger 16%; Volatile Flameblood 14%; Focused Ire 12%; Felbound 12%; Felfire Haste 11%
+**Split talents:** Ascending Flame 88%; Soul Barrier (choice) 88%; Live by the Glaive 88%; State of Matter (choice) 87%; Focused Cleave 84%; Felfire Fist 76%; Revel in Pain 72%; Quickened Sigils 61%; Painbringer 61%; Feed the Demon 54%; Consume Magic 47%; Disrupting Fury 35%; Final Breath 34%; Fel Flame Fortification 31%; Improved Sigil of Misery 26%; Felbound 23%; Pursuit 20%; Erratic Felheart 20%; Soulmonger 16%; Volatile Flameblood 11%; Sigil of Silence 11%; Path to Oblivion (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 1 of 653 run it exactly.
+- `Dungeon`: the typical build. 6 of 681 run it exactly.
 
 ## Balance Druid
 
 ### Raid
 
-823 rankings over 10 bosses, logged 2026-08-30 to 2026-09-25. 432 distinct builds. Hero tree: Elune's Chosen 63%, Keeper of the Grove 37%.
+994 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 497 distinct builds. Hero tree: Elune's Chosen 62%, Keeper of the Grove 38%.
 
-**Typical** (Elune's Chosen, agreement 69% on 31 contested talents, 11 run it exactly):
+**Typical** (Elune's Chosen, agreement 70% on 33 contested talents, 13 run it exactly):
 
 `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzYMzyMLmZGbsMzyYMzYBDDwYbbmBjZbAMBAAAYxMzMzgNDjxMAAmZgBA`
 
 **Most common other builds**, each against the typical:
 
-- 35 (4.3%): +Astral Communion, +Blooming Infusion, +Cenarius' Might, +Control of the Dream, +Dryad's Dance, +Early Spring, +Elune's Guidance, +Expansiveness, +Force of Nature, +Harmony of the Grove, +Keeper of the Grove, +Potent Enchantments, +Power of Nature, +Protective Growth, +Rattle the Stars, +Spirit of the Thicket, +Sylvan Beckoning, +Treants of the Moon, +Wild Mushroom; -Astral Insight, -Atmospheric Exposure, -Bask in Moonlight, -Denizen of the Dream, -Elune's Chosen, -Elune's Grace, -Fury of Elune, -Glistening Fur, -Lunar Calling, -Lunar Insight, -Lunation, -Moon Guardian, -Penumbral Swell, -Radiant Moonlight, -Star Cascade, -Starweaver, -Stellar Command, -The Eternal Moon, -Umbral Intensity
-  `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzY2mZZsMjZsZWmxYmZGbYYAGgttxGmmZWGAAAAsZmZmZwmhxYAYmBAGA`
-- 32 (3.9%): +Astral Communion, +Blooming Infusion, +Cenarius' Might, +Control of the Dream, +Dryad's Dance, +Early Spring, +Elune's Guidance, +Expansiveness, +Force of Nature, +Harmony of the Grove, +Keeper of the Grove, +Meteor Storm, +Potent Enchantments, +Power of Nature, +Protective Growth, +Rattle the Stars, +Spirit of the Thicket, +Sylvan Beckoning, +Treants of the Moon, +Wild Mushroom; -Aetherial Kindling, -Astral Insight, -Atmospheric Exposure, -Bask in Moonlight, -Denizen of the Dream, -Elune's Chosen, -Elune's Grace, -Fury of Elune, -Glistening Fur, -Lunar Calling, -Lunar Insight, -Lunation, -Moon Guardian, -Penumbral Swell, -Radiant Moonlight, -Star Cascade, -Starweaver, -Stellar Command, -The Eternal Moon, -Umbral Intensity
+- 26 (2.6%): +Astral Communion, +Blooming Infusion, +Cenarius' Might, +Control of the Dream, +Dryad's Dance, +Early Spring, +Elune's Guidance, +Expansiveness, +Force of Nature, +Harmony of the Grove, +Keeper of the Grove, +Meteor Storm, +Potent Enchantments, +Power of Nature, +Protective Growth, +Rattle the Stars, +Spirit of the Thicket, +Sylvan Beckoning, +Treants of the Moon, +Wild Mushroom; -Aetherial Kindling, -Astral Insight, -Atmospheric Exposure, -Bask in Moonlight, -Denizen of the Dream, -Elune's Chosen, -Elune's Grace, -Fury of Elune, -Glistening Fur, -Lunar Calling, -Lunar Insight, -Lunation, -Moon Guardian, -Penumbral Swell, -Radiant Moonlight, -Star Cascade, -Starweaver, -Stellar Command, -The Eternal Moon, -Umbral Intensity
   `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzY2mZZsNjZsZWmxYmZGbYYAGgttxGmmZWGAAAAsZmZmZwmhxYAYmBAGA`
-- 18 (2.2%): +Killer Instinct 1/2; -Light of the Sun
+- 25 (2.5%): +Astral Communion, +Blooming Infusion, +Cenarius' Might, +Control of the Dream, +Dryad's Dance, +Early Spring, +Elune's Guidance, +Expansiveness, +Force of Nature, +Harmony of the Grove, +Improved Stampeding Roar, +Keeper of the Grove, +Lingering Healing, +Potent Enchantments, +Power of Nature, +Protective Growth, +Rattle the Stars, +Spirit of the Thicket, +Sylvan Beckoning, +Treants of the Moon, +Wild Mushroom; -Astral Insight, -Atmospheric Exposure, -Bask in Moonlight, -Elune's Chosen, -Elune's Grace, -Glistening Fur, -Light of the Sun, -Lunar Calling, -Lunar Insight, -Lunation, -Moon Guardian, -Penumbral Swell, -Radiant Moonlight, -Star Cascade, -Starweaver, -Stellar Amplification, -Stellar Command, -The Eternal Moon, -Umbral Embrace, -Umbral Intensity, -Ursine Vigor
+  `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMMDzY2mZZsMMjNzyMLjZmhNMMADw22YDTzMLDAAAA2YmZmBbGYMDgZGAYA`
+- 23 (2.3%): +Astral Communion, +Blooming Infusion, +Cenarius' Might, +Control of the Dream, +Dryad's Dance, +Early Spring, +Elune's Guidance, +Expansiveness, +Force of Nature, +Harmony of the Grove, +Keeper of the Grove, +Potent Enchantments, +Power of Nature, +Protective Growth, +Rattle the Stars, +Spirit of the Thicket, +Sylvan Beckoning, +Treants of the Moon, +Wild Mushroom; -Astral Insight, -Atmospheric Exposure, -Bask in Moonlight, -Denizen of the Dream, -Elune's Chosen, -Elune's Grace, -Fury of Elune, -Glistening Fur, -Lunar Calling, -Lunar Insight, -Lunation, -Moon Guardian, -Penumbral Swell, -Radiant Moonlight, -Star Cascade, -Starweaver, -Stellar Command, -The Eternal Moon, -Umbral Intensity
+  `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzY2mZZsMjZsZWmxYmZGbYYAGgttxGmmZWGAAAAsZmZmZwmhxYAYmBAGA`
+- 22 (2.2%): +Killer Instinct 1/2; -Light of the Sun
   `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWmZxMzYjlZWGjZGLYYAGbbzMYMbDgJAAAALmZmZGsZgxMAAmZgBA`
-- 16 (1.9%): +Incapacitating Roar; -Ursine Vigor
-  `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhhZMmZZmFzMjNWmZZMmZsghBYstNzgxsNAmAAAAswMzMD2MMGzAAYmBGA`
 
-**Split talents:** Wild Charge (choice) 88%; Twin Moons 88%; Incarnation: Chosen of Elune (choice) 88%; Meteorites 85%; Heart of the Wild 84%; Remove Corruption 84%; Typhoon 81%; Denizen of the Dream 79%; Fluid Form 75%; Umbral Intensity 75%; Light of the Sun 68%; Aetherial Kindling (choice) 67%; Fury of Elune (choice) 67%; The Eternal Moon 63%; Stellar Command 63%; Star Cascade 63%; Penumbral Swell 63%; Moon Guardian 63%; Lunar Insight 63%; Lunar Calling 63%; Glistening Fur 63%; Bask in Moonlight 63%; Atmospheric Exposure 63%; Astral Insight (choice) 63%; Ursine Vigor 61%; Orbit Breaker (choice) 60%; Radiant Moonlight 59%; Lunation (choice) 59%; Starweaver (choice) 59%; Elune's Grace (choice) 57%; Killer Instinct 53%; Improved Stampeding Roar 43%; Rattle the Stars (choice) 41%; Sundered Firmament (choice) 40%; Treants of the Moon 37%; Sylvan Beckoning 37%; Spirit of the Thicket 37%; Protective Growth 37%; Power of Nature (choice) 37%; Harmony of the Grove 37%; Force of Nature 37%; Expansiveness 37%; Dryad's Dance 37%; Control of the Dream (choice) 37%; Cenarius' Might 37%; Blooming Infusion 37%; Astral Communion 37%; Elune's Guidance 26%; Early Spring (choice) 25%; Potent Enchantments (choice) 25%; Wild Mushroom (choice) 24%; Perfectly-Honed Instincts 22%; Meteor Storm (choice) 20%; Incapacitating Roar (choice) 18%; Power of Goldrinn 15%; Grove's Inspiration (choice) 13%; Nature's Balance 13%; Bounteous Bloom (choice) 12%; Convoke the Spirits (choice) 12%; Tiger Dash (choice) 12%
+**Split talents:** Incarnation: Chosen of Elune (choice) 90%; Umbral Embrace 90%; Wild Charge (choice) 90%; Ursol's Vortex (choice) 90%; Meteorites 89%; Stellar Amplification 87%; Heart of the Wild 85%; Remove Corruption 85%; Typhoon 83%; Denizen of the Dream 82%; Fluid Form 77%; Umbral Intensity 73%; Fury of Elune (choice) 72%; Aetherial Kindling (choice) 71%; Light of the Sun 65%; The Eternal Moon 62%; Stellar Command 62%; Star Cascade 62%; Penumbral Swell 62%; Moon Guardian 62%; Lunar Insight 62%; Lunar Calling 62%; Glistening Fur 62%; Bask in Moonlight 62%; Atmospheric Exposure 62%; Astral Insight (choice) 62%; Radiant Moonlight 61%; Lunation (choice) 61%; Orbit Breaker (choice) 59%; Starweaver (choice) 59%; Elune's Grace (choice) 57%; Killer Instinct 52%; Ursine Vigor 52%; Improved Stampeding Roar 51%; Rattle the Stars (choice) 41%; Sundered Firmament (choice) 41%; Treants of the Moon 38%; Sylvan Beckoning 38%; Spirit of the Thicket 38%; Protective Growth 38%; Power of Nature (choice) 38%; Harmony of the Grove 38%; Force of Nature 38%; Expansiveness 38%; Dryad's Dance 38%; Control of the Dream (choice) 38%; Cenarius' Might 38%; Blooming Infusion 38%; Astral Communion 37%; Elune's Guidance 29%; Wild Mushroom (choice) 27%; Early Spring (choice) 27%; Potent Enchantments (choice) 27%; Perfectly-Honed Instincts 21%; Meteor Storm (choice) 19%; Incapacitating Roar (choice) 18%; Grove's Inspiration (choice) 11%; Tiger Dash (choice) 10%; Power of Goldrinn 10%; Nature's Balance 10%; Bounteous Bloom (choice) 10%; Convoke the Spirits (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Raid: Cleave`: the typical build. 11 of 823 run it exactly.
-- `Raid: Nek'Zali, Altar`: 3 of 823 run it exactly. Typical has +Orbit Breaker, +Ursine Vigor; lacks Improved Stampeding Roar, Sundered Firmament.
-- `Raid: Single Target`: 35 of 823 run it exactly. Typical has +Astral Insight, +Atmospheric Exposure, +Bask in Moonlight, +Denizen of the Dream, +Elune's Chosen, +Elune's Grace, +Fury of Elune, +Glistening Fur, +Lunar Calling, +Lunar Insight, +Lunation, +Moon Guardian, +Penumbral Swell, +Radiant Moonlight, +Star Cascade, +Starweaver, +Stellar Command, +The Eternal Moon, +Umbral Intensity; lacks Astral Communion, Blooming Infusion, Cenarius' Might, Control of the Dream, Dryad's Dance, Early Spring, Elune's Guidance, Expansiveness, Force of Nature, Harmony of the Grove, Keeper of the Grove, Potent Enchantments, Power of Nature, Protective Growth, Rattle the Stars, Spirit of the Thicket, Sylvan Beckoning, Treants of the Moon, Wild Mushroom.
+- `Raid: Cleave`: the typical build. 13 of 994 run it exactly.
+- `Raid: Nek'Zali, Altar`: 15 of 994 run it exactly. Typical has +Orbit Breaker, +Ursine Vigor; lacks Improved Stampeding Roar, Sundered Firmament.
+- `Raid: Single Target`: 23 of 994 run it exactly. Typical has +Astral Insight, +Atmospheric Exposure, +Bask in Moonlight, +Denizen of the Dream, +Elune's Chosen, +Elune's Grace, +Fury of Elune, +Glistening Fur, +Lunar Calling, +Lunar Insight, +Lunation, +Moon Guardian, +Penumbral Swell, +Radiant Moonlight, +Star Cascade, +Starweaver, +Stellar Command, +The Eternal Moon, +Umbral Intensity; lacks Astral Communion, Blooming Infusion, Cenarius' Might, Control of the Dream, Dryad's Dance, Early Spring, Elune's Guidance, Expansiveness, Force of Nature, Harmony of the Grove, Keeper of the Grove, Potent Enchantments, Power of Nature, Protective Growth, Rattle the Stars, Spirit of the Thicket, Sylvan Beckoning, Treants of the Moon, Wild Mushroom.
 
 ### Mythic+
 
-669 rankings over 8 dungeons, logged 2026-08-30 to 2026-09-25, keys 18 to 21 (median 19). 165 distinct builds. Hero tree: Elune's Chosen 100%. 131 left out: their log has no talents.
+643 rankings over 8 dungeons, logged 2026-09-03 to 2026-10-18, keys 19 to 22 (median 20). 162 distinct builds. Hero tree: Elune's Chosen 100%. 157 left out: their log has no talents.
 
-**Typical** (Elune's Chosen, agreement 79% on 6 contested talents, 119 run it exactly):
+**Typical** (Elune's Chosen, agreement 74% on 5 contested talents, 113 run it exactly):
 
 `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhBjZZmlZWYmxGLzsMmZM2wwAM22mZwY2GATAAAAWMzMzMYzwYMAAMzglBA`
 
 **Most common other builds**, each against the typical:
 
-- 67 (10.0%): +Improved Stampeding Roar; -Ursine Vigor
+- 63 (9.8%): +Improved Stampeding Roar; -Ursine Vigor
   `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMLMYMLzsMzCzM2YZmlxMjxGGGgx22MDGz2AYCAAAwCzMzMYzwYMAAMzglBA`
-- 38 (5.7%): +Perfectly-Honed Instincts; -Ursine Vigor
+- 44 (6.8%): +Perfectly-Honed Instincts; -Ursine Vigor
   `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhBjZZmlZWYmxGLzsMmZM2wwAM22mZwY2GATAAAAWYmZmBbGzYMAAMzglBA`
-- 34 (5.1%): +Innervate; -Ursine Vigor
+- 31 (4.8%): +Innervate; -Ursine Vigor
   `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhhZMLzsMzCzM2YZmlxMjxGGGgx22MDGz2AYCAAAwCzMzMYzwYMAAMzglBA`
-- 16 (2.4%): +Perfectly-Honed Instincts; -Fluid Form
-  `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhBMLzsMzCzM2YZmlxMjxGGGgx22MDGz2AYCAAAwiZmZmBbGzYMAAMzglBA`
+- 15 (2.3%): +Meteorites, +Starweaver, +Stellar Amplification; -Elune's Guidance, -Rattle the Stars, -Sunseeker Mushroom
+  `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmZhBjxMLzsYmZsxyMLjxMjFMMAjttZGMmtBwEAAAgFzMzMD2MMGDAAzMYZA`
 
-**Split talents:** Heart of the Wild 88%; Elune's Guidance 86%; Rattle the Stars (choice) 84%; Sunseeker Mushroom (choice) 83%; Fluid Form 80%; Ursine Vigor 53%; Improved Stampeding Roar 33%; Perfectly-Honed Instincts 32%; Killer Instinct 19%; Stellar Amplification 18%; Starweaver (choice) 16%; Innervate 13%; Meteorites 13%
+**Split talents:** Elune's Guidance 85%; Fluid Form 84%; Sunseeker Mushroom (choice) 78%; Rattle the Stars (choice) 77%; Ursine Vigor 49%; Improved Stampeding Roar 34%; Perfectly-Honed Instincts 30%; Stellar Amplification 24%; Starweaver (choice) 23%; Innervate 16%; Killer Instinct 13%; Meteorites 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 119 of 669 run it exactly.
+- `Dungeon`: the typical build. 113 of 643 run it exactly.
 
 ### Boss rows
 
 Each row's typical is pooled over every boss it backs; each boss is also shown alone.
 
-- **`Raid: Nek'Zali, Altar`** for Nek'zali, The Coiled Altar: 191 rankings; Elune's Chosen 100%; typical agreement 74% on 12 contested. Ours: `Raid: Nek'Zali, Altar`: the typical build. 1 of 191 run it exactly.
+- **`Raid: Nek'Zali, Altar`** for Nek'zali, The Coiled Altar: 200 rankings; Elune's Chosen 100%, Keeper of the Grove 0%; typical agreement 75% on 11 contested. Ours: `Raid: Nek'Zali, Altar`: the typical build. 3 of 200 run it exactly.
   typical: `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsMzMzMYYGjZWmZxMzYhlZWGjZGLYYAGbbzMYMbDgJAAAALMzMzgNDjxMAAmZgBA`
-  - Nek'zali alone: 100 rankings; Elune's Chosen 100%; against its own typical, the row's typical has +Aetherial Kindling, +Improved Stampeding Roar, +Sundered Firmament; lacks Meteor Storm, Orbit Breaker, Ursine Vigor.
-  - The Coiled Altar alone: 91 rankings; Elune's Chosen 100%; against its own typical, the row's typical has +Wild Charge; lacks Tiger Dash.
+  - Nek'zali alone: 100 rankings; Elune's Chosen 99%, Keeper of the Grove 1%; against its own typical, the row's typical has +Aetherial Kindling; lacks Meteor Storm.
+  - The Coiled Altar alone: 100 rankings; Elune's Chosen 100%; against its own typical, the row's typical has +Wild Charge; lacks Tiger Dash.
 
-- **`Raid: Cleave`** for Entombed Sentinels, The Lost Explorers, The Twin Fangs: 300 rankings; Elune's Chosen 100%; typical agreement 73% on 7 contested. Ours: `Raid: Cleave`: the typical build. 10 of 300 run it exactly.
+- **`Raid: Cleave`** for Entombed Sentinels, The Lost Explorers, The Twin Fangs, Kith'ix: 394 rankings; Elune's Chosen 100%, Keeper of the Grove 0%; typical agreement 74% on 8 contested. Ours: `Raid: Cleave`: the typical build. 12 of 394 run it exactly.
   typical: `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzYMzyMLmZGbsMzyYMzYBDDwYbbmBjZbAMBAAAYxMzMzgNDjxMAAmZgBA`
   - Entombed Sentinels alone: 100 rankings; Elune's Chosen 100%; against its own typical, the same build.
   - The Lost Explorers alone: 100 rankings; Elune's Chosen 100%; against its own typical, the same build.
   - The Twin Fangs alone: 100 rankings; Elune's Chosen 100%; against its own typical, the row's typical has +Ursine Vigor; lacks Incapacitating Roar.
+  - Kith'ix alone: 94 rankings; Elune's Chosen 99%, Keeper of the Grove 1%; against its own typical, the row's typical has +Orbit Breaker, +Ursine Vigor, +Ursol's Vortex; lacks Improved Stampeding Roar, Mass Entanglement, Sundered Firmament.
 
-- **`Raid: Single Target`** for Vashnik, Sszorak, Ula'tek, Nymrissa Wavecaller: 332 rankings; Keeper of the Grove 92%, Elune's Chosen 8%; typical agreement 69% on 16 contested. Ours: `Raid: Single Target`: the typical build. 35 of 332 run it exactly.
+- **`Raid: Single Target`** for Vashnik, Sszorak, Ula'tek, Nymrissa Wavecaller: 400 rankings; Keeper of the Grove 93%, Elune's Chosen 7%; typical agreement 69% on 16 contested. Ours: `Raid: Single Target`: the typical build. 23 of 400 run it exactly.
   typical: `CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzY2mZZsMjZsZWmxYmZGbYYAGgttxGmmZWGAAAAsZmZmZwmhxYAYmBAGA`
-  - Vashnik alone: 100 rankings; Keeper of the Grove 78%, Elune's Chosen 22%; against its own typical, the row's typical has +Aetherial Kindling; lacks Meteor Storm.
-  - Sszorak alone: 100 rankings; Keeper of the Grove 100%; against its own typical, the row's typical has +Aetherial Kindling, +Early Spring, +Elune's Guidance, +Incarnation: Chosen of Elune, +Light of the Sun, +Meteorites, +Orbit Breaker, +Potent Enchantments, +Twin Moons, +Typhoon, +Wild Mushroom; lacks Bounteous Bloom, Convoke the Spirits, Denizen of the Dream, Grove's Inspiration, Killer Instinct 2/2, Nature's Balance, Power of Goldrinn, Soul of the Forest, Sundered Firmament, Umbral Intensity.
-  - Ula'tek alone: 32 rankings; Keeper of the Grove 100%; against its own typical, the row's typical has +Fluid Form, +Light of the Sun, +Stellar Amplification, +Umbral Embrace; lacks Denizen of the Dream, Fury of Elune, Improved Stampeding Roar, Lingering Healing.
-  - Nymrissa Wavecaller alone: 100 rankings; Keeper of the Grove 96%, Elune's Chosen 4%; against its own typical, the same build.
+  - Vashnik alone: 100 rankings; Keeper of the Grove 84%, Elune's Chosen 16%; against its own typical, the row's typical has +Aetherial Kindling; lacks Meteor Storm.
+  - Sszorak alone: 100 rankings; Keeper of the Grove 99%, Elune's Chosen 1%; against its own typical, the row's typical has +Aetherial Kindling, +Early Spring, +Elune's Guidance, +Incarnation: Chosen of Elune, +Light of the Sun, +Meteorites, +Orbit Breaker, +Potent Enchantments, +Twin Moons, +Typhoon, +Wild Mushroom; lacks Bounteous Bloom, Convoke the Spirits, Denizen of the Dream, Grove's Inspiration, Killer Instinct 2/2, Nature's Balance, Power of Goldrinn, Soul of the Forest, Sundered Firmament, Umbral Intensity.
+  - Ula'tek alone: 100 rankings; Keeper of the Grove 91%, Elune's Chosen 9%; against its own typical, the row's typical has +Light of the Sun, +Stellar Amplification, +Umbral Embrace, +Ursine Vigor; lacks Denizen of the Dream, Fury of Elune, Improved Stampeding Roar, Lingering Healing.
+  - Nymrissa Wavecaller alone: 100 rankings; Keeper of the Grove 98%, Elune's Chosen 2%; against its own typical, the same build.
 
 ## Feral Druid
 
 ### Raid
 
-610 rankings over 10 bosses, logged 2026-09-02 to 2026-09-25. 468 distinct builds. Hero tree: Wildstalker 88%, Druid of the Claw 12%.
+649 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 508 distinct builds. Hero tree: Wildstalker 96%, Druid of the Claw 4%.
 
-**Typical** (Wildstalker, agreement 79% on 32 contested talents, 1 run it exactly):
+**Typical** (Wildstalker, agreement 74% on 19 contested talents, 4 run it exactly):
 
-`CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2YmZmxY2WGLjtZmZMzMAAAAsEMbwYmRNjZZMzMjxMmBAAAAAwADAAAAAwsNzSzyMLbgZGgFzgBAwMDAGA`
+`CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2YmZmxY2WGLjtZmZMzMAAAAsEMbGGzMqZMLMzMjxMmBAAAAAwADAAAAAwsNzSzyMLbgZGgFzgBAwMDAGA`
 
 **Most common other builds**, each against the typical:
 
-- 10 (1.6%): +Carnivorous Instinct 2/2, +Heart of the Wild, +Matted Fur 1/2, +Typhoon, +Veinripper; -Feral Frenzy, -Focused Frenzy, -Lycara's Inspiration, -Matted Fur 2/2, -Rip and Tear
-  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZWYmZmxY2WmBbzMzYmZAAAAYJY2MMmZUzYWmZmZGjZMDAAAAAAwAAAAAAMbzs0sMzyGYmHAYxMYAAMzAgB`
-- 7 (1.1%): +Ashamane's Guidance, +Entangling Vortex, +Heart of the Wild, +Hunger for Battle, +Incarnation: Avatar of Ashamane, +Primal Wrath, +Tireless Energy 1/2; -Apex Predator's Craving, -Convoke the Spirits, -Flower Walk, -Innervate, -Lunar Inspiration, -Tireless Energy 2/2
-  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzGWmZZmZm5BmZAAAAYJY2gxMjaGzyMzMzYMDDAAAAAgBGAAAAAgZZmlmlZW2AzMALmBDAgZGAMA`
-- 6 (1.0%): +Nurturing Instinct 1/2, +Perfectly-Honed Instincts, +Primal Wrath, +Typhoon, +Ursine Vigor; -Fluid Form, -Lore of the Grove, -Nurturing Instinct 2/2, -Rampant Ferocity
-  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2YMzMGz2yYZsNzMzMzMAAAAsEMbGeAzMqZMLjZmZMmxAAAAAAwADAAAAAwsNzSzyMLbwMzAswMMAAmZAwA`
-- 6 (1.0%): +Cyclone, +Forestwalk 1/2, +Hunger for Battle, +Merciless Claws, +Primal Wrath, +Tiger Dash, +Tireless Energy 1/2, +Typhoon; -Fluid Form, -Infected Wounds, -Lore of the Grove, -Lunar Inspiration, -Soothe, -Tireless Energy 2/2, -Wild Charge
-  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYLY2MMmZUzY2GzMzYMzDMAAAAAAMwAAAAAAMbzs0sMzyGYmBYhBDAgZGAMA`
+- 10 (1.5%): +Carnivorous Instinct 2/2, +Double-Clawed Rake, +Heart of the Wild, +Primal Wrath, +Root Network, +Ursine Vigor, +Veinripper; -Feral Frenzy, -Focused Frenzy, -Innervate, -Resilient Flourishing, -Rip and Tear, -Tireless Energy 2/2, -Ursol's Vortex
+  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzCzMzMGz2yMYbmZmxMDAAAALBDDjZG1MmFzMzMGzwAAAAAAYgBAAAAAY2mZpZZmtNYmZAWMDGAAzMAYA`
+- 9 (1.4%): +Coiled to Spring, +Forestwalk 1/2, +Heart of the Wild, +Merciless Claws, +Saber Jaws 2/2, +Ursine Vigor; -Apex Predator's Craving, -Fluid Form, -Infected Wounds, -Lycara's Inspiration, -Rampant Ferocity, -Rip and Tear, -Typhoon
+  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwgZMGzMzMmtFWGbzMzYmZAAAAYJY2gxMjaGziZmZGjZegBAAAAAAwAAAAAAMbzs0sMzyGMzMALmBDAgZGAMA`
+- 8 (1.2%): +Forestwalk 2/2, +Hunger for Battle, +Merciless Claws, +Primal Wrath, +Tireless Energy 1/2; -Fluid Form, -Innervate, -Lunar Inspiration, -Panther's Guile, -Tireless Energy 2/2
+  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMzY2MWGbzYm5BmZAAAAYJY2MMmZUzYWYmZGjZGAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB`
+- 6 (0.9%): +Improved Stampeding Roar, +Incapacitating Roar, +Matted Fur 1/2; -Lycara's Inspiration, -Matted Fur 2/2
+  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2YmZmxY2WGLjtZmZMzMAAAAsEMbGGzMqZMLjZmZWGzYGAAAAAAgBAAAAAY2mZpZZmlNwMPAwiZwAAYmBAD`
 
-**Split talents:** Panther's Guile 90%; Circle of Life and Death 89%; Focused Frenzy (choice) 89%; Wildstalker's Power 88%; Vigorous Creepers 88%; Strategic Infusion 88%; Rampancy 88%; Patient Custodian 88%; Lethal Preservation 88%; Hunt Beneath the Open Skies 88%; Green Thumb 88%; Bursting Growth 88%; Bond with Nature (choice) 85%; Resilient Flourishing (choice) 83%; Flower Walk (choice) 82%; Convoke the Spirits (choice) 82%; Lycara's Inspiration 81%; Ursol's Vortex (choice) 80%; Twin Sprouts (choice) 79%; Lore of the Grove 79%; Innervate 75%; Infected Wounds 75%; Wild Charge (choice) 74%; Rampant Ferocity 64%; Improved Stampeding Roar 64%; Apex Predator's Craving 63%; Fluid Form 62%; Lunar Inspiration (choice) 61%; Typhoon 59%; Primal Wrath 50%; Rip and Tear (choice) 47%; Carnivorous Instinct 41%; Forestwalk 30%; Merciless Claws 28%; Ashamane's Guidance 27%; Hunger for Battle 27%; Tiger Dash (choice) 26%; Heart of the Wild 26%; Coiled to Spring 25%; Ursine Vigor 25%; Saber Jaws 25%; Perfectly-Honed Instincts 19%; Incarnation: Avatar of Ashamane (choice) 18%; Wildshape Mastery 12%; Twin Claw 12%; Strike for the Heart (choice) 12%; Pack's Endurance 12%; Limb from Limb 12%; Fount of Strength 12%; Exacerbating Wounds 12%; Empowered Shapeshifting (choice) 12%; Dreadful Wound 12%; Claw Rampage 12%; Bestial Strength 12%; Aggravate Wounds 12%; Killing Strikes (choice) 11%
+**Split talents:** Convoke the Spirits (choice) 89%; Twin Sprouts (choice) 89%; Tireless Energy 88%; Feral Frenzy 88%; Lore of the Grove 87%; Resilient Flourishing (choice) 86%; Focused Frenzy (choice) 82%; Infected Wounds 79%; Lycara's Inspiration 79%; Ursol's Vortex (choice) 76%; Wild Charge (choice) 75%; Lunar Inspiration (choice) 74%; Apex Predator's Craving 65%; Typhoon 63%; Fluid Form 63%; Innervate 62%; Rampant Ferocity 62%; Improved Stampeding Roar 51%; Rip and Tear (choice) 51%; Primal Wrath 50%; Heart of the Wild 33%; Forestwalk 30%; Saber Jaws 29%; Coiled to Spring 28%; Ursine Vigor 27%; Carnivorous Instinct 26%; Merciless Claws 26%; Tiger Dash (choice) 25%; Perfectly-Honed Instincts 25%; Hunger for Battle 23%; Ashamane's Guidance 13%; Veinripper (choice) 13%; Incapacitating Roar (choice) 12%; Double-Clawed Rake 12%; Incarnation: Avatar of Ashamane (choice) 10%; Root Network (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Raid: Coiled Altar`: no one in the sample runs it exactly. Typical has +Improved Stampeding Roar, +Lycara's Inspiration, +Rip and Tear, +Tireless Energy 2/2; lacks Carnivorous Instinct 1/2, Forestwalk 1/2, Perfectly-Honed Instincts, Primal Wrath, Tireless Energy 1/2.
-- `Raid: Entombed Sentinels`: 1 of 610 run it exactly. Typical has +Improved Stampeding Roar, +Rip and Tear; lacks Carnivorous Instinct 1/2, Typhoon.
-- `Raid: Lost Explorers`: 1 of 610 run it exactly. Typical has +Feral Frenzy, +Focused Frenzy, +Rip and Tear; lacks Carnivorous Instinct 2/2, Veinripper.
-- `Raid: Nek'Zali`: 2 of 610 run it exactly. Typical has +Rampant Ferocity, +Rip and Tear; lacks Carnivorous Instinct 1/2, Primal Wrath.
-- `Raid: Nymrissa`: 1 of 610 run it exactly. Typical has +Fluid Form, +Infected Wounds, +Lunar Inspiration, +Tireless Energy 2/2; lacks Hunger for Battle, Merciless Claws, Primal Wrath, Tireless Energy 1/2, Typhoon.
-- `Raid: Sszorak`: 1 of 610 run it exactly. Typical has +Apex Predator's Craving, +Bond with Nature, +Bursting Growth, +Circle of Life and Death, +Flower Walk, +Green Thumb, +Hunt Beneath the Open Skies, +Infected Wounds, +Lethal Preservation, +Lunar Inspiration, +Patient Custodian, +Rampancy, +Rampant Ferocity, +Resilient Flourishing, +Rip and Tear, +Strategic Infusion, +Twin Sprouts, +Vigorous Creepers, +Wildstalker, +Wildstalker's Power; lacks Aggravate Wounds, Ashamane's Guidance, Bestial Strength, Carnivorous Instinct 1/2, Claw Rampage, Coiled to Spring, Dreadful Wound, Druid of the Claw, Empowered Shapeshifting, Exacerbating Wounds, Fount of Strength, Killing Strikes, Limb from Limb, Merciless Claws, Pack's Endurance, Saber Jaws 2/2, Strike for the Heart, Twin Claw, Wildshape Mastery.
-- `Raid: Twin Fangs`: 1 of 610 run it exactly. Typical has +Convoke the Spirits, +Fluid Form, +Focused Frenzy, +Panther's Guile, +Resilient Flourishing, +Tireless Energy 2/2, +Ursol's Vortex, +Wild Charge; lacks Ashamane's Guidance, Double-Clawed Rake, Incapacitating Roar, Incarnation: Avatar of Ashamane, Primal Wrath, Root Network, Tiger Dash, Typhoon, Wild Slashes.
-- `Raid: Ula'tek`: no one in the sample runs it exactly. Typical has +Fluid Form, +Lunar Inspiration, +Tireless Energy 2/2; lacks Heart of the Wild, Hunger for Battle, Primal Wrath, Tireless Energy 1/2.
-- `Raid: Vashnik`: 2 of 610 run it exactly. Typical has +Apex Predator's Craving, +Convoke the Spirits, +Lunar Inspiration, +Tireless Energy 2/2; lacks Ashamane's Guidance, Hunger for Battle, Incarnation: Avatar of Ashamane, Primal Wrath, Tireless Energy 1/2.
+- `Raid: Coiled Altar`: no one in the sample runs it exactly. Typical has +Lycara's Inspiration, +Rip and Tear, +Tireless Energy 2/2, +Typhoon; lacks Carnivorous Instinct 1/2, Forestwalk 1/2, Perfectly-Honed Instincts, Primal Wrath, Tireless Energy 1/2.
+- `Raid: Entombed Sentinels`: 1 of 649 run it exactly. Typical has +Rip and Tear; lacks Carnivorous Instinct 1/2.
+- `Raid: Lost Explorers`: 2 of 649 run it exactly. Typical has +Feral Frenzy, +Focused Frenzy, +Rip and Tear, +Typhoon; lacks Carnivorous Instinct 2/2, Improved Stampeding Roar, Veinripper.
+- `Raid: Nek'Zali`: 1 of 649 run it exactly. Typical has +Rampant Ferocity, +Rip and Tear, +Typhoon; lacks Carnivorous Instinct 1/2, Improved Stampeding Roar, Primal Wrath.
+- `Raid: Nymrissa`: no one in the sample runs it exactly. Typical has +Fluid Form, +Infected Wounds, +Lunar Inspiration, +Tireless Energy 2/2; lacks Hunger for Battle, Improved Stampeding Roar, Merciless Claws, Primal Wrath, Tireless Energy 1/2.
+- `Raid: Sszorak`: no one in the sample runs it exactly. Typical has +Apex Predator's Craving, +Bond with Nature, +Bursting Growth, +Circle of Life and Death, +Flower Walk, +Green Thumb, +Hunt Beneath the Open Skies, +Infected Wounds, +Lethal Preservation, +Lunar Inspiration, +Patient Custodian, +Rampancy, +Rampant Ferocity, +Resilient Flourishing, +Rip and Tear, +Strategic Infusion, +Twin Sprouts, +Typhoon, +Vigorous Creepers, +Wildstalker, +Wildstalker's Power; lacks Aggravate Wounds, Ashamane's Guidance, Bestial Strength, Carnivorous Instinct 1/2, Claw Rampage, Coiled to Spring, Dreadful Wound, Druid of the Claw, Empowered Shapeshifting, Exacerbating Wounds, Fount of Strength, Improved Stampeding Roar, Killing Strikes, Limb from Limb, Merciless Claws, Pack's Endurance, Saber Jaws 2/2, Strike for the Heart, Twin Claw, Wildshape Mastery.
+- `Raid: Twin Fangs`: no one in the sample runs it exactly. Typical has +Convoke the Spirits, +Fluid Form, +Focused Frenzy, +Panther's Guile, +Resilient Flourishing, +Tireless Energy 2/2, +Ursol's Vortex, +Wild Charge; lacks Ashamane's Guidance, Double-Clawed Rake, Improved Stampeding Roar, Incapacitating Roar, Incarnation: Avatar of Ashamane, Primal Wrath, Root Network, Tiger Dash, Wild Slashes.
+- `Raid: Ula'tek`: no one in the sample runs it exactly. Typical has +Innervate, +Lunar Inspiration, +Tireless Energy 2/2, +Typhoon; lacks Heart of the Wild, Hunger for Battle, Improved Stampeding Roar, Primal Wrath, Tireless Energy 1/2.
+- `Raid: Vashnik`: 1 of 649 run it exactly. Typical has +Apex Predator's Craving, +Convoke the Spirits, +Lunar Inspiration, +Tireless Energy 2/2, +Typhoon; lacks Ashamane's Guidance, Hunger for Battle, Improved Stampeding Roar, Incarnation: Avatar of Ashamane, Primal Wrath, Tireless Energy 1/2.
 
 ### Mythic+
 
-681 rankings over 8 dungeons, logged 2026-08-30 to 2026-09-25, keys 19 to 22 (median 19). 145 distinct builds. Hero tree: Druid of the Claw 99%, Wildstalker 1%. 119 left out: their log has no talents.
+714 rankings over 8 dungeons, logged 2026-09-05 to 2026-10-18, keys 20 to 23 (median 20). 152 distinct builds. Hero tree: Druid of the Claw 95%, Wildstalker 5%. 86 left out: their log has no talents.
 
-**Typical** (Druid of the Claw, agreement 78% on 5 contested talents, 205 run it exactly):
+**Typical** (Druid of the Claw, agreement 83% on 7 contested talents, 258 run it exactly):
 
 `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB`
 
 **Most common other builds**, each against the typical:
 
-- 145 (21.3%): +Convoke the Spirits, +Hunger for Battle; -Ashamane's Guidance, -Incarnation: Avatar of Ashamane
+- 52 (7.3%): +Convoke the Spirits, +Hunger for Battle; -Ashamane's Guidance, -Incarnation: Avatar of Ashamane
   `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2MzMzMGzmx2YbGzMmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB`
-- 34 (5.0%): +Innervate; -Ursine Vigor
+- 42 (5.9%): +Innervate; -Ursine Vigor
   `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYJY2M8AmZUzYWMzMzsMmxMAAAAAAGYAAAA0MLzyMzMAgFwMDwCDGAAAzshB`
-- 22 (3.2%): +Hunger for Battle; -Rip and Tear
-  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZYmZmZMmNjtZWmxMjZGAAAAWCmNDPgZG1MmFzMzMLjZYAAAAAAMwAAAAoZWmlZmZAALwMzAswgBAAwMbYA`
-- 21 (3.1%): +Tiger Dash; -Wild Charge
+- 25 (3.5%): +Tiger Dash; -Wild Charge
   `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmZ2YmZmxY2M2mZZGzMmZAAAAYLY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB`
+- 15 (2.1%): +Panther's Guile, +Tireless Energy 1/2; -Double-Clawed Rake, -Infected Wounds
+  `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmZ2YmZmxY2M2mZZmZm5BmZAAAAYJY2M8AmZUzYWMzMzsMmhBAAAAAwADAAAgmZZWmZmBAsAzMDwCDGAAAzshB`
 
-**Split talents:** Double-Clawed Rake 90%; Wild Charge (choice) 88%; Ursine Vigor 82%; Ashamane's Guidance 65%; Incarnation: Avatar of Ashamane (choice) 64%; Hunger for Battle 39%; Convoke the Spirits (choice) 36%; Innervate 14%; Tiger Dash (choice) 12%; Merciless Claws 11%; Tireless Energy 11%
+**Split talents:** Nurturing Instinct 88%; Infected Wounds 87%; Wild Charge (choice) 87%; Double-Clawed Rake 84%; Ursine Vigor 82%; Ashamane's Guidance 78%; Incarnation: Avatar of Ashamane (choice) 78%; Hunger for Battle 23%; Convoke the Spirits (choice) 22%; Innervate 19%; Tireless Energy 16%; Panther's Guile 13%; Tiger Dash (choice) 13%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 205 of 681 run it exactly.
+- `Dungeon`: the typical build. 258 of 714 run it exactly.
 
 ### Boss rows
 
 Each row's typical is pooled over every boss it backs; each boss is also shown alone.
 
-- **`Raid: Nek'Zali`** for Nek'zali: 100 rankings; Wildstalker 95%, Druid of the Claw 5%; typical agreement 76% on 15 contested. Ours: `Raid: Nek'Zali`: the typical build. 2 of 100 run it exactly.
+- **`Raid: Nek'Zali`** for Nek'zali: 100 rankings; Wildstalker 99%, Druid of the Claw 1%; typical agreement 73% on 15 contested. Ours: `Raid: Nek'Zali`: the typical build. 1 of 100 run it exactly.
   typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwYmZMmtl5BWGbzMzMzMDAAAALBzGMmZUzYWGzMzYMjZAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB`
-  - Nek'zali alone: 100 rankings; Wildstalker 95%, Druid of the Claw 5%; against its own typical, the same build.
+  - Nek'zali alone: 100 rankings; Wildstalker 99%, Druid of the Claw 1%; against its own typical, the same build.
 
-- **`Raid: Entombed Sentinels`** for Entombed Sentinels: 100 rankings; Wildstalker 96%, Druid of the Claw 4%; typical agreement 74% on 10 contested. Ours: `Raid: Entombed Sentinels`: the typical build. 1 of 100 run it exactly.
-  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMzMjxstMPwyYbmZGzMDAAAALBzmhxMjaGzCzMzYMjZAAAAAAMwAAAAAAMbzs0sMzyGYmBYxMYAAMzAgB`
+- **`Raid: Entombed Sentinels`** for Entombed Sentinels: 100 rankings; Wildstalker 96%, Druid of the Claw 4%; typical agreement 75% on 11 contested. Ours: `Raid: Entombed Sentinels`: 1 of 100 run it exactly. Typical has +Rip and Tear; lacks Carnivorous Instinct 1/2.
+  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2YmZmxY2WGLjtZmZMzMAAAAsEMbGGzMqZMLMzMjxMmBAAAAAwADAAAAAwsNzSzyMLbgZGgFzgBAwMDAGA`
   - Entombed Sentinels alone: 100 rankings; Wildstalker 96%, Druid of the Claw 4%; against its own typical, the same build.
 
-- **`Raid: Lost Explorers`** for The Lost Explorers: 100 rankings; Wildstalker 98%, Druid of the Claw 2%; typical agreement 68% on 12 contested. Ours: `Raid: Lost Explorers`: the typical build. 1 of 100 run it exactly.
+- **`Raid: Lost Explorers`** for The Lost Explorers: 100 rankings; Wildstalker 99%, Druid of the Claw 1%; typical agreement 70% on 13 contested. Ours: `Raid: Lost Explorers`: the typical build. 2 of 100 run it exactly.
   typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZWYmZmxY2WmBbzMzYmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA`
-  - The Lost Explorers alone: 100 rankings; Wildstalker 98%, Druid of the Claw 2%; against its own typical, the same build.
+  - The Lost Explorers alone: 100 rankings; Wildstalker 99%, Druid of the Claw 1%; against its own typical, the same build.
 
-- **`Raid: Vashnik`** for Vashnik: 100 rankings; Wildstalker 97%, Druid of the Claw 3%; typical agreement 74% on 12 contested. Ours: `Raid: Vashnik`: the typical build. 2 of 100 run it exactly.
-  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzGWmZZmZm5BmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA`
-  - Vashnik alone: 100 rankings; Wildstalker 97%, Druid of the Claw 3%; against its own typical, the same build.
+- **`Raid: Vashnik`** for Vashnik, Kith'ix: 103 rankings; Wildstalker 95%, Druid of the Claw 5%; typical agreement 74% on 15 contested. Ours: `Raid: Vashnik`: 1 of 103 run it exactly. Typical has +Apex Predator's Craving, +Convoke the Spirits, +Typhoon; lacks Ashamane's Guidance, Incarnation: Avatar of Ashamane, Innervate.
+  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2MMmZUzYWGzMzYMDDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA`
+  - Vashnik alone: 100 rankings; Wildstalker 95%, Druid of the Claw 5%; against its own typical, the same build.
+  - Kith'ix alone: 3 rankings; Wildstalker 100%; against its own typical, the row's typical has +Apex Predator's Craving, +Hunger for Battle, +Improved Stampeding Roar, +Matted Fur 2/2, +Rampant Ferocity, +Rip and Tear, +Tireless Energy 1/2, +Ursol's Vortex, +Wild Charge; lacks Heart of the Wild, Lunar Inspiration, Mass Entanglement, Matted Fur 1/2, Saber Jaws 2/2, Tiger Dash, Tireless Energy 2/2, Ursine Vigor.
 
-- **`Raid: Sszorak`** for Sszorak: 100 rankings; Druid of the Claw 51%, Wildstalker 49%; typical agreement 60% on 25 contested. Ours: `Raid: Sszorak`: the typical build. 1 of 100 run it exactly.
-  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwghxYmZmxsxDsMz2MzMmZGAAAAWCmNYMzomxsMmZmxYGzAAAAAAYgBAAAQzsMLzMzAAWAzMALmBDAAgZ2wA`
-  - Sszorak alone: 100 rankings; Druid of the Claw 51%, Wildstalker 49%; against its own typical, the same build.
+- **`Raid: Sszorak`** for Sszorak: 100 rankings; Wildstalker 94%, Druid of the Claw 6%; typical agreement 73% on 9 contested. Ours: `Raid: Sszorak`: no one in the sample runs it exactly. Typical has +Bond with Nature, +Bursting Growth, +Circle of Life and Death, +Flower Walk, +Green Thumb, +Hunt Beneath the Open Skies, +Lethal Preservation, +Lunar Inspiration, +Patient Custodian, +Rampancy, +Resilient Flourishing, +Strategic Infusion, +Twin Sprouts, +Vigorous Creepers, +Wildstalker, +Wildstalker's Power; lacks Aggravate Wounds, Ashamane's Guidance, Bestial Strength, Carnivorous Instinct 1/2, Claw Rampage, Dreadful Wound, Druid of the Claw, Empowered Shapeshifting, Exacerbating Wounds, Fount of Strength, Killing Strikes, Limb from Limb, Pack's Endurance, Strike for the Heart, Twin Claw, Wildshape Mastery.
+  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAwgZMGzMzMmtFWGbzMzYmZAAAAYJY2gxMjaGzyYmZGjZMDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA`
+  - Sszorak alone: 100 rankings; Wildstalker 94%, Druid of the Claw 6%; against its own typical, the same build.
 
-- **`Raid: Twin Fangs`** for The Twin Fangs: 10 rankings; Wildstalker 100%; typical agreement 65% on 6 contested. Ours: `Raid: Twin Fangs`: 1 of 10 run it exactly. Typical has +Panther's Guile, +Wild Charge; lacks Tiger Dash, Wild Slashes.
-  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMGz2ywMLzMzMmZAAAAYJYYYMzomxsMmZmZZMjBAAAAAgBGAAAAAgZbmlmlZ22AzMALmBDAgZGAMA`
-  - The Twin Fangs alone: 10 rankings; Wildstalker 100%; against its own typical, the same build.
+- **`Raid: Twin Fangs`** for The Twin Fangs: 37 rankings; Wildstalker 100%; typical agreement 71% on 13 contested. Ours: `Raid: Twin Fangs`: no one in the sample runs it exactly. Typical has +Fluid Form, +Panther's Guile, +Wild Charge; lacks Improved Stampeding Roar, Tiger Dash, Wild Slashes.
+  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZMzGzMzMGz2ywMLzMzMmZAAAAYJYYYMzomxswMzMLjZMDAAAAAgBGAAAAAgZbmlmlZ22AzMALmBDAgZGAMA`
+  - The Twin Fangs alone: 37 rankings; Wildstalker 100%; against its own typical, the same build.
 
-- `Raid: Coiled Altar` (The Coiled Altar): no rankings with talents.
+- **`Raid: Coiled Altar`** for The Coiled Altar: 9 rankings; Wildstalker 100%; typical agreement 79% on 15 contested. Ours: `Raid: Coiled Altar`: no one in the sample runs it exactly. Typical has +Heart of the Wild, +Improved Stampeding Roar, +Rip and Tear, +Tireless Energy 2/2; lacks Carnivorous Instinct 1/2, Forestwalk 1/2, Perfectly-Honed Instincts, Primal Wrath, Tireless Energy 1/2.
+  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2YmZmxY2WGLjtZmZMzMAAAAsEMbwYmRNjZZmZmZMmxMAAAAAAADAAAAAwsNzSzyMLbgZGgFzgBAwMDAGA`
+  - The Coiled Altar alone: 9 rankings; Wildstalker 100%; against its own typical, the same build.
 
 - `Raid: Ula'tek` (Ula'tek): no rankings with talents.
 
-- **`Raid: Nymrissa`** for Nymrissa Wavecaller: 100 rankings; Wildstalker 92%, Druid of the Claw 8%; typical agreement 73% on 18 contested. Ours: `Raid: Nymrissa`: the typical build. 1 of 100 run it exactly.
-  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMzmZmZmZGzmxyYbmZm5BmZAAAAYJY2MMmZUzYWGzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA`
+- **`Raid: Nymrissa`** for Nymrissa Wavecaller: 100 rankings; Wildstalker 92%, Druid of the Claw 8%; typical agreement 66% on 16 contested. Ours: `Raid: Nymrissa`: no one in the sample runs it exactly. Typical has +Heart of the Wild, +Infected Wounds; lacks Merciless Claws, Typhoon.
+  typical: `CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMjBAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA`
   - Nymrissa Wavecaller alone: 100 rankings; Wildstalker 92%, Druid of the Claw 8%; against its own typical, the same build.
 
 ## Guardian Druid
 
 ### Raid
 
-623 rankings over 10 bosses, logged 2026-08-27 to 2026-09-25. 282 distinct builds. Hero tree: Elune's Chosen 100%.
+710 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 328 distinct builds. Hero tree: Elune's Chosen 100%, Druid of the Claw 0%.
 
-**Typical** (Elune's Chosen, agreement 77% on 10 contested talents, 38 run it exactly):
+**Typical** (Elune's Chosen, agreement 75% on 10 contested talents, 44 run it exactly):
 
 `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZGjZMDAAAAAYGbzAW2mZwY2GATAAAAbYmBYxMYAbW2GgZGAD`
 
 **Most common other builds**, each against the typical:
 
-- 29 (4.7%): +Ursoc's Endurance; -Gory Fur
-  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZGjZMDAAAAAYGbzAW2mZwY2GATAAAAbYmBYxMYALW2GgZGAD`
-- 11 (1.8%): +Astral Influence, +Starlight Conduit, +Typhoon, +Ursoc's Endurance; -Gory Fur, -Matted Fur 2/2, -Natural Recovery
-  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDYzMGNRzMzyMzMzYMjZAAAAAAzYbGwy2MDGz2AYCAAAYDzYALmBDYxy2AMzAYA`
-- 11 (1.8%): +Astral Insight, +Lycara's Inspiration; -Improved Stampeding Roar, -The Light of Elune
-  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWMzMzYMjZAAAAAAzMbzA22mZwY2GATAAAAbYmBYxMYAbW2GgZGAD`
-- 10 (1.6%): +Astral Influence, +Matted Fur 1/2, +Raze, +Starlight Conduit, +Typhoon; -Improved Stampeding Roar, -Matted Fur 2/2, -Reinforced Fur, -Ursol's Vortex
-  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsMzYMzmZxgxyADzY0ENzMLmZmZMmxMAAAAAgZsNDYZbmBjZbAMBAAAshZegBsYGMgNLbDwMDgB`
+- 20 (2.8%): +Lycara's Inspiration; -Instincts of the Claw
+  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZGjZMDAAAAAYmZbGwy2MDGz2AYCAAAYDzMALGYAbW2GgZGAD`
+- 15 (2.1%): +Typhoon; -Innervate
+  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbGGNRzMzyMzMzYMDDAAAAAYGbzAW2mZwY2GATAAAAbYmBYxMYAbW2GgZGAD`
+- 13 (1.8%): +Incapacitating Roar; -Instincts of the Claw
+  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZmlxMmBAAAAAMjtZALbzMYMbDgJAAAgNMzAsYgBsZZbAmZAMA`
+- 10 (1.4%): +Lycara's Inspiration; -Innervate
+  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYGjZ2MLGMLLDMbwoJamZWmZmZGjZYAAAAAAzMbzAW2mZwY2GATAAAAbYmBYxMYAbW2GgZGAD`
 
-**Split talents:** Instincts of the Claw 88%; Natural Recovery 87%; Elune's Grace (choice) 86%; Brambles (choice) 86%; Improved Stampeding Roar 85%; The Light of Elune (choice) 83%; Matted Fur 82%; Ursol's Vortex (choice) 81%; Innervate 61%; Gory Fur (choice) 52%; Typhoon 46%; Ursoc's Endurance (choice) 45%; Astral Influence 32%; Starlight Conduit 26%; Lycara's Inspiration 24%; Astral Insight (choice) 17%; Moondust (choice) 14%; Perfectly-Honed Instincts 13%
+**Split talents:** Improved Stampeding Roar 89%; Matted Fur 88%; Ursol's Vortex (choice) 86%; Fluid Form 81%; The Light of Elune (choice) 79%; Elune's Grace (choice) 79%; Brambles (choice) 79%; Instincts of the Claw 69%; Innervate 56%; Gory Fur (choice) 55%; Ursoc's Endurance (choice) 44%; Typhoon 39%; Lycara's Inspiration 31%; Astral Influence 29%; Incapacitating Roar (choice) 23%; Moondust (choice) 21%; Astral Insight (choice) 21%; Perfectly-Honed Instincts 18%; Starlight Conduit 17%; Ursol's Warding 14%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 38 of 623 run it exactly.
+- `Raid`: the typical build. 44 of 710 run it exactly.
 
 ### Mythic+
 
-710 rankings over 8 dungeons, logged 2026-09-03 to 2026-09-25, keys 19 to 22 (median 20). 144 distinct builds. Hero tree: Elune's Chosen 100%. 90 left out: their log has no talents.
+688 rankings over 8 dungeons, logged 2026-09-18 to 2026-10-18, keys 21 to 24 (median 21). 123 distinct builds. Hero tree: Elune's Chosen 100%. 112 left out: their log has no talents.
 
-**Typical** (Elune's Chosen, agreement 79% on 6 contested talents, 151 run it exactly):
+**Typical** (Elune's Chosen, agreement 81% on 5 contested talents, 193 run it exactly):
 
 `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD`
 
 **Most common other builds**, each against the typical:
 
-- 51 (7.2%): +Lycara's Inspiration, +Matted Fur 1/2; -Matted Fur 2/2
-  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMzsZALbzMYMLDgJAAAgNMzDAsYMMgFLAMzAYA`
-- 36 (5.1%): +Reinvigoration 1/2; -Soul of the Forest
-  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMPwMLLDMbGGNRzMzyMzMzsMmBAAAAAAjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD`
-- 35 (4.9%): +Elune's Grace; -Moondust
+- 63 (9.2%): +Elune's Grace; -Moondust
   `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYZbmBjZbAMBAAAshZGgFjhBsYBgZGAD`
-- 27 (3.8%): +Innervate, +Matted Fur 1/2; -Matted Fur 2/2
-  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMGAAAAAgZsZALbzMYMLDgJAAAgNMzDAsYMMgFLAMzAYA`
+- 41 (6.0%): +Astral Influence; -Primal Fury
+  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzMGNRmZWmZmZmlxMAAAAAAMjNDYZbmBjZZAMBAAAshZGgFjhBsYBgZGAD`
+- 34 (4.9%): +Astral Insight; -The Light of Elune
+  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMAAAAAAMjNDYbbmBjZZAMBAAAshZGgFjhBsYBgZGAD`
+- 19 (2.8%): +Fluid Form; -Perfectly-Honed Instincts
+  `CgGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgZmxsYmZMziZxMmZZZgZzwoJamZWmZmZmlxMMAAAAAgZsZALbzMYMLDgJAAAgNMzAsYgBsYBgZGAD`
 
-**Split talents:** The Light of Elune (choice) 86%; Primal Fury 83%; Moondust (choice) 81%; Perfectly-Honed Instincts 78%; Soul of the Forest 76%; Reinvigoration 20%; Lycara's Inspiration 19%; Elune's Grace (choice) 19%; Fluid Form 17%; Astral Insight (choice) 14%; Innervate 11%
+**Split talents:** Perfectly-Honed Instincts 83%; The Light of Elune (choice) 82%; Moondust (choice) 79%; Primal Fury 77%; Elune's Grace (choice) 21%; Astral Insight (choice) 18%; Fluid Form 17%; Astral Influence 16%; Innervate 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 151 of 710 run it exactly.
-- `Dungeon: survive more`: no one in the sample runs it exactly. Typical has +Atmospheric Exposure, +Bask in Moonlight, +Dream Guide, +Elune's Chosen, +Fury of Nature 2/2, +Gift of an Ancient Guardian, +Glistening Fur, +Improved Stampeding Roar, +Lunar Calling, +Lunar Insight, +Lunation, +Matted Fur 2/2, +Moon Guardian, +Moondust, +Penumbral Swell, +Perfectly-Honed Instincts, +Star Cascade, +Stellar Command, +The Eternal Moon, +The Light of Elune; lacks Aggravate Wounds, Bestial Strength, Claw Rampage, Dreadful Wound, Dream of Cenarius, Druid of the Claw, Empowered Shapeshifting, Exacerbating Wounds, Fluid Form, Forestwalk 1/2, Fount of Strength, Instincts of the Claw, Killing Blow, Killing Strikes, Limb from Limb, Lingering Healing, Pack's Endurance, Reinvigoration 1/2, Strike for the Heart, Twin Claw, Waking Nightmare, Wildshape Mastery.
+- `Dungeon`: the typical build. 193 of 688 run it exactly.
 
 ## Restoration Druid
 
 ### Raid
 
-719 rankings over 10 bosses, logged 2026-08-29 to 2026-09-25. 414 distinct builds. Hero tree: Wildstalker 100%.
+923 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 442 distinct builds. Hero tree: Wildstalker 100%, Keeper of the Grove 0%. 1 left out: their log has no talents.
 
-**Typical** (Wildstalker, agreement 65% on 8 contested talents, 15 run it exactly):
+**Typical** (Wildstalker, agreement 72% on 11 contested talents, 11 run it exactly):
 
 `CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALGa2MjpZGgZZmZmZYYGAAAAAGAAAAAAAwsNzSz2Mb2YMzMYGY0MAAzMAMA`
 
 **Most common other builds**, each against the typical:
 
-- 19 (2.6%): +Killer Instinct 1/2, +Rake, +Rip; -Starfire, -Starsurge, -Typhoon
-  `CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALDa2YMNzY4BMLzMzMDDzAAAAAAAAAAAAAwsNzSz2Mb2YMzMYGY0MAAzMAMA`
-- 15 (2.1%): +Incapacitating Roar; -Perfectly-Honed Instincts
+- 34 (3.7%): +Fluid Form, +Harmonious Constitution, +Rake, +Rip; -Bond with Nature, -Frenzied Regeneration, -Perfectly-Honed Instincts, -Ursol's Vortex
+  `CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALzQDzYaGGYWmZmZGGmZAAAAAMAAAAAAAgZbmtmtZ2sxYmZwMANDAwMDADA`
+- 28 (3.0%): +Incapacitating Roar; -Perfectly-Honed Instincts
   `CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALGa2MjpZGgZZmZmZWMMDAAAAADAAAAAAAY2mZpZbmNbMmZGMDQzAAMzAwA`
-- 13 (1.8%): +Tiger Dash; -Wild Charge
-  `CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAAbGa2MjpZGgZZmZmZYYGAAAAAGAAAAAAAwsNzSz2Mb2YMzMYGY0MAAzMAMA`
-- 10 (1.4%): +Circle of the Wild, +Killer Instinct 1/2, +Rake, +Rip; -Perfectly-Honed Instincts, -Starfire, -Starlight Conduit, -Starsurge
-  `CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAALDa2MjpZGDPgZZmZmZYYGAAAAAAAAAAAAAmtZWa2mZzGjZGYmFQzAAMzAwA`
+- 18 (2.0%): +Killer Instinct 1/2, +Rake, +Rip, +Tiger Dash; -Starfire, -Starsurge, -Typhoon, -Wild Charge
+  `CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAAbDa2YMNzY4BMLzMzMDDzAAAAAAAAAAAAAwsNzSz2Mb2YMzMYGY0MAAzMAMA`
+- 16 (1.7%): +Circle of the Heavens, +Tiger Dash; -Perfectly-Honed Instincts, -Wild Charge
+  `CkGAAAAAAAAAAAAAAAAAAAAAAYMmZZmZMzMmthZwsZsNmBAAAAAAAAAAbGa2MjpZGgZZmZmZYYGAAAAAGAAAAAAAwsNzSz2Mb2YMzMYmNQzAAMzAwA`
 
-**Split talents:** Master Shapeshifter (choice) 77%; Heart of the Wild 73%; Starlight Conduit 70%; Wild Charge (choice) 69%; Killer Instinct 64%; Starfire 60%; Typhoon 60%; Perfectly-Honed Instincts 58%; Starsurge 54%; Rake 42%; Rip 36%; Tiger Dash (choice) 31%; Liveliness (choice) 23%; Incapacitating Roar (choice) 22%; Moonkin Form 16%; Ursine Vigor 15%
+**Split talents:** Frenzied Regeneration 86%; Ursol's Vortex (choice) 83%; Master Shapeshifter (choice) 81%; Starlight Conduit 81%; Heart of the Wild 74%; Starfire 70%; Starsurge 65%; Wild Charge (choice) 62%; Typhoon 58%; Killer Instinct 49%; Perfectly-Honed Instincts 47%; Rake 46%; Rip 42%; Tiger Dash (choice) 38%; Incapacitating Roar (choice) 29%; Liveliness (choice) 18%; Moonkin Form 16%; Ursine Vigor 14%; Fluid Form 12%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 15 of 719 run it exactly.
+- `Raid`: the typical build. 11 of 923 run it exactly.
 
 ### Mythic+
 
-609 rankings over 8 dungeons, logged 2026-08-29 to 2026-09-25, keys 17 to 20 (median 18). 309 distinct builds. Hero tree: Wildstalker 94%, Keeper of the Grove 6%. 191 left out: their log has no talents.
+657 rankings over 8 dungeons, logged 2026-09-10 to 2026-10-18, keys 19 to 22 (median 20). 334 distinct builds. Hero tree: Wildstalker 93%, Keeper of the Grove 7%. 143 left out: their log has no talents.
 
-**Typical** (Wildstalker, agreement 69% on 24 contested talents, 1 run it exactly):
+**Typical** (Wildstalker, agreement 70% on 22 contested talents, 1 run it exactly):
 
-`CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmNjNbzAAAAAAAAAAgFDNbzw0MDwsYmZmZxwDMAAAAAMAAzAAAAAgZbmtmtZWsxMzMYmZD0MAAzMAMA`
+`CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmNjNbzAAAAAAAAAAgFDNbzw0MDwsYmZmZxwDMAAAAAMAAzAAAAAgZbmtmtZ2sxMzMYmZD0MAAzMAMA`
 
 **Most common other builds**, each against the typical:
 
-- 12 (2.0%): +Circle of the Wild, +Fluid Form, +Grievous Wounds, +Liveliness, +Rake, +Regenerative Heartwood, +Rip, +Swipe; -Circle of the Heavens, -Improved Swiftmend, -Master Shapeshifter, -Moonkin Form, -Starfire, -Starsurge, -Sunfire, -Ursine Vigor
-  `CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmlZsZbGAAAAAAAAAAsMoZzw0MjZwsYmZmZZGegZAAAAAAAwAAAAAgZbmtmtZWsxYmBmZB0MAAzMAMA`
-- 10 (1.6%): +Astral Influence, +Circle of the Wild, +Entangling Vortex, +Fluid Form, +Grievous Wounds, +Harmonious Blooming, +Killer Instinct 2/2, +Liveliness, +Rake, +Rip, +Root Network, +Swipe, +Verdant Infusion; -Circle of the Heavens, -Feline Swiftness, -Flower Walk, -Innervate, -Master Shapeshifter, -Matted Fur 2/2, -Moonkin Form, -Nurturing Dormancy, -Prosperity, -Resilient Flourishing, -Starfire, -Starsurge, -Sunfire
-  `CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmFmFbzAAAAAAAAAAglBNbmx0MjZMmFzMzYZGeADAAAAAAAGAAAAAMLzs1sNzmNmZGYmZB0MAAzMAMA`
-- 9 (1.5%): +Forestwalk 2/2, +Nature's Bounty, +Perfectly-Honed Instincts, +Root Network, +Starlight Conduit, +Tiger Dash; -Circle of the Heavens, -Forestwalk 1/2, -Heart of the Wild, -Nurturing Dormancy, -Resilient Flourishing, -Typhoon, -Wild Charge
-  `CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzshNbzAAAAAAAAAAgNDNbDmmZAmFmZmZxwMAAAAAMAAzAAAAAgZbmtmtZ2sxMzMDzMwoZAAmZAYA`
-- 8 (1.3%): +Astral Influence, +Bond with Nature, +Fluid Form, +Killer Instinct 1/2, +Liveliness, +Matted Fur 1/2, +Root Network, +Stonebark, +Tiger Dash; -Harmonious Constitution, -Improved Ironbark, -Master Shapeshifter, -Matted Fur 2/2, -Resilient Flourishing, -Starsurge, -Ursine Vigor, -Wild Charge
-  `CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmFjNLzAAAAAAAAAAgNoZbmx0MD8AmFzMzMLGegZAAAAAMAAzAAAAAgZbmlmtZ2sxYmHAzMbgmBAYmBgB`
+- 20 (3.0%): +Astral Influence, +Circle of the Wild, +Entangling Vortex, +Fluid Form, +Grievous Wounds, +Harmonious Blooming, +Killer Instinct 2/2, +Liveliness, +Rake, +Resilient Flourishing, +Rip, +Swipe, +Verdant Infusion; -Circle of the Heavens, -Feline Swiftness, -Flower Walk, -Innervate, -Master Shapeshifter, -Matted Fur 2/2, -Moonkin Form, -Nurturing Dormancy, -Prosperity, -Root Network, -Starfire, -Starsurge, -Sunfire
+  `CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmFmFbzAAAAAAAAAAglBNbmx0MjZMmFzMzYZGeADAAAAAAAGAAAAAMLzs1sNziNmZGYmZB0MAAzMAMA`
+- 15 (2.3%): +Call of the Elder Druid, +Reforestation, +Starlight Conduit; -Feline Swiftness, -Nurturing Dormancy, -Verdancy
+  `CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNmZwshNbzAAAAAAAAAAgFDNbzw0MDwsYmZGLGegBAAAAgBAYGAAAAAMbzs1sNzmNmZmZYmZD0MAAzMAMA`
+- 12 (1.8%): +Astral Influence, +Call of the Elder Druid, +Dream of Cenarius, +Fluid Form, +Harmonious Blooming, +Matted Fur 1/2, +Resilient Flourishing, +Starlight Conduit, +Thriving Vegetation 1/2; -Innervate, -Matted Fur 2/2, -Nurturing Dormancy, -Root Network, -Thriving Vegetation 2/2, -Typhoon, -Verdancy
+  `CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNz8AwsxsZbGAAAAAAAAAAsYoZbMmmZAmFzMzMLGeADAAAAgBAYGAAAAAMbzs1sNziNmZmHYYmZD0MAAzMAMA`
+- 12 (1.8%): +Astral Influence, +Forestwalk 2/2, +Starlight Conduit, +Tiger Dash; -Forestwalk 1/2, -Innervate, -Moonkin Form, -Sunfire, -Wild Charge
+  `CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMmNjNbzAAAAAAAAAAgNDNbmx0MDwsYmZmZxwAAAAAgBAwAAAAAgZbmtmtZ2sxMzMDzMbgmBAYmBgB`
 
-**Split talents:** Typhoon 88%; Flower Walk (choice) 87%; Wild Synthesis 86%; Harmonious Constitution (choice) 85%; Overgrowth (choice) 82%; Incapacitating Roar (choice) 82%; Improved Swiftmend 82%; Feline Swiftness 80%; Matted Fur 78%; Heart of the Wild 74%; Innervate 74%; Wild Charge (choice) 70%; Starfire 69%; Verdancy 67%; Moonkin Form 63%; Sunfire 61%; Nurturing Dormancy 60%; Master Shapeshifter (choice) 60%; Fluid Form 54%; Ursine Vigor 52%; Resilient Flourishing (choice) 51%; Starsurge 50%; Starlight Conduit 47%; Circle of the Heavens (choice) 47%; Rake 47%; Rip 45%; Root Network (choice) 43%; Liveliness (choice) 40%; Circle of the Wild (choice) 38%; Grievous Wounds 37%; Astral Influence 34%; Tiger Dash (choice) 30%; Harmonious Blooming 29%; Killer Instinct 29%; Nature's Bounty 25%; Swipe 23%; Reforestation 23%; Regenerative Heartwood 19%; Perfectly-Honed Instincts 17%; Call of the Elder Druid 13%; Passing Seasons (choice) 11%; Dream of Cenarius 11%; Improved Stampeding Roar 10%; Flash of Clarity 10%
+**Split talents:** Overgrowth (choice) 89%; Typhoon 87%; Incapacitating Roar (choice) 84%; Flower Walk (choice) 82%; Harmonious Constitution (choice) 82%; Ursine Vigor 77%; Master Shapeshifter (choice) 77%; Starfire 76%; Matted Fur 76%; Feline Swiftness 71%; Heart of the Wild 70%; Moonkin Form 68%; Starsurge 67%; Sunfire 67%; Wild Charge (choice) 67%; Circle of the Heavens (choice) 65%; Starlight Conduit 64%; Innervate 64%; Verdancy 61%; Root Network (choice) 60%; Fluid Form 51%; Nurturing Dormancy 48%; Harmonious Blooming 46%; Astral Influence 44%; Tiger Dash (choice) 33%; Resilient Flourishing (choice) 32%; Killer Instinct 28%; Rake 28%; Rip 28%; Circle of the Wild (choice) 25%; Grievous Wounds 24%; Liveliness (choice) 23%; Reforestation 23%; Call of the Elder Druid 22%; Swipe 18%; Nature's Bounty 18%; Perfectly-Honed Instincts 16%; Dream of Cenarius 12%; Bond with Nature (choice) 11%; Entangling Vortex (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 1 of 609 run it exactly.
-- `Dungeon: caster damage`: no one in the sample runs it exactly. Typical has +Heart of the Wild, +Improved Swiftmend, +Innervate, +Master Shapeshifter, +Thriving Vegetation 2/2, +Ursine Vigor, +Verdancy, +Wild Charge; lacks Astral Influence, Blooming Infusion, Bounteous Bloom, Call of the Elder Druid, Cenarius' Might, Dream of Cenarius, Expansiveness, Grove's Inspiration, Harmony of the Grove, Liveliness, Perfectly-Honed Instincts, Power of Nature, Power of the Dream, Protective Growth, Regenerative Heartwood, Starlight Conduit, Thriving Vegetation 1/2, Tiger Dash, Treants of the Moon.
-- `Dungeon: cat damage`: no one in the sample runs it exactly. Typical has +Circle of the Heavens, +Improved Swiftmend, +Innervate, +Master Shapeshifter, +Moonkin Form, +Starfire, +Starsurge, +Sunfire, +Thriving Vegetation 2/2, +Ursine Vigor, +Wild Charge; lacks Blooming Infusion, Bounteous Bloom, Cenarius' Might, Circle of the Wild, Expansiveness, Fluid Form, Grievous Wounds, Grove's Inspiration, Harmony of the Grove, Liveliness, Nature's Bounty, Perfectly-Honed Instincts, Power of Nature, Power of the Dream, Protective Growth, Rake, Regenerative Heartwood, Rip, Swipe, Thriving Vegetation 1/2, Tiger Dash, Treants of the Moon.
+- `Dungeon`: no one in the sample runs it exactly. Typical has +Root Network; lacks Resilient Flourishing.
 
 ## Augmentation Evoker
 
 ### Raid
 
-787 rankings over 10 bosses, logged 2026-08-30 to 2026-09-25. 402 distinct builds. Hero tree: Chronowarden 100%, Scalecommander 0%.
+971 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 494 distinct builds. Hero tree: Chronowarden 100%.
 
-**Typical** (Chronowarden, agreement 65% on 9 contested talents, 4 run it exactly):
+**Typical** (Chronowarden, agreement 64% on 11 contested talents, 1 run it exactly):
 
-`CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZGMYmZZmZMjZAAAAAAAAgZGjZwYqxMzMAAAAYGzYMzsMmZgZYgxMWYBGYGGagFMzYmBAG`
+`CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgBzMLzMzMjZAAAAAAAAgZGMDGTNzMzMAAAAYGzMjZmlxMDMziBGzYhFYgZYoBWwYMzAAD`
 
 **Most common other builds**, each against the typical:
 
-- 24 (3.0%): +Chrono Ward, +Clairvoyant, +Overlord, +Twin Guardian; -Arcane Reach, -Inferno's Blessing, -Mighty Inferno, -Tailwind
-  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAYmhxMYM1YmZGAAAAMjZMmZWGzMwMMwYGLsADMDDNwCGjZGAYA`
-- 22 (2.8%): +Chrono Ward, +Twin Guardian; -Arcane Reach, -Tailwind
-  `CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZGMYmZZGjZMzGAAAAAAAAzMMmBjpGzMzAAAAgZMjxMzyYmBmhBGzYhFYgZYoBWwMjZGAYA`
-- 15 (1.9%): +Clairvoyant, +Overlord, +Unravel; -Inferno's Blessing, -Mighty Inferno, -Tailwind
-  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZmZmZMDAAAAAAAAMDjZwYqZmZmBAAAAzYGjZmlxMDMDDMmxCLwAzwQDsgxYmBAG`
-- 14 (1.8%): +Chrono Ward, +Clairvoyant, +Overlord, +Unravel; -Arcane Reach, -Inferno's Blessing, -Mighty Inferno, -Tailwind
-  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAwMMmBjpmZmZGAAAAMjZMmZWGzMwMMwYGLsADMDDNwCGjZGAYA`
+- 11 (1.1%): +Attuned to the Dream 2/2, +Inferno's Blessing, +Mighty Inferno; -Clairvoyant, -Foci of Life, -Tomorrow, Today, -Unravel
+  `CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZGMYmZZmZMjZAAAAAAAAgZGjZwYqxMzMAAAAYGzYMzsMmZgZYgxMWYBGYGGagFMzYmBAG`
+- 10 (1.0%): +Exuberance, +Inferno's Blessing, +Mighty Inferno; -Cauterizing Flame, -Clairvoyant, -Tomorrow, Today
+  `CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZGMYmZZmZMjZAAAAAAAAgZGYYGTNzMzMAAAAYGzMjZmlxMDMDDMmxCLwAzwQDsgZGzMAwA`
+- 10 (1.0%): +Attuned to the Dream 1/2, +Chrono Ward; -Arcane Reach, -Unravel
+  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgBzMLzYmZMzGAAAAAAAAmZ8AmBjpGzMzAAAAgZMzMmZWGzMwMLGYMjFWgBmhhGYBjxMDAM`
+- 10 (1.0%): +Attuned to the Dream 2/2, +Chrono Ward, +Overlord; -Arcane Reach, -Foci of Life, -Tomorrow, Today, -Unravel
+  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAwMjxMYM1YmZGAAAAMjZMmZWGzMwMMwYGLsADMDDNwCGjZGAYA`
 
-**Split talents:** Improved Defy Fate 85%; Scarlet Adaptation 84%; Cauterizing Flame 82%; Quell 73%; Attuned to the Dream 71%; Arcane Reach 59%; Clairvoyant 57%; Chrono Ward (choice) 56%; Tailwind 50%; Mighty Inferno 46%; Inferno's Blessing 46%; Twin Guardian 42%; Foci of Life 40%; Overlord 33%; Unravel 33%; Tomorrow, Today (choice) 22%; Exuberance 20%; Bestow Weyrnstone 19%; Ancient Flame 18%
+**Split talents:** Scarlet Adaptation 84%; Draconic Attunements 83%; Improved Defy Fate 78%; Quell 74%; Tailwind 74%; Cauterizing Flame 62%; Arcane Reach 60%; Clairvoyant 58%; Attuned to the Dream 54%; Unravel 46%; Foci of Life 45%; Inferno's Blessing 44%; Mighty Inferno 43%; Chrono Ward (choice) 42%; Twin Guardian 41%; Tomorrow, Today (choice) 38%; Exuberance 28%; Bestow Weyrnstone 28%; Ancient Flame 21%; Overlord 20%; Blistering Scales 19%; Regenerative Chitin (choice) 17%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 4 of 787 run it exactly.
+- `Raid`: 11 of 971 run it exactly. Typical has +Clairvoyant, +Foci of Life, +Tomorrow, Today, +Unravel; lacks Attuned to the Dream 2/2, Inferno's Blessing, Mighty Inferno.
 
 ### Mythic+
 
-649 rankings over 8 dungeons, logged 2026-08-20 to 2026-09-25, keys 15 to 20 (median 16). 314 distinct builds. Hero tree: Chronowarden 82%, Scalecommander 18%. 151 left out: their log has no talents.
+685 rankings over 8 dungeons, logged 2026-09-02 to 2026-10-18, keys 17 to 21 (median 18). 318 distinct builds. Hero tree: Chronowarden 92%, Scalecommander 8%. 114 left out: their log has no talents. 1 refused: unknown talents or not 34/34/13 points.
 
-**Typical** (Chronowarden, agreement 77% on 28 contested talents, 1 run it exactly):
+**Typical** (Chronowarden, agreement 72% on 15 contested talents, 21 run it exactly):
 
-`CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAwMMGGjpGzMzAAAAgZmZMmZWGzMwMMwYGLsADMDDNwCGzMzAAD`
+`CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzMzyMYmlZYmxMAAAAAAAAwMwMzYM1YmZGAAAAYmZMmZWGzMwMbGYMjFWgBmhhGYBMzMDAM`
 
 **Most common other builds**, each against the typical:
 
-- 18 (2.8%): +Sleep Walk; -Oppressing Roar
-  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAwMMzAjpGzMzAAAAgZmZMmZWGzMwMMwYGLsADMDDNwCGzMzAAD`
-- 14 (2.2%): +Bestow Weyrnstone, +Enkindled 1/2, +Overawe; -Attuned to the Dream 2/2, -Chrono Ward
-  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZAAAAAAAAgZg5BmxYqxMzMAAAAYmZGjZmlxMDMjZgxMWYBGYGGagFMmZmBAG`
-- 14 (2.2%): +Ancient Flame, +Enkindled 2/2, +Foci of Life, +Overawe, +Twin Guardian; -Attuned to the Dream 2/2, -Potent Mana, -Scarlet Adaptation, -Source of Magic, -Stretch Time
-  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAgBAAzMwMzYM1wMzAAAAAzMmxMzyYmBmBwYGLsADMDDNwCGzMzAAD`
-- 14 (2.2%): +Enkindled 2/2, +Twin Guardian; -Clobbering Sweep, -Oppressing Roar, -Terror of the Skies
-  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzgZYmZZGzMjZ2AAAAAAAAYmhxMYM1YmZGAAAAMjZMmZWGzMwMMwYGLsADMDDNwCGjZGAYA`
+- 14 (2.0%): +Enkindled 1/2, +Scarlet Adaptation; -Enkindled 2/2
+  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzMbzMzMzyMYmlZYmxMAAAAAAAAwMw8AzYM1YmZGAAAAMzMjxMzyYmBmZzAjZswCMwMM0ALgZmZAgB`
+- 13 (1.9%): +Ancient Flame, +Attuned to the Dream 2/2, +Chrono Ward; -Clobbering Sweep, -Overawe, -Power Nexus, -Terror of the Skies
+  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzYbmZmZWmBzsMDzMmZDAAAAAGAAYGGzYMmaMzMDAAAAMmxYmZZMzAzsZgxMWYBGYGGagFwYmBAG`
+- 12 (1.8%): +Attuned to the Dream 2/2, +Chrono Ward, +Scarlet Adaptation; -Clobbering Sweep, -Overawe, -Power Nexus, -Terror of the Skies
+  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzYbmZmZWmBzsMDzMmZDAAAAAAAAzwYGjxUjZmZAAAAwMmxYmZZMzAzsZgxMWYBGYGGagFwYmBAG`
+- 12 (1.8%): +Chrono Ward; -Power Nexus
+  `CEcBAAAAAAAAAAAAAAAAAAAAAMMzYbmZmZWmBzsMDzMmZDAAAAAAAAzAzMjxUjZmZAAAAgZmxYmZZMzAzsZgxMWYBGYGGagFwMzMAwA`
 
-**Split talents:** Plot the Future 90%; Clairvoyant 85%; Warp 82%; Temporal Burst 82%; Reverberations 82%; Primacy 82%; Overclock 82%; Nozdormu Adept 82%; Instability Matrix 82%; Golden Opportunity 82%; Chronoboon 82%; Chronal Dynamo 82%; Afterimage 82%; Double-time (choice) 81%; Temporality (choice) 81%; Stretch Time 80%; Improved Defy Fate 80%; Draconic Attunements 80%; Time Spiral (choice) 80%; Clobbering Sweep 78%; Rumbling Earth 78%; Chrono Ward (choice) 77%; Overlord 74%; Terror of the Skies 65%; Enkindled 63%; Attuned to the Dream 62%; Oppressing Roar 55%; Scarlet Adaptation 54%; Overawe 47%; Interwoven Threads (choice) 40%; Foci of Life 40%; Sleep Walk 27%; Blistering Scales 26%; Regenerative Chitin (choice) 24%; Wingleader 18%; Unrelenting Siege 18%; Refined Essence 18%; Onslaught 18%; Might of the Black Dragonflight 18%; Melt Armor 18%; Maneuverability 18%; Concentrated Power 18%; Command Squadron 18%; Bombardments 18%; Hardened Scales (choice) 18%; Twin Guardian 15%; Inferno's Blessing 15%; Spatial Paradox (choice) 14%; Mighty Inferno 14%; Ancient Flame 14%; Bestow Weyrnstone 14%; Reactive Hide 12%; Nimble Flyer (choice) 12%; Extended Battle (choice) 12%; Unravel 10%; Timelessness 10%
+**Split talents:** Blistering Scales 86%; Regenerative Chitin (choice) 85%; Enkindled 84%; Time Spiral (choice) 84%; Stretch Time 82%; Improved Defy Fate 80%; Clairvoyant 76%; Reactive Hide 76%; Interwoven Threads (choice) 75%; Overlord 70%; Clobbering Sweep 68%; Attuned to the Dream 67%; Power Nexus 64%; Oppressing Roar 62%; Terror of the Skies 62%; Chrono Ward (choice) 52%; Overawe 47%; Imminent Destruction 47%; Plot the Future 37%; Scarlet Adaptation 34%; Foci of Life 28%; Draconic Attunements 21%; Ancient Flame 18%; Bestow Weyrnstone 16%; Sleep Walk 14%; Inferno's Blessing 13%; Mighty Inferno 13%; Unravel 12%; Spatial Paradox (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 1 of 649 run it exactly.
+- `Dungeon`: no one in the sample runs it exactly. Typical has +Blistering Scales, +Enkindled 2/2, +Interwoven Threads, +Overawe, +Reactive Hide, +Regenerative Chitin; lacks Attuned to the Dream 2/2, Chrono Ward, Draconic Attunements, Imminent Destruction, Plot the Future, Scarlet Adaptation.
 
 ## Devastation Evoker
 
 ### Raid
 
-708 rankings over 10 bosses, logged 2026-08-27 to 2026-09-25. 208 distinct builds. Hero tree: Scalecommander 99%, Flameshaper 1%. 1 left out: their log has no talents.
+773 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 230 distinct builds. Hero tree: Scalecommander 97%, Flameshaper 3%. 1 left out: their log has no talents.
 
-**Typical** (Scalecommander, agreement 73% on 8 contested talents, 15 run it exactly):
+**Typical** (Scalecommander, agreement 77% on 8 contested talents, 25 run it exactly):
 
 `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMDMYMTjZmpZmx2MzMzMzMzMzAmxMzYmZZmZgBGD2glxox2AYGA2wAzMY4BA`
 
 **Most common other builds**, each against the typical:
 
-- 64 (9.0%): +Strike from Above; -Tailwind
-  `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMgBjZaMzMNzM2mZmZmZmZmZGwMmZGzMLzMDMwYwGsMGN2GAzAwGGYmBz4BA`
-- 62 (8.8%): +Terror of the Skies; -Foci of Life
-  `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMDMYMTjZmpZmx2MzMzMzMzMzAmZmxYmZZmZgBGD2glxox2AYGA2wAzMY4BA`
-- 61 (8.6%): +Unravel; -Foci of Life
+- 91 (11.8%): +Unravel; -Foci of Life
   `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMDMYMTzMzMNzM2mZmZmZmZmZGwMmxYmZZmZgBGD2glxox2AYGA2wAzMY4BA`
-- 22 (3.1%): +Unravel; -Tailwind
+- 82 (10.6%): +Terror of the Skies; -Foci of Life
+  `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMDMYMTjZmpZmx2MzMzMzMzMzAmZmxYmZZmZgBGD2glxox2AYGA2wAzMY4BA`
+- 45 (5.8%): +Strike from Above; -Tailwind
+  `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMgBjZaMzMNzM2mZmZmZmZmZGwMmZGzMLzMDMwYwGsMGN2GAzAwGGYmBz4BA`
+- 19 (2.5%): +Unravel; -Tailwind
   `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwMDzwMgBjZamZmpZmx2MzMzMzMzMzAmxMzYmZZmZgBGD2glxox2AYGA2wAzMY4BA`
 
-**Split talents:** Heat Wave 90%; Eternity's Span 87%; Iridescence 81%; Font of Magic 81%; Star Salvo 75%; Tailwind 52%; Foci of Life 39%; Unravel 32%; Terror of the Skies 31%; Strike from Above 21%; Twin Guardian 16%; Power Nexus 13%; Cauterizing Flame 12%; Ancient Flame 10%; Ruby Embers 10%; Engulfing Blaze 10%
+**Split talents:** Eternity's Span 90%; Scarlet Adaptation 88%; Font of Magic 87%; Iridescence 87%; Star Salvo 84%; Tailwind 55%; Foci of Life 38%; Unravel 38%; Terror of the Skies 28%; Strike from Above 19%; Cauterizing Flame 17%; Power Nexus 12%; Twin Guardian 11%; Ancient Flame 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 15 of 708 run it exactly.
+- `Raid`: the typical build. 25 of 773 run it exactly.
 
 ### Mythic+
 
-647 rankings over 8 dungeons, logged 2026-08-23 to 2026-09-25, keys 17 to 20 (median 17). 254 distinct builds. Hero tree: Scalecommander 99%, Flameshaper 1%. 153 left out: their log has no talents.
+670 rankings over 8 dungeons, logged 2026-08-24 to 2026-10-18, keys 18 to 21 (median 18). 292 distinct builds. Hero tree: Scalecommander 96%, Flameshaper 4%. 130 left out: their log has no talents.
 
-**Typical** (Scalecommander, agreement 70% on 11 contested talents, 36 run it exactly):
+**Typical** (Scalecommander, agreement 78% on 12 contested talents, 58 run it exactly):
 
 `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGzYMTjZmpZmZ2mZmZmZmZmZGgZmxYmZZmZgBGD2glxox2AYGA2wMYmBDPA`
 
 **Most common other builds**, each against the typical:
 
-- 30 (4.6%): +Foci of Life, +Scarlet Adaptation; -Oppressing Roar, -Overawe
-  `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGYMTjZmpZmZ2mZmZmZmZmZGwMzMzYmZZmZgBGD2glxox2AYGA2wMYmBDPA`
-- 27 (4.2%): +Rising Fury 4/4; -Font of Magic, -Iridescence, -Rising Fury 1/4, -Star Salvo
-  `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZAMzwMwYGjZaMzMNjZ2mxMzMzMzMzAMzMGzMLzMDMwYwGsMGN2GAzAwGmBzMYYA`
-- 17 (2.6%): +Scarlet Adaptation; -Terror of the Skies
+- 33 (4.9%): +Scarlet Adaptation; -Terror of the Skies
   `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGzYMTjZmpZmZ2mZmZmZmZmZGwMmxYmZZmZgBGD2glxox2AYGA2wMYmBDPA`
-- 15 (2.3%): +Sleep Walk; -Terror of the Skies
+- 24 (3.6%): +Foci of Life, +Scarlet Adaptation; -Oppressing Roar, -Overawe
+  `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGYMTjZmpZmZ2mZmZmZmZmZGwMzMzYmZZmZgBGD2glxox2AYGA2wMYmBDPA`
+- 18 (2.7%): +Foci of Life; -Terror of the Skies
+  `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBGzYMTjZmpZmZ2mZmZmZmZmZGgxMzYmZZmZgBGD2glxox2AYGA2wMYmBDPA`
+- 14 (2.1%): +Sleep Walk; -Terror of the Skies
   `CsbBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZwgZGmBzYGjZaMzMNzMz2MzMzMzMzMzAMmxYmZZmZgBGD2glxox2AYGA2wMYmBDPA`
 
-**Split talents:** Regenerative Magic 86%; Time Spiral (choice) 84%; Clobbering Sweep 84%; Slipstream (choice) 84%; Terror of the Skies 70%; Oppressing Roar 66%; Star Salvo 63%; Font of Magic 61%; Iridescence 60%; Overawe 56%; Scarlet Adaptation 42%; Foci of Life 29%; Enkindled 21%; Sleep Walk 20%; Nimble Flyer (choice) 15%; Unravel 15%; Attuned to the Dream 14%
+**Split talents:** Rescue 89%; Regenerative Magic 85%; Slipstream (choice) 84%; Font of Magic 84%; Time Spiral (choice) 84%; Clobbering Sweep 84%; Iridescence 83%; Star Salvo 81%; Oppressing Roar 66%; Terror of the Skies 63%; Overawe 54%; Scarlet Adaptation 41%; Foci of Life 33%; Enkindled 24%; Unravel 21%; Sleep Walk 21%; Attuned to the Dream 14%; Nimble Flyer (choice) 12%; Heat Wave 10%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 36 of 647 run it exactly.
+- `Dungeon`: the typical build. 58 of 670 run it exactly.
 
 ## Preservation Evoker
 
 ### Raid
 
-829 rankings over 10 bosses, logged 2026-08-26 to 2026-09-25. 430 distinct builds. Hero tree: Flameshaper 100%, Chronowarden 0%.
+995 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 446 distinct builds. Hero tree: Flameshaper 100%.
 
-**Typical** (Flameshaper, agreement 71% on 10 contested talents, 4 run it exactly):
+**Typical** (Flameshaper, agreement 68% on 9 contested talents, 2 run it exactly):
 
 `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAgZMjZMGzImZAAAAmZGZGzMmlZmBAzYGYDsAmhJwmhNDDgZmxA`
 
 **Most common other builds**, each against the typical:
 
-- 37 (4.5%): +Spark of Insight, +Tailwind; -Blast Furnace, -Life-Giver's Flame
-  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAYmZwMjBzY2MMzMbzYAAgZmZMjxYGhZAAAAmZGZGzMmlZmBAzYGYDsAmhJwmhNDDgZmxA`
-- 24 (2.9%): +Stretch Time; -Oppressing Roar
+- 30 (3.0%): +Spark of Insight, +Time of Need, +Unravel; -Life-Giver's Flame, -Oppressing Roar, -Temporal Artificer
+  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAYmZwMjBzY2mhxMbzYAAgZMjZwYGNmZAAAAmZGZGzMmlZmBAzYGYDsAmhJwmhNDDgZmxA`
+- 23 (2.3%): +Lifecinders, +Unravel; -Draconic Instincts, -Oppressing Roar
+  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAgZMjZwYGNmZAAAAmZGZGzMmlZmBAzYGYBsAmhJwmhNDDgZmxA`
+- 22 (2.2%): +Unravel; -Oppressing Roar
+  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAgZMjZwYGNmZAAAAmZGZGzMmlZmBAzYGYDsAmhJwmhNDDgZmxA`
+- 21 (2.1%): +Stretch Time; -Oppressing Roar
   `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAgZMjZwYGZmZAAAAmZGZGzMmlZmBAzYGYDsAmhJwmhNDDgZmxA`
-- 13 (1.6%): +Exuberance, +Foci of Life, +Lifecinders, +Scarlet Adaptation, +Stretch Time; -Ancient Flame, -Draconic Instincts, -Enkindled 2/2, -Oppressing Roar
-  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbAAAMjZMYGzIzMDAAAwMzMZmZmxsMzMAYGzALgFwMMB2MsZYAMzMGA`
-- 13 (1.6%): +Extended Flight 1/2, +Lifecinders; -Blast Furnace, -Draconic Instincts
-  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAMzMDmZMYGzmhZmZbYAAgZMjZMGzIMDAAAwMzIzYm5BmlZmBAzYGYBsAmhJwmhNDDgZmxA`
 
-**Split talents:** Titan's Gift 88%; Time Spiral (choice) 85%; Ancient Flame 85%; Enkindled 84%; Temporal Artificer 76%; Draconic Instincts (choice) 58%; Blast Furnace 58%; Life-Giver's Flame 55%; Oppressing Roar 46%; Lifecinders (choice) 42%; Extended Flight 38%; Stretch Time 33%; Foci of Life 25%; Spark of Insight 23%; Ouroboros 22%; Scarlet Adaptation 22%; Unravel 20%; Time of Need 19%; Exuberance 15%; Tailwind 15%; Spatial Paradox (choice) 13%; Flow State 12%
+**Split talents:** Ancient Flame 87%; Titan's Gift 78%; Temporal Artificer 68%; Blast Furnace 63%; Draconic Instincts (choice) 58%; Life-Giver's Flame 57%; Lifecinders (choice) 42%; Extended Flight 41%; Oppressing Roar 41%; Unravel 30%; Stretch Time 27%; Time of Need 27%; Spark of Insight 27%; Flow State 22%; Foci of Life 22%; Tailwind 17%; Ouroboros 17%; Exuberance 15%; Scarlet Adaptation 13%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 4 of 829 run it exactly.
+- `Raid`: the typical build. 2 of 995 run it exactly.
 
 ### Mythic+
 
-639 rankings over 8 dungeons, logged 2026-08-28 to 2026-09-25, keys 18 to 21 (median 19). 342 distinct builds. Hero tree: Flameshaper 99%, Chronowarden 1%. 161 left out: their log has no talents.
+666 rankings over 8 dungeons, logged 2026-09-03 to 2026-10-18, keys 19 to 22 (median 20). 361 distinct builds. Hero tree: Flameshaper 97%, Chronowarden 3%. 134 left out: their log has no talents.
 
-**Typical** (Flameshaper, agreement 69% on 10 contested talents, 5 run it exactly):
+**Typical** (Flameshaper, agreement 70% on 13 contested talents, 8 run it exactly):
 
-`CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGzYYMzsZGw2wAAAzYGzMjhZiZmBAAAMzMTGzMjZZMDAMmBWAbgZYCsxYzwMAzMMA`
+`CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGzYYMPwsZGw2wAAAzYGzMjhZiZmBAAAMzMTGzMjZZMDAMmBWAbgZYCsZGbGmBYmhB`
 
 **Most common other builds**, each against the typical:
 
-- 17 (2.7%): +Draconic Instincts, +Extended Flight 2/2, +Time Lord 2/2, +Titan's Gift, +Unravel; -Bountiful Bloom, -Clobbering Sweep, -Field of Dreams, -Fluttering Seedlings 2/2, -Foci of Life, -Lifecinders
+- 15 (2.3%): +Draconic Instincts, +Extended Flight 2/2, +Flow State 2/2, +Time Lord 2/2, +Unravel; -Bountiful Bloom, -Clobbering Sweep, -Field of Dreams, -Flow State 1/2, -Fluttering Seedlings 2/2, -Foci of Life, -Lifecinders
   `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGYYmZmNzA2GGAAYGGzMjhZaMzMAAAgZmZywMzMLjZAgxMwGYDMDTgNzYzwAYmhB`
-- 15 (2.3%): +Terror of the Skies; -Clobbering Sweep
+- 14 (2.1%): +Flow State 2/2, +Terror of the Skies; -Clobbering Sweep, -Flow State 1/2, -Titan's Gift
   `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGzYYMzsZGw2wAAAzYGzMjhZiZmBAAAMzMTzYmZMLjZAgxMwCYDMDTgNGbGGAzMMA`
-- 10 (1.6%): +Extended Flight 1/2, +Sleep Walk, +Trailblazer; -Ancient Flame, -Foci of Life, -Shape of Flame
-  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGzYYMzsZGw2AAAYGzMzMjhZiZmBAAAMzMTGmZegZZMDAMmBWALgZYCsxYzwMAzMMA`
-- 9 (1.4%): +Exhilarating Burst 1/2, +Stretch Time, +Tailwind, +Titan's Gift; -Flow State 2/2, -Oppressing Roar, -Overawe
-  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WmHYGDjxsZGw2wAAAzMzYGMMTmZmBAAAMzMTGzMjZZMDAMmBWAbgZYCsZGbGmBYmhB`
+- 10 (1.5%): +Draconic Instincts, +Extended Flight 2/2, +Flow State 2/2, +Terror of the Skies, +Time Lord 2/2, +Unravel; -Bountiful Bloom, -Field of Dreams, -Flow State 1/2, -Fluttering Seedlings 2/2, -Foci of Life, -Lifecinders, -Oppressing Roar, -Overawe
+  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGYYmZmNzA2GGAAYGGzghZaMzMAAAgZmZaGmZmZZMDAMmB2AbgZYCsZGbGmBYmhB`
+- 10 (1.5%): +Flow State 2/2, +Sleep Walk, +Terror of the Skies, +Trailblazer; -Ancient Flame, -Flow State 1/2, -Foci of Life, -Shape of Flame, -Titan's Gift
+  `CwbBAAAAAAAAAAAAAAAAAAAAAAAAAAAmZmZ2WGzYYMzsZGw2AAAYGzMzMjhZiZmBAAAMzMTzwMjZZMDAMmBWALgZYCsxYzwMAzMMA`
 
-**Split talents:** Scarlet Adaptation 81%; Oppressing Roar 77%; Ancient Flame 77%; Flow State 76%; Shape of Flame (choice) 74%; Time Spiral (choice) 73%; Overawe 61%; Foci of Life 60%; Clobbering Sweep 56%; Titan's Gift 50%; Extended Flight 47%; Terror of the Skies 31%; Trailblazer (choice) 25%; Just in Time (choice) 23%; Stretch Time 23%; Protracted Talons 22%; Regenerative Magic 21%; Exhilarating Burst 21%; Unravel 16%; Sleep Walk 15%; Tailwind 10%
+**Split talents:** Fluttering Seedlings 88%; Bountiful Bloom 88%; Field of Dreams 87%; Scarlet Adaptation 84%; Flow State 83%; Ancient Flame 78%; Oppressing Roar 76%; Time Spiral (choice) 73%; Shape of Flame (choice) 69%; Overawe 64%; Titan's Gift 60%; Clobbering Sweep 58%; Foci of Life 53%; Extended Flight 49%; Terror of the Skies 33%; Trailblazer (choice) 28%; Stretch Time 24%; Unravel 20%; Protracted Talons 18%; Just in Time (choice) 17%; Regenerative Magic 17%; Exhilarating Burst 15%; Time Lord 14%; Sleep Walk 13%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 5 of 639 run it exactly.
+- `Dungeon`: 5 of 666 run it exactly. Typical has +Flow State 1/2, +Titan's Gift; lacks Flow State 2/2.
 
 ## Beast Mastery Hunter
 
 ### Raid
 
-696 rankings over 10 bosses, logged 2026-09-03 to 2026-09-25. 406 distinct builds. Hero tree: Pack Leader 100%.
+793 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 441 distinct builds. Hero tree: Pack Leader 100%.
 
-**Typical** (Pack Leader, agreement 67% on 14 contested talents, 1 run it exactly):
+**Typical** (Pack Leader, agreement 66% on 14 contested talents, 1 run it exactly):
 
-`C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMmZMzgZGzMMzYmZGmZGzYGMmmBAAAAAAAAzMmBYmNAMLgtBgB`
+`C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzwMzYGzgx0MAAAAAAAAYmZGAzsBgZBsNAA`
 
 **Most common other builds**, each against the typical:
 
-- 15 (2.2%): +Catlike Reflexes, +Dire Command, +Dire Frenzy 2/2, +Huntmaster's Call, +Shell Wall, +Wildspeaker; -Beast Cleave, -Emergency Salve, -Laceration, -Misdirection, -Training Expert 2/2, -Wild Thrash
-  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGGzsMzwMmZMDzMGzMMzYGzwMzYGzghmBAAAAMDAAAzMzMAzsBMMLgtBgB`
-- 13 (1.9%): +Kill Cleave, +Thrill of the Hunt 1/2, +Tranquilizing Shot; -Misdirection, -Thrill of the Hunt 2/2
-  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzs8AzwMzMjZGMzYmhZGzMzwMzYGzghmBAAAAAAAAzMmZAzsBgZBsNAM`
-- 11 (1.6%): +Catlike Reflexes, +Dire Command, +Dire Frenzy 2/2, +Huntmaster's Call, +Shell Wall, +Trailblazer, +Wildspeaker; -Beast Cleave, -Binding Shot, -Intimidation, -Laceration, -Misdirection, -Training Expert 2/2, -Wild Thrash
+- 20 (2.5%): +Bloody Frenzy, +Dire Command, +Dire Frenzy 2/2, +Huntmaster's Call, +Shell Wall, +Trailblazer, +Wildspeaker; -Beast Cleave, -Intimidation, -Kill Cleave, -Laceration, -Misdirection, -Training Expert 2/2, -Wild Thrash
   `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGGzsMzwMmZMDzMGzMMzYmZGmxYGzghmBAAAAMDAAAzMzAYmNgZxsA2GAG`
-- 11 (1.6%): +Guttural Roar, +Kill Cleave, +Thrill of the Hunt 1/2; -Misdirection, -Thrill of the Hunt 2/2
-  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzs8AzwMzMjZGMzYmhZGzMzYbmZMjZwQzAAAAAAAAgZGzAMzGAmFw2AwA`
+- 18 (2.3%): +Bloody Frenzy, +Dire Beast, +Dire Command, +Dire Frenzy 2/2, +Huntmaster's Call, +Shell Wall, +Wildspeaker; -Beast Cleave, -Kill Cleave, -Laceration, -Misdirection, -Razor Sharp, -Training Expert 2/2, -Wild Thrash
+  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGGzsMzwMmZYYmxYmxMzYmZGmZGzYGM0MAAAAgZAAAYmZGAzsBMMLgtBgB`
+- 15 (1.9%): +Bloody Frenzy, +Dire Command, +Dire Frenzy 2/2, +Huntmaster's Call, +Shell Wall, +Wildspeaker; -Beast Cleave, -Kill Cleave, -Laceration, -Misdirection, -Training Expert 2/2, -Wild Thrash
+  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGGzsMzwMmZMDzMGzMMzYmZGmZGzYGM0MAAAAgZAAAYmZGAzsBMMLgtBgB`
+- 11 (1.4%): +Bloody Frenzy, +Dire Beast, +Dire Command, +Dire Frenzy 2/2, +Huntmaster's Call, +Kindling Flare, +Tranquilizing Shot, +Wildspeaker; -Beast Cleave, -Intimidation, -Kill Cleave, -Laceration, -Misdirection, -Razor Sharp, -Training Expert 2/2, -Wild Thrash
+  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGGzsMzwMmZYYmxYmxMzYmZGmxYGzghmZAAAAgZAAAYmZGDYmNAMLgtBgB`
 
-**Split talents:** Thrill of the Hunt 89%; Razor Sharp 88%; Scout's Instincts 87%; Disruptive Rounds 84%; Bloody Frenzy 83%; Emergency Salve 82%; Intimidation 74%; Improved Feign Death 73%; Wild Thrash 60%; Beast Cleave 60%; Laceration 60%; Training Expert 58%; Kill Cleave 58%; Catlike Reflexes 53%; Misdirection 52%; Binding Shot 45%; Tranquilizing Shot 41%; Wildspeaker 40%; Shell Wall 40%; Huntmaster's Call 40%; Dire Frenzy 40%; Dire Command 40%; Guttural Roar (choice) 36%; Trailblazer (choice) 22%; Tar Trap (choice) 20%; Aspect of the Beast 16%; Kodo Tranquilizer (choice) 15%; Dire Beast 13%; Horsehair Tether (choice) 11%; Camouflage 11%
+**Split talents:** Scout's Instincts 87%; Emergency Salve 84%; Disruptive Rounds 83%; Razor Sharp 83%; Bloody Frenzy 81%; Improved Feign Death 78%; Intimidation 69%; Wild Thrash 59%; Laceration 59%; Beast Cleave 59%; Training Expert 59%; Kill Cleave 58%; Catlike Reflexes 55%; Misdirection 50%; Shell Wall 45%; Tranquilizing Shot 42%; Dire Frenzy 41%; Dire Command 41%; Wildspeaker 41%; Huntmaster's Call 41%; Binding Shot 40%; Guttural Roar (choice) 33%; Trailblazer (choice) 27%; Tar Trap (choice) 18%; Dire Beast 17%; Camouflage 12%; Kodo Tranquilizer (choice) 11%; Aspect of the Beast 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 1 of 696 run it exactly.
+- `Raid`: no one in the sample runs it exactly. Typical has +Catlike Reflexes, +Kill Cleave; lacks Binding Shot, Bloody Frenzy.
 
 ### Mythic+
 
-662 rankings over 8 dungeons, logged 2026-08-28 to 2026-09-25, keys 19 to 22 (median 19). 196 distinct builds. Hero tree: Pack Leader 100%. 138 left out: their log has no talents.
+685 rankings over 8 dungeons, logged 2026-09-08 to 2026-10-18, keys 20 to 23 (median 21). 210 distinct builds. Hero tree: Pack Leader 100%. 115 left out: their log has no talents.
 
-**Typical** (Pack Leader, agreement 70% on 6 contested talents, 23 run it exactly):
+**Typical** (Pack Leader, agreement 71% on 6 contested talents, 24 run it exactly):
 
-`C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzYbmZMjZwYaGAAAAAAAAYGjBMzGAmFw2AA`
+`C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzYzMjZMDGTzAAAAAAAAgZGjBMzGAmFw2AA`
 
 **Most common other builds**, each against the typical:
 
-- 29 (4.4%): +Aspect of the Beast, +Improved Feign Death 1/2, +Kodo Tranquilizer, +Thrill of the Hunt 1/2; -Improved Feign Death 2/2, -Thrill of the Hunt 2/2
-  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzs8AzYmZmZMzgZGzMMzYmZGbzMjZMDLjpZAAAAAAAAgHYMGwMbAYWAbDAA`
-- 24 (3.6%): +Scout's Instincts, +Trailblazer; -Disruptive Rounds, -Guttural Roar
-  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzgZGzYGMmmBAAAAAAAAzMGDYmNALmFw2AA`
-- 23 (3.5%): +Binding Shot, +Scout's Instincts; -Disruptive Rounds, -Guttural Roar
-  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzgZGzYGMmmBAAAAAAAAzMmZAzsBgZBsNAA`
-- 23 (3.5%): +Kodo Tranquilizer; -Disruptive Rounds
+- 39 (5.7%): +Camouflage; -Scout's Instincts
+  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzYzMjZMDGTzAAAAAAAAAzYMgZ2AYmFw2AA`
+- 36 (5.3%): +Kodo Tranquilizer; -Scout's Instincts
   `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzYzMjZMDLjpZAAAAAAAAgZMGwMbAYWAbDAA`
+- 28 (4.1%): +Binding Shot; -Guttural Roar
+  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzgZGzYGMmmBAAAAAAAAzMmZAzsBgZBsNAA`
+- 22 (3.2%): +Trailblazer; -Guttural Roar
+  `C0PAAAAAAAAAAAAAAAAAAAAAAAMmxwCsAzwQDbAAYGzMzsMzwMzMjZGMzYmhZGzMzgZGzYGMmmBAAAAAAAAzMGDYmNALmFw2AA`
 
-**Split talents:** Pathfinding 89%; Misdirection 70%; Guttural Roar (choice) 66%; Disruptive Rounds 47%; Scout's Instincts 42%; Kodo Tranquilizer (choice) 37%; Aspect of the Beast 27%; Camouflage 24%; Binding Shot 17%; Shell Wall 14%; Trailblazer (choice) 13%
+**Split talents:** Tranquilizing Shot 88%; Misdirection 69%; Guttural Roar (choice) 62%; Scout's Instincts 43%; Disruptive Rounds 38%; Kodo Tranquilizer (choice) 33%; Camouflage 30%; Binding Shot 20%; Aspect of the Beast 18%; Shell Wall 18%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 23 of 662 run it exactly.
+- `Dungeon`: 15 of 685 run it exactly. Typical has +Scout's Instincts; lacks Disruptive Rounds.
 
 ## Marksmanship Hunter
 
 ### Raid
 
-820 rankings over 10 bosses, logged 2026-08-31 to 2026-09-25. 369 distinct builds. Hero tree: Sentinel 100%.
+1000 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 395 distinct builds. Hero tree: Sentinel 100%.
 
-**Typical** (Sentinel, agreement 72% on 10 contested talents, 4 run it exactly):
+**Typical** (Sentinel, agreement 68% on 8 contested talents, 9 run it exactly):
 
-`C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmZxMmZGzgx0MGMbbmZmZmZmZGMzywMDAAYMzwAYGbMMAbMz2MG`
+`C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmZxMmZGzgx0MGMbbbzMzMzMzMDmZZYmBAAMmZAgZsxwAsxMbzYA`
 
 **Most common other builds**, each against the typical:
 
-- 23 (2.8%): +Binding Shot, +Born To Be Wild 1/2, +Guttural Roar, +On Target; -Accuracy By Volume, -Born To Be Wild 2/2, -Emergency Salve
-  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmxMLbzYmZMDeATzYwsttNzMzMzMzMYmlhZAAAGzMjBwM2YYA2YmtZMA`
-- 21 (2.6%): +Camouflage, +Improved Feign Death 2/2, +On Target; -Accuracy By Volume, -Intimidation, -Scout's Instincts, -Tar Trap
-  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmhZMzMmBjpZMY222mZmZmZmZGYWGmBAAwMzwAYGbMmBYjZ2mxA`
-- 20 (2.4%): +Binding Shot, +Born To Be Wild 1/2, +Guttural Roar; -Born To Be Wild 2/2, -Emergency Salve
-  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmxMLbzYmZMDeATzYwstZmZmZmZmZwMLDzMAAgxMzYAMjNGGgNmZbGD`
-- 15 (1.8%): +Guttural Roar, +On Target; -Accuracy By Volume, -Shell Wall
-  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmZZbGzMjZwYaGDmtttZmZmZmZmBzsMMDAAwYmhBwM2ADwGzsNjB`
+- 22 (2.2%): +Improved Feign Death 1/2, +Trailblazer; -Intimidation, -Tar Trap
+  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmhZMzMmBjpZMY222mZmZmZmZGYWGmZAAAzDMzAAzYjZxAsxMbzYA`
+- 19 (1.9%): +Binding Shot, +Camouflage, +Kill Shot; -Accuracy By Volume, -Shell Wall, -Tar Trap
+  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmhZMzMmBjpZMY222mZmZmZmZGMzywMAAAjZmxAYGbwMAbMz2MG`
+- 17 (1.7%): +Improved Feign Death 2/2, +Trailblazer; -Disruptive Rounds, -Intimidation, -Tar Trap
+  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmBjZmxMYMNjBz222MzMzMzMzAzywMDAAYmZGAYGbMLGgNmZbGD`
+- 17 (1.7%): +Improved Feign Death 1/2, +Roar of Sacrifice, +Trailblazer; -Emergency Salve, -Guardian's Hide, -Tar Trap
+  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmxMMjZmxMYMNjBz222MzMzMzMzgZWGmZAAAzDMzAAzYjZxAswMbzYA`
 
-**Split talents:** Catlike Reflexes 89%; Light Ammo 87%; Aspect of the Hydra (choice) 87%; Guardian's Hide (choice) 87%; Misdirection 85%; Emergency Salve 77%; Shell Wall 63%; Intimidation 57%; Improved Feign Death 48%; Binding Shot 45%; Accuracy By Volume 44%; On Target (choice) 42%; Tar Trap (choice) 39%; Guttural Roar (choice) 28%; Obsidian Arrowhead (choice) 19%; Trailblazer (choice) 18%; Tranquilizing Shot 15%; Camouflage 14%; Roar of Sacrifice (choice) 13%; Horsehair Tether (choice) 13%; Tenacious (choice) 12%
+**Split talents:** Catlike Reflexes 89%; Emergency Salve 79%; On Target (choice) 79%; Guardian's Hide (choice) 78%; Accuracy By Volume 74%; Shell Wall 57%; Intimidation 54%; Improved Feign Death 52%; Kill Shot 44%; Binding Shot 38%; Trailblazer (choice) 32%; Tar Trap (choice) 30%; Roar of Sacrifice (choice) 21%; Guttural Roar (choice) 19%; Camouflage 19%; Horsehair Tether (choice) 13%; Tranquilizing Shot 12%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 4 of 820 run it exactly.
+- `Raid`: 4 of 1000 run it exactly. Typical has +On Target; lacks Kill Shot.
 
 ### Mythic+
 
-610 rankings over 8 dungeons, logged 2026-08-21 to 2026-09-25, keys 16 to 20 (median 17). 183 distinct builds. Hero tree: Sentinel 95%, Dark Ranger 5%. 190 left out: their log has no talents.
+655 rankings over 8 dungeons, logged 2026-08-24 to 2026-10-18, keys 18 to 22 (median 18). 199 distinct builds. Hero tree: Sentinel 96%, Dark Ranger 4%. 145 left out: their log has no talents.
 
-**Typical** (Sentinel, agreement 65% on 8 contested talents, 12 run it exactly):
+**Typical** (Sentinel, agreement 65% on 8 contested talents, 13 run it exactly):
 
 `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzwyYaGDmlttZmZmZmZmZhZWGmBAAwDMGDAzYDMAbMz2MG`
 
 **Most common other builds**, each against the typical:
 
-- 78 (12.8%): +Obsidian Arrowhead, +Open Fire; -On Target, -Stargazer
-  `C4PAAAAAAAAAAAAAAAAAAAAAAwGMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzwyYaGDmltlZmZmZmZmZhZWGmBAAwDMGDAzYDMAbMz2MG`
-- 46 (7.5%): +Open Fire; -Stargazer
+- 60 (9.2%): +Open Fire; -Stargazer
   `C4PAAAAAAAAAAAAAAAAAAAAAAwGMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzwyYaGDmlttZmZmZmZmZhZWGmBAAwDMGDAzYDMAbMz2MG`
-- 35 (5.7%): +Improved Feign Death 2/2; -Disruptive Rounds, -Improved Feign Death 1/2
+- 36 (5.5%): +Improved Feign Death 2/2; -Disruptive Rounds, -Improved Feign Death 1/2
   `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmxmxMzYGWGTzYwsstNzMzMzMzMLMzywMAAAmxYAYGbgBYjZ2mxA`
-- 13 (2.1%): +Binding Shot, +Scout's Instincts; -Improved Feign Death 1/2, -Kodo Tranquilizer
-  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzgx0MGMLbbzMzMzMzMzCzsMMDAAwYMzAwM2ADwGzsNjB`
+- 33 (5.0%): +Obsidian Arrowhead, +Open Fire; -On Target, -Stargazer
+  `C4PAAAAAAAAAAAAAAAAAAAAAAwGMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzwyYaGDmltlZmZmZmZmZhZWGmBAAwDMGDAzYDMAbMz2MG`
+- 25 (3.8%): +Accuracy By Volume; -Tenacious
+  `C4PAAAAAAAAAAAAAAAAAAAAAAwCMwMGNWGAzgNAAAAAAAAwMmZmx2MmZGzwyYaGDmlttZmZmZmZmBzsMMzAAA8AjxAwM2ADwGzsNjB`
 
-**Split talents:** Unerring Vision (choice) 88%; Guttural Roar (choice) 88%; Tenacious (choice) 71%; Disruptive Rounds 64%; Kodo Tranquilizer (choice) 59%; Stargazer (choice) 58%; On Target (choice) 44%; Accuracy By Volume 39%; Open Fire (choice) 37%; Obsidian Arrowhead (choice) 32%; Scout's Instincts 19%; Camouflage 15%; Binding Shot 13%; Kill Shot 12%; Calling the Shots (choice) 12%
+**Split talents:** Improved Feign Death 89%; Unerring Vision (choice) 88%; Guttural Roar (choice) 87%; Disruptive Rounds 70%; Tenacious (choice) 61%; Stargazer (choice) 60%; On Target (choice) 55%; Kodo Tranquilizer (choice) 53%; Accuracy By Volume 46%; Open Fire (choice) 36%; Obsidian Arrowhead (choice) 24%; Camouflage 21%; Scout's Instincts 19%; Calling the Shots (choice) 12%; Kill Shot 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 12 of 610 run it exactly.
+- `Dungeon`: the typical build. 13 of 655 run it exactly.
 
 ## Survival Hunter
 
 ### Raid
 
-539 rankings over 10 bosses, logged 2026-09-02 to 2026-09-25. 280 distinct builds. Hero tree: Sentinel 94%, Pack Leader 6%. 1 left out: their log has no talents.
+576 rankings over 10 bosses, logged 2026-10-13 to 2026-10-18. 293 distinct builds. Hero tree: Sentinel 86%, Pack Leader 14%.
 
-**Typical** (Sentinel, agreement 73% on 10 contested talents, 10 run it exactly):
+**Typical** (Sentinel, agreement 79% on 27 contested talents, 4 run it exactly):
 
-`C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzgxYGzgx0MAAAADAmxyyMzswMzMzMzAAzYhhxYmZzAA`
+`C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzwMGzYGMmmBAAAYAwMWWmZmFmZmZMzYAYGLYxYMzsZAA`
 
 **Most common other builds**, each against the typical:
 
-- 50 (9.3%): +Trailblazer; -Emergency Salve
+- 62 (10.8%): +Improved Feign Death 2/2, +Shell Wall; -Disruptive Rounds, -Emergency Salve, -Tranquilizing Shot
   `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzYGMGzYGMmmBAAAYAwMWWmZmFmZmZmZGAYGLMLGjZmNDA`
-- 9 (1.7%): +Disruptive Rounds, +Tranquilizing Shot, +Wilderness Medicine; -Improved Feign Death 2/2, -Shell Wall
-  `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYmZmZGmxYGzgx0MAAAADAmxyyMzswMzMjZGDAzYBMGzMbGAA`
-- 8 (1.5%): +Disruptive Rounds, +Guttural Roar, +Tranquilizing Shot; -Improved Feign Death 2/2, -Shell Wall
-  `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzYbGjZMDGTzAAAAMAYGLLzMzCzMzMmZMAMjFwYMzsZAA`
-- 7 (1.3%): +Disruptive Rounds, +Improved Feign Death 1/2, +Trailblazer; -Improved Feign Death 2/2, -Intimidation
-  `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzwMGzYGMmmBAAAAAmxyyMzswMzMzDMzAAzYhZxYMzsZAA`
+- 12 (2.1%): +Improved Feign Death 2/2, +Shell Wall; -Disruptive Rounds, -Trailblazer, -Tranquilizing Shot
+  `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzgxYGzgx0MAAAADAmxyyMzswMzMzMzAAzYhhxYmZzAA`
+- 11 (1.9%): +Improved Feign Death 2/2, +Shell Wall; -Disruptive Rounds, -Intimidation, -Tranquilizing Shot
+  `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzgxYGzgx0MAAAAAwMWWmZmFmZmZmZGAYGLMLGjZmNDA`
+- 10 (1.7%): +Shell Wall, +Shellshock; -Catlike Reflexes, -Two Against Many
+  `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGwmxMzYYZAAAAAAYGzMzwMGzYGMmmBAAAYAwMWWmZmFzMzMjxYAYGLMLGjZsZAA`
 
-**Split talents:** Twin Fangs 89%; Flanked 89%; Savagery 85%; Two Against Many 75%; Twilight Requiem (choice) 75%; Intimidation 75%; Catlike Reflexes 74%; Emergency Salve 73%; Disruptive Rounds 63%; Improved Feign Death 58%; Shell Wall 52%; Trailblazer (choice) 49%; Shellshock 35%; Tranquilizing Shot 33%; Binding Shot 28%; Stalk and Strike (choice) 19%; Guttural Roar (choice) 17%; Explosives Expert 14%; Bombardier 14%; Lethal Calibration 13%; Wilderness Medicine 12%
+**Split talents:** Guardian's Hide (choice) 89%; Sic 'Em 88%; Flanked 87%; Sanctified Armaments 86%; Radiant Edge 86%; Moonlight Chakram 86%; Moon's Blessing 86%; Lunar Storm 86%; Lunar Calling 86%; Invigorating Pulse 86%; Don't Look Back 86%; Can't Miss, Won't Miss 86%; Arcane Talons 86%; Stargazer (choice) 86%; Conditioning (choice) 86%; Bloody Claws (choice) 85%; Twin Fangs 85%; Savagery 84%; Intimidation 80%; Emergency Salve 73%; Twilight Requiem (choice) 72%; Two Against Many 69%; Disruptive Rounds 67%; Catlike Reflexes 66%; Improved Feign Death 56%; Shell Wall 52%; Trailblazer (choice) 50%; Tranquilizing Shot 37%; Shellshock 34%; Binding Shot 26%; Guttural Roar (choice) 21%; Lethal Calibration 19%; Flanker's Advantage 18%; Explosives Expert 18%; Bombardier 16%; Wallop (choice) 15%; Stalk and Strike (choice) 14%; Stampede! 14%; Shell Cover 14%; Sharpened Fangs 14%; Pack Mentality 14%; No Mercy 14%; Lethal Barbs 14%; Hogstrider 14%; Fury of the Wyvern 14%; Dire Summons 14%; Better Together 14%; Wyvern's Gaze (choice) 14%; Slicked Shoes (choice) 13%; Tar Trap (choice) 12%; Wilderness Medicine 11%; Roar of Sacrifice (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 10 of 539 run it exactly.
+- `Raid`: 12 of 576 run it exactly. Typical has +Disruptive Rounds, +Trailblazer, +Tranquilizing Shot; lacks Improved Feign Death 2/2, Shell Wall.
 
 ### Mythic+
 
-655 rankings over 8 dungeons, logged 2026-08-25 to 2026-09-25, keys 16 to 21 (median 17). 215 distinct builds. Hero tree: Sentinel 57%, Pack Leader 43%. 145 left out: their log has no talents.
+672 rankings over 8 dungeons, logged 2026-08-28 to 2026-10-18, keys 18 to 23 (median 19). 257 distinct builds. Hero tree: Sentinel 79%, Pack Leader 21%. 128 left out: their log has no talents.
 
-**Typical** (Sentinel, agreement 58% on 27 contested talents, 3 run it exactly):
+**Typical** (Sentinel, agreement 74% on 27 contested talents, 19 run it exactly):
 
-`C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGw2MzMzYmZbGAAAAAAzYmZGbzYMjZwYaGAAAgBAYZbmxyMmZYGjBgZsBGDzsZAA`
+`C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGw2MzMzYMbzAAAAAAYGzMzYbGjZMDGTzAAAAMAwYZZmxCmZGzYMAMjNwYMzsZAA`
 
 **Most common other builds**, each against the typical:
 
-- 30 (4.6%): +Scout's Instincts, +Trailblazer; -Improved Feign Death 2/2
+- 22 (3.3%): +Flamebreak, +Flanker's Advantage, +Grenade Juggler, +Scout's Instincts, +Shellshock, +Trailblazer; -Flanked, -Improved Feign Death 2/2, -Shrapnel Bomb, -Sic 'Em, -Twin Fangs
   `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGw2MzMzYmZbGAAAAAAzYmZGbzYMjZwYaGAAAgBAYZbmxyMmZMGjBgZshFjhZ2MAA`
-- 27 (4.1%): +Better Together, +Bloodseeker, +Dire Summons, +Flanked, +Fury of the Wyvern, +Hogstrider, +Kodo Tranquilizer, +Lethal Barbs, +No Mercy, +Pack Leader, +Pack Mentality, +Razor Edge 2/2, +Savagery 2/2, +Sharpened Claws, +Sharpened Fangs, +Shell Cover, +Shrapnel Bomb, +Slicked Shoes, +Stampede!, +Sweeping Spear 1/2, +Vulnerability, +Wyvern's Gaze; -Arcane Talons, -Blackrock Munitions, -Bombardier, -Can't Miss, Won't Miss, -Conditioning, -Disruptive Rounds, -Don't Look Back, -Explosives Expert 2/2, -Flamebreak, -Grenade Juggler, -Improved Wildfire Bomb 2/2, -Invigorating Pulse, -Lunar Calling, -Lunar Storm, -Moon's Blessing, -Moonlight Chakram, -Radiant Edge, -Sanctified Armaments, -Sentinel, -Shellshock, -Stalk and Strike, -Stargazer
-  `C8PAAAAAAAAAAAAAAAAAAAAAAMgxMG2gFYGGawiZmZmZGLDAAAAAAzYmZGbGjZMDLjpZAAAAGAMssMz8ALMzMMjxAmZDAjxMzmBA`
-- 24 (3.7%): +Bloodseeker, +Flanked, +Improved Feign Death 1/2, +Improved Wildfire Bomb 1/2, +Kodo Tranquilizer, +Shrapnel Bomb, +Sic 'Em, +Twin Fangs; -Flamebreak, -Flanker's Advantage, -Grenade Juggler, -Improved Feign Death 2/2, -Improved Wildfire Bomb 2/2, -Shellshock
+- 20 (3.0%): +Bloodseeker, +Improved Feign Death 1/2, +Improved Wildfire Bomb 1/2, +Kodo Tranquilizer; -Improved Feign Death 2/2, -Improved Wildfire Bomb 2/2
   `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGw2MzMzMjZbeAAAAAAAzYmZGbzYMjZYZMNDAAAwAAjllZGLYmZ8AjxAwM2AjxMzmBA`
-- 18 (2.7%): +Better Together, +Bloodseeker, +Devilsaur Tranquilizer, +Dire Summons, +Flanked, +Fury of the Wyvern, +Hogstrider, +Lethal Barbs, +No Mercy, +Pack Leader, +Pack Mentality, +Razor Edge 2/2, +Savagery 2/2, +Sharpened Claws, +Sharpened Fangs, +Shell Cover, +Shrapnel Bomb, +Slicked Shoes, +Stampede!, +Sweeping Spear 1/2, +Vulnerability, +Wyvern's Gaze; -Arcane Talons, -Blackrock Munitions, -Bombardier, -Can't Miss, Won't Miss, -Conditioning, -Don't Look Back, -Explosives Expert 2/2, -Flamebreak, -Grenade Juggler, -Improved Wildfire Bomb 2/2, -Invigorating Pulse, -Lunar Calling, -Lunar Storm, -Moon's Blessing, -Moonlight Chakram, -Pathfinding, -Radiant Edge, -Sanctified Armaments, -Sentinel, -Shellshock, -Stalk and Strike, -Stargazer
-  `C8PAAAAAAAAAAAAAAAAAAAAAAMgxMG2gFYGGawiZmZmZGLDAAAAAAzYmZGbzYYMDbjpZAAAAGAMssMz8ALMzMMjxAmZDAjxMzmBA`
+- 20 (3.0%): +Better Together, +Bloodseeker, +Dire Summons, +Flanker's Advantage, +Fury of the Wyvern, +Hogstrider, +Kodo Tranquilizer, +Lethal Barbs, +No Mercy, +Pack Leader, +Pack Mentality, +Razor Edge 2/2, +Savagery 2/2, +Sharpened Claws, +Sharpened Fangs, +Shell Cover, +Slicked Shoes, +Stampede!, +Sweeping Spear 1/2, +Vulnerability, +Wyvern's Gaze; -Arcane Talons, -Blackrock Munitions, -Bombardier, -Can't Miss, Won't Miss, -Conditioning, -Disruptive Rounds, -Don't Look Back, -Explosives Expert 2/2, -Improved Wildfire Bomb 2/2, -Invigorating Pulse, -Lunar Calling, -Lunar Storm, -Moon's Blessing, -Moonlight Chakram, -Radiant Edge, -Sanctified Armaments, -Sentinel, -Sic 'Em, -Stalk and Strike, -Stargazer, -Twin Fangs
+  `C8PAAAAAAAAAAAAAAAAAAAAAAMgxMG2gFYGGawiZmZmZGLDAAAAAAzYmZGbGjZMDLjpZAAAAGAMssMz8ALMzMMjxAmZDAjxMzmBA`
+- 18 (2.7%): +Improved Feign Death 1/2, +Kodo Tranquilizer; -Improved Feign Death 2/2
+  `C8PAAAAAAAAAAAAAAAAAAAAAAMWgBmxoxyAYGw2MzMzYMbzAAAAAAYGzMzYbGjZMDLjpZAAAAGAYssMzYBzMjHYMGAmxGYMmZ2MAA`
 
-**Split talents:** Flanker's Advantage 83%; Pathfinding 82%; Guttural Roar (choice) 80%; Guardian's Hide (choice) 76%; Improved Feign Death 76%; Disruptive Rounds 70%; Stargazer (choice) 57%; Sanctified Armaments 57%; Radiant Edge 57%; Moonlight Chakram 57%; Moon's Blessing 57%; Lunar Storm 57%; Lunar Calling 57%; Invigorating Pulse 57%; Explosives Expert 57%; Don't Look Back 57%; Can't Miss, Won't Miss 57%; Bombardier 57%; Arcane Talons 57%; Conditioning (choice) 57%; Improved Wildfire Bomb 56%; Stalk and Strike (choice) 56%; Shrapnel Bomb (choice) 56%; Blackrock Munitions (choice) 56%; Flanked 55%; Bloodseeker 53%; Kodo Tranquilizer (choice) 50%; Razor Edge 45%; Vulnerability (choice) 44%; Flamebreak (choice) 44%; Grenade Juggler 44%; Stampede! 43%; Slicked Shoes (choice) 43%; Shell Cover 43%; Sharpened Fangs 43%; Pack Mentality 43%; No Mercy 43%; Lethal Barbs 43%; Hogstrider 43%; Fury of the Wyvern 43%; Dire Summons 43%; Better Together 43%; Savagery 43%; Wyvern's Gaze (choice) 43%; Sharpened Claws (choice) 40%; Sweeping Spear 37%; Shellshock 35%; Sic 'Em 31%; Scout's Instincts 28%; Roar of Sacrifice (choice) 24%; Devilsaur Tranquilizer (choice) 19%; Twin Fangs 16%; Camouflage 13%; Shell Wall 11%; Trailblazer (choice) 11%; Binding Shot 10%
+**Split talents:** Pathfinding 86%; Guttural Roar (choice) 85%; Guardian's Hide (choice) 80%; Stargazer (choice) 79%; Sanctified Armaments 79%; Radiant Edge 79%; Moonlight Chakram 79%; Moon's Blessing 79%; Lunar Storm 79%; Lunar Calling 79%; Invigorating Pulse 79%; Don't Look Back 79%; Can't Miss, Won't Miss 79%; Arcane Talons 79%; Conditioning (choice) 78%; Stalk and Strike (choice) 78%; Improved Wildfire Bomb 78%; Explosives Expert 78%; Bombardier 78%; Blackrock Munitions (choice) 78%; Improved Feign Death 77%; Disruptive Rounds 66%; Shrapnel Bomb (choice) 62%; Flanked 60%; Flanker's Advantage 59%; Twin Fangs 55%; Sic 'Em 46%; Kodo Tranquilizer (choice) 42%; Grenade Juggler 40%; Bloodseeker 39%; Flamebreak (choice) 38%; Razor Edge 23%; Savagery 22%; Vulnerability (choice) 22%; Wyvern's Gaze (choice) 21%; Stampede! 21%; Shell Cover 21%; Sharpened Fangs 21%; Pack Mentality 21%; No Mercy 21%; Lethal Barbs 21%; Hogstrider 21%; Fury of the Wyvern 21%; Dire Summons 21%; Better Together 21%; Slicked Shoes (choice) 21%; Scout's Instincts 20%; Sharpened Claws (choice) 20%; Roar of Sacrifice (choice) 20%; Shellshock 18%; Sweeping Spear 18%; Devilsaur Tranquilizer (choice) 17%; Camouflage 17%; Shell Wall 13%; Trailblazer (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 3 of 655 run it exactly.
+- `Dungeon`: 3 of 672 run it exactly. Typical has +Flanked, +Shrapnel Bomb, +Sic 'Em, +Twin Fangs; lacks Flamebreak, Flanker's Advantage, Grenade Juggler, Shellshock.
 
 ## Arcane Mage
 
 ### Raid
 
-830 rankings over 10 bosses, logged 2026-08-31 to 2026-09-25. 309 distinct builds. Hero tree: Sunfury 100%.
+1000 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 341 distinct builds. Hero tree: Sunfury 100%.
 
-**Typical** (Sunfury, agreement 74% on 6 contested talents, 97 run it exactly):
+**Typical** (Sunfury, agreement 75% on 6 contested talents, 98 run it exactly):
 
 `C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAwMz0sssMDAgNAAAzMDbWmxMLzYMzMzMswMmZmBAYAAAGgZGwMAYYmZA`
 
 **Most common other builds**, each against the typical:
 
-- 33 (4.0%): +Master of Escape; -Captured Thoughts
-  `C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamxAAAwAAmZmmlllZAAsBAAYmZYzyMmZZGjZmZmhFmZmZmBAYAAAGgZGwMAYYmZA`
-- 31 (3.7%): +Master of Escape; -Mana Confluence
+- 64 (6.4%): +Master of Escape; -Mana Confluence
   `C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAwMz0sssMDAgNAAAzMDbWmxMLzYMzMzMswMzMzMAADAAwAMzAMAYYmZA`
-- 30 (3.6%): +Explosive Potential, +Master of Escape; -Lessons in Debilitation, -Mana Confluence
-  `C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAwMz0sssNDAgNAAAzMDbWmxMLzYMzMzMswMzMzMAADAAwAMzAMAYYmZA`
-- 25 (3.0%): +Incantation of Swiftness 1/2, +Master of Escape; -Incantation of Swiftness 2/2
-  `C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswDMDamZGAAAGAwMz0sssMDAgNAAAzMDbWmxMLzYMzMzMswMzMzMAADAAwAMzAmBADzMD`
+- 62 (6.2%): +Master of Escape; -Captured Thoughts
+  `C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamxAAAwAAmZmmlllZAAsBAAYmZYzyMmZZGjZmZmhFmZmZmBAYAAAGgZGwMAYYmZA`
+- 32 (3.2%): +Master of Escape, +Master of Time 1/2; -Master of Time 2/2
+  `C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMPwswMDamZGAAAGAwMz0sssMDAgNAAAzMDbWmxMLzYMzMzMswMzMzMAADAAwAMzAmBADzMD`
+- 32 (3.2%): +Arcane Familiar, +Energized Familiar, +Impetus; -Aether Attunement 2/2, -Resonance
+  `C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMDamZGAAAGAwMz0sssMDAgNAAgZmZGbWmZmZZGjxMzgFmxMzMAADAAwAMzAmBADzMD`
 
-**Split talents:** Aether Attunement 89%; Incantation of Swiftness 78%; Captured Thoughts 71%; Lessons in Debilitation (choice) 71%; Mana Confluence 67%; Master of Escape 62%; Explosive Potential (choice) 29%; Supernova (choice) 26%; Remove Curse 18%; Dragon's Breath (choice) 18%; Arcane Familiar 17%; Spellsteal 13%; Energized Familiar 11%
+**Split talents:** Incantation of Swiftness 79%; Lessons in Debilitation (choice) 73%; Captured Thoughts 72%; Mana Confluence 70%; Master of Escape 66%; Explosive Potential (choice) 27%; Supernova (choice) 23%; Dragon's Breath (choice) 18%; Remove Curse 18%; Arcane Familiar 14%; Spellsteal 12%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 97 of 830 run it exactly.
+- `Raid`: the typical build. 98 of 1000 run it exactly.
 
 ### Mythic+
 
-712 rankings over 8 dungeons, logged 2026-09-05 to 2026-09-25, keys 20 to 22 (median 21). 252 distinct builds. Hero tree: Sunfury 100%. 88 left out: their log has no talents.
+656 rankings over 8 dungeons, logged 2026-09-18 to 2026-10-18, keys 21 to 23 (median 22). 208 distinct builds. Hero tree: Sunfury 100%. 144 left out: their log has no talents.
 
-**Typical** (Sunfury, agreement 70% on 7 contested talents, 20 run it exactly):
+**Typical** (Sunfury, agreement 69% on 7 contested talents, 28 run it exactly):
 
-`C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMmFMDamZGAAAGAwMz0sssMDAgNAA2YMzMsZZGzsMjxMmZGWYmZmZGAgBAAYAmZAzAghZmB`
+`C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMmFMzQzMzAAAwAAmZmmlllZAAsBAwGMzMsZZGzsMjxMzMzwCzMzMzAAMAAADwMDwAghZmB`
 
 **Most common other builds**, each against the typical:
 
-- 45 (6.3%): +Remove Curse; -Mana Confluence
+- 33 (5.0%): +Mana Bomb; -Consortium's Bauble
   `C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMmFMzQzMzAAAwAAmZmmlllZAAsBAwGjZmhNLzYmlZMmxMzwCzMzMzAAMAAADwMDwAghZmB`
-- 21 (2.9%): +Consortium's Bauble, +Master of Time 1/2; -Mana Bomb, -Spellsteal
-  `C4DAAAAAAAAAAAAAAAAAAAAAAYGmZZm5BmFMDamZGAAAGAwMz0sssMDAgNAA2gZmhNLzYmlZMmZmZGWYmZmZGAgBAAYAmZAzAghZmB`
-- 17 (2.4%): +Master of Time 1/2; -Spellsteal
-  `C4DAAAAAAAAAAAAAAAAAAAAAAYGmZZm5BmFMDamZGAAAGAwMz0sssMDAgNAA2YMzMsZZGzsMjxMmZGWYmZmZGAgBAAYAmZAzAghZmB`
-- 15 (2.1%): +Master of Time 1/2, +Remove Curse; -Mass Invisibility, -Spellsteal
-  `C4DAAAAAAAAAAAAAAAAAAAAAAYGGLzMPwsgZGamZGAAAGAwMz0sssMDAgNAA2YMzMsZZGzsMjxMmZGWYmZmZGAgBAAYAmZAzAghZmB`
+- 27 (4.1%): +Mana Bomb, +Master of Time 2/2; -Consortium's Bauble, -Remove Curse, -Spellsteal
+  `C4DAAAAAAAAAAAAAAAAAAAAAAYGmZZmZmFMDamZGAAAGAwMz0sssMDAgNAA2YMzMsZZGzsMjxMmZGWYmZmZGAgBAAYAmZAGAMMzM`
+- 25 (3.8%): +Master of Time 2/2; -Captured Thoughts, -Remove Curse
+  `C4DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMzsgZQzMGAAAGAwMz0sssMDAgNAA2gZmhNLzYmlZMmZmZGWYmZmZGAgBAAYAmZAGAMMzM`
+- 25 (3.8%): +Master of Time 2/2; -Mass Invisibility, -Remove Curse
+  `C4DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMDamZGAAAGAwMz0sssMDAgNAA2gZmhNLzYmlZMmZmZGWYmZmZGAgBAAYAmZAGAMMzM`
 
-**Split talents:** Master of Escape 89%; Lessons in Debilitation (choice) 76%; Master of Time 70%; Mass Invisibility 64%; Mana Confluence 61%; Mana Bomb 61%; Spellsteal 56%; Remove Curse 52%; Consortium's Bauble 38%; Explosive Potential (choice) 24%
+**Split talents:** Lessons in Debilitation (choice) 84%; Captured Thoughts 83%; Master of Time 70%; Mass Invisibility 69%; Consortium's Bauble 58%; Spellsteal 54%; Remove Curse 51%; Mana Confluence 42%; Mana Bomb 41%; Explosive Potential (choice) 16%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 20 of 712 run it exactly.
+- `Dungeon`: 10 of 656 run it exactly. Typical has +Consortium's Bauble, +Remove Curse; lacks Mana Bomb, Mana Confluence.
 
 ## Fire Mage
 
 ### Raid
 
-333 rankings over 10 bosses, logged 2026-09-02 to 2026-09-25. 144 distinct builds. Hero tree: Sunfury 100%.
+299 rankings over 10 bosses, logged 2026-10-13 to 2026-10-18. 114 distinct builds. Hero tree: Sunfury 100%, Frostfire 0%. 1 left out: their log has no talents.
 
-**Typical** (Sunfury, agreement 72% on 11 contested talents, 1 run it exactly):
+**Typical** (Sunfury, agreement 69% on 8 contested talents, 17 run it exactly):
 
-`C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmlttZAA2MzM2mZmZGAAAAAwiZmZGAAYGjZmZGzMLDAzMwYMgZYMA`
+`C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmlttZAA2MzM2mZmZGLAAAAAYxMzMDAAMjxMzMjZmlBgZGgxAmhxA`
 
 **Most common other builds**, each against the typical:
 
-- 28 (8.4%): +Dragon's Breath; -Master of Escape
+- 29 (9.7%): +Improved Counterspell; -Master of Escape
   `C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmlttZAA2MzM2mZmZGLAAAAAYxMjZAAgZMmZmZMzsMAMzAjxAmhxA`
-- 17 (5.1%): +Spellsteal, +Supernova, +Time Manipulation; -Improved Counterspell, -Incantation of Swiftness 2/2
-  `C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGAwMz0sstNDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA`
-- 16 (4.8%): +Dragon's Breath, +Flamestrike; -Flamestrike, -Master of Escape
+- 25 (8.4%): +Flamestrike, +Improved Counterspell; -Flamestrike, -Master of Escape
   `C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmlttZAA2MzM2mZmZGLAAAAAYxMjZAAgZMmZmZMzsNAMzAjxAmhxA`
-- 9 (2.7%): +Dragon's Breath, +Lessons in Debilitation; -Explosive Potential, -Master of Escape
-  `C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmltlZAA2MzM2mZmZGLAAAAAYxMjZAAgZMmZmZMzsMAMzAjxAmhxA`
+- 11 (3.7%): +Spellsteal, +Supernova, +Time Manipulation; -Dragon's Breath, -Incantation of Swiftness 2/2
+  `C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGAwMz0sstNDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA`
+- 8 (2.7%): +Improved Counterspell, +Lessons in Debilitation, +Supernova; -Dragon's Breath, -Explosive Potential, -Master of Escape
+  `C8DAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMzIzMzAAAwAAmZmmltlZAA2MzM2mZmZGbAAAAAYxMjZAAgZMmZmZMzsMAMzAjxAmhxA`
 
-**Split talents:** Merely a Setback (choice) 89%; Heat Shimmer 89%; Improved Warding 88%; Time Walk (choice) 80%; Remove Curse 80%; Captured Thoughts 80%; Flamestrike (choice) 67%; Incantation of Swiftness 65%; Master of Escape 62%; Improved Counterspell 54%; Explosive Potential (choice) 53%; Lessons in Debilitation (choice) 47%; Spellsteal 46%; Supernova (choice) 40%; Dragon's Breath (choice) 39%; Improved Conjuration 36%; Flamestrike (choice) 33%; Temporal Realignment (choice) 20%; Time Manipulation 15%; Ring of Frost (choice) 15%; Time Twist (choice) 11%; Wildfire 10%
+**Split talents:** Time Walk (choice) 86%; Remove Curse 83%; Captured Thoughts 82%; Incantation of Swiftness 69%; Flamestrike (choice) 65%; Explosive Potential (choice) 64%; Master of Escape 62%; Dragon's Breath (choice) 53%; Improved Counterspell 48%; Spellsteal 35%; Lessons in Debilitation (choice) 35%; Flamestrike (choice) 35%; Supernova (choice) 33%; Improved Conjuration 31%; Ring of Frost (choice) 15%; Time Manipulation 15%; Temporal Realignment (choice) 14%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 1 of 333 run it exactly.
+- `Raid`: 1 of 299 run it exactly. Typical has +Dragon's Breath; lacks Improved Counterspell.
 
 ### Mythic+
 
-512 rankings over 8 dungeons, logged 2026-08-27 to 2026-09-25, keys 16 to 19 (median 16). 204 distinct builds. Hero tree: Sunfury 100%. 288 left out: their log has no talents.
+582 rankings over 8 dungeons, logged 2026-08-29 to 2026-10-18, keys 17 to 22 (median 18). 266 distinct builds. Hero tree: Sunfury 100%. 218 left out: their log has no talents.
 
-**Typical** (Sunfury, agreement 70% on 9 contested talents, 1 run it exactly):
+**Typical** (Sunfury, agreement 73% on 12 contested talents, 13 run it exactly):
 
-`C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGAwMz0sstMDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA`
+`C8DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMzsgZGZmZGAAAGAwMz0sstMDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA`
 
 **Most common other builds**, each against the typical:
 
-- 47 (9.2%): +Explosive Potential; -Lessons in Debilitation
+- 31 (5.3%): +Explosive Potential, +Time Manipulation; -Lessons in Debilitation, -Mass Invisibility
   `C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGAwMz0sstNDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA`
-- 23 (4.5%): +Mass Invisibility; -Time Manipulation
-  `C8DAAAAAAAAAAAAAAAAAAAAAAMzwMLzMzsgZGZmZGAAAGAwMz0sstMDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsMAMzAMGwMMGA`
-- 14 (2.7%): +Explosive Potential, +Flamestrike; -Flamestrike, -Lessons in Debilitation
+- 27 (4.6%): +Explosive Potential, +Flamestrike, +Time Manipulation; -Flamestrike, -Lessons in Debilitation, -Mass Invisibility
   `C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzMAAAGAwMz0sstNDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsNAMzAMGwMMGA`
-- 13 (2.5%): +Conflagration, +Incantation of Swiftness 1/2; -Energized Barriers, -Heat Shimmer
-  `C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZGzswDMzIzMzMAAAGAwMz0sstMDAwmZmx2MzMzYDAAAAALmZmZAAgZMmZmZMzsAgZGgxMwMMGA`
+- 11 (1.9%): +Dragon's Breath, +Improved Counterspell, +Ring of Frost; -Barrier Diffusion, -Captured Thoughts, -Supernova
+  `C8DAAAAAAAAAAAAAAAAAAAAAAMzYxsMzMzCmZkZGDAAADAYmZaW2WmBAYzMzYbmZmZsAAAAAgFzMzMAAwMGzMzMmZWGAmZgxYAzwYA`
+- 9 (1.5%): +Fire's Ire 2/2, +Flamestrike, +Improved Conjuration 1/2, +Temporal Realignment; -Firestarter, -Flamestrike, -Heat Shimmer, -Mass Invisibility, -Time Walk
+  `C8DAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzIzMzAAAwAAmZmmltlZAA2MzMz2MzMzYDAAAAAbmZmZeAAAMjxMzMjZmNAMzAMGghxA`
 
-**Split talents:** Firestarter 88%; Merely a Setback (choice) 84%; Captured Thoughts 80%; Supernova (choice) 77%; Time Walk (choice) 74%; Heat Shimmer 67%; Flamestrike (choice) 59%; Lessons in Debilitation (choice) 56%; Explosive Potential (choice) 44%; Time Manipulation 41%; Flamestrike (choice) 41%; Mass Invisibility 34%; Improved Counterspell 30%; Temporal Realignment (choice) 25%; Dragon's Breath (choice) 23%; Improved Conjuration 23%; Conflagration 20%; Fire's Ire 16%; Time Twist (choice) 16%; Incantation of Swiftness 16%
+**Split talents:** Barrier Diffusion 90%; Spellsteal 86%; Firestarter 86%; Merely a Setback (choice) 86%; Captured Thoughts 78%; Time Walk (choice) 70%; Heat Shimmer 70%; Supernova (choice) 69%; Lessons in Debilitation (choice) 57%; Flamestrike (choice) 52%; Mass Invisibility 49%; Flamestrike (choice) 48%; Explosive Potential (choice) 43%; Time Manipulation 38%; Dragon's Breath (choice) 31%; Improved Counterspell 30%; Temporal Realignment (choice) 30%; Improved Conjuration 26%; Fire's Ire 19%; Time Twist (choice) 14%; Incantation of Swiftness 14%; Conflagration 13%; Ring of Frost (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 1 of 512 run it exactly.
+- `Dungeon`: 4 of 582 run it exactly. Typical has +Mass Invisibility; lacks Time Manipulation.
 
 ## Frost Mage
 
 ### Raid
 
-654 rankings over 10 bosses, logged 2026-08-27 to 2026-09-25. 289 distinct builds. Hero tree: Spellslinger 73%, Frostfire 27%.
+699 rankings over 10 bosses, logged 2026-10-13 to 2026-10-18. 324 distinct builds. Hero tree: Spellslinger 67%, Frostfire 33%.
 
-**Typical** (Spellslinger, agreement 75% on 26 contested talents, 91 run it exactly):
+**Typical** (Spellslinger, agreement 71% on 27 contested talents, 100 run it exactly):
 
 `CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGzMzMziZmZMjZAAAgZmZWWmZaDAAAAAA2AYbZMzMDmthxMsAAAwMbAzADYGMMA`
 
 **Most common other builds**, each against the typical:
 
-- 40 (6.1%): +Improved Conjuration 2/2; -Improved Warding, -Remove Curse
-  `CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZEzMzYmZmZWMzMjZMDAAAMzMzyyMTbAAAAAAwGAbLjZmZGmthxMsAAAwMbAzADYGMA`
-- 26 (4.0%): +Blast Radius, +Dragon's Breath, +Dualcasting Adept, +Duality, +Elemental Affinity, +Elemental Conduit, +Flash Freezeburn, +Frostfire, +Frostfire Empowerment, +Frostfire Infusion, +Glacial Shatter, +Hailstones, +Hand of Frost 3/4, +Heat Sink, +Imbued Warding, +Isothermic Core, +Molten Chill, +Piercing Cold, +Rimecaster 2/2, +Thermal Conditioning; -Archmage's Wrath, -Augury Abounds, -Controlled Instincts, -Crystalline Refraction, -Force of Will, -Frigid Focus, -Glaciate, -Hand of Frost 4/4, -Improved Warding, -Infused Splinters, -Polished Focus, -Ray of Frost, -Reactive Barrier, -Shifting Shards, -Signature Spell, -Slippery Slinging, -Spellfrost Teachings, -Spellslinger, -Splintering Orbs, -Splinterstorm
+- 30 (4.3%): +Blast Radius, +Dragon's Breath, +Dualcasting Adept, +Duality, +Elemental Affinity, +Elemental Conduit, +Flash Freezeburn, +Frostfire, +Frostfire Empowerment, +Frostfire Infusion, +Glacial Shatter, +Hailstones, +Hand of Frost 3/4, +Heat Sink, +Imbued Warding, +Isothermic Core, +Molten Chill, +Piercing Cold, +Rimecaster 2/2, +Thermal Conditioning; -Archmage's Wrath, -Augury Abounds, -Controlled Instincts, -Crystalline Refraction, -Force of Will, -Frigid Focus, -Glaciate, -Hand of Frost 4/4, -Improved Warding, -Infused Splinters, -Polished Focus, -Ray of Frost, -Reactive Barrier, -Shifting Shards, -Signature Spell, -Slippery Slinging, -Spellfrost Teachings, -Spellslinger, -Splintering Orbs, -Splinterstorm
   `CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGzYmZWMzMzMMzsMTzMLzCAAAsAAALAAAAAstMmZmBz2MmZGbLAAAgZGMDMgB+AA`
-- 18 (2.8%): +Blast Radius, +Dragon's Breath, +Dualcasting Adept, +Duality, +Elemental Affinity, +Elemental Conduit, +Flash Freezeburn, +Frostfire, +Frostfire Empowerment, +Frostfire Infusion, +Glacial Shatter, +Hailstones, +Hand of Frost 3/4, +Heat Sink, +Imbued Warding, +Isothermic Core, +Molten Chill, +Piercing Cold, +Rimecaster 2/2, +Thermal Conditioning; -Archmage's Wrath, -Augury Abounds, -Controlled Instincts, -Crystalline Refraction, -Force of Will, -Frigid Focus, -Glaciate, -Hand of Frost 4/4, -Infused Splinters, -Master of Escape, -Polished Focus, -Ray of Frost, -Reactive Barrier, -Shifting Shards, -Signature Spell, -Slippery Slinging, -Spellfrost Teachings, -Spellslinger, -Splintering Orbs, -Splinterstorm
+- 19 (2.7%): +Blast Radius, +Dragon's Breath, +Dualcasting Adept, +Duality, +Elemental Affinity, +Elemental Conduit, +Flash Freezeburn, +Frostfire, +Frostfire Empowerment, +Frostfire Infusion, +Glacial Shatter, +Hailstones, +Hand of Frost 3/4, +Heat Sink, +Imbued Warding, +Isothermic Core, +Molten Chill, +Piercing Cold, +Rimecaster 2/2, +Thermal Conditioning; -Archmage's Wrath, -Augury Abounds, -Controlled Instincts, -Crystalline Refraction, -Force of Will, -Frigid Focus, -Glaciate, -Hand of Frost 4/4, -Infused Splinters, -Master of Escape, -Polished Focus, -Ray of Frost, -Reactive Barrier, -Shifting Shards, -Signature Spell, -Slippery Slinging, -Spellfrost Teachings, -Spellslinger, -Splintering Orbs, -Splinterstorm
   `CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmZGzYmZWMzMzMMzsMTzMLzCAAAsAAALAAAAAstMmxMY2mxMzYbBAAAMzgZgBMwHwA`
-- 13 (2.0%): +Blast Radius, +Dragon's Breath, +Dualcasting Adept, +Duality, +Elemental Affinity, +Elemental Conduit, +Flash Freezeburn, +Frostfire, +Frostfire Empowerment, +Frostfire Infusion, +Glacial Shatter, +Hailstones, +Hand of Frost 3/4, +Heat Sink, +Imbued Warding, +Isothermic Core, +Molten Chill, +Piercing Cold, +Rimecaster 2/2, +Thermal Conditioning; -Archmage's Wrath, -Augury Abounds, -Captured Thoughts, -Controlled Instincts, -Crystalline Refraction, -Force of Will, -Frigid Focus, -Glaciate, -Hand of Frost 4/4, -Infused Splinters, -Polished Focus, -Ray of Frost, -Reactive Barrier, -Shifting Shards, -Signature Spell, -Slippery Slinging, -Spellfrost Teachings, -Spellslinger, -Splintering Orbs, -Splinterstorm
-  `CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZmYmxYGzMziZmZmhZmlZamZZWAAAgFAAYBAAAAgtlxMzMY2mxMzYbBAAAMzgZgBMwHwA`
+- 18 (2.6%): +Improved Conjuration 2/2; -Improved Warding, -Remove Curse
+  `CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzsMmZEzMzYmZmZWMzMjZMDAAAMzMzyyMTbAAAAAAwGAbLjZmZGmthxMsAAAwMbAzADYGMA`
+- 18 (2.6%): +Improved Conjuration 2/2; -Frost Conditioning, -Remove Curse
+  `CAEAAAAAAAAAAAAAAAAAAAAAAYGGLzMzswMjYmZGzMzMziZmZMjZAAAgZmZWWmZaDAAAAAA2AYbZMzMzwsNMmhFAAAmZDYGYAzghB`
 
-**Split talents:** Master of Escape 86%; Time Walk (choice) 85%; Frost Conditioning 80%; Glaciate 79%; Ray of Frost 79%; Captured Thoughts 76%; Remove Curse 74%; Splinterstorm 73%; Splintering Orbs 73%; Spellfrost Teachings 73%; Signature Spell 73%; Polished Focus 73%; Infused Splinters 73%; Force of Will 73%; Controlled Instincts 73%; Augury Abounds 73%; Archmage's Wrath 73%; Shifting Shards (choice) 73%; Reactive Barrier (choice) 73%; Improved Warding 73%; Slippery Slinging (choice) 72%; Frigid Focus (choice) 70%; Crystalline Refraction 68%; Rimecaster 33%; Piercing Cold 33%; Hailstones 32%; Dragon's Breath (choice) 31%; Improved Conjuration 31%; Molten Chill 27%; Isothermic Core 27%; Imbued Warding (choice) 27%; Heat Sink 27%; Glacial Shatter (choice) 27%; Frostfire Infusion 27%; Frostfire Empowerment 27%; Flash Freezeburn 27%; Elemental Conduit 27%; Duality 27%; Dualcasting Adept 27%; Blast Radius 27%; Elemental Affinity (choice) 26%; Supernova (choice) 20%; Thermal Conditioning (choice) 20%; Time Manipulation 20%; Temporal Realignment (choice) 15%; Improved Counterspell 13%
+**Split talents:** Blizzard (choice) 89%; Incantation of Swiftness 88%; Master of Escape 86%; Time Walk (choice) 84%; Improved Warding 79%; Frost Conditioning 79%; Captured Thoughts 77%; Ray of Frost 74%; Glaciate 74%; Remove Curse 73%; Splinterstorm 67%; Splintering Orbs 67%; Spellfrost Teachings 67%; Signature Spell 67%; Shifting Shards (choice) 67%; Polished Focus 67%; Infused Splinters 67%; Force of Will 67%; Controlled Instincts 67%; Augury Abounds 67%; Archmage's Wrath 67%; Reactive Barrier (choice) 67%; Slippery Slinging (choice) 65%; Frigid Focus (choice) 64%; Crystalline Refraction 62%; Piercing Cold 41%; Rimecaster 41%; Hailstones 38%; Dragon's Breath (choice) 34%; Molten Chill 33%; Isothermic Core 33%; Imbued Warding (choice) 33%; Heat Sink 33%; Frostfire Infusion 33%; Frostfire Empowerment 33%; Flash Freezeburn 33%; Elemental Conduit 33%; Duality 33%; Dualcasting Adept 33%; Blast Radius 33%; Glacial Shatter (choice) 32%; Elemental Affinity (choice) 32%; Improved Conjuration 32%; Thermal Conditioning (choice) 28%; Supernova (choice) 19%; Temporal Realignment (choice) 16%; Time Manipulation 15%; Improved Counterspell 13%; Ring of Frost (choice) 12%; Spellsteal 11%; Blizzard (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 91 of 654 run it exactly.
+- `Raid`: the typical build. 100 of 699 run it exactly.
 
 ### Mythic+
 
-525 rankings over 8 dungeons, logged 2026-08-28 to 2026-09-25, keys 16 to 20 (median 16). 237 distinct builds. Hero tree: Spellslinger 59%, Frostfire 41%. 275 left out: their log has no talents.
+579 rankings over 8 dungeons, logged 2026-09-04 to 2026-10-18, keys 17 to 21 (median 18). 265 distinct builds. Hero tree: Frostfire 61%, Spellslinger 39%. 221 left out: their log has no talents.
 
-**Typical** (Spellslinger, agreement 63% on 27 contested talents, 8 run it exactly):
+**Typical** (Frostfire, agreement 62% on 28 contested talents, 7 run it exactly):
 
-`CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMmZmZmZWMzMjZMDAAAMzMzyyMTbAAwGAAAYBgtlxMzMY2GGzwCAAAzsBMDjBMDGGA`
+`CAEAAAAAAAAAAAAAAAAAAAAAAMzwMLzMzsgZmYmxYmZmZWMzMzMzMzsMTzMbzCAAAsAAAbAAAAAstMmZmBz2MmZGbLAAAgZGMDjBMAGA`
 
 **Most common other builds**, each against the typical:
 
-- 20 (3.8%): +Blast Radius, +Comet Storm, +Dualcasting Adept, +Duality, +Elemental Affinity, +Elemental Conduit, +Flash Freezeburn, +Frost Conditioning, +Frostfire, +Frostfire Empowerment, +Frostfire Infusion, +Glacial Shatter, +Hailstones, +Heat Sink, +Imbued Warding, +Isothermic Core, +Molten Chill, +Piercing Cold, +Rimecaster 2/2, +Severe Temperatures; -Archmage's Wrath, -Augury Abounds, -Controlled Instincts, -Crystalline Refraction, -Force of Will, -Hand of Frost 4/4, -Infused Splinters, -Polished Focus, -Reactive Barrier, -Shifting Shards, -Signature Spell, -Slippery Slinging, -Spellfrost Teachings, -Spellslinger, -Splintering Orbs, -Splintering Ray, -Splinterstorm, -Time Manipulation
-  `CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmlhZmYmxYmZmZWMzMzMzMzsMTzMbzCAAAsAAAbAAAAAstMmZmBz2MmZGbLAAAgZGMDjBMAGA`
-- 14 (2.7%): +Blast Radius, +Comet Storm, +Dualcasting Adept, +Duality, +Elemental Affinity, +Elemental Conduit, +Flash Freezeburn, +Frostfire, +Frostfire Empowerment, +Frostfire Infusion, +Glacial Shatter, +Hailstones, +Heat Sink, +Imbued Warding, +Isothermic Core, +Molten Chill, +Piercing Cold, +Rimecaster 2/2, +Severe Temperatures; -Archmage's Wrath, -Augury Abounds, -Controlled Instincts, -Crystalline Refraction, -Force of Will, -Hand of Frost 4/4, -Infused Splinters, -Polished Focus, -Reactive Barrier, -Shifting Shards, -Signature Spell, -Slippery Slinging, -Spellfrost Teachings, -Spellslinger, -Splintering Orbs, -Splintering Ray, -Splinterstorm
+- 20 (3.5%): +Time Manipulation; -Mass Invisibility
   `CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMmZmZmZWMzMzMzMzsMTzMbzCAAAsAAAbAAAAAstMmZmBz2MmZGbLAAAgZGMDjBMAGA`
-- 13 (2.5%): +Blast Radius, +Comet Storm, +Dragon's Breath, +Dualcasting Adept, +Duality, +Elemental Affinity, +Elemental Conduit, +Flash Freezeburn, +Frostfire, +Frostfire Empowerment, +Frostfire Infusion, +Glacial Shatter, +Hailstones, +Heat Sink, +Imbued Warding, +Isothermic Core, +Molten Chill, +Piercing Cold, +Rimecaster 2/2, +Severe Temperatures; -Archmage's Wrath, -Augury Abounds, -Controlled Instincts, -Crystalline Refraction, -Force of Will, -Hand of Frost 4/4, -Infused Splinters, -Polished Focus, -Reactive Barrier, -Shifting Shards, -Signature Spell, -Slippery Slinging, -Spellfrost Teachings, -Spellslinger, -Splintering Orbs, -Splintering Ray, -Splinterstorm, -Supernova
+- 20 (3.5%): +Dragon's Breath, +Time Manipulation; -Mass Invisibility, -Supernova
   `CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMmZmZmZWMzMzMzMzsMTzMbzCAAAsAAALAAAAAstMmZmBz2MmZGbLAAAgZGMDjBMAGA`
-- 12 (2.3%): +Dragon's Breath, +Freezing Rain; -Frozen Touch, -Supernova
-  `CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMmZmZmZWMzMMjZAAAgZmZWWmZaDAAWAAAALAstMmZmBz2wYmxCAAAzsBMDjBMDGGA`
+- 19 (3.3%): +Captured Thoughts, +Dragon's Breath, +Temporal Realignment, +Thermal Conditioning, +White Out; -Mass Invisibility, -Severe Temperatures, -Supernova, -Time Walk, -Wintertide
+  `CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmZmFMzEzMzYmZmZ2MzMzMzMzsMTzMLzCAAAsAAALAAAAAstNmZmBz2MmZGbLAAAgZGMDjBMAGA`
+- 13 (2.2%): +Captured Thoughts, +Improved Blink, +Improved Conjuration 2/2, +Thermal Conditioning; -Mass Invisibility, -Master of Time 2/2, -Severe Temperatures, -Shimmer
+  `CAEAAAAAAAAAAAAAAAAAAAAAAMzwYZmxshZmYmZGzMzMziZmZmZmZmlZamZZWAAAgFAAYDAAAAgtlxMzMDz2MmZGbLAAAgZGMDjBMAGA`
 
-**Split talents:** Wintertide (choice) 87%; Spellsteal 87%; Improved Warding 79%; Frozen Touch 69%; Blizzard (choice) 68%; Improved Counterspell 65%; Crystalline Refraction 60%; Hand of Frost 60%; Supernova (choice) 59%; Splinterstorm 59%; Splintering Orbs 59%; Spellfrost Teachings 59%; Signature Spell 59%; Shifting Shards (choice) 59%; Reactive Barrier (choice) 59%; Polished Focus 59%; Infused Splinters 59%; Force of Will 59%; Controlled Instincts 59%; Augury Abounds 59%; Archmage's Wrath 59%; Splintering Ray (choice) 58%; Slippery Slinging (choice) 56%; Time Manipulation 55%; Time Walk (choice) 52%; Temporal Realignment (choice) 48%; Frost Conditioning 43%; Rimecaster 41%; Molten Chill 41%; Isothermic Core 41%; Imbued Warding (choice) 41%; Heat Sink 41%; Frostfire Infusion 41%; Frostfire Empowerment 41%; Flash Freezeburn 41%; Elemental Conduit 41%; Duality 41%; Dualcasting Adept 41%; Comet Storm 41%; Blast Radius 41%; Hailstones 41%; Elemental Affinity (choice) 41%; Piercing Cold 41%; Glacial Shatter (choice) 41%; Dragon's Breath (choice) 39%; Severe Temperatures (choice) 34%; Freezing Rain 33%; Blizzard (choice) 32%; Incantation of Swiftness 29%; Captured Thoughts 23%; Mass Invisibility 21%; Improved Conjuration 14%; White Out (choice) 13%
+**Split talents:** Master of Time 86%; Frozen Touch 80%; Spellsteal 80%; Wintertide (choice) 79%; Blizzard (choice) 73%; Time Walk (choice) 62%; Supernova (choice) 62%; Rimecaster 61%; Molten Chill 61%; Isothermic Core 61%; Imbued Warding (choice) 61%; Heat Sink 61%; Frostfire Infusion 61%; Frostfire Empowerment 61%; Flash Freezeburn 61%; Elemental Conduit 61%; Duality 61%; Dualcasting Adept 61%; Blast Radius 61%; Piercing Cold 60%; Comet Storm 60%; Glacial Shatter (choice) 60%; Elemental Affinity (choice) 60%; Hailstones 59%; Improved Counterspell 57%; Mass Invisibility 46%; Frost Conditioning 43%; Hand of Frost 42%; Crystalline Refraction 41%; Severe Temperatures (choice) 40%; Splintering Ray (choice) 40%; Splinterstorm 39%; Splintering Orbs 39%; Spellfrost Teachings 39%; Signature Spell 39%; Shifting Shards (choice) 39%; Polished Focus 39%; Infused Splinters 39%; Force of Will 39%; Controlled Instincts 39%; Augury Abounds 39%; Archmage's Wrath 39%; Reactive Barrier (choice) 39%; Slippery Slinging (choice) 39%; Time Manipulation 38%; Temporal Realignment (choice) 37%; Dragon's Breath (choice) 37%; Captured Thoughts 34%; Blizzard (choice) 27%; Improved Conjuration 23%; White Out (choice) 21%; Incantation of Swiftness 21%; Thermal Conditioning (choice) 21%; Freezing Rain 20%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 8 of 525 run it exactly.
+- `Dungeon`: 3 of 579 run it exactly. Typical has +Blast Radius, +Comet Storm, +Dualcasting Adept, +Duality, +Elemental Affinity, +Elemental Conduit, +Flash Freezeburn, +Frostfire, +Frostfire Empowerment, +Frostfire Infusion, +Glacial Shatter, +Hailstones, +Heat Sink, +Imbued Warding, +Isothermic Core, +Mass Invisibility, +Molten Chill, +Piercing Cold, +Rimecaster 2/2, +Severe Temperatures; lacks Archmage's Wrath, Augury Abounds, Controlled Instincts, Crystalline Refraction, Force of Will, Hand of Frost 4/4, Infused Splinters, Polished Focus, Reactive Barrier, Shifting Shards, Signature Spell, Slippery Slinging, Spellfrost Teachings, Spellslinger, Splintering Orbs, Splintering Ray, Splinterstorm, Time Manipulation.
 
 ## Brewmaster Monk
 
 ### Raid
 
-655 rankings over 10 bosses, logged 2026-08-28 to 2026-09-25. 390 distinct builds. Hero tree: Shado-Pan 76%, Master of Harmony 24%.
+831 rankings over 10 bosses, logged 2026-10-13 to 2026-10-18. 400 distinct builds. Hero tree: Shado-Pan 83%, Master of Harmony 17%.
 
-**Typical** (Shado-Pan, agreement 74% on 26 contested talents, 4 run it exactly):
+**Typical** (Shado-Pan, agreement 78% on 27 contested talents, 1 run it exactly):
 
 `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGzYGWmxGmZMAAAAAAALLYEzMwMM2YwMzMDz2YmxMLDLb22mtZMLAAwGAAAY2mlmZmZhhNAmZYaMAAgB`
 
 **Most common other builds**, each against the typical:
 
-- 14 (2.1%): +Empty the Cellar, +Energy Transfer, +Save Them All; -Chi Transfer, -Tiger Tail Sweep, -Vital Flame
+- 35 (4.2%): +Empty the Cellar, +Energy Transfer, +Save Them All; -Chi Transfer, -Tiger Tail Sweep, -Vital Flame
   `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGzYGWmxGmZMAAAAAAALLYEzMYmhZ2YwMzMDz2wMGLDLb22GzYWAAgNAAAwsNLNzMziZYDgZGmGDAAYA`
-- 13 (2.0%): +Ancient Arts 1/2, +Bob and Weave, +Elixir of Determination, +Jade Walk, +Save Them All, +Zen State; -Ancient Arts 2/2, -Black Ox Brew, -Walk with the Ox 2/2, -Windwalking
-  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGzwYWmxGzMjBAAAAAAYZBjYmBmhZ2MDmZmZY2YmxMLPALbW2mtZMLAAwGAAAY2mlmZmZhhNAmZYaMAAgB`
-- 13 (2.0%): +Ancient Arts 1/2, +Chi Wave, +Empty the Cellar, +Save Them All, +Silent Sanctuary; -Ancient Arts 2/2, -Chi Burst, -Chi Transfer, -Vital Flame
-  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGzYGWmxGmZMAAAAAAALLYEzMwMMzGDmZmZY2GmxMLPALb22GzYWAAgNAAAwsNLNzMziZYBgZGmGDYAAD`
-- 9 (1.4%): +Peace and Prosperity; -Bounding Agility
-  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGzYGWmxGmZMAAAAAAALLYEzMwMM2gxMzMDz2YmxMLDLb22mtZMLAAwGAAAY2mlmZmZhhNAmZYaMAAgB`
+- 18 (2.2%): +Balanced Stratagem, +Bob and Weave, +Clarity of Purpose, +Coalescence, +Elixir of Determination, +Endless Draught, +Harmonic Surge, +High Tolerance 1/2, +Manifestation, +Mantra of Purity, +Master of Harmony, +Meditative Focus, +Overwhelming Force, +Ox Stance, +Potential Energy, +Purified Spirit, +Stillstep Coil, +Tiger's Vigor, +Way of a Thousand Strikes, +Zen State; -Against All Odds, -Black Ox Brew, -Chi Transfer, -Combat Stance, -Efficient Training, -Fuel on the Fire, -Martial Precision, -One Versus Many, -Predictive Training, -Pride of Pandaria, -Shado Over the Battlefield, -Shado-Pan, -Stand Ready, -Swift as a Coursing River, -Veteran's Eye, -Vigilant Watch, -Walk with the Ox 2/2, -Weapons of the Wall, -Wisdom of the Wall
+  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyM2YmZMAAAAAAALLYEzMwMM2YwMzMDz2wMmZZYZ7BW2mtxMLAAwysMtMbzsMAAAAG2AzMgpxAMAwA`
+- 15 (1.8%): +Balanced Stratagem, +Bob and Weave, +Clarity of Purpose, +Coalescence, +Elixir of Determination, +Endless Draught, +Harmonic Surge, +Manifestation, +Mantra of Purity, +Master of Harmony, +Meditative Focus, +Overwhelming Force, +Potential Energy, +Purified Spirit, +Stillstep Coil, +Tiger's Vigor, +Way of a Thousand Strikes, +Zen State; -Against All Odds, -Black Ox Brew, -Chi Transfer, -Combat Stance, -Efficient Training, -Fuel on the Fire, -Martial Precision, -One Versus Many, -Predictive Training, -Pride of Pandaria, -Shado Over the Battlefield, -Shado-Pan, -Stand Ready, -Swift as a Coursing River, -Veteran's Eye, -Vigilant Watch, -Weapons of the Wall, -Wisdom of the Wall
+  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGzYWmxGzMjBAAAAAAYZBjYmBmhxGDmZmZY2GmxMLDLbW2mthZBAAWmlplZbmlBAAAwwGYmBMNGgBAG`
+- 13 (1.6%): +Bob and Weave, +Chi Wave, +Elixir of Determination, +High Tolerance 2/2, +Initiator's Edge, +Light Brewing, +Summon Black Ox Statue, +Zen State; -Black Ox Brew, -Chi Burst, -Combat Stance, -Fuel on the Fire, -Improved Blackout Kick, -Training of Niuzao, -Walk with the Ox 2/2, -Windwalking
+  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAwMbbGDGzyMWYmZMAAAAAAALLYEzMwMM2YwMzMjZ2YmxMLDLbzy2sNMLAAwGAAAY2mlmZmZjhFAmZYaMAAgB`
 
-**Split talents:** Walk with the Ox 89%; Chi Burst (choice) 88%; Improved Blackout Kick 88%; Vivacious Vivification 87%; Windwalking 83%; Wisdom of the Wall 76%; Weapons of the Wall 76%; Vigilant Watch 76%; Veteran's Eye 76%; Stand Ready 76%; Shado Over the Battlefield 76%; Pride of Pandaria (choice) 76%; One Versus Many 76%; Martial Precision 76%; Efficient Training 76%; Against All Odds 76%; Predictive Training (choice) 76%; Bounding Agility 73%; Tiger Tail Sweep 73%; Fuel on the Fire 67%; Vital Flame (choice) 66%; Combat Stance (choice) 62%; Swift as a Coursing River 60%; Empty the Cellar 52%; Chi Transfer 41%; Zen State 38%; Jade Walk 35%; Save Them All 34%; Peace and Prosperity 32%; Elixir of Determination 29%; Way of a Thousand Strikes (choice) 24%; Purified Spirit (choice) 24%; Potential Energy 24%; Overwhelming Force 24%; Meditative Focus 24%; Mantra of Purity (choice) 24%; Manifestation 24%; Harmonic Surge 24%; Endless Draught 24%; Coalescence 24%; Clarity of Purpose 24%; Balanced Stratagem 24%; Pressure Points 23%; Silent Sanctuary 22%; Tiger's Vigor (choice) 18%; Summon Black Ox Statue 17%; Ox Stance 15%; Initiator's Edge (choice) 14%; High Tolerance 14%; Chi Wave (choice) 12%
+**Split talents:** Black Ox Brew (choice) 90%; Improved Blackout Kick 90%; Detox 89%; Chi Burst (choice) 88%; Walk with the Ox 83%; Wisdom of the Wall 83%; Weapons of the Wall 83%; Vigilant Watch 83%; Veteran's Eye 83%; Stand Ready 83%; Shado Over the Battlefield 83%; Pride of Pandaria (choice) 83%; Predictive Training (choice) 83%; One Versus Many 83%; Martial Precision 83%; Efficient Training 83%; Against All Odds 83%; Windwalking 82%; Bounding Agility 82%; Tiger Tail Sweep 74%; Combat Stance (choice) 69%; Vital Flame (choice) 67%; Swift as a Coursing River 65%; Fuel on the Fire 55%; Empty the Cellar 52%; Peace and Prosperity 39%; Elixir of Determination 38%; Chi Transfer 38%; Zen State 37%; Save Them All 30%; Jade Walk 27%; High Tolerance 26%; Summon Black Ox Statue 21%; Silent Sanctuary 18%; Way of a Thousand Strikes (choice) 17%; Purified Spirit (choice) 17%; Potential Energy 17%; Overwhelming Force 17%; Meditative Focus 17%; Manifestation 17%; Harmonic Surge 17%; Endless Draught 17%; Coalescence 17%; Clarity of Purpose 17%; Balanced Stratagem 17%; Mantra of Purity (choice) 17%; Ox Stance 17%; Tiger's Vigor (choice) 15%; Pressure Points 14%; Initiator's Edge (choice) 14%; Chi Wave (choice) 12%; Bob and Weave (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 4 of 655 run it exactly.
+- `Raid`: the typical build. 1 of 831 run it exactly.
 
 ### Mythic+
 
-698 rankings over 8 dungeons, logged 2026-08-24 to 2026-09-25, keys 18 to 22 (median 19). 135 distinct builds. Hero tree: Master of Harmony 97%, Shado-Pan 3%. 102 left out: their log has no talents.
+720 rankings over 8 dungeons, logged 2026-09-04 to 2026-10-18, keys 19 to 23 (median 20). 133 distinct builds. Hero tree: Master of Harmony 98%, Shado-Pan 2%. 80 left out: their log has no talents.
 
-**Typical** (Master of Harmony, agreement 64% on 4 contested talents, 20 run it exactly):
+**Typical** (Master of Harmony, agreement 68% on 4 contested talents, 36 run it exactly):
 
 `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDzGzMmZZYZ7B22mNMLAAwysMtMbzsMAAAAG2AzMgpxAAAG`
 
 **Most common other builds**, each against the typical:
 
-- 53 (7.6%): +Transcendence: Linked Spirits; -Tiger Tail Sweep
-  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDzmtZGjlhltHYbb2wsAAALzy0ysNzyAAAAYYDMzAmGDAAYA`
-- 43 (6.2%): +Windwalking; -Tiger Tail Sweep
+- 60 (8.3%): +Windwalking; -Tiger Tail Sweep
   `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDz2YmxYZYZ7B22mNMLAAwysMtMbzsMAAAAG2AzMgpxAAAG`
-- 39 (5.6%): +Jade Walk, +Transcendence: Linked Spirits; -Peace and Prosperity, -Tiger Tail Sweep
+- 42 (5.8%): +Transcendence: Linked Spirits; -Tiger Tail Sweep
+  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2gxMzMDzmtZGjlhltHYbb2wsAAALzy0ysNzyAAAAYYDMzAmGDAAYA`
+- 31 (4.3%): +Jade Walk, +Transcendence: Linked Spirits; -Peace and Prosperity, -Tiger Tail Sweep
   `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2MwMzMDzmtZGjlhltHYbb2wsAAALzy0ysNzyAAAAYYDMzAmGDAAYA`
-- 24 (3.4%): +Ironshell Brew, +Jade Walk, +Summon Black Ox Statue; -Expeditious Fortification, -Peace and Prosperity, -Tiger Tail Sweep
-  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2MwMzMjZWYmxYZYZ7B22mNMLAAwysMtMbzsMAAAAG2AzMgpxAAAG`
+- 29 (4.0%): +Jade Walk; -Peace and Prosperity
+  `CwQAAAAAAAAAAAAAAAAAAAAAAAAAAgZbzYGGzyMzGzMjBAAAAAAYZBzEzMwMM2MwMzMDzGzMmZZYZ7B22mNMLAAwysMtMbzsMAAAAG2AzMgpxAAAG`
 
-**Split talents:** Tiger's Vigor (choice) 84%; Vivacious Vivification 82%; Tiger Tail Sweep 46%; Peace and Prosperity 43%; Jade Walk 37%; Windwalking 26%; Summon Black Ox Statue 25%; Transcendence: Linked Spirits (choice) 25%; Save Them All 14%; Roar from the Heavens (choice) 13%
+**Split talents:** Pressure Points 89%; Vivacious Vivification 84%; Peace and Prosperity 50%; Tiger Tail Sweep 50%; Jade Walk 32%; Windwalking 28%; Summon Black Ox Statue 26%; Transcendence: Linked Spirits (choice) 21%; Save Them All 13%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 20 of 698 run it exactly.
+- `Dungeon`: the typical build. 36 of 720 run it exactly.
 
 ## Mistweaver Monk
 
 ### Raid
 
-711 rankings over 10 bosses, logged 2026-09-02 to 2026-09-25. 326 distinct builds. Hero tree: Conduit of the Celestials 98%, Master of Harmony 2%. 6 refused: unknown talents or not 34/34/13 points.
+832 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 312 distinct builds. Hero tree: Conduit of the Celestials 98%, Master of Harmony 2%. 3 refused: unknown talents or not 34/34/13 points.
 
-**Typical** (Conduit of the Celestials, agreement 74% on 13 contested talents, 26 run it exactly):
+**Typical** (Conduit of the Celestials, agreement 71% on 11 contested talents, 44 run it exactly):
 
 `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZZbmxCzoZMDYwgxsMzMzwsNYwiJAAAAAAYxyMLz2MDAAMgBYGwYYsIjZA`
 
 **Most common other builds**, each against the typical:
 
-- 23 (3.2%): +Revival; -Restoral
+- 47 (5.6%): +Revival; -Restoral
   `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZZZmxCzoZMDYwgxsMzMzwsNYwiJAAAAAAYxyMLz2MDAAMgBYGwYYsIjZA`
-- 20 (2.8%): +Chi Transfer; -Jade Infusion
-  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZZbmxCzoZMDYwgxYmZmhZbMGsYCAAAAAAWsMzysNzAAADYAmBMGGLyYGA`
-- 20 (2.8%): +Crane Style, +Deep Clarity, +Zen Pulse; -Chrysalis, -Healing Elixir, -Mists of Life
-  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2MwmFzYmllZshZmhZWW2mZswMaGzAGMYMLzMzMMbDGsYCAAAAAAWsMzysNzAAADYAmBMGGLyYGA`
-- 14 (2.0%): +Chi Transfer, +Revival; -Jade Infusion, -Restoral
-  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZZZmxCzoZMDYwgxYmZmhZbMGsYCAAAAAAWsMzysNzAAADYAmBMGGLyYGA`
+- 31 (3.7%): +Crane Style, +Deep Clarity, +Revival, +Zen Pulse; -Chrysalis, -Healing Elixir, -Mists of Life, -Restoral
+  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2MwmFzYmllZshZmhZWWWmZswMaGzAGMYMLzMzMMbDGsYCAAAAAAWsMzysNzAAADYAmBMGGLyYGA`
+- 25 (3.0%): +Ancient Arts 1/2, +Ferocity of Xuen 1/2, +Jade Walk, +Pressure Points, +Tiger Tail Sweep; -Bounding Agility, -Ferocity of Xuen 2/2, -Improved Touch of Death, -Peace and Prosperity
+  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2YZYzixMzyyM2wYGmZZZbmxCjpZMDYwwgl5BmZGmtBDzyDMBAAAAAALWmZZ2mZAAgBMAzAGDjFZMDA`
+- 20 (2.4%): +Crane Style, +Deep Clarity, +Quick Footed, +Zen Pulse; -Chrysalis, -Healing Elixir, -Mists of Life, -Peace and Prosperity
+  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAghx2MwmFzYmllZshZmhZWW2mZswMaGzAGMLMsMzMzwsNYwiJAAAAAAYxyMLz2MDAAMgBYGwYYsIjZA`
 
-**Split talents:** Silent Sanctuary 90%; Invoke Yu'lon, the Jade Serpent (choice) 89%; Expeditious Fortification (choice) 88%; Windwalking 88%; Jade Infusion (choice) 86%; Energizing Brew (choice) 82%; Improved Touch of Death 77%; Bounding Agility 66%; Healing Elixir 64%; Mists of Life 63%; Chrysalis (choice) 61%; Peace and Prosperity 60%; Restoral (choice) 52%; Crane Style 50%; Revival (choice) 48%; Zen Pulse 41%; Deep Clarity 38%; Tiger Tail Sweep 37%; Ancient Arts 25%; Reinvigoration 14%; Morning Breeze (choice) 12%; Ironshell Brew (choice) 12%; Resplendent Mist 12%; Jade Walk 11%; Invoke Chi-Ji, the Red Crane (choice) 11%; Lifecycles (choice) 10%; Pressure Points 10%; Chi Transfer 10%
+**Split talents:** Silent Sanctuary 89%; Windwalking 89%; Expeditious Fortification (choice) 87%; Jade Infusion (choice) 87%; Bounding Agility 74%; Improved Touch of Death 68%; Healing Elixir 60%; Mists of Life 60%; Peace and Prosperity 59%; Chrysalis (choice) 59%; Restoral (choice) 51%; Revival (choice) 49%; Crane Style 47%; Tiger Tail Sweep 47%; Zen Pulse 43%; Deep Clarity 41%; Ancient Arts 25%; Ironshell Brew (choice) 13%; Reinvigoration 12%; Quick Footed (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 26 of 711 run it exactly.
+- `Raid`: the typical build. 44 of 832 run it exactly.
 
 ### Mythic+
 
-629 rankings over 8 dungeons, logged 2026-08-27 to 2026-09-25, keys 18 to 21 (median 19). 213 distinct builds. Hero tree: Conduit of the Celestials 98%, Master of Harmony 2%. 132 left out: their log has no talents. 39 refused: unknown talents or not 34/34/13 points.
+664 rankings over 8 dungeons, logged 2026-09-03 to 2026-10-18, keys 19 to 23 (median 20). 185 distinct builds. Hero tree: Conduit of the Celestials 98%, Master of Harmony 2%. 105 left out: their log has no talents. 31 refused: unknown talents or not 34/34/13 points.
 
-**Typical** (Conduit of the Celestials, agreement 77% on 9 contested talents, 27 run it exactly):
+**Typical** (Conduit of the Celestials, agreement 79% on 8 contested talents, 65 run it exactly):
 
 `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZADGAzMzMMbYGmlZCAAAAAAWsNz2sNzAAADGDwMgxALyYGA`
 
 **Most common other builds**, each against the typical:
 
-- 30 (4.8%): +Peace and Prosperity; -Chi Wave
+- 46 (6.9%): +Peace and Prosperity; -Chi Wave
   `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZADGwYmZmhZDzwsMTAAAAAAwitZ2mtZGAAAGDwMgxALyYGA`
-- 24 (3.8%): +Peace and Prosperity, +Swift Art; -Chi Wave, -Vital Clarity
+- 28 (4.2%): +Improved Touch of Death; -Tiger Tail Sweep
+  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYmpZMDYwAYmZmhZDzglZCAAAAAAWsNz2sNzAAADGDwMgxALyYGA`
+- 27 (4.1%): +Peace and Prosperity, +Swift Art; -Chi Wave, -Vital Clarity
   `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZAjxAGzMzMMbYGmlZCAAAAAAWsNz2sNzAAAwYAmBMALyYGA`
-- 21 (3.3%): +Swift Art; -Vital Clarity
-  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZAjxAYmZmhZDzwsMTAAAAAAwitZ2mtZGAAYwYAmBMALyYGA`
-- 19 (3.0%): +Improved Touch of Death, +Swift Art; -Tiger Tail Sweep, -Vital Clarity
-  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYmpZMDYMGAzMzMMbYGsMTAAAAAAwitZ2mtZGAAYwYAmBMALyYGA`
+- 25 (3.8%): +Swift Art, +Temple Training; -Vital Clarity, -Xuen's Guidance
+  `C4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgBWmZZML2mxMz2mBmhZzMbLLzMWYMNjZAjxAYmZmhZDzwsMTAAAAAAwitZWmtZGAAYwYAmBMALyYGA`
 
-**Split talents:** Gift of the Celestials (choice) 89%; Energizing Brew (choice) 87%; Pressure Points 85%; Pool of Mists 79%; Diffuse Magic 78%; Chi Wave 76%; Fatal Touch 75%; Xuen's Guidance (choice) 70%; Vital Clarity 59%; Swift Art 41%; Peace and Prosperity 34%; Temple Training (choice) 28%; Amplified Rush 22%; Improved Touch of Death 20%; Jade Infusion (choice) 18%; Mist Wrap 17%; Windwalking 15%; Jade Bond (choice) 11%
+**Split talents:** Tiger Tail Sweep 90%; Pressure Points 86%; Pool of Mists 83%; Diffuse Magic 80%; Xuen's Guidance (choice) 77%; Chi Wave 76%; Fatal Touch 76%; Vital Clarity 62%; Swift Art 38%; Peace and Prosperity 30%; Improved Touch of Death 25%; Temple Training (choice) 20%; Jade Infusion (choice) 20%; Amplified Rush 17%; Windwalking 14%; Mist Wrap 12%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 27 of 629 run it exactly.
+- `Dungeon`: the typical build. 65 of 664 run it exactly.
 
 ## Windwalker Monk
 
 ### Raid
 
-781 rankings over 10 bosses, logged 2026-09-02 to 2026-09-25. 413 distinct builds. Hero tree: Conduit of the Celestials 92%, Shado-Pan 8%.
+957 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 496 distinct builds. Hero tree: Conduit of the Celestials 97%, Shado-Pan 3%.
 
-**Typical** (Conduit of the Celestials, agreement 73% on 14 contested talents, 4 run it exactly):
+**Typical** (Conduit of the Celestials, agreement 71% on 16 contested talents, 3 run it exactly):
 
-`C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZY0wMMMgZMMzMzwsNMDzyMBAsYmtxMmZmZAAsYmlZZMBAAMGAzAMWGAzMzmPA`
+`C0QAAAAAAAAAAAAAAAAAAAAAAMzYM2GGsMzMbzAAAAAAAAAAAAsMMaGzwwAGGmZmZY2GmhZZmAAWMz2YGzMzMAAWMzysMmAAAGDgZAGLDgZmZzFA`
 
 **Most common other builds**, each against the typical:
 
-- 31 (4.0%): +Peace and Prosperity, +Shadowboxing Treads, +Song of Chi-Ji; -Ring of Peace, -Rising Star, -Soothing Mist
-  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mxAAAAAAAAAAAAbDjwMMMgZMjZmZGmthZYWmJAgFmtxMmZmZAAsYmlZZMBAAMGAzAMWGAzMzmPA`
-- 19 (2.4%): +Elusive Mists, +Jadefire Stomp, +Peace and Prosperity, +Silent Sanctuary, +Singularly Focused Jade; -Ancient Arts 2/2, -Harmonic Combo, -Jade Ignition, -Tiger Tail Sweep
+- 25 (2.6%): +Jade Walk, +Peace and Prosperity, +Silent Sanctuary, +Tigereye Brew 3/4; -Ancient Arts 2/2, -Harmonic Combo, -Tiger Tail Sweep, -Tigereye Brew 2/4
   `C0QAAAAAAAAAAAAAAAAAAAAAAMzYM2GGsMzMbzAAAAAAAAAAAAsMMaGzwwAmxMmZmZY2GmBLmAAWMz2YGzMzMAAWMzysMmAAAYAMDwYZGgZmZzHA`
-- 19 (2.4%): +Elusive Mists, +Jadefire Stomp, +Singularly Focused Jade; -Harmonic Combo, -Jade Ignition, -Tiger Tail Sweep
-  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYM2GGsMzMbzAAAAAAAAAAAAsMMaGzwwAmxwMzMDz2wMYZmAAWMz2YGzMzMAAWMzysMmAAAYAMDwYZAMzMb+A`
-- 18 (2.3%): +Elusive Mists, +Jadefire Stomp, +Memory of the Monastery, +Singularly Focused Jade, +Tigereye Brew 2/4; -Inner Peace, -Jade Ignition, -Jade Walk, -Tigereye Brew 3/4
-  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYM2GGsMzMbzAAAAAAAAAAAAsMMaGzwwAGGmZmZY2GmhZZmAAWMz2MzYMzMAAWMzysMmAAAGDgZAGLDgZmZzFA`
+- 24 (2.5%): +Ancient Arts 1/2, +Ironshell Brew, +Jade Ignition, +Restore Balance, +Silent Sanctuary, +Skyfire Heel, +Tigereye Brew 4/4; -Ancient Arts 2/2, -Expeditious Fortification, -Inner Peace, -Jadefire Stomp, -Rising Star, -Singularly Focused Jade, -Tigereye Brew 2/4, -Xuen's Bond
+  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZY0MmhhBMMMzMzwsMMDzyDMBAswsNmxYmZAAsYmlZZMBAAmxAYGgxyMAzMziB`
+- 20 (2.1%): +Jade Walk, +Memory of the Monastery, +Peace and Prosperity, +Silent Sanctuary; -Ancient Arts 2/2, -Inner Peace, -Tiger Tail Sweep
+  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYM2GGsMzMbzAAAAAAAAAAAAsMMaGzwwAmxMmZmZY2GmBLmAAWMz2MzYMzMAAWMzysMmAAAGDgZAGLzAMzMbuA`
+- 20 (2.1%): +Jade Ignition, +Jade Walk, +Peace and Prosperity, +Shadowboxing Treads, +Song of Chi-Ji, +Tigereye Brew 3/4; -Elusive Mists, -Jadefire Stomp, -Ring of Peace, -Rising Star, -Singularly Focused Jade, -Soothing Mist, -Tigereye Brew 2/4
+  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mxAAAAAAAAAAAAbDjwMMMgZMjZmZGmthZYWmJAgFmtxMmZmZAAsYmlZZMBAAMGAzAMWGAzMzmPA`
 
-**Split talents:** Detox 89%; Xuen's Bond (choice) 88%; Vigorous Expulsion 88%; Windwalking 86%; Ancient Arts 81%; Harmonic Combo 80%; Tiger Tail Sweep 78%; Rising Star 76%; Niuzao's Protection (choice) 68%; Soothing Mist 66%; Jade Walk 66%; Inner Peace 62%; Elusive Mists 62%; Singularly Focused Jade (choice) 56%; Jadefire Stomp 56%; Jade Ignition 49%; Memory of the Monastery 42%; Peace and Prosperity 31%; Jade Sanctuary (choice) 24%; Silent Sanctuary 22%; Shadowboxing Treads 19%; Bounding Agility 16%; Pressure Points 13%; Touch of the Tiger 12%
+**Split talents:** Vigorous Expulsion 89%; Energy Burst 89%; Expeditious Fortification (choice) 89%; Harmonic Combo 86%; Windwalking 83%; Xuen's Bond (choice) 81%; Tiger Tail Sweep 78%; Ancient Arts 77%; Niuzao's Protection (choice) 74%; Soothing Mist 73%; Elusive Mists 69%; Rising Star 69%; Inner Peace 54%; Jade Ignition 52%; Jadefire Stomp 52%; Singularly Focused Jade (choice) 51%; Jade Walk 50%; Memory of the Monastery 38%; Peace and Prosperity 36%; Silent Sanctuary 30%; Jade Sanctuary (choice) 23%; Skyfire Heel 19%; Bounding Agility 19%; Restore Balance (choice) 16%; Shadowboxing Treads 15%; Pressure Points 11%; Ironshell Brew (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 4 of 781 run it exactly.
+- `Raid`: 5 of 957 run it exactly. Typical has +Elusive Mists, +Jadefire Stomp, +Singularly Focused Jade, +Tigereye Brew 2/4; lacks Jade Ignition, Jade Walk, Tigereye Brew 3/4.
 
 ### Mythic+
 
-683 rankings over 8 dungeons, logged 2026-08-31 to 2026-09-25, keys 19 to 22 (median 19). 206 distinct builds. Hero tree: Conduit of the Celestials 99%, Shado-Pan 1%. 117 left out: their log has no talents.
+710 rankings over 8 dungeons, logged 2026-09-07 to 2026-10-18, keys 20 to 23 (median 21). 230 distinct builds. Hero tree: Conduit of the Celestials 98%, Shado-Pan 2%. 90 left out: their log has no talents.
 
-**Typical** (Conduit of the Celestials, agreement 73% on 9 contested talents, 9 run it exactly):
+**Typical** (Conduit of the Celestials, agreement 75% on 11 contested talents, 13 run it exactly):
 
-`C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYbmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNMDzyMBAswsxMmZmZAAsYmlZbMBAAmxAYGgxyAYmZ2M`
+`C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNMDzyMBAswsxMmZmZAAsYmlZbMBAAmxAYGgxyAYmZ2M`
 
 **Most common other builds**, each against the typical:
 
-- 40 (5.9%): +Chi Transfer, +Drinking Horn Cover; -Spiritual Focus, -Tiger Tail Sweep
-  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNmZwyMBAswsxMmZmZAAsYmlZbMBAAmxAYGgxyAYmZ2M`
-- 32 (4.7%): +Ancient Arts 1/2, +Drinking Horn Cover, +Martial Agility, +Swift Art; -Ancient Arts 2/2, -Inner Peace, -Spiritual Focus
+- 59 (8.3%): +Ancient Arts 1/2, +Martial Agility, +Swift Art; -Ancient Arts 2/2, -Inner Peace
   `C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYZmZ2mBAAAAAAAAAAAYZYmmxMMMGMMMzMzwshZYWegJAgFmtxMGzMDAgFzsMbjJAAwMGAzAMWGAzMzmB`
-- 27 (4.0%): +Chi Transfer, +Profound Rebuttal; -Strength of Spirit, -Tiger Tail Sweep
+- 26 (3.7%): +Chi Transfer, +Martial Agility, +Profound Rebuttal, +Spiritual Focus; -Drinking Horn Cover, -Energy Burst, -Strength of Spirit, -Tiger Tail Sweep
+  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYbmx2MAAAAAAAAAAAALDz0MmhhBMMMzMzwsxMDWmJAgFmtxMmZmZAAsYmlZbMBAAmxAYGgx2AYmZ2M`
+- 25 (3.5%): +Chi Transfer, +Martial Agility, +Spiritual Focus; -Drinking Horn Cover, -Energy Burst, -Tiger Tail Sweep
+  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYbmx2MAAAAAAAAAAAALDz0MmhhBMMMzMzwsxMDWmJAgFmtxMmZmZAAsYmlZbMBAAmxAYGgxyAYmZ2M`
+- 25 (3.5%): +Chi Transfer, +Profound Rebuttal, +Spiritual Focus; -Drinking Horn Cover, -Strength of Spirit, -Tiger Tail Sweep
   `C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYbmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNmZwyMBAswsxMmZmZAAsYmlZbMBAAmxAYGgx2AYmZ2M`
-- 27 (4.0%): +Chi Transfer; -Tiger Tail Sweep
-  `C0QAAAAAAAAAAAAAAAAAAAAAAMzYMgxYbmZ2mBAAAAAAAAAAAYZYmmxMMMghhZmZGmNmZwyMBAswsxMmZmZAAsYmlZbMBAAmxAYGgxyAYmZ2M`
 
-**Split talents:** Strength of Spirit (choice) 84%; Vigorous Expulsion 84%; Soothing Mist 74%; Elusive Mists 73%; Jade Sanctuary (choice) 72%; Inner Peace 72%; Tiger Tail Sweep 62%; Spiritual Focus (choice) 50%; Drinking Horn Cover (choice) 50%; Chi Transfer 37%; Martial Agility 36%; Jade Walk 28%; Niuzao's Protection (choice) 26%; Diffuse Magic 24%; Swift Art 21%; Windwalking 14%
+**Split talents:** Vigorous Expulsion 89%; Pressure Points 89%; Strength of Spirit (choice) 83%; Soothing Mist 81%; Elusive Mists 79%; Energy Burst 78%; Jade Sanctuary (choice) 73%; Inner Peace 61%; Martial Agility 60%; Tiger Tail Sweep 58%; Drinking Horn Cover (choice) 58%; Spiritual Focus (choice) 42%; Chi Transfer 35%; Swift Art 29%; Niuzao's Protection (choice) 26%; Diffuse Magic 24%; Jade Walk 18%; Profound Rebuttal (choice) 12%; Windwalking 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 9 of 683 run it exactly.
+- `Dungeon`: 4 of 710 run it exactly. Typical has +Drinking Horn Cover; lacks Spiritual Focus.
 
 ## Holy Paladin
 
 ### Raid
 
-770 rankings over 10 bosses, logged 2026-08-28 to 2026-09-25. 258 distinct builds. Hero tree: Herald of the Sun 100%. 1 left out: their log has no talents.
+961 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 288 distinct builds. Hero tree: Herald of the Sun 100%.
 
-**Typical** (Herald of the Sun, agreement 81% on 5 contested talents, 275 run it exactly):
+**Typical** (Herald of the Sun, agreement 81% on 5 contested talents, 287 run it exactly):
 
 `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGGzMDjZLDADYYDsxyMmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB`
 
 **Most common other builds**, each against the typical:
 
-- 32 (4.2%): +Light's Revocation, +Unbound Freedom; -Echoing Blessings, -Hammer of Wrath
+- 40 (4.2%): +Light's Revocation, +Unbound Freedom; -Echoing Blessings, -Hammer of Wrath
   `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwAAA2mZmZMjZGLGzMDLDmZxMNxYGzMDjZLDADYYDsx2MmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB`
-- 23 (3.0%): +Unbound Freedom; -Echoing Blessings
-  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGGzMDjZLDADYYDsx2MmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB`
-- 22 (2.9%): +Light's Revocation; -Hammer of Wrath
+- 24 (2.5%): +Light's Revocation; -Blinding Light
+  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmJxYGzMDjZLDADYYDsxyMmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB`
+- 24 (2.5%): +Light's Revocation; -Hammer of Wrath
   `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwAAA2mZmZMjZGLGzMDLDmZxMNxYGzMDjZLDADYYDsxyMmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB`
-- 13 (1.7%): +A Just Reward 1/2, +Empyreal Ward; -A Just Reward 2/2
-  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGGzMDjZLDADYYDsxyMmZZ2mZmtGAAAgFAYzDMGzYGmBAwMDzYMMA`
+- 20 (2.1%): +Unbound Freedom; -Echoing Blessings
+  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAw2MzMjZMzYxYmZYZwMLmpJGGzMDjZLDADYYDsx2MmZZ2mZmtGAAAgFAYzwYGzwMAAmZYGjhB`
 
-**Split talents:** Glistening Radiance 90%; A Just Reward 89%; Hammer of Wrath 84%; Blinding Light 82%; Echoing Blessings (choice) 74%; Light's Revocation 33%; Unbound Freedom (choice) 24%; Empyreal Ward 12%
+**Split talents:** Moment of Compassion (choice) 90%; A Just Reward 89%; Blinding Light 83%; Hammer of Wrath 80%; Echoing Blessings (choice) 79%; Light's Revocation 39%; Unbound Freedom (choice) 20%; Unending Light 15%; Breaking Dawn 13%; Empyreal Ward 10%; Seraphic Barrier 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 275 of 770 run it exactly.
+- `Raid`: the typical build. 287 of 961 run it exactly.
 
 ### Mythic+
 
-692 rankings over 8 dungeons, logged 2026-09-03 to 2026-09-25, keys 20 to 22 (median 21). 357 distinct builds. Hero tree: Lightsmith 93%, Herald of the Sun 7%. 108 left out: their log has no talents.
+660 rankings over 8 dungeons, logged 2026-09-25 to 2026-10-18, keys 22 to 24 (median 22). 289 distinct builds. Hero tree: Lightsmith 99%, Herald of the Sun 1%. 140 left out: their log has no talents.
 
-**Typical** (Lightsmith, agreement 67% on 8 contested talents, 26 run it exactly):
+**Typical** (Lightsmith, agreement 65% on 6 contested talents, 13 run it exactly):
 
-`CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAAWGwMzyMzsMjZMsY2MziZaihxMzMGzWGAGA2AbsYmBAAAmZWWWsMzwGbjZwGwMGAgZGAmxY0A`
+`CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAwyAmZWmZmlZMjhFzmZWMTTMLGzMzYMbZAYAYDsxiZGAAAYmZZZxyMDbsNmBbAzYAAmZAYGjRDA`
 
 **Most common other builds**, each against the typical:
 
-- 15 (2.2%): +Unbound Freedom; -Echoing Blessings
-  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAAWGwMzyMzsMjZMsY2MziZaihxMzMGzWGAGA2AbsZmBAAAmZWWWsMzwGbjZwGwMGAgZGAmxY0A`
-- 13 (1.9%): +Aurora, +Beacon of Virtue, +Blessing of An'she, +Born in Sunlight, +Call of the Righteous 1/2, +Consecrated Ground, +Divine Glimpse, +Endless Gleam, +Eternal Flame, +Gleaming Rays, +Herald of the Sun, +Luminosity, +Pillars of Light, +Reclamation, +Righteous Protection, +Ringing of the Heavens, +Sacrifice of the Just, +Second Sunrise, +Solar Grace, +Sun Sear, +Sun's Avatar, +Truth Prevails, +Walk Into Light, +Will of the Dawn; -Authoritative Rebuke, -Beacon of Faith, -Blessing of the Forge, -Call of the Righteous 2/2, -Divine Favor, -Divine Guidance, -Divine Inspiration, -Empyrean Legacy, -Faith's Armor, -Hammer and Anvil, -Holy Ritual, -Improved Blessing of Protection, -Laying Down Arms, -Lightsmith, -Masterwork, -Reflection of Radiance, -Resounding Strike, -Rising Sunlight, -Rite of Sanctification, -Shared Resolve, -Solidarity, -Tirion's Devotion, -Valiance
-  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAD2GGmZWmZsYMzMsMPwmZWMaiZxYmZYMbZAYAYDsxiZmZZ2mZmtGAAAgF2YGsBMzGMDAgZGmxYYA`
-- 13 (1.9%): +A Just Reward 1/2, +Unbound Freedom; -Brought to Light, -Echoing Blessings
-  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAAWGwMzyMzsMjZMsY2MziZaihxMzMGzWGAGA2AbsZmBAAAmZWWWsMzwGbjZwmHAmxAAMzAgxY0A`
-- 13 (1.9%): +Light's Revocation, +Vengeful Wrath 1/2; -Vengeful Wrath 2/2
-  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAgZBAmBAAWGwMzyMzsMjZMsY2MziZaixMmZmxY2yAwAwGYjFzMAAAwMzyyilZG2Yb8AD2AmxAAMzAwMGjGA`
+- 25 (3.8%): +Light's Revocation, +Unbound Freedom; -Echoing Blessings, -Sacrifice of the Just
+  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAwyAmZWmZmlZMjhFzmZWMTTMmxMzMGzWGAGA2AbsZmBAAAmZWWWsMzwGbjZwGwMGAgZGAmxY0A`
+- 15 (2.3%): +Light's Revocation; -Sacrifice of the Just
+  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAwyAmZWmZmlZMjhFzmZWMTTMmxMzMGzWGAGA2AbsYmBAAAmZWWWsMzwGbjZwGwMGAgZGAmxY0A`
+- 14 (2.1%): +A Just Reward 2/2, +Righteous Protection; -Improved Blessing of Protection, -Vengeful Wrath 2/2
+  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAwyAmZWmZmlZMjhFzmZWMTTMLGzMDjZLDADAbgNWMzAAAAzMLLLWmZYjthBbGYmtBAYmBgZMGNA`
+- 13 (2.0%): +A Just Reward 2/2, +Protection of Tyr; -Improved Blessing of Protection, -Sacrifice of the Just, -Unwavering Spirit
+  `CEEAAAAAAAAAAAAAAAAAAAAAAAAAALAwMAAwyAmZ2mZmlZMjhFzmZWMTTMMmZGGzWGAGA2AbsYmBAAAmZWWWsMzwGbjZwmBmxAAMzAwMGjGA`
 
-**Split talents:** Holy Ritual 90%; Authoritative Rebuke (choice) 84%; Unwavering Spirit (choice) 75%; Brought to Light 72%; Vengeful Wrath 71%; Improved Blessing of Protection 58%; Echoing Blessings (choice) 58%; Sacrifice of the Just (choice) 45%; Faith's Armor 45%; Unbound Freedom (choice) 41%; A Just Reward 30%; Light's Revocation 28%; Righteous Protection (choice) 26%; Consecrated Ground 22%; Protection of Tyr (choice) 19%; Lead the Charge 13%; Empyreal Ward 12%
+**Split talents:** Unwavering Spirit (choice) 79%; Brought to Light 75%; Improved Blessing of Protection 73%; Echoing Blessings (choice) 63%; Vengeful Wrath 61%; Sacrifice of the Just (choice) 54%; Faith's Armor 42%; Unbound Freedom (choice) 37%; Light's Revocation 37%; Righteous Protection (choice) 30%; A Just Reward 28%; Protection of Tyr (choice) 18%; Consecrated Ground 12%; Turn Evil 10%; Stand Against Evil (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 26 of 692 run it exactly.
+- `Dungeon`: 13 of 660 run it exactly. Typical has +Sacrifice of the Just; lacks Faith's Armor.
 
 ## Protection Paladin
 
 ### Raid
 
-780 rankings over 10 bosses, logged 2026-09-03 to 2026-09-25. 580 distinct builds. Hero tree: Lightsmith 98%, Templar 2%.
+840 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 586 distinct builds. Hero tree: Lightsmith 99%, Templar 1%. 1 left out: their log has no talents.
 
-**Typical** (Lightsmith, agreement 75% on 22 contested talents, 2 run it exactly):
+**Typical** (Lightsmith, agreement 74% on 19 contested talents, 3 run it exactly):
 
-`CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMzMzMzMsMGWGWGGAgBAAAAAApZmlZGzMMmt2AwADYGsBAAAAzMLbLtMzYx2GzAgxMMGAMzAgZGwYB`
+`CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMzMzMzMsMGWGWmxAAMAAAAAAINzsMzYmhxs1GAGAYGsBAAAAzMLbLtMzYx2GzAgxMMGAMzAgZGwYB`
 
 **Most common other builds**, each against the typical:
 
-- 13 (1.7%): +Blinding Light, +Bulwark of Order, +Empyreal Ward, +Eye for an Eye, +Obduracy 1/2, +Recompense, +Redoubt, +Tyr's Enforcer 2/2; -Afterimage, -Imbued Shield, -Lightbearer, -Obduracy 2/2, -Sacrifice of the Just, -Sanctuary, -Seal of Reprisal, -Sentinel
-  `CIEAAAAAAAAAAAAAAAAAAAAAAsNzYWmZmZGzMsNYWGWGGAgBAAAAAANNzsNzYmhZegtAgBGwAbAAAAwMzy2SLzMWstxMAGMDjBAzMAYmBMWA`
-- 11 (1.4%): +Bulwark of Order, +Divine Reach, +Tyr's Enforcer 1/2; -Blessing of Protection, -Gift of the Golden Val'kyr, -Sanctuary
+- 15 (1.8%): +Blinding Light, +Bulwark of Order, +Empyreal Ward; -Cleanse Toxins, -Light's Revocation, -Seal of Reprisal
+  `CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMzMzMzMsMGzywywAAMAAAAAAopZmFzYmhxsFAMAwMYDAAAAmZW2WaZmxitNmBwYMDjBAzMAYmBMWA`
+- 8 (1.0%): +Bulwark of Order, +Divine Reach, +Punishment, +Tyr's Enforcer 1/2; -Blessing of Protection, -Cleanse Toxins, -Gift of the Golden Val'kyr, -Sanctuary
   `CIEAAAAAAAAAAAAAAAAAAAAAAsNzDYWmZMzYmhlxYWGWGGAgBAAAAAApZmlZGzgxs1GAGYGYGsBAAAAzMLbLtMzYx2GzAgxMMGAMzAgZGwYB`
-- 10 (1.3%): +Blinding Light, +Bulwark of Order, +Cleanse Toxins, +Crusader's Resolve, +Empyreal Ward, +Obduracy 1/2, +Soaring Shield, +Tyr's Enforcer 2/2; -Consecration in Flame 2/2, -Ferren Marcus's Fervor 2/2, -Focused Enmity, -Obduracy 2/2, -Punishment, -Sacrifice of the Just
-  `CIEAAAAAAAAAAAAAAAAAAAAAAsNzYWGzYmZmx2yYMLDLzYAAGAAAAAA00MjZGzMMegt2AwAAzgNAAAAYmZZbplZGL2WYGAjxMMGAMzAgZGwYB`
-- 9 (1.2%): +Blessing of Dawn, +Blinding Light, +Brought to Light, +Cleanse Toxins, +Empyreal Ward, +Redoubt, +Tyr's Enforcer 1/2; -Consecrated Ground, -Imbued Shield, -Light's Revocation, -Lightforged Blessing, -Punishment, -Sacrifice of the Just, -Seal of Reprisal
-  `CIEAAAAAAAAAAAAAAAAAAAAAAsNzDYWmZmZmZmhtxwywyMGAAAAAAAAopZGmxMDjZLAYAgZw2AAAAgZmltlWmZsYbDDgxYGGDAmZAYmZAjF`
+- 7 (0.8%): +Bulwark of Order, +Divine Reach, +Empyreal Ward, +Punishment, +Recompense, +Worthy Sacrifice; -Cleanse Toxins, -Consecrated Ground, -Gift of the Golden Val'kyr, -Light's Revocation, -Lightbearer, -Sacrifice of the Just
+  `CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMjZmZmhlxYWGWGGAAAAAAAAINzsZGzMMmt2AwAzAzgNAAAAYmZZbplZGL22YGADmZxYAwMDAmZAjF`
+- 7 (0.8%): +Empyreal Ward, +Eye for an Eye, +Improved Blessing of Protection; -Fist of Justice, -Guided Prayer, -Lightbearer
+  `CIEAAAAAAAAAAAAAAAAAAAAAAsNDzyMzMzMzMsMGWGWmxAAMAAAAAAINzsMzYmZMzs1GAGAYGsBAAAAzMLbLtMzYx2GzAYwMMGAMzAADwYB`
 
-**Split talents:** Imbued Shield (choice) 90%; Focused Enmity (choice) 88%; Fist of Justice 88%; Seal of Reprisal (choice) 87%; Sweeping Verdict (choice) 86%; Tempered in Battle (choice) 85%; Ferren Marcus's Fervor 82%; Guided Prayer 82%; Vision of Sanctity 82%; Consecration in Flame 80%; Consecrated Ground 78%; Afterimage 77%; Gift of the Golden Val'kyr 76%; Light's Revocation 74%; Lightbearer 73%; Blessing of Protection 72%; Sanctuary 72%; Lightforged Blessing 71%; Empyreal Ward 63%; Sacrifice of the Just (choice) 62%; Instrument of the Divine (choice) 60%; Bulwark of Order 60%; Punishment 58%; Cleanse Toxins 56%; Crusader's Resolve (choice) 52%; Blinding Light 48%; Tyr's Enforcer 40%; Solace (choice) 39%; Divine Reach 26%; Improved Blessing of Protection 25%; Light of the Titans (choice) 25%; Undying Embers 15%; Blessing of Dawn 14%; Eye for an Eye 13%; Authoritative Rebuke (choice) 13%; Recompense (choice) 12%; Soaring Shield (choice) 11%; Redoubt (choice) 10%
+**Split talents:** Fist of Justice 87%; Sweeping Verdict (choice) 87%; Focused Enmity (choice) 87%; Tempered in Battle (choice) 86%; Consecration in Flame 83%; Ferren Marcus's Fervor 82%; Guided Prayer 81%; Vision of Sanctity 80%; Afterimage 78%; Blessing of Protection 78%; Lightforged Blessing 77%; Sanctuary 76%; Gift of the Golden Val'kyr 75%; Consecrated Ground 75%; Lightbearer 73%; Light's Revocation 69%; Instrument of the Divine (choice) 64%; Sacrifice of the Just (choice) 62%; Bulwark of Order 61%; Punishment 58%; Cleanse Toxins 56%; Empyreal Ward 54%; Crusader's Resolve (choice) 47%; Blinding Light 46%; Solace (choice) 36%; Tyr's Enforcer 32%; Improved Blessing of Protection 29%; Divine Reach 25%; Light of the Titans (choice) 21%; Undying Embers 15%; Authoritative Rebuke (choice) 13%; Recompense (choice) 13%; Eye for an Eye 13%; Soaring Shield (choice) 12%; Blessed Calling 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 2 of 780 run it exactly.
+- `Raid`: no one in the sample runs it exactly. Typical has +Cleanse Toxins; lacks Punishment.
 
 ### Mythic+
 
-694 rankings over 8 dungeons, logged 2026-08-31 to 2026-09-25, keys 18 to 21 (median 19). 289 distinct builds. Hero tree: Lightsmith 100%, Templar 0%. 106 left out: their log has no talents.
+695 rankings over 8 dungeons, logged 2026-09-15 to 2026-10-18, keys 20 to 22 (median 20). 338 distinct builds. Hero tree: Lightsmith 100%, Templar 0%. 105 left out: their log has no talents.
 
-**Typical** (Lightsmith, agreement 74% on 11 contested talents, 44 run it exactly):
+**Typical** (Lightsmith, agreement 72% on 10 contested talents, 2 run it exactly):
 
-`CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAAAmZW2WaZmxilFmBwgZ2wAgZGAMzAGL`
+`CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwAbAAAAwMzy2SLzMWsswMAGMzmxAgZGAMzAGL`
 
 **Most common other builds**, each against the typical:
 
-- 19 (2.7%): +Redoubt; -Imbued Shield
+- 22 (3.2%): +Consecration in Flame 2/2, +Obduracy 2/2; -Empyreal Ward, -Light of the Titans, -Righteous Protection, -Undying Embers
+  `CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzMzMzMWWGjZZMLzYAAGAAAAAA00MzyMjZGGzWbAYgBMwGAAAAMzsst0yMjFLLMDAYGGDAmZAwMDYsA`
+- 17 (2.4%): +Afterimage; -Lead the Charge
+  `CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAAAmZW2WaZmxilFmBwgZ2wAgZGAMzAGL`
+- 14 (2.0%): +Afterimage, +Redoubt; -Imbued Shield, -Lead the Charge
   `CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZW2GjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAAAmZW2WaZmxilFmBwgZ2wAgZGAMzAGL`
-- 14 (2.0%): +Blessed Word, +Redoubt; -Imbued Shield, -Searing Sunlight
-  `CIEAAAAAAAAAAAAAAAAAAAAAAsZsNLjZMzMzMLbjxYWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAAAmZW2WaZmxilFmBwgZ2wAgZGAMzAGL`
-- 13 (1.9%): +Lead the Charge; -Righteous Protection
-  `CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzYmZmZWWGjZZWmlZMAADAAAAAAaamZZmxMDDbtBgBGwMYDAAAAmZW2WaZmxilFmBwgZYMAYmBAzMgxC`
-- 12 (1.7%): +Brought to Light, +Consecration in Flame 2/2, +Lead the Charge, +Obduracy 2/2; -Afterimage, -Empyreal Ward, -Light of the Titans, -Righteous Protection, -Unbound Freedom, -Undying Embers
-  `CIEAAAAAAAAAAAAAAAAAAAAAAsZYWGzMzMzMWWGjZZMLzYAAGAAAAAA00MzyMjZGGzWbAYgBA2AAAAgZmltlWmZsYZhZAAzwYAwMDAzMDYsA`
+- 13 (1.9%): +Afterimage, +Blessed Word, +Instrument of the Divine, +Obduracy 1/2; -Empyreal Ward, -Lightforged Blessing, -Searing Sunlight, -Solace
+  `CIEAAAAAAAAAAAAAAAAAAAAAAsZsNLjZMzMzMLLjxYWmlZMAADAAAAAAaamZZmxMDjHYrNAMwAmBbAAAAwMzy2SLzMWstgBAMzmxAgZGAMzAGL`
 
-**Split talents:** Unbound Freedom 90%; Blessing of Protection 89%; Light of the Titans (choice) 89%; Sacrifice of the Just (choice) 88%; Blessing of Spellwarding (choice) 84%; Lightforged Blessing 79%; Empyreal Ward 66%; Searing Sunlight (choice) 65%; Obduracy 60%; Imbued Shield (choice) 57%; Afterimage 56%; Righteous Protection (choice) 54%; Lead the Charge 52%; Redoubt (choice) 43%; Blessed Word (choice) 43%; Lightbearer 21%; Consecration in Flame 12%
+**Split talents:** Tempered in Battle (choice) 86%; Blessing of Spellwarding (choice) 84%; Undying Embers 83%; Lightforged Blessing 82%; Searing Sunlight (choice) 81%; Light of the Titans (choice) 73%; Obduracy 66%; Imbued Shield (choice) 64%; Empyreal Ward 62%; Lead the Charge 54%; Righteous Protection (choice) 52%; Afterimage 45%; Redoubt (choice) 36%; Consecration in Flame 28%; Blessed Word (choice) 25%; Lightbearer 15%; Improved Blessing of Protection 14%; Authoritative Rebuke (choice) 13%; Uther's Counsel (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 44 of 694 run it exactly.
+- `Dungeon`: 17 of 695 run it exactly. Typical has +Lead the Charge; lacks Afterimage.
 
 ## Retribution Paladin
 
 ### Raid
 
-727 rankings over 10 bosses, logged 2026-09-02 to 2026-09-25. 354 distinct builds. Hero tree: Herald of the Sun 98%, Templar 2%.
+961 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 442 distinct builds. Hero tree: Herald of the Sun 98%, Templar 2%.
 
-**Typical** (Herald of the Sun, agreement 75% on 8 contested talents, 21 run it exactly):
+**Typical** (Herald of the Sun, agreement 75% on 9 contested talents, 13 run it exactly):
 
 `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxCbAYWmtZmZrBAAAWAMAYMDzgZMzsBMzMMGGMA`
 
 **Most common other builds**, each against the typical:
 
-- 66 (9.1%): +Punishment; -Blessed Calling
+- 62 (6.5%): +Punishment; -Blessed Calling
   `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxCbAYWmtZmZrBAAAWAMAYMDDMjZmNgZmhxMGMA`
-- 32 (4.4%): +Punishment; -Cleanse Toxins
-  `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAANbbzMzyYmZGAAAAAAzUGzwMjtxsNMz2MGjxwMWYDAzysNzMbNAAAwCgBAjZYGMjZmNgZmhxMGMA`
-- 19 (2.6%): +Punishment, +Righteous Protection, +Sacrifice of the Just; -Blessed Calling, -Consecrated Ground, -Lead the Charge
+- 44 (4.6%): +Punishment, +Righteous Protection, +Sacrifice of the Just; -Blessed Calling, -Consecrated Ground, -Lead the Charge
   `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMbAzYmZDYmZYMjBD`
-- 11 (1.5%): +Lightforged Blessing; -Blessed Calling
-  `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxMjxwMWYDAzysNzMbNAAAwCgBAjZYgZMzsBMzMMGGMA`
+- 23 (2.4%): +Punishment; -Cleanse Toxins
+  `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAANbbzMzyYmZGAAAAAAzUGzwMjtxsNMz2MGjxwMWYDAzysNzMbNAAAwCgBAjZYGMjZmNgZmhxMGMA`
+- 20 (2.1%): +Divine Reach, +Holy Reprieve, +Lightforged Blessing; -Blinding Light, -Cleanse Toxins, -Consecrated Ground
+  `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAANbbzMzyYGzAAAAAAYUGzwMjtxsNMz2MmZMGzMWYDAzysNzMbNAAAwCgBgZMDzgZMzsBMzMMGGMA`
 
-**Split talents:** Tempest of the Lightbringer 90%; Lightbearer 85%; Blessed Champion 85%; Blade of Vengeance 79%; Blinding Light 75%; Cleanse Toxins 69%; Consecrated Ground 67%; Blessed Calling 50%; Punishment 47%; Sacrifice of the Just (choice) 28%; Lightforged Blessing 26%; Heart of the Crusader 21%; Recompense (choice) 13%; Holy Reprieve 11%
+**Split talents:** Light of Justice (choice) 89%; Lead the Charge 87%; Blessed Champion 87%; Blade of Vengeance 84%; Lightbearer 80%; Cleanse Toxins 78%; Blinding Light 73%; Blessed Calling 46%; Consecrated Ground 46%; Punishment 43%; Sacrifice of the Just (choice) 32%; Lightforged Blessing 30%; Righteous Protection (choice) 17%; Heart of the Crusader 16%; Recompense (choice) 14%; Holy Reprieve 13%; Swift Justice (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 21 of 727 run it exactly.
+- `Raid`: the typical build. 13 of 961 run it exactly.
 
 ### Mythic+
 
-682 rankings over 8 dungeons, logged 2026-09-03 to 2026-09-25, keys 19 to 22 (median 20). 151 distinct builds. Hero tree: Herald of the Sun 100%, Templar 0%. 118 left out: their log has no talents.
+703 rankings over 8 dungeons, logged 2026-09-17 to 2026-10-18, keys 20 to 23 (median 21). 136 distinct builds. Hero tree: Herald of the Sun 100%, Templar 0%. 97 left out: their log has no talents.
 
-**Typical** (Herald of the Sun, agreement 66% on 5 contested talents, 121 run it exactly):
+**Typical** (Herald of the Sun, agreement 69% on 5 contested talents, 110 run it exactly):
 
-`CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZZbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMbAzYmZDYmZYMjBD`
+`CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMbAzYmZDYmZYMjBD`
 
 **Most common other builds**, each against the typical:
 
-- 69 (10.1%): +Light of Justice; -Swift Justice
-  `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMbAzYmZDYmZYMjBD`
-- 37 (5.4%): +Consecrated Ground, +Lead the Charge, +Light of Justice; -Righteous Protection, -Sacrifice of the Just, -Swift Justice
+- 136 (19.3%): +Swift Justice; -Light of Justice
+  `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZZbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMbAzYmZDYmZYMjBD`
+- 50 (7.1%): +Consecrated Ground, +Lead the Charge; -Righteous Protection, -Sacrifice of the Just
   `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmyYGmZsNmthZ2mxYMGmxCbAYWmtZmZrBAAAWAMAYMDDMjZmNgZmhxMGMA`
-- 30 (4.4%): +Consecrated Ground, +Lead the Charge, +Light of Justice; -Punishment, -Righteous Protection, -Swift Justice
+- 25 (3.6%): +Consecrated Ground; -Punishment
+  `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmysMDzM2Gz2wMbzYMGDzYhNAMLz2Mzs1AAAALAGAMmZDYGzMbAzMDjhBD`
+- 25 (3.6%): +Consecrated Ground, +Lead the Charge; -Punishment, -Righteous Protection
   `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZbbmZWGzMzAAAAAAYmysMDzM2Gz2wMbzYMGDzYhNAMLz2Mzs1AAAALAGAMmhBmxMzGwMzwYYwA`
-- 18 (2.6%): +Lead the Charge; -Righteous Protection
-  `CYEAAAAAAAAAAAAAAAAAAAAAAAAAAAwoZZbmZWGzYGAAAAAAzUmlZYmx2Y2GmZbGjxYYGLsBgZZ2mZmtGAAAYBwAgxMMwMmZ2AmZGGzYwA`
 
-**Split talents:** Sacrifice of the Just (choice) 87%; Punishment 66%; Lightbearer 62%; Righteous Protection (choice) 60%; Swift Justice (choice) 55%; Lead the Charge 48%; Light of Justice (choice) 45%; Consecrated Ground 41%; Lightforged Blessing 16%; Blessed Calling 15%; Improved Blessing of Protection 12%
+**Split talents:** Sacrifice of the Just (choice) 85%; Lightbearer 71%; Righteous Protection (choice) 69%; Punishment 68%; Light of Justice (choice) 52%; Swift Justice (choice) 48%; Lead the Charge 42%; Consecrated Ground 31%; Lightforged Blessing 15%; Blessed Calling 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 121 of 682 run it exactly.
+- `Dungeon`: 136 of 703 run it exactly. Typical has +Light of Justice; lacks Swift Justice.
 
 ## Discipline Priest
 
 ### Raid
 
-768 rankings over 10 bosses, logged 2026-08-25 to 2026-09-25. 361 distinct builds. Hero tree: Voidweaver 99%, Oracle 1%.
+649 rankings over 10 bosses, logged 2026-10-13 to 2026-10-18. 287 distinct builds. Hero tree: Voidweaver 95%, Oracle 5%. 1 refused: unknown talents or not 34/34/13 points.
 
-**Typical** (Voidweaver, agreement 67% on 9 contested talents, 2 run it exactly):
+**Typical** (Voidweaver, agreement 64% on 9 contested talents, 7 run it exactly):
 
 `CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmBzwMmZbmZmZmZAAAAAAAAAAYGWmBzMzwMmZATz0YwMDAAwsNbLgxmBAgxYmxgZwMDmJYA`
 
 **Most common other builds**, each against the typical:
 
-- 39 (5.1%): +Lightburst, +Protector of the Frail; -Body and Soul, -Searing Light
+- 32 (4.9%): +Lightburst, +Protector of the Frail; -Body and Soul, -Searing Light
   `CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmBzgZbmtZmZmZmBAAAAAAAAAgZYZGMzMDzYmBMNTzMYmBAAY2mtFwYzAAwYMzYwMYmBjgB`
-- 27 (3.5%): +Lightburst, +Mental Agility, +Protector of the Frail; -Body and Soul, -Psychic Scream, -Searing Light
+- 19 (2.9%): +Abyssal Reverie 1/2, +Embrace the Shadow, +Encroaching Shadows, +Lightburst; -Mass Dispel, -Pain Suppression, -Shield Discipline, -Void Leech
+  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmxYmHwgZbmZmZmZAAAAAAAAAAYGWmBzMzwMmZATz0MDmZAAAmtZbDM2MAAMGzMGMDmZgJYA`
+- 14 (2.2%): +Lightburst, +Mental Agility, +Protector of the Frail; -Body and Soul, -Psychic Scream, -Searing Light
   `CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmBzgZbmtZmZmZmBAAAAAAAAAgZYZGMzMDzwMgpZamBzMAAAz2stAGbGAAGjZGDzMYmBjgB`
-- 16 (2.1%): +Protector of the Frail; -Searing Light
+- 13 (2.0%): +Protector of the Frail; -Searing Light
   `CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmBzgZbmtZmZmZmBAAAAAAAAAgZYZGMzMDzYmBMNTjBzMAAAz2stAGbGAAGjZGDmBzMYmgB`
-- 12 (1.6%): +Encroaching Shadows, +Lightburst; -Body and Soul, -Searing Light
-  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMmxyYmxYGMmZbmZmZmZAAAAAAAAAAYGWmBzMzwMmZATz0MDmZAAAmtZbBM2MAAMGzMGMDmZwIYA`
 
-**Split talents:** Inspiration 82%; Mass Dispel 80%; Pain Suppression 75%; Holy Nova 73%; Body and Soul 68%; Shield Discipline 58%; Void Leech (choice) 57%; Psychic Scream 57%; Searing Light 52%; Lightburst 45%; Embrace the Shadow (choice) 42%; Abyssal Reverie 37%; Dispel Magic 32%; Protector of the Frail (choice) 32%; Mental Agility 23%; Tithe Evasion 17%; Weal and Woe 16%; Encroaching Shadows 16%; Move with Grace 15%
+**Split talents:** Mass Dispel 80%; Inspiration 78%; Body and Soul 73%; Pain Suppression 66%; Holy Nova 65%; Shield Discipline 58%; Abyssal Reverie 56%; Searing Light 53%; Void Leech (choice) 53%; Psychic Scream 51%; Lightburst 42%; Embrace the Shadow (choice) 42%; Dispel Magic 41%; Protector of the Frail (choice) 28%; Mental Agility 25%; Tithe Evasion 20%; Encroaching Shadows 14%; Move with Grace 14%; Angelic Bulwark 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 2 of 768 run it exactly.
+- `Raid`: the typical build. 7 of 649 run it exactly.
 
 ### Mythic+
 
-638 rankings over 8 dungeons, logged 2026-09-01 to 2026-09-25, keys 17 to 21 (median 18). 346 distinct builds. Hero tree: Oracle 78%, Voidweaver 22%. 162 left out: their log has no talents.
+663 rankings over 8 dungeons, logged 2026-09-16 to 2026-10-18, keys 19 to 23 (median 20). 338 distinct builds. Hero tree: Oracle 85%, Voidweaver 15%. 137 left out: their log has no talents.
 
-**Typical** (Oracle, agreement 77% on 34 contested talents, 3 run it exactly):
+**Typical** (Oracle, agreement 80% on 30 contested talents, 31 run it exactly):
 
-`CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMGzwMbzYmZmZMzAAAAAAAAAAYYWmBzMzwMmZATzEDwMLYIMmlBYMYBAAGzMzYwMAzMzAmB`
+`CAQAAAAAAAAAAAAAAAAAAAAAAADsMDzyMjxMzMMbzgZmZYGAAAAAAAAAADzyMYmZGmxMDYamYGwMLYIMmlBYMYBAAGzMzYwMAzMzAmB`
 
 **Most common other builds**, each against the typical:
 
-- 21 (3.3%): +Enduring Luminescence, +Revel in Darkness; -Occultist, -Shadow Tap
-  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmBmZbmtZmZmxMDAAAAAAAAAghZZGMzMDzYmBMNTMAzsghwYWGgxgFAAYMzMjBzAMzMDYG`
-- 12 (1.9%): +Angel's Mercy, +Blaze of Light 1/2, +Revel in Darkness, +Tithe Evasion; -Dark Indulgence, -Mindpierce, -Psychic Scream, -Searing Light
-  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMzDwyMjxMzgZbGzMjZMzAAAAAAAAAAYYWmhZmZGmhZgZamYAmZBDhxsMAjBLAAwYmxYwMAzMzAmB`
-- 12 (1.9%): +Blaze of Light 2/2, +Collapsing Void, +Dark Energy, +Darkening Horizon, +Devour Matter, +Divine Procession, +Dominate Mind, +Enduring Luminescence, +Greater Smite, +Inner Quietus, +Overwhelming Shadows, +Petrifying Scream, +Phantasm, +Quickened Pulse, +Touch of the Void, +Void Blast, +Void Infusion, +Void Leech, +Voidheart, +Voidweaver, +Voidwraith; -Angelic Bulwark, -Assured Safety, -Body and Soul, -Borrowed Time 2/2, -Divine Feathers, -Foreseen Circumstances, -Inspiration, -Oracle, -Piety, -Preemptive Care, -Preventive Measures, -Prompt Prognosis, -Prophet's Insight, -Prophet's Will, -Searing Light, -Shield Discipline, -Twinsight, -Unfolding Vision, -Waste No Time, -Weal and Woe, -Words of the Wise
-  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMzMWYMGzgZzsNzMzMzMDAAAAAAAAAgxYZGMzMjNjZGsZamYwMDAAwsNbLgxmBAgxMzMGMDmZwIYG`
-- 11 (1.7%): +Abyssal Reverie 1/2, +Angel's Mercy, +Revel in Darkness, +Tithe Evasion; -Dark Indulgence, -Mindpierce, -Psychic Scream, -Searing Light
-  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMDWmZMmZmHgZbGzMjZMzAAAAAAAAAAYYWmhZmZGmhZgZamYAmZBDhxsMAjBLAAwYmxYwMAzMzAmB`
+- 32 (4.8%): +Mental Agility; -Inspiration
+  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMDzyMjxMzMMbzgZmZYGAAAAAAAAAADzyMYmZGMmZATzEzAmZBDhxsMAjBLAAwYmZGDzMAzMzAmB`
+- 17 (2.6%): +Dominate Mind; -Psychic Scream
+  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMDzyMjxMzMMbzgZmZYGAAAAAAAAAADzyMYmZGmhZwmpZiZAzsghwYWGgxgFAAYMzMjBzAMzMDYG`
+- 17 (2.6%): +Dominate Mind, +Mental Agility; -Inspiration, -Psychic Scream
+  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMDzyMjxMzMMbzgZmZYGAAAAAAAAAADzyMYmZGMMD2MNTMDYmFMEGzyAMGsAAAjZmZMMzAMzMDYG`
+- 11 (1.7%): +Phantasm; -Mindpierce
+  `CAQAAAAAAAAAAAAAAAAAAAAAAADsMDzyMjxMzMMbzgZmZYGAAAAAAAAAAjZWmBzMzwMmZATzEzAmZBDhxsMAjBLAAwYmxYwMAzMzAmB`
 
-**Split talents:** Holy Ray 90%; Dark Indulgence 89%; Borrowed Time 89%; Shadow Mend 87%; Ultimate Penitence (choice) 86%; Divine Aegis 85%; Shield Discipline 83%; Grim Deliverance 83%; Purge the Wicked 80%; Weal and Woe 78%; Words of the Wise 78%; Waste No Time 78%; Unfolding Vision 78%; Twinsight 78%; Prophet's Insight 78%; Prompt Prognosis 78%; Preventive Measures 78%; Preemptive Care 78%; Piety 78%; Foreseen Circumstances 78%; Assured Safety 78%; Prophet's Will (choice) 78%; Angelic Bulwark 76%; Inspiration 76%; Mindpierce 73%; Psychic Scream 72%; Body and Soul 71%; Revel in Darkness 70%; Shadow Tap 56%; Occultist 55%; Divine Feathers (choice) 55%; Searing Light 46%; Blaze of Light 46%; Phantasm 43%; Enduring Luminescence (choice) 35%; Divine Procession 31%; Dominate Mind (choice) 31%; Greater Smite 29%; Save the Day (choice) 23%; Abyssal Reverie 22%; Voidwraith 22%; Voidheart 22%; Void Infusion 22%; Void Blast 22%; Touch of the Void 22%; Quickened Pulse 22%; Overwhelming Shadows 22%; Inner Quietus 22%; Devour Matter 22%; Collapsing Void 22%; Pain and Suffering 22%; Darkening Horizon (choice) 22%; Angel's Mercy 22%; Dark Energy (choice) 21%; Mental Agility 19%; Void Leech (choice) 17%; Improved Purify 16%; Tithe Evasion 13%; Power Word: Barrier (choice) 13%; Petrifying Scream (choice) 12%
+**Split talents:** Holy Ray 89%; Borrowed Time 89%; Shield Discipline 87%; Purge the Wicked 87%; Words of the Wise 85%; Waste No Time 85%; Unfolding Vision 85%; Twinsight 85%; Prophet's Insight 85%; Prompt Prognosis 85%; Preventive Measures 85%; Preemptive Care 85%; Piety 85%; Foreseen Circumstances 85%; Assured Safety 85%; Weal and Woe 85%; Shadow Tap 85%; Revel in Darkness 85%; Prophet's Will (choice) 85%; Occultist 84%; Body and Soul 82%; Angelic Bulwark 82%; Mindpierce 80%; Divine Feathers (choice) 76%; Inspiration 70%; Psychic Scream 68%; Abyssal Reverie 62%; Power Word: Radiance 56%; Shadowfiend 49%; Harsh Discipline 48%; Light's Promise 47%; Sanctuary 45%; Dominate Mind (choice) 39%; Phantasm 33%; Mental Agility 33%; Searing Light 28%; Blaze of Light 27%; Pain and Suffering 24%; Greater Smite 16%; Divine Procession 16%; Voidwraith 15%; Voidheart 15%; Void Infusion 15%; Void Blast 15%; Touch of the Void 15%; Quickened Pulse 15%; Overwhelming Shadows 15%; Inner Quietus 15%; Devour Matter 15%; Darkening Horizon (choice) 15%; Collapsing Void 15%; Angel's Mercy 14%; Dark Energy (choice) 14%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 3 of 638 run it exactly.
+- `Dungeon`: no one in the sample runs it exactly. Typical has +Abyssal Reverie 2/2, +Revel in Darkness, +Sanctuary, +Shadowfiend; lacks Harsh Discipline 2/2, Light's Promise, Power Word: Radiance, Searing Light.
 
 ## Holy Priest
 
 ### Raid
 
-746 rankings over 10 bosses, logged 2026-08-26 to 2026-09-25. 281 distinct builds. Hero tree: Oracle 100%.
+988 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 319 distinct builds. Hero tree: Oracle 100%, Archon 0%.
 
-**Typical** (Oracle, agreement 77% on 7 contested talents, 55 run it exactly):
+**Typical** (Oracle, agreement 75% on 7 contested talents, 57 run it exactly):
 
 `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZWGzMmZMMDzsMzYGAAAAzYWmBzMzwMMDgZqBwMLYIMmlBYMwiZmZBgZMGjhZGgZmZgB`
 
 **Most common other builds**, each against the typical:
 
-- 41 (5.5%): +Psychic Scream; -Lightburst
+- 42 (4.3%): +Empyreal Blaze, +Gales of Song, +Psychic Scream; -Afterlife, -Mental Agility, -Seraphic Crescendo
+  `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZ2GzMmZMMDjlZmZGAAAAzYWmBzMzwMmZAMTNAmZBDhxsMAjBWMzMLAMjxYMYGgZmZgB`
+- 38 (3.8%): +Psychic Scream; -Lightburst
   `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZWGzMmZMMDzsMzYGAAAAzYWmBzMzwMmZAMTBwMLYIMmlBYMwiZmZBgZMGjhZGgZmZgB`
-- 22 (2.9%): +Save the Day; -Divine Feathers
-  `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZWGzMmZMMDzsMzYGAAAAzYWmBzMzwMMDgZqBwMbYIMmlBYMwiZmZBgZMGjhZGgZmZgB`
-- 20 (2.7%): +Psychic Scream; -Mental Agility
+- 26 (2.6%): +Gales of Song; -Seraphic Crescendo
+  `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZ2GzMmZMMDzsMzYGAAAAzYWmBzMzwMMDgZqBwMLYIMmlBYMwiZmZBgZMGjhZGgZmZgB`
+- 26 (2.6%): +Psychic Scream; -Mental Agility
   `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZWGzMmZMMDzsMzYGAAAAzYWmBzMzwMmZAMTNAmZBDhxsMAjBWMzMLAMjxYMYGgZmZgB`
-- 19 (2.5%): +Move with Grace; -Mental Agility
-  `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYBmZWGzMmZMMDzsMzYGAAAAzYWmBzMzwMjZAMTNAmZBDhxsMAjBWMzMLAMjxYMYGgZmZgB`
 
-**Split talents:** Divine Feathers (choice) 86%; Holy Fire 84%; Prophet's Will (choice) 84%; Seraphic Crescendo (choice) 79%; Painful Invocation 74%; Lightburst 67%; Mental Agility 66%; Move with Grace 45%; Psychic Scream 39%; Dispel Magic 34%; Gales of Song (choice) 21%; Desperate Measures (choice) 16%; Save the Day (choice) 14%; Angel's Mercy 14%
+**Split talents:** Afterlife 90%; Prophet's Will (choice) 88%; Divine Feathers (choice) 84%; Painful Invocation 69%; Seraphic Crescendo (choice) 67%; Lightburst 65%; Mental Agility 60%; Psychic Scream 58%; Move with Grace 40%; Gales of Song (choice) 33%; Dispel Magic 29%; Save the Day (choice) 16%; Phantasm 13%; Desperate Measures (choice) 12%; Angel's Mercy 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 55 of 746 run it exactly.
+- `Raid`: the typical build. 57 of 988 run it exactly.
 
 ### Mythic+
 
-663 rankings over 8 dungeons, logged 2026-09-01 to 2026-09-25, keys 18 to 21 (median 19). 365 distinct builds. Hero tree: Oracle 100%. 137 left out: their log has no talents.
+686 rankings over 8 dungeons, logged 2026-09-07 to 2026-10-18, keys 20 to 22 (median 20). 366 distinct builds. Hero tree: Oracle 100%. 114 left out: their log has no talents.
 
-**Typical** (Oracle, agreement 71% on 13 contested talents, 2 run it exactly):
+**Typical** (Oracle, agreement 77% on 15 contested talents, 19 run it exactly):
 
-`CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYzMzYWGzMmZMMDsMzMzAAAAYYWmhZmZGmxMDgZKAmZBDhxsMAjBWMmZBgZMzYMYGgZmZgB`
+`CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAMzMmlxMjZGDzALzMzMAAAAGmlZYmZmhZMzAYmCgZWwQYMLDwYgFjZWAYGzMGDmBYmZGYA`
 
 **Most common other builds**, each against the typical:
 
-- 22 (3.3%): +Desperate Measures, +Light of the Naaru 2/2, +Light's Inspiration, +Prismatic Echoes 1/2, +Unwavering Will 1/2; -Light in the Darkness 2/2, -Prophet's Will, -Trail of Light, -Unwavering Will 2/2
+- 35 (5.1%): +Dominate Mind, +Petrifying Scream, +Phantasm, +Save the Day; -Angel's Mercy, -Body and Soul, -Divine Feathers, -Inspiration
+  `CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAMzMmlxMjZGDzALzMzMAAAAGzsMDmZmxmxMD2wMFAzshhwYWGgxALGzsAwMmZMGMDwMzAGA`
+- 15 (2.2%): +Desperate Measures, +Light of the Naaru 2/2, +Light's Inspiration, +Prismatic Echoes 1/2, +Unwavering Will 1/2; -Divine Image, -Light in the Darkness 2/2, -Prophet's Will, -Unwavering Will 2/2
   `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAgZm5BmlxMjZGjZGYZmZmBAAAwwsMzYmZmh5BMzAYmCgZWwQYMbDwYgFDzCAzYmxYwMAzMzAD`
-- 16 (2.4%): +Desperate Measures, +Light of the Naaru 2/2, +Light's Inspiration, +Prismatic Echoes 2/2, +Unwavering Will 1/2; -Desperate Times 2/2, -Epiphany, -Prophet's Will, -Trail of Light, -Unwavering Will 2/2
-  `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAghZmlxMjZGjZGYZmZmBAAAwwsMzYmZmh5BMzAYmCgZWwQYMbDwYgFjZWAYGzMGDmBYmZGYA`
-- 12 (1.8%): +Desperate Measures, +Divine Image, +Lasting Words, +Petrifying Scream, +Phantasm; -Angel's Mercy, -Body and Soul, -Eternal Sanctity, -Prophet's Will, -Trail of Light
-  `CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAMzMmlxMjZGDzALzMzMAAAAGzsMDmZmx2MmZAMTBwMLYIMmtBYMwiZmBAzYmxYwMAzMDYA`
-- 11 (1.7%): +Divine Image; -Trail of Light
-  `CEQAAAAAAAAAAAAAAAAAAAAAAwYAAAAAAAMzMmlxMjZGDzALzMzMAAAAGmlZYmZmhZMzAYmCgZWwQYMLDwYgFjZWAYGzMGDmBYmZGYA`
+- 10 (1.5%): +Desperate Measures, +Light's Inspiration, +Trail of Light, +Unwavering Will 1/2; -Divine Image, -Prophet's Will, -Unwavering Will 2/2
+  `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAYzMzYWGzMmZMMDsMzMzAAAAYYWmZMzMzw8AmZAMTBwMLYIMmtBYMwixMLAMjZGjBzAMzMDMA`
+- 9 (1.3%): +Desperate Measures, +Guardian Angel, +Healing Focus, +Lasting Words, +Light of the Naaru 1/2, +Lightburst, +Prismatic Echoes 2/2; -Desperate Times 2/2, -Dispel Magic, -Divine Image, -Divine Service, -Epiphany, -Prophet's Will, -Restitution
+  `CEQAAAAAAAAAAAAAAAAAAAAAAADAAAAAAghZmlxYMzY8AzwYbmZmBAAAwwsMDzMzMMjZGAzUDgZWwQYMbDwYgFzMzCAzYMGDmBYmZGYA`
 
-**Split talents:** Inspiration 90%; Psychic Scream 89%; Light in the Darkness 86%; Unwavering Will 86%; Eternal Sanctity (choice) 82%; Restitution (choice) 78%; Desperate Times 77%; Body and Soul 73%; Angel's Mercy 68%; Epiphany 64%; Prismatic Echoes 52%; Desperate Measures (choice) 51%; Prophet's Will (choice) 49%; Phantasm 46%; Light's Inspiration 43%; Light of the Naaru 34%; Dominate Mind (choice) 31%; Trail of Light (choice) 26%; Lasting Words 22%; Guardian Angel (choice) 22%; Healing Focus 19%; Divine Image 18%; Petrifying Scream (choice) 12%; Lightburst 10%
+**Split talents:** Cosmic Wave 90%; Psychic Scream 89%; Eternal Sanctity (choice) 88%; Unwavering Will 88%; Inspiration 87%; Desperate Times 86%; Divine Feathers (choice) 85%; Epiphany 77%; Restitution (choice) 74%; Body and Soul 73%; Angel's Mercy 66%; Prophet's Will (choice) 59%; Phantasm 43%; Desperate Measures (choice) 41%; Prismatic Echoes 41%; Dominate Mind (choice) 38%; Divine Image 38%; Light's Inspiration 36%; Guardian Angel (choice) 26%; Trail of Light (choice) 23%; Light of the Naaru 23%; Healing Focus 23%; Lasting Words 20%; Save the Day (choice) 15%; Petrifying Scream (choice) 15%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 2 of 663 run it exactly.
+- `Dungeon`: 5 of 686 run it exactly. Typical has +Divine Image; lacks Trail of Light.
 
 ## Shadow Priest
 
 ### Raid
 
-786 rankings over 10 bosses, logged 2026-08-30 to 2026-09-25. 271 distinct builds. Hero tree: Archon 91%, Voidweaver 9%.
+949 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 341 distinct builds. Hero tree: Archon 91%, Voidweaver 9%.
 
-**Typical** (Archon, agreement 77% on 13 contested talents, 100 run it exactly):
+**Typical** (Archon, agreement 76% on 15 contested talents, 94 run it exactly):
 
 `CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMz2MGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA`
 
 **Most common other builds**, each against the typical:
 
-- 34 (4.3%): +Idol of C'Thun, +Instilled Doubt 2/2, +Spectral Horrors; -Crushing Void, -Descending Darkness, -Mastermind 2/2
-  `CIQAAAAAAAAAAAAAAAAAAAAAAMMDzAAAAAAAAAAAAMMLmxYbmxMz2MYG2mZGzMzYDZGLmpBYGgZ2MDzmBgMGLAYmxgxMzMmNmZbZAmBDA`
-- 31 (3.9%): +Misery; -Invoked Nightmare
+- 31 (3.3%): +Angelic Bulwark; -Protective Light
+  `CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMz2MGzY2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA`
+- 29 (3.1%): +Misery; -Invoked Nightmare
   `CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMzyMGzw2MzYmZGbIzYxMNAzAMzmZY2MAkxYBAzMgxMzMmNmZbZAmBDA`
-- 29 (3.7%): +Angelic Bulwark, +Collapsing Void, +Dark Energy, +Dark Thoughts, +Darkening Horizon, +Devour Matter, +Inner Quietus, +Instilled Doubt 2/2, +Move with Grace, +Overwhelming Shadows, +Quickened Pulse, +Shadowy Insight, +Spectral Horrors, +Touch of the Void, +Void Blast, +Void Infusion, +Void Leech, +Voidheart, +Voidweaver, +Voidwraith; -Archon, -Dark Evangelism, -Divine Halo, -Empowered Surges, -Energy Conservation, -Energy Cycle, -Focused Outburst, -Incessant Screams, -Maddening Touch, -Manifested Power, -Mental Decay, -Perfected Form, -Power Surge, -Protective Light, -Psychic Link, -Purify Disease, -Resonant Energy, -Shattered Psyche, -Spiritwell, -Sustained Potency, -Word of Supremacy
+- 28 (3.0%): +Angelic Bulwark, +Collapsing Void, +Dark Energy, +Dark Thoughts, +Darkening Horizon, +Devour Matter, +Inner Quietus, +Instilled Doubt 2/2, +Move with Grace, +Overwhelming Shadows, +Quickened Pulse, +Shadowy Insight, +Spectral Horrors, +Touch of the Void, +Void Blast, +Void Infusion, +Void Leech, +Voidheart, +Voidweaver, +Voidwraith; -Archon, -Dark Evangelism, -Divine Halo, -Empowered Surges, -Energy Conservation, -Energy Cycle, -Focused Outburst, -Incessant Screams, -Maddening Touch, -Manifested Power, -Mental Decay, -Perfected Form, -Power Surge, -Protective Light, -Psychic Link, -Purify Disease, -Resonant Energy, -Shattered Psyche, -Spiritwell, -Sustained Potency, -Word of Supremacy
   `CIQAAAAAAAAAAAAAAAAAAAAAAMMDzAAAAAAAAAAAAwMLmxMbzMDz2MzYGzmZGzMzYjJDLmpBYmZGAIAz2stAmNGAYwYmZGzGzgZGMDGA`
-- 20 (2.5%): +Everlasting Light, +Idol of C'Thun, +Improved Flash Heal, +Inspiration, +Instilled Doubt 2/2, +Spectral Horrors, +Surge of Light; -Crushing Void, -Descending Darkness, -Mass Dispel, -Mastermind 2/2, -Petrifying Scream, -Psychic Voice, -Purify Disease
-  `CIQAAAAAAAAAAAAAAAAAAAAAAMMDzAAAAAAAAAAAAMMLmxYbmxMz2MYG2mZGzMzwQzAz0MDMDwMbmhZzAQGjFAMzYwYmZGzGzstMAGMA`
+- 21 (2.2%): +Everlasting Light, +Improved Flash Heal, +Inspiration, +Phantasm, +Surge of Light; -Light's Inspiration, -Mass Dispel, -Petrifying Scream, -Psychic Voice, -Purify Disease
+  `CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMz2MGzM2mxYmZGGaGYmmZgZAmZzMMbGAyYsAgZGwYmZGzGzstMAGMA`
 
-**Split talents:** Sustained Potency (choice) 90%; Psychic Link 88%; Mass Dispel 87%; Incessant Screams (choice) 87%; Shattered Psyche 86%; Descending Darkness 82%; Invoked Nightmare (choice) 81%; Crushing Void 81%; Mastermind 74%; Protective Light 73%; Petrifying Scream (choice) 69%; Psychic Voice (choice) 52%; Purify Disease 51%; Move with Grace 41%; Improved Flash Heal 39%; Spectral Horrors 35%; Instilled Doubt 35%; Angelic Bulwark 26%; Surge of Light 25%; Idol of C'Thun 25%; Misery (choice) 19%; Inspiration 15%; Everlasting Light 14%; Phantasm 12%
+**Split talents:** Dark Evangelism 90%; Psychic Link 89%; Descending Darkness 88%; Shattered Psyche 86%; Crushing Void 85%; Light's Inspiration 85%; Incessant Screams (choice) 84%; Sustained Potency (choice) 84%; Mastermind 81%; Mass Dispel 77%; Invoked Nightmare (choice) 73%; Protective Light 71%; Petrifying Scream (choice) 63%; Psychic Voice (choice) 45%; Purify Disease 44%; Improved Flash Heal 42%; Move with Grace 40%; Surge of Light 35%; Instilled Doubt 28%; Spectral Horrors 27%; Misery (choice) 27%; Angelic Bulwark 27%; Everlasting Light 24%; Inspiration 23%; Phantasm 19%; Idol of C'Thun 19%; Shadowy Insight 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 100 of 786 run it exactly.
+- `Raid`: the typical build. 94 of 949 run it exactly.
 
 ### Mythic+
 
-630 rankings over 8 dungeons, logged 2026-08-29 to 2026-09-25, keys 18 to 21 (median 18). 294 distinct builds. Hero tree: Voidweaver 63%, Archon 37%. 170 left out: their log has no talents.
+641 rankings over 8 dungeons, logged 2026-09-06 to 2026-10-18, keys 19 to 22 (median 20). 310 distinct builds. Hero tree: Archon 66%, Voidweaver 34%. 159 left out: their log has no talents.
 
-**Typical** (Voidweaver, agreement 62% on 28 contested talents, 2 run it exactly):
+**Typical** (Archon, agreement 64% on 27 contested talents, 5 run it exactly):
 
-`CIQAAAAAAAAAAAAAAAAAAAAAAMjZMAAAAAAAAAAAAYMLzMGbzMmZ2mZGDz2MzYmZGbID2mpxAzMzAABY2mtNwsxAADGzMzY2GzgZGMDGA`
+`CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAMLmxMbzMmZWmxYY2mZGzMzYDZYZbmGgZAmZzMMbGAyYsAgZGDGzMzY2YmtlBYGMA`
 
 **Most common other builds**, each against the typical:
 
-- 19 (3.0%): +Psychic Voice; -Improved Flash Heal
-  `CIQAAAAAAAAAAAAAAAAAAAAAAMjZMAAAAAAAAAAAAYMLzMGbzMmZ2mZGDz2MzYmZGbIDLbz0AMzMDAEgZb22AzGDAMYMzMjZbMDmZwMYA`
-- 12 (1.9%): +Crushing Void, +Idol of C'Thun, +Insidious Ire 1/2, +Shackle Horror; -Idol of Y'Shaarj, -Inescapable Torment, -Mindbender, -Tithe Evasion
-  `CIQAAAAAAAAAAAAAAAAAAAAAAMMj5BAAAAAAAAAAAAMMLmxMbzMmZ2mZGDz2MzYmZmZDZwmpxAzMzAABY2mtNwsxAADGzMzY2GzgZGMDGA`
-- 11 (1.7%): +False Autonomy, +Purify Disease; -Improved Flash Heal, -Petrifying Scream
-  `CIQAAAAAAAAAAAAAAAAAAAAAAMjZMAAAAAAAAAAAAYMLzMGbzMmZ2mZGDz2MzYmZGQmhtZaAmZmBACwsNbbgZjBAGMzMzMmtxMYmBzgB`
-- 11 (1.7%): +Move with Grace, +Purify Disease; -Dominate Mind, -Petrifying Scream
-  `CIQAAAAAAAAAAAAAAAAAAAAAAMjZMAAAAAAAAAAAAYMLzMGbzMmZ2mZGDz2MzYmZGYyMYmGDMzMDAEgZb22AzGDAMYMzMjZbMDmZwMYA`
+- 28 (4.4%): +False Autonomy, +Mastermind 2/2, +Phantasm; -Angelic Bulwark, -Instilled Doubt 2/2, -Psychic Voice
+  `CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMzyMGjx2MzYmZGbID2mpBYGgZ2MDzmBgMGLAYmBMzMzMmNmZbZAmBDA`
+- 16 (2.5%): +Mastermind 2/2, +Phantasm; -Angelic Bulwark, -Instilled Doubt 2/2
+  `CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMzyMGjx2MzYmZGbIDLbz0AMDwMbmhZzAQGjFAMzAGzMzY2YmtlBYGMA`
+- 13 (2.0%): +False Autonomy, +Mastermind 2/2, +Phantom Reach; -Angelic Bulwark, -Instilled Doubt 2/2, -Psychic Voice
+  `CIQAAAAAAAAAAAAAAAAAAAAAAMMDDAAAAAAAAAAAAmZxMmZbmxMzyMGzw2MzYmZGbID2mpBYGgZ2MDzmBgMGLAYmBMzMzMmNmZbZAmBDA`
+- 10 (1.6%): +Collapsing Void, +Dark Energy, +Darkening Horizon, +Devour Matter, +Embrace the Shadow, +Idol of C'Thun, +Improved Flash Heal, +Inner Quietus, +Insidious Ire 1/2, +Invoked Nightmare, +Overwhelming Shadows, +Quickened Pulse, +Shadowfiend, +Shadowy Insight, +Subservient Shadows, +Touch of the Void, +Void Blast, +Void Infusion, +Voidheart, +Voidweaver, +Voidwraith; -Archon, -Dark Evangelism, -Divine Halo, -Empowered Surges, -Energy Conservation, -Energy Cycle, -Focused Outburst, -Incessant Screams, -Insidious Ire 2/2, -Manifested Power, -Mental Decay, -Misery, -Perfected Form, -Power Surge, -Resonant Energy, -Shattered Psyche, -Spiritwell, -Sustained Potency, -Tithe Evasion, -Word of Supremacy
+  `CIQAAAAAAAAAAAAAAAAAAAAAAMMj5BAAAAAAAAAAAAMMLmxMbzMmZ2mZGDz2MzYmZGbIDLbmGDMzMDAEgZb22AzGDAMYMzMjZbMDmZwMYA`
 
-**Split talents:** Light's Inspiration 86%; Instilled Doubt 78%; Petrifying Scream (choice) 69%; Shadowy Insight 67%; Tithe Evasion 67%; Subservient Shadows 64%; Shadowfiend 64%; Dominate Mind (choice) 63%; Voidwraith 63%; Voidheart 63%; Void Infusion 63%; Void Blast 63%; Touch of the Void 63%; Quickened Pulse 63%; Overwhelming Shadows 63%; Inner Quietus 63%; Devour Matter 63%; Darkening Horizon (choice) 63%; Collapsing Void 63%; Dark Energy (choice) 63%; Invoked Nightmare (choice) 63%; Embrace the Shadow (choice) 55%; Crushing Void 51%; Insidious Ire 50%; Mindbender 49%; Inescapable Torment 49%; Idol of Y'Shaarj 49%; Improved Flash Heal 48%; Angelic Bulwark 48%; Psychic Voice (choice) 47%; Phantasm 40%; Purify Disease 40%; Misery (choice) 37%; Word of Supremacy (choice) 37%; Spiritwell (choice) 37%; Resonant Energy 37%; Power Surge 37%; Perfected Form 37%; Manifested Power 37%; Focused Outburst 37%; Energy Cycle 37%; Energy Conservation 37%; Empowered Surges 37%; Divine Halo 37%; Sustained Potency (choice) 37%; Incessant Screams (choice) 36%; Mental Decay 33%; Phantom Reach 31%; Dark Evangelism 31%; Shattered Psyche 30%; Mastermind 26%; Idol of C'Thun 20%; Surge of Light 17%; False Autonomy 16%; Move with Grace 10%
+**Split talents:** Light's Inspiration 89%; Insidious Ire 73%; Crushing Void 73%; Petrifying Scream (choice) 70%; Dominate Mind (choice) 70%; Tithe Evasion 69%; Word of Supremacy (choice) 66%; Spiritwell (choice) 66%; Resonant Energy 66%; Power Surge 66%; Perfected Form 66%; Manifested Power 66%; Focused Outburst 66%; Energy Cycle 66%; Energy Conservation 66%; Empowered Surges 66%; Divine Halo 66%; Incessant Screams (choice) 65%; Sustained Potency (choice) 65%; Mental Decay 61%; Shattered Psyche 58%; Dark Evangelism 57%; Instilled Doubt 56%; Misery (choice) 55%; Psychic Voice (choice) 49%; Mastermind 48%; Angelic Bulwark 46%; Invoked Nightmare (choice) 45%; Improved Flash Heal 44%; Phantasm 42%; Shadowy Insight 39%; Shadowfiend 38%; Subservient Shadows 37%; Voidwraith 34%; Voidheart 34%; Void Infusion 34%; Void Blast 34%; Touch of the Void 34%; Quickened Pulse 34%; Overwhelming Shadows 34%; Inner Quietus 34%; Devour Matter 34%; Darkening Horizon (choice) 34%; Dark Energy (choice) 34%; Collapsing Void 34%; Phantom Reach 29%; Mindbender 27%; Inescapable Torment 27%; Idol of Y'Shaarj 27%; Embrace the Shadow (choice) 26%; Purify Disease 26%; Surge of Light 22%; False Autonomy 21%; Idol of C'Thun 11%; Holy Nova 10%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 2 of 630 run it exactly.
+- `Dungeon`: 1 of 641 run it exactly. Typical has +Archon, +Crushing Void, +Dark Evangelism, +Divine Halo, +Empowered Surges, +Energy Conservation, +Energy Cycle, +Focused Outburst, +Incessant Screams, +Insidious Ire 2/2, +Manifested Power, +Mental Decay, +Misery, +Perfected Form, +Power Surge, +Psychic Voice, +Resonant Energy, +Shattered Psyche, +Spiritwell, +Sustained Potency, +Word of Supremacy; lacks Collapsing Void, Dark Energy, Darkening Horizon, Devour Matter, Embrace the Shadow, Idol of Y'Shaarj, Improved Flash Heal, Inescapable Torment, Inner Quietus, Invoked Nightmare, Mindbender, Overwhelming Shadows, Quickened Pulse, Shadowfiend, Shadowy Insight, Subservient Shadows, Touch of the Void, Void Blast, Void Infusion, Voidheart, Voidweaver, Voidwraith.
 
 ## Assassination Rogue
 
 ### Raid
 
-783 rankings over 10 bosses, logged 2026-08-25 to 2026-09-25. 345 distinct builds. Hero tree: Fatebound 88%, Deathstalker 12%.
+917 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 305 distinct builds. Hero tree: Fatebound 98%, Deathstalker 2%. 1 left out: their log has no talents.
 
-**Typical** (Fatebound, agreement 82% on 26 contested talents, 52 run it exactly):
+**Typical** (Fatebound, agreement 76% on 12 contested talents, 108 run it exactly):
 
 `CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsYwAAAAAAzygtZAAAAAAZbmZmZmZMWmZmZbmlZmZGjZGjxMzYMAGYBmxoxsBYbAbGAMzMGD`
 
 **Most common other builds**, each against the typical:
 
-- 19 (2.4%): +Airborne Irritant, +Fatal Concoction 1/2, +Scent of Blood 2/2, +Thrown Precision; -Avulsion, -Fatal Concoction 2/2, -Regicide's Reward, -Toxic Stiletto
-  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAottZmZmZmxYZmZmtZWmZmHwMmZMGmZMGADsAzY0Y2AsNgNDAmZGMA`
-- 17 (2.2%): +Thistle Tea; -Thistle Tea
-  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsYwAAAAAAzygtZAAAAAAZbmZmZmZM2mZmZbmlZmZGjZGjxMzYMAGYBmxoxsBYbAbGAMzMGD`
-- 15 (1.9%): +Fatal Concoction 1/2, +Scent of Blood 2/2, +Thrown Precision; -Avulsion, -Fatal Concoction 2/2, -Regicide's Reward
+- 51 (5.6%): +Fatal Concoction 1/2, +Scent of Blood 2/2, +Thistle Tea, +Thrown Precision; -Avulsion, -Fatal Concoction 2/2, -Regicide's Reward, -Thistle Tea
+  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAIbzMzMzMjx2MzMbzsMzMPgZMzYMMzYMAGYBmxoxsBYbAbGAMzMGD`
+- 46 (5.0%): +Fatal Concoction 1/2, +Scent of Blood 2/2, +Thrown Precision; -Avulsion, -Fatal Concoction 2/2, -Regicide's Reward
   `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAIbzMzMzMjxyMzMbzsMzMPgZMzYMMzYMAGYBmxoxsBYbAbGAMzMGD`
-- 14 (1.8%): +Scent of Blood 1/2; -Regicide's Reward
-  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsYwAAAAAAzygtZAAAAAAZbmZmZmZMWmZmZbmlZmZmHYMzYMMzYMAGYBmxoxsBYbAbGAMzMGD`
+- 30 (3.3%): +Thistle Tea; -Thistle Tea
+  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsYwAAAAAAzygtZAAAAAAZbmZmZmZM2mZmZbmlZmZGjZGjxMzYMAGYBmxoxsBYbAbGAMzMGD`
+- 20 (2.2%): +Doomblade, +Improved Poisons, +Internal Bleeding, +Systemic Failure; -Canny Strikes, -Caustic Spatter, -Crimson Tempest, -Poison Bomb
+  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlxsNDGAAAAAYWGsNDAAAAAIbzMzMzMjxyMzMbzsMzMzYGzYMmZMMAGYBmxoxsBYbAbGAMzMGD`
 
-**Split talents:** Iron Stomach 89%; Sometimes Lucky 88%; Rush to the Inevitable 88%; Ravenholdt Mint 88%; Overflowing Purse (choice) 88%; Mean Streak 88%; Lucky Coin 88%; Fate Intertwined 88%; Edge Case 88%; Delivered Doom 88%; Deal Fate 88%; Controlled Chaos 88%; Caustic Spatter 87%; Featherfoot 87%; Crimson Tempest 87%; Tempted Fate (choice) 86%; Recuperator 85%; Poison Bomb 80%; Canny Strikes (choice) 80%; Thistle Tea (choice) 75%; Toxic Stiletto 74%; Death's Arrival (choice) 68%; Avulsion 66%; Regicide's Reward 56%; Scent of Blood 44%; Thrown Precision 42%; Airborne Irritant (choice) 41%; Thistle Tea (choice) 25%; Shadowrunner 22%; Doomblade 21%; Internal Bleeding (choice) 20%; Inexorable March (choice) 20%; Systemic Failure 16%; Improved Poisons 15%; Unshakeable Drive 12%; Singular Focus 12%; Shadewalker (choice) 12%; Quietus Celeris 12%; Precise Killer 12%; Momentum of Despair (choice) 12%; Mass Casualty 12%; Lingering Darkness (choice) 12%; Hunt Them Down 12%; Darkest Night 12%; Corrupt the Blood 12%; Clear the Witnesses 12%
+**Split talents:** Iron Stomach 88%; Caustic Spatter 88%; Crimson Tempest 87%; Recuperator 86%; Poison Bomb 85%; Canny Strikes (choice) 84%; Death's Arrival (choice) 79%; Toxic Stiletto 75%; Thistle Tea (choice) 68%; Avulsion 66%; Regicide's Reward 55%; Scent of Blood 45%; Thrown Precision 43%; Airborne Irritant (choice) 36%; Thistle Tea (choice) 32%; Shadowrunner 21%; Inexorable March (choice) 19%; Doomblade 17%; Internal Bleeding (choice) 16%; Systemic Failure 13%; Improved Poisons 13%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 52 of 783 run it exactly.
+- `Raid`: the typical build. 108 of 917 run it exactly.
 
 ### Mythic+
 
-662 rankings over 8 dungeons, logged 2026-09-05 to 2026-09-25, keys 20 to 22 (median 20). 199 distinct builds. Hero tree: Fatebound 66%, Deathstalker 34%. 138 left out: their log has no talents.
+629 rankings over 8 dungeons, logged 2026-09-17 to 2026-10-18, keys 21 to 23 (median 22). 136 distinct builds. Hero tree: Deathstalker 90%, Fatebound 10%. 171 left out: their log has no talents.
 
-**Typical** (Fatebound, agreement 68% on 20 contested talents, 45 run it exactly):
+**Typical** (Deathstalker, agreement 87% on 17 contested talents, 152 run it exactly):
 
-`CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAYgFYGjGzCgtBsZAwMzYMA`
+`CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAsZWGYALglhJwwiBzMAjxA`
 
 **Most common other builds**, each against the typical:
 
-- 42 (6.3%): +Chosen's Revelry; -Tempted Fate
-  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAYgFYGjGzCglBsZAwMzYMA`
-- 39 (5.9%): +Death's Arrival; -Inexorable March
-  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAYgFYGjGzGgtBsZAwMzYMA`
-- 33 (5.0%): +Bait and Switch, +Clear the Witnesses, +Corrupt the Blood, +Darkest Night, +Deathstalker, +Hunt Them Down, +Lingering Darkness, +Mass Casualty, +Momentum of Despair, +Precise Killer, +Quietus Celeris, +Shadewalker, +Singular Focus, +Unshakeable Drive; -Controlled Chaos, -Deal Fate, -Delivered Doom, -Edge Case, -Fate Intertwined, -Fatebound, -Inexorable March, -Lucky Coin, -Mean Streak, -Overflowing Purse, -Ravenholdt Mint, -Rush to the Inevitable, -Sometimes Lucky, -Tempted Fate
-  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAsZWGYALglhJwwiBzMAjxA`
-- 21 (3.2%): +Avulsion, +Sudden Demise; -Zoldyck Recipe 2/2
-  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AzMmZwMmZMGADsAzY0YWAsNgNDAmZGjB`
+- 149 (23.7%): +Avulsion, +Sudden Demise; -Zoldyck Recipe 2/2
+  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AzMmZwMmZMGgNzyADYBsMMBGWMYmBYMGA`
+- 20 (3.2%): +Avulsion, +Shadowrunner, +Sudden Demise; -Recuperator, -Zoldyck Recipe 2/2
+  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDAAAAAAzygtZAAAAAAttMmZmZmxYbmZmtZWmZmHYmxMDmxMjxAsZWGYALglhJwwiBzMAzMGA`
+- 11 (1.7%): +Iron Stomach; -Featherfoot
+  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlZmZmZmxYbmZmtZWmZmHwMmZMGmZMGgNzyADYBsMMBGWAzMAjxA`
+- 10 (1.6%): +Controlled Chaos, +Deal Fate, +Delivered Doom, +Edge Case, +Fate Intertwined, +Fatebound, +Inexorable March, +Lucky Coin, +Mean Streak, +Overflowing Purse, +Ravenholdt Mint, +Rush to the Inevitable, +Sometimes Lucky, +Tempted Fate; -Bait and Switch, -Clear the Witnesses, -Corrupt the Blood, -Darkest Night, -Deathstalker, -Hunt Them Down, -Lingering Darkness, -Mass Casualty, -Momentum of Despair, -Precise Killer, -Quietus Celeris, -Shadewalker, -Singular Focus, -Unshakeable Drive
+  `CMQAAAAAAAAAAAAAAAAAAAAAAYmlZmFDGAAAAAYWGsNDAAAAAotlxMzMzMGbzMzsNzyMz8AmxMjxwMjxAYgFYGjGzCgtBsZAwMzYMA`
 
-**Split talents:** Zoldyck Recipe 88%; Toxic Stiletto 84%; Recuperator 84%; Thistle Tea (choice) 77%; Featherfoot 73%; Sometimes Lucky 66%; Rush to the Inevitable 66%; Ravenholdt Mint 66%; Mean Streak 66%; Lucky Coin 66%; Fate Intertwined 66%; Edge Case 66%; Delivered Doom 66%; Deal Fate 66%; Controlled Chaos 66%; Overflowing Purse (choice) 66%; Tempted Fate (choice) 52%; Iron Stomach 41%; Inexorable March (choice) 36%; Unshakeable Drive 34%; Singular Focus 34%; Quietus Celeris 34%; Precise Killer 34%; Momentum of Despair (choice) 34%; Mass Casualty 34%; Lingering Darkness (choice) 34%; Hunt Them Down 34%; Darkest Night 34%; Corrupt the Blood 34%; Clear the Witnesses 34%; Bait and Switch (choice) 34%; Shadewalker (choice) 33%; Death's Arrival (choice) 31%; Thistle Tea (choice) 23%; Sudden Demise 22%; Avulsion 20%; Shadowrunner 16%; Chosen's Revelry (choice) 15%
+**Split talents:** Unshakeable Drive 90%; Singular Focus 90%; Quietus Celeris 90%; Precise Killer 90%; Mass Casualty 90%; Lingering Darkness (choice) 90%; Hunt Them Down 90%; Darkest Night 90%; Corrupt the Blood 90%; Clear the Witnesses 90%; Shadewalker (choice) 89%; Momentum of Despair (choice) 89%; Bait and Switch (choice) 88%; Recuperator 85%; Featherfoot 84%; Zoldyck Recipe 62%; Sudden Demise 50%; Avulsion 44%; Iron Stomach 18%; Shadowrunner 16%; Sometimes Lucky 10%; Rush to the Inevitable 10%; Ravenholdt Mint 10%; Overflowing Purse (choice) 10%; Mean Streak 10%; Lucky Coin 10%; Fate Intertwined 10%; Edge Case 10%; Delivered Doom 10%; Deal Fate 10%; Controlled Chaos 10%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 45 of 662 run it exactly.
+- `Dungeon`: 10 of 629 run it exactly. Typical has +Bait and Switch, +Clear the Witnesses, +Corrupt the Blood, +Darkest Night, +Deathstalker, +Hunt Them Down, +Lingering Darkness, +Mass Casualty, +Momentum of Despair, +Precise Killer, +Quietus Celeris, +Shadewalker, +Singular Focus, +Unshakeable Drive; lacks Controlled Chaos, Deal Fate, Delivered Doom, Edge Case, Fate Intertwined, Fatebound, Inexorable March, Lucky Coin, Mean Streak, Overflowing Purse, Ravenholdt Mint, Rush to the Inevitable, Sometimes Lucky, Tempted Fate.
 
 ## Outlaw Rogue
 
 ### Raid
 
-598 rankings over 10 bosses, logged 2026-08-30 to 2026-09-25. 205 distinct builds. Hero tree: Trickster 100%.
+585 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 217 distinct builds. Hero tree: Trickster 100%, Fatebound 0%.
 
-**Typical** (Trickster, agreement 72% on 8 contested talents, 18 run it exactly):
+**Typical** (Trickster, agreement 69% on 7 contested talents, 8 run it exactly):
 
-`CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMjZmxsAmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDG`
+`CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMjxsAmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDG`
 
 **Most common other builds**, each against the typical:
 
-- 45 (7.5%): +Acrobatic Strikes, +Heavy Hitter 1/2, +Stillshroud; -Blade Rush, -Grand Melee, -Shadowrunner
+- 55 (9.4%): +Heavy Hitter 1/2, +Stillshroud; -Blade Rush, -Shadowrunner
   `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMmZmtZmZmZMmF4BmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYmBAjZxwADMLsQLsxAMzgBG`
-- 32 (5.4%): +Acrobatic Strikes, +Gravedigger 1/4, +Summarily Dispatched 2/2; -Gravedigger 4/4
-  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMmFGmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDeA`
-- 30 (5.0%): +Acrobatic Strikes, +Heavy Hitter 1/2; -Blade Rush, -Grand Melee
+- 32 (5.5%): +Heavy Hitter 1/2; -Blade Rush
   `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMmZmtZmZmZMmF4BmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDG`
-- 28 (4.7%): +Stillshroud; -Shadowrunner
-  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMjZmxsAmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYmBAjZxwADMLsQLsxAMzgBG`
+- 27 (4.6%): +Grand Melee, +Gravedigger 1/4, +Summarily Dispatched 2/2; -Gravedigger 4/4
+  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMmFGmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDeA`
+- 19 (3.2%): +Heavy Hitter 1/2, +Unbreakable Stride; -Blade Rush, -Shadowrunner
+  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMmZmtZmZmZMmF4BmZbaZw2MAAAAAAbbzMzwMzMziZmZbAAAAMjBAjZxwADMLsQLsxAMzgBG`
 
-**Split talents:** Sleight of Hand 90%; Cheat Death (choice) 89%; Airborne Irritant (choice) 86%; Combat Stamina (choice) 76%; Grand Melee 61%; Acrobatic Strikes 56%; Blade Rush 54%; Heavy Hitter 47%; Shadowrunner 39%; Unbreakable Stride 28%; Stillshroud 24%; Summarily Dispatched 18%; Deadly Pursuit 16%; Shiv 14%; Dancing Steel 13%; Elusiveness (choice) 11%
+**Split talents:** Airborne Irritant (choice) 86%; Cheat Death (choice) 82%; Combat Stamina (choice) 81%; Acrobatic Strikes 68%; Grand Melee 55%; Blade Rush 53%; Heavy Hitter 52%; Shadowrunner 37%; Unbreakable Stride 27%; Stillshroud 25%; Summarily Dispatched 25%; Elusiveness (choice) 18%; Shiv 16%; Dancing Steel 16%; Deadly Pursuit 13%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 18 of 598 run it exactly.
+- `Raid`: 8 of 585 run it exactly. Typical has +Acrobatic Strikes; lacks Grand Melee.
 
 ### Mythic+
 
-716 rankings over 8 dungeons, logged 2026-08-29 to 2026-09-25, keys 18 to 22 (median 19). 141 distinct builds. Hero tree: Trickster 100%. 84 left out: their log has no talents.
+717 rankings over 8 dungeons, logged 2026-09-05 to 2026-10-18, keys 19 to 23 (median 20). 133 distinct builds. Hero tree: Trickster 100%. 83 left out: their log has no talents.
 
-**Typical** (Trickster, agreement 66% on 9 contested talents, 89 run it exactly):
+**Typical** (Trickster, agreement 68% on 6 contested talents, 21 run it exactly):
 
-`CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFGPwMbTLD2mBAAAAAMbLzMzwMjZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBeA`
+`CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFwMbTLD2mBAAAAAMbLzMzwMjZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBG`
 
 **Most common other builds**, each against the typical:
 
-- 72 (10.1%): +Gravedigger 4/4, +Improved Between the Eyes, +Zero In; -Acrobatic Strikes, -Gravedigger 1/4, -Heavy Hitter 1/2, -Sleight of Hand, -Summarily Dispatched 2/2
-  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMjZmtZmZMzMzsAmZbaZw2MAAAAAgZbZmZGmZmZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBG`
-- 43 (6.0%): +Shadowrunner; -Shiv
+- 67 (9.3%): +Gravedigger 1/4, +Heavy Hitter 1/2, +Summarily Dispatched 2/2; -Gravedigger 4/4
+  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFGPwMbTLD2mBAAAAAMbLzMzwMjZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBeA`
+- 58 (8.1%): +Gravedigger 1/4, +Heavy Hitter 1/2, +Shadowrunner, +Summarily Dispatched 2/2; -Gravedigger 4/4, -Shiv
   `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFGPwMbTLD2mBAAAAAYbZmZGmZMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDeA`
-- 38 (5.3%): +Gravedigger 4/4, +Improved Between the Eyes, +Shadowrunner, +Zero In; -Acrobatic Strikes, -Gravedigger 1/4, -Heavy Hitter 1/2, -Shiv, -Sleight of Hand, -Summarily Dispatched 2/2
-  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMjZmtZmZMzMzsAmZbaZw2MAAAAAAbLzMzwMzMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDG`
-- 32 (4.5%): +Gouge; -Airborne Irritant
-  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFGPwMbTLD2mBAAAAAMLLzMzwMjZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBeA`
+- 46 (6.4%): +Improved Between the Eyes, +Zero In; -Acrobatic Strikes, -Sleight of Hand
+  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMjZmtZmZMzMzsAmZbaZw2MAAAAAgZbZmZGmZmZWMzMbDAAAAjBAjZxwADMLsQLsxAMzgBG`
+- 38 (5.3%): +Shadowrunner; -Shiv
+  `CQQAAAAAAAAAAAAAAAAAAAAAAAgx2MMzMzMzsNzMzMzMjFwMbTLD2mBAAAAAYbZmZGmZMziZmZbAAAAYMAYMLGGYgZhFahNGgZGMDG`
 
-**Split talents:** Featherfoot 90%; Iron Stomach 84%; Airborne Irritant (choice) 74%; Sleight of Hand 66%; Acrobatic Strikes 65%; Shiv 59%; Summarily Dispatched 56%; Heavy Hitter 46%; Zero In 44%; Improved Between the Eyes 43%; Shadowrunner 36%; Gouge (choice) 24%; Stillshroud 17%
+**Split talents:** Iron Stomach 87%; Acrobatic Strikes 75%; Airborne Irritant (choice) 75%; Sleight of Hand 74%; Summarily Dispatched 54%; Shiv 51%; Heavy Hitter 41%; Shadowrunner 41%; Zero In 36%; Improved Between the Eyes 34%; Gouge (choice) 23%; Stillshroud 19%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 89 of 716 run it exactly.
+- `Dungeon`: 67 of 717 run it exactly. Typical has +Gravedigger 4/4; lacks Gravedigger 1/4, Heavy Hitter 1/2, Summarily Dispatched 2/2.
 
 ## Subtlety Rogue
 
 ### Raid
 
-739 rankings over 10 bosses, logged 2026-08-28 to 2026-09-25. 62 distinct builds. Hero tree: Deathstalker 100%.
+937 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 144 distinct builds. Hero tree: Trickster 97%, Deathstalker 3%.
 
-**Typical** (Deathstalker, agreement 71% on 2 contested talents, 287 run it exactly):
+**Typical** (Trickster, agreement 84% on 4 contested talents, 397 run it exactly):
 
-`CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMBmFMDzMAzYA`
+`CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMjZgZmZGzMbzYGbbzMzMzMjBjZ2GAAAAGMGwYWMMwAzCL0iNMDYmBzYA`
 
 **Most common other builds**, each against the typical:
 
-- 208 (28.1%): +Bait and Switch; -Ethereal Cloak
-  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYGbbzMzMzMjBjZ2GAAAAGMmNzyADYBsMMBmFMDzMAzYA`
-- 41 (5.5%): +Unbreakable Stride; -Airborne Irritant
-  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYG2mZmZmZGDGzsNAAAAmBjZxsMwAWALDTgZBzwMDwMGA`
-- 24 (3.2%): +Bait and Switch, +Unbreakable Stride; -Airborne Irritant, -Ethereal Cloak
-  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDDzMzMzw8AbzYG2mZmZmZGDGzsNAAAAmBjZzsMwAWALDTgZBzwMDwMGA`
-- 22 (3.0%): +Potent Powder; -Dark Shadow 1/2
-  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYGbbzMzMzMjBjZ2GAAAAGMmFzyADYBsMMBmFMDzMAzYA`
+- 86 (9.2%): +Warning Signs; -Planned Execution
+  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMjZgZmZGzMbzYGbbzMzMzMjBjZ2GAAAAGMGwYWMMwAzCL0iNMDYmBzYA`
+- 25 (2.7%): +Shiv; -Iron Stomach
+  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMjZgZmZGzMbzYmZbbMzMzMjBjZ2GAAAAGMGwYWMMwAzCL0iNMDYmBzYA`
+- 25 (2.7%): +Unbreakable Stride; -Airborne Irritant
+  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMjZgZmZGzMbzYG2mZmZmZGDGzsNAAAAmBjBMmFDDMwswCtYDzAmZwMGA`
+- 16 (1.7%): +Shiv; -Airborne Irritant
+  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMjZgZmZGzMbzYmx2MzMzMzYwYmtBAAAgBjBMmFDDMwswCtYDzAmZwMGA`
 
-**Split talents:** Airborne Irritant (choice) 85%; Ethereal Cloak (choice) 56%; Bait and Switch (choice) 44%; Unbreakable Stride 14%
+**Split talents:** Improved Secret Technique 90%; Iron Stomach 87%; Airborne Irritant (choice) 86%; Planned Execution (choice) 74%; Warning Signs (choice) 26%; Shiv 20%; Finality 19%; Unbreakable Stride 12%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 287 of 739 run it exactly.
+- `Raid`: 11 of 937 run it exactly. Typical has +Clever Combatant, +Cloud Cover, +Coup de Grace, +Danse Macabre, +Dark Shadow 2/2, +Devious Distractions, +Disorienting Strikes, +Flashing Steel, +Flawless Form, +Hoodwink, +Improved Secret Technique, +Nimble Flurry, +Planned Execution, +Smoke, +So Tricky, +Surprising Strikes, +Thousand Cuts, +Trickster; lacks Clear the Witnesses, Corrupt the Blood, Dark Brew, Dark Shadow 1/2, Darkest Night, Deathstalker, Ethereal Cloak, Finality 2/2, Hunt Them Down, Lingering Darkness, Mass Casualty, Momentum of Despair, Precise Killer, Quietus Celeris, Shadewalker, Singular Focus, Unshakeable Drive, Warning Signs.
 
 ### Mythic+
 
-671 rankings over 8 dungeons, logged 2026-08-27 to 2026-09-25, keys 18 to 21 (median 19). 134 distinct builds. Hero tree: Deathstalker 100%, Trickster 0%. 129 left out: their log has no talents.
+673 rankings over 8 dungeons, logged 2026-09-28 to 2026-10-18, keys 21 to 24 (median 22). 179 distinct builds. Hero tree: Trickster 85%, Deathstalker 15%. 127 left out: their log has no talents.
 
-**Typical** (Deathstalker, agreement 78% on 6 contested talents, 85 run it exactly):
+**Typical** (Trickster, agreement 82% on 22 contested talents, 37 run it exactly):
 
-`CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYGbLzMzMzMjBjZ2GAAAAGMmNzyADYBsMMBmFMDzMAzYA`
+`CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMjZMMzMzwMbzYmZbZMzMzMjBjZ2GAAAAGMGwYWMMwAzCL0iNMDYmBzYA`
 
 **Most common other builds**, each against the typical:
 
-- 51 (7.6%): +Planned Execution; -Warning Signs
-  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMDjZmZmZGGbzYGbLzMzMzMjBjZ2GAAAAGMmNzyADYBsMMBmFMDzMAzYA`
-- 49 (7.3%): +Shiv; -Iron Stomach
-  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYmZbZMzMzMjBjZ2GAAAAGMmNzyADYBsMMBmFMDzMAzYA`
-- 35 (5.2%): +Ethereal Cloak; -Bait and Switch
-  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYGbLzMzMzMjBjZ2GAAAAGMmFzyADYBsMMBmFMDzMAzYA`
-- 21 (3.1%): +Stillshroud; -Iron Stomach
-  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbbjxMDjZmZmZGGbzYGbLjZmZmZMYMz2AAAAwMMmNzyADYBsMMBmFMDzMAzYA`
+- 69 (10.3%): +Danse Macabre; -Veiltouched
+  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMMjhZmZGzMbzYmZbZMzMzMjBjZ2GAAAAGMGwYWMMwAzCL0iNMDYmBzYA`
+- 36 (5.3%): +Dark Brew, +Finality 2/2; -Dark Shadow 2/2, -Improved Secret Technique
+  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMDjZmZmZGGbzYmZbZMzMzMjBjZ2GAAAAGMGwYWMMwAzCL0iNMDYmBzYA`
+- 27 (4.0%): +Bait and Switch, +Clear the Witnesses, +Corrupt the Blood, +Dark Brew, +Darkest Night, +Deathstalker, +Finality 2/2, +Hunt Them Down, +Lingering Darkness, +Mass Casualty, +Momentum of Despair, +Precise Killer, +Quietus Celeris, +Shadewalker, +Singular Focus, +Unshakeable Drive; -Clever Combatant, -Cloud Cover, -Coup de Grace, -Dark Shadow 2/2, -Devious Distractions, -Disorienting Strikes, -Flashing Steel, -Flawless Form, -Hoodwink, -Improved Secret Technique, -Nimble Flurry, -Smoke, -So Tricky, -Surprising Strikes, -Thousand Cuts, -Trickster
+  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMDjZmZmZGGbzYmZbZMzMzMjBjZ2GAAAAGMmNzyADYBsMMBmFMDzMAzYA`
+- 26 (3.9%): +Danse Macabre, +Iron Stomach; -Shiv, -Veiltouched
+  `CUQAAAAAAAAAAAAAAAAAAAAAAAgx2MAAAAAwsMGLTMbLjxMMjhZmZGzMbzYGbLzMzMzMjBjZ2GAAAAGMGwYWMMwAzCL0iNMDYmBzYA`
 
-**Split talents:** Shadowrunner 87%; Elusiveness (choice) 81%; Featherfoot 79%; Bait and Switch (choice) 76%; Warning Signs (choice) 76%; Iron Stomach 67%; Shiv 51%; Planned Execution (choice) 24%; Ethereal Cloak (choice) 23%; Cheat Death (choice) 19%; Toxic Stiletto 13%; Stillshroud 11%
+**Split talents:** Featherfoot 90%; Shadowrunner 90%; Planned Execution (choice) 88%; Thousand Cuts (choice) 85%; Surprising Strikes 85%; Nimble Flurry 85%; Hoodwink 85%; Flawless Form 85%; Flashing Steel 85%; Disorienting Strikes 85%; Devious Distractions 85%; Coup de Grace 85%; Clever Combatant 85%; Potent Powder 85%; So Tricky (choice) 83%; Cloud Cover (choice) 81%; Smoke (choice) 79%; Shiv 75%; Dark Shadow 72%; Improved Secret Technique 65%; Veiltouched 61%; Danse Macabre 44%; Finality 44%; Iron Stomach 33%; Dark Brew 30%; Unshakeable Drive 15%; Singular Focus 15%; Quietus Celeris 15%; Precise Killer 15%; Momentum of Despair (choice) 15%; Mass Casualty 15%; Lingering Darkness (choice) 15%; Hunt Them Down 15%; Darkest Night 15%; Corrupt the Blood 15%; Clear the Witnesses 15%; Shadewalker (choice) 15%; Bait and Switch (choice) 15%; Toxic Stiletto 14%; Stillshroud 12%; Warning Signs (choice) 12%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 85 of 671 run it exactly.
+- `Dungeon`: 12 of 673 run it exactly. Typical has +Clever Combatant, +Cloud Cover, +Coup de Grace, +Dark Shadow 2/2, +Devious Distractions, +Disorienting Strikes, +Flashing Steel, +Flawless Form, +Hoodwink, +Improved Secret Technique, +Nimble Flurry, +Planned Execution, +Shiv, +Smoke, +So Tricky, +Surprising Strikes, +Thousand Cuts, +Trickster; lacks Bait and Switch, Clear the Witnesses, Corrupt the Blood, Dark Brew, Darkest Night, Deathstalker, Finality 2/2, Hunt Them Down, Iron Stomach, Lingering Darkness, Mass Casualty, Momentum of Despair, Precise Killer, Quietus Celeris, Shadewalker, Singular Focus, Unshakeable Drive, Warning Signs.
 
 ## Elemental Shaman
 
 ### Raid
 
-726 rankings over 10 bosses, logged 2026-08-30 to 2026-09-25. 508 distinct builds. Hero tree: Farseer 100%.
+963 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 619 distinct builds. Hero tree: Farseer 100%. 1 left out: their log has no talents.
 
-**Typical** (Farseer, agreement 66% on 16 contested talents, 2 run it exactly):
+**Typical** (Farseer, agreement 64% on 17 contested talents, 3 run it exactly):
 
-`CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMjxyMzMjhlZZmZZYMzsAAMAwMjhhB`
+`CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsNzMjx2ipNmZMWmZmZMsMLzYxMDzsMAgBAmZMMMA`
 
 **Most common other builds**, each against the typical:
 
-- 10 (1.4%): +Earthgrab Totem, +Elemental Unity, +Jet Stream, +Preeminence, +Refreshing Waters; -Cleanse Spirit, -First Ascendant, -Poison Cleansing Totem, -Purge, -Swelling Maelstrom
-  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhBAAAAsYmNYADY2YCMLAwsNzMjx2yMhZmNWmZmZMDzyMzyMGzMbAADAMzYYYA`
-- 8 (1.1%): +Feedback Loop 3/4, +Flames of the Firelord, +Jet Stream, +Lava Flows, +Mana Spring, +Preeminence; -Feedback Loop 4/4, -First Ascendant, -Poison Cleansing Totem, -Swelling Maelstrom, -Totemic Focus
-  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhBAAAAsYmNYADY2YCMLAwsNzMzM2WMhZmtxyMzMjhFLzMLDjZmtBAMAwMjhZ8BA`
-- 7 (1.0%): +Earthen Rage, +Earthquake, +Elemental Unity, +Everlasting Elements, +Flames of the Firelord, +Fusion of Elements, +Power of the Maelstrom; -Crackling Fury 2/2, -Earthquake, -Flames of the Cauldron, -Purging Flames, -Swelling Maelstrom, -Voltaic Blaze
-  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsNzMjx2ipNmZMWmZmZMsMLzYxMDzsMAgBAmZMMMA`
-- 7 (1.0%): +Ascending Air, +Earthen Rage, +Elemental Unity, +Everlasting Elements, +Flames of the Firelord, +Fusion of Elements, +Mana Spring, +Power of the Maelstrom, +Preeminence; -Crackling Fury 2/2, -First Ascendant, -Flames of the Cauldron, -Purging Flames, -Swelling Maelstrom, -Totemic Focus, -Voltaic Blaze, -Windveil
-  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsNzMzM2WMtxMzyYZmZmxwilhFzMMz2AAGAYmxwwA`
+- 15 (1.6%): +Earthgrab Totem, +Jet Stream, +Preeminence, +Refreshing Waters, +Tremor Totem; -Cleanse Spirit, -First Ascendant, -Poison Cleansing Totem, -Purge, -Windveil
+  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsNzMjx2yMtwMzGLzMzMmhZZYxMDzsNAgBAmZMMMA`
+- 13 (1.3%): +Ascending Air; -Totemic Focus
+  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsNzMjx2ipNmZWGLzMzMGWsMjFzMMzyAAGAYmxwwA`
+- 12 (1.2%): +Ascending Air, +Astral Bulwark, +Crackling Fury 2/2, +Flames of the Cauldron, +Purging Flames, +Swelling Maelstrom, +Voltaic Blaze; -Earthen Rage, -Elemental Unity, -Everlasting Elements, -Flames of the Firelord, -Fusion of Elements, -Planes Traveler, -Power of the Maelstrom, -Windveil
+  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMzyYbmZmxwysMmlhxMzCAwAAzMGGGA`
+- 9 (0.9%): +Ascending Air, +Spirit Wolf; -Thunderous Paws, -Windveil
+  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMmZmZZbZMMjBAAAAsYmNYADY2YCMLAwsMzMjx2ipNmZWGLzMzMGWmlhFzMMzyAAGAYmxwwA`
 
-**Split talents:** Capacitor Totem 90%; Cleanse Spirit 73%; Purge (choice) 72%; Thunderous Paws (choice) 71%; Earthquake (choice) 70%; First Ascendant (choice) 70%; Windveil 63%; Flames of the Firelord 63%; Voltaic Blaze 59%; Purging Flames 59%; Crackling Fury 59%; Flames of the Cauldron 58%; Totemic Focus 56%; Poison Cleansing Totem (choice) 53%; Elemental Unity 48%; Power of the Maelstrom 41%; Fusion of Elements 41%; Earthen Rage 41%; Everlasting Elements 40%; Jet Stream (choice) 34%; Swelling Maelstrom 31%; Ascending Air (choice) 31%; Preeminence (choice) 30%; Earthquake (choice) 30%; Spirit Wolf (choice) 29%; Earthgrab Totem 29%; Refreshing Waters 28%; Lava Flows 22%; Frost Shock 22%; Totemic Surge 17%; Tremor Totem (choice) 11%; Healing Stream Totem 11%
+**Split talents:** Capacitor Totem 89%; First Ascendant (choice) 76%; Earthquake (choice) 72%; Cleanse Spirit 69%; Purge (choice) 69%; Thunderous Paws (choice) 68%; Flames of the Firelord 65%; Totemic Focus 62%; Windveil 58%; Poison Cleansing Totem (choice) 55%; Voltaic Blaze 53%; Purging Flames 53%; Crackling Fury 53%; Flames of the Cauldron 51%; Elemental Unity 50%; Power of the Maelstrom 47%; Fusion of Elements 47%; Earthen Rage 47%; Everlasting Elements 44%; Swelling Maelstrom 36%; Jet Stream (choice) 35%; Ascending Air (choice) 33%; Earthgrab Totem 33%; Spirit Wolf (choice) 32%; Refreshing Waters 31%; Earthquake (choice) 28%; Preeminence (choice) 24%; Totemic Surge 21%; Lava Flows 19%; Frost Shock 17%; Tremor Totem (choice) 15%; Static Charge 11%; Mana Spring 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 2 of 726 run it exactly.
+- `Raid`: 2 of 963 run it exactly. Typical has +Earthen Rage, +Elemental Unity, +Everlasting Elements, +Flames of the Firelord, +Fusion of Elements, +Power of the Maelstrom; lacks Crackling Fury 2/2, Flames of the Cauldron, Purging Flames, Swelling Maelstrom, Voltaic Blaze.
 
 ### Mythic+
 
-693 rankings over 8 dungeons, logged 2026-09-05 to 2026-09-25, keys 20 to 22 (median 21). 401 distinct builds. Hero tree: Farseer 100%. 107 left out: their log has no talents.
+625 rankings over 8 dungeons, logged 2026-09-24 to 2026-10-18, keys 22 to 24 (median 22). 356 distinct builds. Hero tree: Farseer 100%. 175 left out: their log has no talents.
 
-**Typical** (Farseer, agreement 70% on 11 contested talents, 16 run it exactly):
+**Typical** (Farseer, agreement 65% on 11 contested talents, 9 run it exactly):
 
-`CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMz2YZGzMGzysMzsMMmZWAAGAYmxwwA`
+`CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmlZmZM2WMtxMz2YZGzMGzysMzsMMmZWAAGAYmxwwA`
 
 **Most common other builds**, each against the typical:
 
-- 11 (1.6%): +Winds of Al'Akir 2/2; -Jet Stream, -Totemic Focus
-  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMjxyMzMjxsYZmZZYMzsAAMAwMjhhB`
-- 11 (1.6%): +Spirit Wolf, +Static Charge 1/2; -Jet Stream, -Thunderous Paws
-  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmlZmZM2WMtxMjxyMmZegxsMLzMLDjZmFAgBAmZMMMA`
-- 11 (1.6%): +Totemic Surge; -Jet Stream
-  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMjxyMmZMmlZZmZZYMzsAAMDAmZMMMA`
-- 10 (1.4%): +Winds of Al'Akir 2/2; -Hex, -Jet Stream
-  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMjxyMzMjhlZZmZZYMzsAAMAwMjhhB`
+- 21 (3.4%): +Winds of Al'Akir 2/2; -Jet Stream, -Totemic Focus
+  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmlZmZM2WMtxMjxyMzMjxsYZmZZYMzsAAMAwMjhhB`
+- 11 (1.8%): +Thunderous Paws; -Spirit Wolf
+  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMz2YZGzMGzysMzsMMmZWAAGAYmxwwA`
+- 8 (1.3%): +Static Charge 1/2, +Thunderous Paws; -Spirit Wolf, -Totemic Focus
+  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZM2WMtxMz2YZGzMPwYWsMzsMMmZWAAGAYmxwwA`
+- 8 (1.3%): +Spirit Walk, +Thunderous Paws; -Gust of Wind, -Spirit Wolf
+  `CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZbZMmhZAAAAgFzsBDYAzGTgZBAmtZmZMWWMtxMz2YZGzMGzysMzsMMmZWAAGAYmxwwA`
 
-**Split talents:** Therazane's Resilience (choice) 85%; Chain Heal 82%; Earthquake (choice) 81%; Earth Shield 80%; Elemental Orbit 80%; Poison Cleansing Totem (choice) 77%; Gust of Wind (choice) 67%; Hex 64%; Thunderous Paws (choice) 55%; Totemic Focus 55%; Winds of Al'Akir 47%; Jet Stream (choice) 45%; Spirit Wolf (choice) 44%; Static Charge 36%; Spirit Walk (choice) 33%; Ancestral Wolf Affinity 24%; Totemic Surge 19%; Earthquake (choice) 19%; Earthgrab Totem 15%; Tremor Totem (choice) 14%; Healing Stream Totem 11%
+**Split talents:** Earthquake (choice) 87%; Poison Cleansing Totem (choice) 79%; Hex 75%; Therazane's Resilience (choice) 68%; Gust of Wind (choice) 65%; Winds of Al'Akir 61%; Chain Heal 60%; Earth Shield 59%; Elemental Orbit 58%; Totemic Focus 58%; Spirit Wolf (choice) 55%; Jet Stream (choice) 53%; Ancestral Wolf Affinity 46%; Static Charge 45%; Thunderous Paws (choice) 44%; Spirit Walk (choice) 35%; Earthgrab Totem 17%; Totemic Surge 13%; Tremor Totem (choice) 13%; Earthquake (choice) 13%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 16 of 693 run it exactly.
+- `Dungeon`: 11 of 625 run it exactly. Typical has +Spirit Wolf; lacks Thunderous Paws.
 
 ## Enhancement Shaman
 
 ### Raid
 
-666 rankings over 10 bosses, logged 2026-08-28 to 2026-09-25. 309 distinct builds. Hero tree: Stormbringer 100%.
+709 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 335 distinct builds. Hero tree: Stormbringer 100%. 2 left out: their log has no talents.
 
-**Typical** (Stormbringer, agreement 69% on 10 contested talents, 12 run it exactly):
+**Typical** (Stormbringer, agreement 68% on 10 contested talents, 2 run it exactly):
 
-`CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssMjNmZ2YZmZmhhxMAAzwYmxMTgZGMYMA`
+`CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssYsxMz2YZmZmhxyYGAgZYMzwMBmZwgxA`
 
 **Most common other builds**, each against the typical:
 
-- 33 (5.0%): +Cleanse Spirit, +Purge, +Static Charge 2/2; -Earthgrab Totem, -Refreshing Waters, -Totemic Focus, -Totemic Projection
+- 42 (5.9%): +Static Charge 2/2; -Earthgrab Totem, -Totemic Focus
   `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssYsxMz2YZmZmZwCzAAMDjZGmJwMDGMGA`
-- 30 (4.5%): +Mana Spring; -Poison Cleansing Totem
+- 19 (2.7%): +Static Charge 2/2, +Thunderous Paws; -Earthgrab Totem, -Spirit Wolf, -Totemic Focus
+  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssYsxMz2YZmZmZwCzAAMDjZGmJwMDGMGA`
+- 18 (2.5%): +Mana Spring, +Refreshing Waters, +Totemic Projection; -Cleanse Spirit, -Poison Cleansing Totem, -Purge
   `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzMjllZgZmNWmZmZYYMDAwMMmZMzEYmBDGDA`
-- 15 (2.3%): +Cleanse Spirit, +Purge, +Thunderous Paws; -Spirit Wolf, -Totemic Projection, -Totemic Surge
-  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssMjNmZ2GLzMzMMWGzAAMDjZGGBmZwgxA`
-- 10 (1.5%): +Cleanse Spirit, +Purge, +Static Charge 2/2, +Thunderous Paws; -Earthgrab Totem, -Refreshing Waters, -Spirit Wolf, -Totemic Projection, -Totemic Surge
-  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssYsxMz2YZmZmZwyYGAgZYMzwIwMDGMGA`
+- 16 (2.3%): +Mana Spring, +Refreshing Waters; -Cleanse Spirit, -Purge
+  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzMjllZsxMzGLzMzMMMmBAYGGzMMTgZGMYMA`
 
-**Split talents:** Jet Stream (choice) 85%; Spirit Walk (choice) 81%; Totemic Focus 80%; Supercharge (choice) 74%; Poison Cleansing Totem (choice) 72%; Earthgrab Totem 70%; Refreshing Waters 66%; Totemic Surge 64%; Spirit Wolf (choice) 57%; Cleanse Spirit 49%; Thunderous Paws (choice) 43%; Totemic Projection 41%; Purge (choice) 40%; Static Charge 40%; Mana Spring 37%; Storm Swell (choice) 26%; Gust of Wind (choice) 19%; Tremor Totem (choice) 11%
+**Split talents:** Jet Stream (choice) 84%; Supercharge (choice) 81%; Spirit Walk (choice) 77%; Totemic Focus 76%; Poison Cleansing Totem (choice) 69%; Earthgrab Totem 67%; Totemic Surge 67%; Spirit Wolf (choice) 61%; Refreshing Waters 59%; Cleanse Spirit 53%; Static Charge 49%; Purge (choice) 44%; Thunderous Paws (choice) 39%; Totemic Projection 36%; Mana Spring 35%; Gust of Wind (choice) 23%; Storm Swell (choice) 19%; Tremor Totem (choice) 16%; Ancestral Wolf Affinity 12%; Ascending Air (choice) 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 12 of 666 run it exactly.
+- `Raid`: 8 of 709 run it exactly. Typical has +Cleanse Spirit, +Purge; lacks Refreshing Waters, Totemic Projection.
 
 ### Mythic+
 
-658 rankings over 8 dungeons, logged 2026-09-02 to 2026-09-25, keys 18 to 22 (median 18). 267 distinct builds. Hero tree: Stormbringer 100%. 142 left out: their log has no talents.
+704 rankings over 8 dungeons, logged 2026-09-06 to 2026-10-18, keys 19 to 22 (median 20). 355 distinct builds. Hero tree: Stormbringer 100%. 96 left out: their log has no talents.
 
-**Typical** (Stormbringer, agreement 70% on 7 contested talents, 81 run it exactly):
+**Typical** (Stormbringer, agreement 71% on 9 contested talents, 44 run it exactly):
 
 `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssMjNmZ2GLzMzMMWGzAAMDjZGGBmZwgxA`
 
 **Most common other builds**, each against the typical:
 
-- 25 (3.8%): +Static Charge 2/2, +Totemic Surge; -Earthgrab Totem, -Refreshing Waters, -Totemic Focus
-  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssYsxMz2YZmZmZwCzAAMDjZGmJwMDGMGA`
-- 20 (3.0%): +Spirit Wolf, +Static Charge 2/2, +Totemic Surge; -Earthgrab Totem, -Refreshing Waters, -Thunderous Paws, -Totemic Focus
+- 21 (3.0%): +Hex; -Cleanse Spirit
+  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssMjNmZ2YZmZmhZWGzAAMDjZGGBmZwgxA`
+- 19 (2.7%): +Hex, +Spirit Wolf, +Static Charge 2/2; -Earthgrab Totem, -Refreshing Waters, -Thunderous Paws, -Totemic Focus
+  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssYsxMz2YZmZmZYWYGAgZYMzwIwMDGMGA`
+- 18 (2.6%): +Spirit Wolf, +Static Charge 2/2, +Totemic Surge; -Earthgrab Totem, -Refreshing Waters, -Thunderous Paws, -Totemic Focus
   `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssYsxMz2YZmZmZwCzAAMDjZGmJwMDGMGA`
-- 19 (2.9%): +Spirit Wolf; -Thunderous Paws
-  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZZGzYssMjNmZ2GLzMzMMWGzAAMDjZGGBmZwgxA`
-- 16 (2.4%): +Static Charge 1/2; -Totemic Focus
-  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssMjNmZ2GLzMzMPgxCzAAMDjZGGBmZwgxA`
+- 15 (2.1%): +Hex; -Purge
+  `CcQAAAAAAAAAAAAAAAAAAAAAAMzMzgZmZmZmhZmZAAAAAAAAA2AsZGDbwCMDDNYBgZbGzYssMjNmZ2GLzMzMMjxMAAzwYmhRgZGMYMA`
 
-**Split talents:** Jet Stream (choice) 84%; Poison Cleansing Totem (choice) 79%; Purge (choice) 77%; Earthgrab Totem 67%; Refreshing Waters 63%; Thunderous Paws (choice) 62%; Totemic Focus 58%; Static Charge 56%; Spirit Wolf (choice) 38%; Totemic Surge 29%; Hex 18%; Totemic Projection 14%; Tremor Totem (choice) 11%; Ancestral Wolf Affinity 11%
+**Split talents:** Poison Cleansing Totem (choice) 78%; Cleanse Spirit 77%; Jet Stream (choice) 75%; Earthgrab Totem 67%; Purge (choice) 67%; Refreshing Waters 65%; Thunderous Paws (choice) 60%; Totemic Focus 57%; Static Charge 55%; Hex 42%; Spirit Wolf (choice) 40%; Totemic Surge 27%; Healing Stream Totem 15%; Ancestral Wolf Affinity 14%; Elemental Resistance 13%; Tremor Totem (choice) 12%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 81 of 658 run it exactly.
+- `Dungeon`: the typical build. 44 of 704 run it exactly.
 
 ## Restoration Shaman
 
 ### Raid
 
-793 rankings over 10 bosses, logged 2026-08-27 to 2026-09-25. 461 distinct builds. Hero tree: Totemic 99%, Farseer 1%.
+965 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 515 distinct builds. Hero tree: Totemic 100%.
 
-**Typical** (Totemic, agreement 72% on 10 contested talents, 11 run it exactly):
+**Typical** (Totemic, agreement 69% on 11 contested talents, 7 run it exactly):
 
-`CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmBbjZmpZbZmZzMmFWMzMjBzyAAAAzMDmZAgBzA`
+`CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmhZbMzMNbLzMbmxswyMmZMYWGAAAYmZwMDAMYG`
 
 **Most common other builds**, each against the typical:
 
-- 58 (7.3%): +Earthgrab Totem, +Improved Purify Spirit, +Winds of Al'Akir 1/2; -Earth Elemental, -Winds of Al'Akir 2/2
+- 36 (3.7%): +Earthgrab Totem, +Improved Purify Spirit, +Winds of Al'Akir 1/2; -Capacitor Totem, -Earth Elemental, -Primordial Bond
   `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMDjFYDmxiGbDgZgNzwMYbMmpZbZmZzMmFWMPwMjZYWGAAAYmZwMDAMYG`
-- 24 (3.0%): +Primordial Bond; -Wind Shear
-  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmBbjZmpZbZmZzMmFWmZMjBzyAAAAzMDmZAgBzA`
-- 19 (2.4%): +Capacitor Totem, +Improved Purify Spirit, +Winds of Al'Akir 1/2; -Earth Elemental, -Winds of Al'Akir 2/2
+- 25 (2.6%): +Improved Purify Spirit, +Winds of Al'Akir 1/2; -Earth Elemental, -Primordial Bond
   `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMDjFYDmxiGbDgZgNzwMMbjxMNbLzMbmxswi5BmZMYWGAAAYmZwMDAMYG`
-- 15 (1.9%): +Primordial Bond, +Winds of Al'Akir 1/2; -Winds of Al'Akir 2/2
-  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmBbjZmpZbZmZzMmFWm5BmZMYWGAAAYmZwMDAMYG`
+- 25 (2.6%): +Winds of Al'Akir 2/2; -Earth Elemental, -Primordial Bond
+  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmhZbMmpZbZmZzMmFWMzMjBzyAAAAzMDmZAgBzA`
+- 17 (1.8%): +Winds of Al'Akir 2/2; -Capacitor Totem, -Wind Shear
+  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMYsAbwMW0YbAMDsZGmBbjZmpZbZmZzMmFWmZMjBzyAAAAzMDmZAgBzA`
 
-**Split talents:** Amplification Core (choice) 90%; Winds of Al'Akir 87%; Coalescing Water 87%; Overflowing Shores 87%; Torrent 82%; Thunderous Paws (choice) 76%; Wind Shear 73%; Poison Cleansing Totem (choice) 68%; Ascending Air (choice) 65%; Earth Elemental 49%; Primordial Bond 45%; Capacitor Totem 44%; Improved Purify Spirit 26%; Acid Rain 25%; Jet Stream (choice) 24%; Spirit Wolf (choice) 24%; Earthgrab Totem 23%; Chain Lightning 16%; Tremor Totem (choice) 14%; Fire and Ice 11%
+**Split talents:** Winds of Al'Akir 89%; Amplification Core (choice) 87%; Overflowing Shores 86%; Coalescing Water 85%; Torrent 73%; Wind Shear 71%; Thunderous Paws (choice) 68%; Poison Cleansing Totem (choice) 66%; Ascending Air (choice) 62%; Earth Elemental 56%; Primordial Bond 53%; Capacitor Totem 50%; Acid Rain 37%; Spirit Wolf (choice) 32%; Jet Stream (choice) 24%; Improved Purify Spirit 20%; Chain Lightning 15%; Tremor Totem (choice) 15%; Earthgrab Totem 15%; Oversurge (choice) 13%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 11 of 793 run it exactly.
+- `Raid`: 4 of 965 run it exactly. Typical has +Capacitor Totem, +Primordial Bond; lacks Winds of Al'Akir 2/2.
 
 ### Mythic+
 
-706 rankings over 8 dungeons, logged 2026-09-04 to 2026-09-25, keys 19 to 22 (median 20). 492 distinct builds. Hero tree: Totemic 99%, Farseer 1%. 94 left out: their log has no talents.
+733 rankings over 8 dungeons, logged 2026-09-10 to 2026-10-18, keys 21 to 23 (median 21). 502 distinct builds. Hero tree: Totemic 100%, Farseer 0%. 67 left out: their log has no talents.
 
-**Typical** (Totemic, agreement 65% on 10 contested talents, 5 run it exactly):
+**Typical** (Totemic, agreement 61% on 9 contested talents, 10 run it exactly):
 
-`CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzMjhhFYDmxiGbDgZgNMzgZbmxoZZZmZzMmNWMmZMsMLzAAwAYmBzMAMGMA`
+`CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzYMMsAbwMW0YbAMDshZmhZbmZGNLLzMbmxglZMzYwsMDAADgZGMzAwYwA`
 
 **Most common other builds**, each against the typical:
 
-- 15 (2.1%): +Improved Purify Spirit; -Purge
+- 11 (1.5%): +Improved Earthliving Weapon, +Improved Purify Spirit, +Jet Stream; -Earth Elemental, -Primordial Bond, -Tidewaters
   `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzMjZMsAbwMW0YbAMDshZGMbzMGNLLzMbmxsxixMjBzyMAAMAmZwMDAjBD`
-- 10 (1.4%): +Earthweaver, +Improved Purify Spirit; -Improved Earthliving Weapon, -Windveil
-  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZmZGjZMsAbwMW0YbAMDshZGMbzMGNLLzMbmxsxixMjhlZZAAwAYmBzMAMGMA`
-- 10 (1.4%): +Earth Elemental, +Earthweaver, +Improved Purify Spirit, +Primordial Bond; -Improved Earthliving Weapon, -Jet Stream, -Purge, -Wind Rush Totem
-  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZmZGjZMsAbwMW0YbAMDshZGMbzMzoZZZmZzMGsMjZGDmFDAADgZGMzAwYwA`
-- 9 (1.3%): +Improved Purify Spirit; -Windveil
-  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzMjZMsAbwMW0YbAMDshZGMbzMGNLLzMbmxsxixMjhlZZAAwAYmBzMAMGMA`
+- 8 (1.1%): +Earthweaver, +Improved Purify Spirit, +Purge; -Tidewaters, -Wind Rush Totem, -Windveil
+  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZmZGjZMsAbwMW0YbAMDshZGMbzMzoZZZmZzMGsMjZGDLzCAAMAmZwMDAjBD`
+- 7 (1.0%): +Improved Purify Spirit, +Jet Stream; -Earth Elemental, -Primordial Bond
+  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzYMjhFYDmxiGbDgZgNMzMMbzMGNLLzMbmxsxixMjBzyMAAMAmZwMDAjBD`
+- 7 (1.0%): +Earthgrab Totem, +Gust of Wind, +Jet Stream, +Purge, +Tremor Totem; -Earth Elemental, -Poison Cleansing Totem, -Primordial Bond, -Spirit Walk, -Windveil
+  `CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsstMmZmZMzYMMsAbwMW0YbAMDshZmhZbmxoZbZmZxMmNWMmZMjlZZAAwAYmBzMAMGMA`
 
-**Split talents:** Supportive Imbuements (choice) 90%; Wind Rush Totem 88%; Thunderous Paws (choice) 76%; Poison Cleansing Totem (choice) 74%; Earthen Accord 63%; Spirit Walk (choice) 60%; Purge (choice) 55%; Jet Stream (choice) 52%; Windveil 50%; Improved Purify Spirit 48%; Earth Elemental 44%; Primordial Bond 43%; Improved Earthliving Weapon 42%; Gust of Wind (choice) 38%; Soothing Rain 31%; Spirit Wolf (choice) 24%; Tidewaters 23%; Current Control 23%; Earthweaver 21%; Hex 14%; Mana Spring 12%; Tremor Totem (choice) 10%
+**Split talents:** Unleash Life 89%; Earthen Accord 77%; Poison Cleansing Totem (choice) 70%; Thunderous Paws (choice) 64%; Spirit Walk (choice) 60%; Windveil 57%; Purge (choice) 47%; Earth Elemental 47%; Primordial Bond 46%; Jet Stream (choice) 45%; Improved Purify Spirit 41%; Gust of Wind (choice) 38%; Tidewaters 37%; Spirit Wolf (choice) 36%; Improved Earthliving Weapon 30%; Hex 24%; Current Control 22%; Earthweaver 17%; Crashing Waves 14%; Soothing Rain 12%; Earthgrab Totem 11%; Mana Spring 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 5 of 706 run it exactly.
+- `Dungeon`: 3 of 733 run it exactly. Typical has +Earth Elemental, +Primordial Bond, +Tidewaters; lacks Improved Earthliving Weapon, Jet Stream, Purge.
 
 ## Affliction Warlock
 
 ### Raid
 
-712 rankings over 10 bosses, logged 2026-08-28 to 2026-09-25. 351 distinct builds. Hero tree: Hellcaller 73%, Soul Harvester 27%.
+743 rankings over 10 bosses, logged 2026-10-13 to 2026-10-18. 361 distinct builds. Hero tree: Hellcaller 74%, Soul Harvester 26%.
 
 **Typical** (Hellcaller, agreement 75% on 30 contested talents, 16 run it exactly):
 
@@ -1865,303 +1866,303 @@ Each row's typical is pooled over every boss it backs; each boss is also shown a
 
 **Most common other builds**, each against the typical:
 
-- 65 (9.1%): +Blight of Tongues; -Curse of Tongues
+- 83 (11.2%): +Blight of Tongues; -Curse of Tongues
   `CkQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAzMLzyMzsMGAwCMwsY0YGAzCYZAAAYGAAYmBzMjxsZmhZGzMjBzMzAAMDMA`
-- 19 (2.7%): +Banish, +Bleakheart Tactics, +Empowered Drain Life, +Gorefiend's Avarice, +Horrify, +Sudden Onset; -Abyss Walker, -Curse of Exhaustion, -Fel Synergy 2/2, -Hatefury Rituals, -Sacrolash's Dark Strike
-  `CkQAAAAAAAAAAAAAAAAAAAAAAsZmxMjmNmxMzYWGAAgZmlZZmZWGDAYBGYWMaMDgZDsMAAAMDAAMzgZmxMMmhZGzMjBzMzMAgZgB`
-- 19 (2.7%): +Cull the Weak, +Demoniac's Fervor, +Eternal Hunger, +Eternal Servitude, +Feast of Souls, +Friends In Dark Places, +Hedonic Gorging, +Manifested Avarice, +Necrolyte Teachings, +Nether Plating, +Potent Soul Shards, +Quietus, +Sataiel's Volition, +Seeds of Destruction 2/2, +Shadow of Death, +Shadowfury, +Shared Vessel, +Soul Anathema, +Soul Harvester, +Sow the Seeds, +Sudden Onset, +Wicked Reaping; -Abyss Walker, -Alzzin's Iniquity, -Blackened Soul, -Cascading Calamity, -Curse of the Satyr, -Devil Fruit, -Eye Contract, -Fatal Echoes, -Hatefury Rituals, -Hellcaller, -Malediction, -Malefic Grasp, -Malevolence, -Mark of Peroth'arn, -Mark of Xavius, -Sacrolash's Dark Strike, -Seeds of Their Demise, -Through the Felvine, -Xalan's Cruelty, -Xalan's Ferocity, -Xavius' Gambit 2/2, -Zevrim's Resilience
+- 23 (3.1%): +Blight of Tongues, +Shadowfury; -Curse of Tongues, -Swift Artifice
+  `CkQAAAAAAAAAAAAAAAAAAAAAAgxMzoZjx2MzMzyAAAMzsMLzMzyYAALwAziRjZAMLglBAAgZAAgZGMzMGzmZGmZMzMGMzMDAwMwA`
+- 20 (2.7%): +Cull the Weak, +Demoniac's Fervor, +Eternal Hunger, +Eternal Servitude, +Feast of Souls, +Friends In Dark Places, +Hedonic Gorging, +Manifested Avarice, +Necrolyte Teachings, +Nether Plating, +Potent Soul Shards, +Quietus, +Sataiel's Volition, +Seeds of Destruction 2/2, +Shadow of Death, +Shadowfury, +Shared Vessel, +Soul Anathema, +Soul Harvester, +Sow the Seeds, +Sudden Onset, +Wicked Reaping; -Abyss Walker, -Alzzin's Iniquity, -Blackened Soul, -Cascading Calamity, -Curse of the Satyr, -Devil Fruit, -Eye Contract, -Fatal Echoes, -Hatefury Rituals, -Hellcaller, -Malediction, -Malefic Grasp, -Malevolence, -Mark of Peroth'arn, -Mark of Xavius, -Sacrolash's Dark Strike, -Seeds of Their Demise, -Through the Felvine, -Xalan's Cruelty, -Xalan's Ferocity, -Xavius' Gambit 2/2, -Zevrim's Resilience
   `CkQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbM2mZGzyAAAmZmlZxMzyYAgx2yADYAzwWghtBAAgZAAAMzMzMmZMGzYMzMzYYmZGAgBMA`
-- 14 (2.0%): +Gorefiend's Avarice; -Curse of Tongues
-  `CkQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmZmlBAAYmZZWmZmlxAAWgBmFjGzAYWALDAAAzAAAzMYmZMGmZYmxMzYwMzMAAzAD`
+- 19 (2.6%): +Empowered Drain Life, +Gorefiend's Avarice, +Ichor of Devils, +Infernal Beneficiary; -Curse of Tongues, -Foul Mouth, -Frequent Donor, -Frequent Traveler
+  `CkQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZhhZmZmlBAAYmZZWmZmlxAAWgBmFjGzAYWALDAAAzAAAzMgZmxwMDzMmZGDmZmZAAzAD`
 
-**Split talents:** Improved Mortal Coil 89%; Curse of Exhaustion 86%; Xavius' Gambit 86%; Cascading Calamity 85%; Strength of Will (choice) 85%; Frequent Donor (choice) 84%; Malediction 83%; Eye Contract 83%; Malefic Grasp 83%; Frequent Traveler 82%; Fatal Echoes 79%; Xalan's Ferocity 73%; Xalan's Cruelty 73%; Through the Felvine 73%; Seeds of Their Demise 73%; Mark of Xavius 73%; Mark of Peroth'arn 73%; Malevolence 73%; Devil Fruit 73%; Blackened Soul 73%; Alzzin's Iniquity 73%; Foul Mouth 71%; Curse of the Satyr (choice) 70%; Zevrim's Resilience (choice) 70%; Hatefury Rituals (choice) 64%; Sacrolash's Dark Strike 56%; Curse of Tongues 55%; Abyss Walker 55%; Gorefiend's Avarice 42%; Sudden Onset 33%; Empowered Drain Life 29%; Cull the Weak 29%; Blight of Tongues (choice) 28%; Banish 28%; Wicked Reaping 27%; Soul Anathema 27%; Shared Vessel 27%; Shadow of Death 27%; Sataiel's Volition 27%; Quietus 27%; Necrolyte Teachings 27%; Manifested Avarice 27%; Eternal Hunger 27%; Demoniac's Fervor 27%; Shadowfury (choice) 26%; Feast of Souls (choice) 25%; Friends In Dark Places (choice) 22%; Sow the Seeds 21%; Seeds of Destruction 21%; Potent Soul Shards 21%; Eternal Servitude (choice) 20%; Nether Plating 17%; Hedonic Gorging 17%; Ichor of Devils (choice) 15%; Dark Accord (choice) 15%; Fel Pact 14%; Oppressive Darkness 11%
+**Split talents:** Swift Artifice 90%; Curse of Exhaustion 88%; Frequent Donor (choice) 86%; Xavius' Gambit 84%; Cascading Calamity 84%; Eye Contract 84%; Malediction 84%; Strength of Will (choice) 83%; Malefic Grasp 81%; Fatal Echoes 80%; Frequent Traveler 78%; Xalan's Ferocity 74%; Xalan's Cruelty 74%; Through the Felvine 74%; Seeds of Their Demise 74%; Mark of Xavius 74%; Mark of Peroth'arn 74%; Malevolence 74%; Devil Fruit 74%; Blackened Soul 74%; Alzzin's Iniquity 74%; Zevrim's Resilience (choice) 72%; Curse of the Satyr (choice) 70%; Hatefury Rituals (choice) 69%; Foul Mouth 66%; Abyss Walker 63%; Sacrolash's Dark Strike 61%; Curse of Tongues 45%; Gorefiend's Avarice 40%; Blight of Tongues (choice) 32%; Sudden Onset 30%; Shadowfury (choice) 29%; Empowered Drain Life 28%; Cull the Weak 28%; Wicked Reaping 26%; Soul Anathema 26%; Shared Vessel 26%; Shadow of Death 26%; Sataiel's Volition 26%; Quietus 26%; Necrolyte Teachings 26%; Manifested Avarice 26%; Eternal Hunger 26%; Demoniac's Fervor 26%; Banish 24%; Feast of Souls (choice) 23%; Friends In Dark Places (choice) 22%; Sow the Seeds 20%; Seeds of Destruction 20%; Nether Plating 19%; Potent Soul Shards 19%; Hedonic Gorging 19%; Eternal Servitude (choice) 19%; Dark Accord (choice) 17%; Ichor of Devils (choice) 14%; Infernal Beneficiary 14%; Oppressive Darkness 11%; Fel Pact 10%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 16 of 712 run it exactly.
+- `Raid`: the typical build. 16 of 743 run it exactly.
 
 ### Mythic+
 
-597 rankings over 8 dungeons, logged 2026-08-27 to 2026-09-25, keys 16 to 19 (median 17). 226 distinct builds. Hero tree: Soul Harvester 97%, Hellcaller 3%. 203 left out: their log has no talents.
+636 rankings over 8 dungeons, logged 2026-09-02 to 2026-10-18, keys 17 to 21 (median 18). 236 distinct builds. Hero tree: Soul Harvester 99%, Hellcaller 1%. 164 left out: their log has no talents.
 
-**Typical** (Soul Harvester, agreement 65% on 15 contested talents, 2 run it exactly):
+**Typical** (Soul Harvester, agreement 64% on 15 contested talents, 1 run it exactly):
 
-`CkQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWGAAwMzsMLmZ2GDAM2WGYADYG2CMsNAAAMDAAgZmxMmZ2GjZMmZmZMMzMDAwAG`
+`CkQAAAAAAAAAAAAAAAAAAAAAAwMjZGNbmZ2mZGzyAAAmZmlZxMz2YAgx2yADYAzwWghtBAAgZAAAMzMmxM2GjZMmZmhhZmZAAmBG`
 
 **Most common other builds**, each against the typical:
 
-- 43 (7.2%): +Absolute Corruption, +Cascading Calamity, +Eye Contract, +Gorefiend's Resolve, +Malediction, +Malefic Grasp, +Xavius' Gambit 2/2; -Death's Embrace, -Eternal Servitude, -Hedonic Gorging, -Niskaran Methods, -Potent Soul Shards, -Ravenous Afflictions, -Siphon Life, -Sudden Onset
+- 39 (6.1%): +Absolute Corruption, +Cascading Calamity, +Curse of Exhaustion, +Gorefiend's Resolve, +Malediction, +Malefic Grasp, +Xavius' Gambit 2/2; -Death's Embrace, -Eternal Servitude, -Gorefiend's Avarice, -Hedonic Gorging, -Niskaran Methods, -Ravenous Afflictions, -Siphon Life, -Sudden Onset
   `CkQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWGAAwMmlZZmZWGDAM22GYADYG2CMsNAAAMAAAMzMmxMzGDzMzMzwMMzMDAwMwA`
-- 40 (6.7%): +Gorefiend's Avarice; -Banish
-  `CkQAAAAAAAAAAAAAAAAAAAAAAwMjZGNbmx2MzYWGAAwMzsMLmZ2GDAM2WGYADYG2CMsNAAAMDAAgZmxMmZ2GjZMmZmZMMzMDAwAG`
-- 26 (4.4%): +Dark Accord, +Empowered Drain Life, +Eye Contract, +Gorefiend's Avarice, +Gorefiend's Resolve; -Curse of Exhaustion, -Empowered Healthstone, -Eternal Servitude, -Potent Soul Shards, -Strength of Will
+- 34 (5.3%): +Dark Accord, +Empowered Drain Life, +Gorefiend's Resolve; -Empowered Healthstone, -Eternal Servitude, -Strength of Will
   `CkQAAAAAAAAAAAAAAAAAAAAAAwMjZGNbmZ2mZGz2AAAmZmlZxMz2YAgx22ADYAzwWghtBAAgZAAAMzMmxM2GjZMmZmhhZmxAAmBG`
-- 15 (2.5%): +Abyss Walker; -Curse of Exhaustion
-  `CkQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMzyAAAmZmlZxMz2YAgx2yADYAzwWghtBAAgZAAAMzMmxM2GjZMmZmZMMzMDAwAG`
+- 22 (3.5%): +Curse of Exhaustion, +Potent Soul Shards; -Banish, -Eye Contract
+  `CkQAAAAAAAAAAAAAAAAAAAAAAwMjZGNbmx2MzYWGAAwMzsMLmZ2GDAM2WGYADYG2CMsNAAAMDAAgZmxMmZ2GjZMmZmZMMzMDAwAG`
+- 11 (1.7%): +Absolute Corruption, +Cascading Calamity, +Fatal Echoes, +Frequent Traveler, +Gorefiend's Resolve, +Malediction, +Malefic Grasp, +Xavius' Gambit 2/2; -Death's Embrace, -Eternal Servitude, -Eye Contract, -Gorefiend's Avarice, -Hedonic Gorging, -Niskaran Methods, -Ravenous Afflictions, -Siphon Life, -Sudden Onset
+  `CkQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWGAAwMmlZZmZWGDAM22GYADYG2CMsNAAAMAAAMzMzMmxGzYmZmZGmhZmZAAGwA`
 
-**Split talents:** Swift Artifice 90%; Fiendish Stride 87%; Strength of Will (choice) 83%; Blight of Tongues (choice) 78%; Oppressive Darkness 76%; Curse of Exhaustion 69%; Niskaran Methods 61%; Hedonic Gorging 58%; Sudden Onset 57%; Ravenous Afflictions 57%; Death's Embrace 57%; Eye Contract 55%; Siphon Life (choice) 54%; Eternal Servitude (choice) 51%; Banish 50%; Gorefiend's Resolve (choice) 46%; Absolute Corruption (choice) 46%; Malediction 45%; Xavius' Gambit 45%; Cascading Calamity 45%; Malefic Grasp 42%; Potent Soul Shards 42%; Fel Synergy 39%; Gorefiend's Avarice 38%; Abyss Walker 21%; Empowered Drain Life 19%; Dark Accord (choice) 17%
+**Split talents:** Improved Mortal Coil 90%; Fiendish Stride 87%; Blight of Tongues (choice) 81%; Strength of Will (choice) 77%; Oppressive Darkness 71%; Banish 63%; Eye Contract 61%; Niskaran Methods 59%; Ravenous Afflictions 58%; Death's Embrace 57%; Siphon Life (choice) 56%; Hedonic Gorging 56%; Sudden Onset 55%; Curse of Exhaustion 54%; Eternal Servitude (choice) 52%; Malediction 47%; Gorefiend's Resolve (choice) 46%; Xavius' Gambit 46%; Cascading Calamity 46%; Malefic Grasp 44%; Fel Synergy 44%; Absolute Corruption (choice) 44%; Potent Soul Shards 33%; Gorefiend's Avarice 30%; Dark Accord (choice) 23%; Abyss Walker 21%; Empowered Drain Life 14%; Frequent Traveler 13%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 2 of 597 run it exactly.
+- `Dungeon`: 2 of 636 run it exactly. Typical has +Eye Contract, +Gorefiend's Avarice; lacks Curse of Exhaustion, Potent Soul Shards.
 
 ## Demonology Warlock
 
 ### Raid
 
-717 rankings over 10 bosses, logged 2026-09-01 to 2026-09-25. 410 distinct builds. Hero tree: Diabolist 100%.
+921 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 471 distinct builds. Hero tree: Diabolist 100%. 1 left out: their log has no talents.
 
-**Typical** (Diabolist, agreement 77% on 11 contested talents, 27 run it exactly):
+**Typical** (Diabolist, agreement 77% on 10 contested talents, 32 run it exactly):
 
 `CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMAAAAAAAgxMGWgB2GWohFjZGLzyMzMmBAmZMzMmZAmZGzMAAAjZmZMMsMjBMA`
 
 **Most common other builds**, each against the typical:
 
-- 14 (2.0%): +Banish; -Curse of Exhaustion
-  `CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMjZmZmlBAAAAAAAMmxwCMw2wCNsYMzYZWmZmxMAwMjZmxMDwMzYGAAAjZmZMMsMjBMA`
-- 12 (1.7%): +Banish, +Howl of Terror; -Abyss Walker, -Curse of Exhaustion
-  `CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMzyMzYWGAAAAAAAwYGDLwAbDL0wixMjlZZmZGzAAzMmZGzMAzMjZAAAMmZmxwwyMGwA`
-- 11 (1.5%): +Empowered Drain Life, +Gorefiend's Avarice; -Curse of Tongues, -Foul Mouth
-  `CoQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmZmlBAAAAAAAMmxwCMw2wCNsYMzYZWmZmxMAwMjZmxMDgZGjBAAYMzMzMMsMjBMA`
-- 11 (1.5%): +Banish, +Gorefiend's Avarice; -Curse of Exhaustion, -Foul Mouth
+- 19 (2.1%): +Shadowfury; -Abyss Walker
+  `CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbM2mZGzyAAAAAAAAGzYYBGYbYhGWMmZsMLzMzYGAYmxMzYmBYmZMzAAAMmZmxwwyMGwA`
+- 16 (1.7%): +Banish, +Gorefiend's Avarice; -Curse of Exhaustion, -Foul Mouth
   `CoQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjZMzMzsMAAAAAAAgxMGWgB2GWohFjZGLzyMzMmBAmZMzMmZAMzYGAAAjZmZMMsMjBMA`
+- 15 (1.6%): +Banish, +Howl of Terror; -Curse of Exhaustion, -Foul Mouth
+  `CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMzyMzMzyAAAAAAAAGzYYBGYbYhGWMmZsMLzMzYGAYmxMzYmBwMjZAAAMmZmxwwyMGwA`
+- 12 (1.3%): +Gorefiend's Avarice; -Foul Mouth
+  `CoQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmZmlBAAAAAAAMmxwCMw2wCNsYMzYZWmZmxMAwMjZmxMDgZGzMAAAjZmZMMsMjBMA`
 
-**Split talents:** Frequent Donor (choice) 90%; Frequent Traveler 85%; Improved Mortal Coil 84%; Practiced Rituals 84%; Mark of Shatug (choice) 83%; Curse of Tongues 81%; Strength of Will (choice) 76%; Foul Mouth 69%; Curse of Exhaustion 63%; Abyss Walker 56%; Banish 54%; Shadowfury (choice) 27%; Dark Accord (choice) 24%; Gorefiend's Avarice 22%; Howl of Terror (choice) 21%; Mark of F'harg (choice) 17%; Summon Felguard 17%; Oppressive Darkness 15%; Demonic Resilience 12%; Empowered Drain Life 12%; Fel Pact 11%; Blight of Tongues (choice) 10%; Ichor of Devils (choice) 10%
+**Split talents:** Improved Mortal Coil 89%; Curse of Tongues 84%; Mark of Shatug (choice) 84%; Practiced Rituals 83%; Frequent Traveler 82%; Strength of Will (choice) 73%; Foul Mouth 69%; Curse of Exhaustion 67%; Abyss Walker 55%; Banish 47%; Shadowfury (choice) 32%; Dark Accord (choice) 27%; Howl of Terror (choice) 21%; Oppressive Darkness 19%; Summon Felguard 18%; Gorefiend's Avarice 17%; Mark of F'harg (choice) 16%; Fel Pact 13%; Blight of Tongues (choice) 12%; Demonic Resilience 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 27 of 717 run it exactly.
+- `Raid`: the typical build. 32 of 921 run it exactly.
 
 ### Mythic+
 
-653 rankings over 8 dungeons, logged 2026-09-02 to 2026-09-25, keys 19 to 22 (median 20). 224 distinct builds. Hero tree: Diabolist 100%. 147 left out: their log has no talents.
+656 rankings over 8 dungeons, logged 2026-09-09 to 2026-10-18, keys 20 to 23 (median 20). 238 distinct builds. Hero tree: Diabolist 100%. 144 left out: their log has no talents.
 
-**Typical** (Diabolist, agreement 73% on 9 contested talents, 23 run it exactly):
+**Typical** (Diabolist, agreement 72% on 8 contested talents, 27 run it exactly):
 
-`CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMzyAAAAAAAAGzYYBGYbYhGWMmZsMbzMzYGAYmxMzYmBYMjZsBAAGzMzYYYZGDYA`
+`CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMzyAAAAAAAAGzYYBGYbYhGWMmZsMLzMzYGAYmxMzYmBYMjZsBAAGzMzYYYZGDYA`
 
 **Most common other builds**, each against the typical:
 
-- 26 (4.0%): +Fel Synergy 2/2; -Abyss Walker, -Oppressive Darkness
-  `CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMz2MzYWGAAAAAAAwYGDLwAbDL0wixMjlZbmZGzAAzMmZGzMAjZMjNAAwYmZGDDLzYAD`
-- 17 (2.6%): +Dark Accord; -Strength of Will
-  `CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMz2AAAAAAAAGzYYBGYbYhGWMmZsMbzMzYGAYmxMzYmBYMjZsBAAGzMzYYYZGDYA`
-- 16 (2.5%): +Fel Synergy 1/2; -Abyss Walker
-  `CoQAAAAAAAAAAAAAAAAAAAAAAwMegZGNbmZ2mZGzyAAAAAAAAGzYYBGYbYhGWMmZsMbzMzYGAYmxMzYmBYMjZsBAAGzMzYYYZGDYA`
-- 14 (2.1%): +Dark Accord, +Frequent Traveler; -Abyss Walker, -Strength of Will
-  `CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzY2GAAAAAAAwYGDLwAbDL0wixMjlZbmZGzAAzMmZGzMAzMjZsBAAGzMzYYYZGDYA`
+- 25 (3.8%): +Mark of F'harg; -Mark of Shatug
+  `CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzMzyAAAAAAAAGzYYBGYbYhGWMmZsMbzMzYGAYmxMzYmBYMjZsBAAGzMzYYYZGDYA`
+- 24 (3.7%): +Frequent Traveler; -Abyss Walker
+  `CoQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWGAAAAAAAwYGDLwAbDL0wixMjlZZmZGzAAzMmZGzMAzMjZsBAAGzMzYYYZGDYA`
+- 20 (3.0%): +Fel Synergy 2/2; -Abyss Walker, -Oppressive Darkness
+  `CoQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMz2MzYWGAAAAAAAwYGDLwAbDL0wixMjlZZmZGzAAzMmZGzMAjZMjNAAwYmZGDDLzYAD`
+- 17 (2.6%): +Curse of Exhaustion, +Dark Accord, +Fel Synergy 1/2; -Banish, -Fortified Soul, -Strength of Will
+  `CoQAAAAAAAAAAAAAAAAAAAAAAwMegZGNbmx2MzMz2AAAAAAAAGzYYBGYbYhGWMmZsMLzMzYGAYmxMzYmBYMjZmNAAwYmxYYYZGDYA`
 
-**Split talents:** Fiendish Stride 90%; Frequent Donor (choice) 90%; Improved Mortal Coil 79%; Banish 77%; Blight of Tongues (choice) 74%; Oppressive Darkness 72%; Mark of F'harg (choice) 67%; Strength of Will (choice) 59%; Fel Synergy 49%; Abyss Walker 45%; Dark Accord (choice) 41%; Mark of Shatug (choice) 33%; Curse of Exhaustion 27%; Blight of Weakness (choice) 17%; Gorefiend's Avarice 14%; Empowered Drain Life 12%; Ichor of Devils (choice) 10%
+**Split talents:** Fortified Soul 86%; Improved Mortal Coil 84%; Banish 78%; Blight of Tongues (choice) 74%; Oppressive Darkness 73%; Mark of Shatug (choice) 64%; Strength of Will (choice) 60%; Fel Synergy 55%; Abyss Walker 52%; Dark Accord (choice) 40%; Mark of F'harg (choice) 36%; Curse of Exhaustion 27%; Blight of Weakness (choice) 18%; Gorefiend's Avarice 14%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 23 of 653 run it exactly.
+- `Dungeon`: 25 of 656 run it exactly. Typical has +Mark of Shatug; lacks Mark of F'harg.
 
 ## Destruction Warlock
 
 ### Raid
 
-593 rankings over 10 bosses, logged 2026-08-23 to 2026-09-25. 430 distinct builds. Hero tree: Hellcaller 98%, Diabolist 2%.
+548 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 427 distinct builds. Hero tree: Hellcaller 97%, Diabolist 3%. 1 left out: their log has no talents.
 
-**Typical** (Hellcaller, agreement 69% on 11 contested talents, 2 run it exactly):
+**Typical** (Hellcaller, agreement 74% on 15 contested talents, 1 run it exactly):
 
 `CsQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmZmlZZmZmZxY2WMDAAmxYmZWsADMLGNmBwshNGAAYMAbAAzMYmZMGAAAmZmBAgxwA`
 
 **Most common other builds**, each against the typical:
 
-- 13 (2.2%): +Backlash 1/2, +Blight of Tongues, +Cataclysm, +Empowered Drain Life, +Ichor of Devils; -Backlash 2/2, -Foul Mouth, -Frequent Donor, -Frequent Traveler
-  `CsQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZhhZmZmlZZmZmZxMz2iHYAAwMGzMziFYgZxoxMAmNsxAAAjBYDAYmBMjxsBAAYmZmBAwYYA`
-- 10 (1.7%): +Backlash 1/2, +Blight of Tongues, +Chaotic Inferno; -Backlash 2/2, -Gorefiend's Avarice
-  `CsQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMLzMzMLGz2iHYAAwMzYmZWsADMLGNmBwshNGAAYMAbAAzMYmZMmNAAAzMzAAwYYA`
-- 9 (1.5%): +Blight of Tongues; -Gorefiend's Avarice
+- 7 (1.3%): +Dark Accord, +Teachings of the Black Harvest; -Foul Mouth, -Strength of Will
+  `CsQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZbMMzMzsNLzMzMLGz2iZAAwMGzMziFYgZxoxMAmNsxAAAjBYDAYmBmZMGAAAmZmBAgxwA`
+- 7 (1.3%): +Blight of Tongues; -Gorefiend's Avarice
   `CsQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsMLzMzMLGz2iZAAwMGzMziFYgZxoxMAmNsxAAAjBYDAYmBzMjxsBAAYmZGAAGDD`
-- 9 (1.5%): +Banish, +Cataclysm, +Empowered Drain Life, +Ichor of Devils, +Lake of Fire, +Shadowfury; -Abyss Walker, -Backlash 2/2, -Fiendish Stride, -Frequent Donor, -Frequent Traveler
-  `CsQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZhZ2MzYWmlZmZmFzMbLMAAYGjZmZxCMwsY0YGAzG2YAAgxghNAgZGMmxYAAAYmZmBAwYYA`
+- 7 (1.3%): +Backlash 1/2, +Blight of Tongues, +Dark Accord, +Practiced Chaos; -Backlash 2/2, -Gorefiend's Avarice, -Strength of Will
+  `CsQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbMMzMzsNLzMzMLGz2iHYAAwMGzMziFYgZxoxMAmNsxAAAjBGbAAzMYmZMmNAAAzMzAAwYYA`
+- 5 (0.9%): +Backlash 1/2, +Chaotic Inferno, +Empowered Drain Life; -Abyss Walker, -Backlash 2/2
+  `CsQAAAAAAAAAAAAAAAAAAAAAAwMzMzoZjhZmxsMLzMzMLGz2iHYAAwMzYmZWsADMLGNmBwshNGAAYMAbAAzMYmZMGAAAmZmZAAMGG`
 
-**Split talents:** Improved Havoc 90%; Curse of Exhaustion 89%; Backlash 82%; Strength of Will (choice) 79%; Frequent Traveler 75%; Curse of the Satyr (choice) 75%; Frequent Donor (choice) 74%; Abyss Walker 73%; Foul Mouth 67%; Havoc (choice) 57%; Gorefiend's Avarice 42%; Chaotic Inferno 39%; Mayhem (choice) 34%; Shadowfury (choice) 31%; Curse of Tongues 31%; Banish 29%; Cataclysm 27%; Ichor of Devils (choice) 26%; Aura of Enfeeblement (choice) 23%; Empowered Drain Life 22%; Dark Accord (choice) 21%; Blight of Tongues (choice) 21%; Practiced Chaos 17%; Demonic Resilience 14%; Howl of Terror (choice) 12%; Lake of Fire 11%
+**Split talents:** Fiendish Stride 89%; Swift Artifice 88%; Backlash 88%; Rain of Fire (choice) 88%; Curse of Exhaustion 87%; Improved Havoc 85%; Strength of Will (choice) 78%; Frequent Traveler 75%; Curse of the Satyr (choice) 75%; Frequent Donor (choice) 75%; Foul Mouth 71%; Abyss Walker 70%; Havoc (choice) 48%; Gorefiend's Avarice 42%; Mayhem (choice) 40%; Chaotic Inferno 38%; Curse of Tongues 35%; Shadowfury (choice) 34%; Banish 30%; Practiced Chaos 26%; Ichor of Devils (choice) 25%; Empowered Drain Life 24%; Dark Accord (choice) 22%; Aura of Enfeeblement (choice) 22%; Blight of Tongues (choice) 20%; Cataclysm 18%; Howl of Terror (choice) 13%; Rain of Fire (choice) 12%; Demonic Resilience 12%; Fel Pact 11%; Oppressive Darkness 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 2 of 593 run it exactly.
+- `Raid`: the typical build. 1 of 548 run it exactly.
 
 ### Mythic+
 
-548 rankings over 8 dungeons, logged 2026-08-25 to 2026-09-25, keys 16 to 20 (median 17). 249 distinct builds. Hero tree: Diabolist 96%, Hellcaller 4%. 252 left out: their log has no talents.
+565 rankings over 8 dungeons, logged 2026-08-29 to 2026-10-18, keys 17 to 22 (median 18). 263 distinct builds. Hero tree: Diabolist 96%, Hellcaller 4%. 235 left out: their log has no talents.
 
-**Typical** (Diabolist, agreement 73% on 12 contested talents, 20 run it exactly):
+**Typical** (Diabolist, agreement 73% on 12 contested talents, 21 run it exactly):
 
 `CsQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzMz2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCMw2wCNWYAAgxgBAYmBYMjZmNAAAzMzAAgZYA`
 
 **Most common other builds**, each against the typical:
 
-- 14 (2.6%): +Fel Synergy 2/2, +Ichor of Devils, +Teachings of the Black Harvest; -Banish, -Blight of Tongues, -Frequent Donor, -Improved Mortal Coil
-  `CsQAAAAAAAAAAAAAAAAAAAAAAwMmZGNLzM2mZGzysZmZmFzMLLjBAAzYMzMLgxMGWgB2GWoxCDAAMGMAAzMAjZYGAAAmZmBAAzwA`
-- 13 (2.4%): +Fel Synergy 2/2, +Ichor of Devils; -Banish, -Blight of Tongues, -Frequent Donor
+- 21 (3.7%): +Fel Synergy 2/2, +Ichor of Devils; -Banish, -Blight of Tongues, -Frequent Donor
   `CsQAAAAAAAAAAAAAAAAAAAAAAwMmZGNLmx2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCMw2wCNWYAAgxgBAYmBYMjZGAAAmZmBAAzwA`
-- 11 (2.0%): +Alythess's Ire, +Devastation 1/2, +Fel Synergy 1/2; -Banish, -Devastation 2/2
-  `CsQAAAAAAAAAAAAAAAAAAAAAAwMegZGNbmx2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCMw2wCNWYAAgxMMAAzMAjZMzsBAAYmZGAA8ADD`
-- 10 (1.8%): +Alythess's Ire, +Dark Accord, +Devastation 1/2, +Fel Synergy 1/2; -Curse of Exhaustion, -Devastation 2/2, -Strength of Will
+- 19 (3.4%): +Alythess's Ire, +Devastation 1/2, +Fel Synergy 2/2; -Banish, -Blight of Tongues, -Devastation 2/2
+  `CsQAAAAAAAAAAAAAAAAAAAAAAwMmZGNbmx2MzYWmNzMzsYmZZZMAAYGjZmZBMmxwCMw2wCNWYAAgxMMAAzMAjZMzAAAwMzMAA4BGG`
+- 11 (1.9%): +Avatar of Destruction, +Dark Accord, +Frequent Traveler, +Improved Havoc, +Soul Fire; -Banish, -Devastation 2/2, -Lake of Fire, -Strength of Will
+  `CsQAAAAAAAAAAAAAAAAAAAAAAwMMzoZzM2mZGz2sNzMzsYmZZZMAAYGjZmZBMmxwCMw2wCNWYAAgxAsBgZGgZmxMzGAAgZmZAAYMM`
+- 11 (1.9%): +Alythess's Ire, +Dark Accord, +Devastation 1/2, +Fel Synergy 1/2; -Curse of Exhaustion, -Devastation 2/2, -Strength of Will
   `CsQAAAAAAAAAAAAAAAAAAAAAAwMegZGNbmZ2mZGz2sZmZmFzMLLjBAAzYMzMLgxMGWgB2GWoxCDAAMmhBAYmBYMjZsBAAYmZGAA8ADD`
 
-**Split talents:** Curse of Tongues 90%; Swift Artifice 88%; Improved Mortal Coil 88%; Infernal Vitality (choice) 87%; Oppressive Darkness 82%; Frequent Donor (choice) 75%; Strength of Will (choice) 74%; Rain of Fire (choice) 73%; Devastation 72%; Blight of Tongues (choice) 70%; Curse of Exhaustion 65%; Fel Synergy 61%; Banish 46%; Alythess's Ire 34%; Rain of Fire (choice) 27%; Dark Accord (choice) 26%; Soul Fire (choice) 25%; Ichor of Devils (choice) 25%; Improved Havoc 21%; Gorefiend's Avarice 20%; Abyss Walker 20%; Frequent Traveler 11%; Avatar of Destruction 10%
+**Split talents:** Improved Mortal Coil 90%; Fiendish Stride 90%; Swift Artifice 88%; Infernal Vitality (choice) 88%; Oppressive Darkness 80%; Frequent Donor (choice) 80%; Rain of Fire (choice) 77%; Strength of Will (choice) 69%; Devastation 69%; Curse of Exhaustion 68%; Fel Synergy 64%; Blight of Tongues (choice) 61%; Banish 47%; Soul Fire (choice) 33%; Alythess's Ire 33%; Dark Accord (choice) 31%; Rain of Fire (choice) 23%; Abyss Walker 21%; Gorefiend's Avarice 21%; Ichor of Devils (choice) 20%; Improved Havoc 18%; Avatar of Destruction 17%; Empowered Drain Life 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 20 of 548 run it exactly.
+- `Dungeon`: the typical build. 21 of 565 run it exactly.
 
 ## Arms Warrior
 
 ### Raid
 
-817 rankings over 10 bosses, logged 2026-08-28 to 2026-09-25. 282 distinct builds. Hero tree: Slayer 100%.
+1000 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 308 distinct builds. Hero tree: Slayer 100%.
 
-**Typical** (Slayer, agreement 77% on 10 contested talents, 91 run it exactly):
+**Typical** (Slayer, agreement 76% on 10 contested talents, 89 run it exactly):
 
 `CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzYmZGAAAghphZGzMWmZmZGMmZAAAAAMzyMDMhxy2ALgBMDTgZwGYmhx2ALzsNAzMAYGGA`
 
 **Most common other builds**, each against the typical:
 
-- 44 (5.4%): +Shockwave; -Second Wind
-  `CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzYmZGAAAghphxYmxyMzMzwMmZAAAAAMzyMDMhxy2ALgBMDTgZwGYmhx2ALzsNAzMAYGGA`
-- 41 (5.0%): +Bloodborne 2/2, +Fierce Followthrough, +Just Warming Up; -Broad Strokes, -Dreadnaught, -Opportunist, -Powerful Momentum
+- 46 (4.6%): +Bloodborne 2/2, +Fierce Followthrough, +Just Warming Up; -Broad Strokes, -Dreadnaught, -Opportunist, -Powerful Momentum
   `CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzMmZGAAAghphZGzMWmZmZGMmZAAAAAMzyMDIMWWGYBMgZYCMD2AzMM2GYZmlBYmBAzwA`
-- 22 (2.7%): +Collateral Damage, +Fervor of Battle; -Bloodsurge, -Fatality
+- 37 (3.7%): +Shockwave; -Second Wind
+  `CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzYmZGAAAghphxYmxyMzMzwMmZAAAAAMzyMDMhxy2ALgBMDTgZwGYmhx2ALzsNAzMAYGGA`
+- 32 (3.2%): +Collateral Damage, +Fervor of Battle; -Bloodsurge, -Fatality
   `CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGzMWmZmZGMmZAAAAAMWmZgJMW2GYBMgZYCMD2AzMM2GMLzsNAzMAYGGA`
-- 20 (2.4%): +Fearless; -Piercing Howl
-  `CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMzYmZGAAAghphZGzMbLzMzMDGzMAAAAAmZZmBmwYZbgFwAmhJwMYDMzwwALzsNAzMAYGGA`
+- 27 (2.7%): +Bloodborne 1/2, +Fierce Followthrough; -Dreadnaught, -Opportunist
+  `CcEAAAAAAAAAAAAAAAAAAAAAAAzMzsMz8AmZGAAAghphZGzMWmZmZGMmZAAAAAMzyMDMhxyyALgBMDTgZwGYmhx2ALzsNAzMAYGGA`
 
-**Split talents:** Wrecking Throw (choice) 89%; Broad Strokes (choice) 87%; Powerful Momentum 86%; Fatality 86%; Storm Bolt 78%; Bloodsurge 74%; Dreadnaught 74%; Opportunist (choice) 68%; Piercing Howl (choice) 65%; Second Wind 63%; Shockwave 45%; Fearless (choice) 32%; Fierce Followthrough (choice) 32%; Fervor of Battle 26%; Bloodborne 25%; Collateral Damage 15%; Rumbling Earth 14%; Just Warming Up (choice) 13%; Interpose (choice) 10%
+**Split talents:** Broad Strokes (choice) 88%; Wrecking Throw (choice) 88%; Powerful Momentum 86%; Fatality 82%; Dreadnaught 75%; Opportunist (choice) 72%; Bloodsurge 70%; Storm Bolt 70%; Piercing Howl (choice) 67%; Second Wind 64%; Shockwave 47%; Fearless (choice) 35%; Fervor of Battle 30%; Fierce Followthrough (choice) 28%; Bloodborne 24%; Collateral Damage 19%; Rumbling Earth 16%; Just Warming Up (choice) 12%; Berserker Shout (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 91 of 817 run it exactly.
+- `Raid`: the typical build. 89 of 1000 run it exactly.
 
 ### Mythic+
 
-679 rankings over 8 dungeons, logged 2026-09-06 to 2026-09-25, keys 20 to 22 (median 21). 97 distinct builds. Hero tree: Slayer 100%. 121 left out: their log has no talents.
+646 rankings over 8 dungeons, logged 2026-09-23 to 2026-10-18, keys 22 to 24 (median 22). 78 distinct builds. Hero tree: Slayer 100%. 154 left out: their log has no talents.
 
-**Typical** (Slayer, agreement 74% on 4 contested talents, 122 run it exactly):
+**Typical** (Slayer, agreement 68% on 3 contested talents, 108 run it exactly):
 
-`CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGmZbZmZmZYGzMAAAAAGLzMwEGLbDsAGwMMBmBbgZGGGMLzsNAzMAYGGA`
+`CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGzMbmZmZGmxMDAAAAgxyMDMhxy2ALgBMDTgZwGYmhhBzyMbDwMDAmhBA`
 
 **Most common other builds**, each against the typical:
 
-- 86 (12.7%): +Fast Footwork; -Wrecking Throw
-  `CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGzMbmZmZGmxMDAAAAgxyMDMhxy2ALgBMDTgZwGYmhhBzyMbDwMDAmhBA`
-- 51 (7.5%): +Rumbling Earth; -Wrecking Throw
+- 83 (12.8%): +Wrecking Throw; -Fast Footwork
+  `CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGmZbZmZmZYGzMAAAAAGLzMwEGLbDsAGwMMBmBbgZGGGMLzsNAzMAYGGA`
+- 46 (7.1%): +Rumbling Earth; -Second Wind
+  `CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphxYmZzMzMzYmxMDAAAAgxyMDMhxy2ALgBMDTgZwGYmhhBzyMbDwMDAmhBA`
+- 42 (6.5%): +Intervene; -Fast Footwork
+  `CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGmZzMzMzwMmZAAAAAMWmZgJMW2GYBMgZYCMD2AzMWGGMLzsNAzMAYGGA`
+- 38 (5.9%): +Rumbling Earth; -Fast Footwork
   `CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGmZzMzMzYmxMDAAAAgxyMDMhxy2ALgBMDTgZwGYmhhBzyMbDwMDAmhBA`
-- 40 (5.9%): +Fast Footwork; -Second Wind
-  `CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphxYmZbZmZmZYGzMAAAAAGLzMwEGLbDsAGwMMBmBbgZGGGMLzsNAzMAYGGA`
-- 27 (4.0%): +Rumbling Earth; -Field Dressing
-  `CcEAAAAAAAAAAAAAAAAAAAAAAgZmZmFzYmZGAAAghphZGmZbZmZmZMzYmBAAAAwYZmBmwYZbgFwAmhJwMYDMzwwgZZmtBYmBAGGA`
 
-**Split talents:** Fearless (choice) 88%; Field Dressing 84%; Second Wind 71%; Wrecking Throw (choice) 53%; Fast Footwork 45%; Rumbling Earth 32%; Intervene (choice) 16%; Berserker Shout (choice) 10%
+**Split talents:** Fearless (choice) 85%; Second Wind 70%; Fast Footwork 49%; Wrecking Throw (choice) 39%; Rumbling Earth 32%; Intervene (choice) 19%; Berserker Shout (choice) 12%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 122 of 679 run it exactly.
+- `Dungeon`: 83 of 646 run it exactly. Typical has +Fast Footwork; lacks Wrecking Throw.
 
 ## Fury Warrior
 
 ### Raid
 
-605 rankings over 10 bosses, logged 2026-08-31 to 2026-09-25. 180 distinct builds. Hero tree: Slayer 98%, Mountain Thane 2%.
+627 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 222 distinct builds. Hero tree: Slayer 93%, Mountain Thane 7%.
 
-**Typical** (Slayer, agreement 73% on 8 contested talents, 23 run it exactly):
+**Typical** (Slayer, agreement 71% on 8 contested talents, 20 run it exactly):
 
-`CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2WmZmZmhxMzMzMjZWmxYmZmNzMzAAAxYZbgFwAmhJwMsBMzwAAAMzwYMMGMG`
+`CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2MzMzMDjZmZmZGzsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMM2AAgZGGzywYwYA`
 
 **Most common other builds**, each against the typical:
 
-- 52 (8.6%): +Cold Steel, Hot Blood, +Enraged Regeneration, +Piercing Howl; -Improved Whirlwind, -Rampaging Ruin, -Wrecking Throw
-  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2MzMzMDjZmZGzMzsMzMmZmZzYmBAAixy2ALgBMDTgZYDYmhxGAAMzwYMMGMG`
-- 43 (7.1%): +Meat Cleaver; -Massacre
-  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2WmZmZmhxMzMzMjZWmxYmxsZmZGAAIGLbDsAGwMMBmhNgZGGAAgZGGzywYwYA`
-- 26 (4.3%): +Interpose, +Meat Cleaver, +Piercing Howl; -Massacre, -Second Wind, -Wrecking Throw
+- 41 (6.5%): +Interpose; -Second Wind
   `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZYMzMzMzYmlZMmZMbmZmBAAixy2ALgBMDTgZYDYmZzYDAAmZYMLDjBjB`
-- 25 (4.1%): +Enraged Regeneration, +Piercing Howl; -Fearless, -Massacre
-  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZsMzMzMDjZmZmZmZmlZMmZMbmZmBAAixy2ALgBMDTgZYDYmhxGAAMzwYMMGMG`
+- 41 (6.5%): +Cold Steel, Hot Blood, +Enraged Regeneration, +Massacre; -Improved Whirlwind, -Meat Cleaver, -Rampaging Ruin
+  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2MzMzMDjZmZGzMzsMzMmZmZzYmBAAixy2ALgBMDTgZYDYmhxGAAMzwYMMGMG`
+- 18 (2.9%): +Wrecking Throw; -Piercing Howl
+  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2WmZmZmhxMzMzMjZWmxYmxsZmZGAAIGLbDsAGwMMBmhNgZGGAAgZGGzywYwYA`
+- 17 (2.7%): +Enraged Regeneration, +Rumbling Earth, +Shockwave, +Spite 1/2; -Piercing Howl, -Second Wind, -Spite 2/2
+  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZmZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMMAAAzMMmlhxgxA`
 
-**Split talents:** Field Dressing 89%; Improved Whirlwind 84%; Storm Bolt 83%; Fearless (choice) 78%; Rampaging Ruin 77%; Second Wind 72%; Wrecking Throw (choice) 57%; Piercing Howl (choice) 56%; Massacre 44%; Meat Cleaver (choice) 39%; Enraged Regeneration 36%; Shockwave 30%; Cold Steel, Hot Blood 26%; Interpose (choice) 15%; Rumbling Earth 13%
+**Split talents:** Field Dressing 90%; Improved Whirlwind 85%; Storm Bolt 82%; Fearless (choice) 79%; Rampaging Ruin 75%; Second Wind 60%; Piercing Howl (choice) 53%; Wrecking Throw (choice) 49%; Shockwave 44%; Meat Cleaver (choice) 42%; Enraged Regeneration 40%; Cold Steel, Hot Blood 35%; Massacre 34%; Interpose (choice) 17%; Rumbling Earth 15%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 23 of 605 run it exactly.
+- `Raid`: 11 of 627 run it exactly. Typical has +Meat Cleaver, +Piercing Howl; lacks Massacre, Wrecking Throw.
 
 ### Mythic+
 
-655 rankings over 8 dungeons, logged 2026-08-25 to 2026-09-25, keys 17 to 21 (median 18). 125 distinct builds. Hero tree: Slayer 93%, Mountain Thane 7%. 145 left out: their log has no talents.
+675 rankings over 8 dungeons, logged 2026-08-28 to 2026-10-18, keys 19 to 22 (median 19). 151 distinct builds. Hero tree: Slayer 58%, Mountain Thane 42%. 125 left out: their log has no talents.
 
-**Typical** (Slayer, agreement 79% on 7 contested talents, 191 run it exactly):
+**Typical** (Slayer, agreement 62% on 29 contested talents, 28 run it exactly):
 
-`CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZmZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMMAAAzMMmlhxgxA`
+`CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjhZ2WmZmZmZmxMzMzMzMPwyMGzMmNzMzAAAxYZbgFwAmhJwMsBMzwAAAMzwYWGGDGD`
 
 **Most common other builds**, each against the typical:
 
-- 39 (6.0%): +Second Wind; -Rumbling Earth
+- 151 (22.4%): +Fast Footwork; -Wrecking Throw
+  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMzmZmZmZmZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMMAAAzMMmlhxgxA`
+- 103 (15.3%): +Avatar, +Avatar of the Storm, +Burst of Power, +Capacitance, +Cold Steel, Hot Blood, +Conductivity, +Crackling Thunder, +Crashing Thunder, +Crushing Force, +Deft Experience 2/2, +Flashing Skies, +Ground Current, +Javelineer, +Keep Your Feet on the Ground, +Mountain Thane, +Scent of Blood, +Spite 2/2, +Storm Bolts, +Storm Surge, +Strength of the Mountain, +Thorim's Might, +Thunder Blast, +Thunder Clap, +Vicious Contempt; -Bladestorm, -Critical Thinking 2/2, -Culling Cyclone, -Deadly Focus, -Death Drive, -Deep Wounds, -Executioner's Wrath, -Field Dressing, -Imminent Demise, -Odyn's Fury, -Opportunist, -Overwhelming Blades, -Reap the Storm, -Relentless Pursuit, -Resonant Voice, -Rumbling Earth, -Show No Mercy, -Slayer, -Slayer's Malice, -Spite 1/2, -Stance Mastery, -Surge of Adrenaline, -Unhinged, -Unrelenting Onslaught, -Violent Euphoria
+  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjZMz2yMzMzMmxMzMzMzMzyMzYmxsMmZGAAIMwGssY0YGAzCmxCgZwAAmZAMYxMAjB`
+- 30 (4.4%): +Fast Footwork, +Second Wind; -Rumbling Earth, -Wrecking Throw
   `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMmZ2MzMzMjZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMMAAAzMMmlhxgxA`
-- 38 (5.8%): +Wrecking Throw; -Fast Footwork
-  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjhZ2WmZmZmZmxMzMzMzMPwyMGzMmNzMzAAAxYZbgFwAmhJwMsBMzwAAAMzwYWGGDGD`
-- 25 (3.8%): +Wrecking Throw; -Rumbling Earth
-  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjxMz2yMzMzMmxMzMzMzMPwyMGzMmNzMzAAAxYZbgFwAmhJwMsBMzwAAAMzwYWGGDGD`
-- 23 (3.5%): +Second Wind; -Fast Footwork
-  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDzMMzmZmZmZmZMzMzMzMzDsMjxMjZzMzMAAQMW2GYBMgZYCMDbAzMMAAAzMMmlhxgxA`
+- 24 (3.6%): +Avatar, +Avatar of the Storm, +Burst of Power, +Capacitance, +Cold Steel, Hot Blood, +Conductivity, +Crackling Thunder, +Crashing Thunder, +Crushing Force, +Deft Experience 2/2, +Flashing Skies, +Ground Current, +Javelineer, +Keep Your Feet on the Ground, +Mountain Thane, +Scent of Blood, +Spite 2/2, +Storm Bolts, +Storm Surge, +Strength of the Mountain, +Thorim's Might, +Thunder Blast, +Thunder Clap, +Vicious Contempt; -Bladestorm, -Critical Thinking 2/2, -Culling Cyclone, -Deadly Focus, -Death Drive, -Deep Wounds, -Executioner's Wrath, -Field Dressing, -Imminent Demise, -Leeching Strikes, -Odyn's Fury, -Opportunist, -Overwhelming Blades, -Reap the Storm, -Relentless Pursuit, -Resonant Voice, -Show No Mercy, -Slayer, -Slayer's Malice, -Spite 1/2, -Stance Mastery, -Surge of Adrenaline, -Unhinged, -Unrelenting Onslaught, -Violent Euphoria
+  `CgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgGDjZMz2yMzMjZmxMzMzMzMzyMzYmxsMmZGAAIMwGssY0YGAzCmxCgZwAAmZAMYxMAjB`
 
-**Split talents:** Stance Mastery 89%; Storm Bolt 88%; Field Dressing 83%; Enraged Regeneration 77%; Rumbling Earth 75%; Fast Footwork 73%; Wrecking Throw (choice) 40%; Second Wind 29%; Crushing Force 10%
+**Split talents:** Leeching Strikes 89%; Storm Bolt 89%; Enraged Regeneration 87%; Odyn's Fury 68%; Resonant Voice 62%; Field Dressing 62%; Surge of Adrenaline 62%; Critical Thinking 62%; Rumbling Earth 59%; Executioner's Wrath 59%; Violent Euphoria 58%; Unrelenting Onslaught 58%; Unhinged 58%; Slayer's Malice 58%; Show No Mercy 58%; Reap the Storm 58%; Overwhelming Blades 58%; Imminent Demise 58%; Deep Wounds 58%; Death Drive 58%; Deadly Focus 58%; Bladestorm (choice) 58%; Stance Mastery 58%; Culling Cyclone (choice) 58%; Opportunist (choice) 57%; Wrecking Throw (choice) 57%; Relentless Pursuit (choice) 56%; Fast Footwork 47%; Crushing Force 43%; Thunder Clap 42%; Thunder Blast 42%; Strength of the Mountain 42%; Storm Surge 42%; Scent of Blood 42%; Ground Current 42%; Flashing Skies (choice) 42%; Crashing Thunder 42%; Conductivity 42%; Capacitance 42%; Burst of Power 42%; Avatar of the Storm 42%; Avatar (choice) 42%; Crackling Thunder 41%; Storm Bolts (choice) 41%; Cold Steel, Hot Blood 41%; Thorim's Might (choice) 40%; Deft Experience 38%; Vicious Contempt 38%; Javelineer 38%; Keep Your Feet on the Ground (choice) 37%; Second Wind 17%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 191 of 655 run it exactly.
+- `Dungeon`: 151 of 675 run it exactly. Typical has +Wrecking Throw; lacks Fast Footwork.
 
 ## Protection Warrior
 
 ### Raid
 
-638 rankings over 10 bosses, logged 2026-08-27 to 2026-09-25. 413 distinct builds. Hero tree: Mountain Thane 65%, Colossus 35%.
+704 rankings over 10 bosses, logged 2026-10-14 to 2026-10-18. 436 distinct builds. Hero tree: Mountain Thane 78%, Colossus 22%.
 
-**Typical** (Mountain Thane, agreement 66% on 26 contested talents, 1 run it exactly):
+**Typical** (Mountain Thane, agreement 72% on 27 contested talents, 1 run it exactly):
 
 `CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZmZGzmxsMMGjGmZYZmZmZwYmBAAAALjBYGDwAbwyiRjZAMbYmNYGzMY2AgZGAAmBGD`
 
 **Most common other builds**, each against the typical:
 
-- 14 (2.2%): +Shield Specialization; -Armor Specialization
-  `CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZGzY2MzsMMGjGmZYZmZmZwYmBAAAALjBYGDwAbwyiRjZAMbYmNYGzMY2AgZGAAmBGD`
-- 9 (1.4%): +Tough as Nails; -Armor Specialization
+- 12 (1.7%): +Tough as Nails; -Armor Specialization
   `CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZGzY2MmlZMGjGmZYZmZmZwYmBAAAALjBYGDwAbwyiRjZAMbYmNYGzMY2AgZGAAmBGD`
-- 8 (1.3%): +Arterial Bleed, +Boneshaker, +Celeritous Conclusion, +Colossal Might, +Colossus, +Cut to the Bone, +Decimator, +Deep Wounds, +Dominance of the Colossus, +Martial Expert, +Massacre, +Mountain of Muscle and Scars, +No Stranger to Pain, +Practiced Strikes, +Precise Might, +Second Wind, +Sudden Death, +Tide of Battle; -Armor Specialization, -Avatar of the Storm, -Bloodborne, -Burst of Power, -Capacitance, -Conductivity, -Crashing Thunder, -Flashing Skies, -Ground Current, -Keep Your Feet on the Ground, -Mountain Thane, -Overwhelming Rage, -Storm Shield, -Storm Surge, -Strength of the Mountain, -Thorim's Might, -Thunder Blast, -Thunderlord
-  `CkEAAAAAAAAAAAAAAAAAAAAAA02AAAzMzYmZGmZ2MmlhxY0MmZYZmZmZAzMAAAAYZMAzYAgFzYYDGYGWoxMLMmxMDmNAAzMAgZgxA`
-- 7 (1.1%): +Barbaric Training, +Deep Wounds, +Massacre, +Snap Induction; -Armor Specialization, -Battle-Scarred Veteran, -Flashing Skies, -Stance Mastery
-  `CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZGzMzmxsMMGjGmZGLzMzMDGzMAAAAYZAYGDwAbw2iRjZAMbYmNGzwMY2AgZGAAmBGD`
+- 11 (1.6%): +Barbaric Training, +Bloodsurge, +Intervene, +Resonant Voice, +Storm Bolts, +Tough as Nails; -Battle-Scarred Veteran, -Field Dressing, -Fight Through the Flames, -Javelineer, -Stance Mastery, -Storm Shield
+  `CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMjZmZmZGzmxsMjxYmGmZGLzMzMDGzMAAAAYZAYGDwAbwyiRjZAMLYmNYGmhZ2AgZGAAAGD`
+- 8 (1.1%): +Shield Specialization; -Armor Specialization
+  `CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZGzY2MzsMMGjGmZYZmZmZwYmBAAAALjBYGDwAbwyiRjZAMbYmNYGzMY2AgZGAAmBGD`
+- 7 (1.0%): +Intervene, +Ravager, +Shield Specialization, +Shockwave, +Snap Induction, +Tough as Nails; -Armor Specialization, -Battle-Scarred Veteran, -Field Dressing, -Flashing Skies, -Pain and Gain, -Whirling Blade
+  `CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAzMzYmZGzY2MzsMjxYmGmZYZMzMDzYmBAAAAbDAzYAGYD2WMaMDgZDzsBzYmBzGAMzAAwAGD`
 
-**Split talents:** Wrecking Throw (choice) 90%; Javelineer 86%; Thunderlord 84%; Field Dressing 79%; Overwhelming Rage 78%; Fast Footwork 75%; Thunder Blast 65%; Strength of the Mountain 65%; Storm Surge 65%; Keep Your Feet on the Ground (choice) 65%; Ground Current 65%; Crashing Thunder 65%; Conductivity 65%; Capacitance 65%; Burst of Power 65%; Avatar of the Storm 65%; Thorim's Might (choice) 64%; Piercing Howl (choice) 64%; Stance Mastery 63%; Fight Through the Flames 61%; Bloodborne (choice) 58%; Battle-Scarred Veteran 54%; Flashing Skies (choice) 48%; Armor Specialization 46%; Storm Shield (choice) 44%; Deep Wounds 42%; Barbaric Training 39%; Shockwave 37%; Sudden Death (choice) 37%; Tough as Nails 35%; Tide of Battle 35%; Precise Might 35%; Practiced Strikes 35%; No Stranger to Pain (choice) 35%; Mountain of Muscle and Scars 35%; Martial Expert 35%; Dominance of the Colossus 35%; Decimator 35%; Cut to the Bone 35%; Colossal Might 35%; Celeritous Conclusion 35%; Fearless (choice) 35%; Arterial Bleed (choice) 34%; Massacre 31%; Intervene 29%; Shield Specialization 21%; Storm Bolts (choice) 21%; Heavy Handed 20%; Boneshaker (choice) 18%; Snap Induction (choice) 17%; Earthquaker (choice) 17%; Resonant Voice 15%; Bloodsurge 14%; Second Wind 13%
+**Split talents:** Devastating Focus 89%; Thunderlord 88%; Wrecking Throw (choice) 86%; Thunder Blast 78%; Strength of the Mountain 78%; Storm Surge 78%; Ground Current 78%; Crashing Thunder 78%; Conductivity 78%; Capacitance 78%; Burst of Power 78%; Avatar of the Storm 78%; Keep Your Feet on the Ground (choice) 78%; Thorim's Might (choice) 77%; Overwhelming Rage 75%; Javelineer 74%; Fast Footwork 74%; Field Dressing 72%; Flashing Skies (choice) 66%; Fight Through the Flames 66%; Stance Mastery 59%; Piercing Howl (choice) 59%; Bloodborne (choice) 55%; Battle-Scarred Veteran 52%; Shockwave 46%; Storm Shield (choice) 44%; Armor Specialization 44%; Barbaric Training 43%; Fearless (choice) 40%; Tough as Nails 38%; Deep Wounds 35%; Storm Bolts (choice) 34%; Sudden Death (choice) 33%; Intervene 33%; Massacre 30%; Resonant Voice 28%; Shield Specialization 24%; Tide of Battle 22%; Precise Might 22%; Practiced Strikes 22%; No Stranger to Pain (choice) 22%; Mountain of Muscle and Scars 22%; Martial Expert 22%; Dominance of the Colossus 22%; Decimator 22%; Cut to the Bone 22%; Colossal Might 22%; Celeritous Conclusion 22%; Arterial Bleed (choice) 21%; Bloodsurge 20%; Heavy Handed 18%; Storm Bolt 14%; Snap Induction (choice) 12%; Second Wind 12%; Boneshaker (choice) 11%; Disrupting Shout 11%; Earthquaker (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Raid`: the typical build. 1 of 638 run it exactly.
+- `Raid`: the typical build. 1 of 704 run it exactly.
 
 ### Mythic+
 
-640 rankings over 8 dungeons, logged 2026-08-28 to 2026-09-25, keys 18 to 21 (median 18). 273 distinct builds. Hero tree: Mountain Thane 95%, Colossus 5%. 159 left out: their log has no talents. 1 refused: unknown talents or not 34/34/13 points.
+694 rankings over 8 dungeons, logged 2026-09-08 to 2026-10-18, keys 19 to 23 (median 20). 349 distinct builds. Hero tree: Mountain Thane 97%, Colossus 3%. 106 left out: their log has no talents.
 
-**Typical** (Mountain Thane, agreement 77% on 13 contested talents, 17 run it exactly):
+**Typical** (Mountain Thane, agreement 80% on 18 contested talents, 4 run it exactly):
 
-`CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmNzMLzYMGNmxwiZmZGzwMDAAAAWmZAmxAMwGssY0YGAzCmZDGzMDmNAYmBAgZgxA`
+`CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmNzMLzYMGNmxwiZmZGzwMDAAAAWmZAmxAMwGssY0YGAzCmZDGzMDjNAYmBAgZgxA`
 
 **Most common other builds**, each against the typical:
 
-- 20 (3.1%): +Frothing Berserker, +Resonant Voice; -Bounding Stride, -Crushing Force
-  `CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmNzMLzYMGNmxwyMmZGzwMDAAAAWmZAmxAMwGssY0YGAzCmZDGzMDjNAYmBAgZgxA`
-- 20 (3.1%): +Bloodsurge, +Fearless, +Resonant Voice; -Crushing Force, -Piercing Howl, -Tough as Nails
-  `CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzYmZmZmxsZmZZYMGNmxYbxMzMjZYmBAAAALzMAzYAGYDWWMaMDgZBzsBjZmhBAYmBAgZgxA`
-- 15 (2.3%): +Bloodsurge, +Resonant Voice; -Crushing Force, -Enduring Alacrity
-  `CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzYmZmZmxsZmZZGjxoxMGWMzMzYGmZAAAAwyMDwMGgB2glFjGzAYWwMbAzMDjNAYmBAgZgxA`
-- 13 (2.0%): +Bloodsurge; -Enduring Alacrity
+- 12 (1.7%): +Bloodborne, +Bloodsurge, +Fight Through the Flames, +Focused Vigor, +Frothing Berserker, +Gathering Clouds, +Intimidating Shout, +Overwhelming Rage, +Snap Induction; -Battle-Scarred Veteran, -Best Served Cold, -Disrupting Shout, -Flashing Skies, -Piercing Howl, -Punish, -Rumbling Earth, -Storm Bolt, -Thorim's Might
+  `CkEAAAAAAAAAAAAAAAAAAAAAA0yAAAjZmZmZmZY2MzsMjxY0wYYZmZmZYGzMAAAAYZGAGDwALw2iRjZAMLYmNYGzMMWAgZGAAmBGD`
+- 11 (1.6%): +Bloodsurge, +Crushing Force; -Enduring Alacrity, -Resonant Voice
   `CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzYmZmZmxsZmZZGjxoxMGWMzMzYGmZAAAAwyMDwMGgB2glFjGzAYWwMbAzMDmNAYmBAgZgxA`
+- 9 (1.3%): +Barbaric Training, +Fight Through the Flames, +Focused Vigor, +Frothing Berserker; -Bounding Stride, -Disrupting Shout, -Indomitable, -Javelineer
+  `CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzMmZmZmxsZmZZGjxoxMmxyMmZGzwMDAAAAWGDwMGgB2glFjGzAYWwMbwMmZYsBAzMAAYgxA`
+- 9 (1.3%): +Frothing Berserker; -Bounding Stride
+  `CkEAAAAAAAAAAAAAAAAAAAAAAkBAAGzwMzMzMmNzMLzYMGNmxwyMmZGzwMDAAAAWmZAmxAMwGssY0YGAzCmZDGzMDjNAYmBAgZgxA`
 
-**Split talents:** Rumbling Earth 90%; Storm Bolts (choice) 89%; Indomitable 89%; Into the Fray (choice) 88%; Javelineer 87%; Instigate 87%; Bounding Stride 82%; Flashing Skies (choice) 81%; Tough as Nails 78%; Armor Specialization 77%; Piercing Howl (choice) 54%; Enduring Alacrity 53%; Crushing Force 52%; Resonant Voice 51%; Bloodsurge 49%; Fight Through the Flames 36%; Frothing Berserker 33%; Intimidating Shout (choice) 28%; Bloodborne (choice) 19%; Fearless (choice) 19%; Focused Vigor 18%; Barbaric Training 16%; Last Stand 15%; Snap Induction (choice) 14%; Heavy Repercussions (choice) 12%
+**Split talents:** Into the Fray (choice) 89%; Thorim's Might (choice) 87%; Best Served Cold 87%; Rumbling Earth 87%; Punish 86%; Indomitable 85%; Instigate 84%; Storm Bolts (choice) 82%; Storm Bolt 82%; Flashing Skies (choice) 82%; Disrupting Shout 82%; Bounding Stride 81%; Armor Specialization 78%; Javelineer 77%; Enduring Alacrity 72%; Tough as Nails 72%; Resonant Voice 63%; Piercing Howl (choice) 57%; Fight Through the Flames 54%; Frothing Berserker 38%; Crushing Force 38%; Bloodborne (choice) 37%; Bloodsurge 35%; Barbaric Training 24%; Intimidating Shout (choice) 24%; Fearless (choice) 21%; Focused Vigor 20%; Storm Shield (choice) 15%; Snap Induction (choice) 15%; Last Stand 14%; Heavy Repercussions (choice) 11%
 
 **Ours, against the whole sample:**
 
-- `Dungeon`: the typical build. 17 of 640 run it exactly.
+- `Dungeon`: 9 of 694 run it exactly. Typical has +Resonant Voice; lacks Crushing Force.
 

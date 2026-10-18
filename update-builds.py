@@ -105,7 +105,15 @@ PICK = {
 # refreshed: copy a new string in when the tree changes (the points check fails
 # loudly when it does). The druids' "Dungeon" pins (Archon's, card 0047) gave
 # way to Warcraft Logs on 2026-09-25 (card 0064); git holds them.
-PIN = {}
+# Ula'tek has no Mythic rankings with talents yet, so without the pin Dreamgrove's string
+# fills the row. Catgpt's is the #3 Heroic kill (239k), 2026-10-18; drop the pin once
+# wcl-builds.py finds Mythic rankings for the boss.
+PIN = {
+    "Feral": {
+        "Raid: Ula'tek": ("CcGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjZ2MzMzMGzmxyYbmZm5BmZAAAAYJY2gxMjaGzyMzMzYMDDAAAAAgBGAAAAAgZbmlmlZW2AzMALmBDAgZGAMA",
+                          "Warcraft Logs Heroic Ula'tek, Catgpt's kill (#3, 239k), 2026-10-18: no Mythic rankings yet"),
+    },
+}
 
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 VAL = {c: i for i, c in enumerate(CHARS)}
