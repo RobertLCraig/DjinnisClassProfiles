@@ -390,7 +390,7 @@ local GEAR_PLAN = {
 				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334", -- Breakwater Boots, worn
 				finger1   = "id=268252,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/13334/12854,ilevel=334", -- Apex Brute's Claw Ring, worn
 				finger2   = "id=268249,bonus_id=13668/12854,enchant_id=7967,gem_id=240908,ilevel=334", -- Vile Alchemist's Band (Vashnik), droptimiser +0.86%
-				trinket1  = "id=270168,bonus_id=12854,ilevel=334", -- Font of Venomous Rage (Ula'tek), droptimiser +1.27%
+				trinket1  = "id=270173,bonus_id=6652/13333/12854,ilevel=334", -- Zul'jin's Guillotine Technique (Coiled Altar), worn at 308, upgrade; pair sim 2026-10-18 with Voracious Heart +3.81%, Font pair +3.07%
 				trinket2  = "id=270175,bonus_id=12854,ilevel=334", -- Voracious Heart of Ula'tek (Ula'tek), droptimiser +2.82%
 				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff, worn
 			},
