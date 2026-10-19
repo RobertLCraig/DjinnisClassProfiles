@@ -111,3 +111,69 @@ pass on the load's own undo. Case-sensitive verbs are left as they are, the same
 slash command here.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked all three criteria (checks `a named action bar profile, ...`: saved under its name, holds the bars, the same name in other case replaces it, loads by name in any case, onto the bars, and undo takes it off, never taken for a spec or build layout; all exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: `/djbis` is `/dcp` in the criteria too, the five steps folded into four looks with the chat lines quoted from the code; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019124752-e1d8)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each of the three ticked criteria against the code. All three are met.
+
+**#1 Save under a name, for every character.** `PlanTab.saveProfile` in `DjinnisClassProfiles.lua` does this.
+- It trims the name and refuses an empty name, a name over 40 characters, a `|`, and "build".
+- It matches the name without case, so "main" replaces "Main" and keeps the stored spelling.
+- It stores the bars from `PlanTab.captureBars` in `DjinnisBiSDB.barProfiles`, through `PlanTab.profilesDB`. That table is shared by every character on the account.
+- `/dcp` reaches it through `PlanTab.barsCommand`.
+
+**#2 Load on any spec, list what it skipped, keep one undo.** `PlanTab.loadProfile` does this.
+- It finds the name in any case.
+- It loads through `PlanTab.applyBars(stored, PlanTab.profilesDB())`, the same code every layout uses.
+- That code lists the skipped slots and keeps the undo.
+- `loadProfile` never reads the spec.
+- The self-test clears `barsUndo` before the load, so the undo check can only pass on the load's own undo.
+
+**#3 Never offered on its own.** Profiles are only in `barProfiles`. The code that offers layouts reads only `bars`. The self-test checks that `db().bars.Main` is still nil after the save.
+
+The other four criteria are manual in-game checks. They are open, so they are not findings.
+
+VERDICT: sound
+
+**scope: sound**
+
+I did not find a scope defect.
+
+**What I checked**
+- The diff covers much more than this card. It has the rename to DjinnisClassProfiles, about 60 other cards, the Warcraft Logs scripts and the research files. Each of those has its own card, for example 0058 (the rename), 0068 (layout strings) and 0053 (buttons). So this is a wide review range. Card 0037 did not quietly grow.
+- The profile code is still there after the rename. `DjinnisClassProfiles.lua` has `PlanTab.saveProfile`, `PlanTab.loadProfile`, `PlanTab.listProfiles` and `PlanTab.deleteProfile`. Profiles still live in `db().barProfiles`, apart from the spec and build layouts.
+- Two newer additions touch profiles: `PlanTab.deleteProfileAsk` and `PlanTab.importProfile`. They come from later cards, not from 0037. The card does not fence them out.
+- The only edit to this card's own text is the clear-down. It renamed `/djbis` to `/dcp` and changed no criterion's meaning.
+
+**What is left half done:** nothing. The four open criteria are `proves: manual`. They wait for in-game looks, so they are not findings.
+
+**Note:** the review range should be narrowed to this card's own commits. Then the next scope review reads a diff that belongs to it.
+
+No criterion is disproved.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break card 0037 and found nothing that breaks it. Verdict: sound.
+
+**What I checked in `DjinnisClassProfiles.lua`:**
+- **The slash command.** In `PlanTab.barsCommand`, plain `save` and `save build` are matched first. A named `save`, `load` or `delete` is matched after them. So the old spec and build saves still work.
+- **Saving a profile.** `PlanTab.saveProfile` trims the name, refuses a bad name, and refuses "build" in any case. It also stops in combat. If a name matches an old one in a different case, it replaces the old one and keeps the old spelling. The chat line matches the first manual look: "Saved the Main profile: N action bar slots and N key bindings".
+- **The date.** `PlanTab.captureBars` stores today's date. `PlanTab.listProfiles` shows it as "(saved <date>)", as the look expects.
+- **Loading and undo.** `PlanTab.loadProfile` goes through `PlanTab.applyBars`, the same code the spec and build layouts use. So the skipped list and the undo come from that code too.
+- **Kept apart.** Profiles live in `barProfiles`, not in `bars`, so the addon never offers one on its own.
+- **The rename.** The rename to DjinnisClassProfiles did not break any caller. The More menu and the delete question both still call the profile functions. The self-test keeps its checks, and it puts `barProfiles` back when it finishes.
+
+**One small thing, not a defect.** `/dcp bars save Build`, with a capital B, now gets a refusal. It does not save the build layout. Only lowercase `save build` does that. The card allows this.
+
+The four open looks are all `proves: manual`. You try those in the game. They are not findings.
+
+VERDICT: sound
+
