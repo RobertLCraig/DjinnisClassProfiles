@@ -78,3 +78,66 @@ No client can be run by an agent. The in-game checks are this card's What I need
 look at: a long own loadout name is cut, not wrapped over the next row.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked both criteria (checks `the player's own loadouts are listed too, ...` cover the list; the double-click criterion is ticked on `talents button loads a saved loadout through ClassTalentHelper` and `no talent-changing call in the file, the button reads only`, since the row's OnDoubleClick calls `loadTalents` and nothing else; all exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the list now also has a **Your builds** group (card 0057), so **Your loadouts** is the last group rather than "at the bottom" alone, and `[CP*]`/`[CP+]` loadouts are kept out of it; the review's long-name look is folded into the first look; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019173903-df82)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+**What I did:** I checked each criterion against the code. I could not break it.
+
+**#1 (the list shows every saved loadout).** The list is built in `PlanTab.sidebarList` in `DjinnisClassProfiles.lua`. It adds a **Your loadouts** group. That group leaves out plan builds, the spare `[CP*]` loadout and the `[CP+]` loadout from a swap. All five named checks are in the self-test in `DjinnisClassProfiles.lua`:
+- `the player's own loadouts are listed too`
+- `..., never the spare`
+- `..., nor a swap's new loadout (card 0059)`
+- `..., ticked by its own string`
+- `..., and marked when selected`
+
+**#2 (double-click switches through Blizzard's helper only).** A double-click on a row calls `PlanTab.loadTalents`. That function ends in `ClassTalentHelper.SwitchToLoadoutByName`. Both named checks exist:
+- `talents button loads a saved loadout through ClassTalentHelper` is in the self-test.
+- `no talent-changing call in the file, the button reads only` is in the self-test. `offline-check.lua` also scans the whole file for any talent-changing call.
+
+**#3 to #5** are `proves: manual`. They wait for Rob in the game. The code does not stop any of them from passing.
+
+**One small gap. It is not a failure.** No check would fail if someone broke the hover diff for an own row or the sort by name. Only the manual hover look proves those.
+
+VERDICT: sound
+
+**scope: sound**
+
+**What I checked:** I checked whether this change goes past what card 0041 asks for.
+
+**What I found:**
+
+1. **The diff is not 0041's work alone.** It covers 163 files. These include the addon rename (card 0058), the build manager (0057), the Warcraft Logs tooling (0064), bar research, and about 60 other board cards. Each of those cards is its own work, with its own review. They are not extra work done under 0041. The reason is the commit range the script gave me. It is too wide. The builder of 0041 did not cause this.
+
+2. **The 0041 feature stays in its scope.** `DjinnisClassProfiles.lua` has the **Your loadouts** group, and `PlanTab.sidebarList` takes `stringOf`. The 2026-10-11 clear-down added two changes: it keeps `[CP...]` loadouts out of the group, and it puts the group last because of the 0057 **Your builds** group. Cards 0059 and 0057 caused these changes, and the acceptance text names them. So this is not quiet growth.
+
+3. **Nothing is half done.** The criteria that are still open are `proves: manual` checks. They wait for Rob to try them in the game.
+
+None of these findings shows that a criterion fails.
+
+**What to do now:** Nothing for this card. The script should pass a narrower commit range next time. With this wide range, every scope review shows other cards' work.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break card 0041. I could not.
+
+**What I checked**
+
+- **Where names come from.** The list gets its names from `PlanTab.savedLoadoutNames`. That function removes the `[CP] ` tag first, and it drops old untagged loadouts. So a plan loadout never shows under **Your loadouts** as a second row.
+- **Your builds (card 0057).** `PlanTab.sidebarList` filters names through `PlanTab.buildsOf`, and that includes your own builds. So no loadout shows in two groups.
+- **The spare and the swap loadout.** `PlanTab.spareBuild` and the `SWAP_MARK` test keep out the addon's spare (`[CP*] `) and its swap loadout (`[CP+] `).
+- **Callers.** The function's only caller, `PlanTab.refreshSidebar`, passes `savedLoadoutNames` in the new order. Nothing calls it the old way.
+
+**One small note.** It does not block the card. Manual look #3 says loadouts named `[CP...]` stay out of the list. But a loadout that *you* named `[CP*] ...` stays in the list. That is on purpose: the 0040 review decided it is yours, and a check proves it. When you do look #3, read it as "the addon's own `[CP...]` loadouts stay out." It still passes.
+
+**What you do now.** Nothing in the code. The three in-game looks wait for you.
+
+VERDICT: sound
+
