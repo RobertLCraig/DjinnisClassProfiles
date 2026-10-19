@@ -368,3 +368,61 @@ review added, and:
   stays on.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked the wear and the delete criteria (checks `a build with no loadout of its own is worn through the spare, ...`: made once the window is shut, then worn through Blizzard's helper, an unfilled spare is not worn, then the one not worn goes, a player's own "[CP*] " loadout is never deleted, a "[CP*] X" it did not make is not doubled; all exist under the `[CP*]` names and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: `BiS: ` is `[CP*] ` throughout, steps 1 to 6 became looks, and the fourth review's two dropdown looks are merged into one. Dropped two of the second review's extras: "a grey row, then a real loadout, then close" is covered by the check that a new ask clears the waiting wish, and "an old v0.36 BiS: X in the dropdown, no second one" is about the old prefix, which card 0059's tagging now handles; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019160653-6707)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked the two ticked criteria against the code. I could not break either one.
+
+**#1, a build with no loadout of its own is worn through the spare.** The code that does this is in `DjinnisClassProfiles.lua`.
+- `PlanTab.wearSpare` waits while the talent window is open. It saves the request and hooks `PlayerSpellsFrame` `OnHide`.
+- `PlanTab.spareOnHide` makes the spare after the window shuts. It drops the request after a spec change, a dropdown pick, or combat.
+- The queue waits for `IsConfigPopulated` (the game's "is this loadout filled in yet" check).
+- `PlanTab.wearMadeSpare` checks again that the spare is filled. Then it wears it through `ClassTalentHelper.SwitchToLoadoutByName`. It wears nothing if the spare is not filled.
+
+**#2, the old spare goes, and nothing else does.**
+- `PlanTab.wearSpare` deletes only spares that `PlanTab.spareBuild` accepts. Each one must have the spare name and an id in `PlanTab.spareIDs()`. It never deletes the one you are wearing.
+- A `[CP*] X` loadout that the addon did not make answers "taken". The addon makes nothing then, so you never get a second copy.
+
+The other seven criteria are all `proves: manual`. They wait for Rob to try in game. Nothing in the code shows that one of them cannot pass.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked if the change goes past the card's fence. I could not prove that it does.
+
+**What I looked at**
+
+- The diff is very big: 162 files, a rename to `DjinnisClassProfiles`, and dozens of other cards. That is the whole branch, not only card 0040. Each of those changes has its own card (for example 0058 for the rename and 0059 for the `[CP*]` tag). So I do not count them as scope creep on 0040.
+- Fence item 1, "each spec has its own spare": `PlanTab.wearSpare` and `PlanTab.spareOnHide` in `DjinnisClassProfiles.lua` keep the spare per spec. This is the same as what the card says.
+- Fence item 2, "the login offer still counts every missing build": the login offer prints "Room for %d." only when room is less than the missing count. The card says this. It is not new work over the fence.
+- Nothing is half done against the ticked criteria. Only the `proves: manual` criteria are open, and those wait for a person to try in game.
+
+**What you do now**
+
+Nothing. The open manual checks stay on the owner's list.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I read `PlanTab.spareBuild`, `PlanTab.spareOnHide` and `PlanTab.wearSpare` in `DjinnisClassProfiles.lua`. I did not run anything.
+
+**What I tried to break, and why it held:**
+
+- **Deleting a loadout the addon did not make.** `PlanTab.spareBuild` needs two things: the `[CP*] ` name and a config id saved in `DjinnisCPCharDB.spares`. The delete list in `PlanTab.wearSpare` uses only `spareBuild`, and it skips the selected id. So a player's own `[CP*] M+` is safe, and the worn spare is safe.
+- **A `[CP*] X` the addon has no record of.** `wearSpare` says "taken" and makes nothing. So it never makes a second loadout with the same name.
+- **The window is open.** The request waits. `spareOnHide` drops it if the spec changed or the player picked another loadout. In combat it says so and makes nothing.
+- **The rename from `BiS: ` to `[CP*] ` (card 0059).** `loadoutKey` still reads an old `BiS: ` spare by `PlanTab.OLD_SPARE`. A check covers this.
+- **Old comments.** The comments now name `[CP*] `. None that I read are false now.
+
+The open boxes are all `proves: manual`, so they are not findings.
+
+VERDICT: sound
+
