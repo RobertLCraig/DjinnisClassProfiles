@@ -142,3 +142,56 @@ nothing.
 Verdict: CLEAN. Acceptance is in-game only, so the card goes to human-review next.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked the hover criterion (checks `hovering a row lights what that build changes, ...` and `the tint lands on the marked buttons only, ...` exist and pass in the Lua 5.1 offline check; the review's granted-node check exists too, as `the nodes a build would change, a granted node is not a pick`); looks rewritten for v0.69.0, the addon is DjinnisClassProfiles now so the taint look names that, and the hover and header looks moved into Acceptance from What I need from you; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019094225-95c2)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I read the code that the hover criterion (#1) depends on. I did not run it, because there is no test suite here and no game client. Each part of the criterion goes to real code. I found nothing that breaks it.
+
+**Criterion #1: hover marks exactly the nodes that differ, and clears them when the hover ends.**
+- Hover start: `PlanTab.sidebarTip` calls `PlanTab.showTreeDiff`. That function decodes the build and your live talents with `PlanTab.decodeBuild`. Then `PlanTab.nodeDiff` and `PlanTab.nodeWord` compare them node by node, and `PlanTab.paintTree` puts a tint on only the marked buttons.
+- "Exactly": `PlanTab.nodeWord` gives back nil for a node that does not change, so that node gets no tint. It treats a granted node (a free talent from the game) as not picked. `PlanTab.decodeBuild` refuses a build string whose header is wrong (old game version, other spec, old tree) because it calls `PlanTab.buildProblem`. So a bad string draws nothing. It does not draw wrong tints.
+- Hover end: `PlanTab.sidebarTipOff` calls `PlanTab.hideTreeDiff`, which hides every tint.
+- Tests: in `DjinnisClassProfiles.lua`, the self-test hovers a row through `PlanTab.sidebarTip` and checks red, green and plain on the right nodes. It then calls `PlanTab.sidebarTipOff` and checks that nothing is left. It also checks a group header, a granted node and a refused header. These checks are in the code. I did not run them.
+
+**#2 to #4** are `proves: manual`. A person must try them in the game. They are not findings. I saw nothing in the code that stops them from passing.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked one thing: does the change do more than card 0034 asked for?
+
+**What I found**
+
+- The tree-diff code is all in `DjinnisClassProfiles.lua`: `PlanTab.decodeBuild`, `PlanTab.nodeWord`, `PlanTab.showTreeDiff`, `PlanTab.hideTreeDiff` and `PlanTab.treeChecks`. The card asked for all of these. I saw nothing extra in them.
+- The diff has 165 files. Most of them belong to other cards: the rename (0058), the bars work, the WCL scripts, a `.xlsx` and many board cards. This looks like a diff of the whole branch, not of card 0034's own commits (`ccd5754`, `3d67af9`). So I do not count that as growth of this card. A person should check which range the review script diffs.
+- Nothing is half done. Both fixes from the first review are in. The note about "the tree reloads mid-hover" was marked minor, and the card does not ask for it.
+- The three open criteria (#2, #3, #4) are `proves: manual`. Each one is only open, not broken, so none is a finding.
+
+**What you do now:** nothing on this card. Do the three in-game checks when you play.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break card 0034 and could not.
+
+**What I checked:**
+- **The callers are all updated.** The tip on a build row calls `PlanTab.showTreeDiff` with the row's own string, `e.code`. That covers your own loadouts (0041) and a build of yours that has the same name as a plan build. A group header calls `PlanTab.showChoices`. When the hover ends, `PlanTab.sidebarTipOff` calls `PlanTab.hideTreeDiff`.
+- **The early returns are safe.** A premade-bars row returns before it draws anything on the tree. No old glow stays, because `PlanTab.paintTree` hides all glows first, and every hover end hides them too.
+- **The header check is the same in both places.** `PlanTab.decodeBuild` now calls `PlanTab.buildProblem` (version, spec, tree). So a string the client would refuse draws nothing.
+- **The live talents still draw.** `PlanTab.liveTalents` makes its string for the spec in play, so that check never blocks the player's own tree.
+- **A granted node does not glow.** `PlanTab.nodeWord` counts a granted node (a free talent from the game) as not picked, on both sides, so it never glows.
+- **The rename broke nothing here.** After the rename and the move to every class, `playerSpec` finds the spec from `PlanTab.SPECS`, so `buildFor` still finds the build.
+- **The comments are still true.** The comment above `decodeBuild` matches the code.
+
+**What is left:** The only open criteria are `proves: manual`. Those are yours to try in the game. They do not count as a finding.
+
+VERDICT: sound
+
