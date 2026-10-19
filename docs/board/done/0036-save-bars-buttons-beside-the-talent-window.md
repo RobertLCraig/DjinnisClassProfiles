@@ -134,3 +134,58 @@ There is no browser surface. The layout and tooltips can only be checked in a cl
 Verdict: CLEAN, human-review next.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked the build save, the spec save and the ask-before-replace criteria (checks `the Save bars buttons, ...`: a build with no layout saves at once, and asks nothing, Replace saves it, replacing the spec layout asks first, and keeps it until Replace, Cancel does nothing, a stale Replace saves nothing, with another question up it waits; all exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the list's foot now holds a Premade bars row, the Save row, the Load row (0044) and a full-width Undo bars button, the chat line and tooltip titles are quoted from the code, and the layout criterion became the first look; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019111410-7e1d)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked the three ticked criteria against the code. All three hold.
+
+**#1, Save bars: build.** `buildSidebar` in `DjinnisClassProfiles.lua` sets the click on `f.saveBuild` to `PlanTab.saveBars(true, true)`. In `PlanTab.saveBars` the key is "spec / loadout name", taken from `activeLoadoutName`. If no layout has that key, it saves at once with `captureBars`, which keeps both the bars and the keys. The self-test checks "a build with no layout saves at once" and "and asks nothing" are in `PlanTab.barChecks` and test this.
+
+**#2, Save bars: spec.** `f.saveSpec` calls `PlanTab.saveBars(false, true)`, and the key is the spec. The check "Replace saves it" tests that the new layout is written.
+
+**#3, ask before replacing.** In `PlanTab.saveBars`, if a layout exists and `ask` is set, it shows a prompt with Replace and Cancel. Cancel has no click action, so it does nothing. Replace calls `saveBars` again with `expect`, so if the build changed, nothing is saved. If another question is open, it waits and shows nothing. Each of these cases has its own check.
+
+The four `proves: manual` criteria are not findings. They can only be checked in the game.
+
+VERDICT: sound
+
+**scope: sound**
+
+The work for card 0036 is all there. I found nothing that goes past what the card asks for.
+
+**What I checked:**
+- **Buttons:** both buttons exist. Look in `buildSidebar`, in `DjinnisClassProfiles.lua`.
+- **Tooltips:** they say "Save bars to this build" and "Save bars for the spec", as the look list asks.
+- **Save:** `PlanTab.saveBars(forBuild, ask, expect)` asks before it replaces a layout. It skips the save if the spec or build changed in the meantime. It waits if another question is already open (`promptBusy`). That was the fix from the first review.
+- **Self-test:** the checks for this card are in the file (`saveButtonTest = "the Save bars buttons"`).
+
+**About the big diff:** it is the whole branch, not only this card. Most of it is other cards' work: the rename (0058), the More menu (0053), the Load and Undo buttons (0044, 0045), and research files. Each of those has its own card. None of it changes what this card's buttons do.
+
+The "More" menu also has "Save bars for this spec" and "Save bars for this build". Card 0053 ("every command has a button") added those. They call the same `saveBars(..., true)`, so they also ask before they replace a layout. That is not this card growing.
+
+**Nothing half done:** the only open items are the four in-game checks, marked `proves: manual`. They are for Rob to try in the game. They are not a finding.
+
+**What you do now:** nothing. The card can go to done. The four in-game checks wait for Rob.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break card 0036 and could not.
+
+- **Save code:** `PlanTab.saveBars` in `DjinnisClassProfiles.lua` still works after the rename. It still checks "is another question up?" (`promptBusy`) before it asks to replace a layout. The check also needs `ask` and an old layout, as the card says.
+- **Chat line:** the code says "Saved %d action bar slots and %d key bindings as the %s layout." This matches the manual look.
+- **Replace box:** it asks "Replace the saved %s layout ... with the bars and keys you have now?" This matches the manual look.
+- **Tooltips:** the titles are "Save bars to this build" and "Save bars for the spec". This matches the manual look.
+- **Old name:** the rename deleted `DjinnisBiS.lua`. I found no caller of `saveBars` that still uses an old path.
+
+Only the `proves: manual` looks are open. Rob checks those in the game, so they are not findings.
+
+VERDICT: sound
+
