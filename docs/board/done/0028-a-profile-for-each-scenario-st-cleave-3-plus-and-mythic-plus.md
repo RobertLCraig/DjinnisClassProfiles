@@ -162,3 +162,56 @@ look, the empty-`3t` message, cannot be seen on Feral any more, because its `3t`
 **2026-10-11** **Decided:** Rob, relayed in the clear-down. 1. 3+ bosses: none for now ("agree, just build it"); no boss row changes. 2. Gear plans for ALL specs: Balance, Guardian and Restoration as well as Feral.
 
 **2026-10-11** Clear-down (attended, Rob asked). Answer 1 needs no change. Answer 2 needs twelve Top Gear runs that only Rob's Raidbots account can make; the exact list and the bake command are now the ask above and one `proves: manual` criterion, and the strip look is the other. Found while writing it: `PlanTab.lines` draws the Plan tab from `PlanTab.BOSSES`, which has rows for Feral and Balance only, so a baked Guardian or Resto plan would reach the strip and the bag glows but not the Plan tab ("No boss plan for Guardian yet"). That is card 0091. The build itself is done and its four criteria ticked, so this moves to ai-review/ with only the manual criteria open (board README, A look waits on the product).
+
+### 2026-10-19 review (v20261019062436-bb26)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each of the four ticked criteria against the code. All four hold. I found no defect.
+
+- **#1 (a 3+ target report fills the 3t cell):** This is in `update-gear-plan.ps1`. The `$SCENARIOS` table gains `3 = '3t'`. `Read-Plan` caps the enemy count at 3, so 7 enemies still go to `3t`. `$SCENARIO_ORDER` is `st, 2t, 3t, mplus`. The `-SelfTest` check "a 3+ target report fills the 3t cell" makes a 3-enemy and a 7-enemy report. It asserts loadout, talents and slots in exactly one `["3t"]` cell.
+- **#2 (the button reaches 3+ targets):** This is `PlanTab.nextScenario` in `DjinnisClassProfiles.lua`. 2t goes to 3t. Then 3t goes to Mythic+, or to 1 target in a raid. `planScenario` accepts `3t`. Self-test checks in `selfTest` cover both cycles.
+- **#3 (a 3t boss row draws the 3t cell):** `PlanTab.CHOICES` and `CHOICE_LABEL` include `3t`. `PlanTab.bossFor` selects a 3t row. `gearPlanFor("Feral","3t")` gives back the 3t cell, not the st one. A self-test covers this.
+- **#4 (a cell without talents has no planned build):** `PlanTab.plannedTalents` gives back nil when `talents` is missing or empty. So nothing shows as "edited".
+
+Criteria #5 and #6 are manual. They are only open, which is not a finding.
+
+VERDICT: sound
+
+**scope: sound**
+
+I looked for work that goes past the card, and for work that is half done. I found no fault.
+
+**What the diff is.** The diff has 158 files. It covers the whole branch: the rename to DjinnisClassProfiles and about 60 other cards. This card is only one of them. For this card, I checked the scenario code. `DjinnisClassProfiles.lua` has 29 `"3t"` uses, so the scenario is in all the places the card's tasks name. The extra files belong to other cards, so they are not scope growth from this card.
+
+**Inside the fence.** Nothing crosses "Not this card." No boss row was changed to `3t`. Rob decided on 2026-10-11 to have no 3+ bosses for now. The build ran no sims. The Feral `3t` cell was baked from a report, on a separate day (2026-09-23).
+
+**Small extra.** `Repair-TalentHeader` in `update-gear-plan.ps1` was not in the card. It supports the "every cell carries talents" direction, so I count it as part of the work, not growth.
+
+**Half done.** The Guardian and Resto Plan tab gap is already on card 0091. Criteria #5 and #6 are `proves: manual` and only open. Nothing I read shows that they cannot pass.
+
+No criterion is disproved.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break this card. It held up.
+
+- **The bake script** (`update-gear-plan.ps1`, in `Read-Plan`): 3 or more enemies go to `3t`. A dungeon fight style goes to `mplus`. Any other report stops with a clear message and writes nothing. The script lists `3t` third, before `mplus`.
+- **The scenario button** (`PlanTab.nextScenario`): outside a raid it goes 1, 2, 3+, Mythic+. In a raid it goes 1, 2, 3+, 1. The self-test checks both orders.
+- **Where the addon lists scenarios** (`SCENARIO_LABEL`, `planScenario`, `PlanTab.CHOICES`, `CHOICE_LABEL`, `CONTENT_WORD`, `SET_SUFFIX`): all of them know `3t`. I found no missed caller.
+- **Pressing the button** calls `PlanTab.pickScenario(PlanTab.nextScenario(planScenario(spec), autoContext()))`. So in a raid it uses the raid order.
+- **A `3t` boss row:** the self-test draws the `3t` cell for it. Then it puts the real Feral `3t` cell back.
+- **A cell with no build:** the earlier review traced it through `plannedTalents`, `talentsEdited` and `loadoutState`. I found nothing that breaks that path.
+
+The two open criteria are `proves: manual`. Rob does those, so they are not findings.
+
+No defect found. No criterion disproved.
+
+VERDICT: sound
+
