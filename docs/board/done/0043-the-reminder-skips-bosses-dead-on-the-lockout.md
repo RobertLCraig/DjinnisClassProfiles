@@ -159,3 +159,74 @@ Security:
 No client can be run by an agent. A person owes What I need from you 1 to 3.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked both criteria (checks `popup names what differs from the plan here, ...` (the reminder names the next living boss, the list puts the next living boss first, the lockout is asked as the journal asks it) and `a build with no loadout of its own is worn through the spare, and offers no Create with no room` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0, with the full `proves:` prefixes written out; dropped old step 2 (no Create offer with every slot used), because card 0039's first look checks the same box; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019204833-92c6)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each criterion against the code in `DjinnisClassProfiles.lua`.
+
+**#1, the reminder names the next living boss after a `/reload` too.** This is met.
+- `PlanTab.bossDone` asks `C_RaidLocks.IsEncounterComplete(mapID, id, difficultyID)`. It reads the map and the difficulty from `GetInstanceInfo`. Each value goes through `canRead` and the call is in `pcall`. It answers false when it is not sure.
+- `PlanTab.bossHere` passes `PlanTab.bossDone` to `PlanTab.rowHere`, together with `lastKill` and the current map.
+- `PlanTab.rowHere` skips each boss that `done` says is dead, after the last kill it saw.
+- The reminder (`PlanTab.checkSetup`) and the list (`PlanTab.sidebarHere`) both have a named check in the self-test. Each check runs with `lastKill` nil and Nek'zali dead on a stubbed lockout. Each one expects Entombed Sentinels. A third check makes sure the lockout is asked in the journal's order.
+
+**#2, no Create offer with no free slot.** This is met.
+- `PlanTab.loadoutRoom` counts the free slots.
+- The self-test check "...offers no Create with no room" makes sure no Create button shows.
+
+**#3 and #4** are `proves: manual`. They wait for the in-game check. Nothing in the code stops them from passing.
+
+I did not run the self-test. I only traced the code and the check names.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked the card's code in `DjinnisClassProfiles.lua`. I did not change anything.
+
+**What I found:**
+
+- The four functions the card names are all there. They are `PlanTab.bossHere`, `PlanTab.bossDone`, `PlanTab.sidebarHere` and `PlanTab.loadoutRoom`.
+- The diff is very big: 165 files and about 66,000 lines. Almost none of it is this card's work. The diff also holds other things:
+  - The rename to DjinnisClassProfiles (card 0058).
+  - About 60 other board cards.
+  - Warcraft Logs tools (`wcl.py`, `wcl-builds.py`).
+  - Research files.
+- The diff covers many cards in the repo's history, not one change for this card. So I cannot blame those extra files on 0043. They are not scope creep in this card's code.
+- I found nothing in the card's own functions that crosses its "Not this card" fence. Nothing goes back to a boss killed out of order. Nothing makes up a lockout when the game has none.
+- Criteria #1 and #2 have named checks. The two in-game looks are only open, so they are not findings.
+
+**What you do now:** Nothing for this card. If you want each card reviewed on its own, scope the next review to that card's own commits, not the whole branch.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break the card 0043 fix. I could not break it.
+
+**What I checked**
+
+- **`PlanTab.bossHere`**: the reminder and the list both use this one function. It passes the last kill, `PlanTab.bossDone` and `PlanTab.mapHere()` to `PlanTab.rowHere`. The rename to `DjinnisClassProfiles.lua` did not break any caller.
+- **`PlanTab.bossDone`**: it still asks the game in the same order as the dungeon journal (map, boss id, difficulty). Each value is checked before use. The call is wrapped so an error cannot stop the addon. When it is not sure, it answers "not dead".
+- **`PlanTab.rowHere`**: a later change makes it match boss rows by map. The raid rows now carry `map = 3004`. The self-test fakes the game with that same map, so the real path runs. The check names the card points to still exist:
+  - "the reminder names the next living boss" goes through `PlanTab.checkSetup`.
+  - "the list puts the next living boss first" goes through `PlanTab.sidebarHere`.
+  - "the lockout is asked as the journal asks it" expects `3004/3445/15`.
+- **Comments**: the notes above `rowHere`, `bossHere` and `bossDone` still match the code.
+
+**What I did not do**
+
+- I did not run the offline check. No test suite ran for this review.
+
+**What you do now**
+
+Nothing in the code. The two in-game checks on the card are still yours to try in the raid.
+
+VERDICT: sound
+
