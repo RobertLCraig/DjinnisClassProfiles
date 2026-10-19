@@ -99,3 +99,60 @@ Nothing now. Built; the open looks are the `proves: manual` criteria under Accep
   else. Not seen in a client; looks 1 to 6 above are the check.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked 3 criteria, all ticked already and confirmed (checks `shopping list sent to auctionator`; `shopping list shows auctionator prices`; `no auctionator parts without auctionator` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0 (`/bis` is `/dcp`; the button is now 100 px wide, so the label look folds into look 1; the send now goes through Auctionator's `ConvertToSearchString` when it has one, so the list shows Auctionator's own search lines); moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019023814-0a19)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I traced the three ticked criteria to the code. I could not break them.
+
+- **#1 (send the list):** `PlanTab.sendToAuctionator` in `DjinnisClassProfiles.lua` makes the list. It calls `CreateShoppingList("DjinnisClassProfiles", "DjinnisBiS plan", terms)` inside a `pcall` (a guarded call that catches errors). Auctionator deletes a list with the same name first, so the list is replaced. The "Auctionator" button on the Total row calls this function. Items with no name yet are left out, and chat says so. When nothing has a name, it refuses and keeps the old list.
+- **#2 (prices and total):** `PlanTab.priceOf` asks Auctionator for each gem's price. Enchants get no price. `PlanTab.pricedLines` adds a grey price to each line and adds up the total. The Plan tab draws the Total row with the unpriced count.
+- **#3 (nothing without Auctionator):** `PlanTab.auctionator()` returns nil when Auctionator is not loaded. Then `pricedLines` returns a nil total, and the Plan tab draws no Total row and no button. With no Total row, there is no button to click.
+
+The offline checks cover all three, under the names the card gives. The other criteria are `proves: manual`. They are open, and Rob tries them in the game.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked the Auctionator code against card 0025's scope. I found nothing that crosses the card's fence or is half done.
+
+**What I looked at:** the `PlanTab.sendToAuctionator`, `PlanTab.pricedLines` and `PlanTab.auctionator` functions in `DjinnisClassProfiles.lua`, and the checks that test them.
+
+- **The fence is kept.** The card says "Not this card: buying anything". Nothing buys. The code only makes a shopping list and reads prices, through Auctionator's public API.
+- **Two things grew since the build. Neither is a defect.**
+  - The send now goes through Auctionator's `ConvertToSearchString` and passes a quantity and an "exact" flag. The `item` kind is a crafting reagent, which is card `0078`, and `0078` is in `done/`. The clear-down note on this card records the change. A gem term still goes as the family name with no rank and `isExact = false`, so manual look 2 can still pass.
+  - The caller name is now `"DjinnisClassProfiles"`, not `"DjinnisBiS"`. That comes from the rename card `0058`, which is also done. The list name stays `"DjinnisBiS plan"`, which is what criterion 1 asks for.
+- **Nothing is half done.** The tests cover the empty-list refusal, an Auctionator refusal, and prices that come back wrong (a string, or an error).
+- **The diff is far bigger than this card.** It has 163 files, mostly other cards and the rename. That is branch history, not work done under this card. I did not judge it.
+
+No criterion is disproven. The open criteria are all `proves: manual`, so they wait for Rob to try in game.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I looked for things this change breaks. I found nothing that breaks.
+
+**What I checked** (all in `DjinnisClassProfiles.lua`):
+- **The guard in `PlanTab.auctionator()`.** Without Auctionator, `PlanTab.pricedLines` gives back no total. The Plan tab's `searchRows` caller then draws no Total row and no button. This keeps criterion #3.
+- **`PlanTab.priceOf`.** It gives no price for an enchant. It also gives no price when the answer is not a number, or when Auctionator throws an error.
+- **`PlanTab.sendToAuctionator`.**
+  - The list name is still `"DjinnisBiS plan"` (`PlanTab.AUCTIONATOR_LIST`).
+  - When no item has a name, it does not touch the old list. It prints the exact chat text from the card.
+  - The success text matches the card: `N items sent to Auctionator's "DjinnisBiS plan" list.`
+  - The caller name is now `"DjinnisClassProfiles"`. That came with the rename. Auctionator only needs a name that is not empty, so this is fine.
+- **The "Higher ranks exist" lines.** They also go through `searchRows`. Their total is thrown away, so the Total row does not count them. This matches look 5.
+- **The tests still fit the code.** The pretend Auctionator includes `ConvertToSearchString`. The tests check the quantity terms.
+
+**One small thing, not a defect.** The card's comments still say the caller name is `"DjinnisBiS"`. Look 2 says the list holds "gem family name, no rank". Now the terms go through `ConvertToSearchString`, so Auctionator's list may show its own search lines. The 2026-10-11 note on the card already says this. That look is for Rob to try in the game.
+
+**What you do now:** nothing. The card can go to `done/`. Only the in-game looks are left.
+
+VERDICT: sound
+
