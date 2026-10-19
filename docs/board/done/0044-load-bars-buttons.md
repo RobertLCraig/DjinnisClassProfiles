@@ -79,3 +79,61 @@ No client can be run by an agent. The in-game checks are this card's What I need
 look at: "Load bars: build" and "Save bars: build" fit in 128 px without being cut.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked the one criterion (checks `the Load bars buttons, ...` (the build's own, the spec's, a build with none loads nothing, no loadout selected, nothing) exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the foot of the list is now three rows (Save bars, Load bars, a full-width Undo bars from card 0045) under a Premade bars row, not "four buttons, two rows", and the chat lines are quoted from the code; which button calls which is still proved only in game, as the review said; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019220644-410a)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+The one ticked criterion (#1) holds. I found no defect.
+
+**#1: Load bars applies the saved layout, or says none is saved.** This is met.
+- `PlanTab.loadBars` in `DjinnisClassProfiles.lua` gets the key from `PlanTab.loadKey`. "Build" gives `<spec> / <build>`. "Spec" gives `<spec>`.
+- When no loadout is selected, chat tells you, and the function returns `"none"`.
+- When no layout is saved under that key, chat says "No saved <key> layout yet". The function returns `"none"` and does not call `applyBars`.
+- When a layout is saved, it calls `PlanTab.applyBars(key)`. This is the same apply that the offer uses.
+- The two buttons connect to the right calls. **Load bars: build** calls `loadBars(true)`. **Load bars: spec** calls `loadBars(false)`.
+- The four named checks are in the offline check block (`loadButtonTest`). They test all four cases: the build's layout, the spec's layout, a build with no layout, and no loadout selected.
+
+**#2 to #4 are manual checks.** They are still open, and they are Rob's to try in game. The code does not block them:
+- #4: the "no layout" chat line in `loadBars` matches the text the criterion expects.
+- #3: the chat line for a successful load comes from `applyBars`, and that function was not changed here.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked how far the change goes. It stays inside the card.
+
+**Findings (lens: scope)**
+
+- The card asks for two buttons. They exist in `DjinnisClassProfiles.lua`, in the Save bars list setup. **Load bars: build** calls `PlanTab.loadBars(true)`. **Load bars: spec** calls `PlanTab.loadBars(false)`.
+- `PlanTab.loadBars` is in the same file. It keeps the card's rules: one apply through `applyBars`, no question first, and a "none saved" path that changes nothing.
+- The four named checks are in the offline self-test block, beside the `loadButtonTest` checks. They cover the build's layout, the spec's layout, a build with no layout, and no loadout selected.
+- The diff is big: 166 files, plus a rename to DjinnisClassProfiles. That is not this card growing. It is the whole branch range, and other cards in `done/` own those parts (0058 for the rename, 0045 for Undo bars, 0081 for `PlanTab.loadBarsOnly`). None of it is here because of card 0044.
+- Nothing is half done. The open criteria are all `proves: manual`, and nothing in the code stops them from passing.
+- The card has no "Not this card" section, so there is no stated limit to cross.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break the card 0044 work. I could not break it.
+
+**What I checked:**
+- **The buttons.** In `DjinnisClassProfiles.lua`, the **Load bars: build** button calls `PlanTab.loadBars(true)`. The **Load bars: spec** button calls `PlanTab.loadBars(false)`. The wiring is correct. The earlier review said the offline check does not cover this wiring. That is still true.
+- **Which layout loads.** `PlanTab.loadKey` uses the spec name alone, or the spec name plus the build name. If the game has not said the spec, or if no loadout is selected, it gives a reason. `PlanTab.loadBars` then shows that reason in chat and changes nothing.
+- **No saved layout.** `PlanTab.loadBars` writes "No saved <key> layout yet. Save bars first." and returns "none". This matches manual criterion #4.
+- **Two load paths.** The row menu has a "Load bars only" item that uses `PlanTab.loadBarsOnly`. That is a different path, with its own checks. It does not change what the buttons do.
+- **Comments after the rename.** The comments now say `/dcp bars undo`, not `/djbis bars undo`. No comment is now false.
+- **Offline checks.** The four `the Load bars buttons, ...` checks still exist. They stub `applyBars` and `activeLoadoutName`, and then put the real ones back.
+
+Criteria #2, #3 and #4 are manual checks. They are still open, and that is expected. #1 is ticked and holds.
+
+**What you do now:** Try the three in-game checks on the card when you can.
+
+VERDICT: sound
+
