@@ -122,3 +122,72 @@ Nothing now. Built; the open looks are the `proves: manual` criteria under Accep
   **Not looked at in the game**, the two looks above stand; a third is added below.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked 3 criteria, all ticked already and confirmed (checks `every boss row has a name and an id`; `boss lookup tries id then name`; `a name and id that disagree fail the check` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); all three criteria were ticked and are confirmed offline. Looks rewritten for v0.69.0 (`/djbis test` is `/dcp test`); the BigWigs look folded into the `/run` look; the old look 2 said nothing in the addon reacts to a pull yet, which is no longer true: `PlanTab.onSetupEvent` calls `bossRow` on `ENCOUNTER_END` to move the popup to the next boss, so that is now a direct look; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019043606-74b3)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: defect**
+
+I checked the three ticked criteria (the boxes marked done) against the code.
+
+**#1: every boss row carries a name and an id.** This holds in the data. Each Feral row and each Balance row in `PlanTab.BOSSES` in `DjinnisClassProfiles.lua` has `boss` and `id`. The only exception is the "Mythic+, any key" row, which the card says is not a boss. One gap: the check `every boss row has a name and an id` in the self-test only loops over `PlanTab.BOSSES.Feral`.
+
+**#2: look up by id first, then by name.** This holds. `PlanTab.bossRow` looks for the id first. An unknown id gives back nil (nothing). It does not fall back to the name. It uses the name only when there is no id. The `ENCOUNTER_END` branch of `PlanTab.onSetupEvent` calls it with the player's spec table. The `boss lookup tries id then name` checks cover this.
+
+**#3: a name and an id that disagree make the check fail.** This is not met for every spec. The `a name and id that disagree fail the check` loop in the self-test only reads `PlanTab.BOSSES.Feral`. `PlanTab.BOSSES.Balance` also has ids, and `bossRow` uses that table on `ENCOUNTER_END` when you play Balance. So a wrong id on a Balance row passes the self-test. A Balance player would then get the wrong row after a kill. The "id used once" and "no name starts with another's" checks have the same Feral-only gap.
+
+The three in-game criteria are only open, so I did not count them as findings.
+
+UNMET: #3 the disagree check (and the id-used-once and name-prefix checks) only loops over PlanTab.BOSSES.Feral, so a Balance row whose id points at another boss passes the self-test but is still used by bossRow on ENCOUNTER_END.
+
+VERDICT: defect
+
+**scope: sound**
+
+I checked if this work went past what card 0027 asked for.
+
+**What I found:**
+
+- All Feral and Guardian boss rows have a name and an id. Proof: `PlanTab.BOSSES` in `DjinnisClassProfiles.lua`. The Mythic+ row has no id, and the card says why.
+- `PlanTab.bossRow` tries the id first. It uses the name only when there is no id. The self-test covers this.
+- The game does not read Keystone Polaris while it runs. The card's fence holds.
+- The big diff is the whole branch history: the rename and many other cards. Those changes belong to their own cards. They are not this card growing.
+- The `update-gear-plan.ps1` task was dropped. The card gives a reason: the boss table is kept by hand, so that script has nothing to write.
+- `PlanTab.onSetupEvent` now calls `bossRow`. That work belongs to card 0013, and the card says so.
+
+Nothing goes past the fence. Nothing is half done. The only open items are the in-game manual checks, and those are for you to try in the game.
+
+VERDICT: sound
+
+**breakage: defect**
+
+I looked at `PlanTab.BOSSES`, `PlanTab.bossRow`, `PlanTab.onSetupEvent` and the card 0027 checks in `selfTest`, all in `DjinnisClassProfiles.lua`.
+
+**Finding: the checks look only at Feral, but two specs have boss tables.**
+
+- `PlanTab.BOSSES` has two tables: `Feral` and `Balance`. The `Balance` table has 11 rows with ids, and Kith'ix is one of them.
+- `PlanTab.onSetupEvent` (`ENCOUNTER_END`) calls `bossRow` with `PlanTab.BOSSES[spec]`. So a Balance player's popup reads the `Balance` table.
+- In `selfTest`, all three card checks loop only over `PlanTab.BOSSES.Feral`: "every boss row has a name and an id", "no name starts with another's" and "a name and id that disagree fail the check".
+- So a wrong, missing or repeated id in a `Balance` row gives no red line. The popup goes to the wrong boss with no warning.
+- Today the `Balance` ids match the Feral ids. This is a gap in the check, not a wrong value now. But the card's rule is "every boss row in the plan", and only half the plan is checked.
+
+The rest held up:
+
+- `bossRow` tries the id first and does not fall back to the name when the id is unknown.
+- `bossRow` checks `canRead` before it compares anything.
+- Kith'ix (3513) is in `ENCOUNTER_NAMES`.
+
+UNMET: #1 the name-and-id check loops only over `PlanTab.BOSSES.Feral`, so the `Balance` rows that `onSetupEvent` uses are never checked.
+UNMET: #3 the disagree check loops only over `PlanTab.BOSSES.Feral`, so a `Balance` row with the wrong id does not make the check fail.
+
+VERDICT: defect
+
+**acceptance**
+
+- **#3 was named by the acceptance lens and is not a ticked criterion here**, so nothing was changed: the disagree check (and the id-used-once and name-prefix checks) only loops over PlanTab.BOSSES.Feral, so a Balance row whose id points at another boss passes the self-test but is still used by bossRow on ENCOUNTER_END.
+- **#1 was named by the breakage lens and is not a ticked criterion here**, so nothing was changed: the name-and-id check loops only over `PlanTab.BOSSES.Feral`, so the `Balance` rows that `onSetupEvent` uses are never checked.
+- **#3 was named by the breakage lens and is not a ticked criterion here**, so nothing was changed: the disagree check loops only over `PlanTab.BOSSES.Feral`, so a `Balance` row with the wrong id does not make the check fail.
+
