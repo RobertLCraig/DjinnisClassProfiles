@@ -217,3 +217,72 @@ id, and Blizzard's helper loads the first by name. It needs the player to make t
 1, 2, 2a and 4.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked 4 criteria, all ticked already and confirmed (checks `talents button says so when that loadout is loaded already`, `..., unmoved it is on already`; `the row's own loadout with the wrong build is not a switch, the button says Fix talents`; `the row's own loadout with the wrong build is not a switch, the line says the build is not the one simmed`; run in a client 2026-09-22, three lines, both cells marked `different` exist in `DjinnisClassProfiles.lua` and pass in the Lua 5.1 offline check); steps rewritten for v0.69.0 against `PlanTab.setupPopup` and `PlanTab.loadTalents`: the loadout in the game is the tagged `[CP] Dungeon` (card 0059), the chat line now points at More > Make the planned loadouts for Reset to plan, and `/djbis` is `/dcp`. Old step 3 (`/djbis talents`) dropped: done in a client 2026-09-22 and recorded under criterion 4; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019080638-d47e)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each of the four ticked criteria against the code in `DjinnisClassProfiles.lua`. All four hold. I found no defect.
+
+- **#1** is met by `PlanTab.loadTalents`.
+  - The build moved and the loadout is the one selected: the code opens the talent window and prints the "Reset to plan" line. The helper is not asked. The function gives back `"same"`.
+  - The build did not move: the code prints only `"X" is on already.` and gives back `"on"`.
+  - The spec is passed to `activeLoadoutName`, so the earlier review finding stays fixed.
+  - The check for the "on already" case is in the file.
+- **#2** is met by `PlanTab.wrongHere` and `PlanTab.setupPopup`. `wrongHere` sets `drifted` only when the loaded loadout is the row's own loadout. Then `setupPopup` labels the button "Fix talents". In all other cases it says "Switch talents".
+- **#3** is met by `PlanTab.setupPopup`. When `drifted` is set, the line says `<loadout> is loaded, but its build is not the one simmed`.
+- **#4** is met by `PlanTab.sayTalents`, which the slash handler calls for `talents`. A person ran it in the game on 2026-09-22.
+
+The four open criteria are all `proves: manual`. The code does not stop any of them from passing. They wait for Rob in the game.
+
+VERDICT: sound
+
+**scope: sound**
+
+I tried to break this card on scope. I could not.
+
+**What I checked**
+
+- `PlanTab.loadTalents` in `DjinnisClassProfiles.lua` has two answers:
+  - Loadout not moved: it says `"X" is on already.` and does nothing more.
+  - Loadout moved: it opens the talent window and prints one line that points to Reset to plan.
+- `PlanTab.setupPopup` uses `wrong.drifted` to choose the button label: "Fix talents" or "Switch talents". That is what the card asks for.
+- The fence ("Not this card") holds. The addon itself never calls `LoadConfig` or `CommitConfig`. Nothing in the "same" path saves or changes a loadout. The offline check list that bans write calls still names `CommitConfig`, `LoadConfig`, `PurchaseRank`, `SetSelection` and `SetStarterBuildActive`.
+
+**Why the big diff is not a finding**
+
+The diff is very large: the rename to DjinnisClassProfiles, about 60 other cards, and the build tools. That is the work of many cards across the whole branch, not growth inside this card. This card's own change is still only the guard, the label, the line and `/djbis talents`.
+
+**Nothing half done**
+
+Only the four `proves: manual` criteria are open. They are for Rob to try in the game. That is not a finding.
+
+No criterion is disproved, so there are no `UNMET:` lines.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I checked the card against the current code. I could not break it.
+
+**What I checked**
+- `PlanTab.loadTalents` in `DjinnisClassProfiles.lua`:
+  - If the loadout is already on and nobody changed it, chat says "is on already." Nothing opens.
+  - If it is on and its build moved, the talent window opens. Chat names "More > Make the planned loadouts" and Reset to plan.
+  - If the spare wears the build and the build has its own loadout, Blizzard's helper switches to that loadout.
+- `PlanTab.wrongHere` sets `drifted` only when the name in play is the row's own name and its build moved.
+- `PlanTab.setupPopup` uses `drifted` for both the line ("is loaded, but its build is not the one simmed") and the button label ("Fix talents").
+- The other callers (the row menu's "Wear it", the double-click, the Plan tab Talents button) all go through the same guard. None of them gives a false drift claim.
+- The offline checks exist under the names the card gives.
+- Manual criteria 5 to 8 can pass with this code.
+
+**One small note, not a finding.** The comment above `PlanTab.wrongHere` says `loadout` is set only "when it is not the row's". That is no longer true: it is now also set for the row's own loadout when its build moved. The behaviour is right. Only the comment is stale.
+
+**What you do now:** nothing. Only the in-game checks (criteria 5 to 8) are left. They are yours to try in the game.
+
+VERDICT: sound
+
