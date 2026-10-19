@@ -159,3 +159,58 @@ No client can be run by an agent. A person owes What I need from you 1 to 4, and
 in the 280 px list on the smallest talent window.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked the one criterion (checks `the Undo button is on after an apply`, `and off after the undo`, `the button asks first after a hand change`, `a key changed by hand asks first too`, `and Undo anyway undoes` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the four steps of What I need from you, step 3 merged with the third review's smallest-window look and now counting the premade row above the Load buttons; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019230956-077f)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked criterion #1 against the code, and it holds. The other four criteria are `proves: manual`. A person must try them in the game, so they are not findings.
+
+- **The button is greyed when there is nothing to undo.** `PlanTab.canUndoBars` is true only when this character has a saved undo. The sidebar redraw greys or lights the button from that test.
+- **It asks first after a hand change.** The button calls `PlanTab.undoBarsAsk`. That function undoes at once only when both the bars and the keys still match what the last load left. If not, it opens a prompt: "Undo anyway" or "Cancel".
+- **"Undo anyway" undoes.** That prompt button calls `PlanTab.undoBars`. It puts the old bars and keys back, clears the saved undo, and redraws the list. After that, the button greys.
+- **The five named checks exist** in the self-test, in `DjinnisClassProfiles.lua`. A key-only change also returns "ask", and a check covers that case. I did not run the checks.
+
+I tried to break criterion #1 and could not.
+
+VERDICT: sound
+
+**scope: sound**
+
+I did not find a scope defect in this card's own work.
+
+**What I checked**
+- The Undo bars button is in `DjinnisClassProfiles.lua`, in the function that draws the bar buttons. When you click it, it calls `PlanTab.undoBarsAsk`.
+- The grey state uses `PlanTab.canUndoBars`. The list sets it each time it redraws.
+- All five checks that criterion 1 names exist in the self-test (`/bis test`). One check is "and Undo anyway undoes". It tests that the button is wired to `PlanTab.undoBars`.
+- I could not run Lua, so I did not run these checks. The card says they pass in the Lua 5.1 offline check.
+
+**About the size of the diff**
+- The diff is very large: 167 files and 66k lines. Almost none of it belongs to card 0045. Most of it is other work: the rename to DjinnisClassProfiles, about 40 other cards, research files and tools.
+- That is work that built up across many sessions. It is not this card growing. The card has no "## Not this card" section, so nothing crossed a fence.
+- The button now also shows in the right-click menu, in `PlanTab.undoBarsAsk`'s callers. That still uses the same safe ask-first path, so it is not a defect.
+
+**What is still open**
+- The four open criteria are all `proves: manual`. You check those in the game, so they are not findings.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I checked the Undo bars code against the card. I could not break it.
+
+- **The button.** The button calls `PlanTab.undoBarsAsk`. `updateSidebar` greys it with `PlanTab.canUndoBars`.
+- **No hand change.** If the bars and keys still match what the load left, `undoBarsAsk` undoes at once.
+- **A hand change.** If a bar slot or a key changed, it asks first. **Undo anyway** calls `PlanTab.undoBars`. The self-test checks exist for both cases.
+- **Redraw.** `undoBars` clears `barsUndo`. Then it calls `PlanTab.barsChanged`, which redraws the list. So the button greys again at once.
+- **The rename.** The move from DjinnisBiS to DjinnisClassProfiles kept all callers. These are the window menu, the sidebar menu and the chat command. The menu self-test also checks that the sidebar's menu leaves Undo to its own button.
+- **Comments.** No comment in this code is now false.
+
+Only the `proves: manual` steps are still open. You must do them in the game.
+
+VERDICT: sound
+
