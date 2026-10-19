@@ -133,3 +133,75 @@ the text is the addon's own, and nothing is sent.
 No client here. Rob's look above is the proof that the measure returns the wrapped height at once.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new (the first criterion was already ticked; its four "prompt height" checks exist and pass in the Lua 5.1 offline check); the look rewritten for v0.69.0 and moved into the AC block, with the Save bars: spec button as the way in beside `/dcp bars save`; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-20 review (v20261020000401-c9f0)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I could not break this card.
+
+**Criterion #1 (the prompt is tall enough when its text wraps): met.** All of this is in `DjinnisClassProfiles.lua`.
+- **`PlanTab.prompt`** does the steps in the right order:
+  1. It sets the frame's width.
+  2. It sets the text's width.
+  3. It sets the text.
+  4. Then it calls `f:SetHeight(PlanTab.promptHeight(f.text:GetStringHeight(), #lines))`.
+
+  So the height comes from the wrapped text, measured at the width that is drawn.
+- **`PlanTab.promptHeight`** checks `PlanTab.canRead` first. Only then does it compare the height. If the height cannot be read, it uses 18 a line.
+- **`PlanTab.barChecks`** holds the four "prompt height" checks. The fourth one runs the real prompt with its text methods shadowed (replaced for the test). It needs the order "width, text, measure" and the measured height. If the fix is undone, that check fails.
+- The self-test calls `PlanTab.barChecks`, so the checks run.
+
+**Criterion #2 (look at it in the game): open.** Rob must try this one by hand. It is not a finding.
+
+One small gap stays. No check looks at the number given to the text's `SetWidth`. A wrong number would push text off the right edge. It would not put text under the buttons, so it does not break this card.
+
+No `UNMET:` lines.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked the card's own work. I did not find scope creep in it.
+
+**What I checked**
+- `PlanTab.prompt` in `DjinnisClassProfiles.lua` sets its height from `f.text:GetStringHeight()`, through `PlanTab.promptHeight`. The card asked for exactly this.
+- `PlanTab.promptHeight` keeps the fallback of 18 per line.
+- `PlanTab.barChecks` has all four "prompt height" checks. The last check drives the real prompt. It also removes its stand-in functions after it runs.
+- `PlanTab.popup` does not change. The card's fence said to leave it alone.
+
+**Why the big diff is not this card's creep**
+- The diff covers many cards: the rename (0058), the builds for every class (0049, 0050), the Warcraft Logs tools (0064) and the gear plan. Each of those has its own card file in the diff.
+- For this card, the diff changes only its own card file: the 2026-10-11 clear-down, which rewrote the manual check and moved it into the acceptance block.
+- Nothing is half done. The only open item is criterion #2. It is a `proves: manual` check, which is yours to try in game. It is not a finding.
+
+**What you do now**
+Do the in-game check when you can:
+1. Type `/reload`.
+2. On a spec that already has a saved layout, click **Save bars: spec** (or type `/dcp bars save`).
+3. Pass: all the question text sits above **Replace** and **Cancel**, with a gap.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I looked for something this change breaks. I found nothing.
+
+- The fix is in `PlanTab.prompt`. It sets the width on the frame and on the text first. Then it puts in the text. Then it measures the text height with `GetStringHeight` and sizes the frame from that number.
+- All five prompts use `PlanTab.prompt`, so the one fix covers all of them.
+- `PlanTab.promptHeight` checks `canRead` before it compares the height. So a secret value (a value the game hides from addons) cannot cause an error. If the height cannot be read, it uses 18 for each line, as it did before.
+- The comment on `PlanTab.promptHeight` is still true.
+- The four "prompt height" checks are in `PlanTab.barChecks`. The last one runs the real prompt and checks the order: width, then text, then measure.
+- The zone-in popup (`PlanTab.popup`) and the other rows still have `SetWordWrap(false)`. Their lines do not wrap, so they cannot have this problem.
+- I could not run the game client or the offline check here. One known gap is not part of this card: a wrong number in the text's width is still not tested.
+
+The only open criterion is the in-game look (`proves: manual`). That one is for you to try in the game.
+
+What you do now: in the game, type `/reload`. Then click **Save bars: spec** on a spec that already has a saved layout. Check that no text touches the **Replace** or **Cancel** buttons.
+
+VERDICT: sound
+
