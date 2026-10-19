@@ -115,3 +115,78 @@ No agent can run the game. A person still owes What I need from you 1 and 2, and
 with all 40 slots used, `/djbis tidy` lists the old names and `/djbis tidy yes` deletes them.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked all three criteria (checks `no loadout is made in combat or with the talent window open, ...` (all slots full, and it says so, slots are counted over every spec, a free slot is counted), `Create makes every missing build, and nothing else` and `tidy removes only the old Dreamgrove names, and only on yes, even with every slot used` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0. The code changed what look 1 can see: since 0043 the loadouts box offers no Create at all when there is no room, and says the builds are worn through the spare, so the "All 40 loadout slots" line is no longer reachable from Create; the look now checks the no-room line. `/dcp tidy` and `/dcp tidy yes` both open the same list-and-ask box as the menu item, so the review's extra tidy look is the second look. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-19 review (v20261019141206-6ed9)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each ticked criterion against the code in `DjinnisClassProfiles.lua`.
+
+**#1. All slots full: the addon says so and makes nothing.** This holds.
+- `PlanTab.freeLoadoutSlots` adds up `GetConfigIDsBySpecID` over every spec. It takes that total from `MAX_COMBAT_TRAIT_CONFIGS`. It stops at a spec id of 0.
+- `PlanTab.loadoutFence` refuses at 0 free slots and prints the "All N loadout slots" line.
+- `PlanTab.makeLoadouts` calls the fence with the slot count on. That is true for every job except a spare wear or a job that only replaces. A replace frees its own slot first, so skipping the count there is correct.
+- Checks in the self-test function: "slots are counted over every spec", "all slots full" and "and it says so".
+
+**#2. A free slot: loadouts are made as before.** This holds. The "a free slot is counted" check proves the count gives 1. Below the cap, the fence lets the build through.
+
+**#3. Tidy still works when all slots are full.** This holds. `PlanTab.tidy` calls `loadoutFence(true)`, so the slot count is skipped. Check: "even with every slot used".
+
+**#4 to #6.** These are `proves: manual` looks, and they are still open. They are not findings.
+
+**Note:** I only read the code. I did not run the offline check.
+
+I could not break any criterion.
+
+VERDICT: sound
+
+**scope: sound**
+
+I tried to find work that goes past the card or was left half done. I found none.
+
+**What I checked**
+- `PlanTab.loadoutFence` adds a slot check only when `anySlots` is not set. This is what the card asks for.
+- `PlanTab.freeLoadoutSlots` counts the loadouts over every spec. It also stops at spec id 0, which fixes the small note from the first review.
+- `PlanTab.tidy` calls `loadoutFence(true)`, so tidy still works when all slots are full. This is criterion #3.
+- There are two more callers that skip the slot check:
+  - `loadoutFence(wear ~= nil or replaces)`, the spare loadout.
+  - A second `loadoutFence(true)`.
+  These come from card 0040, not this card. The second review already wrote this down, so it is not hidden growth here.
+- The "Not this card" fence holds:
+  - When there are fewer free slots than builds, Create still starts.
+  - When a spec gives back no loadout list, the count returns nil and the fence stays open.
+
+**The big diff**
+- The diff is 162 files, but this card did not make it.
+- It holds the rename to DjinnisClassProfiles and many other cards' work.
+- The 0039 code is only the fence and the slot count, and that part stays inside the card.
+
+No criterion is disproved. The three open looks are `proves: manual`, so they are not findings.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break it and could not.
+
+**What I checked, in `DjinnisClassProfiles.lua`:**
+
+- **`PlanTab.loadoutFence`:** it refuses when `freeLoadoutSlots()` gives 0, unless `anySlots` is true. The refusal line names the cap.
+- **`PlanTab.freeLoadoutSlots`:** it counts the loadouts of every spec. It stops at spec id 0, which was the small note from the first review. It gives nil when the game does not answer.
+- **`PlanTab.tidy`:** it calls `loadoutFence(true)`, so it still lists and deletes when all slots are full. Criterion 3 holds.
+- **`PlanTab.makeLoadouts`:** Create still goes through the slot check. A batch where every job is a replace, or a spare wear, skips the check. That is on purpose (card 0067): a replace frees its own slot first. So nothing is lost.
+- **The loadouts box:** it says "N builds have no loadout of their own and no room for one". That matches manual look 1.
+
+**Small notes. They break no criterion:**
+
+- The card's "Built" text says Reset is fenced at the cap. Since 0067, an all-replace Reset is not fenced. The card text is out of date.
+- The comment above `loadoutFence` names tidy and the spare as the callers that skip the count. It does not name replaces.
+
+The three open criteria are `proves: manual`. A person must try them in the game.
+
+VERDICT: sound
+
