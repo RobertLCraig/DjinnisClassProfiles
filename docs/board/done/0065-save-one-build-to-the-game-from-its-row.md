@@ -83,3 +83,67 @@ combat. The API checks passed against `wow-ui-source`.
 Copy, import, rename and delete need "your builds" stored in SavedVariables, which is card `0057`.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked the offline-check criterion (checks `save one build, a spec change offers nothing`, `save one build, right-click on a build row opens its menu, and makes nothing`, `save one build, both made when the window shuts` and the rest of `PlanTab.saveOneChecks` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0, one `proves: manual` line each, in a new Acceptance block that replaces Done when. The menu now also holds Wear talents only, Load bars only and Copy to your builds... (cards 0081, 0057). The old step 6 said Reset asks first once the window is shut, but the build list only shows while the talent window is open (`updateSidebar`), so from the row Reset always gives the close-first line; the look asks only for that. A drifted build is reset from More > Make the planned loadouts. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-20 review (v20261020073515-add1)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I tried to break card 0065. I could not. Each criterion has real code behind it, in `DjinnisClassProfiles.lua`:
+
+- **#1 Offline check:** `PlanTab.saveOneChecks` exists. It has checks for the row menu, for example "menu of a saved build". I did not run it.
+- **#2 No box opens on its own:** `PlanTab.armLoadouts` and `PlanTab.onLoadoutEvent` only call `offerBars`. That is the bars offer, not the loadout box. Nothing else opens the box at login or on a spec change.
+- **#3 Right-click opens only a menu:** `PlanTab.sidebarClick` sends the right button to `PlanTab.openRowMenu`. It does nothing else. `PlanTab.rowMenuItems` adds "Wear it", "Save to the game" (missing builds only) and "Export...".
+- **#4 Save two rows, then close the window:** `PlanTab.saveOne` adds each build to `saveWaiting` while the window is open. `PlanTab.saveWaited` makes them all when the window closes.
+- **#5 "Saved in the game" greyed out, with a tip:** `rowMenuItems` gives it `disabled = true` and a `tip`.
+- **#6 Export box:** `PlanTab.showExport` makes an EditBox that gets focus at once.
+- **#7 Reset with the window open:** `PlanTab.resetAsk` first checks `talentWindowOpen`. Then it says the exact required line and stops.
+
+Criteria #2 to #7 are `proves: manual`. Someone must try them in the game.
+
+VERDICT: sound
+
+**scope: sound**
+
+**What I checked:** I checked whether this change does more than card 0065 asks for, or leaves part of the work open.
+
+**Findings:**
+
+- The card names six functions. All six are in `DjinnisClassProfiles.lua`: `PlanTab.saveOne`, `PlanTab.rowMenuItems`, `PlanTab.openRowMenu`, `PlanTab.resetAsk`, `PlanTab.showExport` and `PlanTab.saveWaited`. `PlanTab.armLoadouts` is there too.
+- The offline check calls `PlanTab.saveOneChecks`, so criterion 1 is backed by real checks.
+- The diff is very large: 152 files. Most of it is other cards' work, for example the new gear plan, the build refresh, `PlanTab.CRAFTED`, the bar research and cards 0066 to 0105. The diff covers many cards at once, not only this one. That size is how the diff was taken. It is not growth this card added on its own.
+- The menu items added later (Wear talents only, Load bars only, Copy to your builds...) are credited to cards 0081 and 0057 on the card itself. The card has no "Not this card" fence for them to cross.
+- I found nothing left half done. Copy, import, rename and delete were moved to card 0057 on purpose.
+
+This finding disproves no criterion. Criteria 2 to 7 are `proves: manual`. They are still open, and that is normal.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break card 0065 and could not. **The card is sound.**
+
+**What I checked**
+
+- **Nothing opens on its own.** `PlanTab.armLoadouts` and `PlanTab.onLoadoutEvent` now offer only bars. The loadout box is gone from both. This fits manual check #2.
+- **Right-click opens a menu.** `PlanTab.sidebarClick` sends the right button to `PlanTab.openRowMenu`. That function only opens a menu. It makes nothing. Fits #3.
+- **Two saves while the talent window is open.** `PlanTab.saveOne` adds each build to `PlanTab.saveWaiting`. When the window closes, `PlanTab.saveWaited` makes all of them in one batch. `PlanTab.whenTalentsClose` drops the waiting list if another job replaces it. Fits #4.
+- **A saved build.** In `PlanTab.rowMenuItems`, "Saved in the game" is greyed out but keeps its tip. Fits #5.
+- **Export.** `PlanTab.showExport` puts the string in a box. Escape and Enter close the box. Fits #6.
+- **Reset with the window open.** `PlanTab.resetAsk` refuses first and says the exact line from #7. It changes nothing.
+- **Other paths.** Combat, the old-loadout rename, the "putting the plan on" step, and a full slot list all stop `saveOne` before it makes anything.
+- **Old comments.** The comments on `armLoadouts` and the box offer now say "never on its own". They match the code.
+
+**What I did not find**
+
+I found no broken caller and no false comment. I found no rule that one part of the code keeps and another breaks. The old nit is still there: with two loadouts of one name, `loadoutGaps` reads only one. The card already lists it.
+
+**What you do now**
+
+Nothing for this review. The manual checks (#2 to #7) wait for you to try in the game.
+
+VERDICT: sound
+
