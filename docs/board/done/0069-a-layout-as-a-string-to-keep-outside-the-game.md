@@ -115,3 +115,58 @@ WHY: The code is built and its offline checks pass. Only an in-game check on a s
 OUTCOME: rob
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new: the four built criteria were already ticked, and their checks (`export gives one string for a layout`, `export then import gives the same layout`, `a damaged string is refused and nothing is saved`, `import saves and does not apply`) exist and pass in the Lua 5.1 offline check. The one manual criterion is split into the three looks the 2026-09-29 entry named, rewritten for v0.69.0 (More > Profile: X > Export and Load, More > Import a profile..., the OK button and the `Saved the X profile` chat line all match the code). Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-20 review (v20261020085128-e637)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each ticked criterion against the code in `DjinnisClassProfiles.lua`. All four are met.
+
+- **#1 Export gives one string.** `PlanTab.exportProfile` calls `PlanTab.layoutString`. That makes one `DCP1:` string with no spaces. `PlanTab.showExport` shows it in a box. The More menu has the Export item.
+- **#2 Import rebuilds slots, keys and macros.** `PlanTab.layoutString` writes 8 fields for each slot: type, id, name, index, body, icon and char. It also writes the key bindings. `PlanTab.readLayoutString` reads all of them back. The fields carry their length, so a `|` or `:` in a macro body cannot break them. The round-trip check compares the slots and the keys in full.
+- **#3 A bad string is refused.** `PlanTab.readLayoutString` refuses a wrong tag, bad base64, a bad Adler-32 checksum or a bad structure. It also refuses a class other than the player's. When it refuses, `PlanTab.importProfile` returns before it writes anything to `profilesDB`.
+- **#4 Import only saves.** `PlanTab.importProfile` writes only `profilesDB()[name]`. It never calls `applyBars` or `placeBars`. The check counts those calls and gets zero.
+
+I found nothing that stops the three manual criteria. The import box is opened with `askName(..., "", 0)`, and the 0 looks like "no length limit". Rob still has to confirm in the game that a long string pastes whole.
+
+VERDICT: sound
+
+**scope: sound**
+
+I tried to find scope creep or half-done work in this card. I found none.
+
+**What I checked, in `DjinnisClassProfiles.lua`:**
+
+- **`PlanTab.layoutString`** writes these fields: class, name, date, the slots and the keys. For each macro slot it also writes the body, the icon and the character flag. These are the same fields that the macro capture from card 0068 saves, so no macro data is lost.
+- **`PlanTab.readLayoutString`** refuses a string in these cases: a wrong tag, bad base64 (the text encoding), a bad checksum, a bad structure, or a different class. It does not read Myslot strings. That is correct, because that is behind the "Not this card" fence.
+- **`PlanTab.exportProfile`** shows the string in the existing export box. It has no sharing or chat-send path, and the code comment says "it is not for sharing". This stays inside the fence.
+- **`PlanTab.importProfile`** only saves to `profilesDB` and tells you so in chat. It does not apply the bars.
+- **One small addition:** `captureBars` now stores `class` on each saved layout. The header needs this. The builder disclosed it in the card, and it does not go past the fence.
+
+**About the large diff:** the git diff covers 146 files. That is the total change in the repository, not this card's work. The card's own TOUCHED list names only the `.lua` file and the card file.
+
+**Nothing to do now.** The three open checks are `proves: manual`. They wait for Rob to try them in the game.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I checked the export and import code. I could not find anything that breaks.
+
+**What I checked** (all in `DjinnisClassProfiles.lua`):
+- `PlanTab.layoutString` writes all 8 fields of a slot: type, id, name, index, body, icon, char. These are the same fields that `PlanTab.captureBars` and `readBars` save. Keys go in as pairs of strings. So the round trip keeps slots, keys and macros.
+- `PlanTab.readLayoutString` refuses five kinds of bad string: a wrong tag, bad base64, a bad checksum, a bad structure, and another class. It returns nothing before it builds the layout, so a bad string saves nothing.
+- `PlanTab.importProfile` only writes to `profilesDB`. It does not call Apply or Load.
+- `PlanTab.importProfileAsk` passes a limit of 0 to `PlanTab.askName`. That calls `SetMaxLetters(0)`, which means no length limit. So a long string with many macros is not cut short. Manual criterion #7 can pass.
+- `PlanTab.exportProfile` falls back to the player's class for an old profile that has no class. The card's comment says this, so it is a known choice.
+
+**One small gap, not a defect:** import does not refuse the profile name "build", but `PlanTab.saveProfile` does. Export only uses names that were saved through `saveProfile`, so a real string cannot carry that name. No criterion fails because of it.
+
+No criterion is disproved.
+
+VERDICT: sound
+
