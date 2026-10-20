@@ -177,3 +177,70 @@ they are: two only change a message or a beat, and the third is covered by `wear
 guard.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked Done-when 1 (checks `one loadout change at a time, the delete goes alone`, `then the import, and nothing is refused`, `the rename once the delete has landed, and nothing is refused`, `it ends holding the plan under its name` in `PlanTab.swapChecks` exist and pass in the Lua 5.1 offline check); `## Done when` became `## Acceptance` in the AC block, wording kept; looks rewritten for v0.69.0: the one in-game Reset, with the chat line the code prints ("now holds the plan, and you are wearing it"); it is the same action as 0060's first look, so one try answers both; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-20 review (v20261020070323-ef81)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: defect**
+
+I checked criterion #1 against the code and ran the offline check. Criterion #1 is not met, so the verdict is defect. Criterion #2 is manual, so it is not a finding.
+
+**Criterion 1: what is there.** The checks live in `PlanTab.swapChecks` in `DjinnisClassProfiles.lua`, and `PlanTab.selfTest` calls it. All four named checks are present:
+- "the delete goes alone"
+- "then the import, and nothing is refused"
+- "the rename once the delete has landed, and nothing is refused"
+- "it ends holding the plan under its name"
+
+None of the four printed a FAIL.
+
+**Criterion 1: why it fails.** The criterion says `lua offline-check.lua` passes. I ran it today and it does not pass. It ends `offline-check: 1 FAIL lines`. The failing line is: `the stub's Interface: 120100, not 120105 (card 0058)`. That check belongs to card 0058, not to this card's swap code. But the box claims the whole script passes, and today that is not true.
+
+**Criterion 2.** The chat line "now holds the plan, and you are wearing it" does exist, in the `stop("done", ...)` call inside `finishSwap`. So the manual look can pass.
+
+UNMET: #1 `lua offline-check.lua` does not pass: it ends with 1 FAIL line (the DjinnisBiS stub says Interface 120100, the check wants 120105). So "passes" is false, even though the four swap checks pass.
+
+VERDICT: defect
+
+**scope: sound**
+
+**Scope check of card 0063: no defect found.**
+
+**What I did.** I read the card's three code commits: `2cf88bf`, `86c46f7` and `389c941`.
+
+**What I found.**
+- The big diff you gave me (157 files) is not this card's work. It covers many cards across the whole history. I did not judge the card on it.
+- The three commits change only `DjinnisClassProfiles.lua`, the `.toc` version line, and this card's own file.
+- One commit also adds a new card, `0067`. That is correct. It moves the out-of-scope `wearSpare` loop to its own card.
+- The changes stay inside what the card asks for:
+  - `importOne` waits for the delete to land before it imports.
+  - `finishSwap` waits for the delete to land before it renames.
+  - A refused change is tried again.
+  - The fence (`PlanTab.swapping`) is held for the whole swap.
+- Two changes go a little past the card's text: the `setupStep` swap fence and the `swapEnded` helper. The first review asked for both, and they close the same bug (a second change sent during a swap). That is not quiet growth.
+- Nothing is half done. The only open item is the in-game Reset check. Rob does that one by hand, so it is not a finding.
+
+**What you do now.** Nothing. The card can go to `done/`. The in-game check waits on Rob's list of things to try.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break it, and I could not find a fault.
+
+- **`finishSwap`:** the delete and the rename now go out at different times. The rename goes only after the old loadout reads as gone, plus one beat. When the game refuses a change, the code tries it again. A late timer from an earlier swap is dropped, because the `after` wrapper checks `PlanTab.swapping == swap`.
+- **The fence:** `swapSelected` holds `PlanTab.swapping` from the switch. Every way out goes through `swapEnded`, so the fence lets go each time. That includes no helper, a timeout, and every `stop`.
+- **Old loadout worn again:** it is never deleted, and the new one is not renamed onto its name. Nothing changes here from before.
+- **Chat line:** the success text in `finishSwap` is exactly the line the manual check looks for: "now holds the plan, and you are wearing it".
+- **Offline checks:** `PlanTab.swapChecks` has the named checks, for example "it ends holding the plan under its name". I did not run the checks myself. I only read the code.
+
+The only open item is the in-game check (#2). That is Rob's to try in the game, so it is not a finding.
+
+VERDICT: sound
+
+**acceptance**
+
+- **#1 was named by the acceptance lens and is not a ticked criterion here**, so nothing was changed: `lua offline-check.lua` does not pass: it ends with 1 FAIL line (the DjinnisBiS stub says Interface 120100, the check wants 120105). So "passes" is false, even though the four swap checks pass.
+
