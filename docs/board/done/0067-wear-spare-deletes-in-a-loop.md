@@ -406,3 +406,61 @@ Then Reset of two at the cap, timing each.
   then tries again. The in-game check above covers it.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked the offline criterion (checks `swapChecks` ", it replaces the old spare, never the worn one, and nothing is refused", ", with every slot used the old spare still makes the room", ", leftover spares are deleted first" and ", one at a time, then the spare replaces the last old one" exist and pass in the Lua 5.1 offline check; the build took one old spare plus one worn, as the first 2026-09-25 entry explains, and the leftover case covers more than one old one); looks rewritten for v0.69.0 as two `proves: manual` lines, with room and at the cap, in a new Acceptance block that replaces Done when. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-20 review (v20261020083638-4048)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+**What I did:** I looked for the code behind criterion #1. Then I read the two checks it names.
+
+**What I found:**
+
+- **#1 holds.** The two checks are in `swapChecks` in `DjinnisClassProfiles.lua`, and both use the timed server.
+  - The first check expects `delete 3|import|wear`. It also expects that no call is refused. The worn spare stays.
+  - The second check expects `delete 5|delete 6|delete 3|import|wear`. This is the "leftover" path. `startTagging` deletes the extra spares one at a time. Then `wearSpare` makes the spare, and the new spare replaces the last old one.
+  - The card says "two old spares". The second check uses three old spares and one worn spare. That covers more than the card asks, so it is not a defect.
+- **#2 and #3 are `proves: manual`.** They wait for a person to try them in the game. I found nothing that shows they cannot pass.
+- **Not done by me:** I did not run `lua offline-check.lua`. This review can only read files. The fifth review says all three modes end with "no FAIL lines".
+
+**What you do now:** Nothing. The card can go to `done/`. The two in-game checks wait on your list of things to try.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked whether the work for card 0067 grew past what the card asked for. It did not.
+
+**Findings**
+
+- **The big diff is not this card's work.** It shows 155 changed files, but that range covers work for many cards. The commits for card 0067 are small. Each one changes only `DjinnisClassProfiles.lua`, the `.toc` version line and this card. One commit also updates `docs/HANDOVER.md`.
+- **The extra work came from the reviews, not from the builder.** Two changes go past the card text. Reset now works when every loadout slot is used (in `PlanTab.makeLoadouts`). "Delete old loadouts" has its own messages (`TIDY_WORDS`). Earlier review findings on the card asked for both. They are small and they stay inside the same queue code.
+- **The work follows the card's second way.** In `PlanTab.wearSpare`, the old spare is now replaced through the job queue. Leftover spares are deleted through `PlanTab.startTagging`. The worn spare is never deleted. The card has no "Not this card" section, so there is no fence to cross.
+- **Nothing is half done.** The only open boxes are #2 and #3. Both are "proves: manual" checks for a person to do in the game.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I checked the spare path for breakage. I did not run the offline check. I only read the code.
+
+**What holds**
+
+- `PlanTab.wearSpare` no longer deletes in a loop. The one old spare goes to `makeLoadouts` as a `replace`. Leftover spares go through `PlanTab.startTagging`, and the spare is made from its `after` function.
+- The `tidied` flag stops the leftover run from looping.
+- `PlanTab.importOne` never deletes the worn loadout. It refuses a renamed loadout and a name that is a secret. At the cap, it asks `CanCreateNewConfig` only before the import, after the delete.
+- A deleted spare id is forgotten only when `configName` reads nil, so a live loadout is never forgotten.
+
+**One small note (not a defect)**
+
+- The comment above `PlanTab.importOne` says: "A replace deletes the old loadout only once the string has parsed and the game says it can make one." Since v0.53.1, the second half is false: at the cap, the delete goes ahead while `CanCreateNewConfig` is false. Code behaviour is correct. It disproves no criterion. Fix the comment when you next touch this code.
+
+The two open criteria are `proves: manual`. They wait for you to try them in game.
+
+**What you do now:** nothing. The card can go to `done/`.
+
+VERDICT: sound
+
