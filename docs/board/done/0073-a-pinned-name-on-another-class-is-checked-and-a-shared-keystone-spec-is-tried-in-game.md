@@ -115,3 +115,56 @@ WHY: The code fix is done and the blocker is done; only Rob's in-game check of t
 OUTCOME: rob
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new: #1 was already ticked and is an `update-builds.py` proof, not a Lua check. #2 is rewritten for v0.69.0 (`/dcp loadouts` and More > Make the planned loadouts both reach `offerLoadouts`; Beast Mastery still has a Dungeon and a Raid build in `BUILDS`). Moves to ai-review/ with only the in-game look open.
+
+### 2026-10-20 review (v20261020122406-7500)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+**#1 (a bad pinned name stops the run): met.** The check is in `block()` in `update-builds.py`. Before it reads any source, `block()` checks every `PIN` entry for every class. A name longer than `NAME_MAX` (24) or a name with a `"` makes the script exit with an error. The message names the spec and the name.
+
+The script exits before it builds or writes anything. So `DjinnisClassProfiles.lua` does not change. The druid check and the non-druid check are now one loop, so they cannot drift apart.
+
+`other_classes()` still has an `assert` on the name. The loop in `block()` always runs first, so that `assert` is only a second guard. It does no harm.
+
+**#2 (Beast Mastery loadouts in the game): open, and that is correct.** It is a `proves: manual` check, so it waits for you. Nothing in the code stops it from passing:
+- `PlanTab.TAG = "[CP] "` is in `DjinnisClassProfiles.lua`.
+- `PlanTab.BUILDS["Beast Mastery"]` has a `Dungeon` row and a `Raid` row.
+- The addon text still points to "More > Make the planned loadouts".
+
+What you do now: nothing for this review. Do the Beast Mastery check in the game when you can.
+
+VERDICT: sound
+
+**scope: sound**
+
+**What I checked:** I checked only scope. That means two questions: did the change do more than the card asked, and did it leave anything half done?
+
+**What I found:**
+
+- The card's own commit is `9779b5b`. It changes two files: `update-builds.py` (8 lines) and the card file.
+- In `update-builds.py`, function `block()`, one loop now checks the pinned names of every class before any source is read. It replaces the old druid-only check, so the druid and non-druid paths cannot drift apart again. This is the "one helper both paths call" that the card's task asked for.
+- It does not cross the "Not this card" fence. The `[CP] ` tag (`0059`), the `valor_dungeon()` finding and the CurseForge release are untouched.
+- The large diff in the brief is not from this card. The range also holds other cards' commits: the gear plan, the bar research and the Warcraft Logs build refresh. None of them is in this card's commit, so this card did not grow.
+- #1 is met by `block()`. `sys.exit` with a text message exits with code 1.
+- #2 is open and `proves: manual`. Nothing in the code stops it from passing, so it is not a finding.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break the fix and could not, so the verdict is sound. I only read the code. I ran nothing.
+
+**What the fix does.** In `update-builds.py`, `block()` now checks the name of every `PIN` entry, for every class. This happens before any source is read and before anything is written. So `other_classes()` gets only names that passed the check. Its two `checked()` calls (the WCL fallback and the "pinned but not filled" loop) are both covered. The druid check and the other-class check are now one loop, so the two cannot drift apart. The `assert` on `PICK` names stays separate, but no `PIN` name goes through it.
+
+**Criterion #1 holds.** The run exits through `sys.exit` with a string message, which gives exit code 1. The message names the spec and the name. It exits before `main` writes the Lua file, so the file stays byte-identical.
+
+**One small gap. It is not a defect against the card.** A pinned name with a `\` passes the check. For example, `Dungeon \` would make `["Dungeon \"]` in `checked()`. That is also Lua the game will not load. The card asks only for "over `NAME_MAX`" and `"`, so I raise no `UNMET:` for it. Adding `\` and newlines to the check would be a cheap fix later.
+
+**Criterion #2** is a `proves: manual` check. It is open, and that is expected, so it is not a finding. You do it in the game.
+
+VERDICT: sound
+
