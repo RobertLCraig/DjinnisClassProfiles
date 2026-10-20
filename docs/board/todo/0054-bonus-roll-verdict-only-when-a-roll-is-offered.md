@@ -383,3 +383,66 @@ its payload are read from `wow-ui-source` on branch `live`; whether 12.1 protect
 known offline.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked all four built criteria (checks `the bonus roll verdict, a kill only remembers the boss`, `the offer gives the verdict for the last boss`, `another prompt says nothing`, `owned BiS does not count, but the rest does`, `all of it owned is NO, and it says so`, `a refused offer event is seen`, `the roll frame holds the offer, its end, the loading screen and the kill` exist and pass in the Lua 5.1 offline check; each criterion's vague proves: now names them); looks rewritten for v0.69.0: the three raid-night steps of What I need from you, the third covering the reviews' "names the boss just killed"; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-20 review (v20261020020816-5335)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I read the code against all four checked criteria. Each one traces to real code. I could not break any of them.
+
+1. **A kill alone gives no verdict.** On `ENCOUNTER_END`, `PlanTab.onBonusEvent` only stores the boss. It gives the verdict there only when the offer event could not be registered (`bonusOnOffer` is false). That fallback is the one the card asks for.
+2. **The offer gives the verdict.** On `SPELL_CONFIRMATION_PROMPT`, `PlanTab.onBonusEvent` first checks that the prompt is a bonus roll. Then it calls `PlanTab.bonusRollVerdict` for the last boss killed in the same place. Any other prompt type returns "other prompt" and shows nothing.
+3. **Owned BiS does not count.** `PlanTab.bonusRollVerdict` uses `PlanTab.bonusSplit` with `PlanTab.bonusOwned` to sort items into "wanted" and "owned". Only wanted items can make a YES. If every item is owned, it shows NO and prints "you own every BiS item". One change from the card: an item counts as owned only at or above the plan's item level, not at any level. An earlier review asked for this, and it is a safe choice.
+4. **A refused event is detected.** `PlanTab.registerRoll` registers each event. Then it calls `IsEventRegistered("SPELL_CONFIRMATION_PROMPT")` to set `bonusOnOffer`. The self-test gives it a frame that refuses the offer event, and checks that the flag comes out false.
+
+The three open criteria say `proves: manual`. They wait for Rob to try them in game. They are not findings.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked what card 0054 itself changed. I found no scope defect.
+
+**What I did:**
+- The big diff above covers about 600 commits and many other cards, for example the rename (0058), the build data and the research files. Those changes are not 0054's work, so I did not count them against it.
+- I found the four code commits for 0054: `e09a451`, `79a4f34`, `fc0c27c` and `1a4f0e5`. Each one touches only `DjinnisClassProfiles.lua`, the version line in `DjinnisClassProfiles.toc`, `offline-check.lua` and the card file.
+
+**What I found:**
+- **Extra work:** the build added the coin check, the "show it once per roll" guard, the login scan, the saved kill (`DjinnisCPCharDB.bonusSource`) and the owned-at-plan-level rule. The card did not name these. The review findings asked for each one, and each one only stops a false or repeated verdict. So they stay inside the card's job. They are not quiet growth.
+- **The fence ("Not this card"):** the card says "no weekly coin planner". The code has no such planner, so the fence holds.
+- **Half-done work:** none. All 4 automatic criteria have checks. The 3 open criteria are `proves: manual`. They wait for Rob to try in game, so they are not findings.
+
+**What you do now:** nothing. The card can go to `done/`. The 3 in-game checks wait on Rob's list.
+
+VERDICT: sound
+
+**breakage: defect**
+
+I'm reading the bonus roll code. I found one real break.
+
+**Finding: the "no boss" message sends you to a check that gives a wrong NO.**
+
+- Where: `DjinnisClassProfiles.lua`, in `PlanTab.onBonusEvent`, the `SPELL_CONFIRMATION_PROMPT` branch, at the `kind == "raid"` fallback.
+- What the message says: "More > Bonus roll worth it here? lists the raid's BiS."
+- What really happens: that button runs slash `here`. Slash `here` calls `PlanTab.bonusRollVerdict((GetInstanceInfo()))` with the raid name.
+- Raid BiS is stored by boss. `bossOf` drops the " / instance" part. So `bisFrom("The Venomous Abyss")` finds nothing.
+- Result: chat says "nothing BiS drops from The Venomous Abyss. Keep the coin."
+- The second review found this same false NO and fixed it on the offer path. This message brings it back by sending the player to the place question.
+- The self-test checks only that the message prints. It never runs the button in a raid.
+
+**Fix (two choices):**
+1. Make `here` in a raid list BiS for every boss of that instance.
+2. Change the message so it does not point at `here`.
+
+UNMET: #2 when the boss is not known after a reload, the prompt sends the player to "Bonus roll worth it here?", which in a raid answers "nothing BiS drops. Keep the coin."
+
+VERDICT: defect
+
+**acceptance**
+
+- **#2 was named by the breakage lens and is not a ticked criterion here**, so nothing was changed: when the boss is not known after a reload, the prompt sends the player to "Bonus roll worth it here?", which in a raid answers "nothing BiS drops. Keep the coin."
+
