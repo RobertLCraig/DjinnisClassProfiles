@@ -466,3 +466,59 @@ The loop parked this card at its bounce limit, and said: "**2026-09-29** The rev
 
 **2026-10-11** Clear-down (attended, Rob asked). The seventh review's two missing checks are added to `PlanTab.levelChecks` on branch `cleardown/djcp`: "below the level cap, edited a level after the loadout was made" (noted at 81, read at 82, `talentsEdited` is true) and "below the level cap, no loadout selected may be short and notes nothing" (`mayBeShort(nil)` at 81 of 90). Each was broken in a scratch copy and went red: `talentsEdited` on `PlanTab.belowCap()` fails the first, and the `id and` guard removed throws "table index is nil" in the second. The Lua 5.1 offline check passes. Criterion 1 re-ticked; AC sentinels added so the board reads the look; the in-game look rewritten for v0.69.0 (the menu names and the "Builds" tab). Moves to ai-review/ with only that look open.
 
+### 2026-10-20 review (v20261020034953-27b8)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+**What I did:** I read the code for each check box. I made no changes. Each ticked box traces to real code in `DjinnisClassProfiles.lua`.
+
+- **#1 Part of the plan below the cap:** `PlanTab.partOfPlan`, `PlanTab.planDiffers` and `PlanTab.belowCap` do it. `belowCap` uses a strict `<`. It gives false when a level is missing, secret or 0. `partOfPlan` gives false for a node outside the plan, for another choice and for more ranks. It also gives false for an empty build. `PlanTab.mayBeShort` notes the level a loadout was made at, so a level-up brings it back. `PlanTab.compareWord` gives the "part" word to Compare. The self-tests named in the card are in `PlanTab.levelChecks` and in the partTest block.
+- **#2 Tab placed when closed:** In `updateSidebar`, `f.tab:SetShown(mode == "tab")` runs before the frames are placed in "tab" mode. The self-test "the tab is placed when the list is closed" exists.
+- **#3 Menu item:** The window menu builder adds "Show the build list". `PlanTab.menuChecks` tests three cases: the list is open, the list is closed, and Talent Loadout Manager is loaded.
+- **#4 Mutations:** The script is in `%TEMP%`. I cannot see it from this repo, and the earlier reviews ran it. I found nothing that disproves this box.
+- **#5 Manual:** This box is still open. Rob must check it in the game. It is not a finding.
+
+**Result:** I could not break it.
+
+VERDICT: sound
+
+**scope: sound**
+
+I checked the code for card 0055. I looked only at scope: work the card did not ask for, and work it left half done.
+
+**What I found**
+
+- **The fence holds.** The card says the sidebar tick stays on the exact compare. It does, in `PlanTab.sidebarList` (the `talentStringsDiffer(live, build)` call).
+- **`pullSpec` holds too.** It still uses the exact compare, as the second review allowed.
+- **The level rule is in all the places the card names.** The offer, Create and Reset (`loadoutGaps`), `talentsEdited` and Compare (`sayTalents`) all call `planDiffers` with the level rule.
+- **The large diff is not this card's work.** It has 162 files. It holds the rename (card 0058), new build data, research files, and about 40 other cards. Each of those has its own card. I found nothing in the 0055 code paths that goes past what the card asks for.
+- **Nothing is half done.** The only open criterion is the in-game check, and it says `proves: manual`. That is not a finding.
+
+I tried to find work over the fence or left half done. I found none.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to find what this change breaks. I found nothing that the next build must fix.
+
+**What I checked:**
+- **`PlanTab.planDiffers` and `PlanTab.compareWord`.** At the level cap (`short` is false), both give the same answer as the exact compare. Below the cap, a build that adds a node or picks another choice still reads as drifted.
+- **`PlanTab.belowCap`.** It returns false when a level is missing, secret, not a number, or 0. The self-test now checks the "level 0" case, which the fifth review asked for.
+- **`PlanTab.mayBeShort`.** A loadout made at a lower level than today reads as drifted. A loadout with no level noted gets today's level, so it comes back at the next level-up.
+- **Callers that still use the exact compare.**
+  - `pullSpec` covers druid raid pulls. It was left as is on purpose.
+  - The sidebar tick in `sidebarList` is listed under "Not this card".
+
+  No other caller was missed.
+
+**What I did not do:** I read the code only. I did not run the offline check, and I did not run mutations (small deliberate code breaks that show whether a test catches them).
+
+**What is still open:** the in-game check (`proves: manual`). Rob must try it on the level 81 Warlock.
+
+VERDICT: sound
+
