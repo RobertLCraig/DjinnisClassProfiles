@@ -222,3 +222,76 @@ SavedVariables. Nothing is sent anywhere, and no other player is read.
 not apply. Rob's seven steps and the self-test question are under `## What I need from you`.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new (the six built criteria were already ticked; `PlanTab.menuChecks` and the `offline-check.lua` source scan exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the seven steps became six (step 6, every item once, folded into step 1), "the BiS window" is now the main window, and the one manual criterion was split into them. Dropped the self-test question: the code keeps it off the menu on purpose (card 0056, check `no self-test in the menu`), so it is not a look; a new card if Rob wants it back. Note: the ticked "off a druid, no tidy item" half is superseded by card 0066, which gives every class "Delete old loadouts" (check `a Death Knight can delete old loadouts too (card 0066)`); the bonus roll half still holds. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-20 review (v20261020010509-e6a2)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: defect**
+
+I checked each ticked box against the code. Five of the six hold. One is now false.
+
+**What holds:**
+- #1, #2 and #3: `PlanTab.menuChecks` in `DjinnisClassProfiles.lua` clicks each menu item and checks the function it calls. It also checks the confirm boxes.
+- #5: the source scan in `offline-check.lua` is still there.
+- #6: the spec-mode checks are in `offline-check.lua`. I did not run them.
+
+**What fails: #4.** It says a class that is not a druid gets "no tidy item". That is no longer true. Card 0066 gives every class "Delete old loadouts" in `PlanTab.menuChecks`' menu builder, which calls `PlanTab.tidyAsk`. `PlanTab.menuChecks` now checks the opposite: "a Death Knight can delete old loadouts too (card 0066)". The 2026-10-11 clear-down saw this and still left the box ticked. The bonus-roll half of #4 may still be true, but the box as a whole is false. The fix is small: change #4 so it only says "no bonus roll item off a druid", and keep the check for that.
+
+The open `proves: manual` boxes are not findings. They are Rob's in-game checks.
+
+UNMET: #4 card 0066 gives every class "Delete old loadouts", and `PlanTab.menuChecks` checks that a Death Knight gets it, so "off a druid, no tidy item" is false.
+
+VERDICT: defect
+
+**scope: defect**
+
+**Scope review of card 0053: I found one defect.**
+
+**Finding: criterion #4 is no longer true.**
+- Criterion #4 says: "Off a druid, no tidy item and no bonus roll item."
+- In `DjinnisClassProfiles.lua`, the window's More menu adds "Delete old loadouts" for every class. There is no druid gate on it.
+- The self-test `menuChecks` now checks the opposite. Its check is "a Death Knight can delete old loadouts too (card 0066)".
+- The card's own 2026-10-11 note says card 0066 replaced this rule. But the box is still ticked, and the card still claims it.
+- The bonus roll half still holds. "Bonus roll worth it here?" is druid only.
+- Fix: rewrite #4 to say only "no bonus roll item". Then point the tidy half at card 0066.
+
+**Finding: this diff is much more than card 0053.**
+- It has 161 files and about 52,000 added lines.
+- That includes the rename to DjinnisClassProfiles (card 0058), new gear plans, Warcraft Logs builds, bar categories and crafted reagents. It also moves about 40 other cards.
+- None of that is a button for a command. "Not this card" says: no new features.
+- The diff range looks too wide. I cannot pin that growth on this card's own commits, so I do not count it as a defect here.
+
+UNMET: #4 "Delete old loadouts" is now on every class's More menu (card 0066), and `menuChecks` asserts a Death Knight has it, so "off a druid, no tidy item" is false.
+
+VERDICT: defect
+
+**breakage: defect**
+
+I read the menu code and the self-test checks. I did not run anything. I found one fault.
+
+**The finding: criterion #4 is false as written.**
+- The card says that off a druid, the menu has no tidy item. The command table also marks "Delete old Dreamgrove loadouts" as druids only.
+- The code does not match. In `DjinnisClassProfiles.lua`, the window menu builder adds "Delete old loadouts" (`PlanTab.tidyAsk`) for every class. It does not check the class.
+- The self-test agrees with the code, not with the card. `PlanTab.menuChecks` has the check `a Death Knight can delete old loadouts too (card 0066)`, and it expects `tidyAsk`.
+- So the box is ticked, but the code does the opposite of what the box says. The card's own clear-down note says card 0066 replaced this rule, but the box stayed ticked.
+- The bonus-roll half of #4 is still true. The check `a Death Knight has no bonus roll verdict` covers it.
+- To fix: rewrite #4 and the table row to say every class gets "Delete old loadouts" and only a druid gets the bonus roll item. Then tick it again on the existing check.
+
+**What held:**
+- Each item in the window menu calls the function the card says it does.
+- `no self-test in the menu` holds.
+- The chat messages name **More > ...**, not a slash command.
+
+UNMET: #4 the menu gives every class "Delete old loadouts" (card 0066, checked by `a Death Knight can delete old loadouts too`), so "off a druid, no tidy item" is false
+
+VERDICT: defect
+
+**acceptance**
+
+- **#4 was named by the acceptance lens and is not a ticked criterion here**, so nothing was changed: card 0066 gives every class "Delete old loadouts", and `PlanTab.menuChecks` checks that a Death Knight gets it, so "off a druid, no tidy item" is false.
+- **#4 was named by the scope lens and is not a ticked criterion here**, so nothing was changed: "Delete old loadouts" is now on every class's More menu (card 0066), and `menuChecks` asserts a Death Knight has it, so "off a druid, no tidy item" is false.
+- **#4 was named by the breakage lens and is not a ticked criterion here**, so nothing was changed: the menu gives every class "Delete old loadouts" (card 0066, checked by `a Death Knight can delete old loadouts too`), so "off a druid, no tidy item" is false
+
