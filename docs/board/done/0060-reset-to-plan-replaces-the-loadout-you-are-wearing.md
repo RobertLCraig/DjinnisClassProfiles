@@ -290,3 +290,78 @@ Not looked at in a client. There is no browser surface and the game cannot be ru
 manual criterion stays open, so the card goes to human-review. Deploy was not touched.
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new (the four built criteria were already ticked; checks `Reset to plan swaps the loadout you are wearing`, `with the talent window open it waits`, `and only once`, `a switch that did not take keeps the old one`, `a refused rename is said` exist and pass in the Lua 5.1 offline check); looks rewritten for v0.69.0: the two steps of What I need from you, now one criterion each, with the "close it, and this goes ahead then" message the code prints; moves to ai-review/ with only in-game looks open.
+
+### 2026-10-20 review (v20261020061535-8761)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked each of the four built criteria. I tried to break each one and could not.
+
+1. **#1, the swap.** `PlanTab.swapSelected` makes the new loadout and puts it on. It then waits until the game shows the new one as worn. `PlanTab.finishSwap` deletes the old one and then calls `C_ClassTalents.RenameConfig`. The check "Reset to plan swaps the loadout you are wearing, made new, worn, old deleted, renamed" in `DjinnisClassProfiles.lua` wants that exact order.
+2. **#2, the open talent window.** `PlanTab.whenTalentsClose` holds the job until the window closes. `PlanTab.askAgain` then asks again with the same spec and names. The checks prove each step: it answers "waiting", it changes nothing, it says "Close it", it runs on close, and a second close does nothing ("and only once").
+3. **#3, a switch that does not take.** The poll in `PlanTab.swapSelected` stops after `PlanTab.GIVE_UP`. It keeps the old loadout and says "did not go on" plus what to click. Both are checked.
+4. **#4, a refused rename.** `PlanTab.finishSwap` ends on `unnamed` and says "Rename it to ...". The check also proves the plan loadout stays worn.
+
+Both open criteria are `proves: manual`. Rob must try them in the game. They are not findings.
+
+I found no defect in this lens. I changed no files.
+
+VERDICT: sound
+
+**scope: sound**
+
+The card 0060 code is all there. I checked the five functions that do the swap and the wait in `DjinnisClassProfiles.lua`:
+
+- `PlanTab.whenTalentsClose`
+- `PlanTab.swapSelected`
+- `PlanTab.finishSwap`
+- `PlanTab.askAgain`
+- `PlanTab.holdsPlan`
+
+The diff is very big (156 files), but that is not the card growing. The diff covers many commits from many cards, not one card's work. Most of it is other work, and each part has its own card on the board:
+
+- The new gear plan and Warcraft Logs builds in `DjinnisClassProfiles.lua`: 0030 and 0064.
+- `PlanTab.CRAFTED`: 0078.
+- The bar categories: 0051.
+- `wcl-builds.py` and the research files.
+
+None of that is code 0060 asked for and hid away.
+
+The "Not this card" fence holds. The `[CP]` tag work came in as its own card, 0059 (v0.48.0). The swap only uses the `[CP+]` / `[CP]` names that 0059 made.
+
+Is anything half done? The card says a swap that stops half way is finished by the next click. Three later fixes cover the cases that were missing:
+- A worn leftover is renamed.
+- A leftover that is not worn is replaced.
+- A worn leftover that was edited is refused, and the player is told.
+
+The only open items are the two `proves: manual` checks. Those wait for Rob to try in the game. They are not findings.
+
+I found nothing out of scope. No criterion fails.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break the card 0060 changes and found nothing that breaks.
+
+**What I checked**
+- The swap code is still there: `PlanTab.swapSelected`, `PlanTab.finishSwap`, `PlanTab.whenTalentsClose` and `PlanTab.askAgain` in `DjinnisClassProfiles.lua`.
+- `C_ClassTalents.RenameConfig` is still on the allowed-writes list in `offline-check.lua`.
+- The four built criteria still have their checks, under the `swapTest` block in `DjinnisClassProfiles.lua`: "Reset to plan swaps the loadout you are wearing", "a switch that did not take keeps the old one" and "a refused rename is said". The check for "waits" (with the talent window open) is in the same block.
+- This round's diff is mostly new build data, gear-plan data and other cards. None of it changes what the swap code calls or expects.
+- `finishSwap` still refuses to delete the old loadout when it is worn again.
+- `swapSelected` still stops in combat. It still gives up after `PlanTab.GIVE_UP`, keeps the old loadout and says what to do.
+- I found no caller left out of date and no comment that is now false.
+
+**What I did not do**
+- I did not run `lua offline-check.lua`, and the review script found no test suite to run. So this is from reading the code only.
+
+**Still open for you**
+- The two `proves: manual` criteria. Try them in the game. They do not block this card.
+
+VERDICT: sound
+
