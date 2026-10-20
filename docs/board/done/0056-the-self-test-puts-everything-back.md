@@ -450,3 +450,61 @@ The loop parked this card at its bounce limit, and said: "**2026-09-29** The rev
 
 **2026-10-11** Clear-down (attended, Rob asked). Finding 1 of the seventh review is fixed on branch `cleardown/djcp`: `put` in `PlanTab.restore` still writes back a value the game will not compare (the safe way), but counts it on its own and says "[CP] could not compare N of the game's values, so they are put back as noted." in grey; only a compare that answered "different" counts as swapped and is named. `offline-check.lua` adds the left-alone run the review asked for: the three planted secrets in place, a run that does nothing, and it fails on any "values swapped" line or a line naming `DjinnisTestSecret`. Run against the old `put`, that run goes red with the exact false FAIL line the review saw. Lua 5.1 offline check green, spec modes 62, 71, 250 and 265 green. Criterion 2 re-ticked; AC sentinels added; the look rewritten for `/dcp`. **Not done:** finding 2, the source check against the `==` form in `PlanTab.restore`; the reviewer of this pass should judge whether it blocks. Moves to ai-review/ with only the in-game look open.
 
+### 2026-10-20 review (v20261020051828-4a67)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I tried to break each ticked box against the code. I could not break any of them.
+
+**What I checked:**
+
+- **#1 (a throw leaves everything as it was).** The net is `PlanTab.runSelfTest` and `PlanTab.restore` in `DjinnisClassProfiles.lua`. The test run in `offline-check.lua` swaps a global (`GetInstanceInfo`), a `C_` field (`C_Item.GetItemCount`) and a PlanTab field (`PlanTab.say`), then throws. The check proves all three go back. It also proves the "stopped part way" line and the swapped-values line both print.
+- **#2 (no Blizzard value left swapped).** In `PlanTab.restore`, the `put` step counts a refused compare apart from a real swap. The "left alone" run in `offline-check.lua` checks that a secret the run did not touch is never named as swapped.
+- **#3 (no self-test item in More).** The menu check in `DjinnisClassProfiles.lua` asserts that "Run the self-test" gives "none". The slash handler still routes `test` to `PlanTab.runSelfTest`.
+- **#4 (mutation goes red).** The script for this is in `%TEMP%`, outside the repo, so I could not run it. I read the code instead. The offline check would fail if the restore were taken out.
+- **#5 (in game).** This box is `proves: manual`. It is the owner's to try, so it is not a finding.
+
+**Limit:** I only read the code. I ran nothing, and no game client is here.
+
+VERDICT: sound
+
+**scope: sound**
+
+I looked for two things: work the card did not ask for, and work it left half done. I found no defect.
+
+**What I checked:**
+- The card asked to take the self-test off the More menu. It is gone. A check proves this: `menuChecks` contains "no self-test in the menu".
+- `/dcp test` still runs `PlanTab.runSelfTest`. The slash-command handler sends "test" to it.
+- The diff is very large. It contains the rename to DjinnisClassProfiles, the Warcraft Logs builds, a new gear plan, bar categories and research files. Other cards cover these: 0058, 0051, 0064, 0084 and more. They came in because the diff range is wide. This card did not add them on its own.
+- The "Not this card" fence is card 0038 (taint). The self-test still writes Blizzard globals, and the card says so. The work does not claim to fix taint. The fence holds.
+
+**Half done:**
+- `PlanTab.recheckSoon` still uses the real `C_Timer`. The reviews raised this as a note only, and the builder chose not to change it. It only reads the game state and saves nothing, so it is not a defect.
+- The in-game check is still open. It says `proves: manual`, so it is the owner's to try. It is not a finding.
+
+No criterion is disproved.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I tried to break the self-test safety net. I could not.
+
+**What I checked** (all in `DjinnisClassProfiles.lua`):
+
+- **`PlanTab.runSelfTest`**: It reads every result that `restore` gives back, in the correct order. If `restore` fails, the counts go back to zero, and it prints a FAIL line that tells you to reload.
+- **`PlanTab.restore`**: Every compare uses `same()` or a guarded `pcall`, and every write to a global is guarded. If the game refuses a compare, the value is put back and counted separately, not as a swap. New globals and new table fields are removed. Frames stay.
+- **`PlanTab.restoreSaved`**: It runs first, in its own `pcall`. So your saved data goes back even if the rest of the restore fails.
+- **`/dcp test`** in `SlashCmdList.DJINNISCP` calls `PlanTab.runSelfTest()` with no arguments, so it uses the real game functions.
+- **More menu**: the self-test is not in it. The menu check confirms this.
+
+**A note, not a finding:** `PlanTab.prompt` uses one shared prompt box. The Reload box at the end of the test reuses it. So if the login loadout offer is on screen, the Reload box replaces it. The offer is lost until it shows again. No criterion asks about this.
+
+**What you do now:** Only the in-game check is left. It is criterion #5 on the card.
+
+VERDICT: sound
+
