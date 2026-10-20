@@ -97,3 +97,69 @@ no network call and no chat output.
 No browser: this is a game popup. No agent can run the client, so the look is the ask above.
 
 **2026-10-11** Clear-down (attended, Rob asked): converted Done when to an Acceptance block and ticked the two offline criteria (the `slot state` outrank checks and the three `the popup says / does not say the plan is old ...` checks exist and pass in the Lua 5.1 offline check). Done when 1, 2 and 4 could not be met as written: the Coiled Altar popup cannot come back and the Feral plans were resimmed (now `simmed = "2026-09-30"`), so the rule they stood for is the two ticked lines. Looks rewritten for v0.69.0: the stale date is now 2026-09-30, not 2026-09-28. Moves to ai-review/ with only in-game looks open.
+
+### 2026-10-20 review (v20261020101343-f543)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: defect**
+
+I checked the two ticked criteria in the code. Both hold. One open manual check cannot pass as written.
+
+**#1: holds.** `outranks` and `slotState` in `DjinnisClassProfiles.lua` do this. A worn item with a higher item level is not marked `change`. Its enchant is still judged. Its gems are judged against the sockets it really has. The offline checks for this are in the self-test, under the "slot state is change when item differs from plan" group.
+
+**#2: holds.** `PlanTab.wrongHere` sets `wrong.stale` only when a different item outranks the plan (`on.id ~= entry.id`). `PlanTab.setupPopup` then adds the grey line. All three named checks are present.
+
+**#3: no fault found.** It waits on Rob to try it in the game.
+
+**#4: cannot pass.** This check expects the exact text `Gear plan from 2026-09-30`. But this diff gives every Feral cell in `GEAR_PLAN` the date `simmed = "2026-10-15"`. The line prints `plan.simmed`, so it will say 2026-10-15. Also, almost every planned slot is now 334, and the rest are the items Rob already wears. So "won a piece since 2026-09-30 that beats the plan's" now means something different. The check needs new words before anyone tries it.
+
+UNMET: #4 the popup prints the plan's `simmed` date, which this diff sets to 2026-10-15, so the expected text "Gear plan from 2026-09-30" can never appear
+
+VERDICT: defect
+
+**scope: defect**
+
+I tried to break this change from the scope angle. It does not do what the card says.
+
+**Findings**
+
+1. **This change does more than the card asks.** The diff holds about 40 other cards' work: bar layouts, crafted reagents, every class's builds, research files and a full plan resim. None of it is card 0071. The 0071 code itself (`outranks`, `wrong.stale`, the popup line) stays inside the card.
+
+2. **Criterion #4 cannot pass as written.** Every Feral cell in `GEAR_PLAN` in `DjinnisClassProfiles.lua` now says `simmed = "2026-10-15"`. The popup line in `PlanTab.setupPopup` prints `plan.simmed`. So the popup will say "Gear plan from 2026-10-15". The criterion asks for 2026-09-30.
+
+3. **The line text is out of date.** `GEAR_PLAN_SOURCE` now says the plan comes from "local SimC droptimiser". But the line in `PlanTab.setupPopup` still says "rerun Top Gear". This tells the player to take the wrong step.
+
+**What you do now:** Update criterion #4 to the current date. Change the line text in `PlanTab.setupPopup` so it names the droptimiser, not Top Gear.
+
+UNMET: #4 the plan is now simmed 2026-10-15, so the popup can never print "Gear plan from 2026-09-30", and its advice "rerun Top Gear" names a tool the plan no longer comes from.
+
+VERDICT: defect
+
+**breakage: defect**
+
+I checked the code and found one real problem. The gear logic works, but one manual check can never pass as written.
+
+**What works:**
+- `outranks` and `slotState` in `DjinnisClassProfiles.lua` work as the card says.
+- A worn piece with a higher item level is no longer asked for. Its enchant and its sockets are still checked.
+- `PlanTab.wrongHere` only shows the "plan is old" line when a different item outranks the plan.
+- The three offline checks for that line exist.
+- Equip all and the bag glows read the same `slotState` result, so they also go quiet.
+
+**What is broken:** criterion 4 asks for the line `Gear plan from 2026-09-30. You have upgraded since: rerun Top Gear.` But the gear plan in this change was re-made. All four Feral cells in `GEAR_PLAN` now say `simmed = "2026-10-15"`. `PlanTab.setupPopup` prints `plan.simmed`, so the line can only ever say 2026-10-15. The card's own comment of 2026-10-11 still says 2026-09-30, so that comment is now wrong too.
+
+**Also:** every planned slot in the new plan is item level 334 or 331. So a worn piece will almost never outrank it, and the "yes" half of criterion 4 is very hard to test in game.
+
+UNMET: #4 GEAR_PLAN Feral cells are now simmed 2026-10-15, so PlanTab.setupPopup can never print "Gear plan from 2026-09-30"; the criterion's expected text is out of date.
+
+VERDICT: defect
+
+**acceptance**
+
+- **#4 was named by the acceptance lens and is not a ticked criterion here**, so nothing was changed: the popup prints the plan's `simmed` date, which this diff sets to 2026-10-15, so the expected text "Gear plan from 2026-09-30" can never appear
+- **#4 was named by the scope lens and is not a ticked criterion here**, so nothing was changed: the plan is now simmed 2026-10-15, so the popup can never print "Gear plan from 2026-09-30", and its advice "rerun Top Gear" names a tool the plan no longer comes from.
+- **#4 was named by the breakage lens and is not a ticked criterion here**, so nothing was changed: GEAR_PLAN Feral cells are now simmed 2026-10-15, so PlanTab.setupPopup can never print "Gear plan from 2026-09-30"; the criterion's expected text is out of date.
+
