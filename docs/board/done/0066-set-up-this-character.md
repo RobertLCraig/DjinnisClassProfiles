@@ -352,3 +352,77 @@ Mutation script: `%TEMP%\dcp66r3_mut.py`, run on the temp copy `%TEMP%\dcp66r3`.
 back after the run. Addon code untouched. In-game pass still waits on Rob (see "Try this in game").
 
 **2026-10-11** Clear-down (attended, Rob asked): ticked nothing new: both built criteria were already ticked, and their checks (`old loadouts no build names, ...` in `PlanTab.orphanChecks`, among them `, and deletes nothing unasked` and `, Delete runs the list chat showed`) exist and pass in the Lua 5.1 offline check; their vague `proves: self-test` now names them. The in-game look is rewritten for v0.69.0 (the chat line, the Rename... item and the box's Delete button match the code). The parked criterion (one button that also makes and resets, and the login offer) is split off to card `0090`, so this card's Acceptance no longer carries it. Moves to ai-review/ with only the in-game look open.
+
+### 2026-10-20 review (v20261020080435-9ad8)
+
+**suite**
+
+No suite this job could find in WoWAddons:DjinnisClassProfiles, so none ran. That is not a pass.
+
+**acceptance: sound**
+
+I checked the two ticked criteria against the code. Both hold. I found nothing that breaks them.
+
+**#1, the delete list is pure and checked: holds.**
+- `PlanTab.orphanLoadouts` in `DjinnisClassProfiles.lua` lists only tagged "[CP] X" loadouts that no build names.
+- It marks the worn one `stays`.
+- It skips ids that are already on the retired list.
+- `PlanTab.orphanChecks` runs the "old loadouts no build names" checks against it.
+
+**#2, nothing changes without the click: holds.**
+- `PlanTab.tidy(false)` only prints the list. It hands back `{spec, todo}` and deletes nothing.
+- The box in `PlanTab.tidyAsk` is the only way into `tidy(true, asked)`.
+- At the click, `tidy` stops if the spec changed. It deletes only what is on both lists: the one chat showed, and a fresh one made at the click.
+- `/dcp tidy yes` also goes through `tidyAsk`. A slash check in the checks proves this.
+
+**One small risk (not a defect):** `tidy(true)` with no `asked` still deletes at once. Only the checks call it that way now. A future caller could bring the old hole back.
+
+**#3** is `proves: manual`, so it waits for Rob in game.
+
+VERDICT: sound
+
+**scope: sound**
+
+The card's own work stayed inside its fence. I found nothing to fix.
+
+**The parked parts were not built.** `tidyAsk` runs from only two places:
+- the menu item **Delete old loadouts**;
+- the slash commands `/dcp tidy` and `/dcp tidy yes`, in the slash handler.
+
+No login event calls it. Nothing new makes or resets loadouts. So the part Rob parked (card `0090`) is still parked, and card `0065`'s park holds.
+
+**The big diff is not this card's work.** It shows 154 files: gear plan, builds, keybind research, bars scripts, many other cards. None of the last 40 commits names 0066, tidy or orphan. That diff is a wide range of commits, so I did not count that work against this card.
+
+**What the card asked for is all there:**
+- `PlanTab.orphanLoadouts` finds the leftover loadouts.
+- `PlanTab.tidy` lists them and deletes only on yes.
+- `PlanTab.tidyAsk` asks first.
+- `PlanTab.orphanChecks` holds the offline checks.
+
+Fixes from the three earlier reviews (for example, the click deletes only the list chat showed) did not take the card past its fence.
+
+**What is left:** only the open `proves: manual` criterion. Rob has to try it in game.
+
+VERDICT: sound
+
+**breakage: sound**
+
+I found no defect in the delete path.
+
+**What I checked:**
+- Two buttons can delete loadouts: the box's Delete button and the slash command `/dcp tidy yes`. Both now go through `PlanTab.tidyAsk`. That function shows the list in chat and asks first. The slash command is in `SlashCmdList`.
+- In `PlanTab.tidy`, the box's Delete button deletes only what is on both lists. List one is what chat showed. List two is worked out again at the click. So a loadout can drop off the list, but no new one can be added.
+- The click is blocked in combat or while another change runs. This check (`loadoutFence`) runs first. A spec change also blocks it. The loadout you wear is never deleted. `tagNext` checks the name and the worn loadout again before each delete.
+- In `PlanTab.orphanLoadouts`, the full name must be "[CP] X". So a loadout you named yourself is never listed.
+
+**One edge case is left:** `PlanTab.tidy(true)` without a list still deletes at once. Only the offline checks call it. No player can reach it.
+
+**Small doc notes, no breakage:**
+- `tagNext` does not check the spec again during a run (older than this card).
+- A build made while the delete queue runs is not checked again.
+- Both are written on card `0090`'s side of the parked work.
+
+The open criterion is `proves: manual`. That is Rob's to try in game. It is not a finding.
+
+VERDICT: sound
+
