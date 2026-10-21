@@ -389,7 +389,7 @@ local GEAR_PLAN = {
 				legs      = "id=271527,enchant_id=8159,bonus_id=13334/13693/6652/13698/12854,ilevel=334", -- Enigmatic Dreamwatcher's Leggings (mythic tier token), droptimiser +0.95%
 				feet      = "id=268247,enchant_id=8019,bonus_id=6652/13662/13334/12854,ilevel=334", -- Breakwater Boots, worn
 				finger1   = "id=268252,enchant_id=7967,gem_id=240888,bonus_id=6652/13668/13334/12854,ilevel=334", -- Apex Brute's Claw Ring, worn
-				finger2   = "id=268249,bonus_id=13668/12854,enchant_id=7967,gem_id=240908,ilevel=334", -- Vile Alchemist's Band (Vashnik), droptimiser +0.86%
+				finger2   = "id=252258,bonus_id=12854/13440/41/13668/12699,enchant_id=7967,gem_id=240890,ilevel=334", -- Sickening Signet of Atroxus (vault 2026-10-21), worn; ties Vile Alchemist's Band 334 in this cell (+0.06%, local SimC 2026-10-21), which still wins 2t -1.38%, 3t -0.40%, mplus -0.60%
 				trinket1  = "id=270173,bonus_id=6652/13333/12854,ilevel=334", -- Zul'jin's Guillotine Technique (Coiled Altar), worn at 308, upgrade; pair sim 2026-10-18 with Voracious Heart +3.81%, Font pair +3.07%
 				trinket2  = "id=270175,bonus_id=12854,ilevel=334", -- Voracious Heart of Ula'tek (Ula'tek), droptimiser +2.82%
 				main_hand = "id=273783,enchant_id=8689,bonus_id=13440/6652/12701/12854,ilevel=334", -- Toxin-Coated Warstaff, worn
@@ -480,13 +480,11 @@ local PlanTab = {}  -- one name for the whole Plan tab: this file sits at Lua's 
 -- could be. Rob may well choose a cheaper rank on gear he expects to replace
 -- (2026-09-22), so a lower rank is "lesser", never "enchant" or "gem".
 -- BEGIN GENERATED PLAN RANKS
-PlanTab.RANK_SOURCE = "Raidbots enchantments.json and gems.json, read 2026-10-11"
+PlanTab.RANK_SOURCE = "Raidbots enchantments.json and gems.json, read 2026-10-21"
 PlanTab.RANK = {
 	enchant = {
 		[7972] = { "Akil'zon's Swiftness", 1, 2 },
 		[7973] = { "Akil'zon's Swiftness", 2, 2 },
-		[7982] = { "Berserker's Rage", 1, 2 },
-		[7983] = { "Berserker's Rage", 2, 2 },
 		[7990] = { "Empowered Blessing of Speed", 1, 2 },
 		[7991] = { "Empowered Blessing of Speed", 2, 2 },
 		[7966] = { "Eyes of the Eagle", 1, 2 },
@@ -501,6 +499,10 @@ PlanTab.RANK = {
 		[8689] = { "Rite of the Hash'ey", 2, 2 },
 	},
 	gem = {
+		[240857] = { "Deadly Peridot", 1, 4 },
+		[240858] = { "Deadly Peridot", 2, 4 },
+		[240889] = { "Deadly Peridot", 3, 4 },
+		[240890] = { "Deadly Peridot", 4, 4 },
 		[240982] = { "Indecipherable Eversong Diamond", 1, 2 },
 		[240983] = { "Indecipherable Eversong Diamond", 2, 2 },
 		[240875] = { "Masterful Garnet", 1, 4 },
