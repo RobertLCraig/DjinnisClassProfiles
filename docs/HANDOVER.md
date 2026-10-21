@@ -6,8 +6,8 @@
 
 **Stage:** built, unreleased
 **Category:** addon
-**Status:** v0.69.0, `/dcp` (and `/djcp`), `Interface: 120100`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
-_Last updated: 2026-10-14 (cards 0094-0102: publish with loot help on every class. Earlier: 2026-10-02, v0.69.0 deployed: premade bars, their own profile, a row fixed under the build list with a rule above: double-click puts them on, as a build, made first when there are none; right-click makes them again. v0.67.0: bars now place mounts, toys, and character macros another class can use. v0.66.0: More > Make bars from your druid's also puts a rogue's Blind, Vanish, Tricks, Gouge, Distract, Thistle Tea and Kidney Shot on their planned keys, card 0082. v0.65.1: More > Make the heal macro, card 0083. Older stamps: docs/build/SESSION-LOG-ARCHIVE.md.)_
+**Status:** v0.70.0, `/dcp` (and `/djcp`), `Interface: 120105`. Remote: github.com/RobertLCraig/DjinnisClassProfiles (public). Built cards wait in `human-review/` for one trip to a live client.
+_Last updated: 2026-10-21 (card 0107, v0.70.0 deployed: Barkskin was on no Resto key. A druid spec's premade bars are now its own bars with each agreed job on its key, `PlanTab.jobLayout`; Efflorescence on Alt+1. Earlier: 2026-10-14, cards 0094-0102: publish with loot help on every class. Earlier: 2026-10-02, v0.69.0 deployed: premade bars, their own profile, a row fixed under the build list with a rule above: double-click puts them on, as a build, made first when there are none; right-click makes them again. v0.67.0: bars now place mounts, toys, and character macros another class can use. v0.66.0: More > Make bars from your druid's also puts a rogue's Blind, Vanish, Tricks, Gouge, Distract, Thistle Tea and Kidney Shot on their planned keys, card 0082. v0.65.1: More > Make the heal macro, card 0083. Older stamps: docs/build/SESSION-LOG-ARCHIVE.md.)_
 
 ## Goal & success criteria
 **No PRD exists. This section is an interim home and a real gap.** What follows is read off the
@@ -260,6 +260,7 @@ Trap (cards `0059`, `0062`): the server takes one loadout change at a time. A se
 Trap (card `0067`): at the slot cap `CanCreateNewConfig` never turns true, so `waitThenStep` takes "filled and one beat" as ready there. A replace deletes only a loadout still named as at the click (`replaceName`).
 Trap: `[IO.File]` in PowerShell resolves a relative path against .NET's current directory, not the shell's. Use absolute paths.
 Next after the in-game checks: `0061` (Rob picks), `0038` (needs Rob's `taint.log`). `0066` (Set up this character) waits for Rob to unpark automatic loadouts.
+Trap (card `0107`): for Balance, Guardian and Resto, premade bars are the spec's OWN bars run through `PlanTab.jobLayout`, made fresh at every load; only another class, or `/dcp bars from <druid spec>`, gets the Feral copy (`translateBars`). A job's key is `PlanTab.agreedHome`, not `jobHome`: the overlay still uses `jobHome` and draws Resto's heals amber.
 Trap (card `0051`): `placeBars` clears every slot a layout leaves nil. So a made layout copies another class's own pages 73-120 from its bars now (`slotSource` "here"). The druid form pages (`FORM_PAGE`) come from Dominos and Bartender; Blizzard's UI source does not say.
 Trap (card `0054`): the kill is kept on the character (`DjinnisCPCharDB.bonusSource`) for a roll still open after a reload. A raid's BiS is listed by boss, so with no known boss there is no verdict.
 Trap: the offline check must pass under Lua 5.1 (`"C:\Program Files (x86)\Lua\5.1\lua.exe"`), which the game runs; which one plain `lua` gives depends on the shell.

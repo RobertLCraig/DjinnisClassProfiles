@@ -7277,14 +7277,22 @@ function PlanTab.sidebarTip(row)
 		GameTooltip:SetOwner(row, "ANCHOR_NONE")
 		GameTooltip:SetPoint("RIGHT", row, "LEFT", -4, 0)
 		GameTooltip:AddLine("Premade bars", 1, 1, 1)
-		GameTooltip:AddLine(("Your %s bars, each button given this spec's ability for the same job. Their own profile: your own saved bars for this spec are never replaced."):format(e.template), nil, nil, nil, true)
-		if e.made and pcall(PlanTab.showGhost, e.spec, PlanTab.premadeDB()) and PlanTab.ghostKey then
+		-- card 0107: a druid spec's are its own bars, each job on its key, worked out now
+		local shown = PlanTab.premadeDB()
+		if e.jobs then
+			local api = PlanTab.barsApi()
+			shown = { [e.spec] = { slots = (PlanTab.jobLayout(api.here, e.spec, api)) } }
+			GameTooltip:AddLine("Your bars now, each job agreed for this spec on its key (Barkskin on Alt+W, as on Feral). Your own saved bars for this spec are never replaced.", nil, nil, nil, true)
+		else
+			GameTooltip:AddLine(("Your %s bars, each button given this spec's ability for the same job. Their own profile: your own saved bars for this spec are never replaced."):format(e.template), nil, nil, nil, true)
+		end
+		if e.made and pcall(PlanTab.showGhost, e.spec, shown) and PlanTab.ghostKey then
 			GameTooltip:AddLine("Your bars show them now. Amber: the slots a load changes.", 1, 0.6, 0, true)
 		elseif not e.made then
 			GameTooltip:AddLine("None made yet.", 1, 0.7, 0, true)
 		end
 		GameTooltip:AddLine(e.made and "Double-click to put them on." or "Double-click to make them and put them on.", 0, 1, 0)
-		GameTooltip:AddLine("Right-click for a menu: make them again from your druid's bars.", 0, 1, 0, true)
+		GameTooltip:AddLine(e.jobs and "Right-click for a menu." or "Right-click for a menu: make them again from your druid's bars.", 0, 1, 0, true)
 		GameTooltip:Show()
 		return
 	end
@@ -7450,7 +7458,9 @@ end
 function PlanTab.premadeRow(spec)
 	local template = spec and PlanTab.templateNow(spec)
 	if not template then return nil end  -- Feral itself: the one the others copy
-	return { premade = true, spec = spec, template = template, made = PlanTab.premadeDB()[spec] ~= nil,
+	-- card 0107: a druid spec's are made from its own bars at every load
+	local jobs = PlanTab.jobsSpec(spec)
+	return { premade = true, spec = spec, template = template, jobs = jobs, made = jobs or PlanTab.premadeDB()[spec] ~= nil,
 		icon = "Interface\\Icons\\INV_Misc_Book_09", bosses = {} }
 end
 
@@ -7458,7 +7468,7 @@ end
 -- the same way as any other build"): puts them on, made first when there are none.
 function PlanTab.wearPremade()
 	local spec = playerSpec()
-	if spec and not PlanTab.premadeDB()[spec] then
+	if spec and not PlanTab.jobsSpec(spec) and not PlanTab.premadeDB()[spec] then
 		local made = PlanTab.barsFrom()
 		if made ~= "made" then return made end
 	end
@@ -7468,7 +7478,17 @@ function PlanTab.wearPremade()
 end
 
 -- Its menu: make them again from the druid's bars, or load them.
+PlanTab.JOBS_MAKE = "Make premade bars: each job on its key"
+PlanTab.JOBS_TIP = "Your bars now, with each job agreed for this spec moved onto its key: Barkskin on Alt+W as on Feral, this spec's own core keys kept. What moves is listed in chat. Nothing changes on your bars until you load them."
 function PlanTab.premadeMenuItems(e)
+	if e.jobs then
+		return {
+			{ title = "Premade bars" },
+			{ text = PlanTab.JOBS_MAKE, tip = PlanTab.JOBS_TIP, fn = function() PlanTab.barsFrom() PlanTab.updateSidebar() end },
+			{ text = "Load premade bars", tip = "Makes them again from your bars now, then puts them on. Undo bars puts yours back.",
+				fn = function() PlanTab.loadPremade() end },
+		}
+	end
 	return {
 		{ title = "Premade bars" },
 		{ text = ("Make premade bars from your %s bars"):format(e.template), tip = "Saved as their own profile. Nothing changes on your bars, and your own saved bars for this spec are not touched.",
@@ -9889,6 +9909,11 @@ end
 function PlanTab.loadPremade()
 	local spec = playerSpec()
 	if not spec then PlanTab.say("The game has not said which spec you are in yet.") return "none" end
+	-- card 0107: never an old Feral copy, always the bars on screen now
+	if PlanTab.jobsSpec(spec) then
+		local made = PlanTab.jobsFrom(spec)
+		if made ~= "made" then return made end
+	end
 	if not PlanTab.premadeDB()[spec] then
 		PlanTab.say(("No premade %s bars yet. Click %sMake premade bars|r%s first."):format(spec, GOLD, GREY))
 		return "none"
@@ -10354,6 +10379,11 @@ function PlanTab.barsApi()
 			local okBase, base = pcall(C_Spell.GetBaseSpell, id)
 			return okBase and canRead(base) and base or id
 		end,
+		-- a macro's spell (card 0107: Prowl is Rob's ProwlMeld macro on Shift+3)
+		macroSpell = function(index)
+			local ok, id = pcall(GetMacroSpell, index)
+			return ok and canRead(id) and id or nil
+		end,
 		here = PlanTab.readBars(),
 	}
 end
@@ -10375,6 +10405,7 @@ function PlanTab.barsFrom(from, confirmed)
 	if why then PlanTab.say(why) return "fenced" end
 	local spec = playerSpec()
 	if not spec then PlanTab.say("The game has not said which spec you are in yet.") return "none" end
+	local named = from ~= nil
 	if from then
 		local asked = from:lower()
 		from = nil
@@ -10384,6 +10415,9 @@ function PlanTab.barsFrom(from, confirmed)
 		from = PlanTab.templateNow(spec)
 	end
 	if not from or from == spec then PlanTab.say(("%s is the layout the others copy, so there is nothing to make it from."):format(spec)) return "none" end
+	-- card 0107: a druid spec's are its own bars, jobs on their keys; a
+	-- Feral copy is still there when a spec is named
+	if not named and PlanTab.jobsSpec(spec) then return PlanTab.jobsFrom(spec) end
 	local template = barsDB()[from]
 	if not (template and type(template.slots) == "table") then
 		PlanTab.say(("No saved %s layout yet. On your %s druid, click %sMore > Save bars for this spec|r%s first."):format(from, from, GOLD, GREY))
@@ -10999,6 +11033,10 @@ PlanTab.JOB_SPEC = {
 	Resto = {
 		["Combat 1"] = "ACTIONBUTTON3", ["Combat 2"] = "ACTIONBUTTON4", ["Combat 3"] = "ACTIONBUTTON2",
 		["Combat 4"] = "ACTIONBUTTON1", ["Combat 7"] = "ACTIONBUTTON9",
+		-- card 0107: Efflorescence on Alt+1, the keybind page's key for it since
+		-- 2026-10-01 (free in Resto: Combat 4 left it for 1). Cast 0 times on 7
+		-- Heroic Ula'tek pulls, 2026-10-21, with no key at all.
+		["Class 7 (Raid Defensive)"] = "ACTIONBUTTON7",
 	},
 }
 -- Rogue, 2026-10-02, the keybind page's keys for the jobs Feral has no key
@@ -11088,6 +11126,123 @@ function PlanTab.jobFor(spec, binding, api)
 		end
 	end
 	return nil
+end
+
+-- Card 0107. Rob raided Heroic Ula'tek as Resto, 2026-10-21, and cast Barkskin
+-- 0 times: his Resto bars never had it on a key. No druid spec's bars were
+-- ever made from the job table: the Feral copy (translateBars) puts Feral's
+-- spells on Feral's buttons, so a Resto copy had Starfire on 1, against Rob's
+-- core keys, and it leaves the planned keys out for a druid. So a druid
+-- spec's bars are made from its own bars, with every agreed job on its key.
+
+-- The key `spec`'s job number `i` is agreed on, or nil. Agreed is the spec's
+-- own choice (JOB_SPEC), or, for a spell Feral has too, Feral's key for that
+-- spell. Rob's answer B on card 0082: Feral's keys for the shared spells, each
+-- spec keeping its own rotation. So Resto's heals get no key here (Rob,
+-- 2026-10-04: healing is on Clique), and Barkskin gets Feral's Alt+W.
+function PlanTab.agreedHome(spec, i)
+	local job, cell = PlanTab.BAR_CATEGORIES[i], (PlanTab.BAR_ABILITIES[spec] or {})[i] or ""
+	if not job or cell == "" then return nil end
+	local own = (PlanTab.JOB_SPEC[spec] or {})[job]
+	if own then return own ~= "" and own or nil end
+	if spec == "Feral" then return PlanTab.JOB_BUTTONS[job] end
+	for alt in cell:gmatch("[^/]+") do
+		local fi = PlanTab.categoryOf("Feral", alt)
+		if fi then return PlanTab.jobHome("Feral", PlanTab.BAR_CATEGORIES[fi]) end
+	end
+	return nil
+end
+
+-- The slot a binding's button shows for `spec`: bar 1 is its form's page.
+function PlanTab.jobKeySlot(spec, binding)
+	local slot = PlanTab.bindingSlot(binding)
+	local page = PlanTab.FORM_PAGE[spec]
+	if slot and page and binding:match("^ACTIONBUTTON%d+$") then return page + slot end
+	return slot
+end
+
+-- `here`, a druid spec's bars, with each agreed job's spell on its key. A
+-- spell elsewhere is swapped with what the key holds, so nothing is lost; one
+-- not on the bars goes onto an empty key. A spell is never taken off a form
+-- page (and a form spec's caster bar): bar 7 shows in every form, those do
+-- not. A key holding a macro, or a job already put on it, is left as it is.
+-- `api` is barsApi's, plus keyFor(binding) to name keys. Answers the slots,
+-- the moves and the jobs left without their key, as lines. Pure.
+function PlanTab.jobLayout(here, spec, api)
+	local slots, moves, skipped, fixed = {}, {}, {}, {}
+	for slot, a in pairs(here) do slots[slot] = a end
+	local page = PlanTab.FORM_PAGE[spec] or 0
+	local function spellOf(a)
+		local id = a and (a.type == "spell" and a.id or a.type == "macro" and api.macroSpell and api.macroSpell(a.index)) or nil
+		return id and (api.base and api.base(id) or id) or nil
+	end
+	local function label(a)
+		if not a then return "nothing" end
+		if a.type == "spell" then return api.name(a.id) or ("spell " .. a.id) end
+		return ("%s %s"):format(a.type, tostring(a.name or a.id))
+	end
+	local function source(slot) return not (slot > 72 and slot <= 120) and not (page > 0 and slot <= 12) end
+	-- a slot by its key where it has one (Rob: say what a move displaces, and where it goes)
+	local function at(slot)
+		local n, binding = (slot - 1) % 12 + 1, nil
+		for prefix, p in pairs(PlanTab.BINDING_PAGE) do if p == math.floor((slot - 1) / 12) + 1 then binding = prefix .. n end end
+		local key = binding and api.keyFor and api.keyFor(binding)
+		return key and key ~= "no key" and key ~= binding and key or ("slot " .. slot)
+	end
+	local column = PlanTab.BAR_ABILITIES[spec] or {}
+	for i, job in ipairs(PlanTab.BAR_CATEGORIES) do
+		local binding = PlanTab.agreedHome(spec, i)
+		local to = binding and PlanTab.jobKeySlot(spec, binding)
+		local id
+		if to then for alt in column[i]:gmatch("[^/]+") do id = id or api.find(alt) end end
+		if id then  -- not learned in this build: nothing to place
+			local onKey, where = slots[to], api.keyFor and api.keyFor(binding) or binding
+			local onSpell = spellOf(onKey)
+			local name = api.name(id) or column[i]
+			if onSpell == id or (onSpell and PlanTab.categoryOfSpell(spec, onSpell, api) == i) then
+				fixed[to] = true  -- there already, or a talent standing in for it
+			elseif onKey and (fixed[to] or onKey.type ~= "spell") then
+				skipped[#skipped + 1] = ("%s has no key: %s holds %s, which stays"):format(name, where, label(onKey))
+			else
+				local from
+				for slot = 1, PlanTab.BAR_SLOTS do
+					local a = slots[slot]
+					if not from and slot ~= to and not fixed[slot] and source(slot) and a and a.type == "spell" and spellOf(a) == id then from = slot end
+				end
+				if from then
+					slots[to], slots[from] = slots[from], onKey
+					moves[#moves + 1] = ("%s from %s to %s%s"):format(name, at(from), where, onKey and (", and %s, which was there, to %s"):format(label(onKey), at(from)) or "")
+				elseif not onKey then
+					slots[to] = { type = "spell", id = id }
+					moves[#moves + 1] = ("%s onto %s, which was empty"):format(name, where)
+				else
+					skipped[#skipped + 1] = ("%s has no key: %s holds %s, and %s is not on your bars to swap with it"):format(name, where, label(onKey), name)
+				end
+				if slots[to] and spellOf(slots[to]) == id then fixed[to] = true end
+			end
+		end
+	end
+	return slots, moves, skipped
+end
+
+-- A druid spec other than Feral: its premade bars are its own, jobs on keys.
+function PlanTab.jobsSpec(spec)
+	return spec ~= nil and spec ~= "Feral" and PlanTab.FORM_PAGE[spec] ~= nil
+end
+
+-- Makes `spec`'s premade bars from the bars on screen through jobLayout.
+-- Nothing changes on the bars; Load premade bars puts them on, Undo bars back.
+function PlanTab.jobsFrom(spec)
+	local api = PlanTab.barsApi()
+	api.keyFor = PlanTab.keyFor
+	local slots, moves, skipped = PlanTab.jobLayout(api.here, spec, api)
+	PlanTab.premadeDB()[spec] = { slots = slots, saved = date and date("%Y-%m-%d") or nil, from = "jobs" }
+	PlanTab.say(("Made premade %s bars from your bars now, each job on its key: %d move%s, %d job%s left where %s. Nothing changes on your bars until you load them.")
+		:format(spec, #moves, #moves == 1 and "" or "s", #skipped, #skipped == 1 and "" or "s", #skipped == 1 and "it is" or "they are"))
+	for _, line in ipairs(moves) do print("  " .. line) end
+	for _, line in ipairs(skipped) do print("  " .. line) end
+	PlanTab.barsChanged()
+	return "made"
 end
 
 -- One entry per button: its job, and "right" (on its Feral button), "move"
@@ -11489,7 +11644,9 @@ function PlanTab.menuItems(where)
 		add({ text = "Put back the build bars", tip = "The build layouts of this spec as they were before the last match or Save picks. Your bars on screen are not changed.", fn = PlanTab.unmatchBuildBars })
 	end
 	local template = PlanTab.templateNow(playerSpec())
-	if template then
+	if PlanTab.jobsSpec(playerSpec()) then  -- card 0107
+		add({ text = PlanTab.JOBS_MAKE, tip = PlanTab.JOBS_TIP .. " The last row of the build list loads them.", fn = function() PlanTab.barsFrom() PlanTab.updateSidebar() end })
+	elseif template then
 		add({ text = ("Make premade bars from your %s bars"):format(template), tip = "Your druid's layout, each button given this spec's ability for the same job (Bellular's keybinding categories). Saved as premade bars, their own profile: the last row of the build list loads them. Nothing changes on your bars until you load them.", fn = function() PlanTab.barsFrom() PlanTab.updateSidebar() end })
 	end
 	add({ text = "Save bars as a profile...", tip = "Keeps your action bars and key bindings now under a name. A profile loads on any character and any spec.", fn = PlanTab.askProfileName })
@@ -14318,6 +14475,106 @@ function PlanTab.barJobChecks(check)
 	end)
 	PlanTab.drawJobs, PlanTab.say, PlanTab.jobsOn = keptDraw, keptSay, keptOn
 	check(t .. ", ran without error", ok and true or err, true)
+end
+
+-- Card 0107: a druid spec's bars made from its own, every agreed job on its
+-- key. The fixture is Rob's Resto bars as saved 2026-10-11: Barkskin only on
+-- slots 20 and 62, Alt+W and Alt+1 empty, Prowl a macro on Shift+3.
+function PlanTab.jobLayoutChecks(check)
+	local t = "jobs on keys for a druid spec"
+	local ids = { Sunfire = 1, Moonfire = 2, Wrath = 3, Starfire = 4, Barkskin = 5, Efflorescence = 6, Rejuvenation = 7, Prowl = 8,
+		Soothe = 9, ["Nature's Swiftness"] = 10, Tranquility = 11, Lifebloom = 12, Regrowth = 13, ["Cat Form"] = 14 }
+	local names = {}
+	for name, id in pairs(ids) do names[id] = name end
+	local function api(known)
+		local k = {}
+		for _, name in ipairs(known) do k[ids[name]] = true end
+		return { name = function(id) return names[id] end, base = function(id) return id end,
+			find = function(name) return k[ids[name]] and ids[name] or nil end,
+			macroSpell = function(index) return index == 130 and ids.Prowl or nil end }
+	end
+	local S = function(name) return { type = "spell", id = ids[name] } end
+	local function rob()
+		return { [1] = S("Sunfire"), [2] = S("Moonfire"), [3] = S("Wrath"), [4] = { type = "macro", name = "0 - OneButton", index = 3 },
+			[5] = S("Cat Form"), [9] = S("Tranquility"), [20] = S("Barkskin"), [62] = S("Barkskin"), [75] = S("Barkskin"),
+			[157] = S("Nature's Swiftness"), [163] = S("Nature's Swiftness"), [165] = { type = "macro", name = "Druid -ProwlMeld", index = 130 },
+			[166] = S("Soothe") }
+	end
+	local all = { "Sunfire", "Moonfire", "Wrath", "Starfire", "Barkskin", "Efflorescence", "Rejuvenation", "Prowl", "Soothe", "Nature's Swiftness", "Tranquility", "Lifebloom", "Regrowth" }
+	local function at(slots, slot) local a = slots[slot] return a and (a.type == "spell" and names[a.id] or a.type) or "-" end
+	local alt = { ["MULTIACTIONBAR6BUTTON2"] = 158, ["ACTIONBUTTON7"] = 7 }
+	check(t .. ", Def1 is Alt+W's button in Resto as on Feral", ("%s %s %s"):format(PlanTab.agreedHome("Resto", 25), PlanTab.agreedHome("Feral", 25), PlanTab.jobKeySlot("Resto", PlanTab.agreedHome("Resto", 25))),
+		"MULTIACTIONBAR6BUTTON2 MULTIACTIONBAR6BUTTON2 " .. alt.MULTIACTIONBAR6BUTTON2)
+	check(t .. ", Resto's Efflorescence is on Alt+1, its heals on no key", ("%s %s %s"):format(tostring(PlanTab.agreedHome("Resto", 23)), tostring(PlanTab.agreedHome("Resto", 5)), tostring(PlanTab.agreedHome("Resto", 11))),
+		"ACTIONBUTTON7 nil nil")
+	check(t .. ", bar 1 is a form spec's form page", PlanTab.jobKeySlot("Guardian", "ACTIONBUTTON4") .. " " .. PlanTab.jobKeySlot("Resto", "ACTIONBUTTON4") .. " " .. PlanTab.jobKeySlot("Guardian", "MULTIACTIONBAR6BUTTON2"), "100 4 158")
+	local slots, moves, skipped = PlanTab.jobLayout(rob(), "Resto", api(all))
+	-- acceptance #1 and #2
+	check(t .. ", Barkskin moves onto Alt+W, the empty slot it left stays empty", at(slots, 158) .. "/" .. at(slots, 20), "Barkskin/-")
+	check(t .. ", Efflorescence, on no bar, goes onto Alt+1", at(slots, 7), "Efflorescence")
+	check(t .. ", Rob's core keys stay", ("%s %s %s"):format(at(slots, 1), at(slots, 2), at(slots, 3)), "Sunfire Moonfire Wrath")
+	check(t .. ", the second Barkskin and the cat page's stay", at(slots, 62) .. "/" .. at(slots, 75), "Barkskin/Barkskin")
+	check(t .. ", a macro casting the job's spell is on its key, a shared spell on Feral's key stays",
+		at(slots, 165) .. "/" .. at(slots, 166) .. "/" .. tostring(table.concat(skipped, "\n"):find("Prowl", 1, true)), "macro/Soothe/nil")
+	check(t .. ", a key holding a macro or another spell keeps it, and says so",
+		("%s %s %s/%d"):format(at(slots, 4), at(slots, 9), at(slots, 163), #skipped), "macro Tranquility Nature's Swiftness/3")
+	check(t .. ", the skip names the key and what it holds", tostring(table.concat(skipped, "\n"):find("Starfire has no key: ACTIONBUTTON4 holds macro 0 - OneButton, which stays", 1, true) ~= nil), "true")
+	check(t .. ", each move is said", table.concat(moves, "; "), "Efflorescence onto ACTIONBUTTON7, which was empty; Barkskin from slot 20 to MULTIACTIONBAR6BUTTON2")
+	local here = rob()
+	check(t .. ", the bars given are not changed", at(here, 20) .. "/" .. at(here, 158), "Barkskin/-")
+	-- a swap: Alt+W holds another spell, Barkskin is elsewhere
+	local swap = rob()
+	swap[158], swap[20] = S("Rejuvenation"), nil
+	swap[30] = S("Barkskin")
+	local swapped = PlanTab.jobLayout(swap, "Resto", api(all))
+	check(t .. ", a swap: nothing is lost", at(swapped, 158) .. "/" .. at(swapped, 30), "Barkskin/Rejuvenation")
+	-- only on a form page: a copy goes on the key, the form page keeps its own
+	local cat = PlanTab.jobLayout({ [75] = S("Barkskin") }, "Resto", api(all))
+	check(t .. ", never taken off a form page", at(cat, 158) .. "/" .. at(cat, 75), "Barkskin/Barkskin")
+	check(t .. ", a spell not learned is not placed", at(PlanTab.jobLayout({}, "Resto", api({ "Barkskin" })), 7), "-")
+	check(t .. ", which specs: druid specs but Feral", ("%s %s %s %s"):format(tostring(PlanTab.jobsSpec("Resto")), tostring(PlanTab.jobsSpec("Guardian")), tostring(PlanTab.jobsSpec("Feral")), tostring(PlanTab.jobsSpec("Destruction"))),
+		"true true false false")
+
+	-- the command, the menu and the load, as Resto
+	local keys = { "say", "barsApi", "barsChanged", "placeBars", "placeKeys", "readBars", "readKeys", "barsFence", "keyFor" }
+	local kept, keptG = {}, { C_SpecializationInfo, print, DjinnisCPCharDB }
+	for i, k in ipairs(keys) do kept[i] = PlanTab[k] end
+	local d = db()
+	local keptPremade = d.premade
+	local ok, err = pcall(function()
+		local said, printed, placed = {}, {}, nil
+		PlanTab.say = function(text) said[#said + 1] = text end
+		print = function(...) local line = tostring((...)) if line:find("FAIL|r", 1, true) then keptG[2](...) else printed[#printed + 1] = line end end
+		PlanTab.barsApi = function() local a = api(all) a.here = rob() return a end
+		PlanTab.keyFor = function(b) return ({ MULTIACTIONBAR6BUTTON2 = "Alt+W", ACTIONBUTTON7 = "Alt+1" })[b] or b end
+		PlanTab.barsChanged = function() end
+		PlanTab.placeBars, PlanTab.placeKeys = function(s) placed = s return 0, {}, { made = {}, notes = {} } end, function() return 0, {} end
+		PlanTab.readBars, PlanTab.readKeys, PlanTab.barsFence = function() return {} end, function() return {} end, function() return nil end
+		C_SpecializationInfo = { GetSpecialization = function() return 4 end, GetSpecializationInfo = function() return 105 end }
+		-- Rob's premade Resto bars of 2026-10-04, a Feral copy with Starfire on 1
+		d.premade = { Resto = { slots = { [1] = S("Starfire") }, from = "Feral" } }
+		check(t .. ", the command makes Resto's from its own bars, not Feral's", PlanTab.barsFrom() .. "/" .. tostring(d.premade.Resto.from) .. "/" .. at(d.premade.Resto.slots, 1) .. "/" .. at(d.premade.Resto.slots, 158), "made/jobs/Sunfire/Barkskin")
+		check(t .. ", chat says the moves with their keys", tostring(said[#said]:find("2 moves, 3 jobs left", 1, true) ~= nil) .. "/" .. tostring(printed[2]), "true/  Barkskin from slot 20 to Alt+W")
+		d.premade.Resto = { slots = { [1] = S("Starfire") }, from = "Feral" }
+		check(t .. ", Load premade bars never puts the old Feral copy on", PlanTab.loadPremade() .. "/" .. at(placed, 1) .. "/" .. at(placed, 158) .. "/" .. at(placed, 7), "applied/Sunfire/Barkskin/Efflorescence")
+		check(t .. ", and Undo bars has the bars from before", tostring(DjinnisCPCharDB and DjinnisCPCharDB.barsUndo ~= nil), "true")
+		placed = nil
+		check(t .. ", a double-click does the same", PlanTab.wearPremade() .. "/" .. at(placed, 158), "applied/Barkskin")
+		local named = PlanTab.barsFrom("feral")
+		check(t .. ", a named druid spec is still a Feral copy", tostring(named == "none" or (named == "made" and d.premade.Resto.from == "Feral")), "true")
+		local menuText
+		for _, item in ipairs(PlanTab.menuItems("window")) do if item.text == PlanTab.JOBS_MAKE then menuText = item.text end end
+		check(t .. ", the menu offers jobs on keys", tostring(menuText), PlanTab.JOBS_MAKE)
+		local row = PlanTab.premadeRow("Resto")
+		local rowMenu = {}
+		for _, item in ipairs(PlanTab.premadeMenuItems(row)) do rowMenu[#rowMenu + 1] = (item.title or item.text) .. (item.disabled and "(off)" or "") end
+		check(t .. ", the row is a jobs row, load always on", tostring(row.jobs) .. "/" .. tostring(row.made) .. ": " .. table.concat(rowMenu, "; "),
+			"true/true: Premade bars; " .. PlanTab.JOBS_MAKE .. "; Load premade bars")
+	end)
+	for i, k in ipairs(keys) do PlanTab[k] = kept[i] end
+	C_SpecializationInfo, print, DjinnisCPCharDB = keptG[1], keptG[2], keptG[3]
+	d.premade = keptPremade
+	check(t .. ", ran", ok or tostring(err), true)
 end
 
 -- Card 0081: talents only, or bars only, from a build's menu.
@@ -17798,6 +18055,7 @@ local function selfTest()
 	PlanTab.barCompareChecks(check)  -- card 0080
 	PlanTab.barOnlyChecks(check)  -- card 0081
 	PlanTab.barJobChecks(check)  -- card 0082
+	PlanTab.jobLayoutChecks(check)  -- card 0107
 	PlanTab.healMacroChecks(check)  -- card 0083
 	PlanTab.orphanChecks(check)  -- card 0066
 	PlanTab.combatLogChecks(check)  -- card 0076
